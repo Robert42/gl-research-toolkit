@@ -35,4 +35,5 @@ target_compile_options(glrt
 
 target_link_libraries(glrt
   ${SFML_LIBRARIES}
+  sfgui
 )
