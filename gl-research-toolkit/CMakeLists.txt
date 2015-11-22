@@ -4,6 +4,11 @@ project(OpenGL-Research-Toolkit)
 
 find_package(SFML 2.1 COMPONENTS graphics window system REQUIRED)
 
+
+set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+set(GLM_INCLUDE_DIR ${GLRT_DIR}/external/glm)
+
+
 add_library(glrt 
   include/glrt/application.h
   src/application.cpp
@@ -12,8 +17,15 @@ add_library(glrt
 target_include_directories(
   glrt
   PUBLIC
-  ${SFML_INCLUDE_DIR}
   include
+)
+
+target_include_directories(
+  glrt
+  SYSTEM
+  PUBLIC
+  ${SFML_INCLUDE_DIR}
+  ${GLM_INCLUDE_DIR}
 )
 
 target_compile_options(glrt
