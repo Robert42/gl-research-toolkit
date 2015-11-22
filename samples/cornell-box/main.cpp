@@ -3,19 +3,19 @@
 
 int main(int argc, char** argv)
 {
-  glrt::Window renderWindow(argc, argv);
+  glrt::Application app(argc, argv);
 
-  while(renderWindow.window.isOpen())
+  while(app.window.isOpen())
   {
     sf::Event event;
-    while(renderWindow.pollEvent(event))
+    while(app.pollEvent(event))
     {
     }
 
-    renderWindow.window.clear(sf::Color::Black);
+    app.window.clear(sf::Color::Black);
 
 
-    renderWindow.window.display();
+    app.window.display();
   }
 
   return 0;

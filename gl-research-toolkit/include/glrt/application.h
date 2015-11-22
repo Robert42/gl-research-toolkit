@@ -5,7 +5,7 @@
 
 namespace glrt {
 
-class Window
+class Application
 {
 public:
   struct Settings
@@ -26,7 +26,7 @@ public:
 
   sf::RenderWindow window;
 
-  Window(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
+  Application(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
 
   bool pollEvent(sf::Event& event);
 };

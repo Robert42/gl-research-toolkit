@@ -5,16 +5,16 @@
 \brief The namespace of the OpenGL Research Toolkit
 */
 
-/*! \class glrt::Window
+/*! \class glrt::Application
 \ingroup glrt
-\inheaderfile glrt/window.h
-\brief A wrapper class creating the OpenGL Window and handling basic events.
+\inheaderfile glrt/application.h
+\brief The main calss of this toolkit. Initializes all dependencies.
 
 */
 
 namespace glrt {
 
-Window::Window(int argc, char** argv, const Settings& settings)
+Application::Application(int argc, char** argv, const Settings& settings)
   : window(settings.videoMode,
            settings.title,
            settings.style,
@@ -23,7 +23,7 @@ Window::Window(int argc, char** argv, const Settings& settings)
 }
 
 
-bool Window::pollEvent(sf::Event& event)
+bool Application::pollEvent(sf::Event& event)
 {
   while(window.pollEvent(event))
   {
