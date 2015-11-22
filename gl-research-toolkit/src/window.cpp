@@ -14,11 +14,11 @@
 
 namespace glrt {
 
-Window::Window(int argc, char** argv)
-  : window(sf::VideoMode(1024, 768),
-           "Title",
-           sf::Style::Default,
-           sf::ContextSettings(32, 32, 0, 4, 5))
+Window::Window(int argc, char** argv, const Settings& settings)
+  : window(settings.videoMode,
+           settings.title,
+           settings.style,
+           settings.contextSettings)
 {
 }
 

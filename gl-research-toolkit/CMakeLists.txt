@@ -16,6 +16,11 @@ target_include_directories(
   include
 )
 
+target_compile_options(glrt
+  PUBLIC
+  "-std=c++11"
+)
+
 target_link_libraries(glrt
   ${SFML_LIBRARIES}
 )
