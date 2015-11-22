@@ -25,6 +25,7 @@ SOFTWARE.
 # External Libraries used by this Toolkit
 
 - [SFML](www.sfml-dev.org) (lib/png license)
+- [glm](glm.g-truc.net) (Modified MIT License)
 
 # External Libraries partially integrated into this Toolkit
 
