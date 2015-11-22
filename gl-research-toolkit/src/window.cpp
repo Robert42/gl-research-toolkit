@@ -22,5 +22,32 @@ Window::Window(int argc, char** argv, const Settings& settings)
 {
 }
 
+
+bool Window::pollEvent(sf::Event& event)
+{
+  while(window.pollEvent(event))
+  {
+    switch(event.type)
+    {
+    case sf::Event::Closed:
+      window.close();
+      break;
+    case sf::Event::KeyPressed:
+      switch(event.key.code)
+      {
+      case sf::Keyboard::Escape:
+        window.close();
+        continue;
+      }
+      break;
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+
 } // namespace glrt
 

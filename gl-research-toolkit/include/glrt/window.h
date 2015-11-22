@@ -27,6 +27,8 @@ public:
   sf::RenderWindow window;
 
   Window(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
+
+  bool pollEvent(sf::Event& event);
 };
 
 } // namespace glrt
