@@ -2,6 +2,9 @@
 #define GLRT_WINDOW_H
 
 #include <SFML/Graphics.hpp>
+#include <SFGUI/SFGUI.hpp>
+#include <SFGUI/Window.hpp>
+#include <SFGUI/Desktop.hpp>
 
 namespace glrt {
 
@@ -25,10 +28,15 @@ public:
   };
 
   sf::RenderWindow window;
+  sfg::SFGUI sfgui;
+  sfg::Desktop sfgDesktop;
+  sfg::Window::Ptr debugMenuWindow;
 
   Application(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
 
   bool pollEvent(sf::Event& event);
+
+  void update(float deltaTime);
 };
 
 } // namespace glrt

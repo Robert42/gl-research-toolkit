@@ -12,8 +12,14 @@ int main(int argc, char** argv)
     {
     }
 
+    app.update(1.f);
+
     app.window.clear(sf::Color::Black);
 
+    app.window.pushGLStates();
+    app.window.resetGLStates();
+    app.sfgui.Display(app.window);
+    app.window.popGLStates();
 
     app.window.display();
   }
