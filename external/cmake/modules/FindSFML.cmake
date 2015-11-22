@@ -73,9 +73,15 @@ set(FIND_SFML_PATHS
     /opt/csw
     /opt)
 
+set(FIND_SFML_HINTS
+    ${SFML_ROOT}
+    $ENV{SFML_ROOT}
+  )
+
 # find the SFML include directory
 find_path(SFML_INCLUDE_DIR SFML/Config.hpp
           PATH_SUFFIXES include
+          HINTS ${FIND_SFML_HINTS}
           PATHS ${FIND_SFML_PATHS})
 
 # check the version number
@@ -130,36 +136,42 @@ foreach(FIND_SFML_COMPONENT ${SFML_FIND_COMPONENTS})
         find_library(SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY_RELEASE
                      NAMES ${FIND_SFML_COMPONENT_NAME}
                      PATH_SUFFIXES lib64 lib
+                     HINTS ${FIND_SFML_HINTS}
                      PATHS ${FIND_SFML_PATHS})
 
         # debug library
         find_library(SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY_DEBUG
                      NAMES ${FIND_SFML_COMPONENT_NAME}-d
                      PATH_SUFFIXES lib64 lib
+                     HINTS ${FIND_SFML_HINTS}
                      PATHS ${FIND_SFML_PATHS})
     else()
         # static release library
         find_library(SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY_STATIC_RELEASE
                      NAMES ${FIND_SFML_COMPONENT_NAME}-s
                      PATH_SUFFIXES lib64 lib
+                     HINTS ${FIND_SFML_HINTS}
                      PATHS ${FIND_SFML_PATHS})
 
         # static debug library
         find_library(SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY_STATIC_DEBUG
                      NAMES ${FIND_SFML_COMPONENT_NAME}-s-d
                      PATH_SUFFIXES lib64 lib
+                     HINTS ${FIND_SFML_HINTS}
                      PATHS ${FIND_SFML_PATHS})
 
         # dynamic release library
         find_library(SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY_DYNAMIC_RELEASE
                      NAMES ${FIND_SFML_COMPONENT_NAME}
                      PATH_SUFFIXES lib64 lib
+                     HINTS ${FIND_SFML_HINTS}
                      PATHS ${FIND_SFML_PATHS})
 
         # dynamic debug library
         find_library(SFML_${FIND_SFML_COMPONENT_UPPER}_LIBRARY_DYNAMIC_DEBUG
                      NAMES ${FIND_SFML_COMPONENT_NAME}-d
                      PATH_SUFFIXES lib64 lib
+                     HINTS ${FIND_SFML_HINTS}
                      PATHS ${FIND_SFML_PATHS})
 
         # choose the entries that fit the requested link type
@@ -243,7 +255,7 @@ if(SFML_STATIC_LIBRARIES)
     # macro that searches for a 3rd-party library
     macro(find_sfml_dependency output friendlyname)
         # No lookup in environment variables (PATH on Windows), as they may contain wrong library versions
-        find_library(${output} NAMES ${ARGN} PATHS ${FIND_SFML_PATHS} PATH_SUFFIXES lib NO_SYSTEM_ENVIRONMENT_PATH)
+        find_library(${output} NAMES ${ARGN} HINTS ${FIND_SFML_HINTS} PATHS ${FIND_SFML_PATHS} PATH_SUFFIXES lib NO_SYSTEM_ENVIRONMENT_PATH)
         if(${${output}} STREQUAL "${output}-NOTFOUND")
             unset(output)
             set(FIND_SFML_DEPENDENCIES_NOTFOUND "${FIND_SFML_DEPENDENCIES_NOTFOUND} ${friendlyname}")
