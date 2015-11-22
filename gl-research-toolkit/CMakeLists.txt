@@ -5,8 +5,8 @@ project(OpenGL-Research-Toolkit)
 find_package(SFML 2.1 COMPONENTS graphics window system REQUIRED)
 
 add_library(glrt 
-  include/glrt/window.h
-  src/window.cpp
+  include/glrt/application.h
+  src/application.cpp
 )
 
 target_include_directories(

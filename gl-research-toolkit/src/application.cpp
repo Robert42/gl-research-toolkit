@@ -1,4 +1,4 @@
-#include <glrt/window.h>
+#include <glrt/application.h>
 
 /*! \namespace glrt
 \ingroup glrt

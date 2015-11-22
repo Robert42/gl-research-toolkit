@@ -1,4 +1,4 @@
-#include <glrt/window.h>
+#include <glrt/application.h>
 
 
 int main(int argc, char** argv)
