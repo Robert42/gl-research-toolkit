@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
 project(OpenGL-Research-Toolkit)
 
-find_package(SFML 2.1 COMPONENTS graphics window system REQUIRED)
+find_package(SFML 2.3 COMPONENTS graphics window system REQUIRED)
 
 
 set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
