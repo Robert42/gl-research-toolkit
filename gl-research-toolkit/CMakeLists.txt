@@ -13,6 +13,7 @@ target_include_directories(
   glrt
   PUBLIC
   ${SFML_INCLUDE_DIR}
+  include
 )
 
 target_link_libraries(glrt
