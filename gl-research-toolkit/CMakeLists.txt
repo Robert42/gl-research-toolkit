@@ -4,14 +4,15 @@ project(OpenGL-Research-Toolkit)
 
 find_package(SFML 2.1 COMPONENTS graphics window system REQUIRED)
 
-include_directories(
-  ${SFML_INCLUDE_DIR}
-  include
-)
-
 add_library(glrt 
   include/glrt/window.h
   src/window.cpp
+)
+
+target_include_directories(
+  glrt
+  PUBLIC
+  ${SFML_INCLUDE_DIR}
 )
 
 target_link_libraries(glrt
