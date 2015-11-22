@@ -4,3 +4,6 @@
 [submodule "external/sfgui"]
 	path = external/sfgui
 	url = git@github.com:TankOs/SFGUI.git
+[submodule "external/sfml"]
+	path = external/sfml
+	url = git@github.com:SFML/SFML.git
