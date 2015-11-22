@@ -7,3 +7,6 @@
 [submodule "external/sfml"]
 	path = external/sfml
 	url = git@github.com:SFML/SFML.git
+[submodule "external/glhelper"]
+	path = external/glhelper
+	url = git@github.com:Wumpf/glhelper.git
