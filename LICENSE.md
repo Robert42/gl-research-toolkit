@@ -1,3 +1,5 @@
+# OpenGL Research Toolkit
+
 The MIT License (MIT)
 
 Copyright (c) 2015 Robert Hildebrandt
@@ -19,4 +21,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+# External Libraries used by this Toolkit
+
+- [SFML](www.sfml-dev.org) (lib/png license)
+
+# External Libraries partially integrated into this Toolkit
+
+- [SFML](www.sfml-dev.org) (lib/png license)  
+    - The [FindSFML.cmake](https://github.com/SFML/SFML/blob/master/cmake/Modules/FindSFML.cmake) file was integrated into the `/cmake/modules/` subdirectory for finding SFML more easily.
 
