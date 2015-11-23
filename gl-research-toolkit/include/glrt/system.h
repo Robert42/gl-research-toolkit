@@ -27,10 +27,6 @@ public:
   sf::RenderWindow window;
 
   System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
-
-  bool pollEvent(sf::Event& event);
-
-  void update(float deltaTime);
 };
 
 } // namespace glrt

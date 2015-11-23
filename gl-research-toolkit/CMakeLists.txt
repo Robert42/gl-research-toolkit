@@ -11,6 +11,8 @@ set(GLM_INCLUDE_DIR ${GLRT_DIR}/external/glm)
 
 
 add_library(glrt
+  include/glrt/application.h
+  src/glrt/application.cpp
   include/glrt/debug-gui.h
   src/glrt/debug-gui.cpp
   include/glrt/dependencies.h
