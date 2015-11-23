@@ -21,6 +21,8 @@ Application::Application(int argc, char** argv, const Settings& settings)
            settings.style,
            settings.contextSettings)
 {
+  window.pushGLStates();
+  window.resetGLStates();
 }
 
 

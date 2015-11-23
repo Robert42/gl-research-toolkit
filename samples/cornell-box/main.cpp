@@ -20,10 +20,7 @@ int main(int argc, char** argv)
 
     app.window.clear(sf::Color::Black);
 
-    app.window.pushGLStates();
-    app.window.resetGLStates();
     debugGui.draw(app.window);
-    app.window.popGLStates();
 
     app.window.display();
   }
