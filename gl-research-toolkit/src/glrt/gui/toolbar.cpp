@@ -3,6 +3,10 @@
 #include <SFGUI/Button.hpp>
 #include <SFGUI/Window.hpp>
 
+namespace sfg {
+sf::Font LoadDejaVuSansFont();
+} // namespace sfg
+
 
 namespace glrt {
 namespace gui {
@@ -17,6 +21,7 @@ DebugGui::DebugGui()
 
   debugMenu->PackStart(sfg::Button::Create("Show FPS"), false, false);
   debugMenuWindow->Add(debugMenu);
+  font = sfg::LoadDejaVuSansFont();
 
   sfgDesktop.Add(debugMenuWindow);
 }

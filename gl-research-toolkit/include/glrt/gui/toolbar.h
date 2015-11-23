@@ -15,6 +15,8 @@ class DebugGui
 public:
   sfg::SFGUI sfgui;
   sfg::Desktop sfgDesktop;
+  sf::Font font;
+
   sfg::Box::Ptr debugMenu;
 
   bool visible : 1;
