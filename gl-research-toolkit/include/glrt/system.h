@@ -10,14 +10,15 @@ class System
 public:
   struct Settings
   {
-    sf::VideoMode videoMode = sf::VideoMode(1920, 1080);
     sf::String title = "Hello World :)";
+    sf::VideoMode videoMode = sf::VideoMode(1920, 1080);
     sf::Uint32 style = sf::Style::Default;
     sf::ContextSettings contextSettings = sf::ContextSettings(24, 8, 0, 4, 5);
 
-    static Settings simpleWindow(int width=1024, int height=768)
+    static Settings simpleWindow(const sf::String& title="Hello World :)", int width=1024, int height=768)
     {
       Settings settings;
+      settings.title = title;
       settings.videoMode.width = width;
       settings.videoMode.height = height;
       return settings;

@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-  glrt::Application app(argc, argv);
+  glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Single-Quad"));
 
   while(app.isRunning())
   {
