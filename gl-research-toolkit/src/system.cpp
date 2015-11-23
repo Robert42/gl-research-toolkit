@@ -1,11 +1,11 @@
-#include <glrt/application.h>
+#include <glrt/system.h>
 
 /*! \namespace glrt
 \ingroup glrt
 \brief The namespace of the OpenGL Research Toolkit
 */
 
-/*! \class glrt::Application
+/*! \class glrt::System
 \ingroup glrt
 \inheaderfile glrt/application.h
 \brief The main calss of this toolkit. Initializes all dependencies.

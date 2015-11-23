@@ -1,4 +1,4 @@
-#include <glrt/application.h>
+#include <glrt/system.h>
 #include <glrt/debug-gui.h>
 
 

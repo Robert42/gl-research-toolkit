@@ -10,13 +10,13 @@ set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(GLM_INCLUDE_DIR ${GLRT_DIR}/external/glm)
 
 
-add_library(glrt 
-  include/glrt/application.h
+add_library(glrt
   include/glrt/debug-gui.h
   include/glrt/dependencies.h
-  src/application.cpp
+  include/glrt/system.h
   src/debug-gui.cpp
   src/dependencies.cpp
+  src/system.cpp
 )
 
 target_include_directories(
