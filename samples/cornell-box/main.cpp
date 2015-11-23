@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
   sf::Clock clock;
 
-  glrt::Application app(argc, argv);
+  glrt::System app(argc, argv);
   glrt::DebugGui debugGui;
 
   while(app.window.isOpen())

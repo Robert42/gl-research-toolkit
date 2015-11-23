@@ -15,7 +15,7 @@
 
 namespace glrt {
 
-Application::Application(int argc, char** argv, const Settings& settings)
+System::System(int argc, char** argv, const Settings& settings)
   : window(settings.videoMode,
            settings.title,
            settings.style,
@@ -29,7 +29,7 @@ Application::Application(int argc, char** argv, const Settings& settings)
 }
 
 
-bool Application::pollEvent(sf::Event& event)
+bool System::pollEvent(sf::Event& event)
 {
   while(window.pollEvent(event))
   {
@@ -59,7 +59,7 @@ bool Application::pollEvent(sf::Event& event)
 }
 
 
-void Application::update(float deltaTime)
+void System::update(float deltaTime)
 {
   Q_UNUSED(deltaTime);
 }
