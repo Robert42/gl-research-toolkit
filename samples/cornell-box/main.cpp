@@ -16,6 +16,7 @@ int main(int argc, char** argv)
     }
 
     app.update(1.f);
+    debugGui.update(1.f);
 
     app.window.clear(sf::Color::Black);
 
