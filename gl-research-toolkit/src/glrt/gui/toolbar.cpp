@@ -73,11 +73,11 @@ void Toolbar::draw(sf::RenderWindow& renderWindow)
 
 void Toolbar::initToolbarWindow()
 {
-  debugMenu = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+  toolVBox = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
 
   sfg::Window::Ptr debugMenuWindow = sfg::Window::Create();
   debugMenuWindow->SetTitle("Toolbar [F9]");
-  debugMenuWindow->Add(debugMenu);
+  debugMenuWindow->Add(toolVBox);
 
   sfgDesktop.Add(debugMenuWindow);
 }
@@ -86,7 +86,7 @@ void Toolbar::initFpsText()
 {
   fpsText.setFont(font);
 
-  debugMenu->PackStart(createPropertyWidget(&fpsVisible, "Show FPS", BoolStyle::ToggleButton), false, false);
+  toolVBox->PackStart(createPropertyWidget(&fpsVisible, "Show FPS", BoolStyle::ToggleButton), false, false);
 }
 
 

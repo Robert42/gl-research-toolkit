@@ -17,7 +17,7 @@ public:
   sfg::Desktop sfgDesktop;
   sf::Font font;
 
-  sfg::Box::Ptr debugMenu;
+  sfg::Box::Ptr toolVBox;
   sf::Text fpsText;
 
   bool visible;
