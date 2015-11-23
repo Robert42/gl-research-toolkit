@@ -4,6 +4,8 @@
 
 int main(int argc, char** argv)
 {
+  sf::Clock clock;
+
   glrt::Application app(argc, argv);
   glrt::DebugGui debugGui;
 
@@ -15,8 +17,10 @@ int main(int argc, char** argv)
       debugGui.handleEvents(event);
     }
 
-    app.update(1.f);
-    debugGui.update(1.f);
+    float deltaTime = clock.restart().asSeconds();
+
+    app.update(deltaTime);
+    debugGui.update(deltaTime);
 
     app.window.clear(sf::Color::Black);
 
