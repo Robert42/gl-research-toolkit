@@ -12,7 +12,6 @@
 
 */
 
-#include <SFGUI/Button.hpp>
 
 namespace glrt {
 
@@ -22,19 +21,11 @@ Application::Application(int argc, char** argv, const Settings& settings)
            settings.style,
            settings.contextSettings)
 {
-  debugMenuWindow = sfg::Window::Create();
-  debugMenuWindow->SetTitle("Debug Menu");
-  debugMenuWindow->Add(sfg::Button::Create());
-
-  sfgDesktop.Add(debugMenuWindow);
-
 }
 
 
 bool Application::pollEvent(sf::Event& event)
 {
-  sfgDesktop.HandleEvent(event);
-
   while(window.pollEvent(event))
   {
     switch(event.type)
@@ -61,7 +52,6 @@ bool Application::pollEvent(sf::Event& event)
 
 void Application::update(float deltaTime)
 {
-  sfgDesktop.Update(deltaTime);
 }
 
 

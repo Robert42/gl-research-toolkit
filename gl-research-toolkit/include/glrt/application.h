@@ -25,9 +25,6 @@ public:
   };
 
   sf::RenderWindow window;
-  sfg::SFGUI sfgui;
-  sfg::Desktop sfgDesktop;
-  sfg::Window::Ptr debugMenuWindow;
 
   Application(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
 
