@@ -83,6 +83,8 @@ void DebugGui::draw(sf::RenderWindow& renderWindow)
 void DebugGui::initFpsText()
 {
   fpsText.setFont(font);
+
+  debugMenu->PackStart(createPropertyWidget(&fpsVisible, "Show FPS", BoolStyle::ToggleButton), false, false);
 }
 
 
