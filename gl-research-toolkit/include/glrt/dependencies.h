@@ -2,9 +2,6 @@
 #define GLRT_DEPENDENCIES_H
 
 #include <SFML/Graphics.hpp>
-#include <SFGUI/SFGUI.hpp>
-#include <SFGUI/Window.hpp>
-#include <SFGUI/Desktop.hpp>
 
 #include <QDebug>
 

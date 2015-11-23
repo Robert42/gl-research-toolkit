@@ -3,6 +3,10 @@
 
 #include "dependencies.h"
 
+#include <SFGUI/SFGUI.hpp>
+#include <SFGUI/Desktop.hpp>
+#include <SFGUI/Box.hpp>
+
 namespace glrt {
 
 class DebugGui
@@ -10,11 +14,13 @@ class DebugGui
 public:
   sfg::SFGUI sfgui;
   sfg::Desktop sfgDesktop;
-  sfg::Window::Ptr debugMenuWindow;
+  sfg::Box::Ptr debugMenu;
+
+  bool visible : 1;
 
   DebugGui();
 
-  void handleEvents(const sf::Event& event);
+  void handleEvent(const sf::Event& event);
   void update(float seconds);
   void draw(sf::RenderWindow& renderWindow);
 };

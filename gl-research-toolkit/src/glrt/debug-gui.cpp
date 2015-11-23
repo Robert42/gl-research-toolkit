@@ -1,32 +1,63 @@
 #include <glrt/debug-gui.h>
 
 #include <SFGUI/Button.hpp>
+#include <SFGUI/Window.hpp>
+
 
 namespace glrt {
 
 DebugGui::DebugGui()
+  : visible(false)
 {
-  debugMenuWindow = sfg::Window::Create();
-  debugMenuWindow->SetTitle("Debug Menu");
-  debugMenuWindow->Add(sfg::Button::Create());
+  sfg::Window::Ptr debugMenuWindow = sfg::Window::Create();
+  debugMenuWindow->SetTitle("GUI [F9]");
+
+  debugMenu = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+
+  debugMenu->PackStart(sfg::Button::Create("Show FPS"), false, false);
+  debugMenuWindow->Add(debugMenu);
 
   sfgDesktop.Add(debugMenuWindow);
 }
 
 
-void DebugGui::handleEvents(const sf::Event& event)
+void DebugGui::handleEvent(const sf::Event& event)
 {
-  sfgDesktop.HandleEvent(event);
+  switch(event.type)
+  {
+  case sf::Event::KeyPressed:
+    switch(event.key.code)
+    {
+    case sf::Keyboard::F1:
+      this->visible = !this->visible;
+      return;
+    case sf::Keyboard::F2:
+      this->visible = !this->visible;
+      return;
+    default:
+      break;
+    }
+
+    break;
+  default:
+    break;
+  }
+
+  if(visible)
+    sfgDesktop.HandleEvent(event);
 }
 
 void DebugGui::update(float seconds)
 {
-  sfgDesktop.Update(seconds);
+  if(visible)
+    sfgDesktop.Update(seconds);
 }
 
 void DebugGui::draw(sf::RenderWindow& renderWindow)
 {
-  sfgui.Display(renderWindow);
+  if(visible)
+    sfgui.Display(renderWindow);
+
 }
 
 

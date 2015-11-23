@@ -24,7 +24,7 @@ bool Application::pollEvent(sf::Event& event)
 {
   while(window.pollEvent(event))
   {
-    gui.handleEvents(event);
+    gui.handleEvent(event);
 
     switch(event.type)
     {
