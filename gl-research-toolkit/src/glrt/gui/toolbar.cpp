@@ -3,6 +3,8 @@
 #include <SFGUI/Button.hpp>
 #include <SFGUI/Window.hpp>
 
+#include <QString>
+
 namespace sfg {
 sf::Font LoadDejaVuSansFont();
 } // namespace sfg
@@ -12,7 +14,8 @@ namespace glrt {
 namespace gui {
 
 DebugGui::DebugGui()
-  : visible(false)
+  : visible(false),
+    fpsVisible(false)
 {
   sfg::Window::Ptr debugMenuWindow = sfg::Window::Create();
   debugMenuWindow->SetTitle("GUI [F9]");
@@ -24,6 +27,7 @@ DebugGui::DebugGui()
   font = sfg::LoadDejaVuSansFont();
 
   sfgDesktop.Add(debugMenuWindow);
+  initFpsText();
 }
 
 
@@ -57,6 +61,14 @@ void DebugGui::update(float seconds)
 {
   if(visible)
     sfgDesktop.Update(seconds);
+
+  if(fpsVisible)
+  {
+    if(seconds >= 0.001f)
+      fpsText.setString(sf::String(QString("FPS: %0").arg(1.f / seconds).toStdString()));
+    else
+      fpsText.setString(sf::String(QString("FPS: > 1000").toStdString()));
+  }
 }
 
 void DebugGui::draw(sf::RenderWindow& renderWindow)
@@ -64,6 +76,13 @@ void DebugGui::draw(sf::RenderWindow& renderWindow)
   if(visible)
     sfgui.Display(renderWindow);
 
+  if(fpsVisible)
+    renderWindow.draw(fpsText);
+}
+
+void DebugGui::initFpsText()
+{
+  fpsText.setFont(font);
 }
 
 

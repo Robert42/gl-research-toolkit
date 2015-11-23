@@ -18,14 +18,20 @@ public:
   sf::Font font;
 
   sfg::Box::Ptr debugMenu;
+  sf::Text fpsText;
 
-  bool visible : 1;
+  bool visible;
+  bool fpsVisible;
 
   DebugGui();
 
   void handleEvent(const sf::Event& event);
   void update(float seconds);
   void draw(sf::RenderWindow& renderWindow);
+
+private:
+  void initToolbarWindow();
+  void initFpsText();
 };
 
 } // namespace gui
