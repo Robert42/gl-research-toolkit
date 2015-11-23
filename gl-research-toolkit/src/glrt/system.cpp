@@ -31,7 +31,9 @@ System::System(int argc, char** argv, const Settings& settings)
   GLenum error =  glewInit();
 
   if(error != GLEW_OK)
-    qCritical() << "Initializing glew failed!";
+    qCritical() << "Initializing glew failed!\nError: " << glewGetErrorString(error);
+  if(!glewIsSupported(QString("GL_VERSION_%0_%1").arg(settings.contextSettings.majorVersion).arg(settings.contextSettings.minorVersion).toStdString().c_str()))
+    qCritical() << QString("The requested OpenGL version %0.%1 is not supported! => Aborting!").arg(settings.contextSettings.majorVersion).arg(settings.contextSettings.minorVersion).toStdString().c_str();
 }
 
 
