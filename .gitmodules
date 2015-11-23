@@ -1,0 +1,12 @@
+[submodule "external/glm"]
+	path = external/glm
+	url = git@github.com:g-truc/glm.git
+[submodule "external/sfgui"]
+	path = external/sfgui
+	url = git@github.com:TankOs/SFGUI.git
+[submodule "external/sfml"]
+	path = external/sfml
+	url = git@github.com:SFML/SFML.git
+[submodule "external/glhelper"]
+	path = external/glhelper
+	url = git@github.com:Robert42/glhelper.git
