@@ -1,5 +1,7 @@
 #include <glrt/system.h>
 
+#include <GL/glew.h>
+
 /*! \namespace glrt
 \ingroup glrt
 \brief The namespace of the OpenGL Research Toolkit
@@ -25,6 +27,11 @@ System::System(int argc, char** argv, const Settings& settings)
 {
   Q_UNUSED(argc);
   Q_UNUSED(argv);
+
+  GLenum error =  glewInit();
+
+  if(error != GLEW_OK)
+    qCritical() << "Initializing glew failed!";
 }
 
 
