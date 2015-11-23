@@ -1,11 +1,11 @@
 #include <glrt/dependencies.h>
 
-namespace glrf {
+namespace glrt {
 
 Dependencies::Dependencies()
 {
 
 }
 
-} // namespace glrf
+} // namespace glrt
 

@@ -1,11 +1,11 @@
 #include <glrt/debug-gui.h>
 
-namespace glrf {
+namespace glrt {
 
 DebugGui::DebugGui()
 {
 
 }
 
-} // namespace glrf
+} // namespace glrt
 

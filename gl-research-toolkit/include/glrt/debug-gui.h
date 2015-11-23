@@ -1,9 +1,9 @@
-#ifndef GLRF_DEBUGGUI_H
-#define GLRF_DEBUGGUI_H
+#ifndef GLRT_DEBUGGUI_H
+#define GLRT_DEBUGGUI_H
 
 #include "dependencies.h"
 
-namespace glrf {
+namespace glrt {
 
 class DebugGui
 {
@@ -11,6 +11,6 @@ public:
   DebugGui();
 };
 
-} // namespace glrf
+} // namespace glrt
 
-#endif // GLRF_DEBUGGUI_H
+#endif // GLRT_DEBUGGUI_H

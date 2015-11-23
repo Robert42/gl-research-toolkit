@@ -1,5 +1,5 @@
-#ifndef GLRF_DEPENDENCIES_H
-#define GLRF_DEPENDENCIES_H
+#ifndef GLRT_DEPENDENCIES_H
+#define GLRT_DEPENDENCIES_H
 
 #include <SFML/Graphics.hpp>
 #include <SFGUI/SFGUI.hpp>
@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-namespace glrf {
+namespace glrt {
 
 class Dependencies
 {
@@ -18,8 +18,8 @@ public:
   Dependencies();
 };
 
-} // namespace glrf
+} // namespace glrt
 
 #define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << x;
 
-#endif // GLRF_DEPENDENCIES_H
+#endif // GLRT_DEPENDENCIES_H
