@@ -6,6 +6,8 @@
 #include <SFGUI/Window.hpp>
 #include <SFGUI/Desktop.hpp>
 
+#include <iostream>
+
 namespace glrf {
 
 class Dependencies
@@ -15,5 +17,7 @@ public:
 };
 
 } // namespace glrf
+
+#define PRINT_VALUE(x) std::cout << "Value of `" << #x << "` = " << x << std::endl;
 
 #endif // GLRF_DEPENDENCIES_H
