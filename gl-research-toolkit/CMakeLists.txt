@@ -14,10 +14,12 @@ add_library(glrt
   include/glrt/application.h
   include/glrt/debug-gui.h
   include/glrt/dependencies.h
+  include/glrt/profiler.h
   include/glrt/system.h
   src/glrt/application.cpp
   src/glrt/debug-gui.cpp
   src/glrt/dependencies.cpp
+  src/glrt/profiler.cpp
   src/glrt/system.cpp
 )
 

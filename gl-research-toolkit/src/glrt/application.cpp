@@ -54,7 +54,7 @@ bool Application::pollEvent(sf::Event& event)
 
 void Application::update()
 {
-  frameDuration = clock.restart().asSeconds();
+  frameDuration = profiler.update();
   gui.update(frameDuration);
 }
 

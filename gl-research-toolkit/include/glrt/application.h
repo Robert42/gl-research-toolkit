@@ -3,6 +3,7 @@
 
 #include "system.h"
 #include "debug-gui.h"
+#include "profiler.h"
 
 namespace glrt {
 
@@ -18,7 +19,7 @@ public:
     }
   };
 
-  sf::Clock clock;
+  Profiler profiler;
   System system;
   DebugGui gui;
   sf::RenderWindow& window;
