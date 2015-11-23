@@ -14,7 +14,7 @@ sf::Font LoadDejaVuSansFont();
 namespace glrt {
 namespace gui {
 
-DebugGui::DebugGui()
+Toolbar::Toolbar()
   : visible(false),
     fpsVisible(false)
 {
@@ -25,7 +25,7 @@ DebugGui::DebugGui()
 }
 
 
-void DebugGui::handleEvent(const sf::Event& event)
+void Toolbar::handleEvent(const sf::Event& event)
 {
   switch(event.type)
   {
@@ -48,7 +48,7 @@ void DebugGui::handleEvent(const sf::Event& event)
     sfgDesktop.HandleEvent(event);
 }
 
-void DebugGui::update(float seconds)
+void Toolbar::update(float seconds)
 {
   if(visible)
     sfgDesktop.Update(seconds);
@@ -62,7 +62,7 @@ void DebugGui::update(float seconds)
   }
 }
 
-void DebugGui::draw(sf::RenderWindow& renderWindow)
+void Toolbar::draw(sf::RenderWindow& renderWindow)
 {
   if(visible)
     sfgui.Display(renderWindow);
@@ -71,18 +71,18 @@ void DebugGui::draw(sf::RenderWindow& renderWindow)
     renderWindow.draw(fpsText);
 }
 
-void DebugGui::initToolbarWindow()
+void Toolbar::initToolbarWindow()
 {
   debugMenu = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
 
   sfg::Window::Ptr debugMenuWindow = sfg::Window::Create();
-  debugMenuWindow->SetTitle("GUI [F9]");
+  debugMenuWindow->SetTitle("Toolbar [F9]");
   debugMenuWindow->Add(debugMenu);
 
   sfgDesktop.Add(debugMenuWindow);
 }
 
-void DebugGui::initFpsText()
+void Toolbar::initFpsText()
 {
   fpsText.setFont(font);
 

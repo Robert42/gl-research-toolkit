@@ -10,7 +10,7 @@
 namespace glrt {
 namespace gui {
 
-class DebugGui
+class Toolbar
 {
 public:
   sfg::SFGUI sfgui;
@@ -23,7 +23,7 @@ public:
   bool visible;
   bool fpsVisible;
 
-  DebugGui();
+  Toolbar();
 
   void handleEvent(const sf::Event& event);
   void update(float seconds);

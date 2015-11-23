@@ -21,7 +21,7 @@ public:
 
   Profiler profiler;
   System system;
-  gui::DebugGui gui;
+  gui::Toolbar gui;
   sf::RenderWindow& window;
 
   float frameDuration;
