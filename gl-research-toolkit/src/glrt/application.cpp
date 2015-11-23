@@ -8,9 +8,6 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
     window(system.window)
 {
   Q_UNUSED(applicationSettings);
-
-  window.pushGLStates();
-  window.resetGLStates();
 }
 
 
@@ -62,11 +59,17 @@ void Application::update()
 void Application::beginDraw()
 {
   window.clear();
+
+  window.pushGLStates();
+  window.resetGLStates();
 }
 
 
 void Application::endDraw()
 {
+  window.popGLStates();
+  window.resetGLStates();
+
   gui.draw(window);
   window.display();
 }

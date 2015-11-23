@@ -10,20 +10,28 @@
 namespace glrt {
 namespace gui {
 
-class DebugGui
+class Toolbar
 {
 public:
   sfg::SFGUI sfgui;
   sfg::Desktop sfgDesktop;
-  sfg::Box::Ptr debugMenu;
+  sf::Font font;
 
-  bool visible : 1;
+  sfg::Box::Ptr toolVBox;
+  sf::Text fpsText;
 
-  DebugGui();
+  bool visible;
+  bool fpsVisible;
+
+  Toolbar();
 
   void handleEvent(const sf::Event& event);
   void update(float seconds);
   void draw(sf::RenderWindow& renderWindow);
+
+private:
+  void initToolbarWindow();
+  void initFpsText();
 };
 
 } // namespace gui
