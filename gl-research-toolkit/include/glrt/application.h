@@ -1,10 +1,7 @@
 #ifndef GLRT_WINDOW_H
 #define GLRT_WINDOW_H
 
-#include <SFML/Graphics.hpp>
-#include <SFGUI/SFGUI.hpp>
-#include <SFGUI/Window.hpp>
-#include <SFGUI/Desktop.hpp>
+#include "dependencies.h"
 
 namespace glrt {
 
