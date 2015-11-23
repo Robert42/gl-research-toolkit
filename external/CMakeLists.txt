@@ -4,6 +4,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/mod
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
 
+######## glhelpers #################################################################
+add_subdirectory(glhelper)
+
 ######## SFML #################################################################
 set(SFML_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/sfml)
 set(SFML_ROOT ${SFML_ROOT} PARENT_SCOPE)
