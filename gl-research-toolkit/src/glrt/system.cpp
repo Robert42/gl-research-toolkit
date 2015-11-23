@@ -1,7 +1,5 @@
 #include <glrt/system.h>
 
-#include <GL/glew.h>
-
 /*! \namespace glrt
 \ingroup glrt
 \brief The namespace of the OpenGL Research Toolkit

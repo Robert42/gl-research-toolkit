@@ -1,11 +1,15 @@
 #ifndef GLRT_DEPENDENCIES_H
 #define GLRT_DEPENDENCIES_H
 
+#include <GL/glew.h>
+
+#include <glm/glm.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <QDebug>
 
 #include <iostream>
+
 
 namespace glrt {
 
