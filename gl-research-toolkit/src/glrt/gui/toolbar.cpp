@@ -1,10 +1,11 @@
-#include <glrt/debug-gui.h>
+#include <glrt/gui/toolbar.h>
 
 #include <SFGUI/Button.hpp>
 #include <SFGUI/Window.hpp>
 
 
 namespace glrt {
+namespace gui {
 
 DebugGui::DebugGui()
   : visible(false)
@@ -61,5 +62,6 @@ void DebugGui::draw(sf::RenderWindow& renderWindow)
 }
 
 
+} // namespace gui
 } // namespace glrt
 

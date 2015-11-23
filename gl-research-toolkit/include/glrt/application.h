@@ -2,7 +2,7 @@
 #define GLRT_APPLICATION_H
 
 #include "system.h"
-#include "debug-gui.h"
+#include "gui/toolbar.h"
 #include "profiler.h"
 
 namespace glrt {
@@ -21,7 +21,7 @@ public:
 
   Profiler profiler;
   System system;
-  DebugGui gui;
+  gui::DebugGui gui;
   sf::RenderWindow& window;
 
   float frameDuration;
