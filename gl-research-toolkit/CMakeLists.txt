@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 project(OpenGL-Research-Toolkit)
 
 find_package(SFML 2.3 COMPONENTS graphics window system REQUIRED)
+find_package(Qt5Core REQUIRED)
 
 
 set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -40,4 +41,5 @@ target_compile_options(glrt
 target_link_libraries(glrt
   ${SFML_LIBRARIES}
   sfgui
+  Qt5::Core
 )

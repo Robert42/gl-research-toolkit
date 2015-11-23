@@ -28,6 +28,7 @@ SOFTWARE.
 - [SFGUI](sfgui.sfml-dev.de) (zlib license)
 - [glm](glm.g-truc.net) (Modified MIT License)
 - [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
+- [Qt](http://www.qt.io/) (LGPL License)
 
 # External Libraries partially integrated into this Toolkit
 

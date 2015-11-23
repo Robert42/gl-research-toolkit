@@ -6,6 +6,8 @@
 #include <SFGUI/Window.hpp>
 #include <SFGUI/Desktop.hpp>
 
+#include <QDebug>
+
 #include <iostream>
 
 namespace glrf {
@@ -18,6 +20,6 @@ public:
 
 } // namespace glrf
 
-#define PRINT_VALUE(x) std::cout << "Value of `" << #x << "` = " << x << std::endl;
+#define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << x;
 
 #endif // GLRF_DEPENDENCIES_H
