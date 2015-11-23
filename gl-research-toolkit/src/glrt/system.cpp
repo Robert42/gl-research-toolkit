@@ -8,8 +8,10 @@
 /*! \class glrt::System
 \ingroup glrt
 \inheaderfile glrt/application.h
-\brief The main calss of this toolkit. Initializes all dependencies.
+\brief The main class of this toolkit. Initializes all dependencies.
 
+\note This is the only class mandatory for this toolkit.
+      If you use the Application helper class, it already automatically creates an instance of this class for you.
 */
 
 
@@ -56,12 +58,6 @@ bool System::pollEvent(sf::Event& event)
   }
 
   return false;
-}
-
-
-void System::update(float deltaTime)
-{
-  Q_UNUSED(deltaTime);
 }
 
 
