@@ -1,4 +1,5 @@
 #include <glrt/gui/toolbar.h>
+#include <glrt/gui/properties.h>
 
 #include <SFGUI/Button.hpp>
 #include <SFGUI/Window.hpp>
@@ -17,16 +18,9 @@ DebugGui::DebugGui()
   : visible(false),
     fpsVisible(false)
 {
-  sfg::Window::Ptr debugMenuWindow = sfg::Window::Create();
-  debugMenuWindow->SetTitle("GUI [F9]");
-
-  debugMenu = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
-
-  debugMenu->PackStart(sfg::Button::Create("Show FPS"), false, false);
-  debugMenuWindow->Add(debugMenu);
   font = sfg::LoadDejaVuSansFont();
 
-  sfgDesktop.Add(debugMenuWindow);
+  initToolbarWindow();
   initFpsText();
 }
 
@@ -38,10 +32,7 @@ void DebugGui::handleEvent(const sf::Event& event)
   case sf::Event::KeyPressed:
     switch(event.key.code)
     {
-    case sf::Keyboard::F1:
-      this->visible = !this->visible;
-      return;
-    case sf::Keyboard::F2:
+    case sf::Keyboard::F9:
       this->visible = !this->visible;
       return;
     default:
@@ -78,6 +69,17 @@ void DebugGui::draw(sf::RenderWindow& renderWindow)
 
   if(fpsVisible)
     renderWindow.draw(fpsText);
+}
+
+void DebugGui::initToolbarWindow()
+{
+  debugMenu = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+
+  sfg::Window::Ptr debugMenuWindow = sfg::Window::Create();
+  debugMenuWindow->SetTitle("GUI [F9]");
+  debugMenuWindow->Add(debugMenu);
+
+  sfgDesktop.Add(debugMenuWindow);
 }
 
 void DebugGui::initFpsText()
