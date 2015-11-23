@@ -35,7 +35,9 @@ target_include_directories(
 
 target_compile_options(glrt
   PUBLIC
-  "-std=c++11"
+  -std=c++11
+  -Wall
+  -Wextra
 )
 
 target_link_libraries(glrt

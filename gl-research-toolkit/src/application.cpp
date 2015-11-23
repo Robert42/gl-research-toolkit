@@ -23,6 +23,9 @@ Application::Application(int argc, char** argv, const Settings& settings)
 {
   window.pushGLStates();
   window.resetGLStates();
+
+  Q_UNUSED(argc);
+  Q_UNUSED(argv);
 }
 
 
@@ -41,7 +44,11 @@ bool Application::pollEvent(sf::Event& event)
       case sf::Keyboard::Escape:
         window.close();
         continue;
+      default:
+        break;
       }
+      break;
+    default:
       break;
     }
 
@@ -54,6 +61,7 @@ bool Application::pollEvent(sf::Event& event)
 
 void Application::update(float deltaTime)
 {
+  Q_UNUSED(deltaTime);
 }
 
 
