@@ -12,16 +12,17 @@ class StaticMesh final
 {
 public:
   struct Vertex;
+  typedef quint16 index_type;
 
   StaticMesh() = delete;
   StaticMesh(const StaticMesh&) = delete;
   StaticMesh(StaticMesh&& mesh);
-  StaticMesh(gl::Buffer&& buffer);
+  StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer);
 
   static StaticMesh loadMeshFromFile(const QString& filename);
 
 public:
-  gl::Buffer buffer;
+  gl::Buffer indexBuffer, vertexBuffer;
 };
 
 

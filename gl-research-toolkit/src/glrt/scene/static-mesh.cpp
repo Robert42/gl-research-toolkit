@@ -22,13 +22,15 @@ inline glm::vec2 toGlm2(const aiVector2D& v)
   return glm::vec2(v.x, v.y);
 }
 
-StaticMesh::StaticMesh(gl::Buffer&& buffer)
-  : buffer(std::move(buffer))
+StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer)
+  : indexBuffer(std::move(indexBuffer)),
+    vertexBuffer(std::move(vertexBuffer))
 {
 }
 
 StaticMesh::StaticMesh(StaticMesh&& mesh)
-  : buffer(std::move(mesh.buffer))
+  : indexBuffer(std::move(mesh.indexBuffer)),
+    vertexBuffer(std::move(mesh.vertexBuffer))
 {
 }
 
@@ -103,11 +105,16 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename)
   if(numFaces == 0)
     throw GLRT_EXCEPTION(QString("Couldn't find any faces in %0").arg(filename));
 
+  if(numVertices > std::numeric_limits<index_type>::max())
+    throw GLRT_EXCEPTION(QString("Too many vertices").arg(filename));
+
   std::vector<Vertex> vertices;
-  std::vector<int> indices;
+  std::vector<index_type> indices;
 
   vertices.reserve(numVertices);
   indices.reserve(numFaces);
+
+  index_type index_offset = 0;
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
@@ -127,12 +134,27 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename)
 
       vertices.push_back(vertex);
     }
+
+    for(quint32 j = 0; j<mesh->mNumFaces; ++j)
+    {
+      const aiFace& face = mesh->mFaces[j];
+
+      if(face.mNumIndices != 3)
+        throw GLRT_EXCEPTION(QString("UNexpected non-triangle face in %0").arg(filename));
+
+      indices.push_back(face.mIndices[j]+index_offset);
+      indices.push_back(face.mIndices[j]+index_offset);
+      indices.push_back(face.mIndices[j]+index_offset);
+    }
+
+    index_offset += mesh->mNumVertices;
   }
 
-  gl::Buffer vertexBuffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE);
-  gl::Buffer indexBuffer(numFaces, gl::Buffer::UsageFlag::IMMUTABLE);
+  gl::Buffer indexBuffer(numFaces, gl::Buffer::UsageFlag::IMMUTABLE, indices.data());
+  gl::Buffer vertexBuffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices.data());
 
-  return std::move(StaticMesh(std::move(vertexBuffer)));
+  return std::move(StaticMesh(std::move(indexBuffer),
+                              std::move(vertexBuffer)));
 }
 
 
