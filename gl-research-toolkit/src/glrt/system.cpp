@@ -48,9 +48,17 @@ void System::initSDL(const Settings& settings)
   CALL_SDL_CRITICAL(sdlWindow != nullptr);
 
   sdlGlContext = SDL_GL_CreateContext(sdlWindow);
+  CALL_SDL_CRITICAL(sdlGlContext != nullptr);
 
+  if(settings.VSync)
+  {
+    if(SDL_GL_SetSwapInterval(-1) < 0)
+      CALL_SDL(SDL_GL_SetSwapInterval(1)  == 0);
+  }else
+  {
+    CALL_SDL(SDL_GL_SetSwapInterval(0)  == 0);
+  }
 
-  CALL_SDL_CRITICAL(sdlWindow != nullptr);
 
   SDL_ShowWindow(sdlWindow);
 }
