@@ -55,8 +55,7 @@ int main(int argc, char** argv)
     buffer.BindVertexBuffer(bindingIndex, 0, vertexArray.GetVertexStride(bindingIndex));
 
     orangeShader.Activate();
-    //orangeShader.BindSSBO(buffer, "position");
-    GL_CALL(glDrawArrays, GL_POINTS, 0, 1);
+    GL_CALL(glDrawArrays, GL_QUADS, 0, 4);
 
     app.swapWindow();
   }
