@@ -7,6 +7,9 @@
 namespace glrt {
 namespace scene {
 
+const GLuint vertexBufferBinding = 0;
+const GLuint indexBufferBinding = 1;
+
 inline glm::vec3 toGlm3(const aiVector3D& v)
 {
   return glm::vec3(v.x, v.y, v.z);
@@ -22,15 +25,17 @@ inline glm::vec2 toGlm2(const aiVector2D& v)
   return glm::vec2(v.x, v.y);
 }
 
-StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer)
+StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices)
   : indexBuffer(std::move(indexBuffer)),
-    vertexBuffer(std::move(vertexBuffer))
+    vertexBuffer(std::move(vertexBuffer)),
+    numberIndices(numberIndices)
 {
 }
 
 StaticMesh::StaticMesh(StaticMesh&& mesh)
   : indexBuffer(std::move(mesh.indexBuffer)),
-    vertexBuffer(std::move(mesh.vertexBuffer))
+    vertexBuffer(std::move(mesh.vertexBuffer)),
+    numberIndices(mesh.numberIndices)
 {
 }
 
@@ -154,7 +159,50 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename)
   gl::Buffer vertexBuffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices.data());
 
   return std::move(StaticMesh(std::move(indexBuffer),
-                              std::move(vertexBuffer)));
+                              std::move(vertexBuffer),
+                              numFaces*3));
+}
+
+
+// Normally, only one instance of gl::VertexArrayObject should be needed, as it only defined the format, which is reusable.
+// Quote (https://www.opengl.org/wiki/Vertex_Specification#Separate_attribute_format):
+// Better yet, if you want to use the same format but move the buffer around, it only takes one function call; namely glBindVertexBuffer​ with a buffer binding of 0.
+//
+//
+// in other words, you can do the following:
+// 1. Bind vertex array object
+// 2. Bind Buffer to 0
+// 3. Draw
+// 4. Bind other Buffer to 0
+// 5. Draw
+// 6. Bind other Buffer to 0
+// 7. Draw
+gl::VertexArrayObject StaticMesh::generateVertexArrayObject()
+{
+  typedef gl::VertexArrayObject::Attribute Attribute;
+
+  return std::move(gl::VertexArrayObject({Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
+                                          Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
+                                          Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
+                                          Attribute(Attribute::Type::FLOAT, 2, vertexBufferBinding),
+                                          Attribute(Attribute::Type::UINT16, 1)}));
+}
+
+void StaticMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
+{
+  indexBuffer.BindIndexBuffer();
+  vertexBuffer.BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
+}
+
+void StaticMesh::resetBinding()
+{
+  // TODO
+}
+
+void StaticMesh::draw()
+{
+  Q_ASSERT(sizeof(index_type) == 2);
+  GL_CALL(glDrawElements, GL_TRIANGLES, numberIndices, GL_UNSIGNED_SHORT, nullptr);
 }
 
 
