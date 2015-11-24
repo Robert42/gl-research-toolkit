@@ -96,6 +96,8 @@ void Profiler::createTweakBar()
 
     qint32 visible = 0;
     TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_INT32, 1, &visible);
+
+    TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &this->printFramerate, "");
   }
 }
 
