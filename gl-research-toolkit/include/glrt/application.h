@@ -33,6 +33,10 @@ public:
   float update();
 
   void swapWindow();
+
+private:
+  bool handleEvent(const SDL_Event& event);
+  bool handleWindowEvent(const SDL_WindowEvent& event);
 };
 
 } // namespace glrt
