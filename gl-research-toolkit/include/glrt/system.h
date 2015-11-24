@@ -37,6 +37,10 @@ public:
 
   System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
+
+private:
+  void initSDL(const Settings& settings);
+  void initGLEW(const Settings& settings);
 };
 
 } // namespace glrt
