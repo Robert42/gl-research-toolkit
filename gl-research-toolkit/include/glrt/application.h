@@ -42,6 +42,8 @@ private:
   bool handleEvent(const SDL_Event& event);
   bool handleWindowEvent(const SDL_WindowEvent& event);
   bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
+
+  void initAntTweakBar();
 };
 
 } // namespace glrt

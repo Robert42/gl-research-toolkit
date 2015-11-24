@@ -9,6 +9,7 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
     sdlWindow(system.sdlWindow),
     isRunning(true)
 {
+  initAntTweakBar();
 }
 
 
@@ -39,13 +40,14 @@ float Application::update()
 
 void Application::swapWindow()
 {
+  TwDraw();
   SDL_GL_SwapWindow(sdlWindow);
 }
 
 
 bool Application::handleEvent(const SDL_Event& event)
 {
-  if(gui.handleEvent(event))
+  if(TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION))
     return true;
 
   switch(event.type)
@@ -87,6 +89,19 @@ bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
   default:
     return false;
   }
+}
+
+
+void Application::initAntTweakBar()
+{
+  glm::ivec2 size;
+
+  TwInit(TW_OPENGL_CORE, NULL);
+
+  SDL_GetWindowSize(sdlWindow, &size.x, &size.y);
+
+  TwWindowSize(size.x,
+               size.y);
 }
 
 

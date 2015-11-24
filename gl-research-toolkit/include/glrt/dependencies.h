@@ -7,6 +7,8 @@
 
 #include <glm/glm.hpp>
 
+#include <AntTweakBar.h>
+
 #include <QDebug>
 #include <QString>
 
