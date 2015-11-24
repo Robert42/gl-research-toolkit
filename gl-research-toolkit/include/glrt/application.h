@@ -24,12 +24,14 @@ public:
 
   System system;
   Settings settings;
+  SDL_Window* const sdlWindow;
+
   Profiler profiler;
   gui::Toolbar gui;
-  SDL_Window* const sdlWindow;
 
   float frameDuration;
   bool isRunning;
+  bool showAntTweakBar;
 
   Application(int argc, char** argv, const System::Settings& systemSettings = System::Settings::simpleWindow(), const Application::Settings& applicationSettings=Settings::techDemo());
 
@@ -42,6 +44,9 @@ private:
   bool handleEvent(const SDL_Event& event);
   bool handleWindowEvent(const SDL_WindowEvent& event);
   bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
+
+  void initAntTweakBar();
+  void updateAntTweakBarWindowSize();
 };
 
 } // namespace glrt

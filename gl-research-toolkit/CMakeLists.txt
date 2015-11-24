@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 project(OpenGL-Research-Toolkit)
 
@@ -48,4 +48,5 @@ target_link_libraries(glrt
   ${SDL2_LIBRARIES}
   glhelper
   Qt5::Core
+  AntTweakBar
 )
