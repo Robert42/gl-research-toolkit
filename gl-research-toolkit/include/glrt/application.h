@@ -25,10 +25,10 @@ public:
   SDL_Window* const sdlWindow;
 
   float frameDuration;
+  bool isRunning;
 
   Application(int argc, char** argv, const System::Settings& systemSettings = System::Settings::simpleWindow(), const Application::Settings& applicationSettings=Settings::techDemo());
 
-  bool isRunning() const;
   bool pollEvent(SDL_Event* event);
   float update();
 

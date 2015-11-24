@@ -42,7 +42,7 @@ int main(int argc, char** argv)
   orangeShader.CreateProgram();
 
 
-  while(app.isRunning())
+  while(app.isRunning)
   {
     SDL_Event event;
     while(app.pollEvent(&event))

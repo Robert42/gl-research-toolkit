@@ -5,15 +5,10 @@ namespace glrt {
 
 Application::Application(int argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
   : system(argc, argv, systemSettings),
-    sdlWindow(system.sdlWindow)
+    sdlWindow(system.sdlWindow),
+    isRunning(true)
 {
   Q_UNUSED(applicationSettings);
-}
-
-
-bool Application::isRunning() const
-{
-  return true;
 }
 
 

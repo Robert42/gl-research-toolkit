@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv);
 
-  while(app.isRunning())
+  while(app.isRunning)
   {
     SDL_Event event;
     while(app.pollEvent(&event))
