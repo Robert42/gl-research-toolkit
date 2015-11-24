@@ -20,13 +20,50 @@ public:
 class Profiler final
 {
 public:
+  class Scope;
+
   Timer timer;
 
   Profiler();
+  ~Profiler();
 
   float update();
+  void activate();
+  void deactivate();
+
+private:
+  struct RecordedScope
+  {
+    quint64 time;
+    const char* file;
+    const char* function;
+    const char* name;
+    int line;
+    int depth;
+  };
+
+  static Profiler* activeProfiler;
+
+  std::vector<RecordedScope> recordedScopes;
+  int currentDepth;
+};
+
+class Profiler::Scope final
+{
+public:
+  Timer timer;
+  size_t index;
+
+  Scope(const char* file, int line, const char* function, const char* name);
+  ~Scope();
 };
 
 } // namespace glrt
+
+#ifdef GLRT_PROFILER
+#define PROFILE_SCOPE(name) static Profiler::Scope __profiler_scope_##name(__FILE__, __LINE__, __PRETTY_FUNCTION__, #name);Q_UNUSED(__profiler_scope_##name);
+#else
+#define PROFILE_SCOPE(name)
+#endif
 
 #endif // GLRT_PROFILER_H
