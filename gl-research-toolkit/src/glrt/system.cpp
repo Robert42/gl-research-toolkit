@@ -24,11 +24,11 @@ System::System(int argc, char** argv, const Settings& settings)
 
   CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0);
 
-  sdlWindow = SDL_CreateWindow(settings.title.toUtf8().data(),
+  sdlWindow = SDL_CreateWindow(settings.windowTitle.toUtf8().data(),
                                SDL_WINDOWPOS_CENTERED,
                                SDL_WINDOWPOS_CENTERED,
-                               0,
-                               0,
+                               settings.windowSize.x,
+                               settings.windowSize.y,
                                SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
   CALL_SDL_CRITICAL(sdlWindow != nullptr);
 
