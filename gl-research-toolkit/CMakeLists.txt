@@ -8,6 +8,7 @@ option(GLRT_PROFILER "If Disabled, there the profiler is reducuced to elminate t
 
 find_package(SDL2 REQUIRED)
 find_package(Qt5Core REQUIRED)
+find_package(ASSIMP REQUIRED)
 
 
 set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
