@@ -30,10 +30,9 @@ public:
 
   bool isRunning() const;
   bool pollEvent(SDL_Event* event);
-  void update();
+  float update();
 
-  void beginDraw();
-  void endDraw();
+  void swapWindow();
 };
 
 } // namespace glrt

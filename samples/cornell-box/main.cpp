@@ -15,8 +15,7 @@ int main(int argc, char** argv)
 
     app.update();
 
-    app.beginDraw();
-    app.endDraw();
+    app.swapWindow();
   }
 
   return 0;

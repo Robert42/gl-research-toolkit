@@ -33,20 +33,15 @@ bool Application::pollEvent(SDL_Event* e)
 }
 
 
-void Application::update()
+float Application::update()
 {
   frameDuration = profiler.update();
   gui.update(frameDuration);
+  return frameDuration;
 }
 
 
-void Application::beginDraw()
-{
-
-}
-
-
-void Application::endDraw()
+void Application::swapWindow()
 {
   SDL_GL_SwapWindow(sdlWindow);
 }
