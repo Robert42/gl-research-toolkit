@@ -5,7 +5,7 @@ namespace glrt {
 
 Application::Application(int argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
   : system(argc, argv, systemSettings),
-    window(system.window)
+    sdlWindow(system.sdlWindow)
 {
   Q_UNUSED(applicationSettings);
 }
@@ -13,34 +13,18 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
 
 bool Application::isRunning() const
 {
-  return window.isOpen();
+  return true;
 }
 
 
-bool Application::pollEvent(sf::Event& event)
+bool Application::pollEvent(SDL_Event* e)
 {
-  while(window.pollEvent(event))
-  {
-    gui.handleEvent(event);
+  SDL_Event& event = *e;
 
-    switch(event.type)
-    {
-    case sf::Event::Closed:
-      window.close();
-      break;
-    case sf::Event::KeyPressed:
-      switch(event.key.code)
-      {
-      case sf::Keyboard::Escape:
-        window.close();
-        continue;
-      default:
-        break;
-      }
-      break;
-    default:
-      break;
-    }
+  while(SDL_PollEvent(&event))
+  {
+    if(gui.handleEvent(event))
+      continue;
 
     return true;
   }
@@ -58,20 +42,13 @@ void Application::update()
 
 void Application::beginDraw()
 {
-  window.clear();
 
-  window.pushGLStates();
-  window.resetGLStates();
 }
 
 
 void Application::endDraw()
 {
-  window.popGLStates();
-  window.resetGLStates();
-
-  gui.draw(window);
-  window.display();
+  SDL_GL_SwapWindow(sdlWindow);
 }
 
 

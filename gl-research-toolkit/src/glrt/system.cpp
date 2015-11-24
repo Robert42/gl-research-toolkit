@@ -7,7 +7,7 @@
 
 /*! \class glrt::System
 \ingroup glrt
-\inheaderfile glrt/application.h
+\inheaderfile glrt/system.h
 \brief The main class of this toolkit. Initializes all dependencies.
 
 \note This is the only class mandatory for this toolkit.
@@ -18,22 +18,26 @@
 namespace glrt {
 
 System::System(int argc, char** argv, const Settings& settings)
-  : window(settings.videoMode,
-           settings.title,
-           settings.style,
-           settings.contextSettings)
 {
   Q_UNUSED(argc);
   Q_UNUSED(argv);
+
+  CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO));
 
   GLenum error =  glewInit();
 
   if(error != GLEW_OK)
     qCritical() << "Initializing glew failed!\nError: " << glewGetErrorString(error);
-  if(!glewIsSupported(QString("GL_VERSION_%0_%1").arg(settings.contextSettings.majorVersion).arg(settings.contextSettings.minorVersion).toStdString().c_str()))
-    qCritical() << QString("The requested OpenGL version %0.%1 is not supported! => Aborting!").arg(settings.contextSettings.majorVersion).arg(settings.contextSettings.minorVersion).toStdString().c_str();
+  if(!glewIsSupported(QString("GL_VERSION_%0_%1").arg(settings.openglVersionMajor()).arg(settings.openglVersionMinor()).toStdString().c_str()))
+    qCritical() << QString("The requested OpenGL version %0.%1 is not supported! => Aborting!").arg(settings.openglVersionMajor()).arg(settings.openglVersionMinor()).toStdString().c_str();
 }
 
+
+System::~System()
+{
+  SDL_DestroyWindow(sdlWindow);
+  SDL_Quit();
+}
 
 
 
