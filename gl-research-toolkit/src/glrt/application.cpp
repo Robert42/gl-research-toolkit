@@ -60,7 +60,7 @@ bool Application::handleEvent(const SDL_Event& event)
 
 bool Application::handleWindowEvent(const SDL_WindowEvent& event)
 {
-  switch(event.type)
+  switch(event.event)
   {
   case SDL_WINDOWEVENT_CLOSE:
     return true;
