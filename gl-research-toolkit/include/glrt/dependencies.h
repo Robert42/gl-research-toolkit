@@ -23,7 +23,7 @@ public:
 
 } // namespace glrt
 
-#define __CALL_SDL(x, action) if(x < 0){qCritical() << #x << " failed: " << SDL_GetError() << "\n("<<__FILE__<<", " << __LINE__ << ")";action}
+#define __CALL_SDL(x, action) if(!(x)){qCritical() << #x << " failed: " << SDL_GetError() << "\n("<<__FILE__<<", " << __LINE__ << ")";action}
 #define CALL_SDL(x) __CALL_SDL(x,)
 #define CALL_SDL_CRITICAL(x) __CALL_SDL(x,exit(-1);)
 

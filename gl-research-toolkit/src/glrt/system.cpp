@@ -22,7 +22,19 @@ System::System(int argc, char** argv, const Settings& settings)
   Q_UNUSED(argc);
   Q_UNUSED(argv);
 
-  CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO));
+  CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0);
+
+  sdlWindow = SDL_CreateWindow(settings.title.toUtf8().data(),
+                               SDL_WINDOWPOS_CENTERED,
+                               SDL_WINDOWPOS_CENTERED,
+                               0,
+                               0,
+                               SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+  CALL_SDL_CRITICAL(sdlWindow != nullptr);
+
+  sdlGlContext = SDL_GL_CreateContext(sdlWindow);
+
+  SDL_ShowWindow(sdlWindow);
 
   GLenum error =  glewInit();
 
@@ -35,6 +47,7 @@ System::System(int argc, char** argv, const Settings& settings)
 
 System::~System()
 {
+  SDL_GL_DeleteContext(sdlGlContext);
   SDL_DestroyWindow(sdlWindow);
   SDL_Quit();
 }

@@ -38,6 +38,7 @@ public:
   };
 
   SDL_Window* sdlWindow;
+  SDL_GLContext sdlGlContext;
 
   System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
