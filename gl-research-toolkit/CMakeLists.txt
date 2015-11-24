@@ -58,6 +58,7 @@ target_include_directories(
   SYSTEM
   PUBLIC
   ${GLM_INCLUDE_DIR}
+  ${ASSIMP_INCLUDE_DIR}
 )
 
 target_compile_options(glrt
@@ -70,6 +71,7 @@ target_compile_options(glrt
 target_link_libraries(glrt
   PUBLIC
   ${SDL2_LIBRARIES}
+  ${ASSIMP_LIBRARY}
   glhelper
   Qt5::Core
   AntTweakBar
