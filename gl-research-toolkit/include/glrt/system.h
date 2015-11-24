@@ -6,10 +6,10 @@
 
 namespace glrt {
 
-class System
+class System final
 {
 public:
-  struct Settings
+  struct Settings final
   {
     QString windowTitle = "Hello World :)";
     glm::ivec2 windowSize = glm::ivec2(640, 480);

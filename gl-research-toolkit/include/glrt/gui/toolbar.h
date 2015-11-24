@@ -7,7 +7,7 @@
 namespace glrt {
 namespace gui {
 
-class Toolbar
+class Toolbar final
 {
 public:
   Toolbar();

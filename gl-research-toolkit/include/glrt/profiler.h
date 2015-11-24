@@ -5,7 +5,7 @@
 
 namespace glrt {
 
-class Timer
+class Timer final
 {
 public:
   quint64 last_tick;
@@ -17,7 +17,7 @@ public:
   quint64 elapsedTimeAsMicoseconds() const;
 };
 
-class Profiler
+class Profiler final
 {
 public:
   Timer timer;
