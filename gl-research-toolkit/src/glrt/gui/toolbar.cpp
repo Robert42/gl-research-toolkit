@@ -8,15 +8,8 @@ Toolbar::Toolbar()
 {
 }
 
-bool Toolbar::handleEvent(const SDL_Event& event)
+Toolbar::~Toolbar()
 {
-  Q_UNUSED(event);
-  return false;
-}
-
-void Toolbar::update(float deltaTime)
-{
-  Q_UNUSED(deltaTime);
 }
 
 } // namespace gui

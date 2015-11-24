@@ -11,9 +11,7 @@ class Toolbar final
 {
 public:
   Toolbar();
-
-  bool handleEvent(const SDL_Event& event);
-  void update(float deltaTime);
+  ~Toolbar();
 };
 
 } // namespace gui

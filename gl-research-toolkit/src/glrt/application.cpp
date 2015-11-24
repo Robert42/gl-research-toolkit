@@ -34,7 +34,6 @@ bool Application::pollEvent(SDL_Event* e)
 float Application::update()
 {
   frameDuration = profiler.update();
-  gui.update(frameDuration);
   qDebug() << 1.f / frameDuration;
   return frameDuration;
 }
