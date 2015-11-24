@@ -51,6 +51,8 @@ int main(int argc, char** argv)
 
     app.update();
 
+    GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+
     vertexArray.Bind();
     buffer.BindVertexBuffer(bindingIndex, 0, vertexArray.GetVertexStride(bindingIndex));
 

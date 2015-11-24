@@ -17,7 +17,7 @@
 
 namespace glrt {
 
-class Dependencies
+class Dependencies final
 {
 public:
   Dependencies();

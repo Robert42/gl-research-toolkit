@@ -7,13 +7,22 @@
 namespace glrt {
 namespace gui {
 
-class Toolbar
+class Toolbar final
 {
 public:
   Toolbar();
+  ~Toolbar();
 
-  bool handleEvent(const SDL_Event& event);
-  void update(float deltaTime);
+  static void registerTweakBar(TwBar* tweakBar);
+  static void unregisterTweakBar(TwBar* tweakBar);
+
+  void init();
+
+private:
+  TwBar* tweakBar;
+
+  static void setBarVisibility(const bool *value, TwBar* bar);
+  static void getBarVisibility(bool *value, TwBar* bar);
 };
 
 } // namespace gui

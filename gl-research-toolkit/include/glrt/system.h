@@ -6,14 +6,15 @@
 
 namespace glrt {
 
-class System
+class System final
 {
 public:
-  struct Settings
+  struct Settings final
   {
     QString windowTitle = "Hello World :)";
     glm::ivec2 windowSize = glm::ivec2(640, 480);
     int minOpenglVersion = 450;
+    bool VSync = false;
 
     static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))
     {
@@ -37,6 +38,10 @@ public:
 
   System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
+
+private:
+  void initSDL(const Settings& settings);
+  void initGLEW(const Settings& settings);
 };
 
 } // namespace glrt

@@ -7,10 +7,10 @@
 
 namespace glrt {
 
-class Application
+class Application final
 {
 public:
-  struct Settings
+  struct Settings final
   {
     bool quitWithEscape = false;
 
@@ -27,9 +27,8 @@ public:
   SDL_Window* const sdlWindow;
 
   Profiler profiler;
-  gui::Toolbar gui;
+  gui::Toolbar toolbar;
 
-  float frameDuration;
   bool isRunning;
   bool showAntTweakBar;
 

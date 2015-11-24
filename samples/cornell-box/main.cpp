@@ -1,6 +1,8 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
 
+#include <glhelper/gl.hpp>
+
 
 int main(int argc, char** argv)
 {
@@ -14,6 +16,8 @@ int main(int argc, char** argv)
     }
 
     app.update();
+
+    GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
     app.swapWindow();
   }

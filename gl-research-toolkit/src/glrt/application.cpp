@@ -33,8 +33,7 @@ bool Application::pollEvent(SDL_Event* e)
 
 float Application::update()
 {
-  frameDuration = profiler.update();
-  gui.update(frameDuration);
+  float frameDuration = profiler.update();
   return frameDuration;
 }
 
@@ -102,6 +101,9 @@ void Application::initAntTweakBar()
 {
   TwInit(TW_OPENGL_CORE, NULL);
   updateAntTweakBarWindowSize();
+
+  toolbar.init();
+  profiler.createTweakBar();
 }
 
 void Application::updateAntTweakBarWindowSize()
