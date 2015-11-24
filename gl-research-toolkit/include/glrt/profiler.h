@@ -14,7 +14,7 @@ public:
 
   float restart();
   float elapsedTimeAsSeconds() const;
-  quint64 elapsedTimeAsMicoseconds() const;
+  quint64 elapsedTimeAsMicroseconds() const;
 };
 
 class Profiler final

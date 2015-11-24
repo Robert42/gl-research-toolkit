@@ -5,6 +5,9 @@
 namespace glrt {
 
 
+// ======== Timer ==============================================================
+
+
 Timer::Timer()
 {
   last_tick = SDL_GetPerformanceCounter();
@@ -22,13 +25,16 @@ float Timer::restart()
 
 float Timer::elapsedTimeAsSeconds() const
 {
-  return elapsedTimeAsMicoseconds() * 0.000001f;
+  return elapsedTimeAsMicroseconds() * 0.000001f;
 }
 
-quint64 Timer::elapsedTimeAsMicoseconds() const
+quint64 Timer::elapsedTimeAsMicroseconds() const
 {
   return (quint64(1000000L)*(SDL_GetPerformanceCounter()-last_tick)) / SDL_GetPerformanceFrequency();
 }
+
+
+// ======== Profiler ===========================================================
 
 
 Profiler::Profiler()
