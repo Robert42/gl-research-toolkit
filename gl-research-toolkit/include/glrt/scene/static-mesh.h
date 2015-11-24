@@ -11,6 +11,8 @@ namespace scene {
 class StaticMesh final
 {
 public:
+  struct Vertex;
+
   StaticMesh() = delete;
   StaticMesh(const StaticMesh&) = delete;
   StaticMesh(StaticMesh&& mesh);
@@ -21,6 +23,16 @@ public:
 public:
   gl::Buffer buffer;
 };
+
+
+struct StaticMesh::Vertex
+{
+  glm::vec3 position;
+  glm::vec3 normal;
+  glm::vec3 tangent;
+  glm::vec2 uv;
+};
+
 
 } // namespace scene
 } // namespace glrt
