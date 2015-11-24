@@ -3,6 +3,7 @@
 
 #include "dependencies.h"
 
+
 namespace glrt {
 
 class System
@@ -10,24 +11,32 @@ class System
 public:
   struct Settings
   {
-    sf::String title = "Hello World :)";
-    sf::VideoMode videoMode = sf::VideoMode(1920, 1080);
-    sf::Uint32 style = sf::Style::Default;
-    sf::ContextSettings contextSettings = sf::ContextSettings(24, 8, 0, 4, 5);
+    QString windowTitle = "Hello World :)";
+    glm::ivec2 windowSize = glm::ivec2(640, 480);
+    int minOpenglVersion = 450;
 
-    static Settings simpleWindow(const sf::String& title="Hello World :)", int width=1024, int height=768)
+    static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))
     {
       Settings settings;
-      settings.title = title;
-      settings.videoMode.width = width;
-      settings.videoMode.height = height;
+      settings.windowTitle = windowTitle;
+      settings.windowSize = windowSize;
       return settings;
+    }
+
+    int openglVersionMajor() const{return minOpenglVersion/100;}
+    int openglVersionMinor() const{return (minOpenglVersion/10)%10;}
+
+  private:
+    Settings()
+    {
     }
   };
 
-  sf::RenderWindow window;
+  SDL_Window* sdlWindow;
+  SDL_GLContext sdlGlContext;
 
   System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
+  ~System();
 };
 
 } // namespace glrt

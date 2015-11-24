@@ -8,15 +8,14 @@ int main(int argc, char** argv)
 
   while(app.isRunning())
   {
-    sf::Event event;
-    while(app.pollEvent(event))
+    SDL_Event event;
+    while(app.pollEvent(&event))
     {
     }
 
     app.update();
 
-    app.beginDraw();
-    app.endDraw();
+    app.swapWindow();
   }
 
   return 0;

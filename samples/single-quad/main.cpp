@@ -44,14 +44,12 @@ int main(int argc, char** argv)
 
   while(app.isRunning())
   {
-    sf::Event event;
-    while(app.pollEvent(event))
+    SDL_Event event;
+    while(app.pollEvent(&event))
     {
     }
 
     app.update();
-
-    app.beginDraw();
 
     vertexArray.Bind();
     buffer.BindVertexBuffer(bindingIndex, 0, vertexArray.GetVertexStride(bindingIndex));
@@ -60,7 +58,7 @@ int main(int argc, char** argv)
     //orangeShader.BindSSBO(buffer, "position");
     GL_CALL(glDrawArrays, GL_POINTS, 0, 1);
 
-    app.endDraw();
+    app.swapWindow();
   }
 
   return 0;

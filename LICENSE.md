@@ -24,13 +24,10 @@ SOFTWARE.
 
 # External Dependencies used by this Toolkit
 
-- [SFML](www.sfml-dev.org) (zlib/png license)
-- [SFGUI](sfgui.sfml-dev.de) (zlib license)
-    - Also using the Dejavu Font
-        - Based on the Vera fonts (extended MIT license, see [external/sfgui/FONT.LICENSE](https://github.com/TankOs/SFGUI/blob/05ab2cd45fd1af654d51739d32490173bf69b413/FONT.LICENSE) or [see wikipedia](https://en.wikipedia.org/wiki/DejaVu_fonts)) modifications made by the DejaVu project are public domain.
 - [glm](glm.g-truc.net) (Modified MIT License)
 - [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
 - [glew](http://glew.sourceforge.net/) (BSDL License)
 - [Qt](http://www.qt.io/) (LGPL License)
+- [SDL](http://libsdl.org) (zlib license)
 
 
