@@ -12,15 +12,19 @@ class Application
 public:
   struct Settings
   {
+    bool quitWithEscape = false;
+
     static Settings techDemo()
     {
       Settings settings;
+      settings.quitWithEscape = true;
       return settings;
     }
   };
 
-  Profiler profiler;
   System system;
+  Settings settings;
+  Profiler profiler;
   gui::Toolbar gui;
   SDL_Window* const sdlWindow;
 
@@ -37,6 +41,7 @@ public:
 private:
   bool handleEvent(const SDL_Event& event);
   bool handleWindowEvent(const SDL_WindowEvent& event);
+  bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
 };
 
 } // namespace glrt

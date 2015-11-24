@@ -5,6 +5,7 @@ namespace glrt {
 
 Application::Application(int argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
   : system(argc, argv, systemSettings),
+    settings(applicationSettings),
     sdlWindow(system.sdlWindow),
     isRunning(true)
 {
@@ -52,6 +53,8 @@ bool Application::handleEvent(const SDL_Event& event)
   {
   case SDL_WINDOWEVENT:
     return handleWindowEvent(event.window);
+  case SDL_KEYDOWN:
+    return handleKeyPressedEvent(event.key);
   default:
     return false;
   }
@@ -63,8 +66,25 @@ bool Application::handleWindowEvent(const SDL_WindowEvent& event)
   switch(event.event)
   {
   case SDL_WINDOWEVENT_CLOSE:
-    isRunning = false;
+    this->isRunning = false;
     return true;
+  default:
+    return false;
+  }
+}
+
+
+bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
+{
+  switch(event.keysym.sym)
+  {
+  case SDLK_ESCAPE:
+    if(settings.quitWithEscape)
+    {
+      this->isRunning = false;
+      return true;
+    }
+    return false;
   default:
     return false;
   }
