@@ -12,7 +12,7 @@ int main(int argc, char** argv)
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Single Mesh"));
 
   Assimp::Importer importer;
-  const aiScene* scene = importer.ReadFile(GLRT_ASSET_DIR"/meshes/suzanne.obj",
+  const aiScene* scene = importer.ReadFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj",
                                            // aiProcess_RemoveComponent |  TODO: use this
                                            aiProcess_JoinIdenticalVertices | // TODO: this can be used to allow switching between indexed and not indexed mode
                                            aiProcess_PreTransformVertices | // TODO: have this only activated when loading a single mesh
