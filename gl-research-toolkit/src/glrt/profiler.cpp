@@ -1,6 +1,8 @@
 #include <glrt/profiler.h>
+#include <glrt/gui/toolbar.h>
 
 #include <SDL2/SDL_timer.h>
+
 
 namespace glrt {
 
@@ -41,12 +43,18 @@ Profiler* Profiler::activeProfiler = nullptr;
 
 
 Profiler::Profiler()
+  : tweakBar(nullptr)
 {
 }
 
 
 Profiler::~Profiler()
 {
+  if(tweakBar)
+  {
+    gui::Toolbar::unregisterTweakBar(tweakBar);
+    TwDeleteBar(tweakBar);
+  }
   deactivate();
 }
 
@@ -56,7 +64,11 @@ float Profiler::update()
 #ifdef GLRT_PROFILER
   recordedScopes.clear();
   recordedScopes.reserve(2048);
+
+  if(printFramerate)
+    qDebug() << 1.f / timer.elapsedTimeAsSeconds();
 #endif
+
   return timer.restart();
 }
 
@@ -72,6 +84,19 @@ void Profiler::deactivate()
 {
   if(activeProfiler == this)
     activeProfiler = nullptr;
+}
+
+
+void Profiler::createTweakBar()
+{
+  if(!tweakBar)
+  {
+    tweakBar = TwNewBar("Profiler");
+    gui::Toolbar::registerTweakBar(tweakBar);
+
+    qint32 visible = 0;
+    TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_INT32, 1, &visible);
+  }
 }
 
 

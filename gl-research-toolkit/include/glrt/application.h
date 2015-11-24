@@ -27,9 +27,8 @@ public:
   SDL_Window* const sdlWindow;
 
   Profiler profiler;
-  gui::Toolbar gui;
+  gui::Toolbar toolbar;
 
-  float frameDuration;
   bool isRunning;
   bool showAntTweakBar;
 
