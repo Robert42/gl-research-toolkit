@@ -48,4 +48,5 @@ target_link_libraries(glrt
   ${SDL2_LIBRARIES}
   glhelper
   Qt5::Core
+  AntTweakBar
 )
