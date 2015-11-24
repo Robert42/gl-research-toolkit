@@ -22,18 +22,17 @@ public:
   Profiler profiler;
   System system;
   gui::Toolbar gui;
-  sf::RenderWindow& window;
+  SDL_Window* const sdlWindow;
 
   float frameDuration;
 
   Application(int argc, char** argv, const System::Settings& systemSettings = System::Settings::simpleWindow(), const Application::Settings& applicationSettings=Settings::techDemo());
 
   bool isRunning() const;
-  bool pollEvent(sf::Event& event);
-  void update();
+  bool pollEvent(SDL_Event* event);
+  float update();
 
-  void beginDraw();
-  void endDraw();
+  void swapWindow();
 };
 
 } // namespace glrt

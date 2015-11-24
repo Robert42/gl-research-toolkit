@@ -3,9 +3,6 @@
 
 #include "../dependencies.h"
 
-#include <SFGUI/SFGUI.hpp>
-#include <SFGUI/Desktop.hpp>
-#include <SFGUI/Box.hpp>
 
 namespace glrt {
 namespace gui {
@@ -13,25 +10,10 @@ namespace gui {
 class Toolbar
 {
 public:
-  sfg::SFGUI sfgui;
-  sfg::Desktop sfgDesktop;
-  sf::Font font;
-
-  sfg::Box::Ptr toolVBox;
-  sf::Text fpsText;
-
-  bool visible;
-  bool fpsVisible;
-
   Toolbar();
 
-  void handleEvent(const sf::Event& event);
-  void update(float seconds);
-  void draw(sf::RenderWindow& renderWindow);
-
-private:
-  void initToolbarWindow();
-  void initFpsText();
+  bool handleEvent(const SDL_Event& event);
+  void update(float deltaTime);
 };
 
 } // namespace gui

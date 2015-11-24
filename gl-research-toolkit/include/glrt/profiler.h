@@ -5,10 +5,22 @@
 
 namespace glrt {
 
+class Timer
+{
+public:
+  quint64 last_tick;
+
+  Timer();
+
+  float restart();
+  float elapsedTimeAsSeconds() const;
+  quint64 elapsedTimeAsMicoseconds() const;
+};
+
 class Profiler
 {
 public:
-  sf::Clock clock;
+  Timer timer;
 
   Profiler();
 
