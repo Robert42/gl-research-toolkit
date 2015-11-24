@@ -6,6 +6,7 @@ include(cmake/package-helper.cmake)
 
 find_package_overide_root(GLEW_ROOT GLEW REQUIRED)
 
+set(GLRT_ASSET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
 
 add_subdirectory(external)
 add_subdirectory(gl-research-toolkit)

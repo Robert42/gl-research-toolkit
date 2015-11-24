@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(OpenGL-Research-Toolkit)
 
 
+if(NOT GLRT_ASSET_DIR)
+message(FATAL_ERROR "GLRT_ASSET_DIR must be set")
+endif()
+
+
 option(GLRT_PROFILER "If Disabled, there the profiler is reducuced to elminate the overhead of the profiler." ON)
 
 
@@ -41,6 +46,12 @@ target_compile_definitions(
   -DGLRT_PROFILER
 )
 endif()
+
+target_compile_definitions(
+  glrt
+  PUBLIC
+  GLRT_ASSET_DIR=\"${GLRT_ASSET_DIR}\"
+)
 
 target_include_directories(
   glrt
