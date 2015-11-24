@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 project(OpenGL-Research-Toolkit)
 
+
+option(GLRT_PROFILER "If Disabled, there the profiler is reducuced to elminate the overhead of the profiler." ON)
+
+
 find_package(SDL2 REQUIRED)
 find_package(Qt5Core REQUIRED)
 
@@ -28,6 +32,14 @@ target_include_directories(
   PUBLIC
   include
 )
+
+if(GLRT_PROFILER)
+target_compile_definitions(
+  glrt
+  PUBLIC
+  -DGLRT_PROFILER
+)
+endif()
 
 target_include_directories(
   glrt
