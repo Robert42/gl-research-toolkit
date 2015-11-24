@@ -12,9 +12,11 @@ class StaticMesh final
 {
 public:
   StaticMesh() = delete;
+  StaticMesh(const StaticMesh&) = delete;
+  StaticMesh(StaticMesh&& mesh);
   StaticMesh(gl::Buffer&& buffer);
 
-  static StaticMesh&& loadMeshFromFile(const QString& filename);
+  static StaticMesh loadMeshFromFile(const QString& filename);
 
 public:
   gl::Buffer buffer;
