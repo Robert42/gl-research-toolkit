@@ -63,6 +63,7 @@ bool Application::handleWindowEvent(const SDL_WindowEvent& event)
   switch(event.event)
   {
   case SDL_WINDOWEVENT_CLOSE:
+    isRunning = false;
     return true;
   default:
     return false;
