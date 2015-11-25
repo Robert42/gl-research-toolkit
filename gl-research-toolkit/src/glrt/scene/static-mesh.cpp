@@ -205,7 +205,8 @@ gl::VertexArrayObject StaticMesh::generateVertexArrayObject()
 
 void StaticMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
 {
-  indexBuffer->BindIndexBuffer();
+  if(indexBuffer != nullptr)
+    indexBuffer->BindIndexBuffer();
   vertexBuffer->BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
 }
 
