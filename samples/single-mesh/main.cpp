@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   TestUniformBlock u;
 
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
-  u.view_projection = glm::perspectiveFov(90.f, 640.f, 480.f, 0.001f, 100.f ) * glm::translate(glm::mat4(1), glm::vec3(0, 0, -5)); // TODO use the real window size
+  u.view_projection = glm::perspectiveFov(glm::radians(90.f), 640.f, 480.f, 0.001f, 100.f ) * glm::translate(glm::mat4(1), glm::vec3(0, 0, -5)); // TODO use the real window size
   u.material_color = glm::vec4(1, 0.5, 0, 1);
 
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, &u);
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-    u.model_matrix = glm::rotate(u.model_matrix, 2 * deltaTime, glm::vec3(0, 0, 1));
+    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 0, 1));
     u.material_color.b = 1;
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
