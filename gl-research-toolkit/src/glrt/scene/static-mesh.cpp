@@ -239,8 +239,8 @@ StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, 
   if(convertToArrays)
     return _createAsArray(indices, numIndices, vertices, numVertices);
 
-  gl::Buffer* indexBuffer = new gl::Buffer(numIndices, gl::Buffer::UsageFlag::IMMUTABLE, indices);
-  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices);
+  gl::Buffer* indexBuffer = new gl::Buffer(numIndices*sizeof(index_type), gl::Buffer::UsageFlag::IMMUTABLE, indices);
+  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices*sizeof(Vertex), gl::Buffer::UsageFlag::IMMUTABLE, vertices);
 
   return StaticMesh(indexBuffer,
                     vertexBuffer,
@@ -271,7 +271,7 @@ StaticMesh StaticMesh::createAsArray(const StaticMesh::Vertex* vertices, int num
   gl::Buffer* indexBuffer = nullptr;
   int numIndices = 0;
 
-  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices);
+  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices*sizeof(Vertex), gl::Buffer::UsageFlag::IMMUTABLE, vertices);
 
   return StaticMesh(indexBuffer,
                     vertexBuffer,
