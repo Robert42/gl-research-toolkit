@@ -25,12 +25,11 @@ inline glm::vec2 toGlm2(const aiVector2D& v)
   return glm::vec2(v.x, v.y);
 }
 
-StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices, int numberVertices, bool indexed)
+StaticMesh::StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices)
   : indexBuffer(std::move(indexBuffer)),
     vertexBuffer(std::move(vertexBuffer)),
     numberIndices(numberIndices),
-    numberVertices(numberVertices),
-    indexed(indexed)
+    numberVertices(numberVertices)
 {
 }
 
@@ -38,12 +37,19 @@ StaticMesh::StaticMesh(StaticMesh&& mesh)
   : indexBuffer(std::move(mesh.indexBuffer)),
     vertexBuffer(std::move(mesh.vertexBuffer)),
     numberIndices(mesh.numberIndices),
-    numberVertices(mesh.numberVertices),
-    indexed(mesh.indexed)
+    numberVertices(mesh.numberVertices)
 {
   mesh.numberIndices = 0;
   mesh.numberVertices = 0;
-  mesh.indexed = false;
+  mesh.indexBuffer = nullptr;
+  mesh.vertexBuffer = nullptr;
+}
+
+
+StaticMesh::~StaticMesh()
+{
+  delete indexBuffer;
+  delete vertexBuffer;
 }
 
 
@@ -162,14 +168,15 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
     index_offset += mesh->mNumVertices;
   }
 
-  gl::Buffer indexBuffer(numFaces, gl::Buffer::UsageFlag::IMMUTABLE, indices.data());
-  gl::Buffer vertexBuffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices.data());
+  gl::Buffer* indexBuffer = nullptr;
+  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices.data());
+  if(indexed)
+    indexBuffer = new gl::Buffer(numFaces, gl::Buffer::UsageFlag::IMMUTABLE, indices.data());
 
-  return std::move(StaticMesh(std::move(indexBuffer),
-                              std::move(vertexBuffer),
+  return std::move(StaticMesh(indexBuffer,
+                              vertexBuffer,
                               numFaces*3,
-                              numVertices,
-                              indexed));
+                              numVertices));
 }
 
 
@@ -198,8 +205,8 @@ gl::VertexArrayObject StaticMesh::generateVertexArrayObject()
 
 void StaticMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
 {
-  indexBuffer.BindIndexBuffer();
-  vertexBuffer.BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
+  indexBuffer->BindIndexBuffer();
+  vertexBuffer->BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
 }
 
 void StaticMesh::resetBinding()
@@ -212,7 +219,7 @@ void StaticMesh::draw()
   Q_ASSERT(sizeof(index_type) == 2);
   //qDebug() << "switch back to GL_TRIANGLES"; // FIXME
   const GLenum mode = GL_LINES;
-  if(indexed)
+  if(indexBuffer != nullptr)
     GL_CALL(glDrawElements, mode, numberIndices, GL_UNSIGNED_SHORT, nullptr);
   else
     GL_CALL(glDrawArrays, mode, 0, numberVertices);
