@@ -12,9 +12,9 @@ uniform TestUniformBlock
 
 
 
-in vec2 position;
+in vec3 position;
 
 void main()
 {
-  gl_Position = u.view_projection * u.model_matrix * vec4(position.x, position.y, 0, 1);
+  gl_Position = u.view_projection * u.model_matrix * vec4(position.xyz, 1);
 }
