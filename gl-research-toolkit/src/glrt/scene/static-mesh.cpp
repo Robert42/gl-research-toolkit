@@ -184,8 +184,7 @@ gl::VertexArrayObject StaticMesh::generateVertexArrayObject()
   return std::move(gl::VertexArrayObject({Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
-                                          Attribute(Attribute::Type::FLOAT, 2, vertexBufferBinding),
-                                          Attribute(Attribute::Type::UINT16, 1)}));
+                                          Attribute(Attribute::Type::FLOAT, 2, vertexBufferBinding)}));
 }
 
 void StaticMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
