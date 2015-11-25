@@ -11,15 +11,16 @@ public:
   glm::mat4 viewMatrix;
   glm::mat4 projectionMatrix;
 
-  DebugCamera();
+  DebugCamera(SDL_Window* sdlWindow);
 
   bool handleEvents(const SDL_Event& event);
 
 private:
   glm::mat4 camera_position;
   glm::mat4 camera_orientation;
+  bool rotationMode;
 
- void update();
+  void update();
 };
 
 } // namespace glrt

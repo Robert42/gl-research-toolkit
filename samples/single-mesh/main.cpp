@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 
   TestUniformBlock u;
 
-  glrt::DebugCamera camera;
+  glrt::DebugCamera camera(app.sdlWindow);
 
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
   u.view_projection = camera.projectionMatrix * camera.viewMatrix;
