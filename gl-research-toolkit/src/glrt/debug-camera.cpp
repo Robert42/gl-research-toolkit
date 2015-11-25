@@ -69,13 +69,13 @@ void DebugCamera::update(float deltaTime)
     SDL_Scancode q = SDL_GetScancodeFromKey(SDLK_q);
     SDL_Scancode e = SDL_GetScancodeFromKey(SDLK_e);
 
-    glm::vec4 key_input(state[a]-state[d],
+    glm::vec3 key_input(state[d]-state[a],
                         state[e]-state[q],
-                        state[w]-state[s],
-                        0);
+                        state[s]-state[w]);
 
+    key_input = (glm::inverse(camera_orientation) * glm::vec4(-key_input, 0)).xyz();
 
-    camera_position = (glm::inverse(camera_orientation) * key_input).xyz() * deltaTime * movement_speed;
+    camera_position +=  key_input * deltaTime * movement_speed;
   }
 
   viewMatrix = camera_orientation * glm::translate(I, camera_position);
