@@ -37,7 +37,7 @@ Cache::Id Cache::idForName(const QString& name)
     if(!_shaderFactories.contains(name))
       throw GLRT_EXCEPTION(QString("Unknown shader name `%0`").arg(name));
 
-    gl::ShaderObject* shader = _shaderFactories[name]->create();
+    gl::ShaderObject* shader = _shaderFactories[name]->create(name);
 
     Q_ASSERT(shader != nullptr);
 

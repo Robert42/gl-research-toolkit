@@ -3,8 +3,6 @@
 
 #include "shader-technique.h"
 
-#include <glhelper/shaderobject.hpp>
-
 namespace glrt {
 namespace shader {
 
@@ -20,14 +18,19 @@ public:
   Factory();
   virtual ~Factory();
 
-  virtual gl::ShaderObject* create() const = 0;
+  virtual gl::ShaderObject* create(const QString& name) const = 0;
 };
 
 
 class CustomFactory final : public Factory
 {
 public:
+  QHash<gl::ShaderObject::ShaderType, QFileInfo> shaderFiles;
 
+  CustomFactory(const QFileInfo& vertexShader,
+                const QFileInfo& fragmentShader);
+
+  gl::ShaderObject* create(const QString& name) const final override;
 };
 
 
@@ -38,7 +41,7 @@ public:
 
   TechniqueBasedFactory(const QVector<Technique*>& techniques);
 
-  gl::ShaderObject* create() const final override;
+  gl::ShaderObject* create(const QString& name) const final override;
 };
 
 
