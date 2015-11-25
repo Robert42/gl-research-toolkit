@@ -28,6 +28,9 @@ public:
   Id idForName(const QString& name);
   gl::ShaderObject& shaderForId(Id id);
 
+  // Caller passes ownership to the given Factory instance
+  void addShaderFactory(const QString& name, Factory* factory);
+
 private:
   QHash<QString, Factory*> _shaderFactories;
   QHash<QString, Id> _idForName;

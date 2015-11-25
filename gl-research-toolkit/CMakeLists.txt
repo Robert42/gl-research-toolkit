@@ -6,6 +6,9 @@ project(OpenGL-Research-Toolkit)
 if(NOT GLRT_ASSET_DIR)
 message(FATAL_ERROR "GLRT_ASSET_DIR must be set")
 endif()
+if(NOT GLRT_SHADER_DIR)
+message(FATAL_ERROR "GLRT_SHADER_DIR must be set")
+endif()
 
 
 option(GLRT_PROFILER "If Disabled, there the profiler is reducuced to elminate the overhead of the profiler." ON)
@@ -59,6 +62,7 @@ target_compile_definitions(
   glrt
   PUBLIC
   GLRT_ASSET_DIR=\"${GLRT_ASSET_DIR}\"
+  GLRT_SHADER_DIR=\"${GLRT_SHADER_DIR}\"
 )
 
 target_include_directories(

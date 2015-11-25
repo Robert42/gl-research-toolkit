@@ -18,6 +18,7 @@ public:
   Factory();
   virtual ~Factory();
 
+  // Caller inherits ownership ovver returned instance
   virtual gl::ShaderObject* create(const QString& name) const = 0;
 };
 
