@@ -132,8 +132,6 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
   vertices.reserve(numVertices);
   indices.reserve(numFaces*3);
 
-  index_type index_offset = 0;
-
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
     aiMesh* mesh = scene->mMeshes[i];
@@ -153,6 +151,8 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
       vertices.push_back(vertex);
     }
 
+    index_type index_offset = indices.size();
+
     for(quint32 j = 0; j<mesh->mNumFaces; ++j)
     {
       const aiFace& face = mesh->mFaces[j];
@@ -160,18 +160,16 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
       if(face.mNumIndices != 3)
         throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(filename));
 
-      indices.push_back(face.mIndices[j]+index_offset);
-      indices.push_back(face.mIndices[j]+index_offset);
-      indices.push_back(face.mIndices[j]+index_offset);
+      indices.push_back(face.mIndices[0]+index_offset);
+      indices.push_back(face.mIndices[1]+index_offset);
+      indices.push_back(face.mIndices[2]+index_offset);
     }
-
-    index_offset += mesh->mNumVertices;
   }
 
   if(indexed)
     return createIndexed(indices.data(), indices.size(), vertices.data(), vertices.size());
   else
-    return createAsArray(vertices.data(), vertices.size());
+    return _createAsArray(indices.data(), indices.size(), vertices.data(), vertices.size());
 }
 
 
