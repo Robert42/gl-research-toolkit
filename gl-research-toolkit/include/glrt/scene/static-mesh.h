@@ -25,6 +25,9 @@ public:
   StaticMesh& operator=(const StaticMesh&&) = delete;
 
   static StaticMesh loadMeshFromFile(const QString& filename, bool indexed=true);
+  static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices);
+  static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
+
   static gl::VertexArrayObject generateVertexArrayObject();
 
   void bind(const gl::VertexArrayObject& vertexArrayObject);

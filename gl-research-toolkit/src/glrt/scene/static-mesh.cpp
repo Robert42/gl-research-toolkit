@@ -130,7 +130,7 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
   std::vector<index_type> indices;
 
   vertices.reserve(numVertices);
-  indices.reserve(numFaces);
+  indices.reserve(numFaces*3);
 
   index_type index_offset = 0;
 
@@ -168,15 +168,36 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
     index_offset += mesh->mNumVertices;
   }
 
-  gl::Buffer* indexBuffer = nullptr;
-  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices.data());
   if(indexed)
-    indexBuffer = new gl::Buffer(numFaces, gl::Buffer::UsageFlag::IMMUTABLE, indices.data());
+    return createIndexed(indices.data(), indices.size(), vertices.data(), vertices.size());
+  else
+    return createAsArray(vertices.data(), vertices.size());
+}
 
-  return std::move(StaticMesh(indexBuffer,
-                              vertexBuffer,
-                              numFaces*3,
-                              numVertices));
+
+StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices)
+{
+  gl::Buffer* indexBuffer = new gl::Buffer(numIndices, gl::Buffer::UsageFlag::IMMUTABLE, indices);
+  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices);
+
+  return StaticMesh(indexBuffer,
+                    vertexBuffer,
+                    numIndices,
+                    numVertices);
+}
+
+
+StaticMesh StaticMesh::createAsArray(const StaticMesh::Vertex* vertices, int numVertices)
+{
+  gl::Buffer* indexBuffer = nullptr;
+  int numIndices = 0;
+
+  gl::Buffer* vertexBuffer = new gl::Buffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices);
+
+  return StaticMesh(indexBuffer,
+                    vertexBuffer,
+                    numIndices,
+                    numVertices);
 }
 
 
