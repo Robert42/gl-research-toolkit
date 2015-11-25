@@ -175,8 +175,70 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
 }
 
 
-StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices)
+StaticMesh StaticMesh::createCube(const glm::vec3& dimensions, bool centered, bool indexed)
 {
+/*    z
+ *    |
+ *    |
+ *    4-----------7
+ *    |\          |\
+ *    | \         | \
+ * y  |  \        |  \
+ *  \ |   5-----------6
+ *   \|   |       |   |
+ *    0---|-------3   |
+ *     \  |        \  |
+ *      \ |         \ |
+ *       \|          \|
+ *        1-----------2----x
+ */
+
+
+  std::vector<index_type> indices = {0, 3, 1, 1, 3, 2, // Ground
+                                     5, 7, 4, 5, 6, 7, // Top
+                                     0, 1, 5, 5, 5, 0, // Left
+                                     3, 7, 6, 3, 6, 2, // Right
+                                     0, 4, 7, 0, 7, 3, // Far
+                                     1, 6, 5, 1, 2, 6, // Near
+                                    };
+  std::vector<Vertex> vertices;
+
+  vertices.resize(8);
+
+  vertices[0].position = glm::vec3(0, 1, 0);
+  vertices[1].position = glm::vec3(0, 0, 0);
+  vertices[2].position = glm::vec3(1, 0, 0);
+  vertices[3].position = glm::vec3(1, 1, 0);
+  vertices[4].position = glm::vec3(0, 1, 1);
+  vertices[5].position = glm::vec3(0, 0, 1);
+  vertices[6].position = glm::vec3(1, 0, 1);
+  vertices[7].position = glm::vec3(1, 1, 1);
+
+  for(Vertex& v : vertices)
+  {
+    v.normal = glm::normalize(v.position);
+    v.tangent = glm::cross(glm::vec3(0, 0, 1), v.normal); // FIXME: no real tangent possible in an indexed version, when vertices are shared bnetween different faces!!!!
+    v.uv = glm::vec2(v.position.x, v.position.y + v.position.z);
+  }
+
+  if(centered)
+  {
+    for(Vertex& v : vertices)
+      v.position -= glm::vec3(0.5f);
+  }
+
+  for(Vertex& v : vertices)
+    v.position *= dimensions;
+
+  return createIndexed(indices.data(), indices.size(), vertices.data(), vertices.size(), !indexed);
+}
+
+
+StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool convertToArrays)
+{
+  if(convertToArrays)
+    return _createAsArray(indices, numIndices, vertices, numVertices);
+
   gl::Buffer* indexBuffer = new gl::Buffer(numIndices, gl::Buffer::UsageFlag::IMMUTABLE, indices);
   gl::Buffer* vertexBuffer = new gl::Buffer(numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices);
 
@@ -184,6 +246,23 @@ StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, 
                     vertexBuffer,
                     numIndices,
                     numVertices);
+}
+
+
+StaticMesh StaticMesh::_createAsArray(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices)
+{
+  std::vector<StaticMesh::Vertex> newVertices;
+
+  newVertices.reserve(numIndices);
+
+  for(int i=0; i<numIndices; ++i)
+  {
+    Q_ASSERT(indices[i] < numVertices);
+
+    newVertices.push_back(vertices[indices[i]]);
+  }
+
+  return createAsArray(newVertices.data(), newVertices.size());
 }
 
 

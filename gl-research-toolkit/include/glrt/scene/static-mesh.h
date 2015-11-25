@@ -25,6 +25,7 @@ public:
   StaticMesh& operator=(const StaticMesh&&) = delete;
 
   static StaticMesh loadMeshFromFile(const QString& filename, bool indexed=true);
+  static StaticMesh createCube(const glm::vec3& dimensions, bool centered, bool indexed=true);
   static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool convertToArrays = false);
   static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
 
