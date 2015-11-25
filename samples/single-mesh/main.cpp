@@ -28,8 +28,8 @@ int main(int argc, char** argv)
 
   TestUniformBlock u;
 
-  u.model_matrix = glm::mat4(1);
-  u.view_projection = glm::mat4(1);
+  u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
+  u.view_projection = glm::perspectiveFov(90.f, 640.f, 480.f, 0.001f, 100.f ) * glm::translate(glm::mat4(1), glm::vec3(0, 0, -5)); // TODO use the real window size
   u.material_color = glm::vec4(1, 0.5, 0, 1);
 
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::IMMUTABLE, &u);
