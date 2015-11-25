@@ -196,7 +196,7 @@ StaticMesh StaticMesh::createCube(const glm::vec3& dimensions, bool centered, bo
 
   std::vector<index_type> indices = {0, 3, 1, 1, 3, 2, // Ground
                                      5, 7, 4, 5, 6, 7, // Top
-                                     0, 1, 5, 5, 5, 0, // Left
+                                     0, 1, 5, 5, 4, 0, // Left
                                      3, 7, 6, 3, 6, 2, // Right
                                      0, 4, 7, 0, 7, 3, // Far
                                      1, 6, 5, 1, 2, 6, // Near
