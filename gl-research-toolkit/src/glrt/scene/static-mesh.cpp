@@ -145,7 +145,7 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename)
       const aiFace& face = mesh->mFaces[j];
 
       if(face.mNumIndices != 3)
-        throw GLRT_EXCEPTION(QString("UNexpected non-triangle face in %0").arg(filename));
+        throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(filename));
 
       indices.push_back(face.mIndices[j]+index_offset);
       indices.push_back(face.mIndices[j]+index_offset);
