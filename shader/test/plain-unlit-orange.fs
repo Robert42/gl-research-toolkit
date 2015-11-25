@@ -1,8 +1,13 @@
 #version 450 core
 
+uniform MaterialInstance
+{
+  vec4 material_color;
+} material;
+
 out vec4 color;
 
 void main()
 {
-  color = vec4(1, 0.5, 0, 1);
+  color = material.material_color;
 }
