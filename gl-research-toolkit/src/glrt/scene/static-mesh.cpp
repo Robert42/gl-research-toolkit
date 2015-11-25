@@ -25,17 +25,19 @@ inline glm::vec2 toGlm2(const aiVector2D& v)
   return glm::vec2(v.x, v.y);
 }
 
-StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices)
+StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices, int numberVertices)
   : indexBuffer(std::move(indexBuffer)),
     vertexBuffer(std::move(vertexBuffer)),
-    numberIndices(numberIndices)
+    numberIndices(numberIndices),
+    numberVertices(numberVertices)
 {
 }
 
 StaticMesh::StaticMesh(StaticMesh&& mesh)
   : indexBuffer(std::move(mesh.indexBuffer)),
     vertexBuffer(std::move(mesh.vertexBuffer)),
-    numberIndices(mesh.numberIndices)
+    numberIndices(mesh.numberIndices),
+    numberVertices(mesh.numberVertices)
 {
 }
 
@@ -160,7 +162,8 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename)
 
   return std::move(StaticMesh(std::move(indexBuffer),
                               std::move(vertexBuffer),
-                              numFaces*3));
+                              numFaces*3,
+                              numVertices));
 }
 
 

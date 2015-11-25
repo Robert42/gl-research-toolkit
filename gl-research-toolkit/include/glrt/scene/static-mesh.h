@@ -16,7 +16,7 @@ public:
   typedef quint16 index_type;
 
   StaticMesh(StaticMesh&& mesh);
-  StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices);
+  StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices, int numberVertices);
 
   StaticMesh() = delete;
   StaticMesh(const StaticMesh&) = delete;
@@ -34,6 +34,7 @@ public:
 public:
   gl::Buffer indexBuffer, vertexBuffer;
   int numberIndices;
+  int numberVertices;
 };
 
 
