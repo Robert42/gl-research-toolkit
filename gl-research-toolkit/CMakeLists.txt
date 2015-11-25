@@ -66,6 +66,7 @@ target_compile_definitions(
   GLRT_ASSET_DIR=\"${GLRT_ASSET_DIR}\"
   GLRT_SHADER_DIR=\"${GLRT_SHADER_DIR}\"
   GLM_FORCE_RADIANS
+  GLM_SWIZZLE
 )
 
 target_include_directories(
