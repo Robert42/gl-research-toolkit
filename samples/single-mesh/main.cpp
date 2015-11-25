@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Single Mesh"));
 
-  //glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj"); // TODO: load suzanne again
+  //glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj", false); // TODO: load suzanne again
   glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::createCube(glm::vec3(1.f), true, false);
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
 
@@ -35,6 +35,8 @@ int main(int argc, char** argv)
 
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, &u);
 
+  //glEnable(GL_CULL_FACE); // TODO uncomment
+
   while(app.isRunning)
   {
     SDL_Event event;
@@ -46,6 +48,7 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
+
     u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 1, 0));
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
@@ -54,11 +57,13 @@ int main(int argc, char** argv)
     shaderObject->Activate();
     shaderObject->BindUBO(uniformBlock, "TestUniformBlock");
 
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     vertexArrayObject.Bind();
     mesh.bind(vertexArrayObject);
     mesh.draw();
     mesh.resetBinding();
     vertexArrayObject.ResetBinding();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     app.swapWindow();
   }
