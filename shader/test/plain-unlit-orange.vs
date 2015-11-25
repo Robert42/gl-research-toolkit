@@ -3,21 +3,18 @@
 #include "../scene/transformation.glsl"
 
 
-uniform MeshBlock
+uniform TestUniformBlock
 {
   mat4 model_matrix;
-} mesh;
-
-
-uniform SceneBlock
-{
   mat4 view_projection;
-} scene;
+  vec4 material_color;
+} u;
+
 
 
 in vec2 position;
 
 void main()
 {
-  gl_Position = scene.view_projection * mesh.model_matrix * vec4(position.x, position.y, 0, 1);
+  gl_Position = u.view_projection * u.model_matrix * vec4(position.x, position.y, 0, 1);
 }

@@ -1,13 +1,15 @@
 #version 450 core
 
-uniform MaterialInstance
+uniform TestUniformBlock
 {
+  mat4 model_matrix;
+  mat4 view_projection;
   vec4 material_color;
-} material;
+} u;
 
 out vec4 color;
 
 void main()
 {
-  color = material.material_color;
+  color = u.material_color;
 }

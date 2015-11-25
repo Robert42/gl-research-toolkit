@@ -6,25 +6,12 @@
 #include <glhelper/gl.hpp>
 
 
-namespace Uniforms
+struct TestUniformBlock
 {
-
-  struct MeshBlock
-  {
-    glm::mat4 model_matrix;
-  };
-
-  struct SceneBlock
-  {
-    glm::mat4 view_projection;
-  };
-
-  struct MaterialInstance
-  {
-    glm::vec4 material_color;
-  };
-
-}
+  glm::mat4 model_matrix;
+  glm::mat4 view_projection;
+  glm::vec4 material_color;
+};
 
 int main(int argc, char** argv)
 {
@@ -39,17 +26,13 @@ int main(int argc, char** argv)
 
   gl::ShaderObject* shaderObject = customFactory.create("plain-unlit-orange");
 
-  Uniforms::MeshBlock meshBlock;
-  Uniforms::SceneBlock sceneBlock;
-  Uniforms::MaterialInstance materialInstanceBlock;
+  TestUniformBlock u;
 
-  meshBlock.model_matrix = glm::mat4(1);
-  sceneBlock.view_projection = glm::mat4(1);
-  materialInstanceBlock.material_color = glm::vec4(1, 0.5, 0, 1);
+  u.model_matrix = glm::mat4(1);
+  u.view_projection = glm::mat4(1);
+  u.material_color = glm::vec4(1, 0.5, 0, 1);
 
-  gl::Buffer meshUniformBlock(sizeof(Uniforms::MeshBlock), gl::Buffer::UsageFlag::IMMUTABLE, &meshBlock);
-  gl::Buffer sceneUniformBlock(sizeof(Uniforms::SceneBlock), gl::Buffer::UsageFlag::IMMUTABLE, &sceneBlock);
-  gl::Buffer materialUniformBlock(sizeof(Uniforms::MaterialInstance), gl::Buffer::UsageFlag::IMMUTABLE, &materialInstanceBlock);
+  gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::IMMUTABLE, &u);
 
   while(app.isRunning)
   {
@@ -63,9 +46,7 @@ int main(int argc, char** argv)
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
     shaderObject->Activate();
-    shaderObject->BindUBO(meshUniformBlock, "MeshBlock");
-    shaderObject->BindUBO(sceneUniformBlock, "SceneBlock");
-    shaderObject->BindUBO(materialUniformBlock, "MaterialInstance");
+    shaderObject->BindUBO(uniformBlock, "TestUniformBlock");
 
     vertexArrayObject.Bind();
     mesh.bind(vertexArrayObject);
