@@ -63,6 +63,7 @@ target_compile_definitions(
   PUBLIC
   GLRT_ASSET_DIR=\"${GLRT_ASSET_DIR}\"
   GLRT_SHADER_DIR=\"${GLRT_SHADER_DIR}\"
+  GLM_FORCE_RADIANS
 )
 
 target_include_directories(
