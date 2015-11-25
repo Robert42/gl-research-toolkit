@@ -318,8 +318,7 @@ void StaticMesh::resetBinding()
 void StaticMesh::draw()
 {
   Q_ASSERT(sizeof(index_type) == 2);
-  //qDebug() << "switch back to GL_TRIANGLES"; // FIXME
-  const GLenum mode = GL_LINES;
+  const GLenum mode = GL_TRIANGLES;
   if(indexBuffer != nullptr)
     GL_CALL(glDrawElements, mode, numberIndices, GL_UNSIGNED_SHORT, nullptr);
   else
