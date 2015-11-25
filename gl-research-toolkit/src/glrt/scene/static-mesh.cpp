@@ -202,7 +202,8 @@ void StaticMesh::resetBinding()
 void StaticMesh::draw()
 {
   Q_ASSERT(sizeof(index_type) == 2);
-  GL_CALL(glDrawElements, GL_TRIANGLES, numberIndices, GL_UNSIGNED_SHORT, nullptr);
+  qDebug() << "switch back to GL_TRIANGLES"; // FIXME
+  GL_CALL(glDrawElements, GL_POINTS, numberIndices, GL_UNSIGNED_SHORT, nullptr);
 }
 
 
