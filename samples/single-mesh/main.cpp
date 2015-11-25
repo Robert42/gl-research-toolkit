@@ -18,8 +18,8 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Single Mesh"));
 
-  //glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj", false); // TODO: load suzanne again
-  glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::createCube(glm::vec3(1.f), true, false);
+  glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj", false); // TODO: load suzanne again
+  //glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::createCube(glm::vec3(1.f), true, false);
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
 
   QDir shaderDir(GLRT_SHADER_DIR"/test");
