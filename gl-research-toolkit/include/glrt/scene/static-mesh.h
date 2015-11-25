@@ -16,14 +16,14 @@ public:
   typedef quint16 index_type;
 
   StaticMesh(StaticMesh&& mesh);
-  StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices, int numberVertices);
+  StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices, int numberVertices, bool indexed);
 
   StaticMesh() = delete;
   StaticMesh(const StaticMesh&) = delete;
   StaticMesh& operator=(const StaticMesh&) = delete;
   StaticMesh& operator=(const StaticMesh&&) = delete;
 
-  static StaticMesh loadMeshFromFile(const QString& filename);
+  static StaticMesh loadMeshFromFile(const QString& filename, bool indexed=true);
   static gl::VertexArrayObject generateVertexArrayObject();
 
   void bind(const gl::VertexArrayObject& vertexArrayObject);
@@ -35,6 +35,7 @@ public:
   gl::Buffer indexBuffer, vertexBuffer;
   int numberIndices;
   int numberVertices;
+  bool indexed;
 };
 
 

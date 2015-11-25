@@ -25,11 +25,12 @@ inline glm::vec2 toGlm2(const aiVector2D& v)
   return glm::vec2(v.x, v.y);
 }
 
-StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices, int numberVertices)
+StaticMesh::StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices, int numberVertices, bool indexed)
   : indexBuffer(std::move(indexBuffer)),
     vertexBuffer(std::move(vertexBuffer)),
     numberIndices(numberIndices),
-    numberVertices(numberVertices)
+    numberVertices(numberVertices),
+    indexed(indexed)
 {
 }
 
@@ -37,19 +38,23 @@ StaticMesh::StaticMesh(StaticMesh&& mesh)
   : indexBuffer(std::move(mesh.indexBuffer)),
     vertexBuffer(std::move(mesh.vertexBuffer)),
     numberIndices(mesh.numberIndices),
-    numberVertices(mesh.numberVertices)
+    numberVertices(mesh.numberVertices),
+    indexed(mesh.indexed)
 {
+  mesh.numberIndices = 0;
+  mesh.numberVertices = 0;
+  mesh.indexed = false;
 }
 
 
-StaticMesh StaticMesh::loadMeshFromFile(const QString& filename)
+StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
 {
   Assimp::Importer importer;
 
   const aiScene* scene = importer.ReadFile(filename.toStdString(),
                                            //aiProcess_RemoveComponent |  // TODO: use this
                                            //aiProcess_FlipUVs | // TODO: Decide about this
-                                           aiProcess_JoinIdenticalVertices | // Use Index Buffer
+                                           (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
                                            aiProcess_PreTransformVertices | // As we are loading everything into one mesh
                                            aiProcess_ValidateDataStructure |
                                            aiProcess_RemoveRedundantMaterials |
@@ -163,7 +168,8 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename)
   return std::move(StaticMesh(std::move(indexBuffer),
                               std::move(vertexBuffer),
                               numFaces*3,
-                              numVertices));
+                              numVertices,
+                              indexed));
 }
 
 
@@ -205,7 +211,11 @@ void StaticMesh::draw()
 {
   Q_ASSERT(sizeof(index_type) == 2);
   //qDebug() << "switch back to GL_TRIANGLES"; // FIXME
-  GL_CALL(glDrawElements, GL_LINE_STRIP, numberIndices, GL_UNSIGNED_SHORT, nullptr);
+  const GLenum mode = GL_LINES;
+  if(indexed)
+    GL_CALL(glDrawElements, mode, numberIndices, GL_UNSIGNED_SHORT, nullptr);
+  else
+    GL_CALL(glDrawArrays, mode, 0, numberVertices);
 }
 
 
