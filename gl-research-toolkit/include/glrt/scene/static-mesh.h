@@ -15,10 +15,13 @@ public:
   struct Vertex;
   typedef quint16 index_type;
 
-  StaticMesh() = delete;
-  StaticMesh(const StaticMesh&) = delete;
   StaticMesh(StaticMesh&& mesh);
   StaticMesh(gl::Buffer&& indexBuffer, gl::Buffer&& vertexBuffer, int numberIndices);
+
+  StaticMesh() = delete;
+  StaticMesh(const StaticMesh&) = delete;
+  StaticMesh& operator=(const StaticMesh&) = delete;
+  StaticMesh& operator=(const StaticMesh&&) = delete;
 
   static StaticMesh loadMeshFromFile(const QString& filename);
   static gl::VertexArrayObject generateVertexArrayObject();
