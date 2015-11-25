@@ -2,6 +2,7 @@
 
 namespace glrt {
 
+
 DebugCamera::DebugCamera(SDL_Window* sdlWindow)
 {
   const glm::mat4 I = glm::mat4(1);
@@ -12,8 +13,8 @@ DebugCamera::DebugCamera(SDL_Window* sdlWindow)
   SDL_GetWindowSize(sdlWindow, &size.x, &size.y);
 
   camera_position = glm::vec3(0, -5, 0);
-  camera_orientation = glm::mat4(1);
-  projectionMatrix = glm::perspectiveFov<float>(glm::radians(90.f), size.x, size.y, 0.001f, 100.f) * glm::rotate(I, glm::radians(90.f), x);
+  camera_orientation = glm::rotate(I, glm::radians(-90.f), x);
+  projectionMatrix = glm::perspectiveFov<float>(glm::radians(90.f), size.x, size.y, 0.001f, 100.f);
 
   movementMode = false;
 
@@ -37,7 +38,7 @@ bool DebugCamera::handleEvents(const SDL_Event& event)
 
       camera_orientation = glm::rotate(I, angle.y, x) *
                            camera_orientation *
-                           glm::rotate(I, angle.x, y);
+                           glm::rotate(I, angle.x, z);
       return true;
     }
     return false;
@@ -78,10 +79,10 @@ void DebugCamera::update(float deltaTime)
 
     key_input = (glm::inverse(camera_orientation) * glm::vec4(-key_input, 0)).xyz();
 
-    camera_position +=  key_input * deltaTime * movement_speed;
+    camera_position -=  key_input * deltaTime * movement_speed;
   }
 
-  viewMatrix = camera_orientation * glm::translate(I, camera_position);
+  viewMatrix = camera_orientation * glm::translate(I, -camera_position);
 }
 
 } // namespace glrt

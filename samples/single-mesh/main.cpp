@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(5.f) * deltaTime, glm::vec3(0, 0, 1)); // TODO: The user should be able to toggle this
+    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(5.f) * deltaTime, glm::vec3(0, 0, 1));
     u.view_projection = camera.projectionMatrix * camera.viewMatrix;
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
