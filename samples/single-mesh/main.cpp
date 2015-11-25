@@ -19,7 +19,7 @@ int main(int argc, char** argv)
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Single Mesh"));
 
   glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj");
-  //glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::createCube(glm::vec3(1.f), true, false);
+  glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
 
   QDir shaderDir(GLRT_SHADER_DIR"/test");
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-    //u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 1, 0)); // TODO: The user should be able to toggle this
+    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(5.f) * deltaTime, glm::vec3(0, 0, 1)); // TODO: The user should be able to toggle this
     u.view_projection = camera.projectionMatrix * camera.viewMatrix;
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
@@ -63,11 +63,13 @@ int main(int argc, char** argv)
     shaderObject->Activate();
     shaderObject->BindUBO(uniformBlock, "TestUniformBlock");
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: The user should be able to toggle this
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: The user should be able to toggle this
     vertexArrayObject.Bind();
     mesh.bind(vertexArrayObject);
     mesh.draw();
-    mesh.resetBinding();
+    podest.bind(vertexArrayObject);
+    podest.draw();
+    podest.resetBinding();
     vertexArrayObject.ResetBinding();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

@@ -25,8 +25,8 @@ public:
   StaticMesh& operator=(const StaticMesh&&) = delete;
 
   static StaticMesh loadMeshFromFile(const QString& filename, bool indexed=true);
-  static StaticMesh createCube(const glm::vec3& dimensions=glm::vec3(2), bool centered=true, bool indexed=true);
-  static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool convertToArrays = false);
+  static StaticMesh createCube(const glm::vec3& dimensions=glm::vec3(2), bool centered=true, const glm::vec3& offset = glm::vec3(0));
+  static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed = true);
   static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
 
   static gl::VertexArrayObject generateVertexArrayObject();
@@ -34,7 +34,7 @@ public:
   void bind(const gl::VertexArrayObject& vertexArrayObject);
   void resetBinding();
 
-  void draw();
+  void draw(GLenum mode = GL_TRIANGLES);
 
 private:
   gl::Buffer* indexBuffer;

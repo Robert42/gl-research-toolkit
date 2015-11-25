@@ -4,13 +4,16 @@ namespace glrt {
 
 DebugCamera::DebugCamera(SDL_Window* sdlWindow)
 {
+  const glm::mat4 I = glm::mat4(1);
+  const glm::vec3 x(1, 0, 0);
+
   glm::ivec2 size;
 
   SDL_GetWindowSize(sdlWindow, &size.x, &size.y);
 
-  camera_position = glm::vec3(0, 0, -5);
+  camera_position = glm::vec3(0, -5, 0);
   camera_orientation = glm::mat4(1);
-  projectionMatrix = glm::perspectiveFov<float>(glm::radians(90.f), size.x, size.y, 0.001f, 100.f );
+  projectionMatrix = glm::perspectiveFov<float>(glm::radians(90.f), size.x, size.y, 0.001f, 100.f) * glm::rotate(I, glm::radians(90.f), x);
 
   movementMode = false;
 
