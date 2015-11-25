@@ -10,17 +10,19 @@ class DebugCamera
 public:
   glm::mat4 viewMatrix;
   glm::mat4 projectionMatrix;
+  float movement_speed;
+  float rotation_speed;
 
   DebugCamera(SDL_Window* sdlWindow);
 
   bool handleEvents(const SDL_Event& event);
 
-private:
-  glm::mat4 camera_position;
-  glm::mat4 camera_orientation;
-  bool rotationMode;
+  void update(float deltaTime);
 
-  void update();
+private:
+  glm::vec3 camera_position;
+  glm::mat4 camera_orientation;
+  bool movementMode;
 };
 
 } // namespace glrt

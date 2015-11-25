@@ -49,6 +49,7 @@ int main(int argc, char** argv)
     }
 
     float deltaTime = app.update();
+    camera.update(deltaTime);
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
