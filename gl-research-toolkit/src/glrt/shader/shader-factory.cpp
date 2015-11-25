@@ -12,13 +12,28 @@ namespace glrt {
 namespace shader {
 
 
-ShaderFactory::ShaderFactory()
+Factory::Factory()
 {
 }
 
 
-ShaderFactory::~ShaderFactory()
+Factory::~Factory()
 {
+}
+
+
+// ======== TechniqueBasedFactory ==============================================
+
+
+TechniqueBasedFactory::TechniqueBasedFactory(const QVector<Technique*>& techniques)
+  : techniques(techniques)
+{
+}
+
+
+gl::ShaderObject* TechniqueBasedFactory::create() const
+{
+  return nullptr; // FIXME: returning nullptr is not allowed
 }
 
 

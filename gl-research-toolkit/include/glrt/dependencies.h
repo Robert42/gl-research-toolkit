@@ -13,6 +13,7 @@
 #include <QString>
 
 #include <iostream>
+#include <memory>
 
 
 namespace glrt {

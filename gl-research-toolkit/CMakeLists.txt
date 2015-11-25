@@ -28,6 +28,7 @@ add_library(glrt
   include/glrt/scene/static-mesh.h
   include/glrt/shader/shader-cache.h
   include/glrt/shader/shader-factory.h
+  include/glrt/shader/shader-technique.h
   include/glrt/system.h
   src/glrt/application.cpp
   src/glrt/dependencies.cpp
@@ -36,6 +37,7 @@ add_library(glrt
   src/glrt/scene/static-mesh.cpp
   src/glrt/shader/shader-cache.cpp
   src/glrt/shader/shader-factory.cpp
+  src/glrt/shader/shader-technique.cpp
   src/glrt/system.cpp
 )
 

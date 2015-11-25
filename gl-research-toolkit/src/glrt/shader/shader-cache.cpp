@@ -4,25 +4,25 @@
 namespace glrt {
 namespace shader {
 
-ShaderCache::ShaderCache()
+Cache::Cache()
 {
 }
 
 
-ShaderCache::~ShaderCache()
+Cache::~Cache()
 {
   for(gl::ShaderObject* shaderObject : _allShaderObjects)
     delete shaderObject;
   _allShaderObjects.clear();
 
-  for(ShaderFactory* shaderFactory : _shaderFactories)
+  for(Factory* shaderFactory : _shaderFactories)
     delete shaderFactory;
   _allShaderObjects.clear();
 }
 
 
-ShaderCache::ShaderCache(ShaderCache&& other)
-  : ShaderCache()
+Cache::Cache(Cache&& other)
+  : Cache()
 {
   _shaderFactories.swap(other._shaderFactories);
   _idForName.swap(other._idForName);
@@ -30,7 +30,7 @@ ShaderCache::ShaderCache(ShaderCache&& other)
 }
 
 
-ShaderCache::Id ShaderCache::idForName(const QString& name)
+Cache::Id Cache::idForName(const QString& name)
 {
   if(!_idForName.contains(name))
   {

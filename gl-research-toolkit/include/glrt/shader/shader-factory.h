@@ -1,26 +1,48 @@
-#ifndef GLRT_SHADER_SHADERFACTORY_H
-#define GLRT_SHADER_SHADERFACTORY_H
+#ifndef GLRT_SHADER_FACTORY_H
+#define GLRT_SHADER_FACTORY_H
+
+#include "shader-technique.h"
 
 #include <glhelper/shaderobject.hpp>
 
 namespace glrt {
 namespace shader {
 
-class ShaderFactory
+class Technique;
+class Factory
 {
 public:
-  ShaderFactory(const ShaderFactory&) = delete;
-  ShaderFactory(ShaderFactory&&) = delete;
-  ShaderFactory& operator=(const ShaderFactory&) = delete;
-  ShaderFactory& operator=(ShaderFactory&&) = delete;
+  Factory(const Factory&) = delete;
+  Factory(Factory&&) = delete;
+  Factory& operator=(const Factory&) = delete;
+  Factory& operator=(Factory&&) = delete;
 
-  ShaderFactory();
-  virtual ~ShaderFactory();
+  Factory();
+  virtual ~Factory();
 
-  virtual gl::ShaderObject* create() = 0;
+  virtual gl::ShaderObject* create() const = 0;
 };
+
+
+class CustomFactory final : public Factory
+{
+public:
+
+};
+
+
+class TechniqueBasedFactory : public Factory
+{
+public:
+  const QVector<Technique*> techniques;
+
+  TechniqueBasedFactory(const QVector<Technique*>& techniques);
+
+  gl::ShaderObject* create() const final override;
+};
+
 
 } // namespace shader
 } // namespace glrt
 
-#endif // GLRT_SHADER_SHADERFACTORY_H
+#endif // GLRT_SHADER_FACTORY_H

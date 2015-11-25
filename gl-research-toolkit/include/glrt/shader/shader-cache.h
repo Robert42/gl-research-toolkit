@@ -1,5 +1,5 @@
-#ifndef GLRT_SHADER_SHADERCACHE_H
-#define GLRT_SHADER_SHADERCACHE_H
+#ifndef GLRT_SHADER_CACHE_H
+#define GLRT_SHADER_CACHE_H
 
 #include <glrt/dependencies.h>
 
@@ -8,8 +8,8 @@
 namespace glrt {
 namespace shader {
 
-class ShaderFactory;
-class ShaderCache final
+class Factory;
+class Cache final
 {
 public:
   enum class Id : int
@@ -17,25 +17,25 @@ public:
     NONE = -1
   };
 
-  ShaderCache(const ShaderCache&) = delete;
-  ShaderCache& operator=(const ShaderCache&) = delete;
-  ShaderCache& operator=(const ShaderCache&&) = delete;
+  Cache(const Cache&) = delete;
+  Cache& operator=(const Cache&) = delete;
+  Cache& operator=(const Cache&&) = delete;
 
-  ShaderCache();
-  ~ShaderCache();
-  ShaderCache(ShaderCache&&);
+  Cache();
+  ~Cache();
+  Cache(Cache&&);
 
   Id idForName(const QString& name);
   gl::ShaderObject& shaderForId(Id id);
 
 private:
-  QHash<QString, ShaderFactory*> _shaderFactories;
+  QHash<QString, Factory*> _shaderFactories;
   QHash<QString, Id> _idForName;
   QVector<gl::ShaderObject*> _allShaderObjects;
 };
 
 
-gl::ShaderObject& ShaderCache::shaderForId(Id id)
+gl::ShaderObject& Cache::shaderForId(Id id)
 {
   return *_allShaderObjects[int(id)];
 }
@@ -44,4 +44,4 @@ gl::ShaderObject& ShaderCache::shaderForId(Id id)
 } // namespace shader
 } // namespace glrt
 
-#endif // GLRT_SHADER_SHADERCACHE_H
+#endif // GLRT_SHADER_CACHE_H
