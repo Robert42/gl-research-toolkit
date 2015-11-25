@@ -1,5 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
+#include <glrt/debug-camera.h>
 #include <glrt/scene/static-mesh.h>
 #include <glrt/shader/shader-factory.h>
 
@@ -29,8 +30,10 @@ int main(int argc, char** argv)
 
   TestUniformBlock u;
 
+  glrt::DebugCamera camera;
+
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
-  u.view_projection = glm::perspectiveFov(glm::radians(90.f), 640.f, 480.f, 0.001f, 100.f ) * glm::translate(glm::mat4(1), glm::vec3(0, 0, -5)); // TODO use the real window size
+  u.view_projection = camera.projectionMatrix * camera.viewMatrix;
   u.material_color = glm::vec4(1, 0.5, 0, 1);
 
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, &u);
@@ -42,14 +45,15 @@ int main(int argc, char** argv)
     SDL_Event event;
     while(app.pollEvent(&event))
     {
+      camera.handleEvents(event);
     }
 
     float deltaTime = app.update();
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-
     u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 1, 0));
+    u.view_projection = camera.projectionMatrix * camera.viewMatrix;
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
     uniformBlock.Unmap();
