@@ -45,8 +45,7 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 0, 1));
-    u.material_color.b = 1;
+    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 1, 0));
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
     uniformBlock.Unmap();
