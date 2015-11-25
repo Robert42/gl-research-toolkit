@@ -38,7 +38,8 @@ int main(int argc, char** argv)
 
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, &u);
 
-  //glEnable(GL_CULL_FACE); // TODO uncomment
+  // TODO: The user should be able to toggle this
+  glEnable(GL_CULL_FACE);
 
   while(app.isRunning)
   {
@@ -53,7 +54,7 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 1, 0));
+    //u.model_matrix = glm::rotate(u.model_matrix, glm::radians(90.f) * deltaTime, glm::vec3(0, 1, 0)); // TODO: The user should be able to toggle this
     u.view_projection = camera.projectionMatrix * camera.viewMatrix;
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
@@ -62,7 +63,7 @@ int main(int argc, char** argv)
     shaderObject->Activate();
     shaderObject->BindUBO(uniformBlock, "TestUniformBlock");
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: The user should be able to toggle this
     vertexArrayObject.Bind();
     mesh.bind(vertexArrayObject);
     mesh.draw();
