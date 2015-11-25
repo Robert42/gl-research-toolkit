@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   u.view_projection = glm::perspectiveFov(90.f, 640.f, 480.f, 0.001f, 100.f ) * glm::translate(glm::mat4(1), glm::vec3(0, 0, -5)); // TODO use the real window size
   u.material_color = glm::vec4(1, 0.5, 0, 1);
 
-  gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::IMMUTABLE, &u);
+  gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, &u);
 
   while(app.isRunning)
   {
@@ -41,9 +41,15 @@ int main(int argc, char** argv)
     {
     }
 
-    app.update();
+    float deltaTime = app.update();
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+
+    u.model_matrix = glm::rotate(u.model_matrix, 2 * deltaTime, glm::vec3(0, 0, 1));
+    u.material_color.b = 1;
+    void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
+    *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
+    uniformBlock.Unmap();
 
     shaderObject->Activate();
     shaderObject->BindUBO(uniformBlock, "TestUniformBlock");
