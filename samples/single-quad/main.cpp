@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
 
   const int bindingIndex = 0;
-  gl::Buffer buffer(8*sizeof(float), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::IMMUTABLE|gl::Buffer::UsageFlag::MAP_READ), positions.data());
+  gl::Buffer buffer(8*sizeof(float), gl::Buffer::UsageFlag::IMMUTABLE, positions.data());
 
   gl::VertexArrayObject vertexArray({gl::VertexArrayObject::Attribute(gl::VertexArrayObject::Attribute::Type::FLOAT, 2, bindingIndex)});
 

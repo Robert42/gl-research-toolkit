@@ -6,6 +6,8 @@ include(cmake/package-helper.cmake)
 
 find_package_overide_root(GLEW_ROOT GLEW REQUIRED)
 
+set(GLRT_ASSET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/assets)
+set(GLRT_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shader)
 
 add_subdirectory(external)
 add_subdirectory(gl-research-toolkit)
