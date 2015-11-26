@@ -8,7 +8,7 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
     settings(applicationSettings),
     sdlWindow(system.sdlWindow),
     isRunning(true),
-    showAntTweakBar(false)
+    showAntTweakBar(applicationSettings.showTweakbarByDefault)
 {
   initAntTweakBar();
 }
@@ -99,10 +99,30 @@ bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
 
 void Application::initAntTweakBar()
 {
+
   TwInit(TW_OPENGL_CORE, NULL);
   updateAntTweakBarWindowSize();
 
+  if(!settings.sampleDescription.isEmpty())
+    TwSetParam(nullptr, nullptr, "help", TW_PARAM_CSTRING, 1, settings.sampleDescription.toStdString().c_str());
+
   toolbar.init();
+
+  // Create the TweakBar of the application
+  if(!settings.tweakBarName.isEmpty())
+  {
+    this->appTweakBar = TwNewBar(settings.tweakBarName.toStdString().c_str());
+    TwSetParam(this->appTweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, settings.tweakBarHelp.toStdString().c_str());
+
+    gui::Toolbar::registerTweakBar(this->appTweakBar);
+
+    qint32 iconified = true;
+    TwSetParam(toolbar.tweakBar, nullptr, "iconified", TW_PARAM_INT32, 1, &iconified);
+  }else
+  {
+    this->appTweakBar = nullptr;
+  }
+
   profiler.createTweakBar();
 }
 

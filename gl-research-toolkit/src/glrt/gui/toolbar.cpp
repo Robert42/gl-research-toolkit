@@ -21,6 +21,7 @@ Toolbar::~Toolbar()
 void Toolbar::init()
 {
   tweakBar = TwNewBar(toolbarTitle);
+  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Toggles the visibilty of other tweak bars");
 }
 
 void Toolbar::registerTweakBar(TwBar *tweakBar)

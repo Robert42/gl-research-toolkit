@@ -16,7 +16,14 @@ struct TestUniformBlock
 
 int main(int argc, char** argv)
 {
-  glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Single Mesh"));
+  glrt::Application app(argc,
+                        argv,
+                        glrt::System::Settings::simpleWindow("Single Mesh" // window title
+                                                             ),
+                        glrt::Application::Settings::techDemo("This Sample shows how to load and display a simple single mesh", // help text of the sample
+                                                              "Mesh", // The name of the TweakBar
+                                                              "Toggle various debug options for the mesh view" // helptext of the
+                                                              ));
 
   glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj");
   glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
