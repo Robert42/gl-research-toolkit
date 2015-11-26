@@ -67,11 +67,15 @@ public:
 
 
   bool handleEvents(const SDL_Event& event);
+  inline void update(float deltaTime){Q_UNUSED(deltaTime);}
   void draw();
 
 
 private:
   void updateAntTweakBarWindowSize();
+
+  void handeledEvent(const SDL_Event& event);
+  bool unhandeledEvent(const SDL_Event& event);
 };
 
 

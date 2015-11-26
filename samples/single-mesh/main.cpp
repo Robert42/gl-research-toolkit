@@ -97,6 +97,7 @@ int main(int argc, char** argv)
     float deltaTime = app.update();
 
     debugCamera.update(deltaTime);
+    antweakbar.update(deltaTime);
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 

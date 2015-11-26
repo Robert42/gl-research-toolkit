@@ -68,8 +68,36 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 bool AntTweakBar::handleEvents(const SDL_Event& event)
 {
   if(visible && TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION))
+  {
+    handeledEvent(event);
     return true;
+  }else
+  {
+    return unhandeledEvent(event);
+  }
+}
 
+
+void AntTweakBar::handeledEvent(const SDL_Event& event)
+{
+  switch(event.type)
+  {
+  case SDL_MOUSEBUTTONDOWN:
+  case SDL_MOUSEBUTTONUP:
+    if(event.button.button == SDL_BUTTON_LEFT)
+    {
+      bool captured_mouse = event.button.state==SDL_PRESSED;
+      SDL_SetWindowGrab(application->sdlWindow, captured_mouse ? SDL_TRUE : SDL_FALSE);
+    }
+    return;
+  default:
+    return;
+  }
+}
+
+
+bool AntTweakBar::unhandeledEvent(const SDL_Event& event)
+{
   switch(event.type)
   {
   case SDL_KEYDOWN:
