@@ -42,9 +42,9 @@ int main(int argc, char** argv)
   glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
 
-  QDir shaderDir(GLRT_SHADER_DIR"/test");
-  glrt::shader::CustomFactory customFactory(shaderDir.absoluteFilePath("plain-unlit-orange.vs"),
-                                            shaderDir.absoluteFilePath("plain-unlit-orange.fs"));
+  QDir shaderDir(GLRT_SHADER_DIR"/samples/single-mesh");
+  glrt::shader::CustomFactory customFactory(shaderDir.absoluteFilePath("plain-color.vs"),
+                                            shaderDir.absoluteFilePath("plain-color.fs"));
 
   gl::ShaderObject* shaderObject = customFactory.create("plain-unlit-orange");
 
