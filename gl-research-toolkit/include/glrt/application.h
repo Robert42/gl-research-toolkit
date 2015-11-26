@@ -16,18 +16,18 @@ public:
     QString sampleDescription;
     QString tweakBarName; // If empty, no Tweakbar will be created. appTweakBar will then be null!
     QString tweakBarHelp;
-    int tweakBarHeight = 200;
+    glm::ivec2 tweakBarSize = glm::ivec2(256);
     bool quitWithEscape = false;
     bool showTweakbarByDefault = false;
 
-    static Settings techDemo(const QString& sampleDescription=QString(), const QString& tweakBarName=QString(), const QString& tweakBarHelp=QString(), int tweakBarHeight=200)
+    static Settings techDemo(const QString& sampleDescription=QString(), const QString& tweakBarName=QString(), const QString& tweakBarHelp=QString(), const glm::ivec2& tweakBarSize = glm::ivec2(256))
     {
       Settings settings;
       settings.quitWithEscape = true;
       settings.sampleDescription = sampleDescription;
       settings.tweakBarName = tweakBarName;
       settings.tweakBarHelp = tweakBarHelp;
-      settings.tweakBarHeight = tweakBarHeight;
+      settings.tweakBarSize = tweakBarSize;
       settings.showTweakbarByDefault = !tweakBarName.isEmpty();
       return settings;
     }
