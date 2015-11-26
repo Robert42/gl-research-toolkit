@@ -7,6 +7,7 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
   : system(argc, argv, systemSettings),
     settings(applicationSettings),
     sdlWindow(system.sdlWindow),
+    debugCamera(sdlWindow),
     isRunning(true),
     showAntTweakBar(applicationSettings.showTweakbarByDefault)
 {
@@ -34,6 +35,7 @@ bool Application::pollEvent(SDL_Event* e)
 float Application::update()
 {
   float frameDuration = profiler.update();
+  debugCamera.update(frameDuration);
   return frameDuration;
 }
 
@@ -48,9 +50,17 @@ void Application::swapWindow()
 
 bool Application::handleEvent(const SDL_Event& event)
 {
+  if(handleApplicationEvent(event))
+    return true;
+  if(debugCamera.handleEvents(event))
+    return true;
   if(showAntTweakBar && TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION))
     return true;
+  return false;
+}
 
+bool Application::handleApplicationEvent(const SDL_Event& event)
+{
   switch(event.type)
   {
   case SDL_WINDOWEVENT:
@@ -61,7 +71,6 @@ bool Application::handleEvent(const SDL_Event& event)
     return false;
   }
 }
-
 
 bool Application::handleWindowEvent(const SDL_WindowEvent& event)
 {

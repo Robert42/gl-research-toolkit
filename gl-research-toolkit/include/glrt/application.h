@@ -4,6 +4,7 @@
 #include "system.h"
 #include "gui/toolbar.h"
 #include "profiler.h"
+#include "debug-camera.h"
 
 namespace glrt {
 
@@ -39,6 +40,7 @@ public:
   Profiler profiler;
   gui::Toolbar toolbar;
   TwBar* appTweakBar;
+  glrt::DebugCamera debugCamera;
 
   bool isRunning;
   bool showAntTweakBar;
@@ -52,6 +54,7 @@ public:
 
 private:
   bool handleEvent(const SDL_Event& event);
+  bool handleApplicationEvent(const SDL_Event& event);
   bool handleWindowEvent(const SDL_WindowEvent& event);
   bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
 

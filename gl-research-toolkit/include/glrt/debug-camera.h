@@ -9,7 +9,7 @@ class DebugCamera
 {
 public:
   glm::mat4 viewMatrix;
-  glm::mat4 projectionMatrix;
+  glm::mat4 projectionMatrix; // TODO:: use a quaternion
   float movement_speed;
   float rotation_speed;
 
