@@ -276,6 +276,8 @@ StaticMesh StaticMesh::_createAsArray(const index_type* indices, int numIndices,
     newVertices.push_back(vertices[indices[i]]);
   }
 
+  Q_UNUSED(numVertices);
+
   return createAsArray(newVertices.data(), newVertices.size());
 }
 
