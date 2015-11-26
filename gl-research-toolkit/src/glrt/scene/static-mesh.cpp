@@ -326,11 +326,6 @@ void StaticMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
   vertexBuffer->BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
 }
 
-void StaticMesh::resetBinding()
-{
-  // TODO
-}
-
 void StaticMesh::draw(GLenum mode)
 {
   Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type

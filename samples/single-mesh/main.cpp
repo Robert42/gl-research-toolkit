@@ -12,15 +12,18 @@ struct TestUniformBlock
   glm::vec4 material_color;
 };
 
+TestUniformBlock u;
+
+bool wireframe = true;
+bool backfaceCulling = true;
+bool showPodest = true;
+float rotationSpeed = 5.f;
+
+QDir shaderDir(GLRT_SHADER_DIR"/samples/single-mesh");
+
 int main(int argc, char** argv)
 {
-  TestUniformBlock u;
-
-  bool wireframe = true;
-  bool backfaceCulling = true;
-  bool showPodest = true;
-  float rotationSpeed = 5.f;
-
+  // ======== Init the application ========
   glrt::Application app(argc,
                         argv,
                         glrt::System::Settings::simpleWindow("Single Mesh" // window title
@@ -30,6 +33,7 @@ int main(int argc, char** argv)
                                                               "Toggle various debug options for the mesh view" // helptext of the
                                                               ));
 
+  // ======== Setup the Tweak Bar ========
   TwAddVarRW(app.appTweakBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?'");
   TwAddVarRW(app.appTweakBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling'");
   TwAddVarRW(app.appTweakBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?'");
@@ -37,25 +41,35 @@ int main(int argc, char** argv)
   TwAddVarRW(app.appTweakBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material'");
   // TODO:: also allow modifying the orientation with TweakBar
 
+  // ======== Setup the Meshes ========
+  // The main mesh we want to load
   glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj");
-  glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
+
+  // Get the Vertex Format of it
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
 
-  QDir shaderDir(GLRT_SHADER_DIR"/samples/single-mesh");
+  // Just for fun we create a cube as a podest
+  glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
 
+  // ======== Setup the Shader ========
+  // load and compile the shader
   gl::ShaderObject shaderObject("plain-color");
   shaderObject.AddShaderFromFile(gl::ShaderObject::ShaderType::VERTEX, shaderDir.absoluteFilePath("plain-color.vs").toStdString());
   shaderObject.AddShaderFromFile(gl::ShaderObject::ShaderType::FRAGMENT, shaderDir.absoluteFilePath("plain-color.fs").toStdString());
   shaderObject.CreateProgram();
 
+  // initialize the uniform block with meaningful values
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
   u.view_projection = app.debugCamera.projectionMatrix * app.debugCamera.viewMatrix;
   u.material_color = glm::vec4(1, 0.5, 0, 1);
 
-  gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, &u);
+  // reserve some GPU space for the uniforms
+  gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr);
 
+  // ======== Main Loop ========
   while(app.isRunning)
   {
+    // -------- Event handling --------
     SDL_Event event;
     while(app.pollEvent(&event))
     {
@@ -65,33 +79,52 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
+    // -------- update the uniform data --------
     u.model_matrix = glm::rotate(u.model_matrix, glm::radians(rotationSpeed) * deltaTime, glm::vec3(0, 0, 1));
     u.view_projection = app.debugCamera.projectionMatrix * app.debugCamera.viewMatrix;
+    // Note: the color gets modified the Tweakbar, search for &u.material_color
+
+    // send the updated uniform to the Graphic device
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
     uniformBlock.Unmap();
 
-    shaderObject.Activate();
-    shaderObject.BindUBO(uniformBlock, "TestUniformBlock");
+    // -------- Render eveything --------
 
+    // update the settings made by the user
     if(backfaceCulling)
       glEnable(GL_CULL_FACE);
     else
       glDisable(GL_CULL_FACE);
     if(wireframe)
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // activate the shader
+    shaderObject.Activate();
+    shaderObject.BindUBO(uniformBlock, "TestUniformBlock");
+
+    // bind the vertex array object
     vertexArrayObject.Bind();
+
+    // draw the mesh
     mesh.bind(vertexArrayObject);
     mesh.draw();
+
+    // draw the podest
     if(showPodest)
     {
       podest.bind(vertexArrayObject);
       podest.draw();
-      podest.resetBinding();
     }
-    vertexArrayObject.ResetBinding();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    // unbind the vertex array object
+    vertexArrayObject.ResetBinding();
+
+    // has no meaning here, but it's a good practive to reset this settings ;)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_CULL_FACE);
+
+    // -------- Swap front and backbuffer --------
     app.swapWindow();
   }
 

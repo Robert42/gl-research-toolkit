@@ -32,7 +32,6 @@ public:
   static gl::VertexArrayObject generateVertexArrayObject();
 
   void bind(const gl::VertexArrayObject& vertexArrayObject);
-  void resetBinding();
 
   void draw(GLenum mode = GL_TRIANGLES);
 
