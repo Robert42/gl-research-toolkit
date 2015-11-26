@@ -16,6 +16,8 @@ struct TestUniformBlock
 
 int main(int argc, char** argv)
 {
+  TestUniformBlock u;
+
   bool wireframe = true;
   bool backfaceCulling = true;
   bool showPodest = true;
@@ -34,6 +36,7 @@ int main(int argc, char** argv)
   TwAddVarRW(app.appTweakBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling'");
   TwAddVarRW(app.appTweakBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?'");
   TwAddVarRW(app.appTweakBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360");
+  TwAddVarRW(app.appTweakBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material'");
 
   glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj");
   glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
@@ -44,8 +47,6 @@ int main(int argc, char** argv)
                                             shaderDir.absoluteFilePath("plain-unlit-orange.fs"));
 
   gl::ShaderObject* shaderObject = customFactory.create("plain-unlit-orange");
-
-  TestUniformBlock u;
 
   glrt::DebugCamera camera(app.sdlWindow);
 
