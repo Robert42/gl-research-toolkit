@@ -1,0 +1,15 @@
+[submodule "external/glm"]
+	path = external/glm
+	url = git@github.com:g-truc/glm.git
+[submodule "external/glhelper"]
+	path = external/glhelper
+	url = git@github.com:Robert42/glhelper.git
+[submodule "external/cmake/modules"]
+	path = external/cmake/modules
+	url = git@github.com:Robert42/cmake-finders.git
+[submodule "external/AntTweakBar"]
+	path = external/AntTweakBar
+	url = git@github.com:Robert42/AntTweakBar-sdl2.git
+[submodule "external/assets/common"]
+	path = external/assets/common
+	url = git@github.com:Robert42/gl-research-toolkit-asssets.git

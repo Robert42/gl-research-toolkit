@@ -1,3 +1,5 @@
+# OpenGL Research Toolkit
+
 The MIT License (MIT)
 
 Copyright (c) 2015 Robert Hildebrandt
@@ -19,4 +21,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+# External Dependencies used by this Toolkit
+
+- [glm](glm.g-truc.net) (Modified MIT License)
+- [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
+- [glew](http://glew.sourceforge.net/) (BSDL License)
+- [Qt](http://www.qt.io/) (LGPL License)
+- [SDL](http://libsdl.org) (zlib license)
+
 
