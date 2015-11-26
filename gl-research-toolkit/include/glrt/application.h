@@ -15,11 +15,11 @@ public:
     QString sampleDescription;
     QString tweakBarName; // If empty, no Tweakbar will be created. appTweakBar will then be null!
     QString tweakBarHelp;
-    int tweakBarHeight = 1;
+    int tweakBarHeight = 200;
     bool quitWithEscape = false;
     bool showTweakbarByDefault = false;
 
-    static Settings techDemo(const QString& sampleDescription=QString(), const QString& tweakBarName=QString(), const QString& tweakBarHelp=QString(), int tweakBarHeight=1)
+    static Settings techDemo(const QString& sampleDescription=QString(), const QString& tweakBarName=QString(), const QString& tweakBarHelp=QString(), int tweakBarHeight=200)
     {
       Settings settings;
       settings.quitWithEscape = true;

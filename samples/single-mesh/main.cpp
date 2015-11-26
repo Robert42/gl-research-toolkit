@@ -27,8 +27,7 @@ int main(int argc, char** argv)
                                                              ),
                         glrt::Application::Settings::techDemo("This Sample shows how to load and display a simple single mesh", // help text of the sample
                                                               "Mesh", // The name of the TweakBar
-                                                              "Toggle various debug options for the mesh view", // helptext of the
-                                                              100 // height of the bar
+                                                              "Toggle various debug options for the mesh view" // helptext of the
                                                               ));
 
   TwAddVarRW(app.appTweakBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?'");
