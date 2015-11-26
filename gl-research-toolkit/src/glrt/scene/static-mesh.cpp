@@ -53,11 +53,39 @@ StaticMesh::~StaticMesh()
 }
 
 
-StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
+StaticMesh& StaticMesh::operator=(StaticMesh&& mesh)
+{
+  std::swap(mesh.indexBuffer, this->indexBuffer);
+  std::swap(mesh.vertexBuffer, this->vertexBuffer);
+  std::swap(mesh.numberIndices, this->numberIndices);
+  std::swap(mesh.numberVertices, this->numberVertices);
+  return *this;
+}
+
+
+bool StaticMesh::isValidFile(const QFileInfo& file, bool parseFile)
+{
+  if(!parseFile)
+  {
+    return file.suffix().toLower() == "obj" || file.suffix().toLower() == "stl";
+  }
+
+  Assimp::Importer importer;
+
+  const aiScene* scene = importer.ReadFile(file.absoluteFilePath().toStdString(),
+                                           aiProcess_FindInvalidData |
+                                           aiProcess_FindDegenerates |
+                                           aiProcess_ValidateDataStructure);
+
+  return scene!=nullptr && scene->HasMeshes();
+}
+
+
+StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
 {
   Assimp::Importer importer;
 
-  const aiScene* scene = importer.ReadFile(filename.toStdString(),
+  const aiScene* scene = importer.ReadFile(file.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
                                            aiProcess_PreTransformVertices | // As we are loading everything into one mesh
                                            aiProcess_ValidateDataStructure |
@@ -78,7 +106,7 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
     throw GLRT_EXCEPTION(QString("Couldn't load mesh: %0").arg(importer.GetErrorString()));
 
   if(!scene->HasMeshes())
-    throw GLRT_EXCEPTION(QString("Couldn't find any mesh in %0").arg(filename));
+    throw GLRT_EXCEPTION(QString("Couldn't find any mesh in %0").arg(file));
 
   quint32 numVertices = 0;
   quint32 numFaces = 0;
@@ -92,16 +120,16 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
       continue;
 
     if(!mesh->HasFaces())
-      throw GLRT_EXCEPTION(QString("No Faces").arg(filename));
+      throw GLRT_EXCEPTION(QString("No Faces").arg(file));
 
     if(!mesh->HasNormals())
-      throw GLRT_EXCEPTION(QString("No Normals").arg(filename));
+      throw GLRT_EXCEPTION(QString("No Normals").arg(file));
 
     if(!mesh->HasPositions())
-      throw GLRT_EXCEPTION(QString("No Positions").arg(filename));
+      throw GLRT_EXCEPTION(QString("No Positions").arg(file));
 
     if(!mesh->HasTangentsAndBitangents())
-      throw GLRT_EXCEPTION(QString("No Tangents").arg(filename));
+      throw GLRT_EXCEPTION(QString("No Tangents").arg(file));
 
     // Quote http://learnopengl.com/?_escaped_fragment_=Advanced-Lighting/Normal-Mapping:
     // > Also important to realize is that aiProcess_CalcTangentSpace doesn't always work.
@@ -110,19 +138,19 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
     // > the texture coordinates; this gives incorrect results when the mirroring is not taken
     // > into account (which Assimp doesn't).
     if(!mesh->HasTextureCoords(0))
-      throw GLRT_EXCEPTION(QString("No Texture Coordinates. HINT: You probably forgot to create a uv-map").arg(filename));
+      throw GLRT_EXCEPTION(QString("No Texture Coordinates. HINT: You probably forgot to create a uv-map").arg(file));
 
     numVertices += mesh->mNumVertices;
     numFaces += mesh->mNumFaces;
   }
 
   if(numVertices == 0)
-    throw GLRT_EXCEPTION(QString("Couldn't find any vertices in %0").arg(filename));
+    throw GLRT_EXCEPTION(QString("Couldn't find any vertices in %0").arg(file));
   if(numFaces == 0)
-    throw GLRT_EXCEPTION(QString("Couldn't find any faces in %0").arg(filename));
+    throw GLRT_EXCEPTION(QString("Couldn't find any faces in %0").arg(file));
 
   if(numVertices > std::numeric_limits<index_type>::max())
-    throw GLRT_EXCEPTION(QString("Too many vertices").arg(filename));
+    throw GLRT_EXCEPTION(QString("Too many vertices").arg(file));
 
   std::vector<Vertex> vertices;
   std::vector<index_type> indices;
@@ -156,7 +184,7 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
       const aiFace& face = mesh->mFaces[j];
 
       if(face.mNumIndices != 3)
-        throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(filename));
+        throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(file));
 
       indices.push_back(face.mIndices[0]+index_offset);
       indices.push_back(face.mIndices[1]+index_offset);

@@ -13,11 +13,13 @@ public:
   struct Settings final
   {
     bool quitWithEscape = false;
+    bool enableFileDropEvents = false;
 
-    static Settings techDemo()
+    static Settings techDemo(bool enableFileDropEvents = false)
     {
       Settings settings;
       settings.quitWithEscape = true;
+      settings.enableFileDropEvents = enableFileDropEvents;
       return settings;
     }
   };

@@ -35,7 +35,7 @@ int main(int argc, char** argv)
                         argv,
                         glrt::System::Settings::simpleWindow("Single Mesh" // window title
                                                              ),
-                        glrt::Application::Settings::techDemo());
+                        glrt::Application::Settings::techDemo(true));
   glrt::DebugCamera debugCamera(app.system.sdlWindow);
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to load and display a simple single mesh" // help text of the sample
@@ -92,6 +92,30 @@ int main(int argc, char** argv)
         continue;
       if(antweakbar.handleEvents(event))
         continue;
+
+      switch(event.type)
+      {
+      case SDL_DROPFILE:
+      {
+        QFileInfo droppedFile = QString::fromUtf8(event.drop.file);
+        SDL_free(event.drop.file);
+
+        if(glrt::scene::StaticMesh::isValidFile(droppedFile, true))
+        {
+          glrt::scene::StaticMesh newMesh = glrt::scene::StaticMesh::loadMeshFromFile(droppedFile.absoluteFilePath());
+          std::swap(newMesh, mesh);
+        }else
+        {
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
+                                   "Couldn't load Mesh",
+                                   QString("The given file `%0` couldn't be laoded as mesh.").arg(droppedFile.fileName()).toStdString().c_str(),
+                                   app.sdlWindow);
+        }
+        break;
+      }
+      default:
+        break;
+      }
     }
 
     float deltaTime = app.update();

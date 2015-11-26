@@ -50,6 +50,17 @@ bool Application::handleEvent(const SDL_Event& event)
     return handleWindowEvent(event.window);
   case SDL_KEYDOWN:
     return handleKeyPressedEvent(event.key);
+  case SDL_DROPFILE:
+    if(!settings.enableFileDropEvents)
+    {
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION,
+                               "Dropping files not supported",
+                               "This Sample accepts no dropped files.",
+                               sdlWindow);
+      SDL_free(event.drop.file);
+      return true;
+    }
+    return false;
   default:
     return false;
   }
