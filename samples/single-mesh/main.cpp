@@ -16,14 +16,25 @@ struct TestUniformBlock
 
 int main(int argc, char** argv)
 {
+  bool wireframe = true;
+  bool backfaceCulling = true;
+  bool showPodest = true;
+  float rotationSpeed = 5.f;
+
   glrt::Application app(argc,
                         argv,
                         glrt::System::Settings::simpleWindow("Single Mesh" // window title
                                                              ),
                         glrt::Application::Settings::techDemo("This Sample shows how to load and display a simple single mesh", // help text of the sample
                                                               "Mesh", // The name of the TweakBar
-                                                              "Toggle various debug options for the mesh view" // helptext of the
+                                                              "Toggle various debug options for the mesh view", // helptext of the
+                                                              100 // height of the bar
                                                               ));
+
+  TwAddVarRW(app.appTweakBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?'");
+  TwAddVarRW(app.appTweakBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling'");
+  TwAddVarRW(app.appTweakBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?'");
+  TwAddVarRW(app.appTweakBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360");
 
   glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj");
   glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
@@ -45,9 +56,6 @@ int main(int argc, char** argv)
 
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, &u);
 
-  // TODO: The user should be able to toggle this
-  glEnable(GL_CULL_FACE);
-
   while(app.isRunning)
   {
     SDL_Event event;
@@ -61,7 +69,7 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(5.f) * deltaTime, glm::vec3(0, 0, 1));
+    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(rotationSpeed) * deltaTime, glm::vec3(0, 0, 1));
     u.view_projection = camera.projectionMatrix * camera.viewMatrix;
     void* mappedData = uniformBlock.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER);
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
@@ -70,13 +78,21 @@ int main(int argc, char** argv)
     shaderObject->Activate();
     shaderObject->BindUBO(uniformBlock, "TestUniformBlock");
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: The user should be able to toggle this
+    if(backfaceCulling)
+      glEnable(GL_CULL_FACE);
+    else
+      glDisable(GL_CULL_FACE);
+    if(wireframe)
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     vertexArrayObject.Bind();
     mesh.bind(vertexArrayObject);
     mesh.draw();
-    podest.bind(vertexArrayObject);
-    podest.draw();
-    podest.resetBinding();
+    if(showPodest)
+    {
+      podest.bind(vertexArrayObject);
+      podest.draw();
+      podest.resetBinding();
+    }
     vertexArrayObject.ResetBinding();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
