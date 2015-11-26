@@ -58,8 +58,6 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
   Assimp::Importer importer;
 
   const aiScene* scene = importer.ReadFile(filename.toStdString(),
-                                           //aiProcess_RemoveComponent |  // TODO: use this
-                                           //aiProcess_FlipUVs | // TODO: Decide about this
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
                                            aiProcess_PreTransformVertices | // As we are loading everything into one mesh
                                            aiProcess_ValidateDataStructure |
@@ -132,8 +130,6 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
   vertices.reserve(numVertices);
   indices.reserve(numFaces*3);
 
-  index_type index_offset = 0;
-
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
     aiMesh* mesh = scene->mMeshes[i];
@@ -153,6 +149,8 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
       vertices.push_back(vertex);
     }
 
+    index_type index_offset = indices.size();
+
     for(quint32 j = 0; j<mesh->mNumFaces; ++j)
     {
       const aiFace& face = mesh->mFaces[j];
@@ -160,22 +158,17 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
       if(face.mNumIndices != 3)
         throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(filename));
 
-      indices.push_back(face.mIndices[j]+index_offset);
-      indices.push_back(face.mIndices[j]+index_offset);
-      indices.push_back(face.mIndices[j]+index_offset);
+      indices.push_back(face.mIndices[0]+index_offset);
+      indices.push_back(face.mIndices[1]+index_offset);
+      indices.push_back(face.mIndices[2]+index_offset);
     }
-
-    index_offset += mesh->mNumVertices;
   }
 
-  if(indexed)
-    return createIndexed(indices.data(), indices.size(), vertices.data(), vertices.size());
-  else
-    return createAsArray(vertices.data(), vertices.size());
+  return createIndexed(indices.data(), indices.size(), vertices.data(), vertices.size(), indexed);
 }
 
 
-StaticMesh StaticMesh::createCube(const glm::vec3& dimensions, bool centered, bool indexed)
+StaticMesh StaticMesh::createCube(const glm::vec3& dimensions, bool centered, const glm::vec3& offset)
 {
 /*    z
  *    |
@@ -196,47 +189,68 @@ StaticMesh StaticMesh::createCube(const glm::vec3& dimensions, bool centered, bo
 
   std::vector<index_type> indices = {0, 3, 1, 1, 3, 2, // Ground
                                      5, 7, 4, 5, 6, 7, // Top
-                                     0, 1, 5, 5, 5, 0, // Left
+                                     0, 1, 5, 5, 4, 0, // Left
                                      3, 7, 6, 3, 6, 2, // Right
                                      0, 4, 7, 0, 7, 3, // Far
                                      1, 6, 5, 1, 2, 6, // Near
                                     };
-  std::vector<Vertex> vertices;
+  std::vector<glm::vec3> tangents = {glm::vec3( 1, 0, 0),
+                                     glm::vec3(-1, 0, 0),
+                                     glm::vec3( 0,-1, 0),
+                                     glm::vec3( 0, 1, 0),
+                                     glm::vec3(-1, 0, 0),
+                                     glm::vec3( 1, 0, 0)};
+  std::vector<glm::vec3> normals = {glm::vec3( 0, 0,-1),
+                                    glm::vec3( 0, 0, 1),
+                                    glm::vec3(-1, 0, 0),
+                                    glm::vec3( 1, 0, 0),
+                                    glm::vec3( 0, 1, 0),
+                                    glm::vec3( 0,-1, 0)};
+  std::vector<Vertex> indexedVertices;
 
-  vertices.resize(8);
+  indexedVertices.resize(8);
 
-  vertices[0].position = glm::vec3(0, 1, 0);
-  vertices[1].position = glm::vec3(0, 0, 0);
-  vertices[2].position = glm::vec3(1, 0, 0);
-  vertices[3].position = glm::vec3(1, 1, 0);
-  vertices[4].position = glm::vec3(0, 1, 1);
-  vertices[5].position = glm::vec3(0, 0, 1);
-  vertices[6].position = glm::vec3(1, 0, 1);
-  vertices[7].position = glm::vec3(1, 1, 1);
+  indexedVertices[0].position = glm::vec3(0, 1, 0);
+  indexedVertices[1].position = glm::vec3(0, 0, 0);
+  indexedVertices[2].position = glm::vec3(1, 0, 0);
+  indexedVertices[3].position = glm::vec3(1, 1, 0);
+  indexedVertices[4].position = glm::vec3(0, 1, 1);
+  indexedVertices[5].position = glm::vec3(0, 0, 1);
+  indexedVertices[6].position = glm::vec3(1, 0, 1);
+  indexedVertices[7].position = glm::vec3(1, 1, 1);
 
-  for(Vertex& v : vertices)
+  std::vector<StaticMesh::Vertex> arrayVertices;
+  arrayVertices.reserve(indices.size());
+
+  for(size_t i=0; i<indices.size(); ++i)
   {
-    v.normal = glm::normalize(v.position);
-    v.tangent = glm::cross(glm::vec3(0, 0, 1), v.normal); // FIXME: no real tangent possible in an indexed version, when vertices are shared bnetween different faces!!!!
-    v.uv = glm::vec2(v.position.x, v.position.y + v.position.z);
-  }
+    Q_ASSERT(indices[i] < indexedVertices.size());
 
-  if(centered)
-  {
-    for(Vertex& v : vertices)
+    arrayVertices.push_back(indexedVertices[indices[i]]);
+
+    Vertex& v = arrayVertices[i];
+
+    int j = i/6;
+
+    v.normal = normals[j];
+    v.tangent = tangents[j];
+    v.uv = glm::vec2(glm::dot(v.position, v.tangent),
+                     glm::dot(v.position, glm::cross(v.tangent, v.normal)));
+
+
+    if(centered)
       v.position -= glm::vec3(0.5f);
+    v.position *= dimensions;
+    v.position += offset;
   }
 
-  for(Vertex& v : vertices)
-    v.position *= dimensions;
-
-  return createIndexed(indices.data(), indices.size(), vertices.data(), vertices.size(), !indexed);
+  return createAsArray(arrayVertices.data(), arrayVertices.size());
 }
 
 
-StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool convertToArrays)
+StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed)
 {
-  if(convertToArrays)
+  if(!indexed)
     return _createAsArray(indices, numIndices, vertices, numVertices);
 
   gl::Buffer* indexBuffer = new gl::Buffer(numIndices*sizeof(index_type), gl::Buffer::UsageFlag::IMMUTABLE, indices);
@@ -310,15 +324,9 @@ void StaticMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
   vertexBuffer->BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
 }
 
-void StaticMesh::resetBinding()
+void StaticMesh::draw(GLenum mode)
 {
-  // TODO
-}
-
-void StaticMesh::draw()
-{
-  Q_ASSERT(sizeof(index_type) == 2);
-  const GLenum mode = GL_TRIANGLES;
+  Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type
   if(indexBuffer != nullptr)
     GL_CALL(glDrawElements, mode, numberIndices, GL_UNSIGNED_SHORT, nullptr);
   else

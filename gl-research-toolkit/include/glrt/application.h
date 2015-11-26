@@ -4,6 +4,7 @@
 #include "system.h"
 #include "gui/toolbar.h"
 #include "profiler.h"
+#include "debug-camera.h"
 
 namespace glrt {
 
@@ -12,12 +13,22 @@ class Application final
 public:
   struct Settings final
   {
+    QString sampleDescription;
+    QString tweakBarName; // If empty, no Tweakbar will be created. appTweakBar will then be null!
+    QString tweakBarHelp;
+    int tweakBarHeight = 200;
     bool quitWithEscape = false;
+    bool showTweakbarByDefault = false;
 
-    static Settings techDemo()
+    static Settings techDemo(const QString& sampleDescription=QString(), const QString& tweakBarName=QString(), const QString& tweakBarHelp=QString(), int tweakBarHeight=200)
     {
       Settings settings;
       settings.quitWithEscape = true;
+      settings.sampleDescription = sampleDescription;
+      settings.tweakBarName = tweakBarName;
+      settings.tweakBarHelp = tweakBarHelp;
+      settings.tweakBarHeight = tweakBarHeight;
+      settings.showTweakbarByDefault = !tweakBarName.isEmpty();
       return settings;
     }
   };
@@ -28,6 +39,8 @@ public:
 
   Profiler profiler;
   gui::Toolbar toolbar;
+  TwBar* appTweakBar;
+  glrt::DebugCamera debugCamera;
 
   bool isRunning;
   bool showAntTweakBar;
@@ -41,6 +54,7 @@ public:
 
 private:
   bool handleEvent(const SDL_Event& event);
+  bool handleApplicationEvent(const SDL_Event& event);
   bool handleWindowEvent(const SDL_WindowEvent& event);
   bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
 

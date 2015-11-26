@@ -10,6 +10,8 @@ namespace gui {
 class Toolbar final
 {
 public:
+  TwBar* tweakBar;
+
   Toolbar();
   ~Toolbar();
 
@@ -19,8 +21,6 @@ public:
   void init();
 
 private:
-  TwBar* tweakBar;
-
   static void setBarVisibility(const bool *value, TwBar* bar);
   static void getBarVisibility(bool *value, TwBar* bar);
 };

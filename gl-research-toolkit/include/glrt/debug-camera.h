@@ -8,8 +8,7 @@ namespace glrt {
 class DebugCamera
 {
 public:
-  glm::mat4 viewMatrix;
-  glm::mat4 projectionMatrix;
+  glm::mat4 viewProjectionMatrix;
   float movement_speed;
   float rotation_speed;
 
@@ -20,6 +19,7 @@ public:
   void update(float deltaTime);
 
 private:
+  glm::mat4 projectionMatrix;
   glm::vec3 camera_position;
   glm::mat4 camera_orientation;
   bool movementMode;
