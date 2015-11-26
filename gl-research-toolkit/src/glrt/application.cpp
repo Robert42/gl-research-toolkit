@@ -87,6 +87,19 @@ bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
       return true;
     }
     return false;
+  case SDLK_F1:
+  {
+    TwBar* helpBar = TwGetBarByName("TW_HELP");
+    qint32 iconified;
+
+    Q_ASSERT(helpBar != nullptr);
+
+    TwGetParam(helpBar, nullptr, "iconified", TW_PARAM_INT32, 1, &iconified);
+    iconified = !iconified;
+    TwSetParam(helpBar, nullptr, "iconified", TW_PARAM_INT32, 1, &iconified);
+    updateAntTweakBarWindowSize();
+    return true;
+  }
   case SDLK_F9:
     this->showAntTweakBar = !this->showAntTweakBar;
     updateAntTweakBarWindowSize();
