@@ -18,8 +18,14 @@ bool wireframe = true;
 bool backfaceCulling = true;
 bool showPodest = true;
 float rotationSpeed = 5.f;
+glm::quat current_orientation;
 
 QDir shaderDir(GLRT_SHADER_DIR"/samples/single-mesh");
+
+void resetOrientation(glm::quat* orientation)
+{
+  *orientation = glm::quat();
+}
 
 int main(int argc, char** argv)
 {
@@ -37,9 +43,10 @@ int main(int argc, char** argv)
   TwAddVarRW(app.appTweakBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?'");
   TwAddVarRW(app.appTweakBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling'");
   TwAddVarRW(app.appTweakBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?'");
-  TwAddVarRW(app.appTweakBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360");
   TwAddVarRW(app.appTweakBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material'");
-  // TODO:: also allow modifying the orientation with TweakBar
+  TwAddVarRW(app.appTweakBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360");
+  TwAddVarRW(app.appTweakBar, "Orientation", TW_TYPE_QUAT4F, &current_orientation, "help='Orientation of the mesh' showval=false " TWEAKBAR_BLENDER_AXIS);
+  TwAddButton(app.appTweakBar, "Reset Orientation", reinterpret_cast<TwButtonCallback>(resetOrientation), &current_orientation, "help='Resets the orientation to the star value'");
 
   // ======== Setup the Meshes ========
   // The main mesh we want to load
@@ -60,7 +67,7 @@ int main(int argc, char** argv)
 
   // initialize the uniform block with meaningful values
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
-  u.view_projection = app.debugCamera.projectionMatrix * app.debugCamera.viewMatrix;
+  u.view_projection = app.debugCamera.viewProjectionMatrix;
   u.material_color = glm::vec4(1, 0.5, 0, 1);
 
   // reserve some GPU space for the uniforms
@@ -80,8 +87,9 @@ int main(int argc, char** argv)
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
     // -------- update the uniform data --------
-    u.model_matrix = glm::rotate(u.model_matrix, glm::radians(rotationSpeed) * deltaTime, glm::vec3(0, 0, 1));
-    u.view_projection = app.debugCamera.projectionMatrix * app.debugCamera.viewMatrix;
+    current_orientation = current_orientation * glm::angleAxis(glm::radians(rotationSpeed) * deltaTime, glm::vec3(0, 0, 1));
+    u.model_matrix = glm::mat4_cast(current_orientation);
+    u.view_projection = app.debugCamera.viewProjectionMatrix;
     // Note: the color gets modified the Tweakbar, search for &u.material_color
 
     // send the updated uniform to the Graphic device

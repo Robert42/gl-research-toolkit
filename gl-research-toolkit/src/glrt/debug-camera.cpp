@@ -82,7 +82,8 @@ void DebugCamera::update(float deltaTime)
     camera_position -=  key_input * deltaTime * movement_speed;
   }
 
-  viewMatrix = camera_orientation * glm::translate(I, -camera_position);
+  const glm::mat4 viewMatrix = camera_orientation * glm::translate(I, -camera_position);
+  this->viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
 } // namespace glrt

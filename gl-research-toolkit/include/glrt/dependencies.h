@@ -7,6 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <AntTweakBar.h>
 
@@ -44,5 +45,7 @@ public:
 #define CALL_SDL_CRITICAL(x) __CALL_SDL(x,abort();)
 
 #define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << x;
+
+#define TWEAKBAR_BLENDER_AXIS " axisy=-z axisz=y "
 
 #endif // GLRT_DEPENDENCIES_H
