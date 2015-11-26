@@ -58,8 +58,9 @@ public:
 
   TwBar* createCustomBar(QString name,
                          QString help,
-                         const glm::ivec2& pos = glm::ivec2(65535, 0),
-                         const glm::ivec2& size = glm::ivec2(256));
+                         glm::ivec2 pos = glm::ivec2(65535, 0),
+                         glm::ivec2 size = glm::ivec2(256),
+                         int marginToWindowBorder = 32);
 
   // WARNING: The caller owns the given instance.
   // You must ensure, that the given profiler lives longer than the created bar

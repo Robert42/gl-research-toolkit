@@ -36,13 +36,25 @@ AntTweakBar::~AntTweakBar()
 
 TwBar* AntTweakBar::createCustomBar(QString name,
                                     QString help,
-                                    const glm::ivec2& pos,
-                                    const glm::ivec2& size)
+                                    glm::ivec2 pos,
+                                    glm::ivec2 size,
+                                    int marginToWindowBorder)
 {
+  // the defautlt margin (32 px) is exactly the radius of the RotoSlider.
+  // By introducing this margin, we are guaranteed to have some space to use
+  // the RotoSlider.
+  marginToWindowBorder = glm::max(marginToWindowBorder, 0);
+
   TwBar* tweakBar = TwNewBar(name.toStdString().c_str());
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, help.toStdString().c_str());
-  TwSetParam(tweakBar, nullptr, "position", TW_PARAM_INT32, 2, &pos);
   TwSetParam(tweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
+
+  glm::ivec2 windowSize;
+  SDL_GetWindowSize(application->sdlWindow, &windowSize.x, &windowSize.y);
+  TwGetParam(tweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
+
+  pos = glm::clamp(pos, glm::ivec2(marginToWindowBorder), windowSize-size-marginToWindowBorder);
+  TwSetParam(tweakBar, nullptr, "position", TW_PARAM_INT32, 2, &pos);
 
   gui::Toolbar::registerTweakBar(tweakBar);
 
