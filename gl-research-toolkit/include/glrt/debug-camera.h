@@ -21,7 +21,7 @@ public:
 private:
   glm::mat4 projectionMatrix;
   glm::vec3 camera_position;
-  glm::mat4 camera_orientation; // TODO:: use a quaternion
+  glm::mat4 camera_orientation;
   bool movementMode;
 };
 

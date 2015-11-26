@@ -59,7 +59,6 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& filename, bool indexed)
 
   const aiScene* scene = importer.ReadFile(filename.toStdString(),
                                            //aiProcess_RemoveComponent |  // TODO use this?
-                                           //aiProcess_FlipUVs | // TODO: Decide about this
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
                                            aiProcess_PreTransformVertices | // As we are loading everything into one mesh
                                            aiProcess_ValidateDataStructure |
