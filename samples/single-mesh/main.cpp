@@ -40,13 +40,15 @@ int main(int argc, char** argv)
                                                               ));
 
   // ======== Setup the Tweak Bar ========
-  TwAddVarRW(app.appTweakBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?'");
-  TwAddVarRW(app.appTweakBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling'");
-  TwAddVarRW(app.appTweakBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?'");
-  TwAddVarRW(app.appTweakBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material'");
-  TwAddVarRW(app.appTweakBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360");
-  TwAddVarRW(app.appTweakBar, "Orientation", TW_TYPE_QUAT4F, &current_orientation, "help='Orientation of the mesh' showval=false " TWEAKBAR_BLENDER_AXIS);
-  TwAddButton(app.appTweakBar, "Reset Orientation", reinterpret_cast<TwButtonCallback>(resetOrientation), &current_orientation, "help='Resets the orientation to the star value'");
+  TwAddVarRW(app.appTweakBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?' group=Presentation");
+  TwAddVarRW(app.appTweakBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling' group=Presentation");
+  TwAddVarRW(app.appTweakBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?' group=Presentation");
+  TwAddVarRW(app.appTweakBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material' group=Presentation");
+  TwAddVarRW(app.appTweakBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360 group=Rotation");
+  TwAddVarRW(app.appTweakBar, "Orientation", TW_TYPE_QUAT4F, &current_orientation, "help='Orientation of the mesh' showval=false group=Rotation" TWEAKBAR_BLENDER_AXIS);
+  TwAddButton(app.appTweakBar, "Reset Orientation", reinterpret_cast<TwButtonCallback>(resetOrientation), &current_orientation, "help='Resets the orientation to the star value' group=Rotation");
+
+  TwDefine("Mesh/Rotation group=Presentation");
 
   // ======== Setup the Meshes ========
   // The main mesh we want to load
