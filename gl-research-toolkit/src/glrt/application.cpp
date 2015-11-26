@@ -103,6 +103,8 @@ void Application::initAntTweakBar()
   TwInit(TW_OPENGL_CORE, NULL);
   updateAntTweakBarWindowSize();
 
+  TwSetParam(nullptr, nullptr, "contained", TW_PARAM_CSTRING, 1, "true");
+
   if(!settings.sampleDescription.isEmpty())
     TwSetParam(nullptr, nullptr, "help", TW_PARAM_CSTRING, 1, settings.sampleDescription.toStdString().c_str());
 
@@ -111,13 +113,15 @@ void Application::initAntTweakBar()
   // Create the TweakBar of the application
   if(!settings.tweakBarName.isEmpty())
   {
+    glm::ivec2 pos(4096, 0);
+    glm::ivec2 size(200, settings.tweakBarHeight);
+
     this->appTweakBar = TwNewBar(settings.tweakBarName.toStdString().c_str());
     TwSetParam(this->appTweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, settings.tweakBarHelp.toStdString().c_str());
+    TwSetParam(this->appTweakBar, nullptr, "position", TW_PARAM_INT32, 2, &pos);
+    TwSetParam(this->appTweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
 
     gui::Toolbar::registerTweakBar(this->appTweakBar);
-
-    qint32 iconified = true;
-    TwSetParam(toolbar.tweakBar, nullptr, "iconified", TW_PARAM_INT32, 1, &iconified);
   }else
   {
     this->appTweakBar = nullptr;

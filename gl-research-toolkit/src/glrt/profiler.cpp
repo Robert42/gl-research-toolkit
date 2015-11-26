@@ -94,7 +94,7 @@ void Profiler::createTweakBar()
     tweakBar = TwNewBar("Profiler");
     gui::Toolbar::registerTweakBar(tweakBar);
 
-    TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance");
+    TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]");
 
     qint32 visible = 0;
     TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_INT32, 1, &visible);

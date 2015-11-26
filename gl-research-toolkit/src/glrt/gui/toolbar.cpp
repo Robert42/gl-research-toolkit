@@ -20,8 +20,13 @@ Toolbar::~Toolbar()
 
 void Toolbar::init()
 {
+  glm::ivec2 pos(4096);
+  glm::ivec2 size(200, 1);
+
   tweakBar = TwNewBar(toolbarTitle);
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Toggles the visibilty of other tweak bars");
+  TwSetParam(tweakBar, nullptr, "position", TW_PARAM_INT32, 2, &pos);
+  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
 }
 
 void Toolbar::registerTweakBar(TwBar *tweakBar)
