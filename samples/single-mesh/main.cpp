@@ -1,7 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
 #include <glrt/scene/static-mesh.h>
-#include <glrt/shader/shader-factory.h>
 
 #include <glhelper/gl.hpp>
 
@@ -43,10 +42,11 @@ int main(int argc, char** argv)
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
 
   QDir shaderDir(GLRT_SHADER_DIR"/samples/single-mesh");
-  glrt::shader::CustomFactory customFactory(shaderDir.absoluteFilePath("plain-color.vs"),
-                                            shaderDir.absoluteFilePath("plain-color.fs"));
 
-  gl::ShaderObject* shaderObject = customFactory.create("plain-unlit-orange");
+  gl::ShaderObject shaderObject("plain-color");
+  shaderObject.AddShaderFromFile(gl::ShaderObject::ShaderType::VERTEX, shaderDir.absoluteFilePath("plain-color.vs").toStdString());
+  shaderObject.AddShaderFromFile(gl::ShaderObject::ShaderType::FRAGMENT, shaderDir.absoluteFilePath("plain-color.fs").toStdString());
+  shaderObject.CreateProgram();
 
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
   u.view_projection = app.debugCamera.projectionMatrix * app.debugCamera.viewMatrix;
@@ -71,8 +71,8 @@ int main(int argc, char** argv)
     *reinterpret_cast<TestUniformBlock*>(mappedData) = u;
     uniformBlock.Unmap();
 
-    shaderObject->Activate();
-    shaderObject->BindUBO(uniformBlock, "TestUniformBlock");
+    shaderObject.Activate();
+    shaderObject.BindUBO(uniformBlock, "TestUniformBlock");
 
     if(backfaceCulling)
       glEnable(GL_CULL_FACE);
@@ -94,8 +94,6 @@ int main(int argc, char** argv)
 
     app.swapWindow();
   }
-
-  delete shaderObject;
 
   return 0;
 }
