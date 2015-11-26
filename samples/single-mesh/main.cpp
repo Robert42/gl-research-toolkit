@@ -1,6 +1,7 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
 #include <glrt/scene/static-mesh.h>
+#include <glrt/gui/anttweakbar.h>
 
 #include <glhelper/gl.hpp>
 
@@ -34,19 +35,24 @@ int main(int argc, char** argv)
                         argv,
                         glrt::System::Settings::simpleWindow("Single Mesh" // window title
                                                              ),
-                        glrt::Application::Settings::techDemo("This Sample shows how to load and display a simple single mesh", // help text of the sample
-                                                              "Mesh", // The name of the TweakBar
-                                                              "Toggle various debug options for the mesh view" // helptext of the
-                                                              ));
+                        glrt::Application::Settings::techDemo());
+  glrt::DebugCamera debugCamera(app.system.sdlWindow);
+  glrt::gui::AntTweakBar antweakbar(&app,
+                                    glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to load and display a simple single mesh" // help text of the sample
+                                                                                ));
+  TwBar* twBar = antweakbar.createCustomBar("Mesh", // The name of the TweakBar
+                                            "Toggle various debug options for the mesh view" // helptext of the TweakBar
+                                            );
+  antweakbar.createProfilerBar(&app.profiler);
 
   // ======== Setup the Tweak Bar ========
-  TwAddVarRW(app.appTweakBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?' group=Presentation");
-  TwAddVarRW(app.appTweakBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling' group=Presentation");
-  TwAddVarRW(app.appTweakBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?' group=Presentation");
-  TwAddVarRW(app.appTweakBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material' group=Presentation");
-  TwAddVarRW(app.appTweakBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360 group=Rotation");
-  TwAddVarRW(app.appTweakBar, "Orientation", TW_TYPE_QUAT4F, &current_orientation, "help='Orientation of the mesh' showval=false group=Rotation" TWEAKBAR_BLENDER_AXIS);
-  TwAddButton(app.appTweakBar, "Reset Orientation", reinterpret_cast<TwButtonCallback>(resetOrientation), &current_orientation, "help='Resets the orientation to the star value' group=Rotation");
+  TwAddVarRW(twBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?' group=Presentation");
+  TwAddVarRW(twBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling' group=Presentation");
+  TwAddVarRW(twBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?' group=Presentation");
+  TwAddVarRW(twBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material' group=Presentation");
+  TwAddVarRW(twBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360 group=Rotation");
+  TwAddVarRW(twBar, "Orientation", TW_TYPE_QUAT4F, &current_orientation, "help='Orientation of the mesh' showval=false group=Rotation" TWEAKBAR_BLENDER_AXIS);
+  TwAddButton(twBar, "Reset Orientation", reinterpret_cast<TwButtonCallback>(resetOrientation), &current_orientation, "help='Resets the orientation to the star value' group=Rotation");
 
   TwDefine("Mesh/Rotation group=Presentation");
 
@@ -69,7 +75,7 @@ int main(int argc, char** argv)
 
   // initialize the uniform block with meaningful values
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
-  u.view_projection = app.debugCamera.viewProjectionMatrix;
+  u.view_projection = debugCamera.viewProjectionMatrix;
   u.material_color = glm::vec4(1, 0.5, 0, 1);
 
   // reserve some GPU space for the uniforms
@@ -82,16 +88,22 @@ int main(int argc, char** argv)
     SDL_Event event;
     while(app.pollEvent(&event))
     {
+      if(debugCamera.handleEvents(event))
+        continue;
+      if(antweakbar.handleEvents(event))
+        continue;
     }
 
     float deltaTime = app.update();
+
+    debugCamera.update(deltaTime);
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
     // -------- update the uniform data --------
     current_orientation = current_orientation * glm::angleAxis(glm::radians(rotationSpeed) * deltaTime, glm::vec3(0, 0, 1));
     u.model_matrix = glm::mat4_cast(current_orientation);
-    u.view_projection = app.debugCamera.viewProjectionMatrix;
+    u.view_projection = debugCamera.viewProjectionMatrix;
     // Note: the color gets modified the Tweakbar, search for &u.material_color
 
     // send the updated uniform to the Graphic device
@@ -133,6 +145,9 @@ int main(int argc, char** argv)
     // has no meaning here, but it's a good practive to reset this settings ;)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glEnable(GL_CULL_FACE);
+
+    // -------- Draw the Gui --------
+    antweakbar.draw();
 
     // -------- Swap front and backbuffer --------
     app.swapWindow();
