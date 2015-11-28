@@ -18,6 +18,7 @@ struct TestUniformBlock
   glm::mat4 model_matrix;
   glm::mat4 view_projection;
   glm::vec4 material_color;
+  glm::vec3 light_direction;
   DebuggingMode debuggingMode;
 };
 
@@ -63,6 +64,7 @@ int main(int argc, char** argv)
   TwAddVarRW(twBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material' group=Presentation");
   TwAddVarRW(twBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360 group=Rotation");
   TwAddVarRW(twBar, "Orientation", TW_TYPE_QUAT4F, &current_orientation, "help='Orientation of the mesh' showval=false group=Rotation" TWEAKBAR_BLENDER_AXIS);
+  TwAddVarRW(twBar, "Light Direction", TW_TYPE_DIR3F, &u.light_direction, "help='The direction of a directional light' showval=true" TWEAKBAR_BLENDER_AXIS);
   TwAddButton(twBar, "Reset Orientation", reinterpret_cast<TwButtonCallback>(resetOrientation), &current_orientation, "help='Resets the orientation to the star value' group=Rotation");
 
   TwDefine("Mesh/Rotation group=Presentation");
@@ -88,6 +90,7 @@ int main(int argc, char** argv)
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
   u.view_projection = debugCamera.viewProjectionMatrix;
   u.material_color = glm::vec4(1, 0.5, 0, 1);
+  u.light_direction = glm::normalize(glm::vec3(-0.67, 0.14, -0.73));
   u.debuggingMode = DebuggingMode::None;
 
   // reserve some GPU space for the uniforms
