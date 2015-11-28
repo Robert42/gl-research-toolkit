@@ -4,7 +4,7 @@ out vec4 color;
 
 #include "./same-dir.glsl"
 #include     "sub-dir/sub-dir.glsl"   
-#include   "global/factor.glsl"   
+#include   <factor.glsl>   
 
 void main()
 {

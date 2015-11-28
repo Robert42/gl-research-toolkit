@@ -3,11 +3,13 @@
 
 #include <glhelper/screenalignedtriangle.hpp>
 
-QDir shaderDir(SHADER_DIR);
+const QDir shaderDir(SHADER_DIR);
 
 int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Shader-Includes")));
+
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(shaderDir.absoluteFilePath("global"));
 
   gl::ScreenAlignedTriangle screenAlignedTriangle;
 
