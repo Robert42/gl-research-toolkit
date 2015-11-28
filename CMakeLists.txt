@@ -13,6 +13,7 @@ set(GLRT_SHADER_DIR ${GLRT_DIR}/shader)
 set(GLM_INCLUDE_DIR ${GLRT_DIR}/external/glm)
 
 add_subdirectory(external)
+add_subdirectory(shader)
 add_subdirectory(gl-research-toolkit)
 add_subdirectory(samples)
 add_subdirectory(tests)

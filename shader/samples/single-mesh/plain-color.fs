@@ -1,15 +1,10 @@
 #version 450 core
 
-uniform TestUniformBlock
-{
-  mat4 model_matrix;
-  mat4 view_projection;
-  vec4 material_color;
-} u;
+in vec3 vertex_color;
 
 out vec4 color;
 
 void main()
 {
-  color = u.material_color;
+  color = vec4(vertex_color, 1);
 }

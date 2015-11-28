@@ -5,12 +5,20 @@
 
 #include <glhelper/gl.hpp>
 
+enum class DebuggingMode : int
+{
+  None,
+  PlainColor,
+  ShadeNormals,
+  ShadeUV,
+};
 
 struct TestUniformBlock
 {
   glm::mat4 model_matrix;
   glm::mat4 view_projection;
   glm::vec4 material_color;
+  DebuggingMode debuggingMode;
 };
 
 TestUniformBlock u;
@@ -46,6 +54,9 @@ int main(int argc, char** argv)
   antweakbar.createProfilerBar(&app.profiler);
 
   // ======== Setup the Tweak Bar ========
+  TwType TwDebuggingModeType = TwDefineEnumFromString("DebuggingMode", "None,PlainColor,ShadeNormals,ShadeUV");
+
+  TwAddVarRW(twBar, "Debugging Mode", TwDebuggingModeType, &u.debuggingMode, nullptr);
   TwAddVarRW(twBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?' group=Presentation");
   TwAddVarRW(twBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling' group=Presentation");
   TwAddVarRW(twBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?' group=Presentation");
@@ -77,6 +88,7 @@ int main(int argc, char** argv)
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
   u.view_projection = debugCamera.viewProjectionMatrix;
   u.material_color = glm::vec4(1, 0.5, 0, 1);
+  u.debuggingMode = DebuggingMode::None;
 
   // reserve some GPU space for the uniforms
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr);
