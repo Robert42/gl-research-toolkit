@@ -27,7 +27,6 @@ TestUniformBlock u;
 
 bool wireframe = false;
 bool backfaceCulling = true;
-bool showPodest = true;
 float rotationSpeed = 5.f;
 glm::quat current_orientation;
 
@@ -61,7 +60,6 @@ int main(int argc, char** argv)
   TwAddVarRW(twBar, "Debugging Mode", TwDebuggingModeType, &u.debuggingMode, nullptr);
   TwAddVarRW(twBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?' group=Presentation");
   TwAddVarRW(twBar, "Backface Culling", TW_TYPE_BOOLCPP, &backfaceCulling, "help='Whether to enable/disable backface culling' group=Presentation");
-  TwAddVarRW(twBar, "Show Podest", TW_TYPE_BOOLCPP, &showPodest, "help='Draw The Podest?' group=Presentation");
   TwAddVarRW(twBar, "Color", TW_TYPE_COLOR3F, &u.material_color, "help='Color of the material' group=Presentation");
   TwAddVarRW(twBar, "Rotation Speed", TW_TYPE_FLOAT, &rotationSpeed, "help='How hast does the mesh rotate?' min=0 max=360 group=Rotation");
   TwAddVarRW(twBar, "Orientation", TW_TYPE_QUAT4F, &current_orientation, "help='Orientation of the mesh' showval=false group=Rotation" TWEAKBAR_BLENDER_AXIS);
@@ -76,9 +74,6 @@ int main(int argc, char** argv)
 
   // Get the Vertex Format of it
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
-
-  // Just for fun we create a cube as a podest
-  glrt::scene::StaticMesh podest = glrt::scene::StaticMesh::createCube(glm::vec3(2.f, 2.f, 0.1f), true, glm::vec3(0, 0, -1.5));
 
   // ======== Setup the Shader ========
   // load and compile the shader
@@ -173,13 +168,6 @@ int main(int argc, char** argv)
     // draw the mesh
     mesh.bind(vertexArrayObject);
     mesh.draw();
-
-    // draw the podest
-    if(showPodest)
-    {
-      podest.bind(vertexArrayObject);
-      podest.draw();
-    }
 
     // unbind the vertex array object
     vertexArrayObject.ResetBinding();
