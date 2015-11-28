@@ -21,7 +21,9 @@ int main(int argc, char** argv)
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
 
-    // T O D O : Add your drawing code here
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL_RECTANGLE_NV);
+
+    screenAlignedTriangle.Draw();
 
     app.swapWindow();
   }
