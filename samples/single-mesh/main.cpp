@@ -31,7 +31,7 @@ bool showPodest = true;
 float rotationSpeed = 5.f;
 glm::quat current_orientation;
 
-QDir shaderDir(GLRT_SHADER_DIR"/samples/single-mesh");
+QDir shaderDir(SHADER_DIR);
 
 void resetOrientation(glm::quat* orientation)
 {
