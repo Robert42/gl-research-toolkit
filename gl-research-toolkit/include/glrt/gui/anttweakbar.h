@@ -46,7 +46,7 @@ public:
   bool toggleHelp;
   bool toggleGui;
 
-  // WARNING: The caller owns the given instance.
+  // The caller owns the given instance.
   // You must ensure, that the given application lives longer than the newly constructed instance.
   AntTweakBar(Application *application, const Settings& settings);
   ~AntTweakBar();
@@ -62,7 +62,7 @@ public:
                          glm::ivec2 size = glm::ivec2(256),
                          int marginToWindowBorder = 32);
 
-  // WARNING: The caller owns the given instance.
+  // The caller owns the given instance.
   // You must ensure, that the given profiler lives longer than the created bar
   TwBar* createProfilerBar(Profiler* profiler);
 
