@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-  glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Shader-Includes"));
+  glrt::Application app(argc, argv, glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Shader-Includes")));
 
   gl::ScreenAlignedTriangle screenAlignedTriangle;
 
