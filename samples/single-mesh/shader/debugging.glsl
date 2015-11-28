@@ -3,6 +3,7 @@ const int DebuggingPlainColor = 1;
 const int DebuggingNormals = 2;
 const int DebuggingTangents = 3;
 const int DebuggingUV = 4;
+const int ShowUV = 5;
 
 uniform TestUniformBlock
 {

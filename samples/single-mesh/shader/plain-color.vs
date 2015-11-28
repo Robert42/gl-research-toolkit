@@ -14,7 +14,10 @@ out vec3 fragment_normal;
 
 void main()
 {
-
+  
+  fragment_normal = (u.model_matrix * vec4(vertex_normal, 0)).xyz;
+  gl_Position = u.view_projection * u.model_matrix * vec4(vertex_position.xyz, 1);
+    
   switch(u.debuggingMode)
   {
   case DebuggingNormals:
@@ -26,12 +29,12 @@ void main()
   case DebuggingUV:
     fragment_color = vec3(vertex_uv, 0);
     break;
+  case ShowUV:
+    gl_Position = vec4(mix(vec2(-1), vec2(1), vertex_uv), 0, 1);
   case DebuggingNone:
   case DebuggingPlainColor:
   default:
     fragment_color = u.material_color.rgb;
   }
 
-  fragment_normal = (u.model_matrix * vec4(vertex_normal, 0)).xyz;
-  gl_Position = u.view_projection * u.model_matrix * vec4(vertex_position.xyz, 1);
 }

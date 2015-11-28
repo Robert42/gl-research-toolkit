@@ -12,6 +12,7 @@ enum class DebuggingMode : int
   ShadeNormals,
   ShadeTangents,
   ShadeUV,
+  ShowUV,
 };
 
 struct TestUniformBlock
@@ -55,7 +56,7 @@ int main(int argc, char** argv)
   antweakbar.createProfilerBar(&app.profiler);
 
   // ======== Setup the Tweak Bar ========
-  TwType TwDebuggingModeType = TwDefineEnumFromString("DebuggingMode", "None,PlainColor,ShadeNormals,ShadeTangents,ShadeUV");
+  TwType TwDebuggingModeType = TwDefineEnumFromString("DebuggingMode", "None,PlainColor,ShadeNormals,ShadeTangents,ShadeUV,ShowUV");
 
   TwAddVarRW(twBar, "Debugging Mode", TwDebuggingModeType, &u.debuggingMode, nullptr);
   TwAddVarRW(twBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?' group=Presentation");
@@ -155,7 +156,7 @@ int main(int argc, char** argv)
       glEnable(GL_CULL_FACE);
     else
       glDisable(GL_CULL_FACE);
-    if(wireframe)
+    if(wireframe || u.debuggingMode==DebuggingMode::ShowUV)
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // activate the shader
