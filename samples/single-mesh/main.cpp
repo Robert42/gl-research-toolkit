@@ -10,6 +10,7 @@ enum class DebuggingMode : int
   None,
   PlainColor,
   ShadeNormals,
+  ShadeTangents,
   ShadeUV,
 };
 
@@ -55,7 +56,7 @@ int main(int argc, char** argv)
   antweakbar.createProfilerBar(&app.profiler);
 
   // ======== Setup the Tweak Bar ========
-  TwType TwDebuggingModeType = TwDefineEnumFromString("DebuggingMode", "None,PlainColor,ShadeNormals,ShadeUV");
+  TwType TwDebuggingModeType = TwDefineEnumFromString("DebuggingMode", "None,PlainColor,ShadeNormals,ShadeTangents,ShadeUV");
 
   TwAddVarRW(twBar, "Debugging Mode", TwDebuggingModeType, &u.debuggingMode, nullptr);
   TwAddVarRW(twBar, "Wireframes", TW_TYPE_BOOLCPP, &wireframe, "help='Draw the mesh as wireframe?' group=Presentation");

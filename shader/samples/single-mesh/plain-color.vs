@@ -20,6 +20,9 @@ void main()
   case DebuggingNormals:
     fragment_color = encode_direction_as_color(vertex_normal);
     break;
+  case DebuggingTangents:
+    fragment_color = encode_direction_as_color(vertex_tangent);
+    break;
   case DebuggingUV:
     fragment_color = vec3(vertex_uv, 0);
     break;
