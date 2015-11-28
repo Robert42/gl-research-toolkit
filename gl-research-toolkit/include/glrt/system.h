@@ -42,6 +42,7 @@ public:
 private:
   void initSDL(const Settings& settings);
   void initGLEW(const Settings& settings);
+  void verifyNVidiaFeatures();
 };
 
 } // namespace glrt
