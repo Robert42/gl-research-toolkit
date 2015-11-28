@@ -44,7 +44,7 @@ namespace gl
 
 
 // Assert
-#ifdef _DEBUG
+#ifndef NDEBUG
 #define GLHELPER_ASSERT(condition, message) do { \
 	if(!(condition)) std::cerr << message; \
 	assert(condition); } while(false)
