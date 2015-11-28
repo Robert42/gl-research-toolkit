@@ -58,7 +58,7 @@ if(GLRT_PROFILER)
 target_compile_definitions(
   glrt
   PUBLIC
-  -DGLRT_PROFILER
+  GLRT_PROFILER
 )
 endif()
 
