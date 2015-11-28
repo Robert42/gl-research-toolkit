@@ -6,11 +6,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(Qt5Core REQUIRED)
 
 
 ######## glhelpers #################################################################
+set(GLHELPER_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glhelperconfig/)
+set(GLHELPER_ADDITIONAL_LIBRARIES Qt5::Core)
 add_subdirectory(glhelper)
-
+target_include_directories(glhelper PUBLIC ${GLM_INCLUDE_DIR})
+target_sources(glhelper PUBLIC ${GLHELPER_CONFIG_DIR}/glhelperconfig.hpp)
 
 ######## AntTweakBar ###########################################################
 set(ATB_OPENGL_HEADER "GL/glew.h")

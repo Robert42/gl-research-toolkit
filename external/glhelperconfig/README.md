@@ -1,0 +1,1 @@
+- Based on [https://github.com/Robert42/glhelper/blob/146549fc9b43e080a59d6af6999a9e6b3bf903cc/defaultconfig/glhelperconfig.hpp](glhelperconfig.hpp from glhelper commit 146549fc)

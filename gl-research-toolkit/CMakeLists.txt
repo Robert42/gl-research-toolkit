@@ -19,10 +19,6 @@ find_package(Qt5Core REQUIRED)
 find_package(ASSIMP REQUIRED)
 
 
-set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
-set(GLM_INCLUDE_DIR ${GLRT_DIR}/external/glm)
-
-
 add_library(glrt
   include/glrt/application.h
   include/glrt/debug-camera.h
@@ -58,7 +54,7 @@ if(GLRT_PROFILER)
 target_compile_definitions(
   glrt
   PUBLIC
-  -DGLRT_PROFILER
+  GLRT_PROFILER
 )
 endif()
 
