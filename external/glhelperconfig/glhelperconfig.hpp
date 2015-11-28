@@ -10,6 +10,8 @@
 #include <algorithm> // for std::count in shaderobject.cpp
 
 #include <QDebug>
+#include <QVector>
+#include <QDir>
 
 
 namespace gl
@@ -76,10 +78,46 @@ namespace gl
 
 	typedef glm::mat3x3 Mat3;
 	typedef glm::mat4x4 Mat4;
-};
+
+  namespace Details
+  {
+
+    class ShaderIncludeDirManager final
+    {
+    public:
+      ShaderIncludeDirManager() = delete;
+
+      static void addIncludeDirs(const QDir& dir)
+      {
+        getIncludeDirs().append(dir);
+      }
+
+      static std::string expandGLobalInclude(const std::string& include_std_string)
+      {
+        QString include_file = QString::fromStdString(include_std_string);
+
+        for(const QDir& dir : getIncludeDirs())
+        {
+          if(dir.exists(include_file))
+            return dir.absoluteFilePath(include_file).toStdString();
+        }
+
+        return std::string();
+      }
+
+    private:
+      static QVector<QDir>& getIncludeDirs()
+      {
+        static QVector<QDir> include_dirs;
+        return include_dirs;
+      }
+    };
+
+  }
+}
 
 // A std::vector of all include paths shaders will be looked for, if an #include<...> statement was found during parsing an glsl script
-#define SHADER_EXPAND_GLOBAL_INCLUDE(x) ""
+#define SHADER_EXPAND_GLOBAL_INCLUDE(x) gl::Details::ShaderIncludeDirManager::expandGLobalInclude(x)
 
 // OpenGL header.
 
