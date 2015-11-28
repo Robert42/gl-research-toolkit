@@ -23,7 +23,7 @@ struct TestUniformBlock
 
 TestUniformBlock u;
 
-bool wireframe = true;
+bool wireframe = false;
 bool backfaceCulling = true;
 bool showPodest = true;
 float rotationSpeed = 5.f;
@@ -94,6 +94,7 @@ int main(int argc, char** argv)
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr);
 
   // ======== Main Loop ========
+  glEnable(GL_DEPTH_TEST);
   while(app.isRunning)
   {
     // -------- Event handling --------
@@ -135,7 +136,7 @@ int main(int argc, char** argv)
     debugCamera.update(deltaTime);
     antweakbar.update(deltaTime);
 
-    GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+    GL_CALL(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     // -------- update the uniform data --------
     current_orientation = current_orientation * glm::angleAxis(glm::radians(rotationSpeed) * deltaTime, glm::vec3(0, 0, 1));
