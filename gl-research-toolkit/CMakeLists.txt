@@ -19,14 +19,11 @@ find_package(Qt5Core REQUIRED)
 find_package(ASSIMP REQUIRED)
 
 
-set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
-set(GLM_INCLUDE_DIR ${GLRT_DIR}/external/glm)
-
-
 add_library(glrt
   include/glrt/application.h
   include/glrt/debug-camera.h
   include/glrt/dependencies.h
+  include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
   include/glrt/profiler.h
   include/glrt/scene/static-mesh.h
@@ -37,6 +34,7 @@ add_library(glrt
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
   src/glrt/dependencies.cpp
+  src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
   src/glrt/profiler.cpp
   src/glrt/scene/static-mesh.cpp
@@ -56,7 +54,7 @@ if(GLRT_PROFILER)
 target_compile_definitions(
   glrt
   PUBLIC
-  -DGLRT_PROFILER
+  GLRT_PROFILER
 )
 endif()
 

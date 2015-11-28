@@ -24,6 +24,12 @@ public:
       return settings;
     }
 
+    static Settings addVSync(Settings settings)
+    {
+      settings.VSync = true;
+      return settings;
+    }
+
     int openglVersionMajor() const{return minOpenglVersion/100;}
     int openglVersionMinor() const{return (minOpenglVersion/10)%10;}
 
@@ -42,6 +48,7 @@ public:
 private:
   void initSDL(const Settings& settings);
   void initGLEW(const Settings& settings);
+  void verifyNVidiaFeatures();
 };
 
 } // namespace glrt

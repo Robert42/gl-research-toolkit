@@ -18,14 +18,14 @@ public:
   StaticMesh(StaticMesh&& mesh);
   StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices);
   ~StaticMesh();
+  StaticMesh& operator=(StaticMesh&&);
 
   StaticMesh() = delete;
   StaticMesh(const StaticMesh&) = delete;
   StaticMesh& operator=(const StaticMesh&) = delete;
-  StaticMesh& operator=(const StaticMesh&&) = delete;
 
-  static StaticMesh loadMeshFromFile(const QString& filename, bool indexed=true);
-  static StaticMesh createCube(const glm::vec3& dimensions=glm::vec3(2), bool centered=true, const glm::vec3& offset = glm::vec3(0));
+  static bool isValidFile(const QFileInfo& file, bool parseFile);
+  static StaticMesh loadMeshFromFile(const QString& file, bool indexed=true);
   static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed = true);
   static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
 

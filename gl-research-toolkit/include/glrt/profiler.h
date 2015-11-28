@@ -32,9 +32,6 @@ public:
   float update();
   void activate();
   void deactivate();
-
-  void createTweakBar();
-
 private:
   struct RecordedScope
   {
@@ -47,8 +44,6 @@ private:
   };
 
   static Profiler* activeProfiler;
-
-  TwBar* tweakBar;
 
   std::vector<RecordedScope> recordedScopes;
   int currentDepth;

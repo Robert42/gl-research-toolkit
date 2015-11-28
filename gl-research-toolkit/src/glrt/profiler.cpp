@@ -43,19 +43,12 @@ Profiler* Profiler::activeProfiler = nullptr;
 
 
 Profiler::Profiler()
-  : tweakBar(nullptr)
 {
 }
 
 
 Profiler::~Profiler()
 {
-  if(tweakBar)
-  {
-    gui::Toolbar::unregisterTweakBar(tweakBar);
-    TwDeleteBar(tweakBar);
-  }
-  deactivate();
 }
 
 
@@ -84,23 +77,6 @@ void Profiler::deactivate()
 {
   if(activeProfiler == this)
     activeProfiler = nullptr;
-}
-
-
-void Profiler::createTweakBar()
-{
-  if(!tweakBar)
-  {
-    tweakBar = TwNewBar("Profiler");
-    gui::Toolbar::registerTweakBar(tweakBar);
-
-    TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]");
-
-    qint32 visible = 0;
-    TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_INT32, 1, &visible);
-
-    TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &this->printFramerate, "");
-  }
 }
 
 

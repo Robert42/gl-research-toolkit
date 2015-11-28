@@ -24,6 +24,8 @@ System::System(int argc, char** argv, const Settings& settings)
 
   initSDL(settings);
   initGLEW(settings);
+
+  verifyNVidiaFeatures();
 }
 
 
@@ -68,9 +70,18 @@ void System::initGLEW(const Settings& settings)
 {
   GLenum error =  glewInit();
   if(error != GLEW_OK)
-    qCritical() << "Initializing glew failed!\nError: " << glewGetErrorString(error);
+    throw GLRT_EXCEPTION(QString("Initializing glew failed!\nError: %0").arg(reinterpret_cast<const char*>(glewGetErrorString(error))));
   if(!glewIsSupported(QString("GL_VERSION_%0_%1").arg(settings.openglVersionMajor()).arg(settings.openglVersionMinor()).toStdString().c_str()))
-    qCritical() << QString("The requested OpenGL version %0.%1 is not supported! => Aborting!").arg(settings.openglVersionMajor()).arg(settings.openglVersionMinor()).toStdString().c_str();
+    throw GLRT_EXCEPTION(QString("The requested OpenGL version %0.%1 is not supported! => Aborting!").arg(settings.openglVersionMajor()).arg(settings.openglVersionMinor()).toStdString().c_str());
+}
+
+void System::verifyNVidiaFeatures()
+{
+  // See http://blog.icare3d.org/ for a more complete list of interesting Features
+
+  // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fill_rectangle.txt
+  if(!GLEW_NV_fill_rectangle)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fill_rectangle"));
 }
 
 

@@ -24,9 +24,10 @@ SOFTWARE.
 
 # External Dependencies used by this Toolkit
 
-- [glm](glm.g-truc.net) (Modified MIT License)
-- [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
+- [AntTweakBar](http://anttweakbar.sourceforge.net/doc/tools:anttweakbar) (zlib/libpng license)
 - [glew](http://glew.sourceforge.net/) (BSDL License)
+- [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
+- [glm](glm.g-truc.net) (Modified MIT License)
 - [Qt](http://www.qt.io/) (LGPL License)
 - [SDL](http://libsdl.org) (zlib license)
 
