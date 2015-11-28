@@ -9,6 +9,28 @@
 #include <vector> // for std::vector in shaderobject.cpp
 #include <algorithm> // for std::count in shaderobject.cpp
 
+#include <QDebug>
+
+
+namespace gl
+{
+	namespace Details
+	{
+
+    inline const char* to_c_str(const std::string& str)
+    {
+      return str.c_str();
+    }
+
+    inline const char* to_c_str(const char* str)
+    {
+      return str;
+    }
+
+  }
+}
+
+
 // General settings.
 
 // If activated, Texture2D has a FromFile method which uses stbi to load images and create mipmaps.
@@ -29,11 +51,10 @@
 #endif
 
 
-
 // Logging
-#define GLHELPER_LOG_ERROR(message)		do { std::cerr << "Error: " << message << " (" << __FILE__ << ", (" << __LINE__ << ")" << std::endl; } while(false)
-#define GLHELPER_LOG_WARNING(message)	do { std::cerr << "Warning: " << message << " (" << __FILE__ << ", (" << __LINE__ << ")" << std::endl; } while(false)
-#define GLHELPER_LOG_INFO(message)		do { std::clog << "Info: " << message << " (" << __FILE__ << ", (" << __LINE__ << ")" << std::endl; } while(false)
+#define GLHELPER_LOG_ERROR(message)		do { qCritical() << QString("Error: %0 (<%1> line %2)").arg(gl::Details::to_c_str(message)).arg(__FILE__).arg(__LINE__).toStdString().c_str(); } while(false)
+#define GLHELPER_LOG_WARNING(message)	do { qWarning() << QString("Warning: %0 (<%1> line %2)").arg(gl::Details::to_c_str(message)).arg(__FILE__).arg(__LINE__).toStdString().c_str(); } while(false)
+#define GLHELPER_LOG_INFO(message)		do { qDebug() << QString("Info: %0 (<%1> line %2)").arg(gl::Details::to_c_str(message)).arg(__FILE__).arg(__LINE__).toStdString().c_str(); } while(false)
 
 
 
