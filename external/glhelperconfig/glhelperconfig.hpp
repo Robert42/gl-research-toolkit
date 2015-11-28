@@ -59,55 +59,23 @@ namespace gl
 
 
 // Vector & Matrix types.
-#include <cstdint>
+#include <glm/glm.hpp>
 namespace gl
 {
-	namespace Details
-	{
-		template<typename T>
-		struct DefaultVec2
-		{
-			DefaultVec2(T x, T y) : x(x), y(y) {}
-			T x, y;
-		};
-		template<typename T>
-		struct DefaultVec3
-		{
-			DefaultVec3(T x, T y, T z) : x(x), y(y), z(z) {}
-			T x, y, z;
-		};
-		template<typename T>
-		struct DefaultVec4
-		{
-			DefaultVec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
-			T x, y, z, w;
-		};
-		template<typename T>
-		struct DefaultMat3x3
-		{
-			T m[3][3];
-		};
-		template<typename T>
-		struct DefaultMat4x4
-		{
-			T m[4][4];
-		};
-	};
+	typedef glm::vec2 Vec2;
+	typedef glm::vec3 Vec3;
+	typedef glm::vec4 Vec4;
 
-	typedef Details::DefaultVec2<float> Vec2;
-	typedef Details::DefaultVec3<float> Vec3;
-	typedef Details::DefaultVec4<float> Vec4;
+	typedef glm::ivec2 IVec2;
+	typedef glm::ivec3 IVec3;
+	typedef glm::ivec4 IVec4;
 
-	typedef Details::DefaultVec2<std::int32_t> IVec2;
-	typedef Details::DefaultVec3<std::int32_t> IVec3;
-	typedef Details::DefaultVec4<std::int32_t> IVec4;
+	typedef glm::uvec2 UVec2;
+	typedef glm::uvec3 UVec3;
+	typedef glm::uvec4 UVec4;
 
-	typedef Details::DefaultVec2<std::uint32_t> UVec2;
-	typedef Details::DefaultVec3<std::uint32_t> UVec3;
-	typedef Details::DefaultVec4<std::uint32_t> UVec4;
-
-	typedef Details::DefaultMat3x3<float> Mat3;
-	typedef Details::DefaultMat4x4<float> Mat4;
+	typedef glm::mat3x3 Mat3;
+	typedef glm::mat4x4 Mat4;
 };
 
 // A std::vector of all include paths shaders will be looked for, if an #include<...> statement was found during parsing an glsl script
