@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QString>
 #include <QDir>
+#include <QObject>
 
 #include <iostream>
 #include <memory>
