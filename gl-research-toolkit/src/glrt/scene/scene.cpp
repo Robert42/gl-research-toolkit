@@ -35,6 +35,11 @@ Scene::MaterialMeshList::MaterialMeshList(gl::ShaderObject&& shaderObject)
   this->shaderObject.AddShaderFromFile(gl::ShaderObject::ShaderType::FRAGMENT, shaderDir + '/' + this->shaderObject.GetName() + ".fs");
 }
 
+void Scene::MaterialMeshList::render()
+{
+  // TODO
+}
+
 
 } // namespace scene
 } // namespace glrt
