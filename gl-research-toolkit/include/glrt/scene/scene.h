@@ -2,15 +2,18 @@
 #define GLRT_SCENE_SCENE_H
 
 #include <glrt/dependencies.h>
+#include <glrt/scene/static-mesh.h>
 
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>
+#include <glhelper/texture2d.hpp>
 
 namespace glrt {
 namespace scene {
 
-class Scene final
+class Scene final : public QObject
 {
+  Q_OBJECT
 public:
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;
@@ -22,10 +25,17 @@ public:
   void render();
 
 private:
+  struct MaterialInstance
+  {
+  public:
+    gl::Buffer buffer;
+    std::vector<StaticMesh> staticMesh;
+  };
+
   struct MaterialMeshList
   {
     gl::ShaderObject shaderObject;
-    std::vector<gl::Buffer> materialInstanceUniform;
+    std::vector<MaterialInstance> materialInstanceUniform;
 
     MaterialMeshList(gl::ShaderObject&& shaderObject);
 

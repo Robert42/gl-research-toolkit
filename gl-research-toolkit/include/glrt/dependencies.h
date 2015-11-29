@@ -15,6 +15,7 @@
 #include <QString>
 #include <QDir>
 #include <QObject>
+#include <QSharedPointer>
 
 #include <iostream>
 #include <memory>
