@@ -30,8 +30,6 @@ add_library(glrt
   include/glrt/gui/toolbar.h
   include/glrt/profiler.h
   include/glrt/scene/static-mesh.h
-  include/glrt/shader/shader.h
-  include/glrt/shader/shader-technique.h
   include/glrt/system.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
@@ -40,8 +38,6 @@ add_library(glrt
   src/glrt/gui/toolbar.cpp
   src/glrt/profiler.cpp
   src/glrt/scene/static-mesh.cpp
-  src/glrt/shader/shader.cpp
-  src/glrt/shader/shader-technique.cpp
   src/glrt/system.cpp
 )
 
