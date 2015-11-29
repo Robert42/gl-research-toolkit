@@ -18,15 +18,7 @@
 
 #include <iostream>
 #include <memory>
-
-#include <glhelper/shaderobject.hpp>
-
-
-namespace gl {
-
-uint qHash(const gl::ShaderObject::ShaderType& type, uint seed = 0);
-
-} // namespace gl
+#include <vector>
 
 
 namespace glrt {

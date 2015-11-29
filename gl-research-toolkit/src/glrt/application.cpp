@@ -1,5 +1,7 @@
 #include <glrt/application.h>
 
+#include <glhelper/gl.hpp>
+
 namespace glrt {
 
 

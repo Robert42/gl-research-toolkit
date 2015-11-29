@@ -4,6 +4,7 @@
 #include <glrt/gui/anttweakbar.h>
 
 #include <glhelper/gl.hpp>
+#include <glhelper/shaderobject.hpp>
 
 enum class DebuggingMode : int
 {
