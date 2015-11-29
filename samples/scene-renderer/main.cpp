@@ -20,9 +20,9 @@ int main(int argc, char** argv)
 
     app.update();
 
-    GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+    GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // T O D O : Add your drawing code here
+    glEnable(GL_DEPTH_TEST);
 
     app.swapWindow();
   }
