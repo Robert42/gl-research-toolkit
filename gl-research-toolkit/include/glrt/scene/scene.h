@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 #include <glrt/scene/static-mesh.h>
 #include <glrt/scene/material.h>
+#include <glrt/debug-camera.h>
 
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>
@@ -20,13 +21,23 @@ class Scene final : public QObject
 {
   Q_OBJECT
 public:
+  struct SceneUniformBlock
+  {
+    glm::mat4 view_projection_matrix;
+  };
+
+  DebugCamera camera;
+
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;
   Scene& operator=(const Scene&) = delete;
   Scene& operator=(Scene&&) = delete;
 
-  Scene();
+  Scene(SDL_Window* sdlWindow);
   ~Scene();
+
+  bool handleEvents(const SDL_Event& event);
+  void update(float deltaTime);
 
   void render();
 
@@ -41,7 +52,7 @@ private:
     {
       struct MeshGroup
       {
-        QMap<StaticMeshComponent*, glm::mat4> staticMeshComponents;
+        QMap<StaticMeshComponent*, gl::Buffer*> staticMeshComponents;
 
         void AddStaticMesh(StaticMeshComponent* staticMeshComponent);
         void RemoveStaticMesh(StaticMeshComponent* staticMeshComponent);
@@ -92,6 +103,8 @@ private:
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
   QSet<Entity*> _entities;
+
+  gl::Buffer sceneUniformBuffer;
 
   void AddEntity(Entity* entity);
   void RemoveEntity(Entity* entity);

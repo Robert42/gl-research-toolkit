@@ -9,13 +9,14 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Scene-Renderer"));
 
-  glrt::scene::Scene scene;
+  glrt::scene::Scene scene(app.sdlWindow);
 
   while(app.isRunning)
   {
     SDL_Event event;
     while(app.pollEvent(&event))
     {
+      scene.handleEvents(event);
     }
 
     app.update();

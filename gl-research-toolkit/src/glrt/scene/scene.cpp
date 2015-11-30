@@ -10,12 +10,14 @@ namespace scene {
 // ======== Scene ==============================================================
 
 
-Scene::Scene()
-  : plainColorMeshes(gl::ShaderObject("plain-color-materials")),
+Scene::Scene(SDL_Window* sdlWindow)
+  : camera(sdlWindow),
+    plainColorMeshes(gl::ShaderObject("plain-color-materials")),
     texturedMeshes(gl::ShaderObject("textured-meshes")),
     maskedMeshes(gl::ShaderObject("masked-meshes")),
     transparentMeshes(gl::ShaderObject("transparent-meshes")),
-    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
+    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject())),
+    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr)
 {
 }
 
@@ -34,9 +36,25 @@ Scene::~Scene()
 }
 
 
+bool Scene::handleEvents(const SDL_Event& event)
+{
+  return camera.handleEvents(event);
+}
+
+
+void Scene::update(float deltaTime)
+{
+  camera.update(deltaTime);
+
+  SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  sceneUniformData.view_projection_matrix = camera.viewProjectionMatrix;
+  sceneUniformBuffer.Unmap();
+}
+
+
 void Scene::render()
 {
-  // TODO bind scene uniform
+  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
 
   staticMeshVertexArrayObject.Bind();
 
@@ -84,7 +102,7 @@ void Scene::MaterialPass::MaterialInstance::MeshGroup::AddStaticMesh(StaticMeshC
 {
   Q_ASSERT_X(!staticMeshComponents.contains(staticMeshComponent), __FUNCTION__, "Called AddStaticMesh, although the saticmesh component is already registered");
 
-  staticMeshComponents.insert(staticMeshComponent, staticMeshComponent->relativeTransform);
+  staticMeshComponents.insert(staticMeshComponent, new gl::Buffer(sizeof(glm::mat4), gl::Buffer::UsageFlag::IMMUTABLE, &staticMeshComponent->relativeTransform));
 }
 
 
@@ -92,7 +110,11 @@ void Scene::MaterialPass::MaterialInstance::MeshGroup::RemoveStaticMesh(StaticMe
 {
   Q_ASSERT_X(staticMeshComponents.contains(staticMeshComponent), __FUNCTION__, "Called RemoveStaticMesh, although the saticmesh component is not registered");
 
-  staticMeshComponents.remove(staticMeshComponent);
+  if(staticMeshComponents.contains(staticMeshComponent))
+  {
+    delete staticMeshComponents[staticMeshComponent];
+    staticMeshComponents.remove(staticMeshComponent);
+  }
 }
 
 
@@ -104,8 +126,11 @@ bool Scene::MaterialPass::MaterialInstance::MeshGroup::isEmpty() const
 
 void Scene::MaterialPass::MaterialInstance::MeshGroup::render(StaticMesh& staticMesh)
 {
-  // TODO: apply buffer
-  staticMesh.draw();
+  for(gl::Buffer* buffer : staticMeshComponents)
+  {
+    buffer->BindUniformBuffer(UNIFORM_BINDING_MESH_INSTANCE_BLOCK);
+    staticMesh.draw();
+  }
 }
 
 
@@ -209,7 +234,7 @@ void Scene::MaterialPass::render()
     Material& material = *i.key();
     MaterialInstance& materialInstance = i.value();
 
-    // TODO bind material instance uniform material->uniformBuffer
+    material.uniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK);
 
     materialInstance.render();
   }
