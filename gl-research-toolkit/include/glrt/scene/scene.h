@@ -3,6 +3,7 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/static-mesh.h>
+#include <glrt/scene/material.h>
 
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>
@@ -10,6 +11,10 @@
 
 namespace glrt {
 namespace scene {
+
+
+class Entity;
+class StaticMeshComponent;
 
 class Scene final : public QObject
 {
@@ -21,40 +26,75 @@ public:
   Scene& operator=(Scene&&) = delete;
 
   Scene();
+  ~Scene();
 
   void render();
 
 private:
-  struct MaterialInstance
-  {
-  public:
-    gl::Buffer buffer;
-    std::vector<StaticMesh> staticMesh;
-  };
+  friend class Entity;
+  friend class StaticMeshComponent;
 
-  struct MaterialMeshList
+
+  struct MaterialPass
   {
+    struct MaterialInstance
+    {
+      struct MeshGroup
+      {
+        QMap<StaticMeshComponent*, glm::mat4> staticMeshComponents;
+
+        void AddStaticMesh(StaticMeshComponent* staticMeshComponent);
+        void RemoveStaticMesh(StaticMeshComponent* staticMeshComponent);
+
+        bool isEmpty() const;
+      };
+
+      QMap<StaticMesh*, MeshGroup> staticMeshes;
+
+      void AddStaticMesh(StaticMeshComponent* staticMeshComponent);
+      void RemoveStaticMesh(StaticMeshComponent* staticMeshComponent);
+
+      bool isEmpty() const;
+    };
+
     gl::ShaderObject shaderObject;
-    std::vector<MaterialInstance> materialInstanceUniform;
+    QMap<Material*, MaterialInstance> materialInstanceMeshList;
 
-    MaterialMeshList(gl::ShaderObject&& shaderObject);
+    MaterialPass(gl::ShaderObject&& shaderObject);
 
-    MaterialMeshList() = delete;
-    MaterialMeshList(const MaterialMeshList&) = delete;
-    MaterialMeshList(MaterialMeshList&&) = delete;
-    MaterialMeshList& operator=(const MaterialMeshList&) = delete;
-    MaterialMeshList& operator=(MaterialMeshList&&) = delete;
+    MaterialPass() = delete;
+    MaterialPass(const MaterialPass&) = delete;
+    MaterialPass(MaterialPass&&) = delete;
+    MaterialPass& operator=(const MaterialPass&) = delete;
+    MaterialPass& operator=(MaterialPass&&) = delete;
+
+    void AddStaticMesh(StaticMeshComponent* staticMeshComponent);
+    void RemoveStaticMesh(StaticMeshComponent* staticMeshComponent);
+    void deinit();
+
+    bool isEmpty() const;
 
     void render();
   };
 
   // Materials without blending
-  MaterialMeshList plainColorMeshes;
-  MaterialMeshList texturedMeshes;
-  MaterialMeshList maskedMeshes;
+  MaterialPass plainColorMeshes;
+  MaterialPass texturedMeshes;
+  MaterialPass maskedMeshes;
 
   // Materials with blending
-  MaterialMeshList transparentMeshes;
+  MaterialPass transparentMeshes;
+
+  QSet<Entity*> _entities;
+
+  void AddEntity(Entity* entity);
+  void RemoveEntity(Entity* entity);
+
+  void AddStaticMesh(StaticMeshComponent* staticMeshComponent);
+  void RemoveStaticMesh(StaticMeshComponent* staticMeshComponent);
+
+  // May return nullptr. The pointer will stay valid until the scene is changed
+  MaterialPass* pickMaterialPass(const Material* material);
 };
 
 } // namespace scene

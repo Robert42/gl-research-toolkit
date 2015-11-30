@@ -15,6 +15,8 @@ public:
   struct Vertex;
   typedef quint16 index_type;
 
+  typedef QSharedPointer<StaticMesh> Ptr;
+
   StaticMesh(StaticMesh&& mesh);
   StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices);
   ~StaticMesh();
@@ -33,7 +35,7 @@ public:
 
   void bind(const gl::VertexArrayObject& vertexArrayObject);
 
-  void draw(GLenum mode = GL_TRIANGLES);
+  void draw(GLenum mode = GL_TRIANGLES) const;
 
 private:
   gl::Buffer* indexBuffer;

@@ -12,6 +12,20 @@ Entity::Entity(Scene& scene)
   : scene(scene)
 {
   setParent(&scene);
+  scene.AddEntity(this);
+}
+
+
+Entity::~Entity()
+{
+  QVector<Entity::Component*> components;
+
+  components.swap(this->_components);
+
+  for(Entity::Component* c : components)
+    delete c;
+
+  scene.RemoveEntity(this);
 }
 
 
@@ -28,6 +42,16 @@ Entity::Component::Component(Entity& entity)
   : entity(entity)
 {
   setParent(&entity);
+  entity._components.append(this);
+}
+
+
+// ======== Entity::Component ==================================================
+
+
+VisibleComponent::VisibleComponent(Entity& entity)
+  : Component(entity)
+{
 }
 
 

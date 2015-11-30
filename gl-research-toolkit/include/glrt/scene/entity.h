@@ -17,6 +17,7 @@ public:
   Scene& scene;
 
   Entity(Scene& scene);
+  ~Entity();
 
   QVector<Entity::Component*> components();
 

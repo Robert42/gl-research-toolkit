@@ -12,10 +12,11 @@ class StaticMeshComponent final : public VisibleComponent
 {
   Q_OBJECT
 public:
-  StaticMesh staticMesh;
-  Material::Ptr material;
+  const StaticMesh::Ptr staticMesh;
+  const Material::Ptr material;
 
-  StaticMeshComponent(Entity& entity, StaticMesh&& staticMesh);
+  StaticMeshComponent(Entity& entity, const StaticMesh::Ptr& staticMesh, const Material::Ptr& material);
+  ~StaticMeshComponent();
 };
 
 } // namespace scene
