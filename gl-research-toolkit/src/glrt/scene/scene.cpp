@@ -14,7 +14,8 @@ Scene::Scene()
   : plainColorMeshes(gl::ShaderObject("plain-color-materials")),
     texturedMeshes(gl::ShaderObject("textured-meshes")),
     maskedMeshes(gl::ShaderObject("masked-meshes")),
-    transparentMeshes(gl::ShaderObject("transparent-meshes"))
+    transparentMeshes(gl::ShaderObject("transparent-meshes")),
+    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
 {
 }
 
@@ -37,10 +38,14 @@ void Scene::render()
 {
   // TODO bind scene uniform
 
+  staticMeshVertexArrayObject.Bind();
+
   plainColorMeshes.render();
   texturedMeshes.render();
   maskedMeshes.render();
   transparentMeshes.render();
+
+  staticMeshVertexArrayObject.ResetBinding();
 }
 
 

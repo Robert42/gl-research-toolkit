@@ -89,6 +89,8 @@ private:
   // Materials with blending
   MaterialPass transparentMeshes;
 
+  gl::VertexArrayObject staticMeshVertexArrayObject;
+
   QSet<Entity*> _entities;
 
   void AddEntity(Entity* entity);
