@@ -47,6 +47,8 @@ private:
         void RemoveStaticMesh(StaticMeshComponent* staticMeshComponent);
 
         bool isEmpty() const;
+
+        void render(StaticMesh& staticMesh);
       };
 
       QMap<StaticMesh*, MeshGroup> staticMeshes;
@@ -55,6 +57,8 @@ private:
       void RemoveStaticMesh(StaticMeshComponent* staticMeshComponent);
 
       bool isEmpty() const;
+
+      void render();
     };
 
     gl::ShaderObject shaderObject;

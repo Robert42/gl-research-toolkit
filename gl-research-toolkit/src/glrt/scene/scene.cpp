@@ -33,6 +33,8 @@ Scene::~Scene()
 
 void Scene::render()
 {
+  // TODO bind scene uniform
+
   plainColorMeshes.render();
   texturedMeshes.render();
   maskedMeshes.render();
@@ -93,6 +95,13 @@ bool Scene::MaterialPass::MaterialInstance::MeshGroup::isEmpty() const
 }
 
 
+void Scene::MaterialPass::MaterialInstance::MeshGroup::render(StaticMesh& staticMesh)
+{
+  // TODO: apply buffer
+  staticMesh.draw();
+}
+
+
 // ======== Scene::MaterialPass::MaterialInstance ==============================
 
 
@@ -123,6 +132,18 @@ void Scene::MaterialPass::MaterialInstance::RemoveStaticMesh(StaticMeshComponent
 bool Scene::MaterialPass::MaterialInstance::isEmpty() const
 {
   return staticMeshes.isEmpty();
+}
+
+
+void Scene::MaterialPass::MaterialInstance::render()
+{
+  for(auto i=staticMeshes.begin(); i!=staticMeshes.end(); ++i)
+  {
+    StaticMesh& mesh = *i.key();
+    MeshGroup& meshGroup = i.value();
+
+    meshGroup.render(mesh);
+  }
 }
 
 
@@ -174,7 +195,17 @@ void Scene::MaterialPass::render()
   if(isEmpty())
     return;
 
-  // TODO
+  shaderObject.Activate();
+
+  for(auto i=materialInstanceMeshList.begin(); i!=materialInstanceMeshList.end(); ++i)
+  {
+    Material& material = *i.key();
+    MaterialInstance& materialInstance = i.value();
+
+    // TODO bind material instance uniform material->uniformBuffer
+
+    materialInstance.render();
+  }
 }
 
 
