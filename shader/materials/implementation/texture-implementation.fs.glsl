@@ -2,9 +2,9 @@
 #include "input-block.fs.glsl"
 #include "material-implementation.fs.glsl"
 
-// TODO:::: Don't forget layout(binding = ...)
+#include <glrt/glsl/layout-constants.h>
   
-uniform MaterialInstanceBlock
+layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK) uniform MaterialInstanceBlock
 {
   // sampler2D within Uniform Block possible thanks to GL_NV_bindless_texture
   sampler2D diffuse_map;

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 add_custom_target(
   gl-research-toolkit-shader
   SOURCES
+  common-with-cpp/glrt/glsl/layout-constants.h
   materials/implementation/common-implementation.vs.glsl
   materials/implementation/input-block.fs.glsl
   materials/implementation/material-implementation.fs.glsl

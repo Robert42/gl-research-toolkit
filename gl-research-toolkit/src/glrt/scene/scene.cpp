@@ -1,6 +1,8 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/static-mesh-component.h>
 
+#include <glrt/glsl/layout-constants.h>
+
 namespace glrt {
 namespace scene {
 

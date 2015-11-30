@@ -1,4 +1,5 @@
 #include <glrt/scene/static-mesh.h>
+#include <glrt/glsl/layout-constants.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -260,6 +261,11 @@ StaticMesh StaticMesh::createAsArray(const StaticMesh::Vertex* vertices, int num
 gl::VertexArrayObject StaticMesh::generateVertexArrayObject()
 {
   typedef gl::VertexArrayObject::Attribute Attribute;
+
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_POSITION == 0);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_NORMAL == 1);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_TANGENT == 2);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_UV == 3);
 
   return std::move(gl::VertexArrayObject({Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),

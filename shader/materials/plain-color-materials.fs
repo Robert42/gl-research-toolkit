@@ -3,7 +3,9 @@
 #include "implementation/input-block.fs.glsl"
 #include "implementation/material-implementation.fs.glsl"
 
-uniform MaterialInstanceBlock
+#include <glrt/glsl/layout-constants.h>
+
+layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK) uniform MaterialInstanceBlock
 {
   vec3 diffuse;
   float roughness;

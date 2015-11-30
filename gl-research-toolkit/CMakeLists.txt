@@ -53,6 +53,7 @@ target_include_directories(
   glrt
   PUBLIC
   include
+  ${GLRT_SHADER_DIR}/common-with-cpp
 )
 
 if(GLRT_PROFILER)

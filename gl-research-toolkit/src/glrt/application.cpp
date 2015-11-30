@@ -12,6 +12,7 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
     isRunning(true)
 {
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
 }
 
 

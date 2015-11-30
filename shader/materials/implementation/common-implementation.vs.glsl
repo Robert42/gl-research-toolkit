@@ -1,16 +1,18 @@
 #include "output-block.vs.glsl"
 
-layout(location=0) in vec3 vertex_position;
-layout(location=1) in vec3 vertex_normal;
-layout(location=2) in vec3 vertex_tangent;
-layout(location=3) in vec2 vertex_uv;
+#include <glrt/glsl/layout-constants.h>
 
-uniform MeshInstanceBlock
+layout(location=VERTEX_ATTRIBUTE_LOCATION_POSITION) in vec3 vertex_position;
+layout(location=VERTEX_ATTRIBUTE_LOCATION_NORMAL) in vec3 vertex_normal;
+layout(location=VERTEX_ATTRIBUTE_LOCATION_TANGENT) in vec3 vertex_tangent;
+layout(location=VERTEX_ATTRIBUTE_LOCATION_UV) in vec2 vertex_uv;
+
+layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK) uniform MeshInstanceBlock
 {
   mat4 model_matrix;
 }mesh_instance;
 
-uniform SceneBlock
+layout(binding=UNIFORM_BINDING_SCENE_BLOCK) uniform SceneBlock
 {
   mat4 view_projection;
 }scene;
