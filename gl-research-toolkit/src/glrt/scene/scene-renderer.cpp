@@ -1,4 +1,5 @@
 #include <glrt/scene/scene-renderer.h>
+#include <glrt/scene/static-mesh-component.h>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -42,14 +43,15 @@ void Renderer::updateSceneUniform()
 // ======== Pass ===============================================================
 
 
-Renderer::Pass::Pass(Renderer* renderer, gl::ShaderObject&& shaderObject)
-  : renderer(*renderer),
+Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, gl::ShaderObject&& shaderObject)
+  : type(type),
+    renderer(*renderer),
     shaderObject(std::move(shaderObject))
 {
 }
 
-Renderer::Pass::Pass(Renderer* renderer, const QString& materialName, const QStringList& preprocessorBlock)
-  : Pass(renderer, std::move(gl::ShaderObject(materialName.toStdString())))
+Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock)
+  : Pass(renderer, type, std::move(gl::ShaderObject(materialName.toStdString())))
 {
   std::string preprocessor_definitions = preprocessorBlock.join('\n').toStdString();
 
@@ -75,10 +77,48 @@ Renderer::Pass::Pass(Renderer* renderer, const QString& materialName, const QStr
 }
 
 
+bool orderByDrawCall(StaticMeshComponent* a, StaticMeshComponent*b)
+{
+  // Movables after unmovables
+  if(!a->movable)
+    return true;
+  if(a->movable)
+    return false;
+
+  if(a->materialInstance.data() < b->materialInstance.data())
+    return true;
+  if(a->materialInstance.data() > b->materialInstance.data())
+    return false;
+
+  if(a->staticMesh.data() < b->staticMesh.data())
+    return true;
+  if(a->staticMesh.data() > b->staticMesh.data())
+    return false;
+
+  return a < b;
+}
+
+
+std::function<bool(StaticMeshComponent* a)> allowOnly(MaterialInstance::Type type, bool movable)
+{
+  return [movable, type](StaticMeshComponent* a) {
+    return a->movable==movable && a->materialInstance->type == type;
+  };
+}
+
+
 inline void Renderer::Pass::updateCache()
 {
-  if(_cachedStaticStructureCacheIndex == renderer.scene._cachedStaticStructureCacheIndex)
+  Scene& scene = renderer.scene;
+
+  if(_cachedStaticStructureCacheIndex == scene._cachedStaticStructureCacheIndex)
     return;
+
+  QVector<StaticMeshComponent*> allStaticMeshComponents = scene.allComponentsWithType<StaticMeshComponent>(allowOnly(this->type, false));
+
+  qSort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
+
+  _cachedStaticStructureCacheIndex = scene._cachedStaticStructureCacheIndex;
 }
 
 

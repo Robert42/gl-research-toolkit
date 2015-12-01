@@ -13,9 +13,9 @@ class StaticMeshComponent final : public VisibleComponent
   Q_OBJECT
 public:
   const StaticMesh::Ptr staticMesh;
-  const Material::Ptr material;
+  const MaterialInstance::Ptr materialInstance;
 
-  StaticMeshComponent(Entity& entity, const StaticMesh::Ptr& staticMesh, const Material::Ptr& material);
+  StaticMeshComponent(Entity& entity, const StaticMesh::Ptr& staticMesh, const MaterialInstance::Ptr& materialInstance);
   ~StaticMeshComponent();
 };
 

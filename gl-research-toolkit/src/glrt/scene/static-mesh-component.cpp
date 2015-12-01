@@ -5,10 +5,10 @@ namespace glrt {
 namespace scene {
 
 
-StaticMeshComponent::StaticMeshComponent(Entity& entity, const StaticMesh::Ptr& staticMesh, const Material::Ptr& material)
+StaticMeshComponent::StaticMeshComponent(Entity& entity, const StaticMesh::Ptr& staticMesh, const MaterialInstance::Ptr& material)
   : VisibleComponent(entity),
     staticMesh(staticMesh),
-    material(material)
+    materialInstance(material)
 {
   entity.scene.staticMeshStructureChanged();
 }

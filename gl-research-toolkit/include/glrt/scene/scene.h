@@ -40,7 +40,7 @@ public:
   void staticMeshStructureChanged();
 
   template<typename T>
-  QVector<T*> allComponentsWithType();
+  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
 
 private:
   friend class Renderer;
@@ -55,7 +55,7 @@ private:
 
 
 template<typename T>
-QVector<T*> Scene::allComponentsWithType()
+QVector<T*> Scene::allComponentsWithType(const std::function<bool(T*)>& filter)
 {
   static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
 
@@ -63,7 +63,7 @@ QVector<T*> Scene::allComponentsWithType()
   components.reserve((_entities.size()+3) / 4);
 
   for(Entity* e : _entities)
-    for(T* component : e->allComponentsWithType<T>())
+    for(T* component : e->allComponentsWithType<T>(filter))
       components.append(component);
   return components;
 }

@@ -8,19 +8,30 @@
 namespace glrt {
 namespace scene {
 
-class Material : public QObject
+class MaterialInstance : public QObject
 {
   Q_OBJECT
 public:
-  typedef QSharedPointer<Material> Ptr;
+  typedef QSharedPointer<MaterialInstance> Ptr;
 
+  enum class Type
+  {
+    PLAIN_COLOR,
+    TEXTURED_OPAQUE,
+    TEXTURED_MASKED,
+    TEXTURED_TRANSPARENT
+  };
+
+  const Type type;
   gl::Buffer uniformBuffer;
 
-  Material(gl::Buffer&& buffer);
+private:
+  friend class PlainColorMaterial;
+  MaterialInstance(const Type type, gl::Buffer&& buffer);
 };
 
 
-class PlainColorMaterial : public Material
+class PlainColorMaterial : public MaterialInstance
 {
   Q_OBJECT
 public:

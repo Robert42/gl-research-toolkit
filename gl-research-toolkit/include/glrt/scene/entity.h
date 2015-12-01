@@ -13,7 +13,7 @@ class Entity final : public QObject
 public:
   class Component;
 
-  glm::mat4 absoluteTransform = glm::mat4(1);
+  glm::mat4 relativeTransformransform = glm::mat4(1);
   Scene& scene;
 
   Entity(Scene& scene);
@@ -22,7 +22,7 @@ public:
   QVector<Entity::Component*> components();
 
   template<typename T>
-  QVector<T*> allComponentsWithType();
+  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
 
 private:
   QVector<Entity::Component*> _components;
@@ -50,7 +50,7 @@ public:
 
 
 template<typename T>
-QVector<T*> Entity::allComponentsWithType()
+QVector<T*> Entity::allComponentsWithType(const std::function<bool(T*)>& filter)
 {
   static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
 
@@ -59,8 +59,8 @@ QVector<T*> Entity::allComponentsWithType()
 
   for(Component* c : _components)
   {
-    T* component = qobject_cast<T>(c);
-    if(component)
+    T* component = qobject_cast<T*>(c);
+    if(component && filter(component))
       components.append(component);
   }
   return components;

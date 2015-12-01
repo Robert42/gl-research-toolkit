@@ -7,8 +7,9 @@ namespace scene {
 // ======== Material ===========================================================
 
 
-Material::Material(gl::Buffer&& buffer)
-  : uniformBuffer(std::move(buffer))
+MaterialInstance::MaterialInstance(const Type type, gl::Buffer&& buffer)
+  : type(type),
+    uniformBuffer(std::move(buffer))
 {
 
 }
@@ -18,7 +19,8 @@ Material::Material(gl::Buffer&& buffer)
 
 
 PlainColorMaterial::PlainColorMaterial(const UniformData& data)
-  : Material(gl::Buffer(sizeof(UniformData), gl::Buffer::UsageFlag::IMMUTABLE, &data))
+  : MaterialInstance(Type::PLAIN_COLOR,
+                     gl::Buffer(sizeof(UniformData), gl::Buffer::UsageFlag::IMMUTABLE, &data))
 {
 }
 

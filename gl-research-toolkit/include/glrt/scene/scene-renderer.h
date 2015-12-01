@@ -44,11 +44,12 @@ private:
 class Renderer::Pass final
 {
 public:
+  const MaterialInstance::Type type;
   Renderer& renderer;
   gl::ShaderObject shaderObject;
 
-  Pass(Renderer* renderer, gl::ShaderObject&& shaderObject);
-  Pass(Renderer* renderer, const QString& materialName, const QStringList& preprocessorBlock);
+  Pass(Renderer* renderer, MaterialInstance::Type type, gl::ShaderObject&& shaderObject);
+  Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock);
 
   Pass(const Pass&) = delete;
   Pass(Pass&&) = delete;
@@ -63,7 +64,7 @@ private:
 
   struct MaterialInstanceRange
   {
-    Material* material;
+    MaterialInstance* materialInstance;
     int begin, end;
   };
   struct MeshRange
