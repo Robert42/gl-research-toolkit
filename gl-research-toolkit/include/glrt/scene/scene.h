@@ -11,6 +11,8 @@
 #include <glhelper/buffer.hpp>
 #include <glhelper/texture2d.hpp>
 
+#include <QJsonObject>
+
 namespace glrt {
 namespace scene {
 
@@ -22,6 +24,7 @@ class Scene final : public QObject
   Q_OBJECT
 
 public:
+  QString name, file;
   DebugCamera camera;
 
   Scene(const Scene&) = delete;
@@ -34,6 +37,9 @@ public:
 
   bool handleEvents(const SDL_Event& event);
   void update(float deltaTime);
+
+  bool loadFromFile(const QString& file);
+  bool fromJson(const QJsonObject& json);
 
   void bindSceneUniformBlock();
 

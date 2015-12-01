@@ -13,6 +13,8 @@ int main(int argc, char** argv)
   glrt::scene::Scene scene(app.sdlWindow);
   glrt::scene::ForwardRenderer renderer(&scene);
 
+  scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
+
   while(app.isRunning)
   {
     SDL_Event event;

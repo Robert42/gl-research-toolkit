@@ -5,6 +5,8 @@
 
 #include <glhelper/buffer.hpp>
 
+#include <QJsonObject>
+
 namespace glrt {
 namespace scene {
 
@@ -23,7 +25,15 @@ public:
   };
 
   const Type type;
+  QString name;
   gl::Buffer uniformBuffer;
+
+  static MaterialInstance::Ptr fromJson(const QJsonObject& object);
+
+protected:
+  bool parseCommonJson(const QJsonObject& object, const QString& expectedType);
+
+  static bool asVec3(glm::vec3& vec, const QJsonValue& value, const char* context);
 
 private:
   friend class PlainColorMaterial;
@@ -37,12 +47,14 @@ class PlainColorMaterial : public MaterialInstance
 public:
   struct UniformData
   {
-    glm::vec3 diffuse;
-    float roughness;
-    float metallicness;
+    glm::vec3 diffuse = glm::vec3(1);
+    float roughness = 0.8f;
+    float metallicness = 0.f;
   };
 
   PlainColorMaterial(const UniformData& data);
+
+  static MaterialInstance::Ptr fromJson(const QJsonObject& object);
 };
 
 
