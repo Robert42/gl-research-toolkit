@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 #include <glrt/scene/static-mesh.h>
 #include <glrt/scene/material.h>
+#include <glrt/scene/entity.h>
 #include <glrt/debug-camera.h>
 
 #include <glhelper/shaderobject.hpp>
@@ -14,12 +15,12 @@ namespace glrt {
 namespace scene {
 
 
-class Entity;
 class StaticMeshComponent;
 
 class Scene final : public QObject
 {
   Q_OBJECT
+
 public:
   DebugCamera camera;
 
@@ -38,6 +39,9 @@ public:
 
   void staticMeshStructureChanged();
 
+  template<typename T>
+  QVector<T*> allComponentsWithType();
+
 private:
   friend class Renderer;
   friend class Entity;
@@ -48,6 +52,22 @@ private:
   void AddEntity(Entity* entity);
   void RemoveEntity(Entity* entity);
 };
+
+
+template<typename T>
+QVector<T*> Scene::allComponentsWithType()
+{
+  static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
+
+  QVector<T*> components;
+  components.reserve((_entities.size()+3) / 4);
+
+  for(Entity* e : _entities)
+    for(T* component : e->allComponentsWithType<T>())
+      components.append(component);
+  return components;
+}
+
 
 } // namespace scene
 } // namespace glrt

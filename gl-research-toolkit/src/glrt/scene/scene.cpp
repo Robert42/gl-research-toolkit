@@ -44,7 +44,7 @@ void Scene::staticMeshStructureChanged()
 }
 
 
-void Scene::AddEntity(Entity*entity)
+void Scene::AddEntity(Entity* entity)
 {
   _entities.insert(entity);
 }

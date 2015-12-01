@@ -21,6 +21,9 @@ public:
 
   QVector<Entity::Component*> components();
 
+  template<typename T>
+  QVector<T*> allComponentsWithType();
+
 private:
   QVector<Entity::Component*> _components;
 };
@@ -40,9 +43,28 @@ class VisibleComponent : public Entity::Component
 {
 public:
   glm::mat4 relativeTransform = glm::mat4(1);
+  bool movable : 1;
 
   VisibleComponent(Entity& entity);
 };
+
+
+template<typename T>
+QVector<T*> Entity::allComponentsWithType()
+{
+  static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
+
+  QVector<T*> components;
+  components.reserve((_components.size()+3) / 4);
+
+  for(Component* c : _components)
+  {
+    T* component = qobject_cast<T>(c);
+    if(component)
+      components.append(component);
+  }
+  return components;
+}
 
 
 } // namespace scene

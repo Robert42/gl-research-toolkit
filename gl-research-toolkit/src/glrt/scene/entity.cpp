@@ -50,7 +50,8 @@ Entity::Component::Component(Entity& entity)
 
 
 VisibleComponent::VisibleComponent(Entity& entity)
-  : Component(entity)
+  : Component(entity),
+    movable(false)
 {
 }
 
