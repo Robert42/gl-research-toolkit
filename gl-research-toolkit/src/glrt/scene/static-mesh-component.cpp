@@ -10,13 +10,13 @@ StaticMeshComponent::StaticMeshComponent(Entity& entity, const StaticMesh::Ptr& 
     staticMesh(staticMesh),
     material(material)
 {
-  entity.scene.AddStaticMesh(this);
+  entity.scene.staticMeshStructureChanged();
 }
 
 
 StaticMeshComponent::~StaticMeshComponent()
 {
-  entity.scene.RemoveStaticMesh(this);
+  entity.scene.staticMeshStructureChanged();
 }
 
 

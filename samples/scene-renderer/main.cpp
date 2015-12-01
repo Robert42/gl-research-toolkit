@@ -1,6 +1,7 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/forward-renderer.h>
 
 #include <glhelper/gl.hpp>
 
@@ -10,6 +11,7 @@ int main(int argc, char** argv)
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Scene-Renderer"));
 
   glrt::scene::Scene scene(app.sdlWindow);
+  glrt::scene::ForwardRenderer renderer(&scene);
 
   while(app.isRunning)
   {
@@ -25,7 +27,7 @@ int main(int argc, char** argv)
 
     glEnable(GL_DEPTH_TEST);
 
-    scene.render();
+    renderer.render();
 
     app.swapWindow();
   }

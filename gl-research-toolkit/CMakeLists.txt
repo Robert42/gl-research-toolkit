@@ -30,6 +30,7 @@ add_library(glrt
   include/glrt/gui/toolbar.h
   include/glrt/profiler.h
   include/glrt/scene/entity.h
+  include/glrt/scene/forward-renderer.h
   include/glrt/scene/material.h
   include/glrt/scene/scene.h
   include/glrt/scene/scene-renderer.h
@@ -43,6 +44,7 @@ add_library(glrt
   src/glrt/gui/toolbar.cpp
   src/glrt/profiler.cpp
   src/glrt/scene/entity.cpp
+  src/glrt/scene/forward-renderer.cpp
   src/glrt/scene/material.cpp
   src/glrt/scene/scene.cpp
   src/glrt/scene/scene-renderer.cpp
