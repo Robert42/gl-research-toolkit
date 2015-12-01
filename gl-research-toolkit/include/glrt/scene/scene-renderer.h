@@ -50,6 +50,7 @@ public:
 
   Pass(Renderer* renderer, MaterialInstance::Type type, gl::ShaderObject&& shaderObject);
   Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock);
+  ~Pass();
 
   Pass(const Pass&) = delete;
   Pass(Pass&&) = delete;
@@ -60,6 +61,8 @@ public:
   void render();
 
 private:
+  typedef glm::mat4 MeshInstanceUniform;
+
   quint64 _cachedStaticStructureCacheIndex = 0;
 
   struct MaterialInstanceRange
@@ -69,15 +72,17 @@ private:
   };
   struct MeshRange
   {
-    StaticMesh* material;
+    StaticMesh* mesh;
     int begin, end;
   };
 
   std::vector<MaterialInstanceRange> materialInstanceRanges;
   std::vector<MeshRange> meshRanges;
-  std::vector<gl::Buffer*> staticMeshInstance_Uniforms;
+  QSharedPointer<gl::Buffer> staticMeshInstance_Uniforms;
 
+  void renderStaticMeshes();
   void updateCache();
+  void clearCache();
 };
 
 

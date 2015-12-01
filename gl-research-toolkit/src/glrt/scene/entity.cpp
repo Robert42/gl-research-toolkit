@@ -35,6 +35,12 @@ QVector<Entity::Component*> Entity::components()
 }
 
 
+glm::mat4 Entity::globalTransformation() const
+{
+  return this->relativeTransform;
+}
+
+
 // ======== Entity::Component ==================================================
 
 
@@ -53,6 +59,12 @@ VisibleComponent::VisibleComponent(Entity& entity)
   : Component(entity),
     movable(false)
 {
+}
+
+
+glm::mat4 VisibleComponent::globalTransformation() const
+{
+  return entity.globalTransformation() * this->relativeTransform;
 }
 
 

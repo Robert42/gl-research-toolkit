@@ -13,7 +13,7 @@ class Entity final : public QObject
 public:
   class Component;
 
-  glm::mat4 relativeTransformransform = glm::mat4(1);
+  glm::mat4 relativeTransform = glm::mat4(1);
   Scene& scene;
 
   Entity(Scene& scene);
@@ -23,6 +23,8 @@ public:
 
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
+
+  glm::mat4 globalTransformation() const;
 
 private:
   QVector<Entity::Component*> _components;
@@ -46,6 +48,8 @@ public:
   bool movable : 1;
 
   VisibleComponent(Entity& entity);
+
+  glm::mat4 globalTransformation() const;
 };
 
 
