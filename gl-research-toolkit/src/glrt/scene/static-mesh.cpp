@@ -68,7 +68,7 @@ bool StaticMesh::isValidFile(const QFileInfo& file, bool parseFile)
 {
   if(!parseFile)
   {
-    return file.suffix().toLower() == "obj" || file.suffix().toLower() == "stl";
+    return file.suffix().toLower() == "obj" || file.suffix().toLower() == "stl" || file.suffix().toLower() == "dae";
   }
 
   Assimp::Importer importer;
@@ -85,6 +85,12 @@ bool StaticMesh::isValidFile(const QFileInfo& file, bool parseFile)
 StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
 {
   Assimp::Importer importer;
+
+  glm::mat3 transform = glm::mat3(1);
+
+  transform = glm::mat3(1, 0, 0,
+                        0, 0, 1,
+                        0,-1, 0);
 
   const aiScene* scene = importer.ReadFile(file.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
@@ -172,9 +178,9 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
     for(quint32 j = 0; j<mesh->mNumVertices; ++j)
     {
       Vertex vertex;
-      vertex.position = toGlm3(mesh->mVertices[j]);
-      vertex.normal = toGlm3(mesh->mNormals[j]);
-      vertex.tangent = toGlm3(mesh->mTangents[j]);
+      vertex.position = transform * toGlm3(mesh->mVertices[j]);
+      vertex.normal = transform * toGlm3(mesh->mNormals[j]);
+      vertex.tangent = transform * toGlm3(mesh->mTangents[j]);
       vertex.uv = toGlm2(mesh->mTextureCoords[0][j]);
 
       vertices.push_back(vertex);
