@@ -17,7 +17,7 @@ MaterialInstance::MaterialInstance(const Type type, gl::Buffer&& buffer)
 }
 
 
-MaterialInstance::Ptr MaterialInstance::fromJson(const QJsonObject& object)
+MaterialInstance::Ptr MaterialInstance::fromJson(const QDir& dir, const QJsonObject& object)
 {
   if(!object.contains("type"))
   {
@@ -26,7 +26,7 @@ MaterialInstance::Ptr MaterialInstance::fromJson(const QJsonObject& object)
   }
 
   if(object["type"].toString() == "PLAIN_COLOR")
-    return PlainColorMaterial::fromJson(object);
+    return PlainColorMaterial::fromJson(dir, object);
 
   qWarning() << "MaterialInstance::fromJson: Unkown type " << object["type"].toString() << "is missing a type";
   return Ptr();
@@ -89,7 +89,7 @@ PlainColorMaterial::PlainColorMaterial(const UniformData& data)
 }
 
 
-MaterialInstance::Ptr PlainColorMaterial::fromJson(const QJsonObject& object)
+MaterialInstance::Ptr PlainColorMaterial::fromJson(const QDir&, const QJsonObject& object)
 {
   UniformData uniformData;
 

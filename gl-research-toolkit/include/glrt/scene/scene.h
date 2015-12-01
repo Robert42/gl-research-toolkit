@@ -39,7 +39,7 @@ public:
   void update(float deltaTime);
 
   bool loadFromFile(const QString& file);
-  bool fromJson(const QJsonObject& json);
+  bool fromJson(const QDir& dir, const QJsonObject& json);
 
   void bindSceneUniformBlock();
 

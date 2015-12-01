@@ -64,10 +64,10 @@ bool Scene::loadFromFile(const QString& filename)
     return false;
   }
 
-  return fromJson(jsonDocument.object());
+  return fromJson(QFileInfo(filename).dir(), jsonDocument.object());
 }
 
-bool Scene::fromJson(const QJsonObject& json)
+bool Scene::fromJson(const QDir& dir, const QJsonObject& json)
 {
   if(!json.contains("name"))
   {
@@ -82,6 +82,9 @@ bool Scene::fromJson(const QJsonObject& json)
 
   this->name = json["name"].toString();
   this->file = json["file"].toString();
+
+  if(!QFileInfo(this->file).exists())
+    this->file = dir.filePath(this->file);
 
   QHash<QString, MaterialInstance::Ptr> materials;
 
@@ -101,7 +104,7 @@ bool Scene::fromJson(const QJsonObject& json)
         return false;
       }
 
-      MaterialInstance::Ptr material = MaterialInstance::fromJson(value.toObject());
+      MaterialInstance::Ptr material = MaterialInstance::fromJson(dir, value.toObject());
 
       if(material.isNull())
         return false;

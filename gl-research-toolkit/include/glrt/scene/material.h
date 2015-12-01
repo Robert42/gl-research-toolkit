@@ -28,7 +28,7 @@ public:
   QString name;
   gl::Buffer uniformBuffer;
 
-  static MaterialInstance::Ptr fromJson(const QJsonObject& object);
+  static MaterialInstance::Ptr fromJson(const QDir& dir, const QJsonObject& object);
 
 protected:
   bool parseCommonJson(const QJsonObject& object, const QString& expectedType);
@@ -54,7 +54,7 @@ public:
 
   PlainColorMaterial(const UniformData& data);
 
-  static MaterialInstance::Ptr fromJson(const QJsonObject& object);
+  static MaterialInstance::Ptr fromJson(const QDir& dir, const QJsonObject& object);
 };
 
 
