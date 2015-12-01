@@ -29,9 +29,10 @@ add_library(glrt
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
   include/glrt/profiler.h
-  include/glrt/scene/scene.h
   include/glrt/scene/entity.h
   include/glrt/scene/material.h
+  include/glrt/scene/scene.h
+  include/glrt/scene/scene-renderer.h
   include/glrt/scene/static-mesh.h
   include/glrt/scene/static-mesh-component.h
   include/glrt/system.h
@@ -41,9 +42,10 @@ add_library(glrt
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
   src/glrt/profiler.cpp
-  src/glrt/scene/scene.cpp
   src/glrt/scene/entity.cpp
   src/glrt/scene/material.cpp
+  src/glrt/scene/scene.cpp
+  src/glrt/scene/scene-renderer.cpp
   src/glrt/scene/static-mesh.cpp
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/system.cpp
