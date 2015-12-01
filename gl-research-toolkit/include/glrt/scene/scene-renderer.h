@@ -6,9 +6,12 @@
 namespace glrt {
 namespace scene {
 
-class Renderer final
+class Renderer
 {
 public:
+  class Pass;
+  class Pass;
+
   Scene& scene;
 
   Renderer(const Renderer&) = delete;
@@ -17,14 +20,28 @@ public:
   Renderer& operator=(Renderer&&) = delete;
 
   Renderer(Scene& scene);
-  ~Renderer();
+  virtual ~Renderer();
 
-  void cacheScene();
-  void renderScene();
+
+protected:
+  void updateCache();
+
 
 private:
-  quint64 _cachedStaticStructureCacheIndex = -1;
+  quint64 _cachedStaticStructureCacheIndex = 0;
 };
+
+
+class Renderer::Pass final
+{
+public:
+  gl::ShaderObject shaderObject;
+
+  Pass(gl::ShaderObject&& shaderObject);
+  Pass(const QString& materialName, const QStringList& preprocessorMacros);
+};
+
+
 
 } // namespace scene
 } // namespace glrt

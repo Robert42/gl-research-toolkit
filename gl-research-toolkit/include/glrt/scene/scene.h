@@ -42,6 +42,9 @@ public:
   void render();
 
 private:
+  friend class Renderer;
+  quint64 cachedStaticStructureCacheIndex;
+
   friend class Entity;
   friend class StaticMeshComponent;
 
