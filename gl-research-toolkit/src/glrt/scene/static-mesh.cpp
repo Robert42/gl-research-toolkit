@@ -167,6 +167,8 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
     if(mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
       continue;
 
+    index_type index_offset = vertices.size();
+
     for(quint32 j = 0; j<mesh->mNumVertices; ++j)
     {
       Vertex vertex;
@@ -177,8 +179,6 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
 
       vertices.push_back(vertex);
     }
-
-    index_type index_offset = indices.size();
 
     for(quint32 j = 0; j<mesh->mNumFaces; ++j)
     {
