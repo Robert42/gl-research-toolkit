@@ -32,6 +32,10 @@ MaterialInstance::Ptr MaterialInstance::fromJson(const QDir& dir, const QJsonObj
   return Ptr();
 }
 
+MaterialInstance::Ptr MaterialInstance::createDummyMaterial()
+{
+  return Ptr(new PlainColorMaterial(PlainColorMaterial::UniformData()));
+}
 
 bool MaterialInstance::parseCommonJson(const QJsonObject& object, const QString& expectedType)
 {

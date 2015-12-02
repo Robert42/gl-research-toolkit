@@ -29,6 +29,7 @@ public:
   gl::Buffer uniformBuffer;
 
   static MaterialInstance::Ptr fromJson(const QDir& dir, const QJsonObject& object);
+  static MaterialInstance::Ptr createDummyMaterial();
 
 protected:
   bool parseCommonJson(const QJsonObject& object, const QString& expectedType);
