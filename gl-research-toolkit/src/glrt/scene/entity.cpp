@@ -55,9 +55,9 @@ Entity::Component::Component(Entity& entity)
 // ======== Entity::Component ==================================================
 
 
-VisibleComponent::VisibleComponent(Entity& entity)
+VisibleComponent::VisibleComponent(Entity& entity, bool movable)
   : Component(entity),
-    movable(false)
+    movable(movable)
 {
 }
 

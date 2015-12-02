@@ -45,9 +45,9 @@ class VisibleComponent : public Entity::Component
 {
 public:
   glm::mat4 relativeTransform = glm::mat4(1);
-  bool movable : 1;
+  const bool movable : 1;
 
-  VisibleComponent(Entity& entity);
+  VisibleComponent(Entity& entity, bool movable);
 
   glm::mat4 globalTransformation() const;
 };

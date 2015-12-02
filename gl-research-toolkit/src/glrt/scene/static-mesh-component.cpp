@@ -5,8 +5,8 @@ namespace glrt {
 namespace scene {
 
 
-StaticMeshComponent::StaticMeshComponent(Entity& entity, const StaticMesh::Ptr& staticMesh, const MaterialInstance::Ptr& material)
-  : VisibleComponent(entity),
+StaticMeshComponent::StaticMeshComponent(Entity& entity, bool movable, const StaticMesh::Ptr& staticMesh, const MaterialInstance::Ptr& material)
+  : VisibleComponent(entity, movable),
     staticMesh(staticMesh),
     materialInstance(material)
 {
