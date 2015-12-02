@@ -115,28 +115,33 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
   if(!scene->HasMeshes())
     throw GLRT_EXCEPTION(QString("Couldn't find any mesh in %0").arg(file));
 
+  return loadMeshFromAssimp(scene->mMeshes, scene->mNumMeshes, transform, QString("\n(in file <%0>)").arg(file), indexed);
+}
+
+StaticMesh StaticMesh::loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
+{
   quint32 numVertices = 0;
   quint32 numFaces = 0;
 
-  for(quint32 i=0; i<scene->mNumMeshes; ++i)
+  for(quint32 i=0; i<nMeshes; ++i)
   {
-    aiMesh* mesh = scene->mMeshes[i];
+    const aiMesh* mesh = meshes[i];
 
     // aiProcess_SortByPType guarants to contain only one type, so we can expect it to contain only one type-bit
     if(mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
       continue;
 
     if(!mesh->HasFaces())
-      throw GLRT_EXCEPTION(QString("No Faces").arg(file));
+      throw GLRT_EXCEPTION(QString("No Faces%0").arg(context));
 
     if(!mesh->HasNormals())
-      throw GLRT_EXCEPTION(QString("No Normals").arg(file));
+      throw GLRT_EXCEPTION(QString("No Normals%0").arg(context));
 
     if(!mesh->HasPositions())
-      throw GLRT_EXCEPTION(QString("No Positions").arg(file));
+      throw GLRT_EXCEPTION(QString("No Positions%0").arg(context));
 
     if(!mesh->HasTangentsAndBitangents())
-      throw GLRT_EXCEPTION(QString("No Tangents").arg(file));
+      throw GLRT_EXCEPTION(QString("No Tangents%0").arg(context));
 
     // Quote http://learnopengl.com/?_escaped_fragment_=Advanced-Lighting/Normal-Mapping:
     // > Also important to realize is that aiProcess_CalcTangentSpace doesn't always work.
@@ -145,19 +150,19 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
     // > the texture coordinates; this gives incorrect results when the mirroring is not taken
     // > into account (which Assimp doesn't).
     if(!mesh->HasTextureCoords(0))
-      throw GLRT_EXCEPTION(QString("No Texture Coordinates. HINT: You probably forgot to create a uv-map").arg(file));
+      throw GLRT_EXCEPTION(QString("No Texture Coordinates. HINT: You probably forgot to create a uv-map%0").arg(context));
 
     numVertices += mesh->mNumVertices;
     numFaces += mesh->mNumFaces;
   }
 
   if(numVertices == 0)
-    throw GLRT_EXCEPTION(QString("Couldn't find any vertices in %0").arg(file));
+    throw GLRT_EXCEPTION(QString("Couldn't find any vertices%0").arg(context));
   if(numFaces == 0)
-    throw GLRT_EXCEPTION(QString("Couldn't find any faces in %0").arg(file));
+    throw GLRT_EXCEPTION(QString("Couldn't find any faces%0").arg(context));
 
   if(numVertices > std::numeric_limits<index_type>::max())
-    throw GLRT_EXCEPTION(QString("Too many vertices").arg(file));
+    throw GLRT_EXCEPTION(QString("Too many vertices%0").arg(context));
 
   std::vector<Vertex> vertices;
   std::vector<index_type> indices;
@@ -165,9 +170,9 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
   vertices.reserve(numVertices);
   indices.reserve(numFaces*3);
 
-  for(quint32 i=0; i<scene->mNumMeshes; ++i)
+  for(quint32 i=0; i<nMeshes; ++i)
   {
-    aiMesh* mesh = scene->mMeshes[i];
+    const aiMesh* mesh = meshes[i];
 
     // aiProcess_SortByPType guarants to contain only one type, so we can expect it to contain only one type-bit
     if(mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
@@ -191,7 +196,7 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
       const aiFace& face = mesh->mFaces[j];
 
       if(face.mNumIndices != 3)
-        throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(file));
+        throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(context));
 
       indices.push_back(face.mIndices[0]+index_offset);
       indices.push_back(face.mIndices[1]+index_offset);

@@ -6,6 +6,8 @@
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
 
+struct aiMesh;
+
 namespace glrt {
 namespace scene {
 
@@ -28,6 +30,7 @@ public:
 
   static bool isValidFile(const QFileInfo& file, bool parseFile);
   static StaticMesh loadMeshFromFile(const QString& file, bool indexed=true);
+  static StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
   static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed = true);
   static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
 
