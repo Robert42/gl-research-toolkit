@@ -112,7 +112,17 @@ bool Scene::fromJson(const QDir& dir, const QJsonObject& json)
       materials[material->name] = material;
     }
   }
-  return true;
+
+  return loadFromColladaFile(this->file, materials, MaterialInstance::createDummyMaterial());
+}
+
+
+bool Scene::loadFromColladaFile(const QString& file,
+                                const QHash<QString, MaterialInstance::Ptr>& materials,
+                                const MaterialInstance::Ptr& fallbackMaterial)
+{
+  qWarning() << "NOT IMPLEMENTED"; // TODO
+  return false;
 }
 
 

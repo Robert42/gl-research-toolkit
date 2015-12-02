@@ -57,6 +57,11 @@ private:
 
   void AddEntity(Entity* entity);
   void RemoveEntity(Entity* entity);
+
+private:
+  bool loadFromColladaFile(const QString& file,
+                           const QHash<QString, MaterialInstance::Ptr>& materials,
+                           const MaterialInstance::Ptr& fallbackMaterial);
 };
 
 
