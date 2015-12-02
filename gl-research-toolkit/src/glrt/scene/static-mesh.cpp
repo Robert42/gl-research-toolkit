@@ -86,11 +86,9 @@ StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
 {
   Assimp::Importer importer;
 
-  glm::mat3 transform = glm::mat3(1);
-
-  transform = glm::mat3(1, 0, 0,
-                        0, 0, 1,
-                        0,-1, 0);
+  glm::mat3 transform = glm::mat3(1, 0, 0,
+                                  0, 0, 1,
+                                  0,-1, 0);
 
   const aiScene* scene = importer.ReadFile(file.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer

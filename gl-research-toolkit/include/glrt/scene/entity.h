@@ -13,6 +13,7 @@ class Entity final : public QObject
 public:
   class Component;
 
+  QString name;
   glm::mat4 relativeTransform = glm::mat4(1);
   Scene& scene;
 

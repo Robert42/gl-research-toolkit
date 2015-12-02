@@ -13,6 +13,9 @@
 
 #include <QJsonObject>
 
+struct aiNode;
+struct aiScene;
+
 namespace glrt {
 namespace scene {
 
@@ -38,6 +41,7 @@ public:
   bool handleEvents(const SDL_Event& event);
   void update(float deltaTime);
 
+  void clear();
   bool loadFromFile(const QString& file);
   bool fromJson(const QDir& dir, const QJsonObject& json);
 
@@ -59,9 +63,18 @@ private:
   void RemoveEntity(Entity* entity);
 
 private:
+  struct SceneAssets
+  {
+    const aiScene* scene;
+    QHash<QString, MaterialInstance::Ptr> materials;
+    QHash<QString, StaticMesh::Ptr> meshes;
+    QHash<int, MaterialInstance::Ptr> materialsForIndex;
+    QHash<int, StaticMesh::Ptr> meshesForIndex;
+    MaterialInstance::Ptr fallbackMaterial;
+  };
   bool loadFromColladaFile(const QString& file,
-                           const QHash<QString, MaterialInstance::Ptr>& materials,
-                           const MaterialInstance::Ptr& fallbackMaterial);
+                           SceneAssets assets);
+  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform);
 };
 
 
