@@ -49,6 +49,7 @@ public:
   {
     glm::vec3 diffuse = glm::vec3(1);
     float roughness = 0.8f;
+    glm::vec3 emission = glm::vec3(0);
     float metallicness = 0.f;
   };
 

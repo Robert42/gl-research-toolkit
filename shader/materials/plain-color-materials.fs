@@ -9,6 +9,7 @@ layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK) uniform MaterialInstance
 {
   vec3 diffuse;
   float roughness;
+  vec3 emission;
   float metallicness;
 }material_instance;
 
@@ -17,6 +18,7 @@ void main()
   MaterialOutput material_output;
   
   material_output.color = vec4(material_instance.diffuse, 1);
+  material_output.emission = vec3(material_instance.emission);
   material_output.roughness = material_instance.roughness;
   material_output.position = fragment.position;
   material_output.metallicness = material_instance.metallicness;
