@@ -140,9 +140,6 @@ bool Scene::loadFromColladaFile(const QString& file,
   const aiScene* scene = importer.ReadFile(file.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
                                            aiProcess_ValidateDataStructure |
-                                           aiProcess_RemoveRedundantMaterials |
-                                           aiProcess_OptimizeMeshes |
-                                           aiProcess_OptimizeGraph |
                                            aiProcess_ImproveCacheLocality |
                                            aiProcess_FindDegenerates  |
                                            aiProcess_FindInvalidData  |
