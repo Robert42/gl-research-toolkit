@@ -77,9 +77,6 @@ Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QStr
 
     gl::ShaderObject::ShaderType type = shaderTypes[extension];
 
-    // FIXME: THATS not the way it works: the proprocessor block must be includeded with an #include<>
-    if(!preprocessor_definitions.empty() && usedTypes.find(type)!=usedTypes.end())
-      this->shaderObject.AddShaderFromSource(type, preprocessor_definitions, "preprocessor-block");
     this->shaderObject.AddShaderFromFile(type, file.absoluteFilePath().toStdString());
 
     usedTypes.insert(type);
