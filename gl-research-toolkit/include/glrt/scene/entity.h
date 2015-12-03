@@ -48,7 +48,7 @@ public:
   glm::mat4 relativeTransform = glm::mat4(1);
   const bool movable : 1;
 
-  VisibleComponent(Entity& entity, bool movable, const glm::mat4& relativeTransform);
+  VisibleComponent(Entity& entity, bool movable, const glm::mat4& relativeTransform=glm::mat4(1));
 
   glm::mat4 globalTransformation() const;
 };

@@ -201,6 +201,8 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
   {
     Entity* entity = new Entity(*this);
     entity->name = node->mName.C_Str();
+    entity->relativeTransform = globalTransform;
+    std::cout << glm::to_string(globalTransform) << std ::endl;;
 
     for(quint32 i=0; i<node->mNumMeshes; ++i)
     {
@@ -219,7 +221,7 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
       else
         material = assets.fallbackMaterial;
 
-      new StaticMeshComponent(*entity, false, mesh, material, globalTransform);
+      new StaticMeshComponent(*entity, false, mesh, material);
     }
   }
 
