@@ -187,7 +187,7 @@ bool Scene::loadFromColladaFile(const QString& file,
 
 inline glm::mat4 toGlmMat4(const aiMatrix4x4& m)
 {
-  return reinterpret_cast<const glm::mat4&>(m);
+  return glm::transpose(reinterpret_cast<const glm::mat4&>(m));
 }
 
 
@@ -195,6 +195,8 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
                                    aiNode* node,
                                    glm::mat4 globalTransform)
 {
+  globalTransform = globalTransform * toGlmMat4(node->mTransformation);
+
   if(node->mNumMeshes > 0)
   {
     Entity* entity = new Entity(*this);
@@ -217,15 +219,13 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
       else
         material = assets.fallbackMaterial;
 
-      new StaticMeshComponent(*entity, false, mesh, material);
+      new StaticMeshComponent(*entity, false, mesh, material, globalTransform);
     }
   }
 
   for(quint32 i=0; i<node->mNumChildren; ++i)
   {
-    glm::mat4 t = globalTransform * toGlmMat4(node->mTransformation);
-
-    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], t))
+    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], globalTransform))
       return false;
   }
 

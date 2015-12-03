@@ -55,9 +55,10 @@ Entity::Component::Component(Entity& entity)
 // ======== Entity::Component ==================================================
 
 
-VisibleComponent::VisibleComponent(Entity& entity, bool movable)
+VisibleComponent::VisibleComponent(Entity& entity, bool movable, const glm::mat4& relativeTransform)
   : Component(entity),
-    movable(movable)
+    movable(movable),
+    relativeTransform(relativeTransform)
 {
 }
 

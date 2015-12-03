@@ -15,7 +15,7 @@ public:
   const StaticMesh::Ptr staticMesh;
   const MaterialInstance::Ptr materialInstance;
 
-  StaticMeshComponent(Entity& entity, bool movable, const StaticMesh::Ptr& staticMesh, const MaterialInstance::Ptr& materialInstance);
+  StaticMeshComponent(Entity& entity, bool movable, const StaticMesh::Ptr& staticMesh, const MaterialInstance::Ptr& materialInstance, const glm::mat4& relativeTransform);
   ~StaticMeshComponent();
 };
 
