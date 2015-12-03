@@ -37,6 +37,7 @@ add_library(glrt
   include/glrt/scene/static-mesh.h
   include/glrt/scene/static-mesh-component.h
   include/glrt/system.h
+  include/glrt/temp-shader-file.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
   src/glrt/dependencies.cpp
@@ -51,6 +52,7 @@ add_library(glrt
   src/glrt/scene/static-mesh.cpp
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/system.cpp
+  src/glrt/temp-shader-file.cpp
 )
 
 target_include_directories(
@@ -73,6 +75,7 @@ target_compile_definitions(
   PUBLIC
   GLRT_ASSET_DIR=\"${GLRT_ASSET_DIR}\"
   GLRT_SHADER_DIR=\"${GLRT_SHADER_DIR}\"
+  GLRT_TEMP_SHADER_DIR=\"${GLRT_TEMP_SHADER_DIR}\"
   GLM_FORCE_RADIANS
   GLM_SWIZZLE
 )

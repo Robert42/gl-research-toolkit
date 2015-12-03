@@ -1,4 +1,6 @@
 #include <glrt/system.h>
+#include <glrt/temp-shader-file.h>
+
 
 /*! \namespace glrt
 \ingroup glrt
@@ -26,6 +28,8 @@ System::System(int argc, char** argv, const Settings& settings)
   initGLEW(settings);
 
   verifyNVidiaFeatures();
+
+  TempShaderFile::init();
 }
 
 
