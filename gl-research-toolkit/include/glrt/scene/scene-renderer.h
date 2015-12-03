@@ -79,6 +79,7 @@ private:
   std::vector<MaterialInstanceRange> materialInstanceRanges;
   std::vector<MeshRange> meshRanges;
   QSharedPointer<gl::Buffer> staticMeshInstance_Uniforms;
+  GLint meshInstanceUniformOffset = 0;
 
   void renderStaticMeshes();
   void updateCache();

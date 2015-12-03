@@ -169,7 +169,7 @@ void Renderer::Pass::renderStaticMeshes()
       mesh->bind(renderer.staticMeshVertexArrayObject);
     }
 
-    buffer->BindUniformBuffer(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, i, sizeof(MeshInstanceUniform));
+    buffer->BindUniformBuffer(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, i*meshInstanceUniformOffset, sizeof(MeshInstanceUniform));
 
     mesh->draw();
   }
@@ -185,6 +185,10 @@ inline void Renderer::Pass::updateCache()
   if(_cachedStaticStructureCacheIndex == scene._cachedStaticStructureCacheIndex)
     return;
 
+  GLint uniformBufferAlignment = 0;
+  glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBufferAlignment);
+  meshInstanceUniformOffset = uniformBufferAlignment * ((uniformBufferAlignment-1+sizeof(MeshInstanceUniform)) / uniformBufferAlignment); // TODO refactor and put into one class?
+
   QVector<StaticMeshComponent*> allStaticMeshComponents = scene.allComponentsWithType<StaticMeshComponent>(allowOnly(this->type, false));
 
   qSort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
@@ -193,11 +197,11 @@ inline void Renderer::Pass::updateCache()
 
   if(!allStaticMeshComponents.isEmpty())
   {
-    std::vector<MeshInstanceUniform> transformations;
+    std::vector<quint8> transformations;
 
     materialInstanceRanges.reserve(allStaticMeshComponents.size());
     meshRanges.reserve(allStaticMeshComponents.size());
-    transformations.reserve(allStaticMeshComponents.size());
+    transformations.resize(allStaticMeshComponents.size()*meshInstanceUniformOffset);
 
     materialInstanceRanges.push_back(MaterialInstanceRange{allStaticMeshComponents[0]->materialInstance.data(), 0, 1});
     meshRanges.push_back(MeshRange(MeshRange{allStaticMeshComponents[0]->staticMesh.data(), 0, 1}));
@@ -209,7 +213,7 @@ inline void Renderer::Pass::updateCache()
     {
       StaticMeshComponent* staticMeshComponent = allStaticMeshComponents[i];
 
-      transformations.push_back(staticMeshComponent->globalTransformation());
+      reinterpret_cast<MeshInstanceUniform&>(transformations[i*meshInstanceUniformOffset]) = staticMeshComponent->globalTransformation(); // TODO refactor and put into one class?
 
       if(staticMeshComponent->materialInstance.data() != lastMaterialInstanceRange->materialInstance)
       {
@@ -227,7 +231,7 @@ inline void Renderer::Pass::updateCache()
       lastMeshRange->end = i+1;
     }
 
-    staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size()*sizeof(MeshInstanceUniform), gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
+    staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size()*meshInstanceUniformOffset, gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
   }
 
   _cachedStaticStructureCacheIndex = scene._cachedStaticStructureCacheIndex;
