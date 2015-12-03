@@ -23,7 +23,8 @@ int main(int argc, char** argv)
       scene.handleEvents(event);
     }
 
-    app.update();
+    const float deltaTime = app.update();
+    scene.update(deltaTime);
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
