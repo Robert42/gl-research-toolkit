@@ -135,7 +135,19 @@ bool Scene::loadFromColladaFile(const QString& file,
   const bool indexed = true;
   Assimp::Importer importer;
 
-  glm::mat3 transform = glm::mat3(1);
+  glm::mat3 meshRotation = glm::mat3(1, 0, 0,
+                                     0, 0, 1,
+                                     0,-1, 0);
+
+  glm::mat4 globalTransform = glm::mat4(1, 0, 0, 0,
+                                        0, 0, 1, 0,
+                                        0,-1, 0, 0,
+                                        0, 0, 0, 1);
+
+  glm::mat4 lokalTransform = glm::mat4(1, 0, 0, 0,
+                                       0, 0,-1, 0,
+                                       0, 1, 0, 0,
+                                       0, 0, 0, 1);
 
   const aiScene* scene = importer.ReadFile(file.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
@@ -172,13 +184,13 @@ bool Scene::loadFromColladaFile(const QString& file,
     aiMesh* mesh = scene->mMeshes[i];
     QString name = mesh->mName.C_Str();
 
-    StaticMesh::Ptr staticMesh(new StaticMesh(std::move(StaticMesh::loadMeshFromAssimp(&mesh, 1, transform, QString("\n in mesh %1 (%2) of the scene file <%0>").arg(file).arg(i).arg(name), indexed))));
+    StaticMesh::Ptr staticMesh(new StaticMesh(std::move(StaticMesh::loadMeshFromAssimp(&mesh, 1, meshRotation, QString("\n in mesh %1 (%2) of the scene file <%0>").arg(file).arg(i).arg(name), indexed))));
 
     assets.meshes[name] = staticMesh;
     assets.meshesForIndex[i] = staticMesh;
   }
 
-  return loadEntitiesFromAssimp(assets, scene->mRootNode, glm::mat4(1));
+  return loadEntitiesFromAssimp(assets, scene->mRootNode, globalTransform, lokalTransform);
 }
 
 
@@ -190,7 +202,8 @@ inline glm::mat4 toGlmMat4(const aiMatrix4x4& m)
 
 bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
                                    aiNode* node,
-                                   glm::mat4 globalTransform)
+                                   glm::mat4 globalTransform,
+                                   glm::mat4 localTransform)
 {
   globalTransform = globalTransform * toGlmMat4(node->mTransformation);
 
@@ -198,8 +211,7 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
   {
     Entity* entity = new Entity(*this);
     entity->name = node->mName.C_Str();
-    entity->relativeTransform = globalTransform;
-    std::cout << glm::to_string(globalTransform) << std ::endl;;
+    entity->relativeTransform = globalTransform*localTransform;
 
     for(quint32 i=0; i<node->mNumMeshes; ++i)
     {
@@ -224,7 +236,7 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
 
   for(quint32 i=0; i<node->mNumChildren; ++i)
   {
-    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], globalTransform))
+    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], globalTransform, localTransform))
       return false;
   }
 

@@ -74,7 +74,7 @@ private:
   };
   bool loadFromColladaFile(const QString& file,
                            SceneAssets assets);
-  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform);
+  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform, glm::mat4 localTransform);
 };
 
 
