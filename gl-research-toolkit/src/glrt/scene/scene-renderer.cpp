@@ -129,6 +129,8 @@ void Renderer::Pass::renderStaticMeshes()
   gl::Buffer* buffer = staticMeshInstance_Uniforms.data();
   StaticMesh* mesh = meshInstanceRange->mesh;
 
+  materialInstanceRange->materialInstance->uniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK);
+
   for(int i=0; i<N; ++i)
   {
     if(materialInstanceRange->end == i)
