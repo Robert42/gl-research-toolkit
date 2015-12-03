@@ -140,6 +140,8 @@ void Renderer::Pass::renderStaticMeshes()
   if(materialInstanceRanges.empty())
     return;
 
+  // FIXME: Don't forget to activate backface-culling
+
   const int N = materialInstanceRanges[materialInstanceRanges.size()-1].end;
 
   this->shaderObject.Activate();
