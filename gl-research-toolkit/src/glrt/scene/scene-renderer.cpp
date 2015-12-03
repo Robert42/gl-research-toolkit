@@ -3,6 +3,8 @@
 
 #include <glrt/glsl/layout-constants.h>
 
+#include <set>
+
 namespace glrt {
 namespace scene {
 
@@ -57,6 +59,8 @@ Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QStr
   shaderTypes[".vs"] = gl::ShaderObject::ShaderType::VERTEX;
   shaderTypes[".fs"] = gl::ShaderObject::ShaderType::FRAGMENT;
 
+  std::set<gl::ShaderObject::ShaderType> usedTypes;
+
   for(const QString& extension : shaderTypes.keys())
   {
     QFileInfo file = shaderDir.filePath(materialName + extension);
@@ -66,10 +70,18 @@ Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QStr
 
     gl::ShaderObject::ShaderType type = shaderTypes[extension];
 
-    if(!preprocessor_definitions.empty())
+    if(!preprocessor_definitions.empty() && usedTypes.find(type)!=usedTypes.end())
       this->shaderObject.AddShaderFromSource(type, preprocessor_definitions, "preprocessor-block");
     this->shaderObject.AddShaderFromFile(type, file.absoluteFilePath().toStdString());
+
+    usedTypes.insert(type);
   }
+
+  if(usedTypes.empty())
+    throw GLRT_EXCEPTION(QString("No shader files found for %0").arg(materialName));
+
+
+  this->shaderObject.CreateProgram();
 }
 
 Renderer::Pass::~Pass()
@@ -121,6 +133,8 @@ void Renderer::Pass::renderStaticMeshes()
     return;
 
   const int N = materialInstanceRanges[materialInstanceRanges.size()-1].end;
+
+  this->shaderObject.Activate();
 
   renderer.staticMeshVertexArrayObject.Bind();
 
