@@ -38,6 +38,7 @@ add_library(glrt
   include/glrt/scene/static-mesh-component.h
   include/glrt/system.h
   include/glrt/temp-shader-file.h
+  include/glrt/toolkit/aligned-vector.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
   src/glrt/dependencies.cpp

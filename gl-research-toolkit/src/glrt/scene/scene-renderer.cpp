@@ -3,6 +3,7 @@
 
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/temp-shader-file.h>
+#include <glrt/toolkit/aligned-vector.h>
 
 #include <set>
 
@@ -185,9 +186,8 @@ inline void Renderer::Pass::updateCache()
   if(_cachedStaticStructureCacheIndex == scene._cachedStaticStructureCacheIndex)
     return;
 
-  GLint uniformBufferAlignment = 0;
-  glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBufferAlignment);
-  meshInstanceUniformOffset = uniformBufferAlignment * ((uniformBufferAlignment-1+sizeof(MeshInstanceUniform)) / uniformBufferAlignment); // TODO refactor and put into one class?
+  aligned_vector<MeshInstanceUniform> transformations(aligned_vector<MeshInstanceUniform>::Alignment::UniformBufferOffsetAlignment);
+  meshInstanceUniformOffset = transformations.alignment();
 
   QVector<StaticMeshComponent*> allStaticMeshComponents = scene.allComponentsWithType<StaticMeshComponent>(allowOnly(this->type, false));
 
@@ -197,11 +197,9 @@ inline void Renderer::Pass::updateCache()
 
   if(!allStaticMeshComponents.isEmpty())
   {
-    std::vector<quint8> transformations;
-
     materialInstanceRanges.reserve(allStaticMeshComponents.size());
     meshRanges.reserve(allStaticMeshComponents.size());
-    transformations.resize(allStaticMeshComponents.size()*meshInstanceUniformOffset);
+    transformations.reserve(allStaticMeshComponents.size());
 
     materialInstanceRanges.push_back(MaterialInstanceRange{allStaticMeshComponents[0]->materialInstance.data(), 0, 1});
     meshRanges.push_back(MeshRange(MeshRange{allStaticMeshComponents[0]->staticMesh.data(), 0, 1}));
@@ -213,7 +211,7 @@ inline void Renderer::Pass::updateCache()
     {
       StaticMeshComponent* staticMeshComponent = allStaticMeshComponents[i];
 
-      reinterpret_cast<MeshInstanceUniform&>(transformations[i*meshInstanceUniformOffset]) = staticMeshComponent->globalTransformation(); // TODO refactor and put into one class?
+      transformations.push_back(staticMeshComponent->globalTransformation());
 
       if(staticMeshComponent->materialInstance.data() != lastMaterialInstanceRange->materialInstance)
       {
@@ -231,7 +229,7 @@ inline void Renderer::Pass::updateCache()
       lastMeshRange->end = i+1;
     }
 
-    staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size()*meshInstanceUniformOffset, gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
+    staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
   }
 
   _cachedStaticStructureCacheIndex = scene._cachedStaticStructureCacheIndex;
