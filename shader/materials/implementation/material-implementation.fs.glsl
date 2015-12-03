@@ -11,7 +11,18 @@ struct MaterialOutput
 
 out vec4 color;
 
+#ifdef FORWARD_RENDERER
+#include "forward-lighting.fs.glsl"
+#endif
+
 void apply_material(in MaterialOutput material_output)
 {
-  color = vec4(material_output.emission, 0) + material_output.color;
+  float alpha = material_output.color.a;
+  
+  vec3 emission = material_output.emission;
+  vec3 diffuse_color = material_output.color.rgb;
+  
+  vec3 diffuse_lighting = direct_diffuse_light(material_output.position, material_output.normal);
+  
+  color = vec4(emission + diffuse_color * diffuse_lighting, alpha);
 }
