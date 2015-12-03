@@ -6,7 +6,7 @@ struct MaterialOutput
   vec3 emission;
   float roughness;
   vec3 position;
-  float metallicness;
+  float metallic;
   vec3 normal;
   float occlusion;
 };
