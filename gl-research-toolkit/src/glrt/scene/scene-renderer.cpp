@@ -2,6 +2,7 @@
 #include <glrt/scene/static-mesh-component.h>
 
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/temp-shader-file.h>
 
 #include <set>
 
@@ -51,6 +52,10 @@ Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, gl::Shader
 Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock)
   : Pass(renderer, type, std::move(gl::ShaderObject(materialName.toStdString())))
 {
+  TempShaderFile tempShaderFile;
+
+  tempShaderFile.addPreprocessorBlock(preprocessorBlock);
+
   std::string preprocessor_definitions = preprocessorBlock.join('\n').toStdString();
   if(!preprocessor_definitions.empty())
     preprocessor_definitions += "\n";

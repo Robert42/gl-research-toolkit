@@ -11,11 +11,15 @@ public:
   TempShaderFile();
   ~TempShaderFile();
 
+  void addPreprocessorBlock(const QStringList& preprocessorBlock);
+
   static void init();
 
 private:
   static void clearTempDir();
   static QDir tempDir();
+
+  static int instanceCounter;
 };
 
 } // namespace glrt

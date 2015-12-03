@@ -1,3 +1,5 @@
+#include <preprocessor-block.h>
+
 struct MaterialOutput
 {
   vec4 color;
