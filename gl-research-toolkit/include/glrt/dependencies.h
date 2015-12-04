@@ -31,6 +31,13 @@ public:
   Exception(const char* file, int line, const char* function, const QString& message);
 };
 
+template<typename T, int N=1>
+struct padding final
+{
+private:
+  quint8 _[sizeof(T)*N];
+};
+
 } // namespace glrt
 
 #define GLRT_EXCEPTION(message) Exception(__FILE__, __LINE__, __FUNCTION__, message)
