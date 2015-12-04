@@ -6,7 +6,7 @@
 namespace glrt {
 namespace scene {
 
-CameraParameter CameraParameter::loadFromAssimp(const aiCamera& assimpCamera)
+CameraParameter CameraParameter::fromAssimp(const aiCamera& assimpCamera)
 {
   CameraParameter camera;
 

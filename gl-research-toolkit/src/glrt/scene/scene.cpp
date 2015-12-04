@@ -21,7 +21,7 @@ namespace scene {
 
 
 Scene::Scene(SDL_Window* sdlWindow)
-  : camera(sdlWindow),
+  : debugCamera(sdlWindow),
     _cachedStaticStructureCacheIndex(0)
 {
 }
@@ -43,13 +43,13 @@ void Scene::clear()
 
 bool Scene::handleEvents(const SDL_Event& event)
 {
-  return camera.handleEvents(event);
+  return debugCamera.handleEvents(event);
 }
 
 
 void Scene::update(float deltaTime)
 {
-  camera.update(deltaTime);
+  debugCamera.update(deltaTime);
 }
 
 
@@ -166,6 +166,9 @@ bool Scene::loadFromColladaFile(const QString& file,
 
   assets.scene = scene;
 
+  if(!scene)
+    throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
+
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
   {
     aiString name;
@@ -177,8 +180,6 @@ bool Scene::loadFromColladaFile(const QString& file,
     }
   }
 
-  if(!scene)
-    throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {

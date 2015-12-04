@@ -35,7 +35,7 @@ void Renderer::render()
 void Renderer::updateSceneUniform()
 {
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneUniformData.view_projection_matrix = scene.camera.viewProjectionMatrix;
+  sceneUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
   sceneUniformBuffer.Unmap();
 }
 

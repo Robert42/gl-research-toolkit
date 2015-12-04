@@ -28,7 +28,7 @@ class Scene final : public QObject
 
 public:
   QString name, file;
-  DebugCamera camera;
+  DebugCamera debugCamera;
 
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;

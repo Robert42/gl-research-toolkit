@@ -25,7 +25,7 @@ public:
   glm::vec3 position = glm::vec3(0);
   padding<float> _padding4;
 
-  static CameraParameter loadFromAssimp(const aiCamera& camera);
+  static CameraParameter fromAssimp(const aiCamera& camera);
   static CameraParameter defaultDebugCamera();
 
   glm::mat4 inverseViewMatrix() const;
