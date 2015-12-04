@@ -39,6 +39,7 @@ add_library(glrt
   include/glrt/system.h
   include/glrt/temp-shader-file.h
   include/glrt/toolkit/aligned-vector.h
+  include/glrt/toolkit/assimp-glm-converter.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
   src/glrt/dependencies.cpp

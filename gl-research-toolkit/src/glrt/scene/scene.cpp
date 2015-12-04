@@ -1,5 +1,6 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/static-mesh-component.h>
+#include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -194,18 +195,12 @@ bool Scene::loadFromColladaFile(const QString& file,
 }
 
 
-inline glm::mat4 toGlmMat4(const aiMatrix4x4& m)
-{
-  return glm::transpose(reinterpret_cast<const glm::mat4&>(m));
-}
-
-
 bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
                                    aiNode* node,
                                    glm::mat4 globalTransform,
                                    glm::mat4 localTransform)
 {
-  globalTransform = globalTransform * toGlmMat4(node->mTransformation);
+  globalTransform = globalTransform * to_glm_mat4(node->mTransformation);
 
   if(node->mNumMeshes > 0)
   {
