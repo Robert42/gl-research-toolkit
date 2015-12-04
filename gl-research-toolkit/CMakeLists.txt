@@ -29,6 +29,7 @@ add_library(glrt
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
   include/glrt/profiler.h
+  include/glrt/scene/camera-parameter.h
   include/glrt/scene/entity.h
   include/glrt/scene/forward-renderer.h
   include/glrt/scene/material.h
@@ -46,6 +47,7 @@ add_library(glrt
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
   src/glrt/profiler.cpp
+  src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/entity.cpp
   src/glrt/scene/forward-renderer.cpp
   src/glrt/scene/material.cpp
