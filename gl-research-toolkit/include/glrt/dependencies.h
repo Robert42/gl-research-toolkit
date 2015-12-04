@@ -8,24 +8,19 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include <AntTweakBar.h>
 
 #include <QDebug>
 #include <QString>
 #include <QDir>
+#include <QObject>
+#include <QSharedPointer>
 
 #include <iostream>
 #include <memory>
-
-#include <glhelper/shaderobject.hpp>
-
-
-namespace gl {
-
-uint qHash(const gl::ShaderObject::ShaderType& type, uint seed = 0);
-
-} // namespace gl
+#include <vector>
 
 
 namespace glrt {

@@ -44,7 +44,7 @@ namespace gl
 
 
 // Assert
-#ifdef _DEBUG
+#ifndef NDEBUG
 #define GLHELPER_ASSERT(condition, message) do { \
 	if(!(condition)) std::cerr << message; \
 	assert(condition); } while(false)
@@ -92,7 +92,7 @@ namespace gl
         getIncludeDirs().append(dir);
       }
 
-      static std::string expandGLobalInclude(const std::string& include_std_string)
+      static std::string expandGlobalInclude(const std::string& include_std_string)
       {
         QString include_file = QString::fromStdString(include_std_string);
 
@@ -117,7 +117,7 @@ namespace gl
 }
 
 // A std::vector of all include paths shaders will be looked for, if an #include<...> statement was found during parsing an glsl script
-#define SHADER_EXPAND_GLOBAL_INCLUDE(x) gl::Details::ShaderIncludeDirManager::expandGLobalInclude(x)
+#define SHADER_EXPAND_GLOBAL_INCLUDE(x) gl::Details::ShaderIncludeDirManager::expandGlobalInclude(x)
 
 // OpenGL header.
 

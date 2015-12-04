@@ -6,6 +6,8 @@
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
 
+struct aiMesh;
+
 namespace glrt {
 namespace scene {
 
@@ -14,6 +16,8 @@ class StaticMesh final
 public:
   struct Vertex;
   typedef quint16 index_type;
+
+  typedef QSharedPointer<StaticMesh> Ptr;
 
   StaticMesh(StaticMesh&& mesh);
   StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices);
@@ -26,6 +30,7 @@ public:
 
   static bool isValidFile(const QFileInfo& file, bool parseFile);
   static StaticMesh loadMeshFromFile(const QString& file, bool indexed=true);
+  static StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
   static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed = true);
   static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
 
@@ -33,7 +38,7 @@ public:
 
   void bind(const gl::VertexArrayObject& vertexArrayObject);
 
-  void draw(GLenum mode = GL_TRIANGLES);
+  void draw(GLenum mode = GL_TRIANGLES) const;
 
 private:
   gl::Buffer* indexBuffer;

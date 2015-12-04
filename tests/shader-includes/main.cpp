@@ -2,6 +2,7 @@
 #include <glrt/gui/toolbar.h>
 
 #include <glhelper/screenalignedtriangle.hpp>
+#include <glhelper/shaderobject.hpp>
 
 const QDir shaderDir(SHADER_DIR);
 

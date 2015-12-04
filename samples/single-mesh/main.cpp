@@ -4,6 +4,7 @@
 #include <glrt/gui/anttweakbar.h>
 
 #include <glhelper/gl.hpp>
+#include <glhelper/shaderobject.hpp>
 
 enum class DebuggingMode : int
 {
@@ -71,7 +72,7 @@ int main(int argc, char** argv)
 
   // ======== Setup the Meshes ========
   // The main mesh we want to load
-  glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.obj");
+  glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.dae");
 
   // Get the Vertex Format of it
   gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();

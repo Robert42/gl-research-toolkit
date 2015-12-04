@@ -19,6 +19,9 @@ find_package(Qt5Core REQUIRED)
 find_package(ASSIMP REQUIRED)
 
 
+set(CMAKE_AUTOMOC ON)
+
+
 add_library(glrt
   include/glrt/application.h
   include/glrt/debug-camera.h
@@ -26,28 +29,38 @@ add_library(glrt
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
   include/glrt/profiler.h
+  include/glrt/scene/entity.h
+  include/glrt/scene/forward-renderer.h
+  include/glrt/scene/material.h
+  include/glrt/scene/scene.h
+  include/glrt/scene/scene-renderer.h
   include/glrt/scene/static-mesh.h
-  include/glrt/shader/shader-cache.h
-  include/glrt/shader/shader-factory.h
-  include/glrt/shader/shader-technique.h
+  include/glrt/scene/static-mesh-component.h
   include/glrt/system.h
+  include/glrt/temp-shader-file.h
+  include/glrt/toolkit/aligned-vector.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
   src/glrt/dependencies.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
   src/glrt/profiler.cpp
+  src/glrt/scene/entity.cpp
+  src/glrt/scene/forward-renderer.cpp
+  src/glrt/scene/material.cpp
+  src/glrt/scene/scene.cpp
+  src/glrt/scene/scene-renderer.cpp
   src/glrt/scene/static-mesh.cpp
-  src/glrt/shader/shader-cache.cpp
-  src/glrt/shader/shader-factory.cpp
-  src/glrt/shader/shader-technique.cpp
+  src/glrt/scene/static-mesh-component.cpp
   src/glrt/system.cpp
+  src/glrt/temp-shader-file.cpp
 )
 
 target_include_directories(
   glrt
   PUBLIC
   include
+  ${GLRT_SHADER_DIR}/common-with-cpp
 )
 
 if(GLRT_PROFILER)
@@ -63,6 +76,7 @@ target_compile_definitions(
   PUBLIC
   GLRT_ASSET_DIR=\"${GLRT_ASSET_DIR}\"
   GLRT_SHADER_DIR=\"${GLRT_SHADER_DIR}\"
+  GLRT_TEMP_SHADER_DIR=\"${GLRT_TEMP_SHADER_DIR}\"
   GLM_FORCE_RADIANS
   GLM_SWIZZLE
 )
