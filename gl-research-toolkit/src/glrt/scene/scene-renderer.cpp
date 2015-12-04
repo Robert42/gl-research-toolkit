@@ -138,7 +138,7 @@ void Renderer::Pass::renderStaticMeshes()
   if(materialInstanceRanges.empty())
     return;
 
-  // FIXME: Don't forget to activate backface-culling
+  glEnable(GL_CULL_FACE);
 
   const int N = materialInstanceRanges[materialInstanceRanges.size()-1].end;
 
