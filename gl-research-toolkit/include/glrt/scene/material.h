@@ -48,7 +48,7 @@ class PlainColorMaterial : public MaterialInstance
 public:
   struct UniformData
   {
-    glm::vec3 diffuse = glm::vec3(1, 0, 1);
+    glm::vec3 diffuse = glm::vec3(1, 1, 1);
     float roughness = 0.8f;
     glm::vec3 emission = glm::vec3(0);
     float metallic = 0.f;
