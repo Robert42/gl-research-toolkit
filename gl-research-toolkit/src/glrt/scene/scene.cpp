@@ -171,7 +171,7 @@ bool Scene::loadFromColladaFile(const QString& file,
     if(scene->mMaterials[i]->Get(AI_MATKEY_NAME, name) == aiReturn_SUCCESS)
     {
       QString n = name.C_Str();
-      if(assets.materials.contains(n))
+      if(assets.materials.contains(n) || assets.materials.contains(n.remove("-material")))
         assets.materialsForIndex[i] = assets.materials[n];
     }
   }
