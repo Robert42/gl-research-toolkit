@@ -25,6 +25,7 @@ set(CMAKE_AUTOMOC ON)
 add_library(glrt
   include/glrt/application.h
   include/glrt/debug-camera.h
+  include/glrt/debugging/draw-cameras.h
   include/glrt/dependencies.h
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
@@ -43,6 +44,7 @@ add_library(glrt
   include/glrt/toolkit/assimp-glm-converter.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
+  src/glrt/debugging/draw-cameras.cpp
   src/glrt/dependencies.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
