@@ -6,16 +6,62 @@
 namespace glrt {
 namespace scene {
 
-void CameraParameter::loadFromAssimp(const aiCamera& camera)
+CameraParameter CameraParameter::loadFromAssimp(const aiCamera& assimpCamera)
 {
-  this->horizontal_fov = camera.mHorizontalFOV;
-  this->aspect = camera.mAspect;
-  this->clipNear = camera.mClipPlaneNear;
-  this->clipFar = camera.mClipPlaneFar;
+  CameraParameter camera;
 
-  this->lookAt = to_glm_vec3(camera.mLookAt);
-  this->upVector = to_glm_vec3(camera.mUp);
-  this->position = to_glm_vec3(camera.mPosition);
+  camera.horizontal_fov = assimpCamera.mHorizontalFOV;
+  camera.aspect = assimpCamera.mAspect;
+  camera.clipNear = assimpCamera.mClipPlaneNear;
+  camera.clipFar = assimpCamera.mClipPlaneFar;
+
+  camera.lookAt = to_glm_vec3(assimpCamera.mLookAt);
+  camera.upVector = to_glm_vec3(assimpCamera.mUp);
+  camera.position = to_glm_vec3(assimpCamera.mPosition);
+
+  return camera;
+}
+
+CameraParameter CameraParameter::defaultDebugCamera()
+{
+  CameraParameter camera;
+
+  camera.lookAt = glm::vec3(0, 1, 0);
+  camera.upVector = glm::vec3(0, 0, 1);
+  camera.position = glm::vec3(0, -5, 0);
+
+  return camera;
+}
+
+glm::mat4 CameraParameter::inverseViewMatrix() const
+{
+  return glm::mat4(glm::vec4(glm::cross(this->lookAt, this->upVector), 0),
+                   glm::vec4(this->upVector, 0),
+                   glm::vec4(-this->lookAt, 0),
+                   glm::vec4(this->position, 1));
+}
+
+glm::mat4 CameraParameter::viewMatrix() const
+{
+  return glm::affineInverse(inverseViewMatrix());
+}
+
+glm::mat4 CameraParameter::projectionMatrix() const
+{
+  return projectionMatrix(this->aspect);
+}
+
+glm::mat4 CameraParameter::projectionMatrix(float aspectRatio) const
+{
+  return glm::perspective<float>(this->horizontal_fov/aspectRatio,
+                                 aspectRatio,
+                                 this->clipNear,
+                                 this->clipFar);
+}
+
+glm::mat4 CameraParameter::projectionMatrix(int width, int height) const
+{
+  return projectionMatrix(float(width) / float(height));
 }
 
 

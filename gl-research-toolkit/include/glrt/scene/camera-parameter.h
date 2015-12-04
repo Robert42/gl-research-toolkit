@@ -13,8 +13,8 @@ struct CameraParameter
 public:
   float horizontal_fov = glm::radians(90.f);
   float aspect = 16.f/9.f;
-  float clipNear = 100.f;
-  float clipFar = 0.001f;
+  float clipNear = 0.001f;
+  float clipFar = 100.f;
 
   glm::vec3 lookAt = glm::vec3(0, 0, -1);
   padding<float> _padding2;
@@ -25,7 +25,15 @@ public:
   glm::vec3 position = glm::vec3(0);
   padding<float> _padding4;
 
-  void loadFromAssimp(const aiCamera& camera);
+  static CameraParameter loadFromAssimp(const aiCamera& camera);
+  static CameraParameter defaultDebugCamera();
+
+  glm::mat4 inverseViewMatrix() const;
+  glm::mat4 viewMatrix() const;
+
+  glm::mat4 projectionMatrix() const;
+  glm::mat4 projectionMatrix(float aspectRatio) const;
+  glm::mat4 projectionMatrix(int width, int height) const;
 };
 
 } // namespace scene

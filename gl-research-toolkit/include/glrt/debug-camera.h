@@ -3,6 +3,8 @@
 
 #include "dependencies.h"
 
+#include <glrt/scene/camera-parameter.h>
+
 namespace glrt {
 
 class DebugCamera
@@ -18,10 +20,14 @@ public:
 
   void update(float deltaTime);
 
+  void operator=(const scene::CameraParameter& cameraParameter);
+
 private:
+  glm::ivec2 windowSize;
+
   glm::mat4 projectionMatrix;
   glm::vec3 camera_position;
-  glm::mat4 camera_orientation;
+  glm::mat4 camera_orientation_inverse;
   bool movementMode;
 };
 
