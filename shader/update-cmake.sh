@@ -1,8 +1,10 @@
 #! /bin/bash
 
-echo -e "cmake_minimum_required(VERSION 3.1 FATAL_ERROR)\n\nadd_custom_target(\n  gl-research-toolkit-shader\n  SOURCES" > CMakeLists.txt
+export FILE=CMakeLists.txt
 
-find . | grep -E '\.(vs|fs|glsl|h)$' | sort | sed -E 's/^\.\//  /g' >> CMakeLists.txt
+echo -e "cmake_minimum_required(VERSION 3.1 FATAL_ERROR)\n\nadd_custom_target(\n  gl-research-toolkit-shader\n  SOURCES" > $FILE
 
-echo ")" >> CMakeLists.txt
+find . | grep -E '\.(vs|fs|glsl|h)$' | sort | sed -E 's/^\.\//  /g' >> $FILE
+
+echo ")" >> $FILE
 
