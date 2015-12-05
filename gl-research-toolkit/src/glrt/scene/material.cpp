@@ -93,7 +93,7 @@ bool MaterialInstance::asVec3(glm::vec3& vec, const QJsonValue& value, const cha
 
 PlainColorMaterial::PlainColorMaterial(const UniformData& data)
   : MaterialInstance(Type::PLAIN_COLOR,
-                     gl::Buffer(sizeof(UniformData), gl::Buffer::UsageFlag::IMMUTABLE, &data)) // FIXME: wither use std140 or query the position of each member. See http://stackoverflow.com/a/13036724/2301866
+                     gl::Buffer(sizeof(UniformData), gl::Buffer::UsageFlag::IMMUTABLE, &data))
 {
 }
 
