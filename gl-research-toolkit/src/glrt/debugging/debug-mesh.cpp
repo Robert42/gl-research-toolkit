@@ -181,6 +181,12 @@ void DebugMesh::Painter::popMatrix()
 }
 
 
+DebugMesh DebugMesh::Painter::toMesh() const
+{
+  return DebugMesh(vertices.data(), vertices.length());
+}
+
+
 } // namespace debugging
 } // namespace glrt
 

@@ -2,6 +2,7 @@
 
 #include <glrt/scene/scene.h>
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/toolkit/shader-compiler.h>
 
 namespace glrt {
 namespace debugging {
@@ -34,13 +35,16 @@ DebugLineVisualisation::~DebugLineVisualisation()
 }
 
 
-DebugLineVisualisation DebugLineVisualisation::drawCameras(const QVector<scene::CameraParameter>& sceneCameras)
+DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QVector<scene::CameraParameter>& sceneCameras)
 {
   DebugMesh::Painter painter;
 
   painter.addSphere(1.f, 16);
 
-  return debugRendering(painter, sceneCameras, std::move(gl::ShaderObject("TODO")));
+  return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                 sceneCameras,
+                                                                 std::move(ShaderCompiler::createShaderFromFiles("visualize-scene-camera",
+                                                                                                                 QDir(GLRT_SHADER_DIR"/debugging/visualizations")))))));
 }
 
 

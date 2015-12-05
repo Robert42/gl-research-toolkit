@@ -6,6 +6,8 @@
 #include <glrt/scene/material.h>
 #include <glrt/scene/entity.h>
 #include <glrt/debug-camera.h>
+#include <glrt/debugging/debug-line-visualisation.h>
+#include <glrt/gui/anttweakbar.h>
 
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>
@@ -29,6 +31,8 @@ class Scene final : public QObject
 public:
   QString name, file;
   DebugCamera debugCamera;
+
+  gui::TweakBarCBVar<bool> visualize_sceneCameras;
 
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;
@@ -59,6 +63,8 @@ private:
 
   QSet<Entity*> _entities;
   QVector<CameraParameter> _sceneCameras;
+
+  debugging::DebugLineVisualisation::Ptr _debug_sceneCameras;
 
   void AddEntity(Entity* entity);
   void RemoveEntity(Entity* entity);

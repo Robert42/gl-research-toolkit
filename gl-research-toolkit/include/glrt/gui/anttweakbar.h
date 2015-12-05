@@ -3,7 +3,6 @@
 
 
 #include <glrt/gui/toolbar.h>
-#include <glrt/scene/scene.h>
 
 
 namespace glrt {
@@ -11,6 +10,12 @@ namespace glrt {
 
 class Application;
 class Profiler;
+
+namespace scene {
+
+class Scene;
+
+} // namspace scene
 
 
 namespace gui {
@@ -83,6 +88,48 @@ private:
   void handeledEvent(const SDL_Event& event);
   bool unhandeledEvent(const SDL_Event& event);
 };
+
+
+template<typename T>
+class TweakBarCBVar
+{
+public:
+  std::function<T()> getter;
+  std::function<void(T)> setter;
+
+  void TwAddVarCB(TwBar* bar, const char* name, const char* def)
+  {
+    ::TwAddVarCB(bar, name, type(), reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
+  }
+
+  void reapply()
+  {
+    if(getter && setter)
+      setter(getter());
+  }
+
+  static TwType type();
+
+private:
+
+  static void getValue(T* value, TweakBarCBVar<T>* wrapper)
+  {
+    if(wrapper->getter)
+      *value = wrapper->getter();
+  }
+
+  static void setValue(const T* value, TweakBarCBVar<T>* wrapper)
+  {
+    if(wrapper->setter)
+      wrapper->setter(*value);
+  }
+};
+
+template<>
+inline TwType TweakBarCBVar<bool>::type()
+{
+  return TW_TYPE_BOOLCPP;
+}
 
 
 } // namespace gui

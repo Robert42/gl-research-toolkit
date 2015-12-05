@@ -24,6 +24,13 @@ Scene::Scene(SDL_Window* sdlWindow)
   : debugCamera(sdlWindow),
     _cachedStaticStructureCacheIndex(0)
 {
+  visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
+  visualize_sceneCameras.setter = [this](bool show) {
+    if(show)
+      this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->sceneCameras());
+    else
+      this->_debug_sceneCameras.clear();
+  };
 }
 
 Scene::~Scene()
@@ -38,6 +45,9 @@ void Scene::clear()
 
   for(Entity* entity : entities)
     delete entity;
+
+  this->_sceneCameras.clear();
+  this->visualize_sceneCameras.reapply();
 }
 
 
