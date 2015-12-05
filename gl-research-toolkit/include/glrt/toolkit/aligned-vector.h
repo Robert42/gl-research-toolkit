@@ -28,12 +28,19 @@ public:
     _alignment = _alignment * ((_alignment-1+sizeof(T)) / _alignment);
   }
 
-  T* data()
+  void writeTo(void* target, size_t nElements=std::numeric_limits<size_t>::max()) const
+  {
+    nElements = glm::min<size_t>(nElements, size());
+
+    memcpy(target, data(), nElements * _alignment);
+  }
+
+  void* data()
   {
     return &operator[](0);
   }
 
-  const T* data() const
+  const void* data() const
   {
     return &operator[](0);
   }

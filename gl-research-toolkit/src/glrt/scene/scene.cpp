@@ -180,6 +180,9 @@ bool Scene::loadFromColladaFile(const QString& file,
     }
   }
 
+  _sceneCameras.resize(scene->mNumCameras);
+  for(quint32 i=0; i<scene->mNumCameras; ++i)
+    _sceneCameras[i] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
@@ -243,6 +246,12 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
 void Scene::staticMeshStructureChanged()
 {
   ++_cachedStaticStructureCacheIndex;
+}
+
+
+const QVector<CameraParameter>& Scene::sceneCameras() const
+{
+  return _sceneCameras;
 }
 
 

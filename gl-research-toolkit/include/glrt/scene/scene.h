@@ -52,12 +52,15 @@ public:
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
 
+  const QVector<CameraParameter>& sceneCameras() const;
+
 private:
   friend class Renderer;
   friend class Entity;
   quint64 _cachedStaticStructureCacheIndex;
 
   QSet<Entity*> _entities;
+  QVector<CameraParameter> _sceneCameras;
 
   void AddEntity(Entity* entity);
   void RemoveEntity(Entity* entity);

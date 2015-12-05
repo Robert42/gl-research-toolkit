@@ -25,6 +25,7 @@ set(CMAKE_AUTOMOC ON)
 add_library(glrt
   include/glrt/application.h
   include/glrt/debug-camera.h
+  include/glrt/debugging/debug-mesh.h
   include/glrt/debugging/draw-cameras.h
   include/glrt/dependencies.h
   include/glrt/gui/anttweakbar.h
@@ -42,8 +43,10 @@ add_library(glrt
   include/glrt/temp-shader-file.h
   include/glrt/toolkit/aligned-vector.h
   include/glrt/toolkit/assimp-glm-converter.h
+  include/glrt/toolkit/geometry.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
+  src/glrt/debugging/debug-mesh.cpp
   src/glrt/debugging/draw-cameras.cpp
   src/glrt/dependencies.cpp
   src/glrt/gui/anttweakbar.cpp
@@ -59,6 +62,7 @@ add_library(glrt
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/system.cpp
   src/glrt/temp-shader-file.cpp
+  src/glrt/toolkit/geometry.cpp
 )
 
 target_include_directories(
