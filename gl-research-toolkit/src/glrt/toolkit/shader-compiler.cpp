@@ -45,6 +45,20 @@ void ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 }
 
 
+gl::ShaderObject ShaderCompiler::createShaderFromFiles(const QString &name, const QDir &shaderDir, const QStringList &preprocessorBlock)
+{
+  gl::ShaderObject shaderObject(name.toStdString());
+
+  ShaderCompiler compiler;
+
+  compiler.preprocessorBlock = preprocessorBlock;
+
+  compiler.compile(&shaderObject, shaderDir);
+
+  return std::move(shaderObject);
+}
+
+
 const QMap<QString, gl::ShaderObject::ShaderType>& ShaderCompiler::shaderTypes()
 {
   static QMap<QString, gl::ShaderObject::ShaderType> shaderTypes;

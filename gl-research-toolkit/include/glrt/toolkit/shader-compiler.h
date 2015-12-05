@@ -16,6 +16,8 @@ public:
 
   void compile(gl::ShaderObject* shaderObject, const QDir& shaderDir);
 
+  static gl::ShaderObject createShaderFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+
 private:
   static const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes();
 };

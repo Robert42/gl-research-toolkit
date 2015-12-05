@@ -49,15 +49,12 @@ Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, gl::Shader
 }
 
 Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock)
-  : Pass(renderer, type, std::move(gl::ShaderObject(materialName.toStdString())))
+  : Pass(renderer,
+         type,
+         std::move(ShaderCompiler::createShaderFromFiles(materialName,
+                                                         QDir(GLRT_SHADER_DIR"/materials"),
+                                                         preprocessorBlock)))
 {
-  ShaderCompiler compiler;
-
-  compiler.preprocessorBlock = preprocessorBlock;
-
-  const QDir shaderDir(GLRT_SHADER_DIR"/materials");
-
-  compiler.compile(&this->shaderObject, shaderDir);
 }
 
 Renderer::Pass::~Pass()
