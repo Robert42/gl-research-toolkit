@@ -5,26 +5,27 @@
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
 uniform CameraBlock
 {
-  vec4 fov_and_aspect_and_clipNear_and_clipFar;
   vec3 lookAt;
+  float fov;
   vec3 upVector;
+  float aspect;
   vec3 position;
-  vec3 frustumEdgeDir;
+  float clipNear;
+  float clipFar;
+  mat4 inverseViewProjectionMatrix;
 }camera;
 
 void main()
 {
-  float fov = camera.fov_and_aspect_and_clipNear_and_clipFar[0];
-  float aspect = camera.fov_and_aspect_and_clipNear_and_clipFar[1];
-  float clipNear = camera.fov_and_aspect_and_clipNear_and_clipFar[2];
-  float clipFar = camera.fov_and_aspect_and_clipNear_and_clipFar[3];
-  
   vec3 ws_position = vertex_position;
 
   if(vertex_parameter1 > 0.5f)
   {
-    vec3 p = camera.frustumEdgeDir * mix(0, 1, vertex_position.z);
-    ws_position = p;
+    //vec3 p = camera.frustumEdgeDir * mix(0, 1, vertex_position.z);
+    //ws_position = p;
+    
+    vec4 p = camera.inverseViewProjectionMatrix * vec4(vertex_position, 1);
+    ws_position = p.xyz / p.w;
   }
 
   pass_attributes_to_fragment_shader(ws_position, vertex_color);

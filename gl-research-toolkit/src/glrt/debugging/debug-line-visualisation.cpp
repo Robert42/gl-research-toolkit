@@ -30,6 +30,7 @@ DebugLineVisualisation::DebugLineVisualisation(DebugLineVisualisation&& other)
 {
   other.numDrawCalls = 0;
   other.uniformBufferOffset = 0;
+  other.uniformBufferElementSize = 0;
 }
 
 DebugLineVisualisation::~DebugLineVisualisation()
@@ -39,12 +40,10 @@ DebugLineVisualisation::~DebugLineVisualisation()
 
 DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QVector<scene::CameraParameter>& sceneCameras)
 {
-  struct CachedCamera
+  struct CachedCamera final
   {
     scene::CameraParameter cameraParameter;
-    glm::vec3 frustumEdgeDir;
-    padding<float> _padding;
-
+    glm::mat4 inverseViewProjectionMatrix;
 
     CachedCamera()
     {
@@ -52,7 +51,7 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QVector<sc
     CachedCamera(const scene::CameraParameter& cameraParameter)
       : cameraParameter(cameraParameter)
     {
-      frustumEdgeDir = glm::vec3(0, 0, 1);
+      inverseViewProjectionMatrix = glm::inverse(this->cameraParameter.projectionMatrix() * this->cameraParameter.viewMatrix());
     }
   };
 
@@ -78,10 +77,10 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QVector<sc
   painter.popMatrix();
 
   painter.nextAttribute.parameter1 = 1.f;
-  painter.addCube(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1));
+  painter.addCube(glm::vec3(-1, -1, -1), glm::vec3(1, 1, 1));
 
   return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
-                                                                 sceneCameras,
+                                                                 cachedCameras,
                                                                  std::move(ShaderCompiler::createShaderFromFiles("visualize-scene-camera",
                                                                                                                  QDir(GLRT_SHADER_DIR"/debugging/visualizations")))))));
 }
