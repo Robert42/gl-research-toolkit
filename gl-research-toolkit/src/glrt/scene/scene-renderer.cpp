@@ -28,6 +28,9 @@ void Renderer::render()
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
 
   renderImplementation();
+
+  if(!scene._debug_sceneCameras.isNull())
+    scene._debug_sceneCameras->draw();
 }
 
 void Renderer::updateSceneUniform()
