@@ -7,7 +7,8 @@ namespace debugging {
 
 
 DebugMesh::DebugMesh(const Vertex* vertices, int numVertices)
-  : vertexBuffer(sizeof(Vertex)*numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices)
+  : vertexBuffer(sizeof(Vertex)*numVertices, gl::Buffer::UsageFlag::IMMUTABLE, vertices),
+    numVertices(numVertices)
 {
 }
 
@@ -17,9 +18,12 @@ DebugMesh::~DebugMesh()
 
 
 DebugMesh::DebugMesh(DebugMesh&& debugMesh)
-  : vertexBuffer(std::move(debugMesh.vertexBuffer))
+  : vertexBuffer(std::move(debugMesh.vertexBuffer)),
+    numVertices(debugMesh.numVertices)
 {
+  debugMesh.numVertices = 0;
 }
+
 
 gl::VertexArrayObject DebugMesh::generateVertexArrayObject()
 {
@@ -36,6 +40,19 @@ gl::VertexArrayObject DebugMesh::generateVertexArrayObject()
                                           Attribute(Attribute::Type::FLOAT, 1, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 1, vertexBufferBinding)}));
+}
+
+
+void DebugMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
+{
+  const int vertexBufferBinding = 0;
+  vertexBuffer.BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
+}
+
+
+void DebugMesh::draw()
+{
+  GL_CALL(glDrawArrays, GL_LINES, 0, numVertices);
 }
 
 

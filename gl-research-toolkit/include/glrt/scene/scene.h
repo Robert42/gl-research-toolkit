@@ -45,8 +45,6 @@ public:
   bool loadFromFile(const QString& file);
   bool fromJson(const QDir& dir, const QJsonObject& json);
 
-  void bindSceneUniformBlock();
-
   void staticMeshStructureChanged();
 
   template<typename T>

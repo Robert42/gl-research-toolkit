@@ -29,8 +29,12 @@ public:
 
   static gl::VertexArrayObject generateVertexArrayObject();
 
+  void bind(const gl::VertexArrayObject& vertexArrayObject);
+  void draw();
+
 private:
   gl::Buffer vertexBuffer;
+  int numVertices;
 };
 
 
@@ -72,7 +76,7 @@ public:
   void pushMatrix(const glm::mat4& matrix=glm::mat4(1), bool multiply = true);
   void popMatrix();
 
-  DebugMesh toMesh();
+  DebugMesh toMesh() const;
 
 private:
   QStack<glm::mat4> transformations;

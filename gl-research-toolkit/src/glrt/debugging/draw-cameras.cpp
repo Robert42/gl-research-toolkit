@@ -1,64 +1,59 @@
 #include <glrt/debugging/draw-cameras.h>
 
 #include <glrt/scene/scene.h>
-#include <glrt/scene/camera-parameter.h>
-#include <glrt/toolkit/aligned-vector.h>
+#include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
 namespace debugging {
 
 
-DrawCameras::DrawCameras()
-  : vertexArrayObject(DebugMesh::generateVertexArrayObject())
+DrawCameras::DrawCameras(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, int numDrawCalls, int bufferOffset)
+  : vertexArrayObject(DebugMesh::generateVertexArrayObject()),
+    debugMesh(std::move(debugMesh)),
+    uniformBuffer(std::move(uniformBuffer)),
+    numDrawCalls(numDrawCalls),
+    bufferOffset(bufferOffset)
 {
 }
 
+DrawCameras::DrawCameras(DrawCameras&& drawCameras)
+  : vertexArrayObject(std::move(drawCameras.vertexArrayObject)),
+    debugMesh(std::move(drawCameras.debugMesh)),
+    uniformBuffer(std::move(drawCameras.uniformBuffer)),
+    numDrawCalls(drawCameras.numDrawCalls),
+    bufferOffset(drawCameras.bufferOffset)
+{
+  drawCameras.numDrawCalls = 0;
+  drawCameras.bufferOffset = 0;
+}
 
 DrawCameras::~DrawCameras()
 {
-  deinit();
 }
 
 
-void DrawCameras::draw(const scene::Scene* scene)
+DrawCameras DrawCameras::drawCameras(const QVector<scene::CameraParameter>& sceneCameras)
 {
-  aligned_vector<scene::CameraParameter> cameras(aligned_vector<scene::CameraParameter>::Alignment::UniformBufferOffsetAlignment);
-  cameras.reserve(scene->sceneCameras().length());
-  for(const scene::CameraParameter& camera : scene->sceneCameras())
-    cameras.push_back(camera);
+  DebugMesh::Painter painter;
 
-  if(nCameras < scene->sceneCameras().length())
+  painter.addSphere(1.f, 16);
+
+  return debugRendering(painter, sceneCameras);
+}
+
+
+void DrawCameras::draw()
+{
+  vertexArrayObject.Bind();
+  debugMesh.bind(this->vertexArrayObject);
+
+  for(int i=0; i<numDrawCalls; ++i)
   {
-    deinit();
-
-    DebugMesh::Painter painter;
-
-    painter.addSphere(1.f, 16);
-
-    nCameras = scene->sceneCameras().length();
-    cameraParameter = new gl::Buffer(cameras.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, cameras.data());
-
-    debugMesh = new DebugMesh(painter.toMesh());
-  }else
-  {
-    cameras.writeTo(cameraParameter->Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-    cameraParameter->Unmap();
+    uniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, i*bufferOffset, vertexArrayObject.GetVertexStride(0));
+    debugMesh.draw();
   }
 
-  vertexArrayObject.Bind();
-  cameraParameter->BindVertexBuffer(0, 0, vertexArrayObject.GetVertexStride(0));
-
   vertexArrayObject.ResetBinding();
-}
-
-
-void DrawCameras::deinit()
-{
-  delete debugMesh;
-  delete cameraParameter;
-  debugMesh = nullptr;
-  cameraParameter = nullptr;
-  nCameras = 0;
 }
 
 
