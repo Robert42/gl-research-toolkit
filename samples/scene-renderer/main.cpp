@@ -18,6 +18,7 @@ int main(int argc, char** argv)
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to load and display a simple single scene" // help text of the sample
                                                                                 ));
 
+  antweakbar.createSceneBar(&scene);
   antweakbar.createProfilerBar(&app.profiler);
 
   scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");

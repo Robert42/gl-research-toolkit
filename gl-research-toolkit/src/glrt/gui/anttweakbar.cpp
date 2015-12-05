@@ -77,6 +77,19 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 }
 
 
+TwBar* AntTweakBar::createSceneBar(scene::Scene* scene)
+{
+  TwBar* tweakBar = TwNewBar("Scene");
+
+  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to modify or debug a scene.");
+  TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
+
+  gui::Toolbar::registerTweakBar(tweakBar);
+
+  return tweakBar;
+}
+
+
 bool AntTweakBar::handleEvents(const SDL_Event& event)
 {
   if(visible && TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION))

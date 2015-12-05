@@ -2,7 +2,8 @@
 #define GLRT_GUI_ANTTWEAKBAR_H
 
 
-#include "toolbar.h"
+#include <glrt/gui/toolbar.h>
+#include <glrt/scene/scene.h>
 
 
 namespace glrt {
@@ -65,6 +66,10 @@ public:
   // The caller owns the given instance.
   // You must ensure, that the given profiler lives longer than the created bar
   TwBar* createProfilerBar(Profiler* profiler);
+
+  // The caller owns the given instance.
+  // You must ensure, that the given profiler lives longer than the created bar
+  TwBar* createSceneBar(scene::Scene* scene);
 
 
   bool handleEvents(const SDL_Event& event);
