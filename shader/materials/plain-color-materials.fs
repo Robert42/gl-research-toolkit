@@ -7,18 +7,20 @@
 
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
-  vec4 diffuse_color_and_roughness;
-  vec4 emission_and_metallic;
+  vec3 diffuse_color;
+  float roughness;
+  vec3 emission;
+  float metallic;
 }material_instance;
 
 void main()
 {
   MaterialOutput material_output;
   
-  vec3 diffuse = material_instance.diffuse_color_and_roughness.rgb;
-  float roughness = material_instance.diffuse_color_and_roughness.a;
-  vec3 emission = material_instance.emission_and_metallic.rgb;
-  float metallic = material_instance.emission_and_metallic.a;
+  vec3 diffuse = material_instance.diffuse_color;
+  float roughness = material_instance.roughness;
+  vec3 emission = material_instance.emission;
+  float metallic = material_instance.metallic;
   
   material_output.color = vec4(diffuse, 1);
   material_output.emission = vec3(emission);

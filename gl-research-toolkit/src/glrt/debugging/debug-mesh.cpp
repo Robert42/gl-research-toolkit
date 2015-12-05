@@ -79,7 +79,11 @@ void DebugMesh::Painter::endStrip()
   if(this->firstStripVertex < vertices.length())
   {
     pushMatrix(glm::mat4(1), false);
-    addVertex(vertices[this->firstStripVertex].position);
+
+    // duplicating, because passing a reference to a value within the array vertices, which might be modified with vertices.resize within addVertex is dangerous
+    glm::vec3 startPosition = vertices[this->firstStripVertex].position;
+
+    addVertex(startPosition);
     popMatrix();
   }
 
@@ -147,6 +151,68 @@ void DebugMesh::Painter::addSphere(float radius, int nPoints)
   pushMatrix(glm::vec3(0), glm::vec3(0, 1, 0));
   addCircle(radius, nPoints);
   popMatrix();
+}
+
+
+void DebugMesh::Painter::addCylinder(float radius, float length, int nPoints)
+{
+  pushMatrix(glm::vec3(0, 0, 0.5f)*length, glm::vec3(0, 0, 1), glm::vec3(1, 0, 0));
+  addCircle(radius, nPoints);
+  popMatrix();
+
+  pushMatrix(-glm::vec3(0, 0, 0.5f)*length, glm::vec3(0, 0, 1), glm::vec3(1, 0, 0));
+  addCircle(radius, nPoints);
+  popMatrix();
+
+  for(const glm::vec3& side : {glm::vec3(1, 0, 0), glm::vec3(-1, 0, 0), glm::vec3(0,-1, 0), glm::vec3(0, 1, 0)})
+  {
+    addVertex(side*radius + glm::vec3(0, 0, .5f)*length);
+    addVertex(side*radius + glm::vec3(0, 0,-.5f)*length);
+  }
+}
+
+
+void DebugMesh::Painter::addRect(const glm::vec2& min, const glm::vec2& max)
+{
+  beginStrip(true);
+  addVertex(min.x, min.y);
+  addVertex(min.x, max.y);
+  addVertex(max.x, max.y);
+  addVertex(max.x, min.y);
+  endStrip();
+}
+
+
+void DebugMesh::Painter::addCube(const glm::vec3& min, const glm::vec3& max)
+{
+  pushMatrix(glm::vec3(0, 0, min.z));
+  addRect(min.xy(), max.xy());
+  popMatrix();
+
+  pushMatrix(glm::vec3(0, 0, max.z));
+  addRect(min.xy(), max.xy());
+  popMatrix();
+
+  for(const glm::vec2& corner_id : {glm::vec2(0, 0), glm::vec2(0, 1), glm::vec2(1, 0), glm::vec2(1, 1)})
+  {
+    glm::vec2 corner = corner_id*max.xy() + (1.f-corner_id)*min.xy();
+
+    addVertex(corner.xy(), min.z);
+    addVertex(corner.xy(), max.z);
+  }
+}
+
+
+void DebugMesh::Painter::addArrow(float length, float tipLength)
+{
+  addVertex(0, 0, 0);
+  addVertex(0, 0, length);
+
+  for(const glm::vec2& dir : {glm::vec2(-1, -1), glm::vec2(-1, 1), glm::vec2(1, -1), glm::vec2(1, 1)})
+  {
+    addVertex(0, 0, length);
+    addVertex(dir*tipLength, length-tipLength);
+  }
 }
 
 

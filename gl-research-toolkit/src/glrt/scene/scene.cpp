@@ -47,7 +47,7 @@ void Scene::clear()
     delete entity;
 
   this->_sceneCameras.clear();
-  this->visualize_sceneCameras.reapply();
+  this->_debug_sceneCameras.clear();
 }
 
 

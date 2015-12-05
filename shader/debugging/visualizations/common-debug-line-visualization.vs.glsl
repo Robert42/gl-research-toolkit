@@ -7,10 +7,7 @@ layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_PARAMETER2) in float vertex
 
 out FagmentBlock
 {
-  vec3 position;
-  float parameter1;
   vec3 color;
-  float parameter2;
 }fragment;
 
 layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
@@ -18,11 +15,13 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   mat4 view_projection;
 }scene;
 
+void pass_attributes_to_fragment_shader(vec3 position, vec3 color)
+{
+  gl_Position = scene.view_projection * vec4(position, 1);
+  fragment.color = color;
+}
+
 void pass_vertex_attributes_to_fragment_shader()
 {
-  gl_Position = scene.view_projection * vec4(vertex_position, 1);
-  fragment.position = vertex_position;
-  fragment.parameter1 = vertex_parameter1;
-  fragment.color = vertex_color;
-  fragment.parameter2 = vertex_parameter2;
+  pass_attributes_to_fragment_shader(vertex_position, vertex_color);
 }

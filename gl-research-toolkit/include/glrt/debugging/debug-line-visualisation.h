@@ -26,7 +26,7 @@ class DebugLineVisualisation final
 public:
   typedef QSharedPointer<DebugLineVisualisation> Ptr;
 
-  DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, gl::ShaderObject&& shaderObject, int numDrawCalls, int bufferOffset);
+  DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, gl::ShaderObject&& shaderObject, int numDrawCalls, int uniformBufferOffset, int uniformBufferElementSize);
   DebugLineVisualisation(DebugLineVisualisation&&);
   ~DebugLineVisualisation();
 
@@ -49,7 +49,8 @@ private:
   gl::Buffer uniformBuffer;
   gl::ShaderObject shaderObject;
   int numDrawCalls;
-  int bufferOffset;
+  int uniformBufferOffset;
+  int uniformBufferElementSize;
 };
 
 template<typename UniformType>
@@ -70,7 +71,8 @@ DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::P
                                 gl::Buffer(uniformData.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, uniformData.data()),
                                 std::move(shaderObject),
                                 uniformData.size(),
-                                uniformData.alignment());
+                                uniformData.alignment(),
+                                sizeof(UniformType));
 }
 
 } // namespace debugging

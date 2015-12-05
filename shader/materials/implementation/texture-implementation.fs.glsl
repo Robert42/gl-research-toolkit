@@ -6,16 +6,16 @@
   
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
-  // sampler2D within Uniform Block possible thanks to GL_NV_bindless_texture
-  sampler2D diffuse_map;
-  sampler2D normal_map;
-  sampler2D rhmo_map;
-  sampler2D emission_map;
   vec4 tint;
   vec2 roughness_range;
   vec2 metallic_range;
   vec2 occlusion_range;
   float emission_factor;
+  // sampler2D within Uniform Block possible thanks to GL_NV_bindless_texture
+  sampler2D diffuse_map;
+  sampler2D normal_map;
+  sampler2D rhmo_map;
+  sampler2D emission_map;
 }material_instance;
 
 
