@@ -5,6 +5,7 @@ add_custom_target(
   SOURCES
   common-with-cpp/glrt/glsl/layout-constants.h
   materials/implementation/common-implementation.vs.glsl
+  materials/implementation/forward-lighting.fs.glsl
   materials/implementation/input-block.fs.glsl
   materials/implementation/material-implementation.fs.glsl
   materials/implementation/output-block.vs.glsl

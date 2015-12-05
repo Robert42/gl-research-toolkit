@@ -1,5 +1,6 @@
 #include <glrt/scene/static-mesh.h>
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -10,21 +11,6 @@ namespace scene {
 
 const GLuint vertexBufferBinding = 0;
 const GLuint indexBufferBinding = 1;
-
-inline glm::vec3 toGlm3(const aiVector3D& v)
-{
-  return glm::vec3(v.x, v.y, v.z);
-}
-
-inline glm::vec2 toGlm2(const aiVector3D& v)
-{
-  return glm::vec2(v.x, v.y);
-}
-
-inline glm::vec2 toGlm2(const aiVector2D& v)
-{
-  return glm::vec2(v.x, v.y);
-}
 
 StaticMesh::StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices)
   : indexBuffer(std::move(indexBuffer)),
@@ -181,10 +167,10 @@ StaticMesh StaticMesh::loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, cons
     for(quint32 j = 0; j<mesh->mNumVertices; ++j)
     {
       Vertex vertex;
-      vertex.position = transform * toGlm3(mesh->mVertices[j]);
-      vertex.normal = transform * toGlm3(mesh->mNormals[j]);
-      vertex.tangent = transform * toGlm3(mesh->mTangents[j]);
-      vertex.uv = toGlm2(mesh->mTextureCoords[0][j]);
+      vertex.position = transform * to_glm_vec3(mesh->mVertices[j]);
+      vertex.normal = transform * to_glm_vec3(mesh->mNormals[j]);
+      vertex.tangent = transform * to_glm_vec3(mesh->mTangents[j]);
+      vertex.uv = to_glm_vec3(mesh->mTextureCoords[0][j]).xy();
 
       vertices.push_back(vertex);
     }

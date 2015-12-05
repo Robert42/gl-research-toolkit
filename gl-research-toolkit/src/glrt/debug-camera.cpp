@@ -5,16 +5,9 @@ namespace glrt {
 
 DebugCamera::DebugCamera(SDL_Window* sdlWindow)
 {
-  const glm::mat4 I = glm::mat4(1);
-  const glm::vec3 x(1, 0, 0);
+  SDL_GetWindowSize(sdlWindow, &this->windowSize.x, &this->windowSize.y);
 
-  glm::ivec2 size;
-
-  SDL_GetWindowSize(sdlWindow, &size.x, &size.y);
-
-  camera_position = glm::vec3(0, -5, 0);
-  camera_orientation = glm::rotate(I, glm::radians(-90.f), x);
-  projectionMatrix = glm::perspectiveFov<float>(glm::radians(90.f), size.x, size.y, 0.001f, 100.f);
+  *this = scene::CameraParameter::defaultDebugCamera();
 
   movementMode = false;
 
@@ -36,9 +29,9 @@ bool DebugCamera::handleEvents(const SDL_Event& event)
     {
       const glm::vec2 angle = rotation_speed * glm::vec2(event.motion.xrel, event.motion.yrel);
 
-      camera_orientation = glm::rotate(I, angle.y, x) *
-                           camera_orientation *
-                           glm::rotate(I, angle.x, z);
+      camera_orientation_inverse = glm::rotate(I, angle.y, x) *
+                                   camera_orientation_inverse *
+                                   glm::rotate(I, angle.x, z);
       return true;
     }
     return false;
@@ -53,6 +46,17 @@ bool DebugCamera::handleEvents(const SDL_Event& event)
     default:
       return false;
     }
+  case SDL_WINDOWEVENT:
+    switch(event.window.event)
+    {
+    case SDL_WINDOWEVENT_RESIZED:
+      this->windowSize.x = event.window.data1;
+      this->windowSize.y = event.window.data2;
+      break;
+    default:
+      break;
+    }
+    return false;
   default:
     return false;
   }
@@ -77,14 +81,24 @@ void DebugCamera::update(float deltaTime)
                         state[e]-state[q],
                         state[s]-state[w]);
 
-    key_input = (glm::inverse(camera_orientation) * glm::vec4(-key_input, 0)).xyz();
+    key_input = (glm::inverse(camera_orientation_inverse) * glm::vec4(-key_input, 0)).xyz();
 
     camera_position -=  key_input * deltaTime * movement_speed;
   }
 
-  const glm::mat4 viewMatrix = camera_orientation * glm::translate(I, -camera_position);
+  const glm::mat4 viewMatrix = camera_orientation_inverse * glm::translate(I, -camera_position);
   this->viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
+
+
+void DebugCamera::operator=(const scene::CameraParameter& cameraParameter)
+{
+  this->projectionMatrix = cameraParameter.projectionMatrix(windowSize.x, windowSize.y);
+  this->camera_orientation_inverse = cameraParameter.viewMatrix();
+  this->camera_orientation_inverse[3] = glm::vec4(0,0,0,1);
+  this->camera_position = cameraParameter.position;
+}
+
 
 } // namespace glrt
 

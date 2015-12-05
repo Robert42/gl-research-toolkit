@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 project(OpenGL-Research-Toolkit)
 
 
+include(files.cmake)
+
+
 if(NOT GLRT_ASSET_DIR)
 message(FATAL_ERROR "GLRT_ASSET_DIR must be set")
 endif()
@@ -23,37 +26,7 @@ set(CMAKE_AUTOMOC ON)
 
 
 add_library(glrt
-  include/glrt/application.h
-  include/glrt/debug-camera.h
-  include/glrt/dependencies.h
-  include/glrt/gui/anttweakbar.h
-  include/glrt/gui/toolbar.h
-  include/glrt/profiler.h
-  include/glrt/scene/entity.h
-  include/glrt/scene/forward-renderer.h
-  include/glrt/scene/material.h
-  include/glrt/scene/scene.h
-  include/glrt/scene/scene-renderer.h
-  include/glrt/scene/static-mesh.h
-  include/glrt/scene/static-mesh-component.h
-  include/glrt/system.h
-  include/glrt/temp-shader-file.h
-  include/glrt/toolkit/aligned-vector.h
-  src/glrt/application.cpp
-  src/glrt/debug-camera.cpp
-  src/glrt/dependencies.cpp
-  src/glrt/gui/anttweakbar.cpp
-  src/glrt/gui/toolbar.cpp
-  src/glrt/profiler.cpp
-  src/glrt/scene/entity.cpp
-  src/glrt/scene/forward-renderer.cpp
-  src/glrt/scene/material.cpp
-  src/glrt/scene/scene.cpp
-  src/glrt/scene/scene-renderer.cpp
-  src/glrt/scene/static-mesh.cpp
-  src/glrt/scene/static-mesh-component.cpp
-  src/glrt/system.cpp
-  src/glrt/temp-shader-file.cpp
+  ${SOURCE_FILES}
 )
 
 target_include_directories(

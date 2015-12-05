@@ -7,7 +7,9 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <AntTweakBar.h>
@@ -29,6 +31,13 @@ class Exception final
 {
 public:
   Exception(const char* file, int line, const char* function, const QString& message);
+};
+
+template<typename T, int N=1>
+struct padding final
+{
+private:
+  quint8 _[sizeof(T)*N];
 };
 
 } // namespace glrt

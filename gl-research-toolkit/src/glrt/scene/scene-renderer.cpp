@@ -2,10 +2,8 @@
 #include <glrt/scene/static-mesh-component.h>
 
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/temp-shader-file.h>
 #include <glrt/toolkit/aligned-vector.h>
-
-#include <set>
+#include <glrt/toolkit/shader-compiler.h>
 
 namespace glrt {
 namespace scene {
@@ -30,12 +28,15 @@ void Renderer::render()
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
 
   renderImplementation();
+
+  if(!scene._debug_sceneCameras.isNull())
+    scene._debug_sceneCameras->draw();
 }
 
 void Renderer::updateSceneUniform()
 {
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneUniformData.view_projection_matrix = scene.camera.viewProjectionMatrix;
+  sceneUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
   sceneUniformBuffer.Unmap();
 }
 
@@ -51,43 +52,12 @@ Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, gl::Shader
 }
 
 Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock)
-  : Pass(renderer, type, std::move(gl::ShaderObject(materialName.toStdString())))
+  : Pass(renderer,
+         type,
+         std::move(ShaderCompiler::createShaderFromFiles(materialName,
+                                                         QDir(GLRT_SHADER_DIR"/materials"),
+                                                         preprocessorBlock)))
 {
-  TempShaderFile tempShaderFile;
-
-  tempShaderFile.addPreprocessorBlock(preprocessorBlock);
-
-  std::string preprocessor_definitions = preprocessorBlock.join('\n').toStdString();
-  if(!preprocessor_definitions.empty())
-    preprocessor_definitions += "\n";
-
-  const QDir shaderDir(GLRT_SHADER_DIR"/materials");
-
-  QMap<QString, gl::ShaderObject::ShaderType> shaderTypes;
-  shaderTypes[".vs"] = gl::ShaderObject::ShaderType::VERTEX;
-  shaderTypes[".fs"] = gl::ShaderObject::ShaderType::FRAGMENT;
-
-  std::set<gl::ShaderObject::ShaderType> usedTypes;
-
-  for(const QString& extension : shaderTypes.keys())
-  {
-    QFileInfo file = shaderDir.filePath(materialName + extension);
-
-    if(!file.exists())
-      continue;
-
-    gl::ShaderObject::ShaderType type = shaderTypes[extension];
-
-    this->shaderObject.AddShaderFromFile(type, file.absoluteFilePath().toStdString());
-
-    usedTypes.insert(type);
-  }
-
-  if(usedTypes.empty())
-    throw GLRT_EXCEPTION(QString("No shader files found for %0").arg(materialName));
-
-
-  this->shaderObject.CreateProgram();
 }
 
 Renderer::Pass::~Pass()
@@ -138,7 +108,7 @@ void Renderer::Pass::renderStaticMeshes()
   if(materialInstanceRanges.empty())
     return;
 
-  // FIXME: Don't forget to activate backface-culling
+  glEnable(GL_CULL_FACE);
 
   const int N = materialInstanceRanges[materialInstanceRanges.size()-1].end;
 

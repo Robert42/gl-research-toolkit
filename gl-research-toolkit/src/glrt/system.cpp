@@ -1,5 +1,5 @@
 #include <glrt/system.h>
-#include <glrt/temp-shader-file.h>
+#include <glrt/toolkit/temp-shader-file.h>
 
 
 /*! \namespace glrt

@@ -1,5 +1,6 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/static-mesh-component.h>
+#include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -20,9 +21,16 @@ namespace scene {
 
 
 Scene::Scene(SDL_Window* sdlWindow)
-  : camera(sdlWindow),
+  : debugCamera(sdlWindow),
     _cachedStaticStructureCacheIndex(0)
 {
+  visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
+  visualize_sceneCameras.setter = [this](bool show) {
+    if(show)
+      this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->sceneCameras());
+    else
+      this->_debug_sceneCameras.clear();
+  };
 }
 
 Scene::~Scene()
@@ -37,18 +45,21 @@ void Scene::clear()
 
   for(Entity* entity : entities)
     delete entity;
+
+  this->_sceneCameras.clear();
+  this->visualize_sceneCameras.reapply();
 }
 
 
 bool Scene::handleEvents(const SDL_Event& event)
 {
-  return camera.handleEvents(event);
+  return debugCamera.handleEvents(event);
 }
 
 
 void Scene::update(float deltaTime)
 {
-  camera.update(deltaTime);
+  debugCamera.update(deltaTime);
 }
 
 
@@ -165,6 +176,9 @@ bool Scene::loadFromColladaFile(const QString& file,
 
   assets.scene = scene;
 
+  if(!scene)
+    throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
+
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
   {
     aiString name;
@@ -176,8 +190,9 @@ bool Scene::loadFromColladaFile(const QString& file,
     }
   }
 
-  if(!scene)
-    throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
+  _sceneCameras.resize(scene->mNumCameras);
+  for(quint32 i=0; i<scene->mNumCameras; ++i)
+    _sceneCameras[i] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
@@ -194,18 +209,12 @@ bool Scene::loadFromColladaFile(const QString& file,
 }
 
 
-inline glm::mat4 toGlmMat4(const aiMatrix4x4& m)
-{
-  return glm::transpose(reinterpret_cast<const glm::mat4&>(m));
-}
-
-
 bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
                                    aiNode* node,
                                    glm::mat4 globalTransform,
                                    glm::mat4 localTransform)
 {
-  globalTransform = globalTransform * toGlmMat4(node->mTransformation);
+  globalTransform = globalTransform * to_glm_mat4(node->mTransformation);
 
   if(node->mNumMeshes > 0)
   {
@@ -247,6 +256,12 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
 void Scene::staticMeshStructureChanged()
 {
   ++_cachedStaticStructureCacheIndex;
+}
+
+
+const QVector<CameraParameter>& Scene::sceneCameras() const
+{
+  return _sceneCameras;
 }
 
 

@@ -1,7 +1,7 @@
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/profiler.h>
 #include <glrt/application.h>
-
+#include <glrt/scene/scene.h>
 
 namespace glrt {
 namespace gui {
@@ -70,6 +70,21 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
   TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &profiler->printFramerate, "");
+
+  gui::Toolbar::registerTweakBar(tweakBar);
+
+  return tweakBar;
+}
+
+
+TwBar* AntTweakBar::createSceneBar(scene::Scene* scene)
+{
+  TwBar* tweakBar = TwNewBar("Scene");
+
+  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to modify or debug a scene.");
+  TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
+
+  scene->visualize_sceneCameras.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
 
   gui::Toolbar::registerTweakBar(tweakBar);
 

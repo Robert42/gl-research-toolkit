@@ -1,7 +1,7 @@
 #ifndef GLRT_TEMPSHADERFILE_H
 #define GLRT_TEMPSHADERFILE_H
 
-#include "dependencies.h"
+#include <glrt/dependencies.h>
 
 namespace glrt {
 
