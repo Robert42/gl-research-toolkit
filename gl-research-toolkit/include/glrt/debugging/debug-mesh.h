@@ -61,7 +61,7 @@ public:
 
   QVector<DebugMesh::Vertex> vertices;
 
-  void beginStrip(bool close, int modulo=std::numeric_limits<int>::max());
+  void beginStrip(bool close);
   void endStrip();
 
   void addVertex(const glm::vec3& position);
@@ -81,7 +81,6 @@ public:
 private:
   QStack<glm::mat4> transformations;
   int stripIndex = -1;
-  int stripModulo;
   int firstStripVertex;
 };
 

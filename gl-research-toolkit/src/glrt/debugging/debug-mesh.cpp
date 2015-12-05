@@ -65,10 +65,9 @@ DebugMesh::Painter::Painter()
 }
 
 
-void DebugMesh::Painter::beginStrip(bool close, int modulo)
+void DebugMesh::Painter::beginStrip(bool close)
 {
   this->stripIndex = 0;
-  this->stripModulo = modulo;
   if(close)
     this->firstStripVertex = vertices.length();
   else
@@ -78,7 +77,11 @@ void DebugMesh::Painter::beginStrip(bool close, int modulo)
 void DebugMesh::Painter::endStrip()
 {
   if(this->firstStripVertex < vertices.length())
+  {
+    pushMatrix(glm::mat4(1), false);
     addVertex(vertices[this->firstStripVertex].position);
+    popMatrix();
+  }
 
   this->stripIndex = -1;
 }
@@ -90,22 +93,23 @@ void DebugMesh::Painter::addVertex(const glm::vec3& position)
 
   if(stripIndex >= 0)
   {
-    if(vertices.length() > 0 && stripIndex > 0)
+    if(vertices.length() > 0 && stripIndex > 1)
     {
       Vertex v = vertices.last();
       vertices.append(v);
     }
-    stripIndex  = stripIndex % stripModulo;;
+    stripIndex  = (stripIndex+1);
   }
 
   vertices.resize(vertices.length()+1);
 
-  glm::vec4 transformed = transformations.top() * glm::vec4(position, 1);
-
-  vertices.last().position = transformed.xyz() / transformed.w;
+  vertices.last().position = position;
   vertices.last().color = nextAttribute.color;
   vertices.last().parameter1 = nextAttribute.parameter1;
   vertices.last().parameter2 = nextAttribute.parameter2;
+
+  glm::vec4 transformed = transformations.top() * glm::vec4(vertices.last().position, 1);
+  vertices.last().position = transformed.xyz() / transformed.w;
 }
 
 void DebugMesh::Painter::addVertex(const glm::vec2& position, float z)
@@ -122,7 +126,7 @@ void DebugMesh::Painter::addVertex(float x, float y, float z)
 void DebugMesh::Painter::addCircle(float radius, int nPoints)
 {
   beginStrip(true);
-  for(int i=0; i<=nPoints; ++i)
+  for(int i=0; i<nPoints; ++i)
   {
     float angle = i * glm::two_pi<float>() / nPoints;
 
