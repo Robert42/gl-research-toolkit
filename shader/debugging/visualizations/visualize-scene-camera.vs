@@ -9,6 +9,7 @@ uniform CameraBlock
   vec3 lookAt;
   vec3 upVector;
   vec3 position;
+  vec3 frustumEdgeDir;
 }camera;
 
 void main()
@@ -18,11 +19,13 @@ void main()
   float clipNear = camera.fov_and_aspect_and_clipNear_and_clipFar[2];
   float clipFar = camera.fov_and_aspect_and_clipNear_and_clipFar[3];
   
-  vec3 p = vertex_position;
-  
-  p = mix(vec3(0, 0, -clipNear), vec3(0, 0, -clipFar), p.z);
-  
-  p = mix(vertex_position, p, vertex_parameter1);
-  
-  pass_attributes_to_fragment_shader(p, vertex_color);
+  vec3 ws_position = vertex_position;
+
+  if(vertex_parameter1 > 0.5f)
+  {
+    vec3 p = camera.frustumEdgeDir * mix(0, 1, vertex_position.z);
+    ws_position = p;
+  }
+
+  pass_attributes_to_fragment_shader(ws_position, vertex_color);
 }

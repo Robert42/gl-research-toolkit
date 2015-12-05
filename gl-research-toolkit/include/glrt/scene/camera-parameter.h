@@ -8,7 +8,7 @@ class aiCamera;
 namespace glrt {
 namespace scene {
 
-struct CameraParameter
+struct CameraParameter final
 {
 public:
   float horizontal_fov = glm::radians(90.f);

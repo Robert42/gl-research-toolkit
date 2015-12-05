@@ -8,13 +8,14 @@ namespace glrt {
 namespace debugging {
 
 
-DebugLineVisualisation::DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, gl::ShaderObject&& shaderObject, int numDrawCalls, int bufferOffset)
+DebugLineVisualisation::DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, gl::ShaderObject&& shaderObject, int numDrawCalls, int uniformBufferOffset, int uniformBufferElementSize)
   : vertexArrayObject(DebugMesh::generateVertexArrayObject()),
     debugMesh(std::move(debugMesh)),
     uniformBuffer(std::move(uniformBuffer)),
     shaderObject(std::move(shaderObject)),
     numDrawCalls(numDrawCalls),
-    bufferOffset(bufferOffset)
+    uniformBufferOffset(uniformBufferOffset),
+    uniformBufferElementSize(uniformBufferElementSize)
 {
 }
 
@@ -24,10 +25,11 @@ DebugLineVisualisation::DebugLineVisualisation(DebugLineVisualisation&& other)
     uniformBuffer(std::move(other.uniformBuffer)),
     shaderObject(std::move(other.shaderObject)),
     numDrawCalls(other.numDrawCalls),
-    bufferOffset(other.bufferOffset)
+    uniformBufferOffset(other.uniformBufferOffset),
+    uniformBufferElementSize(other.uniformBufferElementSize)
 {
   other.numDrawCalls = 0;
-  other.bufferOffset = 0;
+  other.uniformBufferOffset = 0;
 }
 
 DebugLineVisualisation::~DebugLineVisualisation()
@@ -37,6 +39,28 @@ DebugLineVisualisation::~DebugLineVisualisation()
 
 DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QVector<scene::CameraParameter>& sceneCameras)
 {
+  struct CachedCamera
+  {
+    scene::CameraParameter cameraParameter;
+    glm::vec3 frustumEdgeDir;
+    padding<float> _padding;
+
+
+    CachedCamera()
+    {
+    }
+    CachedCamera(const scene::CameraParameter& cameraParameter)
+      : cameraParameter(cameraParameter)
+    {
+      frustumEdgeDir = glm::vec3(0, 0, 1);
+    }
+  };
+
+  QVector<CachedCamera> cachedCameras;
+  cachedCameras.reserve(sceneCameras.length());
+  for(const scene::CameraParameter& cameraParameter : sceneCameras)
+    cachedCameras.append(cameraParameter);
+
   DebugMesh::Painter painter;
 
   float cameraLength = 0.25;
@@ -72,7 +96,7 @@ void DebugLineVisualisation::draw()
 
   for(int i=0; i<numDrawCalls; ++i)
   {
-    uniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, i*bufferOffset, vertexArrayObject.GetVertexStride(0));
+    uniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, i*uniformBufferOffset, uniformBufferElementSize);
     debugMesh.draw();
   }
 
