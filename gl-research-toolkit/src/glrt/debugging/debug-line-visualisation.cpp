@@ -39,7 +39,22 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QVector<sc
 {
   DebugMesh::Painter painter;
 
-  painter.addArrow(0.75f, 0.1f);
+  float cameraLength = 0.25;
+  float cameraWidth = 0.1;
+  float cameraHeight = 0.17;
+  float cameraCylinderRadius = cameraLength*0.5f;
+
+  painter.addCube(glm::vec3(-.5f*cameraWidth, -.5f*cameraHeight, 0), glm::vec3(.5f*cameraWidth, .5f*cameraHeight, cameraLength));
+
+  painter.pushMatrix(glm::vec3(0, cameraHeight*0.5+cameraCylinderRadius, 0), glm::vec3(1, 0, 0), glm::vec3(0, 1, 0));
+  painter.addCylinder(cameraCylinderRadius, cameraWidth, 16);
+  painter.pushMatrix(glm::vec3(0, cameraCylinderRadius*2, 0));
+  painter.addCylinder(cameraCylinderRadius, cameraWidth, 16);
+  painter.popMatrix();
+  painter.popMatrix();
+
+  painter.nextAttribute.parameter1 = 1.f;
+  painter.addCube(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1));
 
   return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
                                                                  sceneCameras,
