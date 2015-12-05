@@ -70,6 +70,7 @@ public:
 
   void addCircle(float radius, int nPoints);
   void addSphere(float radius, int nPoints);
+  void addCylinder(float radius, float length, int nPoints);
 
   void pushMatrix(const glm::vec3& position, const glm::vec3& normal, bool multiply = true);
   void pushMatrix(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& firstPointDirection, bool multiply = true);

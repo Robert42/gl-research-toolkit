@@ -39,7 +39,7 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QVector<sc
 {
   DebugMesh::Painter painter;
 
-  painter.addSphere(1.f, 16);
+  painter.addCylinder(.5f, 1.f, 16);
 
   return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
                                                                  sceneCameras,

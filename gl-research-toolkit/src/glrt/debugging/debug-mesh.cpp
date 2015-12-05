@@ -79,7 +79,11 @@ void DebugMesh::Painter::endStrip()
   if(this->firstStripVertex < vertices.length())
   {
     pushMatrix(glm::mat4(1), false);
-    addVertex(vertices[this->firstStripVertex].position);
+
+    // duplicating, because passing a reference to a value within the array vertices, which might be modified with vertices.resize within addVertex is dangerous
+    glm::vec3 startPosition = vertices[this->firstStripVertex].position;
+
+    addVertex(startPosition);
     popMatrix();
   }
 
@@ -147,6 +151,24 @@ void DebugMesh::Painter::addSphere(float radius, int nPoints)
   pushMatrix(glm::vec3(0), glm::vec3(0, 1, 0));
   addCircle(radius, nPoints);
   popMatrix();
+}
+
+
+void DebugMesh::Painter::addCylinder(float radius, float length, int nPoints)
+{
+  pushMatrix(glm::vec3(0, 0, 0.5f)*length, glm::vec3(0, 0, 1), glm::vec3(1, 0, 0));
+  addCircle(radius, nPoints);
+  popMatrix();
+
+  pushMatrix(-glm::vec3(0, 0, 0.5f)*length, glm::vec3(0, 0, 1), glm::vec3(1, 0, 0));
+  addCircle(radius, nPoints);
+  popMatrix();
+
+  for(const glm::vec3& side : {glm::vec3(1, 0, 0), glm::vec3(-1, 0, 0), glm::vec3(0,-1, 0), glm::vec3(0, 1, 0)})
+  {
+    addVertex(side*radius + glm::vec3(0, 0, .5f)*length);
+    addVertex(side*radius + glm::vec3(0, 0,-.5f)*length);
+  }
 }
 
 
