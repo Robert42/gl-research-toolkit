@@ -7,7 +7,7 @@ namespace glrt {
 namespace debugging {
 
 
-DrawCameras::DrawCameras(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, int numDrawCalls, int bufferOffset)
+DebugLineVisualisation::DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, int numDrawCalls, int bufferOffset)
   : vertexArrayObject(DebugMesh::generateVertexArrayObject()),
     debugMesh(std::move(debugMesh)),
     uniformBuffer(std::move(uniformBuffer)),
@@ -16,23 +16,23 @@ DrawCameras::DrawCameras(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, int 
 {
 }
 
-DrawCameras::DrawCameras(DrawCameras&& drawCameras)
-  : vertexArrayObject(std::move(drawCameras.vertexArrayObject)),
-    debugMesh(std::move(drawCameras.debugMesh)),
-    uniformBuffer(std::move(drawCameras.uniformBuffer)),
-    numDrawCalls(drawCameras.numDrawCalls),
-    bufferOffset(drawCameras.bufferOffset)
+DebugLineVisualisation::DebugLineVisualisation(DebugLineVisualisation&& other)
+  : vertexArrayObject(std::move(other.vertexArrayObject)),
+    debugMesh(std::move(other.debugMesh)),
+    uniformBuffer(std::move(other.uniformBuffer)),
+    numDrawCalls(other.numDrawCalls),
+    bufferOffset(other.bufferOffset)
 {
-  drawCameras.numDrawCalls = 0;
-  drawCameras.bufferOffset = 0;
+  other.numDrawCalls = 0;
+  other.bufferOffset = 0;
 }
 
-DrawCameras::~DrawCameras()
+DebugLineVisualisation::~DebugLineVisualisation()
 {
 }
 
 
-DrawCameras DrawCameras::drawCameras(const QVector<scene::CameraParameter>& sceneCameras)
+DebugLineVisualisation DebugLineVisualisation::drawCameras(const QVector<scene::CameraParameter>& sceneCameras)
 {
   DebugMesh::Painter painter;
 
@@ -42,7 +42,7 @@ DrawCameras DrawCameras::drawCameras(const QVector<scene::CameraParameter>& scen
 }
 
 
-void DrawCameras::draw()
+void DebugLineVisualisation::draw()
 {
   vertexArrayObject.Bind();
   debugMesh.bind(this->vertexArrayObject);

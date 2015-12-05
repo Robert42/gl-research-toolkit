@@ -20,24 +20,24 @@ class Scene;
 namespace debugging {
 
 
-class DrawCameras final
+class DebugLineVisualisation final
 {
 public:
-  typedef QSharedPointer<DrawCameras> Ptr;
+  typedef QSharedPointer<DebugLineVisualisation> Ptr;
 
-  DrawCameras(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, int numDrawCalls, int bufferOffset);
-  DrawCameras(DrawCameras&&);
-  ~DrawCameras();
+  DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, int numDrawCalls, int bufferOffset);
+  DebugLineVisualisation(DebugLineVisualisation&&);
+  ~DebugLineVisualisation();
 
   template<typename UniformType>
-  static DrawCameras debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData);
+  static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData);
   template<typename UniformType>
-  static DrawCameras debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData);
-  static DrawCameras drawCameras(const QVector<scene::CameraParameter>& sceneCameras);
+  static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData);
+  static DebugLineVisualisation drawCameras(const QVector<scene::CameraParameter>& sceneCameras);
 
-  DrawCameras(const DrawCameras&) = delete;
-  DrawCameras& operator=(const DrawCameras&) = delete;
-  DrawCameras& operator=(DrawCameras&&) = delete;
+  DebugLineVisualisation(const DebugLineVisualisation&) = delete;
+  DebugLineVisualisation& operator=(const DebugLineVisualisation&) = delete;
+  DebugLineVisualisation& operator=(DebugLineVisualisation&&) = delete;
 
   void draw();
 
@@ -50,20 +50,20 @@ private:
 };
 
 template<typename UniformType>
-DrawCameras DrawCameras::debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData)
+DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData)
 {
   aligned_vector<UniformType> aligned_data(aligned_vector<UniformType>::Alignment::UniformBufferOffsetAlignment);
   aligned_data.reserve(uniformData.length());
-  for(const scene::CameraParameter& camera : uniformData)
-    aligned_data.push_back(camera);
+  for(const UniformType& data : uniformData)
+    aligned_data.push_back(data);
 
   return std::move(debugRendering(painter, aligned_data));
 }
 
 template<typename UniformType>
-DrawCameras DrawCameras::debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData)
+DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData)
 {
-  return DrawCameras(std::move(painter.toMesh()),
+  return DebugLineVisualisation(std::move(painter.toMesh()),
                      gl::Buffer(uniformData.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, uniformData.data()),
                      uniformData.size(),
                      uniformData.alignment());
