@@ -9,6 +9,7 @@ namespace debugging {
 
 
 DrawCameras::DrawCameras()
+  : vertexArrayObject(DebugMesh::generateVertexArrayObject())
 {
 }
 
@@ -43,6 +44,11 @@ void DrawCameras::draw(const scene::Scene* scene)
     cameras.writeTo(cameraParameter->Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
     cameraParameter->Unmap();
   }
+
+  vertexArrayObject.Bind();
+  cameraParameter->BindVertexBuffer(0, 0, vertexArrayObject.GetVertexStride(0));
+
+  vertexArrayObject.ResetBinding();
 }
 
 

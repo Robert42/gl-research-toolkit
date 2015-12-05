@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 
 #include <glhelper/buffer.hpp>
+#include <glhelper/vertexarrayobject.hpp>
 
 #include <QStack>
 
@@ -25,6 +26,8 @@ public:
   DebugMesh& operator=(DebugMesh&&) = delete;
   DebugMesh(const DebugMesh&) = delete;
   DebugMesh& operator=(const DebugMesh&) = delete;
+
+  static gl::VertexArrayObject generateVertexArrayObject();
 
 private:
   gl::Buffer vertexBuffer;

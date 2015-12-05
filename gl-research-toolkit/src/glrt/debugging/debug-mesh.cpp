@@ -1,5 +1,6 @@
 #include <glrt/debugging/debug-mesh.h>
 #include <glrt/toolkit/geometry.h>
+#include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
 namespace debugging {
@@ -18,6 +19,23 @@ DebugMesh::~DebugMesh()
 DebugMesh::DebugMesh(DebugMesh&& debugMesh)
   : vertexBuffer(std::move(debugMesh.vertexBuffer))
 {
+}
+
+gl::VertexArrayObject DebugMesh::generateVertexArrayObject()
+{
+  typedef gl::VertexArrayObject::Attribute Attribute;
+
+  Q_ASSERT(DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_POSITION == 0);
+  Q_ASSERT(DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_PARAMETER1 == 1);
+  Q_ASSERT(DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_COLOR == 2);
+  Q_ASSERT(DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_PARAMETER2 == 3);
+
+  const int vertexBufferBinding = 0;
+
+  return std::move(gl::VertexArrayObject({Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
+                                          Attribute(Attribute::Type::FLOAT, 1, vertexBufferBinding),
+                                          Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
+                                          Attribute(Attribute::Type::FLOAT, 1, vertexBufferBinding)}));
 }
 
 

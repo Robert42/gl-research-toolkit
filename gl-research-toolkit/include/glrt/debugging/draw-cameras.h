@@ -34,6 +34,7 @@ public:
   void deinit();
 
 private:
+  gl::VertexArrayObject vertexArrayObject;
   gl::Buffer* cameraParameter = nullptr;
   DebugMesh* debugMesh = nullptr;
   int nCameras = 0;
