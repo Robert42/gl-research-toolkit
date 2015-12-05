@@ -1,4 +1,4 @@
-#include <glrt/debugging/draw-cameras.h>
+#include <glrt/debugging/debug-line-visualisation.h>
 
 #include <glrt/scene/scene.h>
 #include <glrt/glsl/layout-constants.h>

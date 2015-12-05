@@ -1,8 +1,8 @@
 set(SOURCE_FILES
   include/glrt/application.h
   include/glrt/debug-camera.h
+  include/glrt/debugging/debug-line-visualisation.h
   include/glrt/debugging/debug-mesh.h
-  include/glrt/debugging/draw-cameras.h
   include/glrt/dependencies.h
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
@@ -22,8 +22,8 @@ set(SOURCE_FILES
   include/glrt/toolkit/geometry.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
+  src/glrt/debugging/debug-line-visualisation.cpp
   src/glrt/debugging/debug-mesh.cpp
-  src/glrt/debugging/draw-cameras.cpp
   src/glrt/dependencies.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
