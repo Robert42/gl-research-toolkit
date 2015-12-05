@@ -2,10 +2,8 @@
 #include <glrt/scene/static-mesh-component.h>
 
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/temp-shader-file.h>
 #include <glrt/toolkit/aligned-vector.h>
-
-#include <set>
+#include <glrt/toolkit/shader-compiler.h>
 
 namespace glrt {
 namespace scene {
@@ -53,41 +51,13 @@ Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, gl::Shader
 Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock)
   : Pass(renderer, type, std::move(gl::ShaderObject(materialName.toStdString())))
 {
-  TempShaderFile tempShaderFile;
+  ShaderCompiler compiler;
 
-  tempShaderFile.addPreprocessorBlock(preprocessorBlock);
-
-  std::string preprocessor_definitions = preprocessorBlock.join('\n').toStdString();
-  if(!preprocessor_definitions.empty())
-    preprocessor_definitions += "\n";
+  compiler.preprocessorBlock = preprocessorBlock;
 
   const QDir shaderDir(GLRT_SHADER_DIR"/materials");
 
-  QMap<QString, gl::ShaderObject::ShaderType> shaderTypes;
-  shaderTypes[".vs"] = gl::ShaderObject::ShaderType::VERTEX;
-  shaderTypes[".fs"] = gl::ShaderObject::ShaderType::FRAGMENT;
-
-  std::set<gl::ShaderObject::ShaderType> usedTypes;
-
-  for(const QString& extension : shaderTypes.keys())
-  {
-    QFileInfo file = shaderDir.filePath(materialName + extension);
-
-    if(!file.exists())
-      continue;
-
-    gl::ShaderObject::ShaderType type = shaderTypes[extension];
-
-    this->shaderObject.AddShaderFromFile(type, file.absoluteFilePath().toStdString());
-
-    usedTypes.insert(type);
-  }
-
-  if(usedTypes.empty())
-    throw GLRT_EXCEPTION(QString("No shader files found for %0").arg(materialName));
-
-
-  this->shaderObject.CreateProgram();
+  compiler.compile(&this->shaderObject, shaderDir);
 }
 
 Renderer::Pass::~Pass()

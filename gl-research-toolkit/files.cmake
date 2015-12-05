@@ -16,10 +16,11 @@ set(SOURCE_FILES
   include/glrt/scene/static-mesh-component.h
   include/glrt/scene/static-mesh.h
   include/glrt/system.h
-  include/glrt/temp-shader-file.h
   include/glrt/toolkit/aligned-vector.h
   include/glrt/toolkit/assimp-glm-converter.h
   include/glrt/toolkit/geometry.h
+  include/glrt/toolkit/shader-compiler.h
+  include/glrt/toolkit/temp-shader-file.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp
   src/glrt/debugging/debug-line-visualisation.cpp
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/scene/static-mesh.cpp
   src/glrt/system.cpp
-  src/glrt/temp-shader-file.cpp
   src/glrt/toolkit/geometry.cpp
+  src/glrt/toolkit/shader-compiler.cpp
+  src/glrt/toolkit/temp-shader-file.cpp
 )
