@@ -84,7 +84,7 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
-  renderer->visualize_sceneCameras.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
+  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
 
   gui::Toolbar::registerTweakBar(tweakBar);
 

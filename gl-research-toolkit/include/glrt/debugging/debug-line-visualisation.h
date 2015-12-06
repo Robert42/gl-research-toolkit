@@ -8,7 +8,6 @@
 #include <glhelper/vertexarrayobject.hpp>
 #include <glhelper/shaderobject.hpp>
 
-
 #include "debug-mesh.h"
 
 namespace glrt {
@@ -74,6 +73,7 @@ DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::P
                                 uniformData.alignment(),
                                 sizeof(UniformType));
 }
+
 
 } // namespace debugging
 } // namespace glrt

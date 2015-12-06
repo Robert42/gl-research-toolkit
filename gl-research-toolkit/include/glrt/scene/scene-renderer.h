@@ -1,10 +1,9 @@
 #ifndef GLRT_SCENE_RENDERER_H
 #define GLRT_SCENE_RENDERER_H
 
-#include "scene.h"
+#include <glrt/scene/scene.h>
+#include <glrt/debugging/visualization-renderer.h>
 
-#include <glrt/debugging/debug-line-visualisation.h>
-#include <glrt/gui/anttweakbar.h>
 
 namespace glrt {
 namespace scene {
@@ -17,8 +16,7 @@ public:
   class Pass;
 
   Scene& scene;
-
-  gui::TweakBarCBVar<bool> visualize_sceneCameras;
+  debugging::VisualizationRenderer visualizeCameras;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
@@ -43,15 +41,10 @@ private:
 
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
-  debugging::DebugLineVisualisation::Ptr _debug_sceneCameras;
-
   void updateSceneUniform();
 
 
   void debugCameraPositions();
-
-private slots:
-  void updateDebuggingViews();
 };
 
 

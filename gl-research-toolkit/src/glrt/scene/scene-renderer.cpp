@@ -11,18 +11,10 @@ namespace scene {
 
 Renderer::Renderer(Scene* scene)
   : scene(*scene),
+    visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
 {
-  visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
-  visualize_sceneCameras.setter = [this](bool show) {
-    if(show)
-      debugCameraPositions();
-    else
-      this->_debug_sceneCameras.clear();
-  };
-
-  connect(scene, SIGNAL(sceneLoaded(bool)), this, SLOT(updateDebuggingViews()));
 }
 
 Renderer::~Renderer()
@@ -38,8 +30,7 @@ void Renderer::render()
 
   renderImplementation();
 
-  if(_debug_sceneCameras)
-    _debug_sceneCameras->draw();
+  visualizeCameras.render();
 }
 
 void Renderer::updateSceneUniform()
@@ -50,20 +41,6 @@ void Renderer::updateSceneUniform()
 }
 
 
-void Renderer::updateDebuggingViews()
-{
-  if(this->_debug_sceneCameras)
-    debugCameraPositions();
-}
-
-
-void Renderer::debugCameraPositions()
-{
-  if(this->scene.sceneCameras().isEmpty())
-    this->_debug_sceneCameras.clear();
-  else
-    this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->scene.sceneCameras().values());
-}
 
 
 // ======== Pass ===============================================================

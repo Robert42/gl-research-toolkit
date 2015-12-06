@@ -89,6 +89,9 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scen
 }
 
 
+
+
+
 void DebugLineVisualisation::draw()
 {
   shaderObject.Activate();
