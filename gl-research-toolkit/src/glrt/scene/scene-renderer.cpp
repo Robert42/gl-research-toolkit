@@ -14,6 +14,15 @@ Renderer::Renderer(Scene* scene)
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
 {
+  visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
+  visualize_sceneCameras.setter = [this](bool show) {
+    if(show)
+      debugCameraPositions();
+    else
+      this->_debug_sceneCameras.clear();
+  };
+
+  connect(scene, SIGNAL(sceneLoaded(bool)), this, SLOT(updateDebuggingViews()));
 }
 
 Renderer::~Renderer()
@@ -29,8 +38,8 @@ void Renderer::render()
 
   renderImplementation();
 
-  if(!scene._debug_sceneCameras.isNull())
-    scene._debug_sceneCameras->draw();
+  if(_debug_sceneCameras)
+    _debug_sceneCameras->draw();
 }
 
 void Renderer::updateSceneUniform()
@@ -38,6 +47,22 @@ void Renderer::updateSceneUniform()
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   sceneUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
   sceneUniformBuffer.Unmap();
+}
+
+
+void Renderer::updateDebuggingViews()
+{
+  if(this->_debug_sceneCameras)
+    debugCameraPositions();
+}
+
+
+void Renderer::debugCameraPositions()
+{
+  if(this->scene.sceneCameras().isEmpty())
+    this->_debug_sceneCameras.clear();
+  else
+    this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->scene.sceneCameras().values());
 }
 
 

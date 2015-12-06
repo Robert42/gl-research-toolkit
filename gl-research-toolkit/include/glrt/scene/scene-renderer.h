@@ -3,16 +3,22 @@
 
 #include "scene.h"
 
+#include <glrt/debugging/debug-line-visualisation.h>
+#include <glrt/gui/anttweakbar.h>
+
 namespace glrt {
 namespace scene {
 
-class Renderer
+class Renderer : public QObject
 {
+  Q_OBJECT
 public:
 
   class Pass;
 
   Scene& scene;
+
+  gui::TweakBarCBVar<bool> visualize_sceneCameras;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
@@ -37,7 +43,15 @@ private:
 
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
+  debugging::DebugLineVisualisation::Ptr _debug_sceneCameras;
+
   void updateSceneUniform();
+
+
+  void debugCameraPositions();
+
+private slots:
+  void updateDebuggingViews();
 };
 
 

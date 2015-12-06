@@ -25,13 +25,6 @@ Scene::Scene(SDL_Window* sdlWindow)
   : debugCamera(sdlWindow),
     _cachedStaticStructureCacheIndex(0)
 {
-  visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
-  visualize_sceneCameras.setter = [this](bool show) {
-    if(show && !sceneCameras().isEmpty())
-      this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->sceneCameras().values());
-    else
-      this->_debug_sceneCameras.clear();
-  };
 }
 
 Scene::~Scene()
@@ -41,13 +34,15 @@ Scene::~Scene()
 
 void Scene::clear()
 {
+  clearScene();
+
   QSet<Entity*> entities;
   entities.swap(this->_entities);
 
   for(Entity* entity : entities)
     delete entity;
 
-  this->_debug_sceneCameras.clear();
+  sceneCleared();
 }
 
 
@@ -86,7 +81,11 @@ bool Scene::loadFromFile(const QString& filename)
     return false;
   }
 
-  return fromJson(QFileInfo(filename).dir(), jsonDocument.object());
+  bool success = fromJson(QFileInfo(filename).dir(), jsonDocument.object());
+
+  sceneLoaded(success);
+
+  return success;
 }
 
 bool Scene::fromJson(const QDir& dir, const QJsonObject& json)
