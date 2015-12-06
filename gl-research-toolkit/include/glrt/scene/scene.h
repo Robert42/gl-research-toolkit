@@ -78,10 +78,11 @@ private:
     QHash<int, StaticMesh::Ptr> meshesForIndex;
     QMap<QString, CameraParameter> cameras;
     MaterialInstance::Ptr fallbackMaterial;
+    glm::mat4 meshTransform;
   };
   bool loadFromColladaFile(const QString& file,
                            SceneAssets assets);
-  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform, glm::mat4 localTransform);
+  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform);
 };
 
 

@@ -155,10 +155,10 @@ bool Scene::loadFromColladaFile(const QString& file,
                                         0,-1, 0, 0,
                                         0, 0, 0, 1);
 
-  glm::mat4 lokalTransform = glm::mat4(1, 0, 0, 0,
-                                       0, 0,-1, 0,
-                                       0, 1, 0, 0,
-                                       0, 0, 0, 1);
+  glm::mat4 meshTransform = glm::mat4(1, 0, 0, 0,
+                                      0, 0,-1, 0,
+                                      0, 1, 0, 0,
+                                      0, 0, 0, 1);
 
   const aiScene* scene = importer.ReadFile(file.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
@@ -175,6 +175,7 @@ bool Scene::loadFromColladaFile(const QString& file,
 
 
   assets.scene = scene;
+  assets.meshTransform = meshTransform;
 
   if(!scene)
     throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
@@ -204,14 +205,13 @@ bool Scene::loadFromColladaFile(const QString& file,
     assets.meshesForIndex[i] = staticMesh;
   }
 
-  return loadEntitiesFromAssimp(assets, scene->mRootNode, globalTransform, lokalTransform);
+  return loadEntitiesFromAssimp(assets, scene->mRootNode, globalTransform);
 }
 
 
 bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
                                    aiNode* node,
-                                   glm::mat4 globalTransform,
-                                   glm::mat4 localTransform)
+                                   glm::mat4 globalTransform)
 {
   globalTransform = globalTransform * to_glm_mat4(node->mTransformation);
 
@@ -224,7 +224,7 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
   {
     Entity* entity = new Entity(*this);
     entity->name = name;
-    entity->relativeTransform = globalTransform*localTransform;
+    entity->relativeTransform = globalTransform;
 
     for(quint32 i=0; i<node->mNumMeshes; ++i)
     {
@@ -243,7 +243,7 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
       else
         material = assets.fallbackMaterial;
 
-      new StaticMeshComponent(*entity, false, mesh, material);
+      new StaticMeshComponent(*entity, false, mesh, material, assets.meshTransform);
     }
 
     if(hasCamera)
@@ -254,7 +254,7 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
 
   for(quint32 i=0; i<node->mNumChildren; ++i)
   {
-    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], globalTransform, localTransform))
+    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], globalTransform))
       return false;
   }
 
