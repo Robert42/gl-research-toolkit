@@ -29,21 +29,22 @@ inline glm::vec3 find_best_perpendicular(const glm::vec3& vector)
 }
 
 
-inline glm::vec3 transform_vector(const glm::mat4& t, glm::vec4 vector)
+inline glm::vec3 transform_point(const glm::mat4& t, const glm::vec3& point)
 {
+  glm::vec4 vector(point, 1);
+
   vector = t * vector;
 
   return vector.xyz() / vector.w;
 }
 
-inline glm::vec3 transform_point(const glm::mat4& t, const glm::vec3& point)
-{
-  return transform_vector(t, glm::vec4(point, 1));
-}
-
 inline glm::vec3 transform_direction(const glm::mat4& t, const glm::vec3& relative)
 {
-  return transform_vector(t, glm::vec4(relative, 0));
+  glm::vec4 vector(relative, 0);
+
+  vector = t * vector;
+
+  return vector.xyz();
 }
 
 

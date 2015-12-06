@@ -1,4 +1,5 @@
 #include <glrt/debug-camera.h>
+#include <glrt/toolkit/geometry.h>
 
 namespace glrt {
 
@@ -81,7 +82,7 @@ void DebugCamera::update(float deltaTime)
                         state[e]-state[q],
                         state[s]-state[w]);
 
-    key_input = (glm::inverse(camera_orientation_inverse) * glm::vec4(-key_input, 0)).xyz();
+    key_input = transform_direction(glm::inverse(camera_orientation_inverse), -key_input);
 
     camera_position -=  key_input * deltaTime * movement_speed;
   }
