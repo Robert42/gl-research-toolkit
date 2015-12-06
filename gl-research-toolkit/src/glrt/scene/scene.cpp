@@ -1,5 +1,6 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/static-mesh-component.h>
+#include <glrt/scene/camera-component.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <glrt/glsl/layout-constants.h>
@@ -26,7 +27,7 @@ Scene::Scene(SDL_Window* sdlWindow)
 {
   visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
   visualize_sceneCameras.setter = [this](bool show) {
-    if(show)
+    if(show && !sceneCameras().isEmpty())
       this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->sceneCameras().values());
     else
       this->_debug_sceneCameras.clear();
@@ -46,7 +47,6 @@ void Scene::clear()
   for(Entity* entity : entities)
     delete entity;
 
-  this->_sceneCameras.clear();
   this->_debug_sceneCameras.clear();
 }
 
@@ -191,7 +191,7 @@ bool Scene::loadFromColladaFile(const QString& file,
   }
 
   for(quint32 i=0; i<scene->mNumCameras; ++i)
-    _sceneCameras[scene->mCameras[i]->mName.C_Str()] = CameraParameter::fromAssimp(*scene->mCameras[i]);
+    assets.cameras[scene->mCameras[i]->mName.C_Str()] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
@@ -215,10 +215,15 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
 {
   globalTransform = globalTransform * to_glm_mat4(node->mTransformation);
 
-  if(node->mNumMeshes > 0)
+  const QString name = node->mName.C_Str();
+
+  const bool hasMesh = node->mNumMeshes > 0;
+  const bool hasCamera = assets.cameras.contains(name);
+
+  if(hasMesh || hasCamera)
   {
     Entity* entity = new Entity(*this);
-    entity->name = node->mName.C_Str();
+    entity->name = name;
     entity->relativeTransform = globalTransform*localTransform;
 
     for(quint32 i=0; i<node->mNumMeshes; ++i)
@@ -240,6 +245,11 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
 
       new StaticMeshComponent(*entity, false, mesh, material);
     }
+
+    if(hasCamera)
+    {
+      new CameraComponent(*entity, assets.cameras[name]);
+    }
   }
 
   for(quint32 i=0; i<node->mNumChildren; ++i)
@@ -258,9 +268,18 @@ void Scene::staticMeshStructureChanged()
 }
 
 
-const QMap<QString, CameraParameter>& Scene::sceneCameras() const
+QMap<QString, CameraParameter> Scene::sceneCameras() const
 {
-  return _sceneCameras;
+  QMap<QString, CameraParameter> cameras;
+
+  QVector<CameraComponent*> cameraComponents = allComponentsWithType<CameraComponent>();
+
+  for(CameraComponent* c : cameraComponents)
+  {
+    cameras[c->entity.name] = c->globalTransformation() * c->cameraParameter;
+  }
+
+  return cameras;
 }
 
 

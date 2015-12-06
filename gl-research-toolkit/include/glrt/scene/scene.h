@@ -52,9 +52,9 @@ public:
   void staticMeshStructureChanged();
 
   template<typename T>
-  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
+  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=[](T*){return true;}) const;
 
-  const QMap<QString, CameraParameter>& sceneCameras() const;
+  QMap<QString, CameraParameter> sceneCameras() const;
 
 private:
   friend class Renderer;
@@ -62,7 +62,6 @@ private:
   quint64 _cachedStaticStructureCacheIndex;
 
   QSet<Entity*> _entities;
-  QMap<QString, CameraParameter> _sceneCameras;
 
   debugging::DebugLineVisualisation::Ptr _debug_sceneCameras;
 
@@ -77,6 +76,7 @@ private:
     QHash<QString, StaticMesh::Ptr> meshes;
     QHash<int, MaterialInstance::Ptr> materialsForIndex;
     QHash<int, StaticMesh::Ptr> meshesForIndex;
+    QMap<QString, CameraParameter> cameras;
     MaterialInstance::Ptr fallbackMaterial;
   };
   bool loadFromColladaFile(const QString& file,
@@ -86,7 +86,7 @@ private:
 
 
 template<typename T>
-QVector<T*> Scene::allComponentsWithType(const std::function<bool(T*)>& filter)
+QVector<T*> Scene::allComponentsWithType(const std::function<bool(T*)>& filter) const
 {
   static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
 

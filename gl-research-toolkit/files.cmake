@@ -7,6 +7,7 @@ set(SOURCE_FILES
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
   include/glrt/profiler.h
+  include/glrt/scene/camera-component.h
   include/glrt/scene/camera-parameter.h
   include/glrt/scene/entity.h
   include/glrt/scene/forward-renderer.h
@@ -29,6 +30,7 @@ set(SOURCE_FILES
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
   src/glrt/profiler.cpp
+  src/glrt/scene/camera-component.cpp
   src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/entity.cpp
   src/glrt/scene/forward-renderer.cpp
