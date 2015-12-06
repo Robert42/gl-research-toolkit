@@ -6,8 +6,6 @@
 #include <glrt/scene/material.h>
 #include <glrt/scene/entity.h>
 #include <glrt/debug-camera.h>
-#include <glrt/debugging/debug-line-visualisation.h>
-#include <glrt/gui/anttweakbar.h>
 
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>
@@ -32,8 +30,6 @@ public:
   QString name, file;
   DebugCamera debugCamera;
 
-  gui::TweakBarCBVar<bool> visualize_sceneCameras;
-
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;
   Scene& operator=(const Scene&) = delete;
@@ -52,9 +48,14 @@ public:
   void staticMeshStructureChanged();
 
   template<typename T>
-  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
+  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=[](T*){return true;}) const;
 
-  const QVector<CameraParameter>& sceneCameras() const;
+  QMap<QString, CameraParameter> sceneCameras() const;
+
+signals:
+  void clearScene();
+  void sceneCleared();
+  void sceneLoaded(bool success);
 
 private:
   friend class Renderer;
@@ -62,9 +63,6 @@ private:
   quint64 _cachedStaticStructureCacheIndex;
 
   QSet<Entity*> _entities;
-  QVector<CameraParameter> _sceneCameras;
-
-  debugging::DebugLineVisualisation::Ptr _debug_sceneCameras;
 
   void AddEntity(Entity* entity);
   void RemoveEntity(Entity* entity);
@@ -77,16 +75,18 @@ private:
     QHash<QString, StaticMesh::Ptr> meshes;
     QHash<int, MaterialInstance::Ptr> materialsForIndex;
     QHash<int, StaticMesh::Ptr> meshesForIndex;
+    QMap<QString, CameraParameter> cameras;
     MaterialInstance::Ptr fallbackMaterial;
+    glm::mat4 meshTransform;
   };
   bool loadFromColladaFile(const QString& file,
                            SceneAssets assets);
-  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform, glm::mat4 localTransform);
+  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform);
 };
 
 
 template<typename T>
-QVector<T*> Scene::allComponentsWithType(const std::function<bool(T*)>& filter)
+QVector<T*> Scene::allComponentsWithType(const std::function<bool(T*)>& filter) const
 {
   static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
 

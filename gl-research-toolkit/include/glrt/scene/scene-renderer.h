@@ -1,18 +1,22 @@
 #ifndef GLRT_SCENE_RENDERER_H
 #define GLRT_SCENE_RENDERER_H
 
-#include "scene.h"
+#include <glrt/scene/scene.h>
+#include <glrt/debugging/visualization-renderer.h>
+
 
 namespace glrt {
 namespace scene {
 
-class Renderer
+class Renderer : public QObject
 {
+  Q_OBJECT
 public:
 
   class Pass;
 
   Scene& scene;
+  debugging::VisualizationRenderer visualizeCameras;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
@@ -38,6 +42,9 @@ private:
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
   void updateSceneUniform();
+
+
+  void debugCameraPositions();
 };
 
 

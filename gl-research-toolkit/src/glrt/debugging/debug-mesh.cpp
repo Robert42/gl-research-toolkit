@@ -112,8 +112,7 @@ void DebugMesh::Painter::addVertex(const glm::vec3& position)
   vertices.last().parameter1 = nextAttribute.parameter1;
   vertices.last().parameter2 = nextAttribute.parameter2;
 
-  glm::vec4 transformed = transformations.top() * glm::vec4(vertices.last().position, 1);
-  vertices.last().position = transformed.xyz() / transformed.w;
+  vertices.last().position = transform_point(transformations.top(), vertices.last().position);
 }
 
 void DebugMesh::Painter::addVertex(const glm::vec2& position, float z)

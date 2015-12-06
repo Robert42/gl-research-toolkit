@@ -2,6 +2,8 @@
 
 #include "common-debug-line-visualization.vs.glsl"
 
+#include <geometry.glsl>
+
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
 uniform CameraBlock
 {
@@ -13,20 +15,17 @@ uniform CameraBlock
   float clipNear;
   float clipFar;
   mat4 inverseViewProjectionMatrix;
+  mat4 inverseViewMatrix;
 }camera;
 
 void main()
 {
-  vec3 ws_position = vertex_position;
+  vec3 ws_position;
 
   if(vertex_parameter1 > 0.5f)
-  {
-    //vec3 p = camera.frustumEdgeDir * mix(0, 1, vertex_position.z);
-    //ws_position = p;
-    
-    vec4 p = camera.inverseViewProjectionMatrix * vec4(vertex_position, 1);
-    ws_position = p.xyz / p.w;
-  }
+    ws_position = transform_point(camera.inverseViewProjectionMatrix, vertex_position);
+  else
+    ws_position = transform_point(camera.inverseViewMatrix, vertex_position);
 
   pass_attributes_to_fragment_shader(ws_position, vertex_color);
 }

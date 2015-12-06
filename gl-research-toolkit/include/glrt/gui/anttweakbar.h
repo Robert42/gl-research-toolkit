@@ -13,7 +13,7 @@ class Profiler;
 
 namespace scene {
 
-class Scene;
+class Renderer;
 
 } // namspace scene
 
@@ -73,8 +73,8 @@ public:
   TwBar* createProfilerBar(Profiler* profiler);
 
   // The caller owns the given instance.
-  // You must ensure, that the given profiler lives longer than the created bar
-  TwBar* createSceneBar(scene::Scene* scene);
+  // You must ensure, that the given rederer lives longer than the created bar
+  TwBar* createDebugSceneBar(scene::Renderer* renderer);
 
 
   bool handleEvents(const SDL_Event& event);

@@ -11,6 +11,7 @@ namespace scene {
 
 Renderer::Renderer(Scene* scene)
   : scene(*scene),
+    visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
 {
@@ -29,8 +30,7 @@ void Renderer::render()
 
   renderImplementation();
 
-  if(!scene._debug_sceneCameras.isNull())
-    scene._debug_sceneCameras->draw();
+  visualizeCameras.render();
 }
 
 void Renderer::updateSceneUniform()
@@ -39,6 +39,8 @@ void Renderer::updateSceneUniform()
   sceneUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
   sceneUniformBuffer.Unmap();
 }
+
+
 
 
 // ======== Pass ===============================================================

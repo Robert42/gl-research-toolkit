@@ -1,5 +1,6 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/static-mesh-component.h>
+#include <glrt/scene/camera-component.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <glrt/glsl/layout-constants.h>
@@ -24,13 +25,6 @@ Scene::Scene(SDL_Window* sdlWindow)
   : debugCamera(sdlWindow),
     _cachedStaticStructureCacheIndex(0)
 {
-  visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
-  visualize_sceneCameras.setter = [this](bool show) {
-    if(show)
-      this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->sceneCameras());
-    else
-      this->_debug_sceneCameras.clear();
-  };
 }
 
 Scene::~Scene()
@@ -40,14 +34,15 @@ Scene::~Scene()
 
 void Scene::clear()
 {
+  clearScene();
+
   QSet<Entity*> entities;
   entities.swap(this->_entities);
 
   for(Entity* entity : entities)
     delete entity;
 
-  this->_sceneCameras.clear();
-  this->_debug_sceneCameras.clear();
+  sceneCleared();
 }
 
 
@@ -86,7 +81,11 @@ bool Scene::loadFromFile(const QString& filename)
     return false;
   }
 
-  return fromJson(QFileInfo(filename).dir(), jsonDocument.object());
+  bool success = fromJson(QFileInfo(filename).dir(), jsonDocument.object());
+
+  sceneLoaded(success);
+
+  return success;
 }
 
 bool Scene::fromJson(const QDir& dir, const QJsonObject& json)
@@ -155,10 +154,10 @@ bool Scene::loadFromColladaFile(const QString& file,
                                         0,-1, 0, 0,
                                         0, 0, 0, 1);
 
-  glm::mat4 lokalTransform = glm::mat4(1, 0, 0, 0,
-                                       0, 0,-1, 0,
-                                       0, 1, 0, 0,
-                                       0, 0, 0, 1);
+  glm::mat4 meshTransform = glm::mat4(1, 0, 0, 0,
+                                      0, 0,-1, 0,
+                                      0, 1, 0, 0,
+                                      0, 0, 0, 1);
 
   const aiScene* scene = importer.ReadFile(file.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
@@ -175,6 +174,7 @@ bool Scene::loadFromColladaFile(const QString& file,
 
 
   assets.scene = scene;
+  assets.meshTransform = meshTransform;
 
   if(!scene)
     throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
@@ -190,9 +190,8 @@ bool Scene::loadFromColladaFile(const QString& file,
     }
   }
 
-  _sceneCameras.resize(scene->mNumCameras);
   for(quint32 i=0; i<scene->mNumCameras; ++i)
-    _sceneCameras[i] = CameraParameter::fromAssimp(*scene->mCameras[i]);
+    assets.cameras[scene->mCameras[i]->mName.C_Str()] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
@@ -205,22 +204,26 @@ bool Scene::loadFromColladaFile(const QString& file,
     assets.meshesForIndex[i] = staticMesh;
   }
 
-  return loadEntitiesFromAssimp(assets, scene->mRootNode, globalTransform, lokalTransform);
+  return loadEntitiesFromAssimp(assets, scene->mRootNode, globalTransform);
 }
 
 
 bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
                                    aiNode* node,
-                                   glm::mat4 globalTransform,
-                                   glm::mat4 localTransform)
+                                   glm::mat4 globalTransform)
 {
   globalTransform = globalTransform * to_glm_mat4(node->mTransformation);
 
-  if(node->mNumMeshes > 0)
+  const QString name = node->mName.C_Str();
+
+  const bool hasMesh = node->mNumMeshes > 0;
+  const bool hasCamera = assets.cameras.contains(name);
+
+  if(hasMesh || hasCamera)
   {
     Entity* entity = new Entity(*this);
-    entity->name = node->mName.C_Str();
-    entity->relativeTransform = globalTransform*localTransform;
+    entity->name = name;
+    entity->relativeTransform = globalTransform;
 
     for(quint32 i=0; i<node->mNumMeshes; ++i)
     {
@@ -239,13 +242,18 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
       else
         material = assets.fallbackMaterial;
 
-      new StaticMeshComponent(*entity, false, mesh, material);
+      new StaticMeshComponent(*entity, false, mesh, material, assets.meshTransform);
+    }
+
+    if(hasCamera)
+    {
+      new CameraComponent(*entity, assets.cameras[name]);
     }
   }
 
   for(quint32 i=0; i<node->mNumChildren; ++i)
   {
-    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], globalTransform, localTransform))
+    if(!loadEntitiesFromAssimp(assets, node->mChildren[i], globalTransform))
       return false;
   }
 
@@ -259,9 +267,18 @@ void Scene::staticMeshStructureChanged()
 }
 
 
-const QVector<CameraParameter>& Scene::sceneCameras() const
+QMap<QString, CameraParameter> Scene::sceneCameras() const
 {
-  return _sceneCameras;
+  QMap<QString, CameraParameter> cameras;
+
+  QVector<CameraComponent*> cameraComponents = allComponentsWithType<CameraComponent>();
+
+  for(CameraComponent* c : cameraComponents)
+  {
+    cameras[c->entity.name] = c->globalTransformation() * c->cameraParameter;
+  }
+
+  return cameras;
 }
 
 

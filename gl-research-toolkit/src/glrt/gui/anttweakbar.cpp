@@ -1,7 +1,7 @@
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/profiler.h>
 #include <glrt/application.h>
-#include <glrt/scene/scene.h>
+#include <glrt/scene/scene-renderer.h>
 
 namespace glrt {
 namespace gui {
@@ -77,14 +77,14 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 }
 
 
-TwBar* AntTweakBar::createSceneBar(scene::Scene* scene)
+TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
 {
-  TwBar* tweakBar = TwNewBar("Scene");
+  TwBar* tweakBar = TwNewBar("Debug Scene");
 
-  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to modify or debug a scene.");
+  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
-  scene->visualize_sceneCameras.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
+  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
 
   gui::Toolbar::registerTweakBar(tweakBar);
 

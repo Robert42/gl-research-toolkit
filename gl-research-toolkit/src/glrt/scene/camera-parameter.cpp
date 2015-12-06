@@ -1,5 +1,6 @@
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
+#include <glrt/toolkit/geometry.h>
 
 #include <assimp/scene.h>
 
@@ -64,6 +65,13 @@ glm::mat4 CameraParameter::projectionMatrix(int width, int height) const
   return projectionMatrix(float(width) / float(height));
 }
 
+CameraParameter operator*(const glm::mat4& t, CameraParameter camera)
+{
+  camera.lookAt = transform_direction(t, camera.lookAt);
+  camera.upVector = transform_direction(t, camera.upVector);
+  camera.position = transform_point(t, camera.position);
+  return camera;
+}
 
 } // namespace scene
 } // namespace glrt
