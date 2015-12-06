@@ -54,7 +54,7 @@ public:
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
 
-  const QVector<CameraParameter>& sceneCameras() const;
+  const QMap<QString, CameraParameter>& sceneCameras() const;
 
 private:
   friend class Renderer;
@@ -62,7 +62,7 @@ private:
   quint64 _cachedStaticStructureCacheIndex;
 
   QSet<Entity*> _entities;
-  QVector<CameraParameter> _sceneCameras;
+  QMap<QString, CameraParameter> _sceneCameras;
 
   debugging::DebugLineVisualisation::Ptr _debug_sceneCameras;
 

@@ -38,7 +38,6 @@ set(SOURCE_FILES
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/scene/static-mesh.cpp
   src/glrt/system.cpp
-  src/glrt/toolkit/geometry.cpp
   src/glrt/toolkit/shader-compiler.cpp
   src/glrt/toolkit/temp-shader-file.cpp
 )

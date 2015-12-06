@@ -27,7 +27,7 @@ Scene::Scene(SDL_Window* sdlWindow)
   visualize_sceneCameras.getter = [this]() -> bool {return !this->_debug_sceneCameras.isNull();};
   visualize_sceneCameras.setter = [this](bool show) {
     if(show)
-      this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->sceneCameras());
+      this->_debug_sceneCameras = debugging::DebugLineVisualisation::drawCameras(this->sceneCameras().values());
     else
       this->_debug_sceneCameras.clear();
   };
@@ -190,9 +190,8 @@ bool Scene::loadFromColladaFile(const QString& file,
     }
   }
 
-  _sceneCameras.resize(scene->mNumCameras);
   for(quint32 i=0; i<scene->mNumCameras; ++i)
-    _sceneCameras[i] = CameraParameter::fromAssimp(*scene->mCameras[i]);
+    _sceneCameras[scene->mCameras[i]->mName.C_Str()] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
@@ -259,7 +258,7 @@ void Scene::staticMeshStructureChanged()
 }
 
 
-const QVector<CameraParameter>& Scene::sceneCameras() const
+const QMap<QString, CameraParameter>& Scene::sceneCameras() const
 {
   return _sceneCameras;
 }

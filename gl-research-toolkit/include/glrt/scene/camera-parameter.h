@@ -26,6 +26,8 @@ public:
   static CameraParameter fromAssimp(const aiCamera& camera);
   static CameraParameter defaultDebugCamera();
 
+  friend CameraParameter operator*(const glm::mat4& t, CameraParameter camera);
+
   glm::mat4 inverseViewMatrix() const;
   glm::mat4 viewMatrix() const;
 
@@ -33,6 +35,8 @@ public:
   glm::mat4 projectionMatrix(float aspectRatio) const;
   glm::mat4 projectionMatrix(int width, int height) const;
 };
+
+static_assert(sizeof(CameraParameter)==64, "Please make sure the struct CameraParameter is std140 compatible");
 
 } // namespace scene
 } // namespace glrt

@@ -35,7 +35,7 @@ public:
   template<typename UniformType>
   static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData, gl::ShaderObject&& shaderObject);
 
-  static Ptr drawCameras(const QVector<scene::CameraParameter>& sceneCameras);
+  static Ptr drawCameras(const QList<scene::CameraParameter>& sceneCameras);
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;
   DebugLineVisualisation& operator=(const DebugLineVisualisation&) = delete;
