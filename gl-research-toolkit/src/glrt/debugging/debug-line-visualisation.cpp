@@ -44,6 +44,7 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scen
   {
     scene::CameraParameter cameraParameter;
     glm::mat4 inverseViewProjectionMatrix;
+    glm::mat4 inverseViewMatrix;
 
     CachedCamera()
     {
@@ -52,9 +53,10 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scen
       : cameraParameter(cameraParameter)
     {
       inverseViewProjectionMatrix = glm::inverse(this->cameraParameter.projectionMatrix() * this->cameraParameter.viewMatrix());
+      inverseViewMatrix = this->cameraParameter.inverseViewMatrix();
     }
   };
-  static_assert(sizeof(CachedCamera)==128, "Please make sure the struct CachedCamera is std140 compatible");
+  static_assert(sizeof(CachedCamera)==192, "Please make sure the struct CachedCamera is std140 compatible");
 
   QVector<CachedCamera> cachedCameras;
   cachedCameras.reserve(sceneCameras.length());
