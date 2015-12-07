@@ -1,5 +1,6 @@
 #include <glrt/debug-camera.h>
 #include <glrt/toolkit/geometry.h>
+#include <glrt/toolkit/json.h>
 
 namespace glrt {
 
@@ -14,10 +15,17 @@ DebugCamera::DebugCamera(SDL_Window* sdlWindow)
 
   movement_speed = 5.f;
   rotation_speed = glm::radians(1.f);
+  locked = false;
 }
 
 bool DebugCamera::handleEvents(const SDL_Event& event)
 {
+  if(locked)
+  {
+    movementMode = false;
+    return false;
+  }
+
   const glm::mat4 I = glm::mat4(1);
   const glm::vec3 x(1, 0, 0);
   const glm::vec3 y(0, 1, 0);
@@ -98,6 +106,25 @@ void DebugCamera::operator=(const scene::CameraParameter& cameraParameter)
   this->camera_orientation_inverse = cameraParameter.viewMatrix();
   this->camera_orientation_inverse[3] = glm::vec4(0,0,0,1);
   this->camera_position = cameraParameter.position;
+}
+
+
+bool DebugCamera::fromJson(const QJsonObject& json, const QMap<QString, scene::CameraParameter>& cameraParameter)
+{
+  this->locked = QJsonValue(json["locked"]).toBool(false);
+
+  if(json.contains("camera"))
+  {
+    QString name = QJsonValue(json["camera"]).toString("NOT-A-STRING");
+    if(!cameraParameter.contains(name))
+    {
+      qWarning() << "Unknown camera " << name;
+      return false;
+    }
+    this->loadedName = name;
+    *this = cameraParameter[name];
+  }
+  return true;
 }
 
 

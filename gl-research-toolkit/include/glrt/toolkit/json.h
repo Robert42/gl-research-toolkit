@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 
 #include <QJsonValue>
+#include <QJsonObject>
 
 namespace glrt {
 

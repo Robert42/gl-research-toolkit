@@ -4,6 +4,8 @@
 
 #include <glrt/gui/toolbar.h>
 
+#include <glrt/scene/camera-parameter.h>
+
 
 namespace glrt {
 
@@ -14,6 +16,7 @@ class Profiler;
 namespace scene {
 
 class Renderer;
+class Scene;
 
 } // namspace scene
 
@@ -21,8 +24,115 @@ class Renderer;
 namespace gui {
 
 
-class AntTweakBar final
+
+template<typename T>
+class TweakBarEnum
 {
+public:
+  typedef QSharedPointer<TweakBarEnum<T>> Ptr;
+  typedef QMap<QString, T> Map;
+
+  Map map;
+  const std::string name;
+  const std::string typeName;
+  const TwType typeId;
+  int currentIndex = 0;
+
+  TweakBarEnum(const std::string& typeName, TwBar* tweakBar, const std::string& name, const char* def)
+    : name(name),
+      typeName(typeName),
+      typeId(TwDefineEnumFromString(typeName.c_str(), "[None]")),
+      tweakBarName(TwGetBarName(tweakBar))
+  {
+    TwAddVarCB(tweakBar, name.c_str(), typeId, reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
+  }
+
+  ~TweakBarEnum()
+  {
+    TwBar* tweakBar = TwGetBarByName(tweakBarName.c_str());
+
+    if(tweakBar)
+      TwRemoveVar(tweakBar, name.c_str());
+  }
+
+  void init(const Map& map)
+  {
+    this->map = map;
+
+    if(map.size() == 0)
+    {
+      currentIndex = 0;
+      TwDefineEnumFromString(typeName.c_str(), "[None]");
+      return;
+    }
+
+    currentIndex = glm::clamp<int>(currentIndex, 0, map.size()-1);
+
+    std::vector<TwEnumVal> enumValues;
+    QVector<char*> labels;
+    enumValues.reserve(map.size());
+    labels.reserve(map.size());
+
+    int index=0;
+    for(auto i=map.begin(); i!=map.end(); ++i)
+    {
+      char* label = new char[i.key().length()+1];
+      memcpy(label, i.key().toStdString().c_str(), i.key().length()+1);
+      labels.append(label);
+
+      TwEnumVal v;
+      v.Label = label;
+      v.Value = index;
+
+      enumValues.push_back(v);
+
+      index++;
+    }
+
+    TwDefineEnum(typeName.c_str(), enumValues.data(), enumValues.size());
+
+    for(char* l : labels)
+      delete[] l;
+  }
+
+  std::function<void(const T&)> valueChanged;
+
+  void setCurrentValue(const T& value)
+  {
+    int i = map.values().indexOf(value);
+    if(i>=0)
+      currentIndex = i;
+  }
+
+  void setCurrentKey(const QString& key)
+  {
+    int i = map.keys().indexOf(key);
+    if(i>=0)
+      currentIndex = i;
+  }
+
+private:
+  std::string tweakBarName;
+
+  static void getValue(int* value, TweakBarEnum<T>* wrapper)
+  {
+    *value = wrapper->currentIndex;
+  }
+
+  static void setValue(const int* value, TweakBarEnum<T>* wrapper)
+  {
+    if(wrapper->map.size() > *value && *value >= 0 && wrapper->valueChanged)
+      wrapper->valueChanged(wrapper->map.values()[*value]);
+  }
+};
+
+
+
+
+
+class AntTweakBar final : public QObject
+{
+  Q_OBJECT
 public:
   struct Settings final
   {
@@ -83,10 +193,16 @@ public:
 
 
 private:
+  TweakBarEnum<QString>::Ptr sceneSwitcher;
+  TweakBarEnum<scene::CameraParameter>::Ptr cameraSwitcher;
+
   void updateAntTweakBarWindowSize();
 
   void handeledEvent(const SDL_Event& event);
   bool unhandeledEvent(const SDL_Event& event);
+
+private slots:
+  void handleSceneLoaded(scene::Scene* scene);
 };
 
 

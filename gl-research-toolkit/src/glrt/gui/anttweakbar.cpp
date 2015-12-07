@@ -31,6 +31,8 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
 
 AntTweakBar::~AntTweakBar()
 {
+  cameraSwitcher.clear();
+  sceneSwitcher.clear();
 }
 
 
@@ -79,18 +81,39 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 
 TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
 {
-  TwBar* tweakBar = TwNewBar("Debug Scene");
+  scene::Scene& scene = renderer->scene;
+
+  connect(&scene, &scene::Scene::sceneLoadedExt, this, &AntTweakBar::handleSceneLoaded);
+
+  TwBar* tweakBar = TwNewBar("Scene");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
-  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
-  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "");
-  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "");
+  sceneSwitcher = TweakBarEnum<QString>::Ptr(new TweakBarEnum<QString>("CurrentSceneEnum", tweakBar, "Current Scene", ""));
+
+  cameraSwitcher = TweakBarEnum<scene::CameraParameter>::Ptr(new TweakBarEnum<scene::CameraParameter>("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
+  cameraSwitcher->valueChanged = [&scene](const scene::CameraParameter& p){scene.debugCamera = p;};
+  TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
+
+  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
+  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
+  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group=Debug");
 
   gui::Toolbar::registerTweakBar(tweakBar);
 
   return tweakBar;
+}
+
+void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
+{
+  if(cameraSwitcher)
+  {
+    cameraSwitcher->init(scene->sceneCameras());
+    if(!scene->debugCamera.loadedName.isEmpty())
+      cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
+
+  }
 }
 
 

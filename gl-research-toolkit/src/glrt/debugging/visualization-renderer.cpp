@@ -47,7 +47,7 @@ VisualizationRenderer::VisualizationRenderer(scene::Scene* scene, const std::fun
       this->visualization.clear();
   };
 
-  connect(scene, SIGNAL(sceneLoaded(bool)), this, SLOT(createVisualization()));
+  connect(scene, &scene::Scene::sceneLoaded, this, &VisualizationRenderer::sceneLoaded);
 }
 
 
