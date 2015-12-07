@@ -251,12 +251,12 @@ private:
   void deinit()
   {
     variadicElementBuffer.reinit();
+    staticComponents.clear();
+    movableComponents.clear();
 
     for(const QMetaObject::Connection& connection : connections)
       QObject::disconnect(connection);
     connections.clear();
-
-    // TODO: don't forget about this function
   }
 
   void handleLoadedScene(bool success)
