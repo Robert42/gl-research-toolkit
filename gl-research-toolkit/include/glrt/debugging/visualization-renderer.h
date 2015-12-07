@@ -16,6 +16,8 @@ public:
 
   // Note, the given scene instance must live longer than the returned instance
   static VisualizationRenderer debugSceneCameras(scene::Scene* scene);
+  static VisualizationRenderer debugSphereAreaLights(scene::Scene* scene);
+  static VisualizationRenderer debugRectAreaLights(scene::Scene* scene);
 
   VisualizationRenderer(scene::Scene* scene, const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory);
   VisualizationRenderer(VisualizationRenderer&& other);

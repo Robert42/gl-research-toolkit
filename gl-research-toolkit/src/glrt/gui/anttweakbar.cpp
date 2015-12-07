@@ -85,6 +85,8 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
+  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "");
+  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "");
 
   gui::Toolbar::registerTweakBar(tweakBar);
 

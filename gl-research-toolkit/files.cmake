@@ -12,6 +12,7 @@ set(SOURCE_FILES
   include/glrt/scene/camera-parameter.h
   include/glrt/scene/entity.h
   include/glrt/scene/forward-renderer.h
+  include/glrt/scene/light-component.h
   include/glrt/scene/material.h
   include/glrt/scene/scene.h
   include/glrt/scene/scene-renderer.h
@@ -21,6 +22,7 @@ set(SOURCE_FILES
   include/glrt/toolkit/aligned-vector.h
   include/glrt/toolkit/assimp-glm-converter.h
   include/glrt/toolkit/geometry.h
+  include/glrt/toolkit/json.h
   include/glrt/toolkit/shader-compiler.h
   include/glrt/toolkit/temp-shader-file.h
   src/glrt/application.cpp
@@ -36,12 +38,14 @@ set(SOURCE_FILES
   src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/entity.cpp
   src/glrt/scene/forward-renderer.cpp
+  src/glrt/scene/light-component.cpp
   src/glrt/scene/material.cpp
   src/glrt/scene/scene.cpp
   src/glrt/scene/scene-renderer.cpp
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/scene/static-mesh.cpp
   src/glrt/system.cpp
+  src/glrt/toolkit/json.cpp
   src/glrt/toolkit/shader-compiler.cpp
   src/glrt/toolkit/temp-shader-file.cpp
 )

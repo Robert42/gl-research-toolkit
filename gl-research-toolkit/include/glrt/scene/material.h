@@ -34,8 +34,6 @@ public:
 protected:
   bool parseCommonJson(const QJsonObject& object, const QString& expectedType);
 
-  static bool asVec3(glm::vec3& vec, const QJsonValue& value, const char* context);
-
 private:
   friend class PlainColorMaterial;
   MaterialInstance(const Type type, gl::Buffer&& buffer);
