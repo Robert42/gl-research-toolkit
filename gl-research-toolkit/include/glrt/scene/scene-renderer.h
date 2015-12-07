@@ -13,6 +13,7 @@ class Renderer : public QObject
   Q_OBJECT
 public:
 
+  class DirectLights;
   class Pass;
 
   Scene& scene;
@@ -24,6 +25,8 @@ public:
   Renderer(Renderer&&) = delete;
   Renderer& operator=(const Renderer&) = delete;
   Renderer& operator=(Renderer&&) = delete;
+
+  DirectLights& directLights();
 
   Renderer(Scene* scene);
   virtual ~Renderer();
@@ -43,10 +46,35 @@ private:
 
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
+  DirectLights* _directLights = nullptr;
+
   void updateSceneUniform();
 
 
   void debugCameraPositions();
+};
+
+
+class Renderer::DirectLights final
+{
+public:
+  Renderer& renderer;
+
+  DirectLights(Renderer* renderer);
+  ~DirectLights();
+
+  DirectLights(const DirectLights&) = delete;
+  DirectLights(DirectLights&&) = delete;
+  DirectLights& operator=(const DirectLights&) = delete;
+  DirectLights& operator=(DirectLights&&) = delete;
+
+  void init();
+
+private:
+  gl::Buffer* sphereAreaLightShaderStorageBuffer = nullptr;
+  gl::Buffer* rectAreaLightShaderStorageBuffer = nullptr;
+
+  void deinit();
 };
 
 

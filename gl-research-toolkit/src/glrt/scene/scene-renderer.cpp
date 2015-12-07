@@ -1,5 +1,6 @@
 #include <glrt/scene/scene-renderer.h>
 #include <glrt/scene/static-mesh-component.h>
+#include <glrt/scene/light-component.h>
 
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/toolkit/aligned-vector.h>
@@ -9,20 +10,38 @@ namespace glrt {
 namespace scene {
 
 
+template<typename VisibleComponent>
+void sortComponentsByMovability(QVector<VisibleComponent*>* components)
+{
+  auto order = [](VisibleComponent* a, VisibleComponent* b)
+  {
+    if(a->movable && !b->movable)
+      return true;
+    if(!a->movable && b->movable)
+      return false;
+    return false;
+  };
+
+  qSort(components->begin(), components->end(), order);
+}
+
+
+
 Renderer::Renderer(Scene* scene)
   : scene(*scene),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
+    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject())),
+    _directLights(new DirectLights(this))
 {
 }
 
 Renderer::~Renderer()
 {
+  delete _directLights;
 }
-
 
 void Renderer::render()
 {
@@ -44,6 +63,47 @@ void Renderer::updateSceneUniform()
   sceneUniformBuffer.Unmap();
 }
 
+Renderer::DirectLights& Renderer::directLights()
+{
+  return *this->_directLights;
+}
+
+
+
+
+// ======== DirectLights =======================================================
+
+
+Renderer::DirectLights::DirectLights(Renderer* renderer)
+  : renderer(*renderer)
+{
+}
+
+Renderer::DirectLights::~DirectLights()
+{
+  deinit();
+}
+
+
+void Renderer::DirectLights::init()
+{
+  deinit();
+
+  QVector<SphereAreaLightComponent*> sphereAreaLights = renderer.scene.allComponentsWithType<scene::SphereAreaLightComponent>();
+  QVector<RectAreaLightComponent*> rectAreaLights = renderer.scene.allComponentsWithType<scene::RectAreaLightComponent>();
+
+  sortComponentsByMovability(&sphereAreaLights);
+  sortComponentsByMovability(&rectAreaLights);
+}
+
+void Renderer::DirectLights::deinit()
+{
+  delete sphereAreaLightShaderStorageBuffer;
+  delete rectAreaLightShaderStorageBuffer;
+
+  sphereAreaLightShaderStorageBuffer = nullptr;
+  rectAreaLightShaderStorageBuffer = nullptr;
+}
 
 
 
