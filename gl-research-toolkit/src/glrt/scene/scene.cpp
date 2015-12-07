@@ -2,6 +2,7 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
+#include <glrt/toolkit/json.h>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -9,6 +10,7 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QFile>
+#include <QDirIterator>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -58,28 +60,56 @@ void Scene::update(float deltaTime)
 }
 
 
+QMap<QString, QString> Scene::findAllScenes()
+{
+  QMap<QString, QString> map;
+
+  QDirIterator dirIterator(QDir(GLRT_ASSET_DIR), QDirIterator::Subdirectories|QDirIterator::FollowSymlinks);
+
+  while(dirIterator.hasNext())
+  {
+    QDir dir = dirIterator.next();
+
+    for(const QFileInfo& fileInfo : dir.entryList({"*.scene"}, QDir::Dirs|QDir::Files|QDir::Readable, QDir::Name))
+    {
+      QString absoluteFilename = dir.absoluteFilePath(fileInfo.fileName());
+
+      QJsonObject json = readJsonFile(absoluteFilename).object();
+
+      if(!json.contains("name"))
+      {
+        qWarning() << "The scene " << absoluteFilename << " has no name";
+        continue;
+      }
+
+      QJsonValue value = json["name"];
+      QString name = value.toString();
+
+      if(name.isEmpty())
+      {
+        qWarning() << "The scene " << absoluteFilename << " has an empty name";
+        continue;
+      }
+
+      if(map.contains(name))
+      {
+        qWarning() << "The scene-name " << name << " is used twice. Once for " << map[name] << " and once for " << absoluteFilename;
+        continue;
+      }
+
+      map[name] = absoluteFilename;
+    }
+  }
+
+  return map;
+}
+
+
 bool Scene::loadFromFile(const QString& filename)
 {
   clear();
 
-  QFile file(filename);
-
-  if(!file.open(QFile::ReadOnly))
-  {
-    qWarning() << "Scene::loadFromFile: Couldn't open file <" << filename.toStdString().c_str() << ">";
-    return false;
-  }
-
-  QJsonParseError error;
-
-  QByteArray json = file.readAll()  ;
-  QJsonDocument jsonDocument = QJsonDocument::fromJson(json, &error);
-
-  if(error.error != QJsonParseError::NoError)
-  {
-    qWarning() << "Scene json parsing error:\n" << error.errorString().toStdString().c_str() << "\n<" << filename.toStdString().c_str() << ">  - offset: " << error.offset;
-    return false;
-  }
+  QJsonDocument jsonDocument = readJsonFile(filename);
 
   bool success = fromJson(QFileInfo(filename).dir(), jsonDocument.object());
 
