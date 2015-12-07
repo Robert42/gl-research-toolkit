@@ -3,6 +3,7 @@
 
 #include <glrt/scene/scene.h>
 #include <glrt/debugging/visualization-renderer.h>
+#include <glrt/toolkit/shader-storage-format.h>
 
 
 namespace glrt {
@@ -63,21 +64,12 @@ public:
   DirectLights(Renderer* renderer);
   ~DirectLights();
 
-  DirectLights(const DirectLights&) = delete;
-  DirectLights(DirectLights&&) = delete;
-  DirectLights& operator=(const DirectLights&) = delete;
-  DirectLights& operator=(DirectLights&&) = delete;
-
-  void init();
-
   void bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex);
   void bindShaderStoreageBuffers();
 
 private:
-  gl::Buffer* sphereAreaLightShaderStorageBuffer = nullptr;
-  gl::Buffer* rectAreaLightShaderStorageBuffer = nullptr;
-
-  void deinit();
+  ShaderStorageFormat<SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
+  ShaderStorageFormat<RectAreaLightComponent> rectAreaShaderStorageBuffer;
 };
 
 

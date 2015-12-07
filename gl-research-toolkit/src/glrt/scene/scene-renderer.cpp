@@ -10,23 +10,6 @@ namespace glrt {
 namespace scene {
 
 
-template<typename VisibleComponent>
-void sortComponentsByMovability(QVector<VisibleComponent*>* components)
-{
-  auto order = [](VisibleComponent* a, VisibleComponent* b)
-  {
-    if(a->movable && !b->movable)
-      return true;
-    if(!a->movable && b->movable)
-      return false;
-    return false;
-  };
-
-  qSort(components->begin(), components->end(), order);
-}
-
-
-
 Renderer::Renderer(Scene* scene)
   : scene(*scene),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
@@ -36,7 +19,6 @@ Renderer::Renderer(Scene* scene)
     staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject())),
     _directLights(new DirectLights(this))
 {
-  directLights().init();
 }
 
 Renderer::~Renderer()
@@ -75,73 +57,25 @@ Renderer::DirectLights& Renderer::directLights()
 // ======== DirectLights =======================================================
 
 
-template<typename LightComponent>
-gl::Buffer* createBufferForLightComponents(const QVector<LightComponent*>& components)
-{
-  typedef typename LightComponent::Data Data;
-
-  struct ShaderStarageBuffer
-  {
-    int numLights;
-    padding<int, 3> _padding;
-    Data data;
-  };
-
-  static_assert(sizeof(float) == sizeof(int), "warning aligment is broken");
-
-  gl::Buffer* buffer = new gl::Buffer(components.size()*sizeof(Data) + sizeof(int)*4, gl::Buffer::MAP_WRITE, nullptr);
-
-  ShaderStarageBuffer* storageBuffer = reinterpret_cast<ShaderStarageBuffer*>(buffer->Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-
-  storageBuffer->numLights = components.length();
-
-  Data* data = &storageBuffer->data;
-
-  for(LightComponent* component : components)
-  {
-    *data = component->data;
-    data++;
-  }
-
-  buffer->Unmap();
-
-  return buffer;
-}
-
-
 Renderer::DirectLights::DirectLights(Renderer* renderer)
-  : renderer(*renderer)
+  : renderer(*renderer),
+    sphereAreaShaderStorageBuffer(this->renderer.scene),
+    rectAreaShaderStorageBuffer(this->renderer.scene)
 {
 }
 
 Renderer::DirectLights::~DirectLights()
 {
-  deinit();
-}
-
-
-void Renderer::DirectLights::init()
-{
-  deinit();
-
-  QVector<SphereAreaLightComponent*> sphereAreaLights = renderer.scene.allComponentsWithType<scene::SphereAreaLightComponent>();
-  QVector<RectAreaLightComponent*> rectAreaLights = renderer.scene.allComponentsWithType<scene::RectAreaLightComponent>();
-
-  sortComponentsByMovability(&sphereAreaLights);
-  sortComponentsByMovability(&rectAreaLights);
-
-  sphereAreaLightShaderStorageBuffer = createBufferForLightComponents(sphereAreaLights);
-  rectAreaLightShaderStorageBuffer = createBufferForLightComponents(rectAreaLights);
 }
 
 
 void Renderer::DirectLights::bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex)
 {
-  Q_ASSERT(sphereAreaLightShaderStorageBuffer!=nullptr);
-  Q_ASSERT(rectAreaLightShaderStorageBuffer!=nullptr);
+  sphereAreaShaderStorageBuffer.update();
+  rectAreaShaderStorageBuffer.update();
 
-  sphereAreaLightShaderStorageBuffer->BindShaderStorageBuffer(sphereAreaLightBindingIndex);
-  sphereAreaLightShaderStorageBuffer->BindShaderStorageBuffer(rectAreaLightBindingIndex);
+  sphereAreaShaderStorageBuffer.bindShaderStorageBuffer(sphereAreaLightBindingIndex);
+  rectAreaShaderStorageBuffer.bindShaderStorageBuffer(rectAreaLightBindingIndex);
 }
 
 
@@ -149,16 +83,6 @@ void Renderer::DirectLights::bindShaderStoreageBuffers()
 {
   bindShaderStoreageBuffers(SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA,
                             SHADERSTORAGE_BINDING_LIGHTS_RECTAREA);
-}
-
-
-void Renderer::DirectLights::deinit()
-{
-  delete sphereAreaLightShaderStorageBuffer;
-  delete rectAreaLightShaderStorageBuffer;
-
-  sphereAreaLightShaderStorageBuffer = nullptr;
-  rectAreaLightShaderStorageBuffer = nullptr;
 }
 
 
