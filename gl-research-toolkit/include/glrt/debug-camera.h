@@ -13,6 +13,7 @@ public:
   glm::mat4 viewProjectionMatrix;
   float movement_speed;
   float rotation_speed;
+  QString loadedName;
   bool locked;
 
   DebugCamera(SDL_Window* sdlWindow);

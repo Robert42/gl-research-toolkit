@@ -58,6 +58,7 @@ public:
 signals:
   void clearScene();
   void sceneCleared();
+  void sceneLoadedExt(scene::Scene* scene, bool success);
   void sceneLoaded(bool success);
 
 private:

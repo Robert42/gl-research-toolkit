@@ -83,6 +83,7 @@ bool Scene::loadFromFile(const QString& filename)
 
   bool success = fromJson(QFileInfo(filename).dir(), jsonDocument.object());
 
+  sceneLoadedExt(this, success);
   sceneLoaded(success);
 
   return success;
@@ -202,6 +203,9 @@ bool Scene::fromJson(const QDir& dir, const QJsonObject& json)
     QJsonObject jsonDebugCamera = json["debug-camera"].toObject();
     if(!this->debugCamera.fromJson(jsonDebugCamera, this->sceneCameras()))
       return false;
+  }else
+  {
+    debugCamera.loadedName = "";
   }
 
   return success;

@@ -16,6 +16,7 @@ class Profiler;
 namespace scene {
 
 class Renderer;
+class Scene;
 
 } // namspace scene
 
@@ -43,7 +44,7 @@ public:
       typeId(TwDefineEnumFromString(typeName.c_str(), "[None]")),
       tweakBarName(TwGetBarName(tweakBar))
   {
-    TwAddVarRW(tweakBar, name.c_str(), typeId, &this->currentIndex, def);
+    TwAddVarCB(tweakBar, name.c_str(), typeId, reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
   }
 
   ~TweakBarEnum()
@@ -54,16 +55,18 @@ public:
       TwRemoveVar(tweakBar, name.c_str());
   }
 
-  void init(const Map& map, const T& currentValue)
+  void init(const Map& map)
   {
     this->map = map;
-    this->currentIndex = map.values().find(currentValue);
 
     if(map.size() == 0)
     {
+      currentIndex = 0;
       TwDefineEnumFromString(typeName.c_str(), "[None]");
       return;
     }
+
+    currentIndex = glm::clamp<int>(currentIndex, 0, map.size()-1);
 
     std::vector<TwEnumVal> enumValues;
     QVector<char*> labels;
@@ -81,6 +84,8 @@ public:
       v.Label = label;
       v.Value = index;
 
+      enumValues.push_back(v);
+
       index++;
     }
 
@@ -90,16 +95,44 @@ public:
       delete[] l;
   }
 
+  std::function<void(const T&)> valueChanged;
+
+  void setCurrentValue(const T& value)
+  {
+    int i = map.values().indexOf(value);
+    if(i>=0)
+      currentIndex = i;
+  }
+
+  void setCurrentKey(const QString& key)
+  {
+    int i = map.keys().indexOf(key);
+    if(i>=0)
+      currentIndex = i;
+  }
+
 private:
   std::string tweakBarName;
+
+  static void getValue(int* value, TweakBarEnum<T>* wrapper)
+  {
+    *value = wrapper->currentIndex;
+  }
+
+  static void setValue(const int* value, TweakBarEnum<T>* wrapper)
+  {
+    if(wrapper->map.size() > *value && *value >= 0 && wrapper->valueChanged)
+      wrapper->valueChanged(wrapper->map.values()[*value]);
+  }
 };
 
 
 
 
 
-class AntTweakBar final
+class AntTweakBar final : public QObject
 {
+  Q_OBJECT
 public:
   struct Settings final
   {
@@ -167,6 +200,9 @@ private:
 
   void handeledEvent(const SDL_Event& event);
   bool unhandeledEvent(const SDL_Event& event);
+
+private slots:
+  void handleSceneLoaded(scene::Scene* scene);
 };
 
 

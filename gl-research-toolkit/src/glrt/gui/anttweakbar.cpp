@@ -83,6 +83,8 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
 {
   scene::Scene& scene = renderer->scene;
 
+  connect(&scene, &scene::Scene::sceneLoadedExt, this, &AntTweakBar::handleSceneLoaded);
+
   TwBar* tweakBar = TwNewBar("Scene");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
@@ -91,6 +93,7 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   sceneSwitcher = TweakBarEnum<QString>::Ptr(new TweakBarEnum<QString>("CurrentSceneEnum", tweakBar, "Current Scene", ""));
 
   cameraSwitcher = TweakBarEnum<scene::CameraParameter>::Ptr(new TweakBarEnum<scene::CameraParameter>("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
+  cameraSwitcher->valueChanged = [&scene](const scene::CameraParameter& p){scene.debugCamera = p;};
   TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
 
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
@@ -100,6 +103,17 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   gui::Toolbar::registerTweakBar(tweakBar);
 
   return tweakBar;
+}
+
+void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
+{
+  if(cameraSwitcher)
+  {
+    cameraSwitcher->init(scene->sceneCameras());
+    if(!scene->debugCamera.loadedName.isEmpty())
+      cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
+
+  }
 }
 
 

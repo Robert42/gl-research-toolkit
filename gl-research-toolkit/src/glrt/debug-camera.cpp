@@ -121,6 +121,7 @@ bool DebugCamera::fromJson(const QJsonObject& json, const QMap<QString, scene::C
       qWarning() << "Unknown camera " << name;
       return false;
     }
+    this->loadedName = name;
     *this = cameraParameter[name];
   }
   return true;
