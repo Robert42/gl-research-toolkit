@@ -13,6 +13,7 @@ public:
   glm::mat4 viewProjectionMatrix;
   float movement_speed;
   float rotation_speed;
+  bool locked;
 
   DebugCamera(SDL_Window* sdlWindow);
 
@@ -21,6 +22,8 @@ public:
   void update(float deltaTime);
 
   void operator=(const scene::CameraParameter& cameraParameter);
+
+  bool fromJson(const QJsonObject& json, const QMap<QString, scene::CameraParameter>& cameraParameter);
 
 private:
   glm::ivec2 windowSize;

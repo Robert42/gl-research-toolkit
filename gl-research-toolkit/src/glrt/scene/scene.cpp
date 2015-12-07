@@ -190,7 +190,21 @@ bool Scene::fromJson(const QDir& dir, const QJsonObject& json)
     }
   }
 
-  return loadFromColladaFile(this->file, assets);
+  bool success = loadFromColladaFile(this->file, assets);
+
+  if(json.contains("debug-camera"))
+  {
+    if(!json["debug-camera"].isObject())
+    {
+      qWarning() << "Scene::loadFromJson: debug-camera mus be an object";
+      return false;
+    }
+    QJsonObject jsonDebugCamera = json["debug-camera"].toObject();
+    if(!this->debugCamera.fromJson(jsonDebugCamera, this->sceneCameras()))
+      return false;
+  }
+
+  return success;
 }
 
 
