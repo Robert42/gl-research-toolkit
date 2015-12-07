@@ -9,13 +9,13 @@
 
 int main(int argc, char** argv)
 {
-  glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Scene-Renderer"));
+  glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
   glrt::scene::Scene scene(app.sdlWindow);
   glrt::scene::ForwardRenderer renderer(&scene);
 
   glrt::gui::AntTweakBar antweakbar(&app,
-                                    glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to load and display a simple single scene" // help text of the sample
+                                    glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
                                                                                 ));
 
   antweakbar.createDebugSceneBar(&renderer);
