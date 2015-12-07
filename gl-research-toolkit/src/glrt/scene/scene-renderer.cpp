@@ -36,6 +36,7 @@ Renderer::Renderer(Scene* scene)
     staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject())),
     _directLights(new DirectLights(this))
 {
+  directLights().init();
 }
 
 Renderer::~Renderer()
@@ -74,6 +75,40 @@ Renderer::DirectLights& Renderer::directLights()
 // ======== DirectLights =======================================================
 
 
+template<typename LightComponent>
+gl::Buffer* createBufferForLightComponents(const QVector<LightComponent*>& components)
+{
+  typedef typename LightComponent::Data Data;
+
+  struct ShaderStarageBuffer
+  {
+    int numLights;
+    padding<int, 3> _padding;
+    Data data;
+  };
+
+  static_assert(sizeof(float) == sizeof(int), "warning aligment is broken");
+
+  gl::Buffer* buffer = new gl::Buffer(components.size()*sizeof(Data) + sizeof(int)*4, gl::Buffer::MAP_WRITE, nullptr);
+
+  ShaderStarageBuffer* storageBuffer = reinterpret_cast<ShaderStarageBuffer*>(buffer->Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+
+  storageBuffer->numLights = components.length();
+
+  Data* data = &storageBuffer->data;
+
+  for(LightComponent* component : components)
+  {
+    *data = component->data;
+    data++;
+  }
+
+  buffer->Unmap();
+
+  return buffer;
+}
+
+
 Renderer::DirectLights::DirectLights(Renderer* renderer)
   : renderer(*renderer)
 {
@@ -94,6 +129,9 @@ void Renderer::DirectLights::init()
 
   sortComponentsByMovability(&sphereAreaLights);
   sortComponentsByMovability(&rectAreaLights);
+
+  sphereAreaLightShaderStorageBuffer = createBufferForLightComponents(sphereAreaLights);
+  rectAreaLightShaderStorageBuffer = createBufferForLightComponents(rectAreaLights);
 }
 
 void Renderer::DirectLights::deinit()
