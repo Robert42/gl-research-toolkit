@@ -79,14 +79,18 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 
 TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
 {
-  TwBar* tweakBar = TwNewBar("Debug Scene");
+  scene::Scene& scene = renderer->scene;
+
+  TwBar* tweakBar = TwNewBar("Scene");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
-  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "");
-  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "");
-  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "");
+  TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
+
+  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
+  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
+  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group=Debug");
 
   gui::Toolbar::registerTweakBar(tweakBar);
 
