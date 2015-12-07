@@ -110,7 +110,7 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
 void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 {
   if(sceneSwitcher)
-    cameraSwitcher->setCurrentKey(scene->name);
+    sceneSwitcher->setCurrentKey(scene->name);
 
   if(cameraSwitcher)
   {
