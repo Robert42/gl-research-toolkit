@@ -70,10 +70,12 @@ QMap<QString, QString> Scene::findAllScenes()
   {
     QDir dir = dirIterator.next();
 
+    if(dir.dirName() == ".")
+      continue;
+
     for(const QFileInfo& fileInfo : dir.entryList({"*.scene"}, QDir::Dirs|QDir::Files|QDir::Readable, QDir::Name))
     {
       QString absoluteFilename = dir.absoluteFilePath(fileInfo.fileName());
-
       QJsonObject json = readJsonFile(absoluteFilename).object();
 
       if(!json.contains("name"))
