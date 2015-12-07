@@ -17,6 +17,8 @@ public:
 
   Scene& scene;
   debugging::VisualizationRenderer visualizeCameras;
+  debugging::VisualizationRenderer visualizeSphereAreaLights;
+  debugging::VisualizationRenderer visualizeRectAreaLights;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;

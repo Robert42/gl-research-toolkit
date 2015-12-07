@@ -135,6 +135,61 @@ bool Scene::fromJson(const QDir& dir, const QJsonObject& json)
     }
   }
 
+  if(json.contains("lights"))
+  {
+    if(!json["lights"].isArray())
+    {
+      qWarning() << "Scene::loadFromJson: lights must be an array";
+      return false;
+    }
+
+    for(const QJsonValue& value : json["lights"].toArray())
+    {
+      if(!value.isObject())
+      {
+        qWarning() << "Scene::loadFromJson: lights must be an array of objects";
+        return false;
+      }
+
+      QJsonObject lightObject = value.toObject();
+
+      if(!lightObject.contains("type") || !lightObject["type"].isString())
+      {
+        qWarning() << "Scene::loadFromJson: a light contain a type";
+        return false;
+      }
+
+      if(!lightObject.contains("name") || !lightObject["name"].isString())
+      {
+        qWarning() << "Scene::loadFromJson: a light contain a name";
+        return false;
+      }
+
+      QString type = lightObject["type"].toString();
+      QString name = lightObject["name"].toString();
+
+      if(type == "sphere-area-light")
+      {
+        SphereAreaLightComponent::Data data;
+        if(!data.initFromJson(lightObject))
+          return false;
+
+        assets.sphereAreaLights[name] = data;
+      }else if(type == "rect-area-light")
+      {
+        RectAreaLightComponent::Data data;
+        if(!data.initFromJson(lightObject))
+          return false;
+
+        assets.rectAreaLights[name] = data;
+      }else
+      {
+        qWarning() << "Scene::loadFromJson: Unknown light type " << type;
+        return false;
+      }
+    }
+  }
+
   return loadFromColladaFile(this->file, assets);
 }
 
@@ -218,8 +273,11 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
 
   const bool hasMesh = node->mNumMeshes > 0;
   const bool hasCamera = assets.cameras.contains(name);
+  const bool hasSphereAreaLight = assets.sphereAreaLights.contains(name);
+  const bool hasRectAreaLight = assets.rectAreaLights.contains(name);
+  const bool hasLight = hasSphereAreaLight || hasRectAreaLight;
 
-  if(hasMesh || hasCamera)
+  if(hasMesh || hasCamera || hasLight)
   {
     Entity* entity = new Entity(*this);
     entity->name = name;
@@ -248,6 +306,16 @@ bool Scene::loadEntitiesFromAssimp(const SceneAssets& assets,
     if(hasCamera)
     {
       new CameraComponent(*entity, assets.cameras[name]);
+    }
+
+    if(hasSphereAreaLight)
+    {
+      new SphereAreaLightComponent(*entity, assets.sphereAreaLights[name]);
+    }
+
+    if(hasRectAreaLight)
+    {
+      new RectAreaLightComponent(*entity, assets.rectAreaLights[name]);
     }
   }
 
@@ -279,6 +347,36 @@ QMap<QString, CameraParameter> Scene::sceneCameras() const
   }
 
   return cameras;
+}
+
+
+QMap<QString, SphereAreaLightComponent::Data> Scene::sphereAreaLights() const
+{
+  QMap<QString, SphereAreaLightComponent::Data> lights;
+
+  QVector<SphereAreaLightComponent*> lightComponent = allComponentsWithType<SphereAreaLightComponent>();
+
+  for(SphereAreaLightComponent* c : lightComponent)
+  {
+    lights[c->entity.name] = c->globalTransformation() * c->data;
+  }
+
+  return lights;
+}
+
+
+QMap<QString, RectAreaLightComponent::Data> Scene::rectAreaLights() const
+{
+  QMap<QString, RectAreaLightComponent::Data> lights;
+
+  QVector<RectAreaLightComponent*> lightComponent = allComponentsWithType<RectAreaLightComponent>();
+
+  for(RectAreaLightComponent* c : lightComponent)
+  {
+    lights[c->entity.name] = c->globalTransformation() * c->data;
+  }
+
+  return lights;
 }
 
 

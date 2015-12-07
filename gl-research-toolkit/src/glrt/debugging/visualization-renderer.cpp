@@ -15,6 +15,27 @@ VisualizationRenderer VisualizationRenderer::debugSceneCameras(scene::Scene* sce
   });
 }
 
+VisualizationRenderer VisualizationRenderer::debugSphereAreaLights(scene::Scene* scene)
+{
+  return VisualizationRenderer(scene, [scene](){
+    if(scene->sphereAreaLights().isEmpty())
+      return DebugLineVisualisation::Ptr();
+    else
+      return debugging::DebugLineVisualisation::drawSphereAreaLights(scene->sphereAreaLights().values());
+  });
+}
+
+VisualizationRenderer VisualizationRenderer::debugRectAreaLights(scene::Scene* scene)
+{
+  return VisualizationRenderer(scene, [scene](){
+    if(scene->rectAreaLights().isEmpty())
+      return DebugLineVisualisation::Ptr();
+    else
+      return debugging::DebugLineVisualisation::drawRectAreaLights(scene->rectAreaLights().values());
+  });
+}
+
+
 VisualizationRenderer::VisualizationRenderer(scene::Scene* scene, const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory)
   : factory(visualizationFactory)
 {

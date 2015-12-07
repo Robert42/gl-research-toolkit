@@ -12,6 +12,8 @@ namespace scene {
 Renderer::Renderer(Scene* scene)
   : scene(*scene),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
+    visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
+    visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
 {
@@ -31,6 +33,8 @@ void Renderer::render()
   renderImplementation();
 
   visualizeCameras.render();
+  visualizeSphereAreaLights.render();
+  visualizeRectAreaLights.render();
 }
 
 void Renderer::updateSceneUniform()

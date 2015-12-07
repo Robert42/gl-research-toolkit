@@ -12,4 +12,4 @@
 	url = git@github.com:Robert42/AntTweakBar-sdl2.git
 [submodule "external/assets/common"]
 	path = external/assets/common
-	url = git@github.com:Robert42/gl-research-toolkit-asssets.git
+	url = git@github.com:Robert42/gl-research-toolkit-assets.git

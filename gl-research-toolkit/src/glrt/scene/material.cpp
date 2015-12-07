@@ -1,4 +1,5 @@
 #include <glrt/scene/material.h>
+#include <glrt/toolkit/json.h>
 
 #include <QJsonArray>
 
@@ -64,30 +65,6 @@ bool MaterialInstance::parseCommonJson(const QJsonObject& object, const QString&
 }
 
 
-bool MaterialInstance::asVec3(glm::vec3& vec, const QJsonValue& value, const char* context)
-{
-  if(!value.isArray())
-  {
-    qWarning() << context << " parsing vec3 failed";
-    return false;
-  }
-
-  QJsonArray array = value.toArray();
-
-  if(array.size() != 3 || !array[0].isDouble() || !array[1].isDouble() || !array[2].isDouble())
-  {
-    qWarning() << context << " parsing vec3 failed";
-    return false;
-  }
-
-  vec[0] = array[0].toDouble();
-  vec[1] = array[1].toDouble();
-  vec[2] = array[2].toDouble();
-
-  return true;
-}
-
-
 // ======== PlainColorMaterial =================================================
 
 
@@ -102,9 +79,9 @@ MaterialInstance::Ptr PlainColorMaterial::fromJson(const QDir&, const QJsonObjec
 {
   UniformData uniformData;
 
-  if(!asVec3(uniformData.diffuse, object["diffuse"], "PlainColorMaterial::fromJson (diffuse)"))
+  if(!as_vec3(uniformData.diffuse, object["diffuse"], "PlainColorMaterial::fromJson (diffuse)"))
     return Ptr();
-  if(object.contains("emission") && !asVec3(uniformData.emission, object["emission"], "PlainColorMaterial::fromJson (emission)"))
+  if(object.contains("emission") && !as_vec3(uniformData.emission, object["emission"], "PlainColorMaterial::fromJson (emission)"))
     return Ptr();
 
   uniformData.metallic = object["metallic"].toDouble(0);

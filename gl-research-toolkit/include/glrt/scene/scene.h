@@ -5,6 +5,7 @@
 #include <glrt/scene/static-mesh.h>
 #include <glrt/scene/material.h>
 #include <glrt/scene/entity.h>
+#include <glrt/scene/light-component.h>
 #include <glrt/debug-camera.h>
 
 #include <glhelper/shaderobject.hpp>
@@ -51,6 +52,8 @@ public:
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=[](T*){return true;}) const;
 
   QMap<QString, CameraParameter> sceneCameras() const;
+  QMap<QString, SphereAreaLightComponent::Data> sphereAreaLights() const;
+  QMap<QString, RectAreaLightComponent::Data> rectAreaLights() const;
 
 signals:
   void clearScene();
@@ -76,6 +79,8 @@ private:
     QHash<int, MaterialInstance::Ptr> materialsForIndex;
     QHash<int, StaticMesh::Ptr> meshesForIndex;
     QMap<QString, CameraParameter> cameras;
+    QMap<QString, SphereAreaLightComponent::Data> sphereAreaLights;
+    QMap<QString, RectAreaLightComponent::Data> rectAreaLights;
     MaterialInstance::Ptr fallbackMaterial;
     glm::mat4 meshTransform;
   };

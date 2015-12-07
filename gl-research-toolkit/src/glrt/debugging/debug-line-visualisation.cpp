@@ -90,6 +90,32 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scen
 
 
 
+DebugLineVisualisation::Ptr DebugLineVisualisation::drawSphereAreaLights(const QList<scene::SphereAreaLightComponent::Data>& sphereAreaLights)
+{
+  DebugMesh::Painter painter;
+
+  painter.addSphere(1, 16);
+
+  return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                 sphereAreaLights.toVector(),
+                                                                 std::move(ShaderCompiler::createShaderFromFiles("visualize-sphere-area-light",
+                                                                                                                 QDir(GLRT_SHADER_DIR"/debugging/visualizations")))))));
+}
+
+
+DebugLineVisualisation::Ptr DebugLineVisualisation::drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights)
+{
+  DebugMesh::Painter painter;
+
+  painter.addRect(glm::vec2(-1), glm::vec2(1));
+  painter.addArrow(1.f, 0.1f);
+
+  return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                 rectAreaLights.toVector(),
+                                                                 std::move(ShaderCompiler::createShaderFromFiles("visualize-rect-area-light",
+                                                                                                                 QDir(GLRT_SHADER_DIR"/debugging/visualizations")))))));
+}
+
 
 
 void DebugLineVisualisation::draw()
