@@ -91,6 +91,8 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
   sceneSwitcher = TweakBarEnum<QString>::Ptr(new TweakBarEnum<QString>("CurrentSceneEnum", tweakBar, "Current Scene", ""));
+  sceneSwitcher->init(scene::Scene::findAllScenes());
+  sceneSwitcher->valueChanged = [&scene](const QString& file){scene.loadFromFile(file);};
 
   cameraSwitcher = TweakBarEnum<scene::CameraParameter>::Ptr(new TweakBarEnum<scene::CameraParameter>("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
   cameraSwitcher->valueChanged = [&scene](const scene::CameraParameter& p){scene.debugCamera = p;};
@@ -107,12 +109,14 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
 
 void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 {
+  if(sceneSwitcher)
+    sceneSwitcher->setCurrentKey(scene->name);
+
   if(cameraSwitcher)
   {
     cameraSwitcher->init(scene->sceneCameras());
     if(!scene->debugCamera.loadedName.isEmpty())
       cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
-
   }
 }
 

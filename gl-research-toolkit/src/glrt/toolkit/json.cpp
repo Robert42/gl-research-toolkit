@@ -5,6 +5,26 @@
 namespace glrt {
 
 
+QJsonDocument readJsonFile(const QString& filename)
+{
+  QFile file(filename);
+
+  if(!file.open(QFile::ReadOnly))
+    throw GLRT_EXCEPTION(QString("Couldn't open file <%0>").arg(filename));
+
+  QJsonParseError error;
+
+  QByteArray json = file.readAll()  ;
+  QJsonDocument document =  QJsonDocument::fromJson(json, &error);
+
+
+  if(error.error != QJsonParseError::NoError)
+    throw GLRT_EXCEPTION(QString("Scene json parsing error:\n%0\n%1%3").arg(error.errorString()).arg(filename).arg(error.offset));
+
+  return document;
+}
+
+
 bool as_vec3(glm::vec3& vec, const QJsonValue& value, const char* context)
 {
   if(!value.isArray())

@@ -3,10 +3,14 @@
 
 #include <glrt/dependencies.h>
 
+#include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonObject>
 
 namespace glrt {
+
+
+QJsonDocument readJsonFile(const QString& filename);
 
 
 bool as_vec3(glm::vec3& vec, const QJsonValue& value, const char* context);

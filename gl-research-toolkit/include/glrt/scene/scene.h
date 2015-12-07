@@ -43,6 +43,7 @@ public:
   void update(float deltaTime);
 
   void clear();
+  static QMap<QString, QString> findAllScenes();
   bool loadFromFile(const QString& file);
   bool fromJson(const QDir& dir, const QJsonObject& json);
 
