@@ -62,7 +62,7 @@ public:
 
     friend Data operator*(const glm::mat4& t, Data data)
     {
-      data.normal = transform_direction(t, data.origin);
+      data.normal = transform_direction(t, data.normal);
       data.tangent = transform_direction(t, data.tangent);
       data.origin = transform_point(t, data.origin);
 
