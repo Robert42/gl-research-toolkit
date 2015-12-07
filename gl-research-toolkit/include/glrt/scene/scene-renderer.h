@@ -70,6 +70,9 @@ public:
 
   void init();
 
+  void bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex);
+  void bindShaderStoreageBuffers();
+
 private:
   gl::Buffer* sphereAreaLightShaderStorageBuffer = nullptr;
   gl::Buffer* rectAreaLightShaderStorageBuffer = nullptr;

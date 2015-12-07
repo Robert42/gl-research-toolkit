@@ -134,6 +134,24 @@ void Renderer::DirectLights::init()
   rectAreaLightShaderStorageBuffer = createBufferForLightComponents(rectAreaLights);
 }
 
+
+void Renderer::DirectLights::bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex)
+{
+  Q_ASSERT(sphereAreaLightShaderStorageBuffer!=nullptr);
+  Q_ASSERT(rectAreaLightShaderStorageBuffer!=nullptr);
+
+  sphereAreaLightShaderStorageBuffer->BindShaderStorageBuffer(sphereAreaLightBindingIndex);
+  sphereAreaLightShaderStorageBuffer->BindShaderStorageBuffer(rectAreaLightBindingIndex);
+}
+
+
+void Renderer::DirectLights::bindShaderStoreageBuffers()
+{
+  bindShaderStoreageBuffers(SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA,
+                            SHADERSTORAGE_BINDING_LIGHTS_RECTAREA);
+}
+
+
 void Renderer::DirectLights::deinit()
 {
   delete sphereAreaLightShaderStorageBuffer;
@@ -219,6 +237,7 @@ void Renderer::Pass::renderStaticMeshes()
   this->shaderObject.Activate();
 
   renderer.staticMeshVertexArrayObject.Bind();
+  renderer.directLights().bindShaderStoreageBuffers();
 
   MaterialInstanceRange* materialInstanceRange = &materialInstanceRanges[0];
   MeshRange* meshInstanceRange = &meshRanges[0];
