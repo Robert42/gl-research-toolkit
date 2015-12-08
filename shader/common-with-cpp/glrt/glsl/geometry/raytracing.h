@@ -50,6 +50,10 @@ float sq(vec4 x)
 
 // ======== Ray ================================================================
 
+vec3 get_point(in Ray ray, float t)
+{
+  return ray.origin + ray.direction * t;
+}
 
 // ---- nearest_point
 
@@ -100,8 +104,6 @@ bool contains_unclamped(in Ray ray, in vec3 point, float epsilon)
 
 // ======== Plane ==============================================================
 
-// ---- construct
-
 // normal must have length 1
 Plane plane_from_normal(in vec3 normal, in float d)
 {
@@ -147,7 +149,10 @@ float distance_to(in Plane plane, in vec3 point)
 
 // ---- nearest point
 
-// TODO
+vec3 nearest_point(in Plane plane, in vec3 point)
+{
+  return point - plane.normal * signed_distance_to(plane, point);
+}
 
 // ---- contains
 
@@ -160,7 +165,39 @@ bool contains(in Plane plane, in vec3 point, float epsilon)
 
 // ---- intersection
 
-// TODO
+
+// returns infinity, if there's no intersection at all
+float intersection_distance(in Plane plane, in Ray ray)
+{
+  // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
+  return (plane.d - dot(ray.origin, plane.normal)) / dot(ray.direction, plane.normal);
+}
+
+// TODO test from here on
+
+bool intersection_test_unclamped(in Plane plane, in Ray ray, out(float) distance)
+{
+  distance = intersection_distance(plane, ray);
+  
+  return !isnan(distance);
+}
+
+bool intersection_test(in Plane plane, in Ray ray, out(float) distance)
+{
+  distance = intersection_distance(plane, ray);
+  
+  return distance >= 0 && !isnan(distance);
+}
+
+bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
+{
+  float t;
+  bool intersects = intersection_test(plane, ray, t);
+  
+  point = get_point(ray, t);
+  
+  return intersects;
+}
 
 
 // ======== Sphere =============================================================
