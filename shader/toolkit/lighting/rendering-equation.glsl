@@ -110,10 +110,10 @@ vec3 light_material(in MaterialOutput material_output, in vec3 direction_to_came
   specular_color *= specularfactor;
   
   ShadingInput shading_input;
-  shading_input.surface_normal = material_output.normal;
+  shading_input.surface_normal = normalize(material_output.normal);
   shading_input.surface_roughness = material_output.roughness;
   shading_input.surface_position = material_output.position;
-  shading_input.direction_to_viewer = direction_to_camera;
+  shading_input.direction_to_viewer = normalize(direction_to_camera);
   shading_input.diffuse_color = diffuse_color;
   shading_input.specular_color = specular_color;
   shading_input.emission = emission;
