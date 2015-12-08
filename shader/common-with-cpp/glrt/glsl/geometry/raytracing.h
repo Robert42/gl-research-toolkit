@@ -201,18 +201,27 @@ bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
 
 
 // ======== Sphere =============================================================
-/*
-vec3 nearest_point_on_sphere(in Sphere sphere, in Plane ray)
+
+
+vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
 {
-  Plane 
+  vec3 nearest_point = nearest_point_unclamped(ray, sphere.origin);
+  
+  float d = min(sphere.origin, distance(nearest_point, sphere.radius));
+  
+  return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
 }
 
-vec3 nearest_point_on_sphere(in Sphere sphere, in Ray ray)
+
+vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
 {
-  return nearest_point_on_sphere(sphere,
-                                 ); 
+  vec3 nearest_point = nearest_point_unclamped(ray, sphere.origin);
+  
+  float d = min(sphere.origin, distance(nearest_point, sphere.radius));
+  
+  return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
 }
-*/
+
 
 
 #include <glrt/glsl/compatibility/end.h>
