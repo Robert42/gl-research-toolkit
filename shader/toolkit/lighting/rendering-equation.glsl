@@ -12,7 +12,21 @@ struct ShadingInput
   vec3 emission;
 };
 
+/*
+The following lambertian_brdf is taken from
+@book{RTR3,
+ author = {Tomas Akenine-M\"{o}ller and Eric Haines and Naty Hoffman},
+ title = {Real-Time Rendering 3rd Edition},
+ year = {2008},
+ pages = {1045},
+ isbn = {987-1-56881-424-7},
+ publisher = {A. K. Peters, Ltd.},
+ address = {Natick, MA, USA},
+ }
 
+Equation 7.4.8  (page 257)
+
+*/
 vec3 lambertian_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
 {
   return shading_input.diffuse_color / pi;
@@ -23,6 +37,8 @@ vec3 brdf(in ShadingInput shading_input, in vec3 direction_to_light)
   vec3 diffuse_term = lambertian_brdf(shading_input, direction_to_light);
   vec3 specular_term = vec3(0);
   
+  
+  // Just adding them is ok, because of the invariant (diffuse_color + specular_color) <= 1
   return diffuse_term + specular_term;
 }
 
@@ -65,8 +81,12 @@ vec3 light_material(in MaterialOutput material_output, in vec3 direction_to_came
   float specularfactor = mix(specularfactor_dielectric, specularfactor_metal, material_output.metallic);
   
   vec3 emission = material_output.emission;
-  vec3 diffuse_color = material_output.color.rgb * (1.f - specularfactor);
-  vec3 specular_color = mix(vec3(1), material_output.color.rgb, material_output.metallic) * specularfactor;
+  vec3 diffuse_color = material_output.color.rgb;
+  vec3 specular_color = mix(vec3(1), material_output.color.rgb, material_output.metallic);
+  
+  // Ensure the invariant (diffuse_color + specular_color) <= 1
+  diffuse_color *= 1.f - specularfactor;
+  specular_color *= specularfactor;
   
   ShadingInput shading_input;
   shading_input.surface_normal = material_output.normal;
