@@ -1,61 +1,81 @@
 #include <lighting/light-buffers.glsl>
 
-void phong_shading(in ShadingInput shading_input, in LightSource light, in vec3 light_position, inout vec3 diffuse_light, inout vec3 specular_light)
+// assumed invariant when using this struct:  (diffuse_color + specular_color) <= 1
+struct ShadingInput
+{
+  vec3 surface_normal;
+  float surface_roughness;
+  vec3 surface_position;
+  vec3 direction_to_viewer;
+  vec3 diffuse_color;
+  vec3 specular_color;
+  vec3 emission;
+};
+
+
+vec3 lambertian_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
+{
+  return shading_input.diffuse_color / pi;
+}
+
+vec3 brdf(in ShadingInput shading_input, in vec3 direction_to_light)
+{
+  vec3 diffuse_term = lambertian_brdf(shading_input, direction_to_light);
+  vec3 specular_term = vec3(0);
+  
+  return diffuse_term + specular_term;
+}
+
+vec3 do_the_lighting(in ShadingInput shading_input, in LightSource light, in vec3 light_position)
 {
   vec3 luminance = light.luminance * light.color;
+  vec3 direction_to_light = normalize(light_position-shading_input.surface_position);
+  float cos_factor = max(0, dot(direction_to_light, shading_input.surface_normal));
   
-  vec3 light_direction = normalize(light_position-shading_input.surface_position);
-  
-  float factor = max(0, dot(light_direction, shading_input.surface_normal));
-  
-  diffuse_light += luminance * factor / pi;
-  //specular_light += luminance * factor * () / pi;
+  return luminance * brdf(shading_input, direction_to_light) * cos_factor;
 }
 
 
-ShadingOutput direct_lighting(in ShadingInput shading_input)
+vec3 rendering_equation(in ShadingInput shading_input)
 {
-  ShadingOutput shading_output;
-  shading_output.diffuse_light = vec3(0);
-  shading_output.specular_light = vec3(0);
+  vec3 outgoing_light = vec3(0);
   
   for(int i=0; i<sphere_arealights.num; ++i)
   {
     SphereAreaLight light = sphere_arealights.lights[i];
     
-    phong_shading(shading_input, light.light, light.origin, shading_output.diffuse_light, shading_output.specular_light);
+    outgoing_light += do_the_lighting(shading_input, light.light, light.origin);
   }
   
   for(int i=0; i<rect_arealights.num; ++i)
   {
     RectAreaLight light = rect_arealights.lights[i];
     
-    phong_shading(shading_input, light.light, light.origin, shading_output.diffuse_light, shading_output.specular_light);
+    outgoing_light += do_the_lighting(shading_input, light.light, light.origin);
   }
   
-  return shading_output;
+  return outgoing_light + shading_input.emission;
 }
 
 
 vec3 light_material(in MaterialOutput material_output, in vec3 direction_to_camera)
-{
+{  
+  float specularfactor_dielectric = 0.05f;
+  float specularfactor_metal = 1.f;
+  float specularfactor = mix(specularfactor_dielectric, specularfactor_metal, material_output.metallic);
+  
+  vec3 emission = material_output.emission;
+  vec3 diffuse_color = material_output.color.rgb * (1.f - specularfactor);
+  vec3 specular_color = mix(vec3(1), material_output.color.rgb, material_output.metallic) * specularfactor;
+  
   ShadingInput shading_input;
   shading_input.surface_normal = material_output.normal;
   shading_input.surface_roughness = material_output.roughness;
   shading_input.surface_position = material_output.position;
   shading_input.direction_to_viewer = direction_to_camera;
+  shading_input.diffuse_color = diffuse_color;
+  shading_input.specular_color = specular_color;
+  shading_input.emission = emission;
   
-  float alpha = material_output.color.a;
-  vec3 emission = material_output.emission;
-  vec3 diffuse_color = material_output.color.rgb;
-  vec3 specular_color = mix(vec3(1), material_output.color.rgb, material_output.metallic);
-  float specularfactor_dielectric = 0.05f;
-  float specularfactor_metal = 1.f;
-  float specularfactor = mix(specularfactor_dielectric, specularfactor_metal, material_output.metallic);
-  
-  ShadingOutput shading_output = direct_lighting(shading_input);
-  
-  vec3 lit_color = mix(diffuse_color*shading_output.diffuse_light, specular_color*shading_output.specular_light, specularfactor);
-  
-  return emission + lit_color;
+  return rendering_equation(shading_input);
 }
