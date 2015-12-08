@@ -14,6 +14,11 @@ using glm::ivec2;
 using glm::ivec3;
 using glm::ivec4;
 
+using glm::dot;
+using glm::max;
+using glm::min;
+using glm::clamp;
+
 #ifndef in
 #define in
 #endif

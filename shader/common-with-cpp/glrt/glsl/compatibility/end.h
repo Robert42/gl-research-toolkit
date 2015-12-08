@@ -5,6 +5,10 @@
 #undef out
 #endif
 
+#ifdef in
+#undef in
+#endif
+
 #ifdef inout
 #undef inout
 #endif
