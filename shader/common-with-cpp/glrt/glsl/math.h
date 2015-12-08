@@ -1,3 +1,6 @@
+#ifndef _GLRT_GLSL_MATH_H_
+#define _GLRT_GLSL_MATH_H_
+
 #include <glrt/glsl/compatibility/begin.h>
 
 float pi = 3.1415926535897;
@@ -45,3 +48,5 @@ vec4 blend_screen(vec4 x, vec4 y)
 }
 
 #include <glrt/glsl/compatibility/end.h>
+
+#endif // #define _GLRT_GLSL_MATH_H_
