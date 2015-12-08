@@ -1,7 +1,8 @@
 #ifdef FORWARD_RENDERER
 
-#include <lighting/light-buffers.glsl>
-#include "common-uniform-blocks.glsl"
+#include <lighting/rendering-equation.glsl>
+
+out vec4 color;
 
 void apply_material(in MaterialOutput material_output, in vec3 direction_to_camera)
 {

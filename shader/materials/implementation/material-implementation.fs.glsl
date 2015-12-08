@@ -11,11 +11,12 @@ struct MaterialOutput
   float occlusion;
 };
 
-out vec4 color;
 
 #ifdef FORWARD_RENDERER
 #include "forward-lighting.fs.glsl"
 #endif
+
+#include "common-uniform-blocks.glsl"
 
 vec3 direction_to_camera()
 {
