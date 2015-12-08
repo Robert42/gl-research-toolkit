@@ -16,9 +16,3 @@ struct MaterialOutput
 #include "forward-lighting.fs.glsl"
 #endif
 
-#include "common-uniform-blocks.glsl"
-
-vec3 direction_to_camera()
-{
-  return normalize(scene.view_position-fragment.position);
-}
