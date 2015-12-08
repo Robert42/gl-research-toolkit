@@ -13,7 +13,7 @@ struct ShadingInput
 };
 
 /*
-The following lambertian_brdf is taken from
+The following blinn_phong_brdf and lambertian_brdf is taken from
 @book{RTR3,
  author = {Tomas Akenine-M\"{o}ller and Eric Haines and Naty Hoffman},
  title = {Real-Time Rendering 3rd Edition},
@@ -27,15 +27,32 @@ The following lambertian_brdf is taken from
 Equation 7.4.8  (page 257)
 
 */
+vec3 blinn_phong_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
+{
+  vec3 specular_color = shading_input.specular_color;
+  vec3 half_vector = normalize(direction_to_light + shading_input.direction_to_viewer);
+  float cos_theta_half_vector = max(0, dot(shading_input.surface_normal, half_vector));
+  
+  float roughness = shading_input.surface_roughness;
+  
+  float m = mix(1024.f, 1.f, roughness);
+  
+  return specular_color * pow(cos_theta_half_vector, m) * (m + 8.f) / (8.f * pi);
+  
+  // TODO: use instead equation 7.49 (fresnel is described in 7.5.3)
+}
+
 vec3 lambertian_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
 {
-  return shading_input.diffuse_color / pi;
+  vec3 diffuse_color = shading_input.diffuse_color;
+  
+  return diffuse_color / pi;
 }
 
 vec3 brdf(in ShadingInput shading_input, in vec3 direction_to_light)
 {
   vec3 diffuse_term = lambertian_brdf(shading_input, direction_to_light);
-  vec3 specular_term = vec3(0);
+  vec3 specular_term = blinn_phong_brdf(shading_input, direction_to_light);
   
   
   // Just adding them is ok, because of the invariant (diffuse_color + specular_color) <= 1
