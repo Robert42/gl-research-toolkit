@@ -5,7 +5,7 @@ using glm::vec2;
 using glm::vec3;
 using glm::vec4;
 
-#define EXPECT_EQ(value, expected) if(value!=expected){qCritical() << "Expected"<<expected<<"got"<<value;Q_UNREACHABLE();}
+#define EXPECT_EQ(value, expected) if(value!=expected){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
 #define EXPECT_TRUE(value) EXPECT_EQ(value, true);
 #define EXPECT_FALSE(value) EXPECT_EQ(value, false);
 
