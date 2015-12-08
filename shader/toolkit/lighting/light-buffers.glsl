@@ -1,4 +1,5 @@
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/glsl/math.h>
 #include "light-structs.glsl"
 
 layout(binding=SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA, std140)
@@ -20,6 +21,14 @@ buffer RectAreaLightBlock
 
 void phong_shading(in ShadingInput shading_input, in LightSource light, in vec3 light_position, inout vec3 diffuse_light, inout vec3 specular_light)
 {
+  vec3 luminance = light.luminance * light.color;
+  
+  vec3 light_direction = normalize(light_position-shading_input.surface_position);
+  
+  float factor = max(0, dot(light_direction, shading_input.surface_normal));
+  
+  diffuse_light += luminance * factor / pi;
+  //specular_light += luminance * factor;
 }
 
 
