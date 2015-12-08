@@ -67,7 +67,7 @@ vec3 do_the_lighting(in ShadingInput shading_input, in LightSource light, in vec
   float cos_factor = max(0, dot(direction_to_light, shading_input.surface_normal));
   
   float falloff = 1.f/sq(distance_to_light);
-  //falloff = clamp(falloff, 0, 1); // TODO decide whether to clamp of not
+  falloff = clamp(falloff, 0, 1); // TODO decide whether to clamp of not
   
   return luminance * falloff * brdf(shading_input, direction_to_light) * cos_factor;
 }
