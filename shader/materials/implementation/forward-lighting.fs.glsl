@@ -3,13 +3,13 @@
 #include <lighting/light-buffers.glsl>
 #include "common-uniform-blocks.glsl"
 
-void apply_material(in MaterialOutput material_output)
+void apply_material(in MaterialOutput material_output, in vec3 direction_to_camera)
 {
   ShadingInput shading_input;
   shading_input.surface_normal = material_output.normal;
   shading_input.surface_roughness = material_output.roughness;
   shading_input.surface_position = material_output.position;
-  shading_input.direction_to_viewer = scene.view_position;
+  shading_input.direction_to_viewer = direction_to_camera;
   
   float alpha = material_output.color.a;
   vec3 emission = material_output.emission;

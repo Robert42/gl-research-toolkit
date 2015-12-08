@@ -10,5 +10,5 @@ void main()
   if(material_output.color.a < 0.6f)
     discard;
   
-  apply_material(material_output);
+  apply_material(material_output, direction_to_camera());
 }

@@ -32,5 +32,5 @@ void main()
   
   // No normal mapping here, so uv and tangent ar eunused
   
-  apply_material(material_output);
+  apply_material(material_output, direction_to_camera());
 }

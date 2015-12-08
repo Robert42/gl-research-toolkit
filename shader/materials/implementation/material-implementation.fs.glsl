@@ -16,3 +16,8 @@ out vec4 color;
 #ifdef FORWARD_RENDERER
 #include "forward-lighting.fs.glsl"
 #endif
+
+vec3 direction_to_camera()
+{
+  return normalize(scene.view_position-fragment.position);
+}
