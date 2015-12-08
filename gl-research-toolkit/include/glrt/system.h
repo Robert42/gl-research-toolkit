@@ -14,7 +14,7 @@ public:
     QString windowTitle = "Hello World :)";
     glm::ivec2 windowSize = glm::ivec2(640, 480);
     int minOpenglVersion = 450;
-    bool VSync = false;
+    bool VSync = true;
 
     static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))
     {
