@@ -35,7 +35,7 @@ vec3 blinn_phong_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
   
   float roughness = shading_input.surface_roughness;
   
-  float m = mix(1024.f, 1.f, roughness);
+  float m = mix(128.f, 1.f, roughness);
   
   return specular_color * pow(cos_theta_half_vector, m) * (m + 8.f) / (8.f * pi);
   
