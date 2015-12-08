@@ -41,6 +41,8 @@ private:
   struct SceneUniformBlock
   {
     glm::mat4 view_projection_matrix;
+    glm::vec3 view_position;
+    padding<float> _padding;
   };
 
   gl::Buffer sceneUniformBuffer;

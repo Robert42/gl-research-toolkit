@@ -10,7 +10,10 @@ namespace glrt {
 class DebugCamera
 {
 public:
+  glm::mat4 projectionMatrix;
   glm::mat4 viewProjectionMatrix;
+  glm::vec3 camera_position;
+
   float movement_speed;
   float rotation_speed;
   QString loadedName;
@@ -29,8 +32,6 @@ public:
 private:
   glm::ivec2 windowSize;
 
-  glm::mat4 projectionMatrix;
-  glm::vec3 camera_position;
   glm::mat4 camera_orientation_inverse;
   bool movementMode;
 };
