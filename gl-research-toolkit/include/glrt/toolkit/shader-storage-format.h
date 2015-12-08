@@ -209,7 +209,8 @@ public:
     {
       variadicElementBuffer.initStaticElements(newStaticComponents.length(),
                                               [&newStaticComponents](ElementType* element, int i) {
-        *element = newStaticComponents[i]->data;
+        EntityComponentType* component = newStaticComponents[i];
+        *element = component->globalTransformation() * component->data;
       });
     }
   }
@@ -229,7 +230,8 @@ public:
   void update()
   {
     variadicElementBuffer.updateMovableElements([this](ElementType* element, int i) {
-      *element = movableComponents[i]->data;
+      EntityComponentType* component = movableComponents[i];
+      *element = component->globalTransformation() * component->data;
     });
   }
 
