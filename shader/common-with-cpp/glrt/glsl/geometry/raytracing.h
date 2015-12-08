@@ -207,17 +207,7 @@ vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
 {
   vec3 nearest_point = nearest_point_unclamped(ray, sphere.origin);
   
-  float d = min(sphere.origin, distance(nearest_point, sphere.radius));
-  
-  return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
-}
-
-
-vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
-{
-  vec3 nearest_point = nearest_point_unclamped(ray, sphere.origin);
-  
-  float d = min(sphere.origin, distance(nearest_point, sphere.radius));
+  float d = min(distance(sphere.origin, nearest_point), sphere.radius);
   
   return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
 }
