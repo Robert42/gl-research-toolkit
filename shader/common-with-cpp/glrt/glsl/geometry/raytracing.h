@@ -1,3 +1,5 @@
+#include <glrt/glsl/math.h>
+
 #include <glrt/glsl/compatibility/begin.h>
 
 
@@ -22,30 +24,6 @@ struct Ray
   vec3 origin;
   vec3 direction;
 };
-
-
-// ======== Helper =============================================================
-
-
-float sq(float x)
-{
-  return x*x;
-}
-
-float sq(vec2 x)
-{
-  return dot(x, x);
-}
-
-float sq(vec3 x)
-{
-  return dot(x, x);
-}
-
-float sq(vec4 x)
-{
-  return dot(x, x);
-}
 
 
 // ======== Ray ================================================================
