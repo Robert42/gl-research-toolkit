@@ -62,10 +62,14 @@ vec3 brdf(in ShadingInput shading_input, in vec3 direction_to_light)
 vec3 do_the_lighting(in ShadingInput shading_input, in LightSource light, in vec3 light_position)
 {
   vec3 luminance = light.luminance * light.color;
-  vec3 direction_to_light = normalize(light_position-shading_input.surface_position);
+  float distance_to_light = length(light_position-shading_input.surface_position);
+  vec3 direction_to_light = (light_position-shading_input.surface_position) / distance_to_light;
   float cos_factor = max(0, dot(direction_to_light, shading_input.surface_normal));
   
-  return luminance * brdf(shading_input, direction_to_light) * cos_factor;
+  float falloff = 1.f/sq(distance_to_light);
+  //falloff = clamp(falloff, 0, 1); // TODO decide whether to clamp of not
+  
+  return luminance * falloff * brdf(shading_input, direction_to_light) * cos_factor;
 }
 
 
@@ -92,7 +96,7 @@ vec3 rendering_equation(in ShadingInput shading_input)
 
 
 vec3 light_material(in MaterialOutput material_output, in vec3 direction_to_camera)
-{  
+{
   float specularfactor_dielectric = 0.05f;
   float specularfactor_metal = 1.f;
   float specularfactor = mix(specularfactor_dielectric, specularfactor_metal, material_output.metallic);
