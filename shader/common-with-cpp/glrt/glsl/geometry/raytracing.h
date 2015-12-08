@@ -190,6 +190,13 @@ vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
   return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
 }
 
+bool intersects(in Sphere sphere, in Ray ray)
+{
+  float d = sq_distance_to(ray, sphere.origin);
+  
+  return d <= sq(sphere.radius);
+}
+
 
 
 #include <glrt/glsl/compatibility/end.h>
