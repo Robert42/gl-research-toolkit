@@ -1,3 +1,4 @@
+#include <glrt/dependencies.h>
 #include <glrt/glsl/geometry/raytracing.h>
 
 using namespace glrt::glsl;

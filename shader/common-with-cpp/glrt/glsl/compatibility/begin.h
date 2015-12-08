@@ -1,8 +1,6 @@
 // ======== C++ ================================================================
 #if defined(__GNUC__)
 
-#include <glrt/dependencies.h>
-
 namespace glrt {
 namespace glsl {
 
