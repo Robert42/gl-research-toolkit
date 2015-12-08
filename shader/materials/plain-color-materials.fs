@@ -5,6 +5,8 @@
 
 #include <glrt/glsl/layout-constants.h>
 
+
+// TODO: improve performance by doing this in the vertex shader and just passing the MaterialOutput instance (flat, without interpolation)
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
   vec3 diffuse_color;
