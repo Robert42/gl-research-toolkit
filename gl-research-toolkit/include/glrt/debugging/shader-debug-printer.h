@@ -30,6 +30,7 @@ private:
   bool mouse_is_pressed = false;
   glm::ivec2 mouseCoordinate;
   gl::ShaderObject shader;
+  gl::Buffer counterBuffer;
   gl::Buffer buffer;
 
   void setMouseCoordinate(const glm::ivec2& mouseCoordinate, Uint32 windowId);

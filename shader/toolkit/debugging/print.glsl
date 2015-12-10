@@ -9,26 +9,28 @@ struct DebuggingOutputChunk
   ivec4 integerValues;
 };
 
+layout(binding=ATOMIC_COUNTER_BINDING_VALUE_PRINTER) uniform atomic_uint debugging_buffer_counter_numberChunks;
+
 layout(binding=SHADERSTORAGE_BINDING_VALUE_PRINTER, std140)
 buffer DebuggingOutputBlock
 {
   vec2 fragment_coord;
   float treshold;
-  int numberChunks;
+  float offset;
   DebuggingOutputChunk chunks[];
 }debugging_buffer;
 
 bool is_fragment_to_debug()
 {
-  return distance(gl_FragCoord.xy, debugging_buffer.fragment_coord) <= debugging_buffer.treshold;
+  return distance(gl_FragCoord.xy, debugging_buffer.fragment_coord+debugging_buffer.offset) <= debugging_buffer.treshold;
 }
 
 void implement_print_chunk(in DebuggingOutputChunk chunk)
 {
-  if(is_fragment_to_debug() && debugging_buffer.numberChunks < GLSL_DEBUGGING_LENGTH)
+  if(is_fragment_to_debug())
   {
-    debugging_buffer.chunks[debugging_buffer.numberChunks] = chunk;
-    debugging_buffer.numberChunks++;
+    uint i = atomicCounterIncrement(debugging_buffer_counter_numberChunks);
+    debugging_buffer.chunks[i] = chunk;
   }
 }
 
