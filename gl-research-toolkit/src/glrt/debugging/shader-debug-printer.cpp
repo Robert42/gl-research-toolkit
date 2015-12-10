@@ -1,5 +1,7 @@
 #include <glrt/debugging/shader-debug-printer.h>
 
+#include <glrt/toolkit/shader-compiler.h>
+
 #include <glrt/glsl/debugging/printer-types.h>
 #include <glrt/glsl/layout-constants.h>
 
@@ -87,7 +89,8 @@ inline void printChunk(const Chunk& chunk)
 
 
 ShaderDebugPrinter::ShaderDebugPrinter()
-  : buffer(sizeof(WholeBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr)
+  : shader(std::move(ShaderCompiler::createShaderFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
+    buffer(sizeof(WholeBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr)
 {
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
@@ -136,6 +139,10 @@ void ShaderDebugPrinter::end()
 
 void ShaderDebugPrinter::drawCross()
 {
+  shader.Activate();
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL_RECTANGLE_NV);
+  GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 3);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 bool ShaderDebugPrinter::handleEvents(const SDL_Event& event)

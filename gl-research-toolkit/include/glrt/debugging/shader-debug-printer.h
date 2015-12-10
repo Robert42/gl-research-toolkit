@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 
 #include <glhelper/buffer.hpp>
+#include <glhelper/shaderobject.hpp>
 #include <glrt/gui/anttweakbar.h>
 
 namespace glrt {
@@ -27,6 +28,7 @@ public:
 private:
   bool active = false;
   bool mouse_is_pressed = false;
+  gl::ShaderObject shader;
   gl::Buffer buffer;
 };
 
