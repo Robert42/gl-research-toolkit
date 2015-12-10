@@ -20,16 +20,16 @@ buffer DebuggingOutputBlock
 
 bool is_fragment_to_debug()
 {
-  return distance(gl_FragCoord,debugging_input.fragment_coord) <= debugging_input.treshold;
+  return distance(gl_FragCoord.xy, debugging_buffer.fragment_coord) <= debugging_buffer.treshold;
 }
 
 void implement_print_value(in ivec4 type, in mat4 values)
 {
   if(is_fragment_to_debug())
   {
-    debugging_output.chunks[debugging_output.numberChunks].type = type;
-    debugging_output.chunks[debugging_output.numberChunks].floatValues = values;
-    debugging_output.numberChunks++;
+    debugging_buffer.chunks[debugging_buffer.numberChunks].type = type;
+    debugging_buffer.chunks[debugging_buffer.numberChunks].floatValues = values;
+    debugging_buffer.numberChunks++;
   }
 }
 
@@ -37,85 +37,85 @@ void implement_print_value(in ivec4 type, in ivec4 values)
 {
   if(is_fragment_to_debug())
   {
-    debugging_output.chunks[debugging_output.numberChunks].type = type;
-    debugging_output.chunks[debugging_output.numberChunks].integerValues = values;
-    debugging_output.numberChunks++;
+    debugging_buffer.chunks[debugging_buffer.numberChunks].type = type;
+    debugging_buffer.chunks[debugging_buffer.numberChunks].integerValues = values;
+    debugging_buffer.numberChunks++;
   }
 }
 
-void PRINT_VALUE(in bool value)
+void PRINT_VALUE(in bool v)
 {
-  ivec4 value = ivec4(int(value), 0, 0, 0);
+  ivec4 value = ivec4(int(v), 0, 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_BOOL(1), value);
 }
 
-void PRINT_VALUE(in bvec2 value)
+void PRINT_VALUE(in bvec2 v)
 {
-  ivec4 value = ivec4(ivec2(value), 0, 0);
+  ivec4 value = ivec4(ivec2(v), 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_BOOL(2), value);
 }
 
-void PRINT_VALUE(in bvec3 value)
+void PRINT_VALUE(in bvec3 v)
 {
-  ivec4 value = ivec4(ivec3(value), 0);
+  ivec4 value = ivec4(ivec3(v), 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_BOOL(3), value);
 }
 
-void PRINT_VALUE(in bvec4 value)
+void PRINT_VALUE(in bvec4 v)
 {
-  ivec4 value = ivec4(value);
+  ivec4 value = ivec4(v);
   implement_print_value(GLSL_DEBUGGING_TYPE_BOOL(4), value);
 }
 
-void PRINT_VALUE(in int value)
+void PRINT_VALUE(in int v)
 {
-  ivec4 value = ivec4(int(value), 0, 0, 0);
+  ivec4 value = ivec4(int(v), 0, 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_INT(1), value);
 }
 
-void PRINT_VALUE(in ivec2 value)
+void PRINT_VALUE(in ivec2 v)
 {
-  ivec4 value = ivec4(ivec2(value), 0, 0);
+  ivec4 value = ivec4(ivec2(v), 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_INT(2), value);
 }
 
-void PRINT_VALUE(in ivec3 value)
+void PRINT_VALUE(in ivec3 v)
 {
-  ivec4 value = ivec4(ivec3(value), 0);
+  ivec4 value = ivec4(ivec3(v), 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_INT(3), value);
 }
 
-void PRINT_VALUE(in ivec4 value)
+void PRINT_VALUE(in ivec4 v)
 {
-  ivec4 value = ivec4(value);
+  ivec4 value = ivec4(v);
   implement_print_value(GLSL_DEBUGGING_TYPE_INT(4), value);
 }
 
-void PRINT_VALUE(in float value)
+void PRINT_VALUE(in float v)
 {
   mat4 value;
-  value[0] = vec4(int(value), 0, 0, 0);
+  value[0] = vec4(int(v), 0, 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(1), value);
 }
 
-void PRINT_VALUE(in vec2 value)
+void PRINT_VALUE(in vec2 v)
 {
   mat4 value;
-  value[0] = vec4(ivec2(value), 0, 0);
+  value[0] = vec4(ivec2(v), 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(2), value);
 }
 
-void PRINT_VALUE(in vec3 value)
+void PRINT_VALUE(in vec3 v)
 {
   mat4 value;
-  value[0] = vec4(ivec3(value), 0);
+  value[0] = vec4(ivec3(v), 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(3), value);
 }
 
-void PRINT_VALUE(in vec4 value)
+void PRINT_VALUE(in vec4 v)
 {
   mat4 value;
-  value[0] = vec4(value);
+  value[0] = vec4(v);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(4), value);
 }
 
@@ -124,10 +124,10 @@ void PRINT_VALUE(in mat4 value)
   implement_print_value(GLSL_DEBUGGING_TYPE_MAT(4,4), value);
 }
 
-void PRINT_VALUE(in Ray value)
+void PRINT_VALUE(in Ray r)
 {
   mat4 value;
-  value[0] = vec4(value.origin);
-  value[1] = vec4(value.direction);
+  value[0] = vec4(r.origin, 1);
+  value[1] = vec4(r.direction, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_RAY, value);
 }
