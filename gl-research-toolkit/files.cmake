@@ -24,6 +24,7 @@ set(SOURCE_FILES
   include/glrt/toolkit/geometry.h
   include/glrt/toolkit/json.h
   include/glrt/toolkit/shader-compiler.h
+  include/glrt/toolkit/shader-storage-format.h
   include/glrt/toolkit/temp-shader-file.h
   src/glrt/application.cpp
   src/glrt/debug-camera.cpp

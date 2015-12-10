@@ -3,8 +3,21 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 add_custom_target(
   gl-research-toolkit-shader
   SOURCES
+  common-with-cpp/glrt/glsl/compatibility/begin.h
+  common-with-cpp/glrt/glsl/compatibility/end.h
+  common-with-cpp/glrt/glsl/geometry/raytracing.h
   common-with-cpp/glrt/glsl/layout-constants.h
+  common-with-cpp/glrt/glsl/math.h
+  debugging/visualizations/common-debug-line-visualization.fs.glsl
+  debugging/visualizations/common-debug-line-visualization.vs.glsl
+  debugging/visualizations/visualize-rect-area-light.fs
+  debugging/visualizations/visualize-rect-area-light.vs
+  debugging/visualizations/visualize-scene-camera.fs
+  debugging/visualizations/visualize-scene-camera.vs
+  debugging/visualizations/visualize-sphere-area-light.fs
+  debugging/visualizations/visualize-sphere-area-light.vs
   materials/implementation/common-implementation.vs.glsl
+  materials/implementation/common-uniform-blocks.glsl
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/input-block.fs.glsl
   materials/implementation/material-implementation.fs.glsl
@@ -19,4 +32,8 @@ add_custom_target(
   materials/transparent-meshes.fs
   materials/transparent-meshes.vs
   toolkit/debugging/normal.glsl
+  toolkit/geometry/transform.glsl
+  toolkit/lighting/light-buffers.glsl
+  toolkit/lighting/light-structs.glsl
+  toolkit/lighting/rendering-equation.glsl
 )

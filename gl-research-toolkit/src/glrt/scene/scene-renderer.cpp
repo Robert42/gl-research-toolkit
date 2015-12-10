@@ -1,5 +1,6 @@
 #include <glrt/scene/scene-renderer.h>
 #include <glrt/scene/static-mesh-component.h>
+#include <glrt/scene/light-component.h>
 
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/toolkit/aligned-vector.h>
@@ -15,14 +16,15 @@ Renderer::Renderer(Scene* scene)
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject()))
+    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject())),
+    _directLights(new DirectLights(this))
 {
 }
 
 Renderer::~Renderer()
 {
+  delete _directLights;
 }
-
 
 void Renderer::render()
 {
@@ -41,9 +43,48 @@ void Renderer::updateSceneUniform()
 {
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   sceneUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
+  sceneUniformData.view_position = scene.debugCamera.camera_position;
   sceneUniformBuffer.Unmap();
 }
 
+Renderer::DirectLights& Renderer::directLights()
+{
+  return *this->_directLights;
+}
+
+
+
+
+// ======== DirectLights =======================================================
+
+
+Renderer::DirectLights::DirectLights(Renderer* renderer)
+  : renderer(*renderer),
+    sphereAreaShaderStorageBuffer(this->renderer.scene),
+    rectAreaShaderStorageBuffer(this->renderer.scene)
+{
+}
+
+Renderer::DirectLights::~DirectLights()
+{
+}
+
+
+void Renderer::DirectLights::bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex)
+{
+  sphereAreaShaderStorageBuffer.update();
+  rectAreaShaderStorageBuffer.update();
+
+  sphereAreaShaderStorageBuffer.bindShaderStorageBuffer(sphereAreaLightBindingIndex);
+  rectAreaShaderStorageBuffer.bindShaderStorageBuffer(rectAreaLightBindingIndex);
+}
+
+
+void Renderer::DirectLights::bindShaderStoreageBuffers()
+{
+  bindShaderStoreageBuffers(SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA,
+                            SHADERSTORAGE_BINDING_LIGHTS_RECTAREA);
+}
 
 
 
@@ -121,6 +162,7 @@ void Renderer::Pass::renderStaticMeshes()
   this->shaderObject.Activate();
 
   renderer.staticMeshVertexArrayObject.Bind();
+  renderer.directLights().bindShaderStoreageBuffers();
 
   MaterialInstanceRange* materialInstanceRange = &materialInstanceRanges[0];
   MeshRange* meshInstanceRange = &meshRanges[0];

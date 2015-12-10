@@ -1,4 +1,5 @@
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/glsl/math.h>
 #include "light-structs.glsl"
 
 layout(binding=SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA, std140)

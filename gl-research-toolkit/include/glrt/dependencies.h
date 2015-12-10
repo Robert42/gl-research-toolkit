@@ -23,6 +23,20 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <functional>
+
+
+QDebug operator<<(QDebug d, const glm::vec2& v);
+QDebug operator<<(QDebug d, const glm::vec3& v);
+QDebug operator<<(QDebug d, const glm::vec4& v);
+
+QDebug operator<<(QDebug d, const glm::ivec2& v);
+QDebug operator<<(QDebug d, const glm::ivec3& v);
+QDebug operator<<(QDebug d, const glm::ivec4& v);
+
+QDebug operator<<(QDebug d, const glm::mat2& v);
+QDebug operator<<(QDebug d, const glm::mat3& v);
+QDebug operator<<(QDebug d, const glm::mat4& v);
 
 
 namespace glrt {

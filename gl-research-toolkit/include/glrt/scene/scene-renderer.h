@@ -3,6 +3,7 @@
 
 #include <glrt/scene/scene.h>
 #include <glrt/debugging/visualization-renderer.h>
+#include <glrt/toolkit/shader-storage-format.h>
 
 
 namespace glrt {
@@ -13,6 +14,7 @@ class Renderer : public QObject
   Q_OBJECT
 public:
 
+  class DirectLights;
   class Pass;
 
   Scene& scene;
@@ -24,6 +26,8 @@ public:
   Renderer(Renderer&&) = delete;
   Renderer& operator=(const Renderer&) = delete;
   Renderer& operator=(Renderer&&) = delete;
+
+  DirectLights& directLights();
 
   Renderer(Scene* scene);
   virtual ~Renderer();
@@ -37,16 +41,37 @@ private:
   struct SceneUniformBlock
   {
     glm::mat4 view_projection_matrix;
+    glm::vec3 view_position;
+    padding<float> _padding;
   };
 
   gl::Buffer sceneUniformBuffer;
 
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
+  DirectLights* _directLights = nullptr;
+
   void updateSceneUniform();
 
 
   void debugCameraPositions();
+};
+
+
+class Renderer::DirectLights final
+{
+public:
+  Renderer& renderer;
+
+  DirectLights(Renderer* renderer);
+  ~DirectLights();
+
+  void bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex);
+  void bindShaderStoreageBuffers();
+
+private:
+  ShaderStorageFormat<SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
+  ShaderStorageFormat<RectAreaLightComponent> rectAreaShaderStorageBuffer;
 };
 
 

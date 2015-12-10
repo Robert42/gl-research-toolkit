@@ -54,9 +54,9 @@ public:
     LightSource light;
 
     glm::vec3 normal = glm::vec3(0, 0, -1);
-    float halfWidth;
+    float half_width;
     glm::vec3 tangent = glm::vec3(-1, 0, 0);
-    float halfHeight;
+    float half_height;
     glm::vec3 origin = glm::vec3(0);
     padding<float> _padding;
 
