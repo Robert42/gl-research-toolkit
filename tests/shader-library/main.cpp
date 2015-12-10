@@ -106,9 +106,12 @@ void test_raytracing_sphere()
   Sphere small;
 
   ray.direction = vec3(1, 0, 0);
-  ray.origin = vec3(0);
+  ray.origin = vec3(0, 42, 0);
 
+  small.origin = vec3(5, 8, 0);
+  small.radius = 3;
 
+  EXPECT_EQ(nearest_point_on_sphere_unclamped(small, ray), vec3(5, 11, 0));
 }
 
 

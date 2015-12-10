@@ -184,8 +184,12 @@ bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
 vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
 {
   vec3 nearest_point = nearest_point_unclamped(ray, sphere.origin);
+
+  float distance_to_ray = distance(sphere.origin, nearest_point);
   
-  float d = min(distance(sphere.origin, nearest_point), sphere.radius);
+  float d = min(distance_to_ray, sphere.radius);
+
+  nearest_point = sphere.origin + d * (nearest_point - sphere.origin) / distance_to_ray;
   
   return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
 }
