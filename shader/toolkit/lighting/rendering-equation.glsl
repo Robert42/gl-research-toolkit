@@ -78,13 +78,6 @@ vec3 brdf(in ShadingInput shading_input)
   //vec3 specular_term = blinn_phong_brdf(shading_input);
   vec3 specular_term = test_sharp_highlight(shading_input);
   
-  PRINT_VALUE(gl_FragCoord.xy);/*
-  PRINT_VALUE(diffuse_term);
-  PRINT_VALUE(vec3(1,0,1));
-  PRINT_VALUE(distance(gl_FragCoord.xy, debugging_buffer.fragment_coord));
-  PRINT_VALUE(debugging_buffer.treshold);*/
-  
-  
   // Just adding them is ok, because of the invariant (diffuse_color + specular_color) <= 1
   return diffuse_term + specular_term;
 }
@@ -169,6 +162,8 @@ vec3 light_material(in MaterialOutput material_output, in vec3 direction_to_came
   
   shading_input.perfect_reflection_ray.origin = shading_input.surface_position;
   shading_input.perfect_reflection_ray.direction = reflect(-shading_input.direction_to_viewer, shading_input.surface_normal);
+  
+  PRINT_VALUE(shading_input.perfect_reflection_ray);
   
   return rendering_equation(shading_input);
 }
