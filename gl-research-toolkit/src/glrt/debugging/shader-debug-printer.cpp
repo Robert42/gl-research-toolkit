@@ -115,7 +115,7 @@ void ShaderDebugPrinter::begin()
   memset(whole_buffer, 0, sizeof(WholeBuffer));
 
   whole_buffer->fragment_coord = glm::vec2(mouseCoordinate);
-  whole_buffer->treshold = 0.5f;
+  whole_buffer->treshold = 1.f;
 
   buffer.Unmap();
 

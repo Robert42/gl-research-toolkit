@@ -1,5 +1,7 @@
 #include <lighting/light-buffers.glsl>
 
+#include <debugging/print.glsl>
+
 // assumed invariant when using this struct:  (diffuse_color + specular_color) <= 1
 struct ShadingInput
 {
@@ -75,6 +77,8 @@ vec3 brdf(in ShadingInput shading_input)
   vec3 diffuse_term = lambertian_brdf(shading_input);
   //vec3 specular_term = blinn_phong_brdf(shading_input);
   vec3 specular_term = test_sharp_highlight(shading_input);
+  
+  PRINT_VALUE(vec3(1,0,1));
   
   
   // Just adding them is ok, because of the invariant (diffuse_color + specular_color) <= 1
