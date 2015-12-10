@@ -106,14 +106,14 @@ void PRINT_VALUE(in float v)
 void PRINT_VALUE(in vec2 v)
 {
   mat4 value;
-  value[0] = vec4(ivec2(v), 0, 0);
+  value[0] = vec4(vec2(v), 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(2), value);
 }
 
 void PRINT_VALUE(in vec3 v)
 {
   mat4 value;
-  value[0] = vec4(ivec3(v), 0);
+  value[0] = vec4(vec3(v), 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(3), value);
 }
 

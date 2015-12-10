@@ -127,6 +127,8 @@ void ShaderDebugPrinter::end()
   if(!active || !mouse_is_pressed)
     return;
 
+  // TODO: some memory barrier necessary here?
+
   WholeBuffer whole_buffer = *reinterpret_cast<WholeBuffer*>(buffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
   buffer.Unmap();
 
