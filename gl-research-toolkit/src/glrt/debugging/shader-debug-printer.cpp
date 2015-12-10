@@ -85,6 +85,8 @@ inline void printChunk(const Chunk& chunk)
     printMatrixChunk<float>(chunk.type.yz(), "", chunk.floatValues);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RAY[0])
     printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz());
+  else
+    qCritical() << "ShaderDebugPrinter: printChunk: Unknown chunk-type " << chunk.type;
 }
 
 
@@ -125,13 +127,13 @@ void ShaderDebugPrinter::end()
   if(!active || !mouse_is_pressed)
     return;
 
-  WholeBuffer whole_buffer = *reinterpret_cast<WholeBuffer*>(buffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  WholeBuffer whole_buffer = *reinterpret_cast<WholeBuffer*>(buffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
   buffer.Unmap();
 
   if(whole_buffer.numberChunks > 0)
     qDebug() << "\n\n";
 
-  for(int i=0; i<whole_buffer.numberChunks; ++i)
+  for(int i=0; i<whole_buffer.numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
     printChunk(whole_buffer.chunks[i]);
 }
 

@@ -23,24 +23,29 @@ bool is_fragment_to_debug()
   return distance(gl_FragCoord.xy, debugging_buffer.fragment_coord) <= debugging_buffer.treshold;
 }
 
-void implement_print_value(in ivec4 type, in mat4 values)
+void implement_print_chunk(in DebuggingOutputChunk chunk)
 {
-  if(is_fragment_to_debug())
+  if(is_fragment_to_debug() && debugging_buffer.numberChunks < GLSL_DEBUGGING_LENGTH)
   {
-    debugging_buffer.chunks[debugging_buffer.numberChunks].type = type;
-    debugging_buffer.chunks[debugging_buffer.numberChunks].floatValues = values;
+    debugging_buffer.chunks[debugging_buffer.numberChunks] = chunk;
     debugging_buffer.numberChunks++;
   }
 }
 
+void implement_print_value(in ivec4 type, in mat4 values)
+{
+  DebuggingOutputChunk chunk;
+  chunk.type = type;
+  chunk.floatValues = values;
+  implement_print_chunk(chunk);
+}
+
 void implement_print_value(in ivec4 type, in ivec4 values)
 {
-  if(is_fragment_to_debug())
-  {
-    debugging_buffer.chunks[debugging_buffer.numberChunks].type = type;
-    debugging_buffer.chunks[debugging_buffer.numberChunks].integerValues = values;
-    debugging_buffer.numberChunks++;
-  }
+  DebuggingOutputChunk chunk;
+  chunk.type = type;
+  chunk.integerValues = values;
+  implement_print_chunk(chunk);
 }
 
 void PRINT_VALUE(in bool v)
