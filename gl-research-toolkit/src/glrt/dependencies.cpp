@@ -1,6 +1,21 @@
 #include <glrt/dependencies.h>
 
 
+QDebug operator<<(QDebug d, const glm::bvec2& v)
+{
+  return d << glm::to_string(v).c_str();
+}
+
+QDebug operator<<(QDebug d, const glm::bvec3& v)
+{
+  return d << glm::to_string(v).c_str();
+}
+
+QDebug operator<<(QDebug d, const glm::bvec4& v)
+{
+  return d << glm::to_string(v).c_str();
+}
+
 QDebug operator<<(QDebug d, const glm::vec2& v)
 {
   return d << glm::to_string(v).c_str();

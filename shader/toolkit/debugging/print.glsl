@@ -1,4 +1,5 @@
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/glsl/math.h>
 #include <glrt/glsl/debugging/printer-types.h>
 
 struct DebuggingOutputChunk
@@ -24,16 +25,22 @@ bool is_fragment_to_debug()
 
 void implement_print_value(in ivec4 type, in mat4 values)
 {
-  debugging_output.chunks[debugging_output.numberChunks].type = type;
-  debugging_output.chunks[debugging_output.numberChunks].floatValues = values;
-  debugging_output.numberChunks++;
+  if(is_fragment_to_debug())
+  {
+    debugging_output.chunks[debugging_output.numberChunks].type = type;
+    debugging_output.chunks[debugging_output.numberChunks].floatValues = values;
+    debugging_output.numberChunks++;
+  }
 }
 
 void implement_print_value(in ivec4 type, in ivec4 values)
 {
-  debugging_output.chunks[debugging_output.numberChunks].type = type;
-  debugging_output.chunks[debugging_output.numberChunks].integerValues = values;
-  debugging_output.numberChunks++;
+  if(is_fragment_to_debug())
+  {
+    debugging_output.chunks[debugging_output.numberChunks].type = type;
+    debugging_output.chunks[debugging_output.numberChunks].integerValues = values;
+    debugging_output.numberChunks++;
+  }
 }
 
 void PRINT_VALUE(in bool value)
@@ -87,32 +94,40 @@ void PRINT_VALUE(in ivec4 value)
 void PRINT_VALUE(in float value)
 {
   mat4 value;
-  value[0] value = vec4(int(value), 0, 0, 0);
+  value[0] = vec4(int(value), 0, 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(1), value);
 }
 
 void PRINT_VALUE(in vec2 value)
 {
   mat4 value;
-  value[0] value = vec4(ivec2(value), 0, 0);
+  value[0] = vec4(ivec2(value), 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(2), value);
 }
 
 void PRINT_VALUE(in vec3 value)
 {
   mat4 value;
-  value[0] value = vec4(ivec3(value), 0);
+  value[0] = vec4(ivec3(value), 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(3), value);
 }
 
 void PRINT_VALUE(in vec4 value)
 {
   mat4 value;
-  value[0] value = vec4(value);
+  value[0] = vec4(value);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(4), value);
 }
 
 void PRINT_VALUE(in mat4 value)
 {
   implement_print_value(GLSL_DEBUGGING_TYPE_MAT(4,4), value);
+}
+
+void PRINT_VALUE(in Ray value)
+{
+  mat4 value;
+  value[0] = vec4(value.origin);
+  value[1] = vec4(value.direction);
+  implement_print_value(GLSL_DEBUGGING_TYPE_RAY, value);
 }
