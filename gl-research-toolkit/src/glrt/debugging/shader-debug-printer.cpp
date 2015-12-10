@@ -139,7 +139,11 @@ void ShaderDebugPrinter::end()
 
 void ShaderDebugPrinter::drawCross()
 {
+  if(!active || !mouse_is_pressed)
+    return;
+
   shader.Activate();
+  buffer.BindShaderStorageBuffer(SHADERSTORAGE_BINDING_VALUE_PRINTER);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL_RECTANGLE_NV);
   GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 3);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
