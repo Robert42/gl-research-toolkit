@@ -20,6 +20,12 @@ class Scene;
 
 } // namspace scene
 
+namespace debugging {
+
+class ShaderDebugPrinter;
+
+} // namspace debugging
+
 
 namespace gui {
 
@@ -185,6 +191,11 @@ public:
   // The caller owns the given instance.
   // You must ensure, that the given rederer lives longer than the created bar
   TwBar* createDebugSceneBar(scene::Renderer* renderer);
+
+  // The caller owns the given instance.
+  // You must ensure, that the given debugPrinter lives longer than the created bar.
+  // Note: debugPritnercan be null
+  TwBar* createDebugShaderBar(debugging::ShaderDebugPrinter* debugPrinter=nullptr);
 
 
   bool handleEvents(const SDL_Event& event);

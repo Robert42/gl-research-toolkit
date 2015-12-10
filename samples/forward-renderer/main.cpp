@@ -3,6 +3,7 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/forward-renderer.h>
 #include <glrt/gui/anttweakbar.h>
+#include <glrt/debugging/shader-debug-printer.h>
 
 #include <glhelper/gl.hpp>
 
@@ -18,7 +19,10 @@ int main(int argc, char** argv)
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
                                                                                 ));
 
+  glrt::debugging::ShaderDebugPrinter shaderDebugPrinter;
+
   antweakbar.createDebugSceneBar(&renderer);
+  antweakbar.createDebugShaderBar(&shaderDebugPrinter);
   antweakbar.createProfilerBar(&app.profiler);
 
   scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
@@ -32,6 +36,8 @@ int main(int argc, char** argv)
         continue;
       if(antweakbar.handleEvents(event))
         continue;
+      if(shaderDebugPrinter.handleEvents(event))
+        continue;
     }
 
     const float deltaTime = app.update();
@@ -42,7 +48,11 @@ int main(int argc, char** argv)
 
     glEnable(GL_DEPTH_TEST);
 
+    shaderDebugPrinter.begin();
     renderer.render();
+    shaderDebugPrinter.end();
+    shaderDebugPrinter.drawCross();
+
 
     antweakbar.draw();
 

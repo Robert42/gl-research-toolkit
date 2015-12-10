@@ -1,6 +1,7 @@
 #include <glrt/debugging/shader-debug-printer.h>
 
 #include <glrt/glsl/debugging/printer-types.h>
+#include <glrt/glsl/layout-constants.h>
 
 
 namespace glrt {
@@ -88,6 +89,14 @@ inline void printChunk(const Chunk& chunk)
 ShaderDebugPrinter::ShaderDebugPrinter()
   : buffer(sizeof(WholeBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr)
 {
+  guiToggle.getter = [this]() -> bool {return this->active;};
+  guiToggle.setter = [this](bool active) {
+    this->active = active;
+  };
+}
+
+ShaderDebugPrinter::~ShaderDebugPrinter()
+{
 }
 
 
@@ -106,6 +115,8 @@ void ShaderDebugPrinter::begin()
   whole_buffer->treshold = 0.5f;
 
   buffer.Unmap();
+
+  buffer.BindShaderStorageBuffer(SHADERSTORAGE_BINDING_VALUE_PRINTER);
 }
 
 void ShaderDebugPrinter::end()
@@ -123,8 +134,15 @@ void ShaderDebugPrinter::end()
     printChunk(whole_buffer.chunks[i]);
 }
 
+void ShaderDebugPrinter::drawCross()
+{
+}
+
 bool ShaderDebugPrinter::handleEvents(const SDL_Event& event)
 {
+  if(!active)
+    return false;
+
   switch(event.type)
   {
   case SDL_MOUSEBUTTONDOWN:

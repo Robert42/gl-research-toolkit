@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 
 #include <glhelper/buffer.hpp>
+#include <glrt/gui/anttweakbar.h>
 
 namespace glrt {
 namespace debugging {
@@ -11,17 +12,20 @@ namespace debugging {
 class ShaderDebugPrinter final
 {
 public:
-  bool active = false;
+  gui::TweakBarCBVar<bool> guiToggle;
 
   ShaderDebugPrinter();
   ~ShaderDebugPrinter();
 
+  bool handleEvents(const SDL_Event& event);
+
   void begin();
   void end();
 
-  bool handleEvents(const SDL_Event& event);
+  void drawCross();
 
 private:
+  bool active = false;
   bool mouse_is_pressed = false;
   gl::Buffer buffer;
 };
