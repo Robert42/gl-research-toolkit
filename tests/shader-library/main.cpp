@@ -130,25 +130,45 @@ void test_raytracing_rect()
 
   ray.origin = vec3(0);
   ray.direction = vec3(0, 0, -1);
-  bool is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
 
+  bool is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
   EXPECT_EQ(nearest_point, vec3(1000-512, 1000-384, 42));
   EXPECT_TRUE(is_intersecting);
 
 
   ray.origin = vec3(0);
   ray.direction = vec3(0, 0, 1);
-  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
 
+  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
   EXPECT_EQ(nearest_point, vec3(1000-512, 1000-384, 42));
   EXPECT_TRUE(is_intersecting);
 
 
   ray.origin = vec3(10000, 10000, 0);
   ray.direction = vec3(0, 0, 1);
-  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
 
+  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
   EXPECT_EQ(nearest_point, vec3(1000+512, 1000+384, 42));
+  EXPECT_TRUE(is_intersecting);
+
+
+  rect.origin = vec3(0, 0, 1);
+  rect.half_width = 0.3;
+  rect.half_height = 0.2;
+  rect.tangent1 = vec3(-1,0,0);
+  rect.tangent2 = vec3(0,1,0);
+
+  ray.origin = vec3(1, 0, 0);
+  ray.direction = normalize(vec3(-0.1, 0, 1));
+
+  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
+  EXPECT_EQ(nearest_point, vec3(0.3, 0, 1));
+  EXPECT_TRUE(is_intersecting);
+
+  ray.direction = normalize(vec3(-0.1, 0, -1));
+
+  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
+  EXPECT_EQ(nearest_point, vec3(0.3, 0, 1));
   EXPECT_TRUE(is_intersecting);
 }
 
