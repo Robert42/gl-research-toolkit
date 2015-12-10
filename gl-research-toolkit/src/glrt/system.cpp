@@ -87,6 +87,10 @@ void System::verifyNVidiaFeatures()
   if(!GLEW_NV_fill_rectangle)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fill_rectangle"));
 
+  // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fragment_shader_interlock.txt
+  if(!GLEW_NV_fragment_shader_interlock)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fragment_shader_interlock"));
+
   // https://www.opengl.org/registry/specs/NV/bindless_texture.txt
   if(!GLEW_ARB_bindless_texture)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_bindless_texture"));

@@ -26,6 +26,10 @@
 #include <functional>
 
 
+QDebug operator<<(QDebug d, const glm::bvec2& v);
+QDebug operator<<(QDebug d, const glm::bvec3& v);
+QDebug operator<<(QDebug d, const glm::bvec4& v);
+
 QDebug operator<<(QDebug d, const glm::vec2& v);
 QDebug operator<<(QDebug d, const glm::vec3& v);
 QDebug operator<<(QDebug d, const glm::vec4& v);

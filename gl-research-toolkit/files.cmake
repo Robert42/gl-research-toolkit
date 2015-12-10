@@ -3,6 +3,7 @@ set(SOURCE_FILES
   include/glrt/debug-camera.h
   include/glrt/debugging/debug-line-visualisation.h
   include/glrt/debugging/debug-mesh.h
+  include/glrt/debugging/shader-debug-printer.h
   include/glrt/debugging/visualization-renderer.h
   include/glrt/dependencies.h
   include/glrt/gui/anttweakbar.h
@@ -30,6 +31,7 @@ set(SOURCE_FILES
   src/glrt/debug-camera.cpp
   src/glrt/debugging/debug-line-visualisation.cpp
   src/glrt/debugging/debug-mesh.cpp
+  src/glrt/debugging/shader-debug-printer.cpp
   src/glrt/debugging/visualization-renderer.cpp
   src/glrt/dependencies.cpp
   src/glrt/gui/anttweakbar.cpp

@@ -21,7 +21,7 @@ Toolbar::~Toolbar()
 void Toolbar::init()
 {
   glm::ivec2 pos(4096);
-  glm::ivec2 size(200, 1);
+  glm::ivec2 size(200, 96);
 
   tweakBar = TwNewBar(toolbarTitle);
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Toggles the visibilty of other tweak bars");

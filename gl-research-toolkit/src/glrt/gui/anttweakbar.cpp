@@ -2,6 +2,7 @@
 #include <glrt/profiler.h>
 #include <glrt/application.h>
 #include <glrt/scene/scene-renderer.h>
+#include <glrt/debugging/shader-debug-printer.h>
 
 namespace glrt {
 namespace gui {
@@ -101,6 +102,24 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group=Debug");
+
+  gui::Toolbar::registerTweakBar(tweakBar);
+
+  return tweakBar;
+}
+
+
+TwBar* AntTweakBar::createDebugShaderBar(debugging::ShaderDebugPrinter* shaderDebugPrinter)
+{
+  TwBar* tweakBar = TwNewBar("Shader");
+
+  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a shader.");
+  TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
+
+  if(shaderDebugPrinter != nullptr)
+  {
+    shaderDebugPrinter->guiToggle.TwAddVarCB(tweakBar, "Use Printer", "group=Debug");
+  }
 
   gui::Toolbar::registerTweakBar(tweakBar);
 

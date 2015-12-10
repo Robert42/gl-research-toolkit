@@ -5,6 +5,7 @@ add_custom_target(
   SOURCES
   common-with-cpp/glrt/glsl/compatibility/begin.h
   common-with-cpp/glrt/glsl/compatibility/end.h
+  common-with-cpp/glrt/glsl/debugging/printer-types.h
   common-with-cpp/glrt/glsl/geometry/raytracing.h
   common-with-cpp/glrt/glsl/layout-constants.h
   common-with-cpp/glrt/glsl/math.h
@@ -32,6 +33,7 @@ add_custom_target(
   materials/transparent-meshes.fs
   materials/transparent-meshes.vs
   toolkit/debugging/normal.glsl
+  toolkit/debugging/print.glsl
   toolkit/geometry/transform.glsl
   toolkit/lighting/light-buffers.glsl
   toolkit/lighting/light-structs.glsl
