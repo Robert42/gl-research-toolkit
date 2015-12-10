@@ -114,6 +114,44 @@ void test_raytracing_sphere()
   EXPECT_EQ(nearest_point_on_sphere_unclamped(small, ray), vec3(5, 11, 0));
 }
 
+void test_raytracing_rect()
+{
+  Ray ray;
+  Rect rect;
+
+  rect.origin = vec3(1000, 1000, 42);
+  rect.half_width = 512;
+  rect.half_height = 384;
+  rect.tangent1 = vec3(1,0,0);
+  rect.tangent2 = vec3(0,1,0);
+
+  vec3 nearest_point;
+
+
+  ray.origin = vec3(0);
+  ray.direction = vec3(0, 0, -1);
+  bool is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
+
+  EXPECT_EQ(nearest_point, vec3(1000-512, 1000-384, 42));
+  EXPECT_TRUE(is_intersecting);
+
+
+  ray.origin = vec3(0);
+  ray.direction = vec3(0, 0, 1);
+  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
+
+  EXPECT_EQ(nearest_point, vec3(1000-512, 1000-384, 42));
+  EXPECT_TRUE(is_intersecting);
+
+
+  ray.origin = vec3(10000, 10000, 0);
+  ray.direction = vec3(0, 0, 1);
+  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
+
+  EXPECT_EQ(nearest_point, vec3(1000+512, 1000+384, 42));
+  EXPECT_TRUE(is_intersecting);
+}
+
 
 int main(int argc, char** argv)
 {
@@ -125,6 +163,7 @@ int main(int argc, char** argv)
   test_ray_nearest_point();
   test_raytracing_plane();
   test_raytracing_sphere();
+  test_raytracing_rect();
 
   return 0;
 }

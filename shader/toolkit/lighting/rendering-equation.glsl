@@ -10,6 +10,11 @@ struct ShadingInput
   vec3 diffuse_color;
   vec3 specular_color;
   vec3 emission;
+  
+  // Per light
+  Ray perfect_reflection_ray;
+  vec3 light_position;
+  vec3 direction_to_light;
 };
 
 /*
@@ -27,8 +32,10 @@ The following blinn_phong_brdf and lambertian_brdf is taken from
 Equation 7.4.8  (page 257)
 
 */
-vec3 blinn_phong_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
+vec3 blinn_phong_brdf(in ShadingInput shading_input)
 {
+  vec3 direction_to_light = shading_input.direction_to_light;
+  
   vec3 specular_color = shading_input.specular_color;
   vec3 half_vector = normalize(direction_to_light + shading_input.direction_to_viewer);
   float cos_theta_half_vector = max(0, dot(shading_input.surface_normal, half_vector));
@@ -42,44 +49,57 @@ vec3 blinn_phong_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
   // TODO: use instead equation 7.49 (fresnel is described in 7.5.3)
 }
 
-vec3 lambertian_brdf(in ShadingInput shading_input, in vec3 direction_to_light)
+vec3 lambertian_brdf(in ShadingInput shading_input)
 {
   vec3 diffuse_color = shading_input.diffuse_color;
   
   return diffuse_color / pi;
 }
 
-vec3 brdf(in ShadingInput shading_input, in vec3 direction_to_light)
+vec3 test_sharp_highlight(in ShadingInput shading_input)
 {
-  vec3 diffuse_term = lambertian_brdf(shading_input, direction_to_light);
-  vec3 specular_term = blinn_phong_brdf(shading_input, direction_to_light);
+  vec3 specular_color = shading_input.specular_color;
+  float roughness = shading_input.surface_roughness;
+  
+  float cos_angle = dot(shading_input.direction_to_light, shading_input.perfect_reflection_ray.direction);
+    
+  float angle = degrees(acos(clamp(cos_angle, -1, 1)));
+  
+  float strength = smoothstep(mix(0.5f, 90.f, roughness), 0, angle);
+  
+  return specular_color * strength;
+}
+
+vec3 brdf(in ShadingInput shading_input)
+{
+  vec3 diffuse_term = lambertian_brdf(shading_input);
+  //vec3 specular_term = blinn_phong_brdf(shading_input);
+  vec3 specular_term = test_sharp_highlight(shading_input);
   
   
   // Just adding them is ok, because of the invariant (diffuse_color + specular_color) <= 1
   return diffuse_term + specular_term;
 }
 
-vec3 do_the_lighting(in ShadingInput shading_input, in LightSource light, in vec3 light_position)
+vec3 do_the_lighting(ShadingInput shading_input, in LightSource light)
 {
   vec3 luminance = light.luminance * light.color;
-  float distance_to_light = length(light_position-shading_input.surface_position);
-  vec3 direction_to_light = (light_position-shading_input.surface_position) / distance_to_light;
+  float distance_to_light = length(shading_input.light_position-shading_input.surface_position);
+  vec3 direction_to_light = (shading_input.light_position-shading_input.surface_position) / distance_to_light;
   float cos_factor = max(0, dot(direction_to_light, shading_input.surface_normal));
+  
+  shading_input.direction_to_light = direction_to_light;
   
   float falloff = 1.f/sq(distance_to_light);
   falloff = clamp(falloff, 0, 1); // TODO decide whether to clamp of not
   
-  return luminance * falloff * brdf(shading_input, direction_to_light) * cos_factor;
+  return luminance * falloff * brdf(shading_input) * cos_factor;
 }
 
 
 vec3 rendering_equation(in ShadingInput shading_input)
 {
   vec3 outgoing_light = vec3(0);
-  
-  Ray perfect_reflection_ray;
-  perfect_reflection_ray.origin = shading_input.surface_position;
-  perfect_reflection_ray.direction = reflect(-shading_input.direction_to_viewer, shading_input.surface_normal);
   
   for(int i=0; i<sphere_arealights.num; ++i)
   {
@@ -89,9 +109,9 @@ vec3 rendering_equation(in ShadingInput shading_input)
     sphere.origin = light.origin;
     sphere.radius = light.radius;
     
-    vec3 nearest_point = nearest_point_on_sphere_unclamped(sphere, perfect_reflection_ray);
+    shading_input.light_position = nearest_point_on_sphere_unclamped(sphere, shading_input.perfect_reflection_ray);
     
-    outgoing_light += do_the_lighting(shading_input, light.light, nearest_point);
+    outgoing_light += do_the_lighting(shading_input, light.light);
   }
   
   for(int i=0; i<rect_arealights.num; ++i)
@@ -105,11 +125,11 @@ vec3 rendering_equation(in ShadingInput shading_input)
     rect.half_width = light.half_width;
     rect.half_height = light.half_height;
     
-    vec3 nearest_point;
-    bool ray_is_intersecting_plane = nearest_point_on_rect(rect, perfect_reflection_ray, nearest_point);
+    bool ray_is_intersecting_plane = nearest_point_on_rect(rect, shading_input.perfect_reflection_ray, shading_input.light_position);
     
-    if(ray_is_intersecting_plane && dot(shading_input.surface_position-light.origin, light.normal) >= 0)
-      outgoing_light += do_the_lighting(shading_input, light.light, light.origin);
+     // TODO this if can be rmeoved by multiplying with the boolean value of the condition. Measure performance?
+    //if(ray_is_intersecting_plane && dot(shading_input.surface_position-shading_input.light_position, light.normal) >= 0)
+      outgoing_light += do_the_lighting(shading_input, light.light);
   }
   
   return outgoing_light + shading_input.emission;
@@ -138,6 +158,9 @@ vec3 light_material(in MaterialOutput material_output, in vec3 direction_to_came
   shading_input.diffuse_color = diffuse_color;
   shading_input.specular_color = specular_color;
   shading_input.emission = emission;
+  
+  shading_input.perfect_reflection_ray.origin = shading_input.surface_position;
+  shading_input.perfect_reflection_ray.direction = reflect(-shading_input.direction_to_viewer, shading_input.surface_normal);
   
   return rendering_equation(shading_input);
 }
