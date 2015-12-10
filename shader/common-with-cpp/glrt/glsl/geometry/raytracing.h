@@ -1,7 +1,6 @@
-#include <glrt/glsl/math.h>
-
-#include <glrt/glsl/compatibility/begin.h>
-
+#ifndef _GLRT_GLSL_MATH_H_
+#error Do not include this file directly, instead, include <glrt/glsl/math.h>
+#endif
 
 // ======== Structs ==========================================================
 
@@ -200,7 +199,3 @@ bool intersects(in Sphere sphere, in Ray ray)
   
   return d <= sq(sphere.radius);
 }
-
-
-
-#include <glrt/glsl/compatibility/end.h>

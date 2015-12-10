@@ -7,6 +7,7 @@ add_custom_target(
   common-with-cpp/glrt/glsl/compatibility/end.h
   common-with-cpp/glrt/glsl/geometry/raytracing.h
   common-with-cpp/glrt/glsl/layout-constants.h
+  common-with-cpp/glrt/glsl/math.h
   debugging/visualizations/common-debug-line-visualization.fs.glsl
   debugging/visualizations/common-debug-line-visualization.vs.glsl
   debugging/visualizations/visualize-rect-area-light.fs
@@ -16,6 +17,7 @@ add_custom_target(
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
   materials/implementation/common-implementation.vs.glsl
+  materials/implementation/common-uniform-blocks.glsl
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/input-block.fs.glsl
   materials/implementation/material-implementation.fs.glsl
@@ -33,4 +35,5 @@ add_custom_target(
   toolkit/geometry/transform.glsl
   toolkit/lighting/light-buffers.glsl
   toolkit/lighting/light-structs.glsl
+  toolkit/lighting/rendering-equation.glsl
 )

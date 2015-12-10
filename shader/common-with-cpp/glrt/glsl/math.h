@@ -47,6 +47,9 @@ vec4 blend_screen(vec4 x, vec4 y)
   return vec4(1)-(vec4(1)-x)*(vec4(1)-y);
 }
 
+
+#include <glrt/glsl/geometry/raytracing.h>
+
 #include <glrt/glsl/compatibility/end.h>
 
 #endif // #define _GLRT_GLSL_MATH_H_

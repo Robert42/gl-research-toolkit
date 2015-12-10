@@ -1,5 +1,5 @@
 #include <glrt/dependencies.h>
-#include <glrt/glsl/geometry/raytracing.h>
+#include <glrt/glsl/math.h>
 
 using namespace glrt::glsl;
 using glm::vec2;

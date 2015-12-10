@@ -77,11 +77,21 @@ vec3 rendering_equation(in ShadingInput shading_input)
 {
   vec3 outgoing_light = vec3(0);
   
+  Ray perfect_reflection_ray;
+  perfect_reflection_ray.origin = shading_input.surface_position;
+  perfect_reflection_ray.direction = reflect(-shading_input.direction_to_viewer, shading_input.surface_normal);
+  
   for(int i=0; i<sphere_arealights.num; ++i)
   {
     SphereAreaLight light = sphere_arealights.lights[i];
     
-    outgoing_light += do_the_lighting(shading_input, light.light, light.origin);
+    Sphere sphere;
+    sphere.origin = light.origin;
+    sphere.radius = light.radius;
+    
+    vec3 nearest_point = nearest_point_on_sphere_unclamped(sphere, perfect_reflection_ray);
+    
+    outgoing_light += do_the_lighting(shading_input, light.light, nearest_point);
   }
   
   for(int i=0; i<rect_arealights.num; ++i)
