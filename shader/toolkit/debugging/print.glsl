@@ -76,7 +76,7 @@ void PRINT_VALUE(in bvec4 v)
 
 void PRINT_VALUE(in int v)
 {
-  ivec4 value = ivec4(int(v), 0, 0, 0);
+  ivec4 value = ivec4(v, 0, 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_INT(1), value);
 }
 
@@ -101,7 +101,7 @@ void PRINT_VALUE(in ivec4 v)
 void PRINT_VALUE(in float v)
 {
   mat4 value;
-  value[0] = vec4(int(v), 0, 0, 0);
+  value[0] = vec4(float(v), 0, 0, 0);
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(1), value);
 }
 
