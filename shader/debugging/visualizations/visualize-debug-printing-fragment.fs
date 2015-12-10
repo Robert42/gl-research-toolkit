@@ -1,5 +1,7 @@
 #version 450 core
 
+#include <debugging/print.glsl>
+
 out vec4 color;
 
 void draw_cross(vec2 position, float line_width, float line_length)
@@ -18,7 +20,7 @@ void draw_cross(vec2 position, float line_width, float line_length)
 
 void main()
 {
-  draw_cross(vec2(100, 100), 2, 16);
+  draw_cross(debugging_buffer.fragment_coord, 2, 16);
   
   color = vec4(1, 0, 1, 1);
 }

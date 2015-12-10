@@ -107,8 +107,6 @@ void ShaderDebugPrinter::begin()
 {
   if(!active || !mouse_is_pressed)
     return;
-  glm::ivec2 mouseCoordinate;
-  SDL_GetRelativeMouseState(&mouseCoordinate.x, &mouseCoordinate.y);
 
   WholeBuffer* whole_buffer = reinterpret_cast<WholeBuffer*>(buffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
@@ -162,13 +160,31 @@ bool ShaderDebugPrinter::handleEvents(const SDL_Event& event)
     {
     case SDL_BUTTON_LEFT:
       this->mouse_is_pressed = event.button.state == SDL_PRESSED;
+      if(this->mouse_is_pressed)
+        setMouseCoordinate(glm::ivec2(event.button.x, event.button.y), event.motion.windowID);
       return true;
     default:
       return false;
     }
+  case SDL_MOUSEMOTION:
+    if(mouse_is_pressed)
+    {
+      setMouseCoordinate(glm::ivec2(event.motion.x, event.motion.y), event.motion.windowID);
+      return true;
+    }
+    return false;
   default:
     return false;
   }
+}
+
+void ShaderDebugPrinter::setMouseCoordinate(const glm::ivec2& mouseCoordinate, Uint32 windowId)
+{
+  glm::ivec2 windowSize;
+
+  SDL_GetWindowSize(SDL_GetWindowFromID(windowId), &windowSize.x, &windowSize.y);
+
+  this->mouseCoordinate = glm::ivec2(mouseCoordinate.x, windowSize.y-mouseCoordinate.y);
 }
 
 
