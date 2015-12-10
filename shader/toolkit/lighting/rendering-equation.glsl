@@ -98,7 +98,18 @@ vec3 rendering_equation(in ShadingInput shading_input)
   {
     RectAreaLight light = rect_arealights.lights[i];
     
-    outgoing_light += do_the_lighting(shading_input, light.light, light.origin);
+    Rect rect;
+    rect.origin = light.origin;
+    rect.tangent1 = light.tangent;
+    rect.tangent2 = cross(light.normal, light.tangent);
+    rect.half_width = light.half_width;
+    rect.half_height = light.half_height;
+    
+    vec3 nearest_point;
+    bool ray_is_intersecting_plane = nearest_point_on_rect(rect, perfect_reflection_ray, nearest_point);
+    
+    if(ray_is_intersecting_plane && dot(shading_input.surface_position-light.origin, light.normal) >= 0)
+      outgoing_light += do_the_lighting(shading_input, light.light, light.origin);
   }
   
   return outgoing_light + shading_input.emission;

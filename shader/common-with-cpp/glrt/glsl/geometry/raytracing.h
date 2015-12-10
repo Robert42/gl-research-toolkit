@@ -11,6 +11,15 @@ struct Sphere
   float radius;
 };
 
+struct Rect
+{
+  vec3 origin;
+  float half_width;
+  vec3 tangent1;
+  float half_height;
+  vec3 tangent2;
+};
+
 // https://de.wikipedia.org/wiki/Hessesche_Normalform
 struct Plane
 {
@@ -111,6 +120,11 @@ Plane plane_from_three_points(in vec3 a, in vec3 b, in vec3 c)
   return plane_from_tangents(a-c, b-c, c);
 }
 
+Plane plane_from_rect(in Rect rect)
+{
+  return plane_from_tangents(rect.tangent1, rect.tangent2, rect.origin);
+}
+
 // ---- distances
 
 // https://de.wikipedia.org/wiki/Hessesche_Normalform#Abstand_2
@@ -166,13 +180,23 @@ bool intersection_test(in Plane plane, in Ray ray, out(float) distance)
   return distance >= 0 && !isnan(distance);
 }
 
+bool intersection_point_unclamped(in Plane plane, in Ray ray, out(vec3) point)
+{
+  float t;
+  bool intersects = intersection_test_unclamped(plane, ray, t);
+  
+  point = get_point(ray, t);
+  
+  return intersects;
+}
+
 bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
 {
   float t;
   bool intersects = intersection_test(plane, ray, t);
-  
+
   point = get_point(ray, t);
-  
+
   return intersects;
 }
 
@@ -199,3 +223,26 @@ bool intersects(in Sphere sphere, in Ray ray)
   
   return d <= sq(sphere.radius);
 }
+
+
+// ======== Rect =============================================================
+
+
+bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)
+{
+  Plane plane = plane_from_rect(rect);
+  vec3 plane_intersection_point;
+  
+  bool intersects = intersection_point_unclamped(plane, ray, plane_intersection_point);
+  
+  float w = dot(plane_intersection_point-rect.origin, rect.tangent1);
+  float h = dot(plane_intersection_point-rect.origin, rect.tangent2);
+  
+  w = clamp(w, -rect.half_width,  rect.half_width);
+  h = clamp(h, -rect.half_height, rect.half_height);
+  
+  nearest_point = rect.origin + w*rect.tangent1 + h*rect.tangent2;
+
+  return intersects;
+}
+

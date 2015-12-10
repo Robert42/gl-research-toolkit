@@ -16,9 +16,9 @@ struct RectAreaLight
 {
   LightSource light;
   vec3 normal;
-  float halfWidth;
+  float half_width;
   vec3 tangent;
-  float halfHeight;
+  float half_height;
   vec3 origin;
 };
 
