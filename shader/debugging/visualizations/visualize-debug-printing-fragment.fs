@@ -1,5 +1,7 @@
 #version 450 core
 
+#define SHADER_DEBUG_PRINTER
+
 #include <debugging/print.glsl>
 
 out vec4 color;

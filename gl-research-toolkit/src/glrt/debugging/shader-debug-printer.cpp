@@ -4,6 +4,7 @@
 
 #include <glrt/glsl/debugging/printer-types.h>
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/toolkit/reloadable-shader.h>
 
 
 namespace glrt {
@@ -100,6 +101,12 @@ ShaderDebugPrinter::ShaderDebugPrinter()
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
     this->active = active;
+    QString preprocessorBlock = "#define SHADER_DEBUG_PRINTER";
+    if(this->active)
+      ReloadableShader::globalPreprocessorBlock.insert(preprocessorBlock);
+    else
+      ReloadableShader::globalPreprocessorBlock.remove(preprocessorBlock);
+    ReloadableShader::reloadAll();
   };
 }
 
