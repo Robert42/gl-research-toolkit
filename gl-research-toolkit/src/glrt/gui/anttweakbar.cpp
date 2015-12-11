@@ -184,6 +184,10 @@ bool AntTweakBar::unhandeledEvent(const SDL_Event& event)
 {
   switch(event.type)
   {
+  case SDL_MOUSEBUTTONUP:
+    if(event.button.button == SDL_BUTTON_LEFT)
+      SDL_SetWindowGrab(application->sdlWindow, SDL_FALSE);
+    return false;
   case SDL_KEYDOWN:
     switch(event.key.keysym.sym)
     {
