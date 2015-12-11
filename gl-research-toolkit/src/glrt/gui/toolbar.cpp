@@ -6,6 +6,8 @@ namespace gui {
 
 const char* toolbarTitle = "Toolbar";
 
+const bool toggleVisibility = false;
+
 Toolbar::Toolbar()
   : tweakBar(nullptr)
 {
@@ -38,13 +40,25 @@ void Toolbar::registerTweakBar(TwBar *tweakBar)
   if(toolTweakBar == nullptr)
     return;
 
-  TwAddVarCB(toolTweakBar,
-             TwGetBarName(tweakBar),
-             TW_TYPE_BOOLCPP,
-             reinterpret_cast<TwSetVarCallback>(setBarVisibility),
-             reinterpret_cast<TwGetVarCallback>(getBarVisibility),
-             tweakBar,
-             "");
+  if(toggleVisibility)
+  {
+    TwAddVarCB(toolTweakBar,
+               TwGetBarName(tweakBar),
+               TW_TYPE_BOOLCPP,
+               reinterpret_cast<TwSetVarCallback>(setBarVisibility),
+               reinterpret_cast<TwGetVarCallback>(getBarVisibility),
+               tweakBar,
+               "");
+  }else
+  {
+    TwAddVarCB(toolTweakBar,
+               TwGetBarName(tweakBar),
+               TW_TYPE_BOOLCPP,
+               reinterpret_cast<TwSetVarCallback>(setBarIconified),
+               reinterpret_cast<TwGetVarCallback>(getBarIconified),
+               tweakBar,
+               "");
+  }
 }
 
 
@@ -71,6 +85,21 @@ void Toolbar::getBarVisibility(bool *value, TwBar* bar)
   qint32 visible = 0;
   TwGetParam(bar, nullptr, "visible", TW_PARAM_INT32, 1, &visible);
   *value = visible;
+}
+
+
+void Toolbar::setBarIconified(const bool *value, TwBar* bar)
+{
+  qint32 iconified = !*value;
+  TwSetParam(bar, nullptr, "iconified", TW_PARAM_INT32, 1, &iconified);
+}
+
+
+void Toolbar::getBarIconified(bool *value, TwBar* bar)
+{
+  qint32 iconified = 0;
+  TwGetParam(bar, nullptr, "iconified", TW_PARAM_INT32, 1, &iconified);
+  *value = !iconified;
 }
 
 

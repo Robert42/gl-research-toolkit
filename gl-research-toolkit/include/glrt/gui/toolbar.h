@@ -21,6 +21,9 @@ public:
   void init();
 
 private:
+  static void setBarIconified(const bool *value, TwBar* bar);
+  static void getBarIconified(bool *value, TwBar* bar);
+
   static void setBarVisibility(const bool *value, TwBar* bar);
   static void getBarVisibility(bool *value, TwBar* bar);
 };
