@@ -4,6 +4,7 @@
 #include <glrt/scene/scene.h>
 #include <glrt/debugging/visualization-renderer.h>
 #include <glrt/toolkit/shader-storage-format.h>
+#include <glrt/toolkit/reloadable-shader.h>
 
 
 namespace glrt {
@@ -80,10 +81,10 @@ class Renderer::Pass final
 public:
   const MaterialInstance::Type type;
   Renderer& renderer;
-  gl::ShaderObject shaderObject;
+  ReloadableShader shader;
 
-  Pass(Renderer* renderer, MaterialInstance::Type type, gl::ShaderObject&& shaderObject);
-  Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock);
+  Pass(Renderer* renderer, MaterialInstance::Type type, ReloadableShader&& shader);
+  Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock);
   ~Pass();
 
   Pass(const Pass&) = delete;

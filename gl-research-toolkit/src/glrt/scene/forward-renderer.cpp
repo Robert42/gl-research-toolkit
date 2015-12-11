@@ -22,7 +22,7 @@ void ForwardRenderer::renderImplementation()
 }
 
 
-QStringList ForwardRenderer::preprocessorBlock()
+QSet<QString> ForwardRenderer::preprocessorBlock()
 {
   return {"#define FORWARD_RENDERER"};
 }
