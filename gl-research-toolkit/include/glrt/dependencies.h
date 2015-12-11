@@ -19,6 +19,7 @@
 #include <QDir>
 #include <QObject>
 #include <QSharedPointer>
+#include <QSet>
 
 #include <iostream>
 #include <memory>

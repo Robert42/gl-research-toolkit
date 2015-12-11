@@ -24,6 +24,7 @@ set(SOURCE_FILES
   include/glrt/toolkit/assimp-glm-converter.h
   include/glrt/toolkit/geometry.h
   include/glrt/toolkit/json.h
+  include/glrt/toolkit/reloadable-shader.h
   include/glrt/toolkit/shader-compiler.h
   include/glrt/toolkit/shader-storage-format.h
   include/glrt/toolkit/temp-shader-file.h
@@ -49,6 +50,7 @@ set(SOURCE_FILES
   src/glrt/scene/static-mesh.cpp
   src/glrt/system.cpp
   src/glrt/toolkit/json.cpp
+  src/glrt/toolkit/reloadable-shader.cpp
   src/glrt/toolkit/shader-compiler.cpp
   src/glrt/toolkit/temp-shader-file.cpp
 )

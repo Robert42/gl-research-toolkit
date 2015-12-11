@@ -18,7 +18,7 @@ public:
 
   void renderImplementation() override;
 
-  static QStringList preprocessorBlock();
+  static QSet<QString> preprocessorBlock();
 };
 
 } // namespace scene

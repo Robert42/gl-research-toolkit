@@ -10,7 +10,7 @@ ShaderCompiler::ShaderCompiler()
 }
 
 
-void ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
+bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
 {
   TempShaderFile tempShaderFile;
 
@@ -42,6 +42,14 @@ void ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
 
   shaderObject->CreateProgram();
+
+  return true;
+}
+
+
+bool ShaderCompiler::recompile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
+{
+  return compile(shaderObject, shaderDir);
 }
 
 
