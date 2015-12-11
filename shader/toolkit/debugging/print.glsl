@@ -4,7 +4,8 @@
 
 struct DebuggingOutputChunk
 {
-  ivec4 type;
+  ivec3 type;
+  float z_value;
   mat4 floatValues;
   ivec4 integerValues;
 };
@@ -30,11 +31,12 @@ void implement_print_chunk(in DebuggingOutputChunk chunk)
   if(is_fragment_to_debug())
   {
     uint i = atomicCounterIncrement(debugging_buffer_counter_numberChunks);
+    chunk.z_value = gl_FragCoord.z;
     debugging_buffer.chunks[i] = chunk;
   }
 }
 
-void implement_print_value(in ivec4 type, in mat4 values)
+void implement_print_value(in ivec3 type, in mat4 values)
 {
   DebuggingOutputChunk chunk;
   chunk.type = type;
@@ -42,7 +44,7 @@ void implement_print_value(in ivec4 type, in mat4 values)
   implement_print_chunk(chunk);
 }
 
-void implement_print_value(in ivec4 type, in ivec4 values)
+void implement_print_value(in ivec3 type, in ivec4 values)
 {
   DebuggingOutputChunk chunk;
   chunk.type = type;
