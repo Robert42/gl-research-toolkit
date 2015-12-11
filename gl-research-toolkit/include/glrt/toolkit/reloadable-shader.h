@@ -10,7 +10,12 @@ namespace glrt {
 class ReloadableShader final
 {
 public:
-  ReloadableShader();
+  static QSet<QString> globalPreprocessorBlock;
+  QSet<QString> preprocessorBlock;
+
+  gl::ShaderObject shaderObject;
+
+  ReloadableShader(const QString& name, const QDir& shaderDir, const QSet<QString>& preprocessorBlock=QSet<QString>());
   ~ReloadableShader();
 
   ReloadableShader(const ReloadableShader&) = delete;
@@ -23,9 +28,13 @@ public:
   static void reloadAll();
 
 private:
+  const QDir shaderDir;
+
   static QSet<ReloadableShader*>& allReloadableShader();
 
   static bool reload(QSet<ReloadableShader*> shaders);
+
+  QStringList wholeProprocessorBlock() const;
 };
 
 } // namespace glrt

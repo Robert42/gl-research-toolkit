@@ -1,9 +1,16 @@
 #include <glrt/toolkit/reloadable-shader.h>
+#include <glrt/toolkit/shader-compiler.h>
 
 namespace glrt {
 
 
-ReloadableShader::ReloadableShader()
+QSet<QString> ReloadableShader::globalPreprocessorBlock;
+
+
+ReloadableShader::ReloadableShader(const QString& name, const QDir& shaderDir, const QSet<QString>& preprocessorBlock)
+  : preprocessorBlock(preprocessorBlock),
+    shaderObject(std::move(ShaderCompiler::createShaderFromFiles(name, shaderDir, wholeProprocessorBlock()))),
+    shaderDir(shaderDir)
 {
   allReloadableShader().insert(this);
 }
@@ -25,7 +32,10 @@ QSet<ReloadableShader*>& ReloadableShader::allReloadableShader()
 
 bool ReloadableShader::reload()
 {
-  return true;
+  ShaderCompiler compiler;
+  compiler.preprocessorBlock = wholeProprocessorBlock();
+
+  return compiler.recompile(&this->shaderObject, shaderDir);
 }
 
 
@@ -47,6 +57,11 @@ bool ReloadableShader::reload(QSet<ReloadableShader*> shaders)
       return false;
 
   return true;
+}
+
+QStringList ReloadableShader::wholeProprocessorBlock() const
+{
+  return (globalPreprocessorBlock|preprocessorBlock).toList();
 }
 
 
