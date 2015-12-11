@@ -3,6 +3,7 @@
 #include <glrt/application.h>
 #include <glrt/scene/scene-renderer.h>
 #include <glrt/debugging/shader-debug-printer.h>
+#include <glrt/toolkit/reloadable-shader.h>
 
 namespace glrt {
 namespace gui {
@@ -109,12 +110,20 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
 }
 
 
+void __reload_all_shaders(void*)
+{
+  ReloadableShader::reloadAll();
+}
+
+
 TwBar* AntTweakBar::createDebugShaderBar(debugging::ShaderDebugPrinter* shaderDebugPrinter)
 {
   TwBar* tweakBar = TwNewBar("Shader");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a shader.");
   TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
+
+  TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
   if(shaderDebugPrinter != nullptr)
   {
