@@ -16,10 +16,10 @@ public:
   gl::ShaderObject shaderObject;
 
   ReloadableShader(const QString& name, const QDir& shaderDir, const QSet<QString>& preprocessorBlock=QSet<QString>());
+  ReloadableShader(ReloadableShader&& other);
   ~ReloadableShader();
 
   ReloadableShader(const ReloadableShader&) = delete;
-  ReloadableShader(ReloadableShader&&) = delete;
   ReloadableShader& operator=(const ReloadableShader&) = delete;
   ReloadableShader& operator=(ReloadableShader&&) = delete;
 

@@ -16,6 +16,15 @@ ReloadableShader::ReloadableShader(const QString& name, const QDir& shaderDir, c
 }
 
 
+ReloadableShader::ReloadableShader(ReloadableShader&& other)
+  : preprocessorBlock(std::move(other.preprocessorBlock)),
+    shaderObject(std::move(other.shaderObject)),
+    shaderDir(other.shaderDir)
+{
+  allReloadableShader().insert(this);
+}
+
+
 ReloadableShader::~ReloadableShader()
 {
   allReloadableShader().remove(this);
