@@ -15,7 +15,7 @@ public:
   Toolbar();
   ~Toolbar();
 
-  static void registerTweakBar(TwBar* tweakBar);
+  static void registerTweakBar(TwBar* tweakBar, bool hideNow=false);
   static void unregisterTweakBar(TwBar* tweakBar);
 
   void init();

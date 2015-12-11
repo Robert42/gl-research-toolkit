@@ -31,7 +31,7 @@ void Toolbar::init()
   TwSetParam(tweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
 }
 
-void Toolbar::registerTweakBar(TwBar *tweakBar)
+void Toolbar::registerTweakBar(TwBar *tweakBar, bool hideNow)
 {
   TwBar* toolTweakBar = TwGetBarByName(toolbarTitle);
 
@@ -59,6 +59,9 @@ void Toolbar::registerTweakBar(TwBar *tweakBar)
                tweakBar,
                "");
   }
+
+  if(hideNow)
+    TwSetParam(tweakBar, nullptr, toggleVisibility ? "visible" : "iconified", TW_PARAM_CSTRING, 1, "true");
 }
 
 

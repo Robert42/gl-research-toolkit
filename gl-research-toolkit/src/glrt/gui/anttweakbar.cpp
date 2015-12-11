@@ -71,11 +71,10 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
   TwBar* tweakBar = TwNewBar("Profiler");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]");
-  TwSetParam(tweakBar, nullptr, "iconified", TW_PARAM_CSTRING, 1, "true");
 
   TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &profiler->printFramerate, "");
 
-  gui::Toolbar::registerTweakBar(tweakBar);
+  gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;
 }
@@ -90,7 +89,6 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   TwBar* tweakBar = TwNewBar("Scene");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
-  TwSetParam(tweakBar, nullptr, "iconified", TW_PARAM_CSTRING, 1, "true");
 
   sceneSwitcher = TweakBarEnum<QString>::Ptr(new TweakBarEnum<QString>("CurrentSceneEnum", tweakBar, "Current Scene", ""));
   sceneSwitcher->init(scene::Scene::findAllScenes());
@@ -104,7 +102,7 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group=Debug");
 
-  gui::Toolbar::registerTweakBar(tweakBar);
+  gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;
 }
@@ -121,7 +119,6 @@ TwBar* AntTweakBar::createDebugShaderBar(debugging::ShaderDebugPrinter* shaderDe
   TwBar* tweakBar = TwNewBar("Shader");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a shader.");
-  TwSetParam(tweakBar, nullptr, "iconified", TW_PARAM_CSTRING, 1, "true");
 
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
@@ -130,7 +127,7 @@ TwBar* AntTweakBar::createDebugShaderBar(debugging::ShaderDebugPrinter* shaderDe
     shaderDebugPrinter->guiToggle.TwAddVarCB(tweakBar, "Use Printer", "group=Debug");
   }
 
-  gui::Toolbar::registerTweakBar(tweakBar);
+  gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;
 }
