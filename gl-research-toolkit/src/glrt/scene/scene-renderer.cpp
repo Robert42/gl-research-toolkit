@@ -91,19 +91,19 @@ void Renderer::DirectLights::bindShaderStoreageBuffers()
 // ======== Pass ===============================================================
 
 
-Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, gl::ShaderObject&& shaderObject)
+Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, ReloadableShader&& shader)
   : type(type),
     renderer(*renderer),
-    shaderObject(std::move(shaderObject))
+    shader(std::move(shader))
 {
 }
 
-Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QStringList& preprocessorBlock)
+Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock)
   : Pass(renderer,
          type,
-         std::move(ShaderCompiler::createShaderFromFiles(materialName,
-                                                         QDir(GLRT_SHADER_DIR"/materials"),
-                                                         preprocessorBlock)))
+         std::move(ReloadableShader(materialName,
+                                    QDir(GLRT_SHADER_DIR"/materials"),
+                                    preprocessorBlock)))
 {
 }
 
@@ -159,7 +159,7 @@ void Renderer::Pass::renderStaticMeshes()
 
   const int N = materialInstanceRanges[materialInstanceRanges.size()-1].end;
 
-  this->shaderObject.Activate();
+  this->shader.shaderObject.Activate();
 
   renderer.staticMeshVertexArrayObject.Bind();
   renderer.directLights().bindShaderStoreageBuffers();

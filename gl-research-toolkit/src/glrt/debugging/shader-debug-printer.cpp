@@ -4,6 +4,7 @@
 
 #include <glrt/glsl/debugging/printer-types.h>
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/toolkit/reloadable-shader.h>
 
 
 namespace glrt {
@@ -12,7 +13,8 @@ namespace debugging {
 
 struct Chunk
 {
-  glm::ivec4 type;
+  glm::ivec3 type;
+  float z_value;
   glm::mat4 floatValues;
   glm::ivec4 integerValues;
 };
@@ -99,6 +101,12 @@ ShaderDebugPrinter::ShaderDebugPrinter()
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
     this->active = active;
+    QString preprocessorBlock = "#define SHADER_DEBUG_PRINTER";
+    if(this->active)
+      ReloadableShader::globalPreprocessorBlock.insert(preprocessorBlock);
+    else
+      ReloadableShader::globalPreprocessorBlock.remove(preprocessorBlock);
+    ReloadableShader::reloadAll();
   };
 }
 
@@ -146,8 +154,12 @@ void ShaderDebugPrinter::end()
   if(numberChunks > 0)
     qDebug() << "\n\n";
 
+  float min_z = INFINITY;
   for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
-    printChunk(whole_buffer.chunks[i]);
+    min_z = glm::min(whole_buffer.chunks[i].z_value, min_z);
+  for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
+    if(whole_buffer.chunks[i].z_value == min_z)
+      printChunk(whole_buffer.chunks[i]);
 }
 
 void ShaderDebugPrinter::drawCross()
