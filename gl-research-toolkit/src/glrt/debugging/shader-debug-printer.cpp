@@ -12,7 +12,8 @@ namespace debugging {
 
 struct Chunk
 {
-  glm::ivec4 type;
+  glm::ivec3 type;
+  float z_value;
   glm::mat4 floatValues;
   glm::ivec4 integerValues;
 };
@@ -146,8 +147,12 @@ void ShaderDebugPrinter::end()
   if(numberChunks > 0)
     qDebug() << "\n\n";
 
+  float min_z = INFINITY;
   for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
-    printChunk(whole_buffer.chunks[i]);
+    min_z = glm::min(whole_buffer.chunks[i].z_value, min_z);
+  for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
+    if(whole_buffer.chunks[i].z_value == min_z)
+      printChunk(whole_buffer.chunks[i]);
 }
 
 void ShaderDebugPrinter::drawCross()
