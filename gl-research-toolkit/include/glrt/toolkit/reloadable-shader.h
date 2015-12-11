@@ -18,8 +18,14 @@ public:
   ReloadableShader& operator=(const ReloadableShader&) = delete;
   ReloadableShader& operator=(ReloadableShader&&) = delete;
 
+  bool reload();
+
+  static void reloadAll();
+
 private:
-  QSet<ReloadableShader*>& allReloadableShader();
+  static QSet<ReloadableShader*>& allReloadableShader();
+
+  static bool reload(QSet<ReloadableShader*> shaders);
 };
 
 } // namespace glrt

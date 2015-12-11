@@ -23,5 +23,32 @@ QSet<ReloadableShader*>& ReloadableShader::allReloadableShader()
 }
 
 
+bool ReloadableShader::reload()
+{
+  return true;
+}
+
+
+void ReloadableShader::reloadAll()
+{
+  bool succeeded = false;
+
+  do
+  {
+    succeeded = reload(allReloadableShader());
+  }while(!succeeded);
+}
+
+
+bool ReloadableShader::reload(QSet<ReloadableShader*> shaders)
+{
+  for(ReloadableShader* shader : shaders)
+    if(!shader->reload())
+      return false;
+
+  return true;
+}
+
+
 } // namespace glrt
 
