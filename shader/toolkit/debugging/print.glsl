@@ -10,6 +10,7 @@ struct DebuggingOutputChunk
   ivec4 integerValues;
 };
 
+#ifdef SHADER_DEBUG_PRINTER
 layout(binding=ATOMIC_COUNTER_BINDING_VALUE_PRINTER) uniform atomic_uint debugging_buffer_counter_numberChunks;
 
 layout(binding=SHADERSTORAGE_BINDING_VALUE_PRINTER, std140)
@@ -20,36 +21,47 @@ buffer DebuggingOutputBlock
   float offset;
   DebuggingOutputChunk chunks[];
 }debugging_buffer;
+#endif
 
 bool is_fragment_to_debug()
 {
+#ifdef SHADER_DEBUG_PRINTER
   return distance(gl_FragCoord.xy, debugging_buffer.fragment_coord+debugging_buffer.offset) <= debugging_buffer.treshold;
+#else
+  return false;
+#endif
 }
 
 void implement_print_chunk(in DebuggingOutputChunk chunk)
 {
+#ifdef SHADER_DEBUG_PRINTER
   if(is_fragment_to_debug())
   {
     uint i = atomicCounterIncrement(debugging_buffer_counter_numberChunks);
     chunk.z_value = gl_FragCoord.z;
     debugging_buffer.chunks[i] = chunk;
   }
+#endif
 }
 
 void implement_print_value(in ivec3 type, in mat4 values)
 {
+#ifdef SHADER_DEBUG_PRINTER
   DebuggingOutputChunk chunk;
   chunk.type = type;
   chunk.floatValues = values;
   implement_print_chunk(chunk);
+#endif
 }
 
 void implement_print_value(in ivec3 type, in ivec4 values)
 {
+#ifdef SHADER_DEBUG_PRINTER
   DebuggingOutputChunk chunk;
   chunk.type = type;
   chunk.integerValues = values;
   implement_print_chunk(chunk);
+#endif
 }
 
 void PRINT_VALUE(in bool v)
