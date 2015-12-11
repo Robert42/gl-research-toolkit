@@ -3,6 +3,8 @@
 
 #include <glrt/dependencies.h>
 
+#include <glhelper/shaderobject.hpp>
+
 namespace glrt {
 
 class ReloadableShader final
@@ -15,6 +17,9 @@ public:
   ReloadableShader(ReloadableShader&&) = delete;
   ReloadableShader& operator=(const ReloadableShader&) = delete;
   ReloadableShader& operator=(ReloadableShader&&) = delete;
+
+private:
+  QSet<ReloadableShader*>& allReloadableShader();
 };
 
 } // namespace glrt
