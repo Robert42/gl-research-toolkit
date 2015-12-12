@@ -2,10 +2,16 @@
 
 namespace glrt {
 
+
 Logger::Logger()
 {
-
 }
+
+
+Logger::~Logger()
+{
+}
+
 
 } // namespace glrt
 

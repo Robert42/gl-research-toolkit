@@ -4,10 +4,16 @@
 
 namespace glrt {
 
-class Logger
+class Logger final
 {
 public:
   Logger();
+  ~Logger();
+
+  Logger(const Logger&) = delete;
+  Logger(Logger&&) = delete;
+  Logger& operator=(const Logger&) = delete;
+  Logger& operator=(Logger&&) = delete;
 };
 
 } // namespace glrt
