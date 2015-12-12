@@ -1,6 +1,5 @@
 #include <glrt/toolkit/logger.h>
 
-#include <QColor>
 #include <QCoreApplication>
 
 namespace glrt {
@@ -12,8 +11,6 @@ inline QString getLogFilePath()
   QDir dir(qApp->applicationDirPath());
 
   QFileInfo executableFile(qApp->applicationFilePath());
-
-  std::cout << dir.absoluteFilePath(executableFile.baseName()+".log.html").toStdString() << std::endl;
 
   return dir.absoluteFilePath(executableFile.baseName()+".log.html");
 }
@@ -31,6 +28,10 @@ inline QFile* getLogFile()
 Logger::Logger()
   : logStream(getLogFile())
 {
+  logStream.setAutoFormatting(true);
+  logStream.setAutoFormattingIndent(2);
+  logStream.writeStartElement("body");
+  logStream.writeAttribute("bgcolor", "#2e3436");
 
   Q_ASSERT(logger == nullptr);
   logger = this;
@@ -41,6 +42,8 @@ Logger::Logger()
 
 Logger::~Logger()
 {
+  logStream.writeEndElement();
+
   logger = nullptr;
   qInstallMessageHandler(0);
 }
@@ -50,40 +53,55 @@ void Logger::messageHandler(QtMsgType msgType,
                             const QMessageLogContext& context,
                             const QString& message)
 {
-  QColor color;
-  QColor backColor = QColor::fromRgba(0);
+  QString color;
+  QString backColor;
   std::ostream* std_stream = nullptr;
 
   switch(msgType)
   {
   case QtDebugMsg:
     std_stream = &std::cout;
-    color = QColor::fromRgb(0x888a85);
+    color = QString("#babdb6");
     break;
   case QtWarningMsg:
     std_stream = &std::cerr;
-    color = QColor::fromRgb(0xfcaf3e);
+    color = QString("#fcaf3e");
     break;
   case QtCriticalMsg:
     std_stream = &std::cerr;
-    color = QColor::fromRgb(0xef2929);
+    color = QString("#ef2929");
     break;
   case QtFatalMsg:
     std_stream = &std::cerr;
-    color = QColor::fromRgb(0xeeeeec);
-    backColor = QColor::fromRgb(0xa40000);
+    color = QString("#eeeeec");
+    backColor = QString("#a40000");
     break;
   default:
     Q_UNREACHABLE();
   }
 
-  if(std_stream != nullptr)
-    *std_stream << message.toStdString() << std::endl;
+  logger->logStream.writeStartElement("font");
+  logger->logStream.writeAttribute("color", color);
+  if(!backColor.isEmpty())
+    logger->logStream.writeAttribute("style", QString("background-color: %0;").arg(backColor));
+  logger->logStream.writeCharacters(message);
+  logger->logStream.writeEndElement();
+  logger->logStream.writeEmptyElement("br");
 
-  logger->logStream << message << "<br>\n";
+  logger->logStream.writeStartElement("font");
+  logger->logStream.writeAttribute("color", "#555753");
+  logger->logStream.writeCharacters(QString("(Function %3, file %1, line %2)").arg(context.file).arg(context.line).arg(context.function));
+  logger->logStream.writeEndElement();
+  logger->logStream.writeEmptyElement("br");
+  logger->logStream.writeEmptyElement("br");
+
+  bool alreadyHandeled = false;
 
   if(!logger->handler.isEmpty())
-    logger->handler.top()(msgType, context, message);
+    alreadyHandeled = logger->handler.top()(msgType, context, message);
+
+  if(!alreadyHandeled && std_stream != nullptr)
+    *std_stream << message.toStdString() << std::endl;
 }
 
 

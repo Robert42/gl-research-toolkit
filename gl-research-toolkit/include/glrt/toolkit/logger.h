@@ -3,6 +3,8 @@
 
 #include <glrt/dependencies.h>
 
+#include <QXmlStreamWriter>
+
 namespace glrt {
 
 class Logger final
@@ -21,7 +23,7 @@ public:
   Logger& operator=(Logger&&) = delete;
 
 private:
-  QTextStream logStream;
+  QXmlStreamWriter logStream;
 
   static Logger* logger;
 
