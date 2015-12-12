@@ -20,10 +20,8 @@
 namespace glrt {
 
 System::System(int argc, char** argv, const Settings& settings)
+  : application(argc, argv)
 {
-  Q_UNUSED(argc);
-  Q_UNUSED(argv);
-
   initSDL(settings);
   initGLEW(settings);
 
