@@ -1,9 +1,44 @@
 #include <glrt/toolkit/shader-compiler.h>
 #include <glrt/toolkit/temp-shader-file.h>
+#include <glrt/toolkit/logger.h>
 
 #include <set>
 
 namespace glrt {
+
+
+class ShaderErrorDialog final
+{
+public:
+  ShaderErrorDialog()
+  {
+    Logger::handler.push(std::bind(&ShaderErrorDialog::handleMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    stack_size = Logger::handler.size();
+  }
+
+  ~ShaderErrorDialog()
+  {
+    Q_ASSERT(stack_size==Logger::handler.size());
+    Logger::handler.pop();
+  }
+
+  bool handleMessage(QtMsgType type, const QMessageLogContext&, const QString& message)
+  {
+    if(type == QtDebugMsg)
+      return true;
+
+    return false;
+  }
+
+  ShaderErrorDialog(const ShaderErrorDialog&) = delete;
+  ShaderErrorDialog(ShaderErrorDialog&&) = delete;
+  ShaderErrorDialog& operator=(const ShaderErrorDialog&) = delete;
+  ShaderErrorDialog& operator=(ShaderErrorDialog&&) = delete;
+
+private:
+ int stack_size;
+};
+
 
 ShaderCompiler::ShaderCompiler()
 {
@@ -12,6 +47,8 @@ ShaderCompiler::ShaderCompiler()
 
 bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
 {
+  ShaderErrorDialog errorDialog;
+
   TempShaderFile tempShaderFile;
 
   const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes = ShaderCompiler::shaderTypes();

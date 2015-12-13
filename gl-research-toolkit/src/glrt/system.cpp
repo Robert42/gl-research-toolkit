@@ -92,6 +92,8 @@ inline GLint print_gl_integer(GLenum variable, const char* variableName)
 
 void System::verifyGLFeatures()
 {
+  Logger::SuppressDebug suppressLog;
+
   // If a system doesn't support one of there numbers
 
   if(PRINT_GL_INTEGER(GL_MAX_VERTEX_ATTRIB_BINDINGS) < EXPECTED_GL_MAX_VERTEX_ATTRIB_BINDINGS)
@@ -104,6 +106,8 @@ void System::verifyGLFeatures()
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl uniform blocks."));
   if(PRINT_GL_INTEGER(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS) < EXPECTED_GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS)
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl shader storage buffers."));
+
+  Q_UNUSED(suppressLog);
 }
 
 void System::verifyNVidiaFeatures()

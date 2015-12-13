@@ -5,6 +5,7 @@
 namespace glrt {
 
 Logger* Logger::logger = nullptr;
+QStack<Logger::MessageHandler> Logger::handler;
 
 inline QString getLogFilePath()
 {
@@ -105,6 +106,26 @@ void Logger::messageHandler(QtMsgType msgType,
 
   if(!alreadyHandeled && std_stream != nullptr)
     *std_stream << message.toStdString() << std::endl;
+}
+
+// ======== Logger::Suppress ===================================================
+
+Logger::SuppressDebug::SuppressDebug()
+{
+  Logger::handler.push(std::bind(&SuppressDebug::handleMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+  stack_size = Logger::handler.size();
+}
+
+Logger::SuppressDebug::~SuppressDebug()
+{
+  Q_ASSERT(stack_size==Logger::handler.size());
+  Logger::handler.pop();
+}
+
+bool Logger::SuppressDebug::handleMessage(QtMsgType type, const QMessageLogContext&, const QString&)
+{
+  // suppress debug messages
+  return type==QtDebugMsg;
 }
 
 

@@ -10,9 +10,11 @@ namespace glrt {
 class Logger final
 {
 public:
+  class SuppressDebug;
+
   typedef std::function<bool(QtMsgType, const QMessageLogContext&, const QString&)> MessageHandler;
 
-  QStack<MessageHandler> handler;
+  static QStack<MessageHandler> handler;
 
   Logger();
   ~Logger();
@@ -31,6 +33,25 @@ private:
                              const QMessageLogContext& context,
                              const QString& message);
 };
+
+
+class Logger::SuppressDebug final
+{
+public:
+  SuppressDebug();
+  ~SuppressDebug();
+
+  bool handleMessage(QtMsgType, const QMessageLogContext&, const QString&);
+
+  SuppressDebug(const SuppressDebug&) = delete;
+  SuppressDebug(SuppressDebug&&) = delete;
+  SuppressDebug& operator=(const SuppressDebug&) = delete;
+  SuppressDebug& operator=(SuppressDebug&&) = delete;
+
+private:
+ int stack_size;
+};
+
 
 } // namespace glrt
 
