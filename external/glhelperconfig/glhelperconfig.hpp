@@ -113,6 +113,10 @@ namespace gl
       }
     };
 
+    const unsigned int s_numUBOBindings = 84;	/// Arbitrary value based the value of GL_MAX_COMBINED_UNIFORM_BLOCKS returned by the driver of my graphic device (NVidia GTX 960)
+    const unsigned int s_numSSBOBindings = 96; /// Arbitrary value based the value of GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS returned by the driver of my graphic device (NVidia GTX 960)
+    const unsigned int s_numAtomicCounterBindings = 8; /// Arbitrary value based on observations
+
   }
 }
 

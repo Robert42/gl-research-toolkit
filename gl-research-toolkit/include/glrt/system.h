@@ -53,6 +53,7 @@ private:
 
   void initSDL(const Settings& settings);
   void initGLEW(const Settings& settings);
+  void verifyGLFeatures();
   void verifyNVidiaFeatures();
 };
 
