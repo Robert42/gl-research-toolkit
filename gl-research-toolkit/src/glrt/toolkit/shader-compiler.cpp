@@ -22,12 +22,42 @@ public:
     Logger::handler.pop();
   }
 
-  bool handleMessage(QtMsgType type, const QMessageLogContext&, const QString& message)
+  bool thereWereErrors()
   {
-    if(type == QtDebugMsg)
-      return true;
+    if(messages.isEmpty())
+      return false;
 
-    return false;
+    std::string message = messages.join("\n").toStdString();
+
+    enum Results : int
+    {
+      INGORE,
+      EXIT,
+      RECOMPILE
+    };
+
+    const SDL_MessageBoxButtonData buttons[] = {
+      {0, 0, "Ignore"},
+      {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "Exit App"},
+      {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "Recompile Shaders"},
+    };
+
+    SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", message.c_str(), SDL_arraysize(buttons), buttons, nullptr};
+
+    int result;
+    if(SDL_ShowMessageBox(&msgBoxData, &result) < 0)
+    {
+      std::cerr << "Displayng SHader Compile Error Dialog failed"<<std::endl;
+      std::exit(-1);
+    }
+
+    if(result == EXIT)
+    {
+      std::cout << "Aborted by user"<<std::endl;
+      std::exit(-1);
+    }
+
+    return result!=INGORE;
   }
 
   ShaderErrorDialog(const ShaderErrorDialog&) = delete;
@@ -37,6 +67,18 @@ public:
 
 private:
  int stack_size;
+
+ QStringList messages;
+
+  bool handleMessage(QtMsgType type, const QMessageLogContext&, const QString& message)
+  {
+    if(type == QtDebugMsg)
+      return true;
+
+    messages << message;
+
+    return false;
+ }
 };
 
 
@@ -80,7 +122,7 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
   shaderObject->CreateProgram();
 
-  return true;
+  return !errorDialog.thereWereErrors();
 }
 
 
@@ -98,7 +140,7 @@ gl::ShaderObject ShaderCompiler::createShaderFromFiles(const QString &name, cons
 
   compiler.preprocessorBlock = preprocessorBlock;
 
-  compiler.compile(&shaderObject, shaderDir);
+  while(!compiler.compile(&shaderObject, shaderDir));
 
   return std::move(shaderObject);
 }
