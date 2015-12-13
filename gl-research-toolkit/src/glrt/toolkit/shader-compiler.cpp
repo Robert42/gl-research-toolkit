@@ -4,6 +4,8 @@
 
 #include <set>
 
+#include <QRegularExpression>
+
 namespace glrt {
 
 
@@ -75,7 +77,13 @@ private:
     if(type == QtDebugMsg)
       return true;
 
-    messages << message;
+    QString improvedMessage = message;
+
+    improvedMessage = improvedMessage.replace(QRegularExpression("^Error\\: *"), "");
+    improvedMessage = improvedMessage.replace(QRegularExpression(" *\\(\\<[^\\>]+shaderobject.cpp\\> line [0-9]+\\) ?$"), "");
+    improvedMessage = improvedMessage.replace("compiled.Output:", "compiled with errors:");
+
+    messages << improvedMessage;
 
     return false;
  }
