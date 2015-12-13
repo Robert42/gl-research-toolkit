@@ -79,8 +79,6 @@ private:
 
     QString improvedMessage = message;
 
-    improvedMessage = improvedMessage.replace(QRegularExpression("^Error\\: *"), "");
-    improvedMessage = improvedMessage.replace(QRegularExpression(" *\\(\\<[^\\>]+shaderobject.cpp\\> line [0-9]+\\) ?$"), "");
     improvedMessage = improvedMessage.replace("compiled.Output:", "compiled with errors:");
 
     messages << improvedMessage;
