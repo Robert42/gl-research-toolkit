@@ -19,12 +19,18 @@
 #include <QDir>
 #include <QObject>
 #include <QSharedPointer>
+#include <QSet>
+#include <QStack>
 
 #include <iostream>
 #include <memory>
 #include <vector>
 #include <functional>
 
+
+QDebug operator<<(QDebug d, const glm::bvec2& v);
+QDebug operator<<(QDebug d, const glm::bvec3& v);
+QDebug operator<<(QDebug d, const glm::bvec4& v);
 
 QDebug operator<<(QDebug d, const glm::vec2& v);
 QDebug operator<<(QDebug d, const glm::vec3& v);

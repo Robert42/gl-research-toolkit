@@ -2,6 +2,8 @@
 #include <glrt/profiler.h>
 #include <glrt/application.h>
 #include <glrt/scene/scene-renderer.h>
+#include <glrt/debugging/shader-debug-printer.h>
+#include <glrt/toolkit/reloadable-shader.h>
 
 namespace glrt {
 namespace gui {
@@ -69,11 +71,10 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
   TwBar* tweakBar = TwNewBar("Profiler");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]");
-  TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
   TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &profiler->printFramerate, "");
 
-  gui::Toolbar::registerTweakBar(tweakBar);
+  gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;
 }
@@ -88,7 +89,6 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   TwBar* tweakBar = TwNewBar("Scene");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
-  TwSetParam(tweakBar, nullptr, "visible", TW_PARAM_CSTRING, 1, "false");
 
   sceneSwitcher = TweakBarEnum<QString>::Ptr(new TweakBarEnum<QString>("CurrentSceneEnum", tweakBar, "Current Scene", ""));
   sceneSwitcher->init(scene::Scene::findAllScenes());
@@ -102,7 +102,32 @@ TwBar* AntTweakBar::createDebugSceneBar(scene::Renderer* renderer)
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group=Debug");
 
-  gui::Toolbar::registerTweakBar(tweakBar);
+  gui::Toolbar::registerTweakBar(tweakBar, true);
+
+  return tweakBar;
+}
+
+
+void __reload_all_shaders(void*)
+{
+  ReloadableShader::reloadAll();
+}
+
+
+TwBar* AntTweakBar::createDebugShaderBar(debugging::ShaderDebugPrinter* shaderDebugPrinter)
+{
+  TwBar* tweakBar = TwNewBar("Shader");
+
+  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a shader.");
+
+  TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
+
+  if(shaderDebugPrinter != nullptr)
+  {
+    shaderDebugPrinter->guiToggle.TwAddVarCB(tweakBar, "Use Printer", "group=Debug");
+  }
+
+  gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;
 }
@@ -156,6 +181,10 @@ bool AntTweakBar::unhandeledEvent(const SDL_Event& event)
 {
   switch(event.type)
   {
+  case SDL_MOUSEBUTTONUP:
+    if(event.button.button == SDL_BUTTON_LEFT)
+      SDL_SetWindowGrab(application->sdlWindow, SDL_FALSE);
+    return false;
   case SDL_KEYDOWN:
     switch(event.key.keysym.sym)
     {

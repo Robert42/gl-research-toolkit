@@ -1,6 +1,8 @@
 #include <glrt/system.h>
 #include <glrt/toolkit/temp-shader-file.h>
 
+#include <glrt/glsl/layout-constants.h>
+
 
 /*! \namespace glrt
 \ingroup glrt
@@ -20,13 +22,12 @@
 namespace glrt {
 
 System::System(int argc, char** argv, const Settings& settings)
+  : application(argc, argv)
 {
-  Q_UNUSED(argc);
-  Q_UNUSED(argv);
-
   initSDL(settings);
   initGLEW(settings);
 
+  verifyGLFeatures();
   verifyNVidiaFeatures();
 
   TempShaderFile::init();
@@ -79,6 +80,36 @@ void System::initGLEW(const Settings& settings)
     throw GLRT_EXCEPTION(QString("The requested OpenGL version %0.%1 is not supported! => Aborting!").arg(settings.openglVersionMajor()).arg(settings.openglVersionMinor()).toStdString().c_str());
 }
 
+inline GLint print_gl_integer(GLenum variable, const char* variableName)
+{
+  GLint value;
+  glGetIntegerv(variable, &value);
+  qDebug() << "OpenGL Capability: " << variableName << " = " << value;
+  return value;
+}
+
+#define PRINT_GL_INTEGER(x) print_gl_integer(x, #x)
+
+void System::verifyGLFeatures()
+{
+  Logger::SuppressDebug suppressLog;
+
+  // If a system doesn't support one of there numbers
+
+  if(PRINT_GL_INTEGER(GL_MAX_VERTEX_ATTRIB_BINDINGS) < EXPECTED_GL_MAX_VERTEX_ATTRIB_BINDINGS)
+    throw GLRT_EXCEPTION(QString("Unsupported number of opengl vertex attribute bindings."));
+
+  if(PRINT_GL_INTEGER(GL_MAX_FRAGMENT_ATOMIC_COUNTERS) < 2)
+    throw GLRT_EXCEPTION(QString("Unsupported number of opengl vertex attribute bindings."));
+
+  if(PRINT_GL_INTEGER(GL_MAX_COMBINED_UNIFORM_BLOCKS) < EXPECTED_GL_MAX_COMBINED_UNIFORM_BLOCKS)
+    throw GLRT_EXCEPTION(QString("Unsupported number of opengl uniform blocks."));
+  if(PRINT_GL_INTEGER(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS) < EXPECTED_GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS)
+    throw GLRT_EXCEPTION(QString("Unsupported number of opengl shader storage buffers."));
+
+  Q_UNUSED(suppressLog);
+}
+
 void System::verifyNVidiaFeatures()
 {
   // See http://blog.icare3d.org/ for a more complete list of interesting Features
@@ -86,6 +117,10 @@ void System::verifyNVidiaFeatures()
   // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fill_rectangle.txt
   if(!GLEW_NV_fill_rectangle)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fill_rectangle"));
+
+  // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fragment_shader_interlock.txt
+  if(!GLEW_NV_fragment_shader_interlock)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fragment_shader_interlock"));
 
   // https://www.opengl.org/registry/specs/NV/bindless_texture.txt
   if(!GLEW_ARB_bindless_texture)
