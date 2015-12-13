@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QSet>
+#include <QStack>
 
 #include <iostream>
 #include <memory>
