@@ -39,7 +39,7 @@ public:
     const SDL_MessageBoxButtonData buttons[] = {
       {0, 0, "Ignore"},
       {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "Exit App"},
-      {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "Recompile Shaders"},
+      {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 2, "Recompile Shaders"},
     };
 
     SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", message.c_str(), SDL_arraysize(buttons), buttons, nullptr};
