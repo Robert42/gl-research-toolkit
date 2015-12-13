@@ -2,7 +2,9 @@
 #define GLRT_WINDOW_H
 
 #include "dependencies.h"
+#include "toolkit/logger.h"
 
+#include <QCoreApplication>
 
 namespace glrt {
 
@@ -46,8 +48,12 @@ public:
   ~System();
 
 private:
+  QCoreApplication application;
+  Logger logger;
+
   void initSDL(const Settings& settings);
   void initGLEW(const Settings& settings);
+  void verifyGLFeatures();
   void verifyNVidiaFeatures();
 };
 

@@ -1,9 +1,92 @@
 #include <glrt/toolkit/shader-compiler.h>
 #include <glrt/toolkit/temp-shader-file.h>
+#include <glrt/toolkit/logger.h>
 
 #include <set>
 
+#include <QRegularExpression>
+
 namespace glrt {
+
+
+class ShaderErrorDialog final
+{
+public:
+  ShaderErrorDialog()
+  {
+    Logger::handler.push(std::bind(&ShaderErrorDialog::handleMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    stack_size = Logger::handler.size();
+  }
+
+  ~ShaderErrorDialog()
+  {
+    Q_ASSERT(stack_size==Logger::handler.size());
+    Logger::handler.pop();
+  }
+
+  bool thereWereErrors()
+  {
+    if(messages.isEmpty())
+      return false;
+
+    std::string message = messages.join("\n\n").toStdString();
+
+    enum Results : int
+    {
+      INGORE,
+      EXIT,
+      RECOMPILE
+    };
+
+    const SDL_MessageBoxButtonData buttons[] = {
+      {0, 0, "Ignore"},
+      {SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 1, "Exit App"},
+      {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 2, "Recompile Shaders"},
+    };
+
+    SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", message.c_str(), SDL_arraysize(buttons), buttons, nullptr};
+
+    int result;
+    if(SDL_ShowMessageBox(&msgBoxData, &result) < 0)
+    {
+      std::cerr << "Displayng SHader Compile Error Dialog failed"<<std::endl;
+      std::exit(-1);
+    }
+
+    if(result == EXIT)
+    {
+      std::cout << "Aborted by user"<<std::endl;
+      std::exit(-1);
+    }
+
+    return result!=INGORE;
+  }
+
+  ShaderErrorDialog(const ShaderErrorDialog&) = delete;
+  ShaderErrorDialog(ShaderErrorDialog&&) = delete;
+  ShaderErrorDialog& operator=(const ShaderErrorDialog&) = delete;
+  ShaderErrorDialog& operator=(ShaderErrorDialog&&) = delete;
+
+private:
+ int stack_size;
+
+ QStringList messages;
+
+  bool handleMessage(QtMsgType type, const QMessageLogContext&, const QString& message)
+  {
+    if(type == QtDebugMsg)
+      return true;
+
+    QString improvedMessage = message;
+
+    improvedMessage = improvedMessage.replace("compiled.Output:", "compiled with errors:");
+
+    messages << improvedMessage;
+
+    return false;
+ }
+};
+
 
 ShaderCompiler::ShaderCompiler()
 {
@@ -12,6 +95,8 @@ ShaderCompiler::ShaderCompiler()
 
 bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
 {
+  ShaderErrorDialog errorDialog;
+
   TempShaderFile tempShaderFile;
 
   const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes = ShaderCompiler::shaderTypes();
@@ -43,7 +128,7 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
   shaderObject->CreateProgram();
 
-  return true;
+  return !errorDialog.thereWereErrors();
 }
 
 
@@ -61,7 +146,7 @@ gl::ShaderObject ShaderCompiler::createShaderFromFiles(const QString &name, cons
 
   compiler.preprocessorBlock = preprocessorBlock;
 
-  compiler.compile(&shaderObject, shaderDir);
+  while(!compiler.compile(&shaderObject, shaderDir));
 
   return std::move(shaderObject);
 }
