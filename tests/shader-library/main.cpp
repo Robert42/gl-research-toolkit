@@ -103,15 +103,23 @@ void test_raytracing_plane()
 void test_raytracing_sphere()
 {
   Ray ray;
-  Sphere small;
+  Sphere sphere;
 
   ray.direction = vec3(1, 0, 0);
   ray.origin = vec3(0, 42, 0);
 
-  small.origin = vec3(5, 8, 0);
-  small.radius = 3;
+  sphere.origin = vec3(5, 8, 0);
+  sphere.radius = 3;
 
-  EXPECT_EQ(nearest_point_on_sphere_unclamped(small, ray), vec3(5, 11, 0));
+  EXPECT_EQ(nearest_point_on_sphere_unclamped(sphere, ray), vec3(5, 11, 0));
+
+  sphere.origin = vec3(-0.700000, 0.500000, 1.600000);
+  sphere.radius = 0.1125;
+
+  ray.direction = vec3(-0.150159, 0.741311, 0.654148);
+  ray.origin = vec3(-0.384320, -0.902267, 0.376229);
+
+  qDebug() << nearest_point_on_sphere_unclamped(sphere, ray);
 }
 
 void test_raytracing_rect()

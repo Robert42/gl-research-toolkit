@@ -50,7 +50,7 @@ vec3 nearest_point(in Ray ray, in vec3 point)
 
 vec3 nearest_point_unclamped(in Ray ray, in vec3 point)
 {
-  return ray.origin + ray.direction * dot(ray.direction, point);
+  return ray.origin + ray.direction * dot(ray.direction, point-ray.origin);
 }
 
 // ---- distance
