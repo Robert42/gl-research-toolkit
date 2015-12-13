@@ -83,20 +83,20 @@ void Logger::messageHandler(QtMsgType msgType,
 
   if(!message.trimmed().isEmpty())
   {
-  logger->logStream.writeStartElement("font");
-  logger->logStream.writeAttribute("color", color);
-  if(!backColor.isEmpty())
-    logger->logStream.writeAttribute("style", QString("background-color: %0;").arg(backColor));
-  logger->logStream.writeCharacters(message);
-  logger->logStream.writeEndElement();
-  logger->logStream.writeEmptyElement("br");
-
     logger->logStream.writeStartElement("font");
-    logger->logStream.writeAttribute("color", "#555753");
-    logger->logStream.writeCharacters(QString("(Function %3, file %1, line %2)").arg(context.file).arg(context.line).arg(context.function));
+    logger->logStream.writeAttribute("color", color);
+    if(!backColor.isEmpty())
+      logger->logStream.writeAttribute("style", QString("background-color: %0;").arg(backColor));
+    logger->logStream.writeCharacters(message);
     logger->logStream.writeEndElement();
     logger->logStream.writeEmptyElement("br");
-    logger->logStream.writeEmptyElement("br");
+
+      logger->logStream.writeStartElement("font");
+      logger->logStream.writeAttribute("color", "#555753");
+      logger->logStream.writeCharacters(QString("(Function %3, file %1, line %2)").arg(context.file).arg(context.line).arg(context.function));
+      logger->logStream.writeEndElement();
+      logger->logStream.writeEmptyElement("br");
+      logger->logStream.writeEmptyElement("br");
   }
 
   bool alreadyHandeled = false;

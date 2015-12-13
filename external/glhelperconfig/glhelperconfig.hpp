@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QVector>
 #include <QDir>
+#include <QRegularExpression>
 
 
 namespace gl
@@ -54,9 +55,9 @@ namespace gl
 
 
 // Logging
-#define GLHELPER_LOG_ERROR(message)		do { qCritical() << QString("Error: %0 (<%1> line %2)").arg(gl::Details::to_c_str(message)).arg(__FILE__).arg(__LINE__).toStdString().c_str(); } while(false)
-#define GLHELPER_LOG_WARNING(message)	do { qWarning() << QString("Warning: %0 (<%1> line %2)").arg(gl::Details::to_c_str(message)).arg(__FILE__).arg(__LINE__).toStdString().c_str(); } while(false)
-#define GLHELPER_LOG_INFO(message)		do { qDebug() << QString("Info: %0 (<%1> line %2)").arg(gl::Details::to_c_str(message)).arg(__FILE__).arg(__LINE__).toStdString().c_str(); } while(false)
+#define GLHELPER_LOG_ERROR(message)		do { qCritical() << QString("%0").arg(gl::Details::to_c_str(message)).toStdString().c_str(); } while(false)
+#define GLHELPER_LOG_WARNING(message)	do { qWarning() << QString("%0").arg(gl::Details::to_c_str(message)).toStdString().c_str(); } while(false)
+#define GLHELPER_LOG_INFO(message)		do { qDebug() << QString("%0").arg(gl::Details::to_c_str(message)).toStdString().c_str(); } while(false)
 
 
 
@@ -122,6 +123,29 @@ namespace gl
 
 // A std::vector of all include paths shaders will be looked for, if an #include<...> statement was found during parsing an glsl script
 #define SHADER_EXPAND_GLOBAL_INCLUDE(x) gl::Details::ShaderIncludeDirManager::expandGlobalInclude(x)
+
+#define SHADER_OVERRIDE_SHADER_ERROR_TEXT_FILTER \
+std::string ShaderObject::FileIndex::filterErrorText(const std::string& t) const \
+{ \
+  QString text = QString::fromStdString(t); \
+ \
+  QRegularExpression filter("^([0-9]+)\\(([0-9]+)\\) *\\:? *"); \
+  filter.setPatternOptions(QRegularExpression::MultilineOption); \
+ \
+  QRegularExpressionMatchIterator i = filter.globalMatch(text); \
+ \
+  while(i.hasNext()) \
+  { \
+    QRegularExpressionMatch match = i.next(); \
+ \
+    QString shaderName = QString::fromStdString(this->shaderNameForIndex(match.captured(1).toInt())); \
+    QString lineNumber = match.captured(2); \
+ \
+    text.replace(match.captured(), QString("-> %1 (%2):\n        ").arg(shaderName, lineNumber)); \
+  } \
+ \
+  return text.toStdString(); \
+}
 
 // OpenGL header.
 

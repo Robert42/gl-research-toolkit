@@ -29,7 +29,7 @@ public:
     if(messages.isEmpty())
       return false;
 
-    std::string message = messages.join("\n").toStdString();
+    std::string message = messages.join("\n\n").toStdString();
 
     enum Results : int
     {
