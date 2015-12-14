@@ -131,3 +131,53 @@ float rectAreaLightLuminance(in vec3 worldPos, in vec3 worldNormal, in Rect rect
 {
   return rectAreaLightLuminance(worldPos, worldNormal, rect.origin, cross(rect.tangent1, rect.tangent2), rect.tangent1, rect.tangent2, rect.half_width, rect.half_height);
 }
+
+
+// ======== Tube-Area-Light ====================================================
+
+// Return the closest point on the line ( without limit )
+float3 closestPointOnLine(float3 a, float3 b, float3 c)
+{
+    float3 ab = b - a;
+    float t = dot(c - a, ab) / dot(ab, ab);
+    return a + t * ab;
+}
+
+// Return the closest point on the segment ( with limit )
+float3 closestPointOnSegment(float3 a ,float3 b ,float3 c)
+{
+    float3 ab = b - a;
+    float t = dot(c - a , ab) / dot(ab , ab);
+    return a + saturate (t) * ab;
+}
+
+// The sphere is placed at the nearest point on the segment .
+// The rectangular plane is define by the following orthonormal frame :
+float3 forward = normalize(closestPointOnLine(P0, P1, worldPos) - worldPos);
+float3 left = lightLeft;
+float3 up = cross(lightLeft , forward);
+
+float3 p0 = lightPos - left * (0.5 * lightWidth) + lightRadius * up;
+float3 p1 = lightPos - left * (0.5 * lightWidth) - lightRadius * up;
+float3 p2 = lightPos + left * (0.5 * lightWidth) - lightRadius * up;
+float3 p3 = lightPos + left * (0.5 * lightWidth) + lightRadius * up;
+
+float solidAngle = rectangleSolidAngle(worldPos, p0, p1, p2, p3);
+
+float illuminance = solidAngle * 0.2 * (
+        saturate(dot(normalize(p0 - worldPos) , worldNormal)) +
+        saturate(dot(normalize(p1 - worldPos) , worldNormal)) +
+        saturate(dot(normalize(p2 - worldPos) , worldNormal)) +
+        saturate(dot(normalize(p3 - worldPos) , worldNormal)) +
+        saturate(dot(normalize(lightPos - worldPos) , worldNormal)));
+
+// We then add the contribution of the sphere
+float3 spherePosition = closestPointOnSegment(P0, P1, worldPos);
+float3 sphereUnormL = spherePosition - worldPos;
+float3 sphereL = normalize(sphereUnormL);
+float sqrSphereDistance = dot(sphereUnormL, sphereUnormL);
+
+float illuminanceSphere = FB_PI * saturate(dot(sphereL, data.worldNormal)) *
+                          ((lightRadius * lightRadius) / sqrSphereDistance);
+
+illuminance += illuminanceSphere;
