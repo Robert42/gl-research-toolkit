@@ -145,6 +145,29 @@ void PRINT_VALUE(in mat4 value)
   implement_print_value(GLSL_DEBUGGING_TYPE_MAT(4,4), value);
 }
 
+void PRINT_VALUE(in Sphere s)
+{
+  mat4 value;
+  value[0] = vec4(s.origin, s.radius);
+  implement_print_value(GLSL_DEBUGGING_TYPE_SPHERE, value);
+}
+
+void PRINT_VALUE(in Rect r)
+{
+  mat4 value;
+  value[0] = vec4(r.origin, 1);
+  value[1] = vec4(r.tangent1, r.half_width);
+  value[2] = vec4(r.tangent2, r.half_height);
+  implement_print_value(GLSL_DEBUGGING_TYPE_RECT, value);
+}
+
+void PRINT_VALUE(in Plane p)
+{
+  mat4 value;
+  value[0] = vec4(p.normal, p.d);
+  implement_print_value(GLSL_DEBUGGING_TYPE_PLANE, value);
+}
+
 void PRINT_VALUE(in Ray r)
 {
   mat4 value;

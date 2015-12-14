@@ -50,7 +50,7 @@ vec3 nearest_point(in Ray ray, in vec3 point)
 
 vec3 nearest_point_unclamped(in Ray ray, in vec3 point)
 {
-  return ray.origin + ray.direction * dot(ray.direction, point);
+  return ray.origin + ray.direction * dot(ray.direction, point-ray.origin);
 }
 
 // ---- distance
@@ -136,6 +136,13 @@ float signed_distance_to(in Plane plane, in vec3 point)
 float distance_to(in Plane plane, in vec3 point)
 {
   return abs(signed_distance_to(plane, point));
+}
+
+// ---- front/backside
+
+bool is_on_frontside(in Plane plane, in vec3 point)
+{
+  return signed_distance_to(plane, point) > 0;
 }
 
 // ---- nearest point

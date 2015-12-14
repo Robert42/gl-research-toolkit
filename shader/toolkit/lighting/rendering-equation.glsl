@@ -109,6 +109,7 @@ vec3 rendering_equation(in ShadingInput shading_input)
     Sphere sphere;
     sphere.origin = light.origin;
     sphere.radius = light.radius;
+    PRINT_VALUE(sphere);
     
     shading_input.light_position = nearest_point_on_sphere_unclamped(sphere, shading_input.perfect_reflection_ray);
     
@@ -125,6 +126,7 @@ vec3 rendering_equation(in ShadingInput shading_input)
     rect.tangent2 = cross(light.normal, light.tangent);
     rect.half_width = light.half_width;
     rect.half_height = light.half_height;
+    PRINT_VALUE(rect);
     
     bool ray_is_intersecting_plane = nearest_point_on_rect(rect, shading_input.perfect_reflection_ray, shading_input.light_position);
     

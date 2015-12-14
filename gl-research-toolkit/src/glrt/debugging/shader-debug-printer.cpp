@@ -70,6 +70,21 @@ inline void printMatrixChunk(glm::ivec2 dimensions, const char* matrixPrefix, co
   }
 }
 
+inline void printSphere(const glm::vec3& origin, float radius)
+{
+  qDebug() << "Sphere(origin="<< origin <<",   radius="<<radius<<")";
+}
+
+inline void printRect(const glm::vec3& origin, const glm::vec3& tangent1, const glm::vec3& tangent2, float half_width, float half_height)
+{
+  qDebug() << "Rect(origin="<< origin <<",   tangent1="<<tangent1<<",  tangent2="<<tangent2<<",  half_width="<<half_width<<",  half_height="<<half_height<<")";
+}
+
+inline void printPlane(const glm::vec3& normal, float d)
+{
+  qDebug() << "Plane(normal="<< normal <<",   d="<<d<<")";
+}
+
 inline void printRay(const glm::vec3& origin, const glm::vec3& direction)
 {
   qDebug() << "Ray(origin="<< origin <<",   direction="<<direction<<")";
@@ -86,6 +101,12 @@ inline void printChunk(const Chunk& chunk)
     printVectorChunk<float>(chunk.type.y, "float", "", chunk.floatValues[0]);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_MAT(1,1)[0])
     printMatrixChunk<float>(chunk.type.yz(), "", chunk.floatValues);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_SPHERE[0])
+    printSphere(chunk.floatValues[0].xyz(), chunk.floatValues[0].w);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RECT[0])
+    printRect(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.floatValues[2].xyz(), chunk.floatValues[1].w, chunk.floatValues[2].w);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_PLANE[0])
+    printPlane(chunk.floatValues[0].xyz(), chunk.floatValues[0].w);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RAY[0])
     printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz());
   else
