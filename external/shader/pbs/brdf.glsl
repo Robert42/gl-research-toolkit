@@ -1,4 +1,6 @@
-float3 F_Schlick(in float3 f0, in float f90, in float u)
+#include <glrt/glsl/math.h>
+
+vec3 F_Schlick(in vec3 f0, in float f90, in float u)
 {
   return f0 + (f90 - f0) * pow(1.f - u, 5.f);
 }
@@ -31,29 +33,69 @@ float D_GGX(float NdotH, float m)
 float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH,
                        float linearRoughness)
 {
-    float energyBias      = lerp(0, 0.5, linearRoughness);
-    float energyFactor    = lerp(1.0, 1.0/1.51, linearRoughness);
+    float energyBias      = mix(0.f, 0.5f, linearRoughness);
+    float energyFactor    = mix(1.0, 1.0/1.51, linearRoughness);
     float fd90            = energyBias + 2.0 * LdotH * LdotH * linearRoughness;
-    float3 f0             = float3(1.0f, 1.0f, 1.0f);
+    vec3 f0               = vec3(1.0f, 1.0f, 1.0f);
     float lightScatter    = F_Schlick(f0, fd90, NdotL).r;
     float viewScatter     = F_Schlick(f0, fd90, NdotV).r;
     
     return lightScatter * viewScatter * energyFactor;
 }
 
+struct BrdfParameters
+{
+  float NdotV;
+  float LdotH;
+  float NdotH;
+  float NdotL;
+  float roughness;
+};
 
-// This code is an example of call of previous functions
-float NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
-float3 H                = normalize(V + L);
-float LdotH             = saturate(dot(L , H));
-float NdotH             = saturate(dot(N, H));
-float NdotL             = saturate(dot(N, L));
+#define saturate(value) clamp(value, 0.f, 1.f)
+
+BrdfParameters init_brdf_parameters(in vec3 N, in vec3 V, in vec3 L)
+{
+  BrdfParameters p;
+
+  // This code is an example of call of previous functions
+  p.NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
+  vec3 H              = normalize(V + L);
+  p.LdotH             = saturate(dot(L, H));
+  p.NdotH             = saturate(dot(N, H));
+  p.NdotL             = saturate(dot(N, L));
+  
+  return p;
+}
+
+#undef saturate
 
 // Specular BRDF
-float3 F                = F_Schlick(f0 , f90, LdotH);
-float Vis               = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
-float D                 = D_GGX (NdotH, roughness);
-float Fr                = D * F * Vis / PI;
+vec3 brdf_specular(in BrdfParameters param, float roughness, in vec3 f0, in float f90)
+{
+  float LdotH   = param.LdotH;
+  float NdotV   = param.NdotV;
+  float NdotL   = param.NdotL;
+  float NdotH   = param.NdotH;
+  
+  vec3 F        = F_Schlick(f0 , f90, LdotH);
+  float Vis     = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
+  float D       = D_GGX (NdotH, roughness);
+  vec3 Fr       = D * F * Vis / pi;
+  
+  return Fr;
+}
 
 // Diffuse BRDF
-float Fd                = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, linearRoughness) / PI;
+float brdf_diffuse(in BrdfParameters param, float linearRoughness)
+{
+  float LdotH   = param.LdotH;
+  float NdotV   = param.NdotV;
+  float NdotL   = param.NdotL;
+  
+  float Fd      = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, linearRoughness) / pi;
+  
+  return Fd;
+}
+
+
