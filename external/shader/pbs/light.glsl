@@ -9,7 +9,7 @@
 // cosTheta is not clamped
 float illuminanceSphereOrDisk(float cosTheta, float sinSigmaSqr)
 {
-    float sinTheta = sqrt(1.0 f - cosTheta * cosTheta);
+    float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
     
     float illuminance = 0.0f;
     // Note : Following test is equivalent to the original formula.
@@ -19,13 +19,13 @@ float illuminanceSphereOrDisk(float cosTheta, float sinSigmaSqr)
     // and using saturate(cosTheta) instead.
     if(cosTheta * cosTheta > sinSigmaSqr)
     {
-        illuminance = FB_PI * sinSigmaSqr * saturate(cosTheta);
+        illuminance = pi * sinSigmaSqr * saturate(cosTheta);
     }
     else
     {
         float x = sqrt(1.0f / sinSigmaSqr - 1.0f); // For a disk this simplify to x = d / r
         float y = -x * (cosTheta / sinTheta);
-        float sinThetaSqrtY = sinTheta * sqrt(1.0 f - y * y);
+        float sinThetaSqrtY = sinTheta * sqrt(1.0f - y * y);
         illuminance = (cosTheta * acos(y) - x * sinThetaSqrtY) * sinSigmaSqr + atan(sinThetaSqrtY / x);
     }
     
@@ -33,22 +33,51 @@ float illuminanceSphereOrDisk(float cosTheta, float sinSigmaSqr)
 }
 
 // Sphere evaluation
-float cosTheta = clamp(dot(worldNormal, L), -0.999, 0.999); // Clamp to avoid edge case
-// We need to prevent the object penetrating into the surface
-// and we must avoid divide by 0 , thus the 0.9999f
-float sqr LightRadius = lightRadius * lightRadius;
-float sinSigmaSqr = min(sqrLightRadius / sqrDist , 0.9999f);
-float illuminance = illuminanceSphereOrDisk(cosTheta , sinSigmaSqr);
+float sphereLightIlluminance(in vec3 worldNormal, in vec3 L, float sqrDist, float lightRadius)
+{
+    float cosTheta = clamp(dot(worldNormal, L), -0.999, 0.999); // Clamp to avoid edge case
+    // We need to prevent the object penetrating into the surface
+    // and we must avoid divide by 0 , thus the 0.9999f
+    float sqrLightRadius = lightRadius * lightRadius;
+    float sinSigmaSqr = min(sqrLightRadius / sqrDist , 0.9999f);
+    float illuminance = illuminanceSphereOrDisk(cosTheta , sinSigmaSqr);
+    
+    return illuminance;
+}
 
 
 // Disk evaluation
-float cosTheta = dot(worldNormal, L);
-float sqr LightRa dius = lightRadius * lightRadius;
-// Do not let the surface penetrate the light
-float sinSigmaSqr = sqrLightRadius / (sqrLightRadius + max(sqrLightRadius, sqrDist));
-// Multiply by saturate(dot(planeNormal, -L)) to better match ground truth .
-float illuminance = illuminanceSphereOrDisk(cosTheta , sinSigmaSqr)
-                     * saturate(dot(planeNormal, -L));
+float diskLightIlluminance(in vec3 worldNormal, in vec3 L, float sqrDist, in vec3 planeNormal, float lightRadius)
+{
+    float cosTheta = dot(worldNormal, L);
+    float sqrLightRadius = lightRadius * lightRadius;
+    // Do not let the surface penetrate the light
+    float sinSigmaSqr = sqrLightRadius / (sqrLightRadius + max(sqrLightRadius, sqrDist));
+    // Multiply by saturate(dot(planeNormal, -L)) to better match ground truth .
+    float illuminance = illuminanceSphereOrDisk(cosTheta , sinSigmaSqr)
+                         * saturate(dot(planeNormal, -L));
+                         
+    return illuminance;
+}
+
+
+float sphereLightIlluminance(in vec3 worldNormal, in vec3 worldPos, in Sphere sphere)
+{
+  vec3 unnormalizedL = sphere.origin - worldPos;
+  vec3 L = normalize(unnormalizedL);
+  float sqrDist = sq(unnormalizedL);
+  
+  return sphereLightIlluminance(worldNormal, L, sqrDist, sphere.radius);
+}
+
+float diskLightIlluminance(in vec3 worldNormal, in vec3 worldPos, in Disk disk)
+{
+  vec3 unnormalizedL = disk.origin - worldPos;
+  vec3 L = normalize(unnormalizedL);
+  float sqrDist = sq(unnormalizedL);
+  
+  return diskLightIlluminance(worldNormal, L, sqrDist, disk.normal, disk.radius);
+}
 
 
 // ======== Rect-Area-Light ====================================================

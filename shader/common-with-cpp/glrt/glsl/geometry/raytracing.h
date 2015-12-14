@@ -11,6 +11,14 @@ struct Sphere
   float radius;
 };
 
+struct Disk
+{
+  vec3 origin;
+  float radius;
+  vec3 normal;
+};
+
+
 struct Rect
 {
   vec3 origin;
