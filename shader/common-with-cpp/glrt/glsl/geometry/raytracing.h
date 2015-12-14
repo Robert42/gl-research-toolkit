@@ -18,7 +18,6 @@ struct Disk
   vec3 normal;
 };
 
-
 struct Rect
 {
   vec3 origin;
@@ -26,6 +25,14 @@ struct Rect
   vec3 tangent1;
   float half_height;
   vec3 tangent2;
+};
+
+struct Tube
+{
+  vec3 origin;
+  float radius;
+  vec3 direction;
+  float length;
 };
 
 // https://de.wikipedia.org/wiki/Hessesche_Normalform
