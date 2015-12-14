@@ -52,8 +52,6 @@ struct BrdfParameters
   float roughness;
 };
 
-#define saturate(value) clamp(value, 0.f, 1.f)
-
 BrdfParameters init_brdf_parameters(in vec3 N, in vec3 V, in vec3 L)
 {
   BrdfParameters p;
@@ -67,8 +65,6 @@ BrdfParameters init_brdf_parameters(in vec3 N, in vec3 V, in vec3 L)
   
   return p;
 }
-
-#undef saturate
 
 // Specular BRDF
 vec3 brdf_specular(in BrdfParameters param, float roughness, in vec3 f0, in float f90)

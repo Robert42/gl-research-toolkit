@@ -1,5 +1,3 @@
-#include "brdf.glsl"
-
 struct DisneyBaseMaterial
 {
   vec3 normal;
