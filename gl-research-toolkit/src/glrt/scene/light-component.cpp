@@ -52,9 +52,12 @@ bool RectAreaLightComponent::Data::initFromJson(QJsonObject& json)
   if(!light.initFromJson(json))
     return false;
 
+  glm::vec3 normal = as_vec3_with_fallback(json["normal"], glm::vec3(0, 0, -1), "RectAreaLightComponent::Data::initFromJson");
+  glm::vec3 tangent = as_vec3_with_fallback(json["tangent"], glm::vec3(-1, 0, 0), "RectAreaLightComponent::Data::initFromJson");
+
+  this->tangent1 = tangent;
+  this->tangent2 = glm::cross(normal, tangent);
   this->origin = as_vec3_with_fallback(json["origin"], glm::vec3(0), "RectAreaLightComponent::Data::initFromJson");
-  this->normal = as_vec3_with_fallback(json["normal"], glm::vec3(0, 0, -1), "RectAreaLightComponent::Data::initFromJson");
-  this->tangent = as_vec3_with_fallback(json["tangent"], glm::vec3(-1, 0, 0), "RectAreaLightComponent::Data::initFromJson");
   this->half_width = json.contains("width") ? json["width"].toDouble()*.5 : .5;
   this->half_height = json.contains("height") ? json["height"].toDouble()*.5 : .5;
 

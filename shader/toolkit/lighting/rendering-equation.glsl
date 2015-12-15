@@ -2,6 +2,8 @@
 
 #include <debugging/print.glsl>
 
+#include <pbs/pbs.glsl>
+
 // assumed invariant when using this struct:  (diffuse_color + specular_color) <= 1
 struct ShadingInput
 {
@@ -122,8 +124,8 @@ vec3 rendering_equation(in ShadingInput shading_input)
     
     Rect rect;
     rect.origin = light.origin;
-    rect.tangent1 = light.tangent;
-    rect.tangent2 = cross(light.normal, light.tangent);
+    rect.tangent1 = light.tangent1;
+    rect.tangent2 = light.tangent2;
     rect.half_width = light.half_width;
     rect.half_height = light.half_height;
     PRINT_VALUE(rect);

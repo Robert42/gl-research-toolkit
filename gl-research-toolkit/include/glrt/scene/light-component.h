@@ -53,17 +53,17 @@ public:
   {
     LightSource light;
 
-    glm::vec3 normal = glm::vec3(0, 0, -1);
+    glm::vec3 tangent1 = glm::vec3(-1, 0, 0);
     float half_width;
-    glm::vec3 tangent = glm::vec3(-1, 0, 0);
+    glm::vec3 tangent2 = glm::vec3(0, 1, 0);
     float half_height;
     glm::vec3 origin = glm::vec3(0);
     padding<float> _padding;
 
     friend Data operator*(const glm::mat4& t, Data data)
     {
-      data.normal = transform_direction(t, data.normal);
-      data.tangent = transform_direction(t, data.tangent);
+      data.tangent1 = transform_direction(t, data.tangent1);
+      data.tangent2 = transform_direction(t, data.tangent2);
       data.origin = transform_point(t, data.origin);
 
       return data;
