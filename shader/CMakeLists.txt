@@ -11,6 +11,8 @@ add_custom_target(
   common-with-cpp/glrt/glsl/math.h
   debugging/visualizations/common-debug-line-visualization.fs.glsl
   debugging/visualizations/common-debug-line-visualization.vs.glsl
+  debugging/visualizations/visualize-debug-printing-fragment.fs
+  debugging/visualizations/visualize-debug-printing-fragment.vs
   debugging/visualizations/visualize-rect-area-light.fs
   debugging/visualizations/visualize-rect-area-light.vs
   debugging/visualizations/visualize-scene-camera.fs
