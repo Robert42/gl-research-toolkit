@@ -104,10 +104,11 @@ float rectangleSolidAngle(vec3 worldPos,
     return g0 + g1 + g2 + g3 - 2 * pi;
 }
 
-float rectAreaLightLuminance(in vec3 worldPos, in vec3 worldNormal, in vec3 lightPos, in vec3 lightPlaneNormal, in vec3 lightLeft, in vec3 lightUp, in float halfWidth, in float halfHeight)
+float rectAreaLightIlluminance(in vec3 worldPos, in vec3 worldNormal, in vec3 lightPos, in vec3 lightPlaneNormal, in vec3 lightLeft, in vec3 lightUp, in float halfWidth, in float halfHeight)
 {
   float illuminance = 0.f;
   
+  // TODO this can be removed by multiplying with the boolean value of the condition. Measure performance instead of guessing
   if(dot(worldPos - lightPos, lightPlaneNormal) > 0)
   {
       vec3 p0 = lightPos + lightLeft * -halfWidth + lightUp *  halfHeight;
@@ -127,9 +128,9 @@ float rectAreaLightLuminance(in vec3 worldPos, in vec3 worldNormal, in vec3 ligh
   return illuminance;
 }
 
-float rectAreaLightLuminance(in vec3 worldPos, in vec3 worldNormal, in Rect rect)
+float rectAreaLightIlluminance(in vec3 worldPos, in vec3 worldNormal, in Rect rect)
 {
-  return rectAreaLightLuminance(worldPos, worldNormal, rect.origin, cross(rect.tangent1, rect.tangent2), rect.tangent1, rect.tangent2, rect.half_width, rect.half_height);
+  return rectAreaLightIlluminance(worldPos, worldNormal, rect.origin, cross(rect.tangent1, rect.tangent2), rect.tangent1, rect.tangent2, rect.half_width, rect.half_height);
 }
 
 
