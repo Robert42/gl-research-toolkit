@@ -55,7 +55,7 @@ vec3 rendering_equation(in BaseMaterial material, in SurfaceData surface, in Vie
     LightData light_data;
     
     light_data.lightSource = light.light;
-    light_data.direction_to_light = getDirectionToLight(sphere);
+    light_data.direction_to_light = getDirectionToLight(sphere, worldPosition);
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
     
     outgoing_light += do_the_lighting(material, viewer, light_data);
@@ -75,7 +75,7 @@ vec3 rendering_equation(in BaseMaterial material, in SurfaceData surface, in Vie
     LightData light_data;
     
     light_data.lightSource = light.light;
-    light_data.direction_to_light = getDirectionToLight(rect);
+    light_data.direction_to_light = getDirectionToLight(rect, worldPosition);
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
     
     outgoing_light += do_the_lighting(material, viewer, light_data);
