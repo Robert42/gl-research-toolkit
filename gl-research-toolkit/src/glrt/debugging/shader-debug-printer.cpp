@@ -35,16 +35,16 @@ inline void printVectorChunk(int dimension, const char* scalarName, const char* 
   switch(dimension)
   {
   case 1:
-    qDebug() << scalarName  << " " << T(input.x);
+    qDebug() << scalarName  << T(input.x);
     break;
   case 2:
-    qDebug() << vectorPrefix  << "vec2 " << glm::tvec2<T>(input.xy());
+    qDebug() << vectorPrefix  << glm::tvec2<T>(input.xy());
     break;
   case 3:
-    qDebug() << vectorPrefix  << "vec3 " << glm::tvec3<T>(input.xyz());
+    qDebug() << vectorPrefix  << glm::tvec3<T>(input.xyz());
     break;
   case 4:
-    qDebug() << vectorPrefix  << "vec4 " << glm::tvec4<T>(input);
+    qDebug() << vectorPrefix  << glm::tvec4<T>(input);
     break;
   default:
     Q_UNREACHABLE();
@@ -60,7 +60,7 @@ inline void printMatrixChunk(glm::ivec2 dimensions, const char* matrixPrefix, co
     switch(dimensions.y)
     {
     case 4:
-      qDebug() << matrixPrefix  << "mat4x4 " << glm::tmat4x4<T>(input);
+      qDebug() << matrixPrefix  << glm::tmat4x4<T>(input);
       break;
     default:
       Q_UNREACHABLE();
