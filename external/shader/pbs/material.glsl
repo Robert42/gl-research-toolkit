@@ -34,7 +34,10 @@ vec3 material_brdf(in BrdfParameters brdf_param, in BaseMaterial material)
   float diffuse_occlusion = AO;
   float specular_occlusion = computeSpecOcclusion(NdotV, AO, roughness);
   
-  return brdf_specular(brdf_param, roughness, f0, f90) * specular_occlusion + brdf_diffuse(brdf_param, roughness) * diffuse_occlusion;
+  vec3 f_s = brdf_specular(brdf_param, roughness, f0, f90);
+  float f_d = brdf_diffuse(brdf_param, roughness);
+  
+  return f_s * specular_occlusion + f_d * diffuse_occlusion;
 }
 
 vec3 material_brdf(in vec3 V, in vec3 L, in BaseMaterial material)
