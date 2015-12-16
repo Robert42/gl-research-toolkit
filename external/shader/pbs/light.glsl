@@ -1,3 +1,5 @@
+// TODO: try out better falloff (Frostbite PBS Figure 44 or Epic PBS Figure 9)
+
 // ======== Disk-Area-Light ====================================================
 
 // A right disk is a disk oriented to always face the lit surface.
