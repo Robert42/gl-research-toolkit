@@ -106,10 +106,10 @@ float rectangleSolidAngle(vec3 worldPos,
     vec3 n2 = normalize(cross(v2, v3));
     vec3 n3 = normalize(cross(v3, v0));
 
-    float g0 = clamp(acos(dot(-n0, n1)), -1, 1);
-    float g1 = clamp(acos(dot(-n1, n2)), -1, 1);
-    float g2 = clamp(acos(dot(-n2, n3)), -1, 1);
-    float g3 = clamp(acos(dot(-n3, n0)), -1, 1);
+    float g0 = acos(clamp(dot(-n0, n1), -1, 1));
+    float g1 = acos(clamp(dot(-n1, n2), -1, 1));
+    float g2 = acos(clamp(dot(-n2, n3), -1, 1));
+    float g3 = acos(clamp(dot(-n3, n0), -1, 1));
 
     return g0 + g1 + g2 + g3 - 2 * pi;
 }
