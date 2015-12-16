@@ -2,7 +2,7 @@
 
 vec3 F_Schlick(in vec3 f0, in float f90, in float u)
 {
-  return f0 + (f90 - f0) * pow(1.f - u, 5.f);
+  return f0 + (f90 - f0) * pow(max(0.f, 1.f - u), 5.f);
 }
 
 float V_SmithGGXCorrelated(float NdotL, float NdotV, float alphaG)
