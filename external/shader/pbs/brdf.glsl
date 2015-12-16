@@ -43,6 +43,14 @@ float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH,
     return lightScatter * viewScatter * energyFactor;
 }
 
+float3 getSpecularDominantDirArea(float3 N, float3 R, float NdotV, float roughness)
+{
+    // Simple linear approximation
+    lerpFactor = (1 - roughness);
+
+    return normalize(lerp(N, R, lerpFactor));
+}
+
 struct BrdfParameters
 {
   float NdotV;
