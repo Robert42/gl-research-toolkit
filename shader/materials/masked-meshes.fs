@@ -5,10 +5,13 @@
 
 void main()
 {
-  MaterialOutput material_output = calculate_material_output();
+  BaseMaterial material;
+  SurfaceData surface;
+  float alpha;
+  calculate_material_output(material, surface, alpha);
   
-  if(material_output.color.a < 0.6f)
+  if(alpha < 0.6f)
     discard;
   
-  apply_material(material_output);
+  apply_material(material, surface, 1.f);
 }

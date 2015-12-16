@@ -6,9 +6,12 @@
 
 out vec4 color;
 
-void apply_material(in MaterialOutput material_output)
+void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
-  color = vec4(light_material(material_output, direction_to_camera(material_output.position)), material_output.color.a);
+  ViewerData viewer;
+  viewer.direction_to_camera = direction_to_camera(surface.position);
+  
+  color = vec4(light_material(material, surface, viewer), alpha);
 }
 
 #endif // FORWARD_RENDERER

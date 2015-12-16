@@ -4,59 +4,43 @@
 
 #include <pbs/pbs.glsl>
 
-struct MaterialInput
+struct SurfaceData
 {
-  DisneyBaseMaterial disneyBaseMaterial;
-  vec3 emission;
   vec3 position;
 };
 
-struct ViewerInput
+struct ViewerData
 {
-  vec3 directionToCamera;
+  vec3 direction_to_camera;
 };
 
-struct LightInput
+struct LightData
 {
   LightSource lightSource;
   vec3 direction_to_light;
   float illuminance;
 };
 
-vec3 brdf(in ShadingInput shading_input)
-{
-  // TODO: integrate better and performanter (don't do all steps for every light)
-  
-  DisneyBaseMaterial material;
-  
-  material.normal = shading_input.surface_normal;
-  material. = shading_input.surface_normal;
-  
-  vec3 V = shading_input.direction_to_viewer;
-  vec3 L = shading_input.direction_to_light;
-  
-  vec3 diffuse_term = lambertian_brdf(shading_input);
-  //vec3 specular_term = blinn_phong_brdf(shading_input);
-  vec3 specular_term = test_sharp_highlight(shading_input);
-  
-  // Just adding them is ok, because of the invariant (diffuse_color + specular_color) <= 1
-  return diffuse_term + specular_term;
-}
 
-vec3 do_the_lighting(in MaterialInput material, in ViewerInput viewer, in LightInput light)
+vec3 do_the_lighting(in BaseMaterial material, in ViewerData viewer, in LightData light)
 {
-  vec3 direction_to_light = shading_input.direction_to_light;
-  vec3 luminance = light.illuminance * light.luminance * light.color;
-  float cos_factor = max(0, dot(direction_to_light, shading_input.surface_normal));
+  vec3 V = viewer.direction_to_camera;
+  vec3 L = light.direction_to_light;
+  vec3 N = material.normal;
   
-  return luminance * brdf(shading_input) * cos_factor;
+  // TODO is luminance really the right name?
+  vec3 luminance = light.illuminance * light.lightSource.luminance * light.lightSource.color;
+  vec3 brdf = material_brdf(V, L, material);
+  float cos_factor = max(0, dot(L, N));
+  
+  return luminance * brdf * cos_factor;
 }
 
 
-vec3 rendering_equation(in MaterialInput material, in ViewerInput viewer)
+vec3 rendering_equation(in BaseMaterial material, in SurfaceData surface, in ViewerData viewer)
 {
-  vec3 worldNormal = material.material.normal;
-  vec3 worldPosition = material.position;
+  vec3 worldNormal = material.normal;
+  vec3 worldPosition = surface.position;
   
   vec3 outgoing_light = vec3(0);
   
@@ -68,13 +52,13 @@ vec3 rendering_equation(in MaterialInput material, in ViewerInput viewer)
     sphere.origin = light.origin;
     sphere.radius = light.radius;
     
-    LightInput light;
+    LightData light_data;
     
-    light.lightSource = light.light;
-    light.direction_to_light = getDirectionToLight(sphere);
-    light.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
+    light_data.lightSource = light.light;
+    light_data.direction_to_light = getDirectionToLight(sphere);
+    light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
     
-    outgoing_light += do_the_lighting(material, viewer, light);
+    outgoing_light += do_the_lighting(material, viewer, light_data);
   }
   
   for(int i=0; i<rect_arealights.num; ++i)
@@ -88,20 +72,20 @@ vec3 rendering_equation(in MaterialInput material, in ViewerInput viewer)
     rect.half_width = light.half_width;
     rect.half_height = light.half_height;
     
-    LightInput light;
+    LightData light_data;
     
-    light.lightSource = light.light;
-    shading_input.direction_to_light = getDirectionToLight(rect);
-    shading_input.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
+    light_data.lightSource = light.light;
+    light_data.direction_to_light = getDirectionToLight(rect);
+    light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
     
-    outgoing_light += do_the_lighting(material, viewer, light);
+    outgoing_light += do_the_lighting(material, viewer, light_data);
   }
   
   return outgoing_light + material.emission;
 }
 
 
-vec3 light_material(in MaterialInput material, in ViewerInput viewer)
-{  
-  return rendering_equation(material, viewer);
+vec3 light_material(in BaseMaterial material, in SurfaceData surface, in ViewerData viewer)
+{
+  return rendering_equation(material, surface, viewer);
 }

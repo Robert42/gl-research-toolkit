@@ -5,7 +5,10 @@
 
 void main()
 {
-  MaterialOutput material_output = calculate_material_output();
+  BaseMaterial material;
+  SurfaceData surface;
+  float alpha;
+  calculate_material_output(material, surface, alpha);
   
-  apply_material(material_output);
+  apply_material(material, surface, 1.f);
 }

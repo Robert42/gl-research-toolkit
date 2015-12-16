@@ -1,9 +1,10 @@
-struct DisneyBaseMaterial
+struct BaseMaterial
 {
   vec3 normal;
   float smoothness;
   vec3 baseColor;
   float metalMask;
+  vec3 emission;
   float reflectance;
   float occlusion;
 };
@@ -14,7 +15,7 @@ float computeSpecOcclusion(float NdotV, float AO, float roughness)
     return saturate(pow(NdotV + AO, exp2(-16.0f * roughness - 1.0f)) - 1.0f + AO);
 }
 
-vec3 material_brdf(in BrdfParameters brdf_param, in DisneyBaseMaterial material)
+vec3 material_brdf(in BrdfParameters brdf_param, in BaseMaterial material)
 {
   vec3 normal = material.normal;
   vec3 baseColor = material.baseColor;
@@ -36,9 +37,8 @@ vec3 material_brdf(in BrdfParameters brdf_param, in DisneyBaseMaterial material)
   return brdf_specular(brdf_param, roughness, f0, f90) * specular_occlusion + brdf_diffuse(brdf_param, roughness) * diffuse_occlusion;
 }
 
-vec3 material_brdf(in vec3 V, in vec3 L, in DisneyBaseMaterial material)
+vec3 material_brdf(in vec3 V, in vec3 L, in BaseMaterial material)
 {
   // TODO: try out using dominant direction
-  
   return material_brdf(init_brdf_parameters(material.normal, V, L), material);
 }
