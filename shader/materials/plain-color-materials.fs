@@ -25,7 +25,7 @@ void main()
   material.metalMask  = material_instance.metalMask;
   material.emission = material_instance.emission;
   material.reflectance = 0.5f;
-  material.occlusion = 0;
+  material.occlusion = 1;
   
   SurfaceData surface;
   surface.position = fragment.position;
