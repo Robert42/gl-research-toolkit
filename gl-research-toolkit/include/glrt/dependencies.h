@@ -26,6 +26,22 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <thread>
+#include <atomic>
+
+
+// the unnecessary macros make my syntax highligh unpretty ;)
+#ifdef __GNUC__
+#ifdef bool
+#undef bool
+#endif
+#ifdef true
+#undef true
+#endif
+#ifdef false
+#undef false
+#endif
+#endif
 
 
 QDebug operator<<(QDebug d, const glm::bvec2& v);
