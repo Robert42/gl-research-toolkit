@@ -84,7 +84,7 @@ MaterialInstance::Ptr PlainColorMaterial::fromJson(const QDir&, const QJsonObjec
   if(object.contains("emission") && !as_vec3(uniformData.emission, object["emission"], "PlainColorMaterial::fromJson (emission)"))
     return Ptr();
 
-  uniformData.metalMask = object["metalMask"].toDouble(0);
+  uniformData.metal_mask = object["metal_mask"].toDouble(0);
   uniformData.smoothness = object["smoothness"].toDouble(0.8);
 
   PlainColorMaterial* material = new PlainColorMaterial(uniformData);

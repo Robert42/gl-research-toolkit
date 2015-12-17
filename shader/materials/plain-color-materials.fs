@@ -12,7 +12,7 @@ layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform Material
   vec3 base_color;
   float smoothness;
   vec3 emission;
-  float metalMask;
+  float metal_mask;
 }material_instance;
 
 void main()
@@ -21,8 +21,8 @@ void main()
   
   material.normal = fragment.normal;
   material.smoothness = material_instance.smoothness;
-  material.baseColor = material_instance.base_color;
-  material.metalMask  = material_instance.metalMask;
+  material.base_color = material_instance.base_color;
+  material.metal_mask  = material_instance.metal_mask;
   material.emission = material_instance.emission;
   material.reflectance = 0.5f;
   material.occlusion = 1;

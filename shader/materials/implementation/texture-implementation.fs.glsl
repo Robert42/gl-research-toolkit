@@ -25,15 +25,15 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   vec4 shmo = texture2D(material_instance.shmo_map, uv);
   
   float smoothness = shmo[0];
-  float metalMask = shmo[2];
+  float metal_mask = shmo[2];
   float occlusion = shmo[3];
   
   vec4 color = texture2D(material_instance.diffuse_map, uv) * material_instance.tint;
   
   material.normal = fragment.normal; // TODO implement normal mapping
   material.smoothness = mix(material_instance.smoothness_range[0], material_instance.smoothness_range[1], smoothness);
-  material.baseColor = color.rgb;
-  material.metalMask = metalMask;
+  material.base_color = color.rgb;
+  material.metal_mask = metal_mask;
   material.emission = texture2D(material_instance.emission_map, uv).xyz * material_instance.emission_factor;
   material.reflectance = 0.5f;
   material.occlusion = mix(material_instance.occlusion_range[0], material_instance.occlusion_range[1], occlusion);

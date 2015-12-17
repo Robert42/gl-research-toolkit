@@ -16,8 +16,8 @@ struct BaseMaterial
 {
   vec3 normal;
   float smoothness;
-  vec3 baseColor;
-  float metalMask;
+  vec3 base_color;
+  float metal_mask;
   vec3 emission;
   float reflectance;
   float occlusion;
@@ -30,12 +30,12 @@ struct SurfaceData
   vec3 normal;
   float roughness;
   vec3 diffuse_color;
-  float metalMask;
+  float metal_mask;
   vec3 f0;
   float f90;
-  vec3 reflectionDir;
+  vec3 R;
   float diffuse_occlusion;
-  vec3 dominantSpecularDir;
+  vec3 dominant_specular_dir;
   float specular_occlusion;
   vec3 emission;
 };
@@ -64,8 +64,8 @@ void precomputeData(in BaseMaterial material,
   vec3 V = normalize(camera_position-surface_position);
   vec3 N = material.normal;
   float smoothness = material.smoothness;
-  vec3 baseColor = material.baseColor;
-  float metalMask = material.metalMask;
+  vec3 base_color = material.base_color;
+  float metal_mask = material.metal_mask;
   float reflectance = material.reflectance;
   vec3 emission = material.emission;
   float AO = material.occlusion;
@@ -75,25 +75,25 @@ void precomputeData(in BaseMaterial material,
   float NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
   
   float roughness = sq(1.f-smoothness); // 3.2.1 & Figure 12
-  vec3 f0 = mix(vec3(0.16f * sq(reflectance)), baseColor, metalMask); // 3.2.1 & Appendix D
+  vec3 f0 = mix(vec3(0.16f * sq(reflectance)), base_color, metal_mask); // 3.2.1 & Appendix D
   float f90 = saturate(50.0 * dot(f0, vec3(0.33))); // listing 27
-  vec3 diffuseColor = mix(baseColor, vec3(0), metalMask); // Appendix D
+  vec3 diffuseColor = mix(base_color, vec3(0), metal_mask); // Appendix D
   
   float diffuse_occlusion = AO;
   float specular_occlusion = computeSpecOcclusion(NdotV, AO, roughness);
   
-  vec3 dominantSpecularDir = getSpecularDominantDirArea(N, R, NdotV, roughness);
+  vec3 dominant_specular_dir = getSpecularDominantDirArea(N, R, NdotV, roughness);
   
   surface_data.position = surface_position;
   surface_data.direction_to_camera = V;
   surface_data.normal = N;
   surface_data.roughness =roughness;
   surface_data.diffuse_color = diffuseColor;
-  surface_data.metalMask = metalMask;
+  surface_data.metal_mask = metal_mask;
   surface_data.f0 = f0;
   surface_data.f90 = f90;
-  surface_data.reflectionDir = R;
-  surface_data.dominantSpecularDir = dominantSpecularDir;
+  surface_data.R = R;
+  surface_data.dominant_specular_dir = dominant_specular_dir;
   surface_data.diffuse_occlusion = diffuse_occlusion;
   surface_data.specular_occlusion = specular_occlusion;
   surface_data.emission = emission;

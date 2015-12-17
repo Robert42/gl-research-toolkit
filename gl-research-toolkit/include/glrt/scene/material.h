@@ -49,7 +49,7 @@ public:
     glm::vec3 base_color = glm::vec3(1, 1, 1);
     float smoothness = 0.2f;
     glm::vec3 emission = glm::vec3(0);
-    float metalMask = 0.f;
+    float metal_mask = 0.f;
   };
 
   PlainColorMaterial(const UniformData& data);

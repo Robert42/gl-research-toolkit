@@ -34,7 +34,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
   vec3 worldNormal = surface.normal;
   vec3 worldPosition = surface.position;
   vec3 viewDir = surface.direction_to_camera;
-  vec3 reflectionDir = reflect(-viewDir, worldNormal);
+  vec3 R = reflect(-viewDir, worldNormal);
   
   vec3 outgoing_light = vec3(0);
   
