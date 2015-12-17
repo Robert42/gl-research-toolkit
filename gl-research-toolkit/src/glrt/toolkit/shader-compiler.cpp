@@ -1,6 +1,7 @@
 #include <glrt/toolkit/shader-compiler.h>
 #include <glrt/toolkit/temp-shader-file.h>
 #include <glrt/toolkit/logger.h>
+#include <glrt/toolkit/antifreeze.h>
 
 #include <set>
 
@@ -28,6 +29,8 @@ public:
   {
     if(messages.isEmpty())
       return false;
+
+    Antifreeze::Sleep antifreeze;
 
     std::string message = messages.join("\n\n").toStdString();
 
