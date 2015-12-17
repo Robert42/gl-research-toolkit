@@ -43,27 +43,14 @@ float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH,
     return lightScatter * viewScatter * energyFactor;
 }
 
-vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness)
-{
-    // Simple linear approximation
-    float lerpFactor = (1 - roughness);
-
-    return normalize(mix(N, R, lerpFactor));
-}
-
-struct BrdfParameters
-{
-  float LdotH;
-  float NdotL;
-};
-
 // Specular BRDF
-vec3 brdf_specular(in BrdfParameters param, float roughness, in vec3 f0, in float f90)
+vec3 brdf_specular(in BrdfData_Generic brdf_data_g, in BrdfData_WithLight brdf_data_l, in vec3 f0, in float f90)
 {
-  float LdotH   = param.LdotH;
-  float NdotV   = param.NdotV;
-  float NdotL   = param.NdotL;
-  float NdotH   = param.NdotH;
+  float LdotH     = brdf_data_l.LdotH;
+  float NdotV     = brdf_data_g.NdotV;
+  float NdotL     = brdf_data_l.NdotL;
+  float NdotH     = brdf_data_g.NdotH;
+  float roughness = brdf_data_g.roughness;
   
   vec3 F        = F_Schlick(f0 , f90, LdotH);
   float Vis     = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
@@ -74,13 +61,14 @@ vec3 brdf_specular(in BrdfParameters param, float roughness, in vec3 f0, in floa
 }
 
 // Diffuse BRDF
-float brdf_diffuse(in BrdfParameters param, float linearRoughness)
+float brdf_diffuse(in BrdfData_Generic brdf_data_g, in BrdfData_WithLight brdf_data_l)
 {
-  float LdotH   = param.LdotH;
-  float NdotV   = param.NdotV;
-  float NdotL   = param.NdotL;
+  float LdotH   = brdf_data_l.LdotH;
+  float NdotV   = brdf_data_g.NdotV;
+  float NdotL   = brdf_data_l.NdotL;
+  float roughness = brdf_data_g.roughness;
   
-  float Fd      = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, linearRoughness) / pi;
+  float Fd      = Fr_DisneyDiffuse(NdotV, NdotL, LdotH, roughness) / pi;
   
   return Fd;
 }

@@ -4,16 +4,6 @@
 
 #include <pbs/pbs.glsl>
 
-struct SurfaceData
-{
-  vec3 position;
-};
-
-struct ViewerData
-{
-  vec3 direction_to_camera;
-};
-
 struct LightData
 {
   LightSource lightSource;
@@ -87,7 +77,8 @@ vec3 rendering_equation(in BaseMaterial material, in SurfaceData surface, in Vie
 }
 
 
-vec3 light_material(in BaseMaterial material, in SurfaceData surface, in ViewerData viewer)
+vec3 light_material(in BaseMaterial material, in vec3 surface_position, in vec3 camera_position)
 {
+  TODO: remove Surface data and just 
   return rendering_equation(material, surface, viewer);
 }
