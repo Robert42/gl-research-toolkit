@@ -9,17 +9,18 @@ struct LightData
   LightSource lightSource;
   vec3 direction_to_light;
   float illuminance;
+  float specularEnergyFactor;
 };
 
-vec3 getDirectionToLight(inout float evergyFactor, in Disk disk, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+vec3 getDirectionToLight(out float specularEnergyFactor, in Disk disk, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
 {
-  evergyFactor *= 1.f;
+  specularEnergyFactor = 1.f;
   return normalize(disk.origin-surface.position);
 }
 
-vec3 getDirectionToLight(inout float evergyFactor, in Rect rect, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+vec3 getDirectionToLight(out float specularEnergyFactor, in Rect rect, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
 {
-  evergyFactor *= 1.f;
+  specularEnergyFactor = 1.f;
   return normalize(rect.origin-surface.position);
 }
 
@@ -30,7 +31,7 @@ vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceD
   vec3 V = surface.direction_to_camera;
   vec3 N = surface.normal;
   
-  BrdfData_WithLight brdf_l = init_brdf_data_with_light(N, L, V);
+  BrdfData_WithLight brdf_l = init_brdf_data_with_light(N, L, V, light.specularEnergyFactor);
   
   // TODO is luminance really the right name?
   vec3 luminance = light.illuminance * light.lightSource.luminance * light.lightSource.color;
@@ -62,7 +63,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     light_data.lightSource = light.light;
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
-    light_data.direction_to_light = getDirectionToLight(light_data.illuminance, sphere, surface);
+    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, sphere, surface);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
   }
@@ -82,7 +83,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     light_data.lightSource = light.light;
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
-    light_data.direction_to_light = getDirectionToLight(light_data.illuminance, rect, surface);
+    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, rect, surface);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
   }

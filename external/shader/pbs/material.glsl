@@ -7,5 +7,7 @@ vec3 evaluate_brdf_for_material(in BrdfData_Generic brdf_g, in BrdfData_WithLigh
   float diffuse_occlusion = surface.diffuse_occlusion;
   vec3 diffuseColor = surface.diffuse_color;
   
-  return f_s * specular_occlusion + f_d * diffuse_occlusion * diffuseColor;
+  float specular_factor = specular_occlusion * brdf_l.specularEnergyFactor;
+  
+  return f_s * specular_factor + f_d * diffuse_occlusion * diffuseColor;
 }

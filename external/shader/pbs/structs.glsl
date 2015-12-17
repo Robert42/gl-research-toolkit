@@ -4,6 +4,7 @@ struct BrdfData_WithLight
   float NdotH;
   float LdotH;
   float NdotL;
+  float specularEnergyFactor;
 };
 
 struct BrdfData_Generic
@@ -104,16 +105,17 @@ void precomputeData(in BaseMaterial material,
   brdf_data.roughness         = roughness;
 }
 
-BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V)
+BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V, float specularEnergyFactor)
 {
   BrdfData_WithLight p;
   
   vec3 H                  = normalize(V + L);
   
-  p.H                 = H;
-  p.NdotH             = saturate(dot(N, H));
-  p.LdotH             = saturate(dot(L, H));
-  p.NdotL             = saturate(dot(N, L));
+  p.H                     = H;
+  p.NdotH                 = saturate(dot(N, H));
+  p.LdotH                 = saturate(dot(L, H));
+  p.NdotL                 = saturate(dot(N, L));
+  p.specularEnergyFactor  = specularEnergyFactor;
   
   return p;
 }
