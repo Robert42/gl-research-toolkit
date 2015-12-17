@@ -2,7 +2,7 @@ vec3 getDirectionToLight(inout float evergyFactor, in Sphere sphere, in SurfaceD
 {
   // Equation 11
   vec3 L = sphere.origin - surface.position;
-  vec3 r = surface.R;
+  vec3 r = surface.R; // TODO try out specular dominant dir
   vec3 centerToRay = dot(L, r)*r - L;
   vec3 closesPoint = L + centerToRay * saturate(sphere.radius/length(centerToRay));
   float light_distance = length(closesPoint);
