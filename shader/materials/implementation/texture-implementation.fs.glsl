@@ -9,11 +9,13 @@ layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform Material
   vec4 tint;
   vec2 smoothness_range;
   vec2 occlusion_range;
+  vec2 reflectance_range;
   float emission_factor;
   // sampler2D within Uniform Block possible thanks to GL_NV_bindless_texture
   sampler2D diffuse_map;
   sampler2D normal_map;
-  sampler2D shmo_map;
+  sampler2D height_map;
+  sampler2D srmo_map; // smoothness, reflectance, metalic_map, occlusion
   sampler2D emission_map;
 }material_instance;
 
@@ -25,6 +27,7 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   vec4 shmo = texture2D(material_instance.shmo_map, uv);
   
   float smoothness = shmo[0];
+  float reflectance = shmo[1];
   float metal_mask = shmo[2];
   float occlusion = shmo[3];
   
@@ -35,7 +38,7 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   material.base_color = color.rgb;
   material.metal_mask = metal_mask;
   material.emission = texture2D(material_instance.emission_map, uv).xyz * material_instance.emission_factor;
-  material.reflectance = 0.5f;
+  material.reflectance = mix(material_instance.reflectance_range[0], material_instance.reflectance_range[1], reflectance);
   material.occlusion = mix(material_instance.occlusion_range[0], material_instance.occlusion_range[1], occlusion);
   
   surface.position = fragment.position;
