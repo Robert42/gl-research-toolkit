@@ -53,26 +53,9 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness)
 
 struct BrdfParameters
 {
-  float NdotV;
   float LdotH;
-  float NdotH;
   float NdotL;
-  float roughness;
 };
-
-BrdfParameters init_brdf_parameters(in vec3 N, in vec3 V, in vec3 L)
-{
-  BrdfParameters p;
-
-  // This code is an example of call of previous functions
-  p.NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
-  vec3 H              = normalize(V + L);
-  p.LdotH             = saturate(dot(L, H));
-  p.NdotH             = saturate(dot(N, H));
-  p.NdotL             = saturate(dot(N, L));
-  
-  return p;
-}
 
 // Specular BRDF
 vec3 brdf_specular(in BrdfParameters param, float roughness, in vec3 f0, in float f90)

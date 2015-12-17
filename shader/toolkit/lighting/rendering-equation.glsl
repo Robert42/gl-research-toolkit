@@ -22,7 +22,7 @@ struct LightData
 };
 
 
-vec3 do_the_lighting(in BaseMaterial material, in ViewerData viewer, in LightData light)
+vec3 do_the_lighting(in BaseMaterial material, in ViewerData viewer, in LightData light, in PrecomputedMaterial precomputedMaterial)
 {
   vec3 V = viewer.direction_to_camera;
   vec3 L = light.direction_to_light;
@@ -30,7 +30,7 @@ vec3 do_the_lighting(in BaseMaterial material, in ViewerData viewer, in LightDat
   
   // TODO is luminance really the right name?
   vec3 luminance = light.illuminance * light.lightSource.luminance * light.lightSource.color;
-  vec3 brdf = material_brdf(V, L, material);
+  vec3 brdf = material_brdf(V, L, material, precomputedMaterial);
   float cos_factor = max(0, dot(L, N));
   
   return luminance * brdf * cos_factor;
@@ -41,6 +41,8 @@ vec3 rendering_equation(in BaseMaterial material, in SurfaceData surface, in Vie
 {
   vec3 worldNormal = material.normal;
   vec3 worldPosition = surface.position;
+  vec3 viewDir = viewer.direction_to_camera;
+  vec3 reflectionDir = reflect(-viewDir, worldNormal);
   
   vec3 outgoing_light = vec3(0);
   

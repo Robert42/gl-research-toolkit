@@ -9,10 +9,49 @@ struct BaseMaterial
   float occlusion;
 };
 
+struct PrecomputedMaterial
+{
+  vec3 reflectionDir;
+  float roughness;
+  vec3 dominantSpecularDir;
+  float NdotV;
+  vec3 H;
+  float NdotH;
+};
+
 // listing 26
 float computeSpecOcclusion(float NdotV, float AO, float roughness)
 {
     return saturate(pow(NdotV + AO, exp2(-16.0f * roughness - 1.0f)) - 1.0f + AO);
+}
+
+PrecomputedMaterial precomputeMaterial(in BaseMaterial material)
+{
+  PrecomputedMaterial m;
+  
+  m.reflectionDir = reflect(-viewDir, worldNormal)
+  
+  m.H                 = normalize(V + L);
+  m.NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
+  m.NdotH             = saturate(dot(N, H));
+  
+  p.dominantSpecularDir = getSpecularDominantDirArea(worldNormal, reflectionDir, dot(worldNormal, viewDir));
+  
+  TODO roughness, f0, f90, diffuseColor, diffuse_occlusion, specular_occlusion
+  
+  return m;
+}
+
+BrdfParameters init_brdf_parameters(in vec3 N, in vec3 V, in vec3 L, in PrecomputedMaterial)
+{
+  BrdfParameters p;
+
+  // This code is an example of call of previous functions
+  vec3 H              = PrecomputedMaterial.H;
+  p.LdotH             = saturate(dot(L, H));
+  p.NdotL             = saturate(dot(N, L));
+  
+  return p;
 }
 
 vec3 material_brdf(in BrdfParameters brdf_param, in BaseMaterial material)
@@ -40,8 +79,7 @@ vec3 material_brdf(in BrdfParameters brdf_param, in BaseMaterial material)
   return f_s * specular_occlusion + f_d * diffuse_occlusion * diffuseColor;
 }
 
-vec3 material_brdf(in vec3 V, in vec3 L, in BaseMaterial material)
+vec3 material_brdf(in vec3 V, in vec3 L, in BaseMaterial material, in PrecomputedMaterial precomputedMaterial)
 {
-  // TODO: try out using dominant direction
-  return material_brdf(init_brdf_parameters(material.normal, V, L), material);
+  return material_brdf(init_brdf_parameters(material.normal, V, L, precomputedMaterial), material);
 }
