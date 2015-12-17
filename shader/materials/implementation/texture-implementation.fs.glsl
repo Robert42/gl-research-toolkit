@@ -24,12 +24,12 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
 {
   vec2 uv = fragment.uv; // TODO simple parallax mapping using the green channel from rhmo_map
   
-  vec4 shmo = texture2D(material_instance.shmo_map, uv);
+  vec4 srmo = texture2D(material_instance.srmo_map, uv);
   
-  float smoothness = shmo[0];
-  float reflectance = shmo[1];
-  float metal_mask = shmo[2];
-  float occlusion = shmo[3];
+  float smoothness = srmo[0];
+  float reflectance = srmo[1];
+  float metal_mask = srmo[2];
+  float occlusion = srmo[3];
   
   vec4 color = texture2D(material_instance.diffuse_map, uv) * material_instance.tint;
   
