@@ -1,3 +1,17 @@
+float mrp_specular_correction_factor_line(in float len, in float light_distance, in SurfaceData surface)
+{
+  float alpha = surface.roughness;
+  // Equation 10
+  float alpha_ = saturate(alpha + len / (2.f*light_distance));
+  
+  return alpha / alpha_;
+}
+
+float mrp_specular_correction_factor_area(in float radius, in float light_distance, in SurfaceData surface)
+{
+  return sq(mrp_specular_correction_factor_line(radius, light_distance, surface));
+}
+
 vec3 getDirectionToLight(out float specularEnergyFactor, in Sphere sphere, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
 {
   // Equation 11
@@ -8,12 +22,7 @@ vec3 getDirectionToLight(out float specularEnergyFactor, in Sphere sphere, in Su
   float light_distance = length(closesPoint);
   vec3 l = closesPoint / light_distance;
   
-  float alpha = surface.roughness;
-  
-  // Equation 10
-  float alpha_ = saturate(alpha + sphere.radius / (2.f*light_distance));
-  
-  specularEnergyFactor = sq(alpha / alpha_);
+  specularEnergyFactor = mrp_specular_correction_factor_area(sphere.radius, light_distance, surface);
   return l;
 }
 
