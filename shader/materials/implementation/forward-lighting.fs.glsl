@@ -8,10 +8,7 @@ out vec4 color;
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
-  ViewerData viewer;
-  viewer.direction_to_camera = direction_to_camera(surface.position);
-  
-  color = vec4(light_material(material, surface, viewer), alpha);
+  color = vec4(light_material(material, surface.position, scene.camera_position), alpha);
 }
 
 #endif // FORWARD_RENDERER

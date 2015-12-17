@@ -49,7 +49,7 @@ vec3 brdf_specular(in BrdfData_Generic brdf_data_g, in BrdfData_WithLight brdf_d
   float LdotH     = brdf_data_l.LdotH;
   float NdotV     = brdf_data_g.NdotV;
   float NdotL     = brdf_data_l.NdotL;
-  float NdotH     = brdf_data_g.NdotH;
+  float NdotH     = brdf_data_l.NdotH;
   float roughness = brdf_data_g.roughness;
   
   vec3 F        = F_Schlick(f0 , f90, LdotH);

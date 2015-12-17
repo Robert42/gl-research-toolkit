@@ -1,5 +1,7 @@
 struct BrdfData_WithLight
 {
+  vec3 H;
+  float NdotH;
   float LdotH;
   float NdotL;
 };
@@ -7,8 +9,6 @@ struct BrdfData_WithLight
 struct BrdfData_Generic
 {
   float NdotV;
-  vec3 H;
-  float NdotH;
   float roughness;
 };
 
@@ -32,8 +32,12 @@ struct SurfaceData
   vec3 diffuse_color;
   float metalMask;
   vec3 f0;
+  float f90;
   vec3 reflectionDir;
+  float diffuse_occlusion;
   vec3 dominantSpecularDir;
+  float specular_occlusion;
+  vec3 emission;
 };
 
 // listing 16
@@ -54,8 +58,8 @@ float computeSpecOcclusion(float NdotV, float AO, float roughness)
 void precomputeData(in BaseMaterial material,
                     in vec3 surface_position,
                     in vec3 camera_position,
-                    out SurfaceData surface_data,
-                    out BrdfData_Generic brdf_data)
+                    out BrdfData_Generic brdf_data,
+                    out SurfaceData surface_data)
 {
   vec3 V = normalize(camera_position-surface_position);
   vec3 N = material.normal;
@@ -63,15 +67,12 @@ void precomputeData(in BaseMaterial material,
   vec3 baseColor = material.baseColor;
   float metalMask = material.metalMask;
   float reflectance = material.reflectance;
+  vec3 emission = material.emission;
   float AO = material.occlusion;
   
   vec3 R                  = reflect(-V, N);
   
-  vec3 H                  = normalize(V + L);
   float NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
-  float NdotH             = saturate(dot(N, H));
-  
-  vec3 dominantSpecularDir = getSpecularDominantDirArea(N, R, NdotV, roughness);
   
   float roughness = sq(1.f-smoothness); // 3.2.1 & Figure 12
   vec3 f0 = mix(vec3(0.16f * sq(reflectance)), baseColor, metalMask); // 3.2.1 & Appendix D
@@ -81,6 +82,8 @@ void precomputeData(in BaseMaterial material,
   float diffuse_occlusion = AO;
   float specular_occlusion = computeSpecOcclusion(NdotV, AO, roughness);
   
+  vec3 dominantSpecularDir = getSpecularDominantDirArea(N, R, NdotV, roughness);
+  
   surface_data.position = surface_position;
   surface_data.direction_to_camera = V;
   surface_data.normal = N;
@@ -88,19 +91,25 @@ void precomputeData(in BaseMaterial material,
   surface_data.diffuse_color = diffuseColor;
   surface_data.metalMask = metalMask;
   surface_data.f0 = f0;
+  surface_data.f90 = f90;
   surface_data.reflectionDir = R;
   surface_data.dominantSpecularDir = dominantSpecularDir;
+  surface_data.diffuse_occlusion = diffuse_occlusion;
+  surface_data.specular_occlusion = specular_occlusion;
+  surface_data.emission = emission;
   
-  brdf_data.H                 = H;
   brdf_data.NdotV             = NdotV;
-  brdf_data.NdotH             = NdotH;
   brdf_data.roughness         = roughness;
 }
 
-BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 H)
+BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V)
 {
   BrdfData_WithLight p;
-
+  
+  vec3 H                  = normalize(V + L);
+  
+  p.H                 = H;
+  p.NdotH             = saturate(dot(N, H));
   p.LdotH             = saturate(dot(L, H));
   p.NdotL             = saturate(dot(N, L));
   

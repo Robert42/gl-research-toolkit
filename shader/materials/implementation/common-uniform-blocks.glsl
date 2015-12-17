@@ -8,10 +8,5 @@ layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstance
 layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
 {
   mat4 view_projection;
-  vec3 view_position;
+  vec3 camera_position;
 }scene;
-
-vec3 direction_to_camera(vec3 surface_position)
-{
-  return normalize(scene.view_position-surface_position);
-}

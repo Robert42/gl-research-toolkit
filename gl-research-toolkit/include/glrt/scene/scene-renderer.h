@@ -42,7 +42,7 @@ private:
   struct SceneUniformBlock
   {
     glm::mat4 view_projection_matrix;
-    glm::vec3 view_position;
+    glm::vec3 camera_position;
     padding<float> _padding;
   };
 
