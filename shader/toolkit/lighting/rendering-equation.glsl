@@ -49,7 +49,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     LightData light_data;
     
     light_data.lightSource = light.light;
-    light_data.direction_to_light = getDirectionToLight(sphere, worldPosition);
+    light_data.direction_to_light = getDirectionToLight(sphere, surface);
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
@@ -69,7 +69,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     LightData light_data;
     
     light_data.lightSource = light.light;
-    light_data.direction_to_light = getDirectionToLight(rect, worldPosition);
+    light_data.direction_to_light = getDirectionToLight(rect, surface);
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);

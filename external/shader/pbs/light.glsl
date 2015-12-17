@@ -81,15 +81,6 @@ float diskLightIlluminance(in vec3 worldNormal, in vec3 worldPos, in Disk disk)
   return diskLightIlluminance(worldNormal, L, sqrDist, disk.normal, disk.radius);
 }
 
-vec3 getDirectionToLight(in Sphere sphere, vec3 worldPosition) // using the center of the light as approximnation (see 4.7.4 for alternatives)
-{
-  return normalize(sphere.origin-worldPosition);
-}
-
-vec3 getDirectionToLight(in Disk disk, vec3 worldPosition) // using the center of the light as approximnation (see 4.7.4 for alternatives)
-{
-  return normalize(disk.origin-worldPosition);
-}
 
 
 // ======== Rect-Area-Light ====================================================
@@ -143,11 +134,6 @@ float rectAreaLightIlluminance(in vec3 worldPos, in vec3 worldNormal, in vec3 li
 float rectAreaLightIlluminance(in vec3 worldPos, in vec3 worldNormal, in Rect rect)
 {
   return rectAreaLightIlluminance(worldPos, worldNormal, rect.origin, cross(rect.tangent1, rect.tangent2), rect.tangent1, rect.tangent2, rect.half_width, rect.half_height);
-}
-
-vec3 getDirectionToLight(in Rect rect, vec3 worldPosition) // using the center of the light as approximnation (see 4.7.4 for alternatives)
-{
-  return normalize(rect.origin-worldPosition);
 }
 
 
@@ -210,9 +196,4 @@ float tubeAreaLightIlluminance(in vec3 worldPos, in vec3 worldNormal, in Tube tu
   vec3 tubeOriginToP0 = tube.direction*tube.length*0.5f;
   
   return tubeAreaLightIlluminance(worldPos, worldNormal, tube.origin+tubeOriginToP0, tube.origin-tubeOriginToP0, tube.origin, tube.direction, tube.length, tube.radius);
-}
-
-vec3 getDirectionToLight(in Tube tube, vec3 worldPosition) // using the center of the light as approximnation (see 4.7.4 for alternatives)
-{
-  return normalize(tube.origin-worldPosition);
 }

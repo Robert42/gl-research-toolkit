@@ -4,6 +4,7 @@
 #include "brdf.glsl"
 #include "material.glsl"
 #include "light.glsl"
+#include "mrp.glsl"
 
 
 #undef saturate
