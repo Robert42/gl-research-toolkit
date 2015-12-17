@@ -32,13 +32,17 @@ public:
 
     Antifreeze::Sleep antifreeze;
 
-    std::string message = messages.join("\n\n").toStdString();
+    QString message = messages.join("\n\n");
 
-    size_t len = 1024;
+    int len = 1024;
     if(message.length() > len)
     {
+      int linesVisibleBefore = message.count(QChar('\n'))+1;
       message.resize(len);
-      message += "\n\n[...] Rest of the message removed";
+      int linesVisibleNow = message.count(QChar('\n'))+1;
+      int linesRemoved = linesVisibleBefore-linesVisibleNow;
+
+      message += QString("\n\n[...] Rest of the message (%0 lines) removed").arg(linesRemoved);
     }
 
     enum Results : int
@@ -54,7 +58,9 @@ public:
       {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 2, "Recompile Shaders"},
     };
 
-    SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", message.c_str(), SDL_arraysize(buttons), buttons, nullptr};
+    std::string std = message.toStdString();
+
+    SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", std.c_str(), SDL_arraysize(buttons), buttons, nullptr};
 
     int result;
     if(SDL_ShowMessageBox(&msgBoxData, &result) < 0)
