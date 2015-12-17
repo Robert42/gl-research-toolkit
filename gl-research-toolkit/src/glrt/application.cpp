@@ -35,6 +35,7 @@ bool Application::pollEvent(SDL_Event* e)
 
 float Application::update()
 {
+  antifreeze.nextFrame();
   float frameDuration = profiler.update();
   return frameDuration;
 }
