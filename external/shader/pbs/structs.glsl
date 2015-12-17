@@ -79,6 +79,8 @@ void precomputeData(in BaseMaterial material,
   float f90 = saturate(50.0 * dot(f0, vec3(0.33))); // listing 27
   vec3 diffuseColor = mix(base_color, vec3(0), metal_mask); // Appendix D
   
+  roughness = clamp(roughness, 0.001, 1.0); // avoid numerical errors
+  
   float diffuse_occlusion = AO;
   float specular_occlusion = computeSpecOcclusion(NdotV, AO, roughness);
   
