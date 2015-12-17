@@ -11,6 +11,18 @@ struct LightData
   float illuminance;
 };
 
+vec3 getDirectionToLight(inout float evergyFactor, in Disk disk, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+{
+  evergyFactor *= 1.f;
+  return normalize(disk.origin-surface.position);
+}
+
+vec3 getDirectionToLight(inout float evergyFactor, in Rect rect, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+{
+  evergyFactor *= 1.f;
+  return normalize(rect.origin-surface.position);
+}
+
 
 vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceData surface)
 {
@@ -49,8 +61,8 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     LightData light_data;
     
     light_data.lightSource = light.light;
-    light_data.direction_to_light = getDirectionToLight(sphere, surface);
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
+    light_data.direction_to_light = getDirectionToLight(light_data.illuminance, sphere, surface);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
   }
@@ -69,8 +81,8 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     LightData light_data;
     
     light_data.lightSource = light.light;
-    light_data.direction_to_light = getDirectionToLight(rect, surface);
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
+    light_data.direction_to_light = getDirectionToLight(light_data.illuminance, rect, surface);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
   }
