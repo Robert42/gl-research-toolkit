@@ -34,6 +34,13 @@ public:
 
     std::string message = messages.join("\n\n").toStdString();
 
+    size_t len = 1024;
+    if(message.length() > len)
+    {
+      message.resize(len);
+      message += "\n\n[...] Rest of the message removed";
+    }
+
     enum Results : int
     {
       INGORE,
@@ -61,6 +68,8 @@ public:
       std::cout << "Aborted by user"<<std::endl;
       std::exit(-1);
     }
+
+    Q_UNUSED(antifreeze);
 
     return result!=INGORE;
   }
