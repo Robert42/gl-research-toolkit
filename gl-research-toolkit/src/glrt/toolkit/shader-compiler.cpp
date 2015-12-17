@@ -34,15 +34,17 @@ public:
 
     QString message = messages.join("\n\n");
 
-    int len = 1024;
+    int len = 2048;
     if(message.length() > len)
     {
+      QString noteAboutRemovedLines("\n\n[...] Rest of the message (%0 lines) removed");
+
       int linesVisibleBefore = message.count(QChar('\n'))+1;
-      message.resize(len);
+      message.resize(len-(noteAboutRemovedLines.length()+5));
       int linesVisibleNow = message.count(QChar('\n'))+1;
       int linesRemoved = linesVisibleBefore-linesVisibleNow;
 
-      message += QString("\n\n[...] Rest of the message (%0 lines) removed").arg(linesRemoved);
+      message += noteAboutRemovedLines.arg(linesRemoved);
     }
 
     enum Results : int
