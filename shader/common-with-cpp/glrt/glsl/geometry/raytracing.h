@@ -255,7 +255,7 @@ bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)
   Plane plane = plane_from_rect(rect);
   vec3 plane_intersection_point;
   
-  bool intersects = intersection_point_unclamped(plane, ray, plane_intersection_point);
+  bool intersects = intersection_point(plane, ray, plane_intersection_point);
   
   float w = dot(plane_intersection_point-rect.origin, rect.tangent1);
   float h = dot(plane_intersection_point-rect.origin, rect.tangent2);

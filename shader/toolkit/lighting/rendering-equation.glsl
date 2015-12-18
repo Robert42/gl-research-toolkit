@@ -20,8 +20,22 @@ vec3 getDirectionToLight(out float specularEnergyFactor, in Disk disk, in Surfac
 
 vec3 getDirectionToLight(out float specularEnergyFactor, in Rect rect, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
 {
-  specularEnergyFactor = 1.f;
-  return normalize(rect.origin-surface.position);
+  vec3 nearest_point;
+  Ray ray;
+  ray.origin = surface.position;
+  ray.direction = get_mrp_reflection_direction(surface);
+  nearest_point_on_rect(rect, ray, nearest_point);
+  nearest_point -= ray.origin;
+  
+  float light_distance = length(nearest_point);
+  float radius = mix(rect.half_width, rect.half_height, 0.5f);
+  
+  vec3 l = nearest_point / light_distance;
+  
+  specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
+  
+  
+  return l;
 }
 
 
@@ -85,6 +99,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
     light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, rect, surface);
     
+    // TODO: muoltiply instead of if?
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
   }
   

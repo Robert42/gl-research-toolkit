@@ -118,8 +118,6 @@ void test_raytracing_sphere()
 
   ray.direction = vec3(-0.150159, 0.741311, 0.654148);
   ray.origin = vec3(-0.384320, -0.902267, 0.376229);
-
-  qDebug() << nearest_point_on_sphere_unclamped(sphere, ray);
 }
 
 void test_raytracing_rect()
@@ -141,7 +139,7 @@ void test_raytracing_rect()
 
   bool is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
   EXPECT_EQ(nearest_point, vec3(1000-512, 1000-384, 42));
-  EXPECT_TRUE(is_intersecting);
+  EXPECT_FALSE(is_intersecting);
 
 
   ray.origin = vec3(0);
@@ -177,7 +175,7 @@ void test_raytracing_rect()
 
   is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
   EXPECT_EQ(nearest_point, vec3(0.3, 0, 1));
-  EXPECT_TRUE(is_intersecting);
+  EXPECT_FALSE(is_intersecting);
 }
 
 
