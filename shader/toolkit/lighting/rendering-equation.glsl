@@ -24,8 +24,8 @@ vec3 getDirectionToLight(out float specularEnergyFactor, in Rect rect, in Surfac
   Ray ray;
   ray.origin = surface.position;
   ray.direction = get_mrp_reflection_direction(surface);
-  nearest_point_on_rect(rect, ray, nearest_point);
-  nearest_point -= ray.origin;
+  nearest_point = mrp(rect, ray) - surface.position;
+  
   
   float light_distance = length(nearest_point);
   float radius = mix(rect.half_width, rect.half_height, 0.5f);

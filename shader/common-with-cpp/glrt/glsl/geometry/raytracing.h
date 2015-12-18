@@ -186,8 +186,6 @@ float intersection_distance(in Plane plane, in Ray ray)
   return (plane.d - dot(ray.origin, plane.normal)) / dot(ray.direction, plane.normal);
 }
 
-// TODO test from here on
-
 bool intersection_test_unclamped(in Plane plane, in Ray ray, out(float) distance)
 {
   distance = intersection_distance(plane, ray);
@@ -223,6 +221,21 @@ bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
 }
 
 
+vec3 _most_representative_point_on_plane(in Plane plane, in vec3 origin_of_region_of_interest, in float radius_of_region_of_interrest, in Ray ray)
+{
+  float t;
+  bool intersects = intersection_test(plane, ray, t);
+  
+  if(intersects)
+  {
+    return get_point(ray, t);
+  }else
+  {
+    ray.direction -= dot(ray.direction, plane.normal);
+    return origin_of_region_of_interest + normalize(ray.direction) * radius_of_region_of_interrest;
+  }
+}
+
 // ======== Sphere =============================================================
 
 
@@ -249,6 +262,16 @@ bool intersects(in Sphere sphere, in Ray ray)
 
 // ======== Rect =============================================================
 
+vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
+{
+  float w = dot(point-rect.origin, rect.tangent1);
+  float h = dot(point-rect.origin, rect.tangent2);
+
+  w = clamp(w, -rect.half_width,  rect.half_width);
+  h = clamp(h, -rect.half_height, rect.half_height);
+
+  return rect.origin + w*rect.tangent1 + h*rect.tangent2;
+}
 
 bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)
 {
@@ -257,14 +280,15 @@ bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)
   
   bool intersects = intersection_point(plane, ray, plane_intersection_point);
   
-  float w = dot(plane_intersection_point-rect.origin, rect.tangent1);
-  float h = dot(plane_intersection_point-rect.origin, rect.tangent2);
-  
-  w = clamp(w, -rect.half_width,  rect.half_width);
-  h = clamp(h, -rect.half_height, rect.half_height);
-  
-  nearest_point = rect.origin + w*rect.tangent1 + h*rect.tangent2;
+  nearest_point = clamp_point_to_rect(rect, plane_intersection_point);
 
   return intersects;
+}
+
+vec3 mrp(in Rect rect, in Ray ray)
+{
+  vec3 candidate = _most_representative_point_on_plane(plane_from_rect(rect), rect.origin, rect.half_width+rect.half_height, ray);
+  
+  return clamp_point_to_rect(rect, candidate);
 }
 
