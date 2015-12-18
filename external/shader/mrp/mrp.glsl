@@ -12,11 +12,16 @@ float mrp_specular_correction_factor_area(in float radius, in float light_distan
   return sq(mrp_specular_correction_factor_line(radius, light_distance, surface));
 }
 
+vec3 get_mrp_reflection_direction(in SurfaceData surface)
+{
+  return surface.R; // TODO try out specular dominant dir
+}
+
 vec3 getDirectionToLight(out float specularEnergyFactor, in Sphere sphere, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
 {
   // Equation 11
   vec3 L = sphere.origin - surface.position;
-  vec3 r = surface.R; // TODO try out specular dominant dir
+  vec3 r = get_mrp_reflection_direction(surface);
   vec3 centerToRay = dot(L, r)*r - L;
   vec3 closesPoint = L + centerToRay * saturate(sphere.radius/length(centerToRay));
   float light_distance = length(closesPoint);
