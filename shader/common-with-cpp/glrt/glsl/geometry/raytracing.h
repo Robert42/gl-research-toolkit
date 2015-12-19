@@ -268,21 +268,19 @@ bool intersects(in Sphere sphere, in Ray ray)
 
 vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
 {
-  float w = dot(point-rect.origin, rect.tangent1);
-  float h = dot(point-rect.origin, rect.tangent2);
-  /*
-  if(w < -rect.half_width || w > rect.half_width)
-    discard
-    ;*/
-//  if(h < -rect.half_height)
-  //  discard;
-  //if(h > rect.half_height)
-//    discard;
+  vec2 p = vec2(dot(point-rect.origin, rect.tangent1),
+                dot(point-rect.origin, rect.tangent2));
+                
+  float dist = length(p); // TODO potential numeric issue. write unittest for this
+  vec2 dir = p / dist;
+  
+  vec2 half_size = vec2(rect.half_width, rect.half_height);
 
-  w = clamp(w, -rect.half_width,  rect.half_width);
-  h = clamp(h, -rect.half_height, rect.half_height);
+  float t = min_component(abs(half_size / dir));
 
-  return rect.origin + w*rect.tangent1 + h*rect.tangent2;
+  p = dir * min(dist, t);
+
+  return rect.origin + p.x*rect.tangent1 + p.y*rect.tangent2;
 }
 
 bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)

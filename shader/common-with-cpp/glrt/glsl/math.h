@@ -25,6 +25,16 @@ float sq(vec4 x)
   return dot(x, x);
 }
 
+float min_component(vec2 vector)
+{
+  // TODO optimize by using bvectors?
+  // TODO: also add versions for min vec3, max vec2 and max vec3
+  if(vector.x < vector.y)
+    return vector.x;
+  else
+    return vector.y;
+}
+
 // blending
 
 float blend_screen(float x,float y)
