@@ -14,10 +14,12 @@ float mrp_specular_correction_factor_area(in float radius, in float light_distan
 
 vec3 get_mrp_reflection_direction(in SurfaceData surface)
 {
-  return surface.R; // TODO try out specular dominant dir
+  return surface.R;
+  // TODO try out specular dominant dir instead:
+  //return surface.dominant_specular_dir;
 }
 
-vec3 getDirectionToLight(out float specularEnergyFactor, in Sphere sphere, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+vec3 getDirectionToLight(out float specularEnergyFactor, in Sphere sphere, in SurfaceData surface)
 {
   // Equation 11
   vec3 L = sphere.origin - surface.position;
@@ -31,8 +33,9 @@ vec3 getDirectionToLight(out float specularEnergyFactor, in Sphere sphere, in Su
   return l;
 }
 
-vec3 getDirectionToLight(out float specularEnergyFactor, in Tube tube, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+vec3 getDirectionToLight(out float specularEnergyFactor, in Tube tube, in SurfaceData surface)
 {
+  // TODO
   specularEnergyFactor = 1.f;
   return normalize(tube.origin-surface.position);
 }

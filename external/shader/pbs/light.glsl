@@ -1,4 +1,4 @@
-// TODO: try out better falloff (Frostbite PBS Figure 44 or Epic PBS Figure 9)
+// FIXME: try out better falloff (Frostbite PBS Figure 44 or Epic PBS Figure 9)
 
 // ======== Disk-Area-Light ====================================================
 

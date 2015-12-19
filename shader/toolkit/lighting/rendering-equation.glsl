@@ -14,6 +14,7 @@ struct LightData
 
 vec3 getDirectionToLight(out float specularEnergyFactor, in Disk disk, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
 {
+  // TODO
   specularEnergyFactor = 1.f;
   return normalize(disk.origin-surface.position);
 }
@@ -49,7 +50,7 @@ vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceD
   
   BrdfData_WithLight brdf_l = init_brdf_data_with_light(N, L, V, light.specularEnergyFactor);
   
-  // TODO is luminance really the right name?
+  // FIXME: is luminance really the right name?
   vec3 luminance = light.illuminance * light.lightSource.luminance * light.lightSource.color;
   vec3 brdf = evaluate_brdf_for_material(brdf_g, brdf_l, surface);
   float cos_factor = brdf_l.NdotL;
