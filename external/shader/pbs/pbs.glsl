@@ -5,6 +5,7 @@
 #include "material.glsl"
 #include "light.glsl"
 #include "../mrp/mrp.glsl"
+#include "camera.glsl"
 
 
 #undef saturate

@@ -1,31 +1,40 @@
-// Listing 30
-float3 approximationSRgbToLinear(in float3 sRGBCol)
+vec3 chooseValue(in vec3 x, in vec3 treshold, in vec3 lower, in vec3 larger)
 {
-  return pow(sRGBCol, 2.2);
+  bvec3 useLower = lessThanEqual(x, treshold);
+  bvec3 useLarger = not(useLower);
+  
+  return float(useLower) * lower + float(useLarger) * larger;
 }
 
-float3 approximationLinearToSRGB(in float3 linearCol)
+// based on Listing 30
+
+vec3 approximationSRgbToLinear(in vec3 sRGBCol)
 {
-return pow(linearCol, 1 / 2.2);
+  return pow(sRGBCol, vec3(2.2));
 }
 
-float3 accurateSRGBToLinear(in float3 sRGBCol)
+vec3 approximationLinearToSRGB(in vec3 linearCol)
 {
-  float3 linearRGBLo = sRGBCol / 12.92;
-  float3 linearRGBHi = pow((sRGBCol + 0.055) / 1.055, 2.4);
-  float3 linearRGB = (sRGBCol <= 0.04045) ? linearRGBLo : linearRGBHi;
-  return linearRGB ;
+  return pow(linearCol, vec3(1 / 2.2));
 }
 
-float3 accurateLinearToSRGB(in float3 linearCol)
+vec3 accurateSRGBToLinear(in vec3 sRGBCol)
 {
-  float3 sRGBLo = linearCol * 12.92;
-  float3 sRGBHi = (pow(abs(linearCol), 1.0/2.4) * 1.055) - 0.055;
-  float3 sRGB = (linearCol <= 0.0031308) ? sRGBLo : sRGBHi;
+  vec3 linearRGBLo = sRGBCol / 12.92;
+  vec3 linearRGBHi = pow((sRGBCol + 0.055) / 1.055, vec3(2.4));
+  
+  return chooseValue(sRGBCol, vec3(0.04045), linearRGBLo, linearRGBHi);
+}
+
+vec3 accurateLinearToSRGB(in vec3 linearCol)
+{
+  vec3 sRGBLo = linearCol * 12.92;
+  vec3 sRGBHi = (pow(abs(linearCol), vec3(1.0/2.4)) * 1.055) - 0.055;
+  vec3 sRGB = chooseValue(linearCol, vec3(0.0031308),  sRGBLo, sRGBHi);
   return sRGB;
 }
 
-// Listing 28
+// based on Listing 28
 
 float computeEV100 ( float aperture , float shutterTime , float ISO )
 {
@@ -36,7 +45,7 @@ float computeEV100 ( float aperture , float shutterTime , float ISO )
     // EV_100 + log2 (S /100) = log2 (N^2 / t)
     // EV_100 = log2 (N^2 / t) - log2 (S /100)
     // EV_100 = log2 (N^2 / t . 100 / S)
-    return log2(sqr(aperture) / shutterTime * 100 / ISO);
+    return log2(sq(aperture) / shutterTime * 100 / ISO);
 }
 
 float computeEV100FromAvgLuminance(float avgLuminance)
@@ -61,21 +70,3 @@ float convertEV100ToExposure(float EV100)
   float maxLuminance = 1.2f * pow(2.0f, EV100);
   return 1.0f / maxLuminance;
 }
-
-// usage with manual settings
-float EV100 = computeEV100(aperture, shutterTime, ISO);
-// usage with auto settings
-float AutoEV100 = computeEV100FromAvgLuminance(Lavg);
-
-float currentEV = useAutoExposure ? AutoEV100 : EV100 ;
-float exposure = convertEV100toExposure(currentEV);
-
-// exposure can then be used later in the shader to scale luminance
-// if color is decomposed into XYZ
-...
-float exposedLuminance = luminance * exposure;
-...
-// or it can be applied directly on color
-...
-finalColor = color * exposure
-...
