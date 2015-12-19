@@ -24,7 +24,10 @@ namespace debugging {
 
 struct Arrow
 {
-  glm::vec3 from, to;
+  glm::vec3 from;
+  padding<float> _p1;
+  glm::vec3 to;
+  padding<float> _p2;
 };
 
 

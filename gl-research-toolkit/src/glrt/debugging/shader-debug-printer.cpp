@@ -93,7 +93,12 @@ inline void ShaderDebugPrinter::printRay(const glm::vec3& origin, const glm::vec
   if(visualize)
   {
     positionsToDebug.append(origin);
-    directionsToDebug.append(Arrow{origin, origin+direction});
+
+    Arrow arrow;
+    arrow.from = origin;
+    arrow.to = origin+direction;
+
+    directionsToDebug.append(arrow);
   }
 }
 
@@ -207,11 +212,14 @@ void ShaderDebugPrinter::end()
 
 void ShaderDebugPrinter::draw()
 {
-  if(!active || !mouse_is_pressed)
+  if(!active)
     return;
 
   positionVisualization.render();
   directionVisualization.render();
+
+  if(!mouse_is_pressed)
+    return;
 
   shader.Activate();
   buffer.BindShaderStorageBuffer(SHADERSTORAGE_BINDING_VALUE_PRINTER);
