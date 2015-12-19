@@ -266,6 +266,14 @@ vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
 {
   float w = dot(point-rect.origin, rect.tangent1);
   float h = dot(point-rect.origin, rect.tangent2);
+  /*
+  if(w < -rect.half_width || w > rect.half_width)
+    discard
+    ;*/
+//  if(h < -rect.half_height)
+  //  discard;
+  //if(h > rect.half_height)
+//    discard;
 
   w = clamp(w, -rect.half_width,  rect.half_width);
   h = clamp(h, -rect.half_height, rect.half_height);

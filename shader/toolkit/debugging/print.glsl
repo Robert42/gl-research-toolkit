@@ -44,12 +44,13 @@ void implement_print_chunk(in DebuggingOutputChunk chunk)
 #endif
 }
 
-void implement_print_value(in ivec3 type, in mat4 values)
+void implement_print_value(in ivec3 type, in mat4 values, in bool visualize=false)
 {
 #ifdef SHADER_DEBUG_PRINTER
   DebuggingOutputChunk chunk;
   chunk.type = type;
   chunk.floatValues = values;
+  chunk.integerValues = ivec4(float(visualize), 0, 0, 0);
   implement_print_chunk(chunk);
 #endif
 }
@@ -126,11 +127,16 @@ void PRINT_VALUE(in vec2 v)
   implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(2), value);
 }
 
-void PRINT_VALUE(in vec3 v)
+void PRINT_VALUE(in vec3 v, bool visualize=false)
 {
   mat4 value;
   value[0] = vec4(vec3(v), 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(3), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_FLOAT(3), value, visualize);
+}
+
+void SHOW_VALUE(in vec3 v)
+{
+  PRINT_VALUE(v, true);
 }
 
 void PRINT_VALUE(in vec4 v)
@@ -168,10 +174,15 @@ void PRINT_VALUE(in Plane p)
   implement_print_value(GLSL_DEBUGGING_TYPE_PLANE, value);
 }
 
-void PRINT_VALUE(in Ray r)
+void PRINT_VALUE(in Ray r, bool visualize=false)
 {
   mat4 value;
   value[0] = vec4(r.origin, 1);
   value[1] = vec4(r.direction, 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_RAY, value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_RAY, value, visualize);
+}
+
+void SHOW_VALUE(in Ray r)
+{
+  PRINT_VALUE(r, true);
 }

@@ -35,19 +35,62 @@ VisualizationRenderer VisualizationRenderer::debugRectAreaLights(scene::Scene* s
   });
 }
 
+VisualizationRenderer VisualizationRenderer::debugPoints(QVector<glm::vec3>* points)
+{
+  return VisualizationRenderer([points](){
+    if(points->isEmpty())
+      return DebugLineVisualisation::Ptr();
+    else
+      return debugging::DebugLineVisualisation::drawPositions(*points);
+  });
+}
+
+VisualizationRenderer VisualizationRenderer::debugArrows(QVector<Arrow>* arrows)
+{
+  return VisualizationRenderer([arrows](){
+    if(arrows->isEmpty())
+      return DebugLineVisualisation::Ptr();
+    else
+      return debugging::DebugLineVisualisation::drawArrows(*arrows);
+  });
+}
+
+
+VisualizationRenderer::VisualizationRenderer(const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory)
+  : VisualizationRenderer(nullptr, visualizationFactory)
+{
+}
+
 
 VisualizationRenderer::VisualizationRenderer(scene::Scene* scene, const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory)
-  : factory(visualizationFactory)
+  : scene(scene),
+    _enabled(false),
+    factory(visualizationFactory)
 {
-  guiToggle.getter = [this]() -> bool {return !this->visualization.isNull();};
-  guiToggle.setter = [this](bool show) {
-    if(show)
-      this->createVisualization();
-    else
-      this->visualization.clear();
-  };
+  guiToggle.getter = std::bind(&VisualizationRenderer::isEnabled, this);
+  guiToggle.setter = std::bind(&VisualizationRenderer::setEnabled, this, std::placeholders::_1);
 
-  connect(scene, &scene::Scene::sceneLoaded, this, &VisualizationRenderer::sceneLoaded);
+  if(scene)
+    loadSceneConnection = QObject::connect(scene, &scene::Scene::sceneLoaded, std::bind(&VisualizationRenderer::update, this));
+}
+
+VisualizationRenderer::VisualizationRenderer(const VisualizationRenderer& other)
+  : VisualizationRenderer(other.scene, other.factory)
+{
+  if(other.isEnabled())
+    this->setEnabled(true);
+}
+
+VisualizationRenderer::VisualizationRenderer(VisualizationRenderer&& other)
+  : VisualizationRenderer(other.scene, other.factory)
+{
+  if(other.isEnabled())
+    this->setEnabled(true);
+}
+
+VisualizationRenderer::~VisualizationRenderer()
+{
+  QObject::disconnect(loadSceneConnection);
 }
 
 
@@ -57,18 +100,34 @@ void VisualizationRenderer::render()
     visualization->draw();
 }
 
+void VisualizationRenderer::setEnabled(bool enabled)
+{
+  if(enabled == this->isEnabled())
+    return;
+
+  this->_enabled = enabled;
+
+  update();
+}
+
+bool VisualizationRenderer::isEnabled() const
+{
+  return this->_enabled;
+}
+
+void VisualizationRenderer::update()
+{
+  if(this->isEnabled())
+    createVisualization();
+  else
+    visualization.clear();
+}
 
 void VisualizationRenderer::createVisualization()
 {
   visualization = factory();
 }
 
-
-void VisualizationRenderer::sceneLoaded()
-{
-  if(!visualization.isNull())
-    createVisualization();
-}
 
 
 } // namespace debugging

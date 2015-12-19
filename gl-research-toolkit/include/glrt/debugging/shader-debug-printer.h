@@ -6,6 +6,7 @@
 #include <glhelper/buffer.hpp>
 #include <glhelper/shaderobject.hpp>
 #include <glrt/gui/anttweakbar.h>
+#include <glrt/debugging/visualization-renderer.h>
 
 namespace glrt {
 namespace debugging {
@@ -23,9 +24,12 @@ public:
   void begin();
   void end();
 
-  void drawCross();
+  void draw();
 
 private:
+  struct Chunk;
+  struct WholeBuffer;
+
   bool active = false;
   bool mouse_is_pressed = false;
   glm::ivec2 mouseCoordinate;
@@ -33,7 +37,18 @@ private:
   gl::Buffer counterBuffer;
   gl::Buffer buffer;
 
+  QVector<glm::vec3> positionsToDebug;
+  QVector<Arrow> directionsToDebug;
+
+  VisualizationRenderer positionVisualization;
+  VisualizationRenderer directionVisualization;
+
   void setMouseCoordinate(const glm::ivec2& mouseCoordinate, Uint32 windowId);
+
+  template<typename T, typename T_in>
+  void printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize);
+  void printRay(const glm::vec3& origin, const glm::vec3& direction, bool visualize);
+  void printChunk(const Chunk& chunk);
 };
 
 } // namespace debugging

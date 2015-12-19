@@ -21,6 +21,13 @@ class Scene;
 namespace debugging {
 
 
+
+struct Arrow
+{
+  glm::vec3 from, to;
+};
+
+
 class DebugLineVisualisation final
 {
 public:
@@ -38,6 +45,8 @@ public:
   static Ptr drawCameras(const QList<scene::CameraParameter>& sceneCameras);
   static Ptr drawSphereAreaLights(const QList<scene::SphereAreaLightComponent::Data>& sphereAreaLights);
   static Ptr drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights);
+  static Ptr drawPositions(const QVector<glm::vec3>& positions);
+  static Ptr drawArrows(const QVector<Arrow>& arrows);
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;
   DebugLineVisualisation& operator=(const DebugLineVisualisation&) = delete;

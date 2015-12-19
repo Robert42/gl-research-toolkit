@@ -11,7 +11,7 @@ namespace glrt {
 namespace debugging {
 
 
-struct Chunk
+struct ShaderDebugPrinter::Chunk
 {
   glm::ivec3 type;
   float z_value;
@@ -19,7 +19,7 @@ struct Chunk
   glm::ivec4 integerValues;
 };
 
-struct WholeBuffer
+struct ShaderDebugPrinter::WholeBuffer
 {
   glm::vec2 fragment_coord;
   float treshold;
@@ -30,7 +30,7 @@ struct WholeBuffer
 
 
 template<typename T, typename T_in>
-inline void printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input)
+inline void ShaderDebugPrinter::printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize=false)
 {
   switch(dimension)
   {
@@ -42,6 +42,8 @@ inline void printVectorChunk(int dimension, const char* scalarName, const char* 
     break;
   case 3:
     qDebug() << vectorPrefix  << glm::tvec3<T>(input.xyz());
+    if(visualize)
+      positionsToDebug.append(glm::tvec3<T>(input.xyz()));
     break;
   case 4:
     qDebug() << vectorPrefix  << glm::tvec4<T>(input);
@@ -85,20 +87,25 @@ inline void printPlane(const glm::vec3& normal, float d)
   qDebug() << "Plane(normal="<< normal <<",   d="<<d<<")";
 }
 
-inline void printRay(const glm::vec3& origin, const glm::vec3& direction)
+inline void ShaderDebugPrinter::printRay(const glm::vec3& origin, const glm::vec3& direction, bool visualize)
 {
   qDebug() << "Ray(origin="<< origin <<",   direction="<<direction<<")";
+  if(visualize)
+  {
+    positionsToDebug.append(origin);
+    directionsToDebug.append(Arrow{origin, origin+direction});
+  }
 }
 
 
-inline void printChunk(const Chunk& chunk)
+inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 {
   if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_BOOL(1)[0])
     printVectorChunk<bool>(chunk.type.y, "bool", "b", chunk.integerValues);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_INT(1)[0])
     printVectorChunk<int>(chunk.type.y, "int", "i", chunk.integerValues);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_FLOAT(1)[0])
-    printVectorChunk<float>(chunk.type.y, "float", "", chunk.floatValues[0]);
+    printVectorChunk<float>(chunk.type.y, "float", "", chunk.floatValues[0], chunk.integerValues[0]);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_MAT(1,1)[0])
     printMatrixChunk<float>(chunk.type.yz(), "", chunk.floatValues);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_SPHERE[0])
@@ -108,7 +115,7 @@ inline void printChunk(const Chunk& chunk)
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_PLANE[0])
     printPlane(chunk.floatValues[0].xyz(), chunk.floatValues[0].w);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RAY[0])
-    printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz());
+    printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.integerValues[0]);
   else
     qCritical() << "ShaderDebugPrinter: printChunk: Unknown chunk-type " << chunk.type;
 }
@@ -117,16 +124,25 @@ inline void printChunk(const Chunk& chunk)
 ShaderDebugPrinter::ShaderDebugPrinter()
   : shader(std::move(ShaderCompiler::createShaderFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
     counterBuffer(sizeof(int), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
-    buffer(sizeof(WholeBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr)
+    buffer(sizeof(WholeBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
+    positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
+    directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug))
 {
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
     this->active = active;
     QString preprocessorBlock = "#define SHADER_DEBUG_PRINTER";
     if(this->active)
+    {
       ReloadableShader::globalPreprocessorBlock.insert(preprocessorBlock);
-    else
+      positionVisualization.setEnabled(true);
+      directionVisualization.setEnabled(true);
+    }else
+    {
       ReloadableShader::globalPreprocessorBlock.remove(preprocessorBlock);
+      positionVisualization.setEnabled(false);
+      directionVisualization.setEnabled(false);
+    }
     ReloadableShader::reloadAll();
   };
 }
@@ -175,18 +191,27 @@ void ShaderDebugPrinter::end()
   if(numberChunks > 0)
     qDebug() << "\n\n";
 
+  positionsToDebug.clear();
+  directionsToDebug.clear();
+
   float min_z = INFINITY;
   for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
     min_z = glm::min(whole_buffer.chunks[i].z_value, min_z);
   for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
     if(whole_buffer.chunks[i].z_value == min_z)
       printChunk(whole_buffer.chunks[i]);
+
+  positionVisualization.update();
+  directionVisualization.update();
 }
 
-void ShaderDebugPrinter::drawCross()
+void ShaderDebugPrinter::draw()
 {
   if(!active || !mouse_is_pressed)
     return;
+
+  positionVisualization.render();
+  directionVisualization.render();
 
   shader.Activate();
   buffer.BindShaderStorageBuffer(SHADERSTORAGE_BINDING_VALUE_PRINTER);

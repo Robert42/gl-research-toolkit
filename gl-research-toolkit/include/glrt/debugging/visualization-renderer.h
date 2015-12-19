@@ -8,34 +8,43 @@ namespace glrt {
 namespace debugging {
 
 
-class VisualizationRenderer : public QObject
+class VisualizationRenderer final
 {
-  Q_OBJECT
 public:
   gui::TweakBarCBVar<bool> guiToggle;
 
-  // Note, the given scene instance must live longer than the returned instance
+  // Note, the given scene/vector instance must live longer than the returned instance
   static VisualizationRenderer debugSceneCameras(scene::Scene* scene);
   static VisualizationRenderer debugSphereAreaLights(scene::Scene* scene);
   static VisualizationRenderer debugRectAreaLights(scene::Scene* scene);
+  static VisualizationRenderer debugPoints(QVector<glm::vec3>* points);
+  static VisualizationRenderer debugArrows(QVector<Arrow>* arrows);
 
+  VisualizationRenderer(const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory);
   VisualizationRenderer(scene::Scene* scene, const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory);
+  VisualizationRenderer(const VisualizationRenderer&);
   VisualizationRenderer(VisualizationRenderer&& other);
+  ~VisualizationRenderer();
 
-  VisualizationRenderer(const VisualizationRenderer&) = delete;
   VisualizationRenderer& operator=(const VisualizationRenderer&) = delete;
   VisualizationRenderer& operator=(VisualizationRenderer&&) = delete;
 
   void render();
 
+  void setEnabled(bool enabled);
+  bool isEnabled() const;
+
+  void update();
+
 private:
+  scene::Scene* scene;
+  QMetaObject::Connection loadSceneConnection;
+
+  bool _enabled : 1;
   std::function<DebugLineVisualisation::Ptr()> factory;
   DebugLineVisualisation::Ptr visualization;
 
   void createVisualization();
-
-private slots:
-  void sceneLoaded();
 };
 
 

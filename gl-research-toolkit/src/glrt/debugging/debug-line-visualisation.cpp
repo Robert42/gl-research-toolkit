@@ -116,6 +116,39 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawRectAreaLights(const QLi
                                                                                                                  QDir(GLRT_SHADER_DIR"/debugging/visualizations")))))));
 }
 
+DebugLineVisualisation::Ptr DebugLineVisualisation::drawPositions(const QVector<glm::vec3>& positions)
+{
+  DebugMesh::Painter painter;
+
+  float r = 0.1f;
+  for(int i=0; i<3; ++i)
+  {
+    glm::vec3 a(0), b(0);
+
+    a[i] = r;
+    b[i] = -r;
+
+    painter.addVertex(a);
+    painter.addVertex(b);
+  }
+
+  return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                 positions,
+                                                                 std::move(ShaderCompiler::createShaderFromFiles("visualize-position",
+                                                                                                                 QDir(GLRT_SHADER_DIR"/debugging/visualizations")))))));
+}
+
+DebugLineVisualisation::Ptr DebugLineVisualisation::drawArrows(const QVector<Arrow>& arrows)
+{
+  DebugMesh::Painter painter;
+
+  painter.addArrow(1.f, 0.1f);
+
+  return Ptr(new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                 arrows,
+                                                                 std::move(ShaderCompiler::createShaderFromFiles("visualize-arrow",
+                                                                                                                 QDir(GLRT_SHADER_DIR"/debugging/visualizations")))))));
+}
 
 
 void DebugLineVisualisation::draw()

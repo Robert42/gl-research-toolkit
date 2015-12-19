@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     shaderDebugPrinter.begin();
     renderer.render();
     shaderDebugPrinter.end();
-    shaderDebugPrinter.drawCross();
+    shaderDebugPrinter.draw();
 
 
     antweakbar.draw();
