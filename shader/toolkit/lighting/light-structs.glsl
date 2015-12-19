@@ -2,13 +2,14 @@ struct LightSource
 {
   vec3 color;
   float luminance;
+  vec3 origin;
+  float influence_radius;
 };
 
 
 struct SphereAreaLight
 {
   LightSource light;
-  vec3 origin;
   float radius;
 };
 
@@ -19,6 +20,5 @@ struct RectAreaLight
   float half_width;
   vec3 tangent2;
   float half_height;
-  vec3 origin;
 };
 

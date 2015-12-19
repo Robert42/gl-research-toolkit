@@ -10,16 +10,18 @@ struct LightData
   vec3 direction_to_light;
   float illuminance;
   float specularEnergyFactor;
+  float distance_to_light;
 };
 
-vec3 getDirectionToLight(out float specularEnergyFactor, in Disk disk, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Disk disk, in SurfaceData surface)
 {
   // TODO
   specularEnergyFactor = 1.f;
-  return normalize(disk.origin-surface.position);
+  light_distance = length(disk.origin-surface.position);
+  return (disk.origin-surface.position) / light_distance;
 }
 
-vec3 getDirectionToLight(out float specularEnergyFactor, in Rect rect, in SurfaceData surface) // using the center of the light as approximnation (see 4.7.4 for alternatives)
+vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Rect rect, in SurfaceData surface)
 {
   vec3 nearest_point;
   Ray ray;
@@ -27,20 +29,24 @@ vec3 getDirectionToLight(out float specularEnergyFactor, in Rect rect, in Surfac
   ray.direction = get_mrp_reflection_direction(surface);
   nearest_point = mrp(rect, ray) - surface.position;
   
-  PRINT_VALUE(nearest_point+surface.position, true);
-  PRINT_VALUE(ray, true);
-  
-  float light_distance = length(nearest_point);
+  light_distance = length(nearest_point);
   float radius = mix(rect.half_width, rect.half_height, 0.5f);
   
   vec3 l = nearest_point / light_distance;
   
   specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
   
-  
   return l;
 }
 
+float light_falloff(in LightData light, in SurfaceData surface)
+{
+  float distance_for_influence = length(light.lightSource.origin-surface.position);
+  float influence_radius = light.lightSource.influence_radius;
+  float distance_to_light = light.distance_to_light;
+  
+  return light_falloff(distance_for_influence, influence_radius, distance_to_light);
+}
 
 vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceData surface)
 {
@@ -51,7 +57,7 @@ vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceD
   BrdfData_WithLight brdf_l = init_brdf_data_with_light(N, L, V, light.specularEnergyFactor);
   
   // FIXME: is luminance really the right name?
-  vec3 luminance = light.illuminance * light.lightSource.luminance * light.lightSource.color;
+  vec3 luminance = light.illuminance * light.lightSource.luminance * light.lightSource.color * light_falloff(light, surface);
   vec3 brdf = evaluate_brdf_for_material(brdf_g, brdf_l, surface);
   float cos_factor = brdf_l.NdotL;
   
@@ -73,14 +79,14 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     SphereAreaLight light = sphere_arealights.lights[i];
     
     Sphere sphere;
-    sphere.origin = light.origin;
+    sphere.origin = light.light.origin;
     sphere.radius = light.radius;
     
     LightData light_data;
     
     light_data.lightSource = light.light;
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
-    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, sphere, surface);
+    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, sphere, surface);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
   }
@@ -90,7 +96,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     RectAreaLight light = rect_arealights.lights[i];
     
     Rect rect;
-    rect.origin = light.origin;
+    rect.origin = light.light.origin;
     rect.tangent1 = light.tangent1;
     rect.tangent2 = light.tangent2;
     rect.half_width = light.half_width;
@@ -100,7 +106,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     light_data.lightSource = light.light;
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
-    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, rect, surface);
+    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, rect, surface);
     
     outgoing_light += do_the_lighting(light_data, brdf_g, surface);
   }

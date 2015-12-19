@@ -8,8 +8,10 @@ namespace scene {
 
 bool LightSource::initFromJson(QJsonObject& json)
 {
-  this->luminance = json.contains("luminance") ? json["luminance"].toDouble() : 10.0;
+  this->luminance = json.contains("luminance") ? json["luminance"].toDouble() : 25.0;
   this->color = as_vec3_with_fallback(json["color"], glm::vec3(1), "SphereAreaLightComponent::Data::initFromJson");
+  this->origin = as_vec3_with_fallback(json["origin"], glm::vec3(0), "SphereAreaLightComponent::Data::initFromJson");
+  this->influence_radius = json.contains("influence_radius") ? float(json["influence_radius"].toDouble()) : INFINITY;
 
   return true;
 }
@@ -30,7 +32,6 @@ bool SphereAreaLightComponent::Data::initFromJson(QJsonObject& json)
   if(!light.initFromJson(json))
     return false;
 
-  this->origin = as_vec3_with_fallback(json["origin"], glm::vec3(0), "SphereAreaLightComponent::Data::initFromJson");
   this->radius = json.contains("radius") ? json["radius"].toDouble() : 1.0;
 
   return true;
@@ -57,7 +58,6 @@ bool RectAreaLightComponent::Data::initFromJson(QJsonObject& json)
 
   this->tangent1 = tangent;
   this->tangent2 = glm::cross(normal, tangent);
-  this->origin = as_vec3_with_fallback(json["origin"], glm::vec3(0), "RectAreaLightComponent::Data::initFromJson");
   this->half_width = json.contains("width") ? json["width"].toDouble()*.5 : .5;
   this->half_height = json.contains("height") ? json["height"].toDouble()*.5 : .5;
 
