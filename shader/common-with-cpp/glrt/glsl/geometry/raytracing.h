@@ -231,8 +231,12 @@ vec3 _most_representative_point_on_plane(in Plane plane, in vec3 origin_of_regio
     return get_point(ray, t);
   }else
   {
-    ray.direction -= dot(ray.direction, plane.normal);
-    return origin_of_region_of_interest + normalize(ray.direction) * radius_of_region_of_interrest;
+    ray.direction -= (dot(ray.direction, plane.normal)*2.f + 0.0001f) * plane.normal;
+    ray.direction = normalize(ray.direction);
+    
+    t = intersection_distance(plane, ray);
+    
+    return get_point(ray, t);
   }
 }
 
