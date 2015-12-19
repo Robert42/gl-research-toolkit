@@ -3,7 +3,12 @@ vec3 chooseValue(in vec3 x, in vec3 treshold, in vec3 lower, in vec3 larger)
   bvec3 useLower = lessThanEqual(x, treshold);
   bvec3 useLarger = not(useLower);
   
-  return float(useLower) * lower + float(useLarger) * larger;
+  /* TODO measure which one is faster
+  return vec3(x[0] <= treshold[0] ? lower[0] : larger[0],
+              x[1] <= treshold[1] ? lower[1] : larger[1],
+              x[2] <= treshold[2] ? lower[2] : larger[2]);
+  */
+  return vec3(useLower) * lower + vec3(useLarger) * larger;;
 }
 
 // based on Listing 30
