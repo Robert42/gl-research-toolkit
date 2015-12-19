@@ -8,7 +8,7 @@ namespace scene {
 
 bool LightSource::initFromJson(QJsonObject& json)
 {
-  this->luminance = json.contains("luminance") ? json["luminance"].toDouble() : 25.0;
+  this->luminous_power = json.contains("luminous_power") ? json["luminous_power"].toDouble() : 25.0;
   this->color = as_vec3_with_fallback(json["color"], glm::vec3(1), "SphereAreaLightComponent::Data::initFromJson");
   this->origin = as_vec3_with_fallback(json["origin"], glm::vec3(0), "SphereAreaLightComponent::Data::initFromJson");
   this->influence_radius = json.contains("influence_radius") ? float(json["influence_radius"].toDouble()) : INFINITY;

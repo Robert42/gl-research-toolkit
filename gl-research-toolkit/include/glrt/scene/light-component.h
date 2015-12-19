@@ -11,7 +11,7 @@ namespace scene {
 struct LightSource
 {
   glm::vec3 color;
-  float luminance;
+  float luminous_power;
   glm::vec3 origin;
   float influence_radius;
 

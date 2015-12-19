@@ -56,12 +56,11 @@ vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceD
   
   BrdfData_WithLight brdf_l = init_brdf_data_with_light(N, L, V, light.specularEnergyFactor);
   
-  // FIXME: is luminance really the right name?
-  vec3 luminance = light.illuminance * light.lightSource.luminance * light.lightSource.color * light_falloff(light, surface);
+  vec3 illuminance = light.illuminance * light.lightSource.luminous_power * light.lightSource.color * light_falloff(light, surface);
   vec3 brdf = evaluate_brdf_for_material(brdf_g, brdf_l, surface);
   float cos_factor = brdf_l.NdotL;
   
-  return luminance * brdf * cos_factor;
+  return illuminance * brdf * cos_factor;
 }
 
 
@@ -72,7 +71,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
   vec3 viewDir = surface.direction_to_camera;
   vec3 R = reflect(-viewDir, worldNormal);
   
-  vec3 outgoing_light = vec3(0);
+  vec3 outgoing_luminance = vec3(0);
   
   for(int i=0; i<sphere_arealights.num; ++i)
   {
@@ -88,7 +87,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
     light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, sphere, surface);
     
-    outgoing_light += do_the_lighting(light_data, brdf_g, surface);
+    outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
   
   for(int i=0; i<rect_arealights.num; ++i)
@@ -108,10 +107,10 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
     light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, rect, surface);
     
-    outgoing_light += do_the_lighting(light_data, brdf_g, surface);
+    outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
   
-  return outgoing_light + surface.emission;
+  return outgoing_luminance + surface.emission;
 }
 
 

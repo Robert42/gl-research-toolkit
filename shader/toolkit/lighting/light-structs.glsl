@@ -1,7 +1,7 @@
 struct LightSource
 {
   vec3 color;
-  float luminance;
+  float luminous_power;
   vec3 origin;
   float influence_radius;
 };
