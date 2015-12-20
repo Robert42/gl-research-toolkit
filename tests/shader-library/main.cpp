@@ -101,97 +101,6 @@ void test_raytracing_plane()
   EXPECT_EQ(intersection_distance(plane2, ray4), 3);
 }
 
-void test_raytracing_sphere()
-{
-  Ray ray;
-  Sphere sphere;
-
-  ray.direction = vec3(1, 0, 0);
-  ray.origin = vec3(0, 42, 0);
-
-  sphere.origin = vec3(5, 8, 0);
-  sphere.radius = 3;
-
-  EXPECT_EQ(nearest_point_on_sphere_unclamped(sphere, ray), vec3(5, 11, 0));
-
-  sphere.origin = vec3(-0.700000, 0.500000, 1.600000);
-  sphere.radius = 0.1125;
-
-  ray.direction = vec3(-0.150159, 0.741311, 0.654148);
-  ray.origin = vec3(-0.384320, -0.902267, 0.376229);
-}
-
-void test_raytracing_rect()
-{
-  Ray ray;
-  Rect rect;
-/* FIXMEblen uncomment
-  rect.origin = vec3(1000, 1000, 42);
-  rect.half_width = 512;
-  rect.half_height = 384;
-  rect.tangent1 = vec3(1,0,0);
-  rect.tangent2 = vec3(0,1,0);
-
-  vec3 nearest_point;
-
-
-  ray.origin = vec3(0);
-  ray.direction = vec3(0, 0, -1);
-
-  bool is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
-  EXPECT_EQ(nearest_point, vec3(1000-512, 1000-384, 42));
-  EXPECT_FALSE(is_intersecting);
-
-
-  ray.origin = vec3(0);
-  ray.direction = vec3(0, 0, 1);
-
-  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
-  EXPECT_EQ(nearest_point, vec3(1000-512, 1000-384, 42));
-  EXPECT_TRUE(is_intersecting);
-
-
-  ray.origin = vec3(10000, 10000, 0);
-  ray.direction = vec3(0, 0, 1);
-
-  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
-  EXPECT_EQ(nearest_point, vec3(1000+512, 1000+384, 42));
-  EXPECT_TRUE(is_intersecting);
-
-
-  rect.origin = vec3(0, 0, 1);
-  rect.half_width = 0.3;
-  rect.half_height = 0.2;
-  rect.tangent1 = vec3(-1,0,0);
-  rect.tangent2 = vec3(0,1,0);
-
-  ray.origin = vec3(1, 0, 0);
-  ray.direction = normalize(vec3(-0.1, 0, 1));
-
-  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
-  EXPECT_EQ(nearest_point, vec3(0.3, 0, 1));
-  EXPECT_TRUE(is_intersecting);
-
-  ray.direction = normalize(vec3(-0.1, 0, -1));
-
-  is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
-  EXPECT_EQ(nearest_point, vec3(0.3, 0, 1));
-  EXPECT_FALSE(is_intersecting);
-*/
-
-  rect.origin = vec3(0.000000, 0.000000, 1.980000);
-  rect.tangent1 = vec3(-1.000000, 0.000000, 0.000000);
-  rect.tangent2 = vec3(0.000000, 1.000000, 0.000000);
-  rect.half_width = 0.235;
-  rect.half_height  = 0.19;
-  ray.origin  = vec3(-0.443107, 1.000000, 1.689072);
-  ray.direction= vec3(-0.096876, -0.983829, 0.150651);
-
-  vec3 point_on_plane = vec3(-0.630188, -0.899907, 1.980000);
-
-  EXPECT_NEAR(clamp_point_to_rect(rect, point_on_plane), vec3(-0.133053, -0.190000, 1.980000));
-}
-
 
 int main(int argc, char** argv)
 {
@@ -202,8 +111,6 @@ int main(int argc, char** argv)
   test_ray_distance();
   test_ray_nearest_point();
   test_raytracing_plane();
-  test_raytracing_sphere();
-  test_raytracing_rect();
 
   return 0;
 }

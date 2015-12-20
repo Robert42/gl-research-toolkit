@@ -35,6 +35,7 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   t_lines = abs(t_lines);
   t_lines = clamp(t_lines, vec2(0), vec2(1));
   
+  // try hiding the artifacts by using a fallback mode if the reflection ray is more parallel to the axis
   vec2 t_nearest_edge = vec2(dot(-origin, rect.tangent1) / width,
                              dot(-origin, rect.tangent2) / height);
   t_nearest_edge = clamp(t_nearest_edge, vec2(0), vec2(1));
@@ -42,7 +43,7 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   vec2 weight = abs(vec2(dot(reflection_direction, rect.tangent1),
                          dot(reflection_direction, rect.tangent2)));
                          
-  vec2 t = mix(t_lines, t_nearest_edge, sq(weight));
+  vec2 t = mix(t_lines, t_nearest_edge, weight*weight);
   
   vec3 nearest_point = origin + t.x*axis1 + t.y*axis2;
   
@@ -52,16 +53,5 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   vec3 l = nearest_point / light_distance;
   
   specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
-  
-  Ray ray;
-  ray.origin = surface.position;
-  ray.direction = reflection_direction;
-  PRINT_VALUE(nearest_point+surface.position, true);
-  PRINT_VALUE(ray, true);
-  /*
-  vec3 i;
-  if(intersection_point(plane_from_rect(rect), ray, i))
-    PRINT_VALUE(i, true);
-  */
   return l;
 }
