@@ -57,13 +57,23 @@ float _closestPointToLine_unclamped(vec3 start, vec3 startToEnd, float sqLineLen
   vec3 Ld = startToEnd;
   vec3 r = reflection_direction;
   
-  // FIXME: TODO decide
   // Equation 18
   return (dot(L0,Ld)*dot(r,L0) - dot(L0,L0)*dot(r,Ld)) / (dot(L0,Ld)*dot(r,Ld) - dot(Ld,Ld)*dot(r,L0));
   
   // Equation 19
+  //return (dot(r, start) * dot(r, Ld) - dot(L0, Ld)) / (sqLineLength - sq(dot(r, Ld)));
+}
+
+float _closestPointToLine_unclamped_approximated(vec3 start, vec3 startToEnd, float sqLineLength, in vec3 reflection_direction)
+{
+  vec3 L0 = start;
+  vec3 Ld = startToEnd;
+  vec3 r = reflection_direction;
+  
+  // Equation 19
   return (dot(r, start) * dot(r, Ld) - dot(L0, Ld)) / (sqLineLength - sq(dot(r, Ld)));
 }
+  
 
 vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Tube tube, in SurfaceData surface)
 {

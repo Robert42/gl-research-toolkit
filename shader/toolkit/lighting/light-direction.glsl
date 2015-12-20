@@ -12,25 +12,30 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   vec2 half_size = vec2(rect.half_width, rect.half_height);
   
   vec3 reflection_direction = get_mrp_reflection_direction(surface);
-  rect.origin -= surface.position;
   
-  float t1 =_closestPointToLine_unclamped(rect.origin,
-                                          rect.tangent1*rect.half_width,
-                                          sq(rect.half_width),
+  vec3 half_axis1 = rect.tangent1*rect.half_width;
+  vec3 half_axis2 = rect.tangent2*rect.half_height;
+  vec3 axis1 = half_axis1*2.f;
+  vec3 axis2 = half_axis2*2.f;
+  vec3 origin = rect.origin - surface.position - half_axis1 - half_axis2;
+  
+  float t1 =_closestPointToLine_unclamped(origin,
+                                          axis1,
+                                          sq(rect.half_width*2.f),
                                           reflection_direction);
-  float t2 =_closestPointToLine_unclamped(rect.origin,
-                                          rect.tangent2*rect.half_height,
-                                          sq(rect.half_height),
+  float t2 =_closestPointToLine_unclamped(origin,
+                                          axis2,
+                                          sq(rect.half_height*2.f),
                                           reflection_direction);
 
   vec2 t = vec2(t1, t2);
+  t = abs(t);
   
-  t = clamp(t, vec2(-1), vec2(1));
+  PRINT_VALUE(t);
   
-  t = clamp(t, vec2(0), vec2(1));// FIXME: remove this
-  t.y = 0; // FIXME: remove this
+  t = clamp(t, vec2(0), vec2(1));
   
-  vec3 nearest_point = map_point_from_rect_plane(rect, t * half_size);
+  vec3 nearest_point = origin + t.x*axis1 + t.y*axis2;
   
   light_distance = length(nearest_point);
   float radius = mix(rect.half_width, rect.half_height, 0.5f);
@@ -44,10 +49,10 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   ray.direction = reflection_direction;
   PRINT_VALUE(nearest_point+surface.position, true);
   PRINT_VALUE(ray, true);
+  /*
   vec3 i;
-  rect.origin += surface.position;
   if(intersection_point(plane_from_rect(rect), ray, i))
     PRINT_VALUE(i, true);
-  
+  */
   return l;
 }
