@@ -1,7 +1,5 @@
 #include <lighting/light-buffers.glsl>
 
-#include <debugging/print.glsl>
-
 #include <pbs/pbs.glsl>
 
 struct LightData
@@ -35,6 +33,9 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   vec3 l = nearest_point / light_distance;
   
   specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
+  
+  PRINT_VALUE(nearest_point+surface.position, true);
+  PRINT_VALUE(ray, true);
   
   return l;
 }

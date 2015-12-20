@@ -2,52 +2,8 @@
 #error Do not include this file directly, instead, include <glrt/glsl/math.h>
 #endif
 
-// ======== Structs ==========================================================
 
-
-struct Sphere
-{
-  vec3 origin;
-  float radius;
-};
-
-struct Disk
-{
-  vec3 origin;
-  float radius;
-  vec3 normal;
-};
-
-struct Rect
-{
-  vec3 origin;
-  float half_width;
-  vec3 tangent1;
-  float half_height;
-  vec3 tangent2;
-};
-
-struct Tube
-{
-  vec3 origin;
-  float radius;
-  vec3 direction;
-  float length;
-};
-
-// https://de.wikipedia.org/wiki/Hessesche_Normalform
-struct Plane
-{
-  vec3 normal;
-  float d;
-};
-
-struct Ray
-{
-  vec3 origin;
-  vec3 direction;
-};
-
+#include "./structs.h"
 
 // ======== Ray ================================================================
 
@@ -221,7 +177,7 @@ bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
 }
 
 
-vec3 _most_representative_point_on_plane(in Plane plane, in vec3 origin_of_region_of_interest, in float radius_of_region_of_interrest, in Ray ray)
+vec3 _most_representative_point_on_plane(in Plane plane, in Ray ray)
 {
   float t;
   bool intersects = intersection_test(plane, ray, t);
@@ -266,21 +222,77 @@ bool intersects(in Sphere sphere, in Ray ray)
 
 // ======== Rect =============================================================
 
-vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
+vec2 map_point_to_rect_plane(in Rect rect, in vec3 point)
 {
-  vec2 p = vec2(dot(point-rect.origin, rect.tangent1),
-                dot(point-rect.origin, rect.tangent2));
-                
+  return vec2(dot(point-rect.origin, rect.tangent1),
+              dot(point-rect.origin, rect.tangent2));
+}
+
+vec2 map_direction_to_rect_plane(in Rect rect, in vec3 direction)
+{
+  vec2 dir_2d = vec2(dot(direction-rect.origin, rect.tangent1),
+                     dot(direction-rect.origin, rect.tangent2));
+  
+  // TODO potential performance issue
+  return sq(dir_2d)!=0.f ? vec2(0) : normalize(dir_2d);
+}
+
+vec3 map_point_from_rect_plane(in Rect rect, in vec2 p)
+{
+  return rect.origin + p.x*rect.tangent1 + p.y*rect.tangent2;
+}
+
+vec2 clamp_point_to_rect(in vec2 half_size, in vec2 p)
+{
   float dist = length(p); // TODO potential numeric issue. write unittest for this
   vec2 dir = p / dist;
-  
-  vec2 half_size = vec2(rect.half_width, rect.half_height);
 
   float t = min_component(abs(half_size / dir));
 
   p = dir * min(dist, t);
 
-  return rect.origin + p.x*rect.tangent1 + p.y*rect.tangent2;
+  return p;
+}
+
+vec2 clamp_point_to_rect(in Rect rect, in vec2 p)
+{
+  return clamp_point_to_rect(vec2(rect.half_width, rect.half_height), p);
+}
+
+vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
+{
+  return map_point_from_rect_plane(rect, clamp_point_to_rect(rect, map_point_to_rect_plane(rect, point)));
+}
+
+// aabb.x the x coordinate of the edge with the lower x coordinate
+// aabb.z the x coordinate of the edge with the larger x coordinate
+// aabb.y the y coordinate of the edge with the lower y coordinate
+// aabb.w the y coordinate of the edge with the larger y coordinate
+vec4 intersection_distance_rect2d_aabb(in vec4 aabb, in vec2 ray_origin, in vec2 ray_direction)
+{
+  // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
+  // Formula for arbitrary 3d planes intersecting with 3d ray:
+  // (plane.d - dot(ray.origin, plane.normal)) / dot(ray.direction, plane.normal);
+  //
+  // Formular for 2d plane with normal (1,0) with 2d ray:
+  // (plane.d - ray.origin.x) / ray.direction.x;
+  
+  return (aabb - ray_origin.xyxy) / ray_direction.xyxy;
+}
+
+// aabb.x the x coordinate of the edge with the lower x coordinate
+// aabb.z the x coordinate of the edge with the larger x coordinate
+// aabb.y the y coordinate of the edge with the lower y coordinate
+// aabb.w the y coordinate of the edge with the larger y coordinate
+vec2 nearest_point_of_ray_in_rect_2d(in vec4 aabb, in vec2 ray_origin, in vec2 ray_direction)
+{
+  vec4 t = intersection_distance_rect2d_aabb(aabb, ray_origin, ray_direction); 
+  bool inside = any(lessThan(t, vec4(0)));
+  
+  // TODO possible to improve performance by multiplying with float instead of using ?:
+  vec2 intersection = sq(ray_direction)==0.f||inside ? ray_origin : ray_origin+ray_direction*min_component(t);
+  
+  return clamp_point_to_rect(aabb.zw, intersection);
 }
 
 bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)
@@ -297,8 +309,8 @@ bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)
 
 vec3 mrp(in Rect rect, in Ray ray)
 {
-  vec3 candidate = _most_representative_point_on_plane(plane_from_rect(rect), rect.origin, rect.half_width+rect.half_height, ray);
+  vec4 aabb = vec4(-rect.half_width, -rect.half_height, rect.half_width, rect.half_height);
   
-  return clamp_point_to_rect(rect, candidate);
+  return map_point_from_rect_plane(rect, nearest_point_of_ray_in_rect_2d(aabb, map_point_to_rect_plane(rect, ray.origin), map_direction_to_rect_plane(rect, ray.direction)));
 }
 

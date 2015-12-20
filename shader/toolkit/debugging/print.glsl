@@ -1,5 +1,5 @@
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/geometry/structs.h>
 #include <glrt/glsl/debugging/printer-types.h>
 
 struct DebuggingOutputChunk

@@ -33,6 +33,14 @@ using glm::asin;
 #define inout(t) t&
 #endif
 
+#undef PRINT_VALUE
+
+template<typename T>
+inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
+
+#define xyxy xyxy()
+#define zw zw()
+
 // ======== GLSL ===============================================================
 #else
 
@@ -43,5 +51,7 @@ using glm::asin;
 #ifndef inout
 #define inout(t) inout t
 #endif
+
+#include <debugging/print.glsl>
 
 #endif
