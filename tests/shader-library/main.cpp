@@ -125,7 +125,7 @@ void test_raytracing_rect()
 {
   Ray ray;
   Rect rect;
-
+/* FIXMEblen uncomment
   rect.origin = vec3(1000, 1000, 42);
   rect.half_width = 512;
   rect.half_height = 384;
@@ -177,6 +177,19 @@ void test_raytracing_rect()
   is_intersecting = nearest_point_on_rect(rect, ray, nearest_point);
   EXPECT_EQ(nearest_point, vec3(0.3, 0, 1));
   EXPECT_FALSE(is_intersecting);
+*/
+
+  rect.origin = vec3(0.000000, 0.000000, 1.980000);
+  rect.tangent1 = vec3(-1.000000, 0.000000, 0.000000);
+  rect.tangent2 = vec3(0.000000, 1.000000, 0.000000);
+  rect.half_width = 0.235;
+  rect.half_height  = 0.19;
+  ray.origin  = vec3(-0.443107, 1.000000, 1.689072);
+  ray.direction= vec3(-0.096876, -0.983829, 0.150651);
+
+  vec3 point_on_plane = vec3(-0.630188, -0.899907, 1.980000);
+
+  EXPECT_NEAR(clamp_point_to_rect(rect, point_on_plane), vec3(-0.133053, -0.190000, 1.980000));
 }
 
 

@@ -3,7 +3,9 @@
 
 #include <glrt/glsl/compatibility/begin.h>
 
-float pi = 3.1415926535897;
+const float pi = 3.1415926535897;
+
+const float inf = 1./0.;
 
 float sq(float x)
 {
@@ -64,11 +66,6 @@ float min_component(vec4 vector)
 
 // max
 
-float max_component(vec2 vector)
-{
-  return max(vector.x, vector.y);
-}
-
 int max3(int a, int b, int c)
 {
   return max(max(a, b), c);
@@ -87,6 +84,11 @@ float max3(float a, float b, float c)
 float max4(float a, float b, float c, float d)
 {
   return max(max(a, b), max(c, d));
+}
+
+float max_component(vec2 vector)
+{
+  return max(vector.x, vector.y);
 }
 
 float max_component(vec3 vector)

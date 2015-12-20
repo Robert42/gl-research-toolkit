@@ -36,6 +36,9 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   
   PRINT_VALUE(nearest_point+surface.position, true);
   PRINT_VALUE(ray, true);
+  vec3 i;
+  if(intersection_point(plane_from_rect(rect), ray, i))
+    PRINT_VALUE(i, true);
   
   return l;
 }

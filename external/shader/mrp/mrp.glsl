@@ -14,9 +14,9 @@ float mrp_specular_correction_factor_area(in float radius, in float light_distan
 
 vec3 get_mrp_reflection_direction(in SurfaceData surface)
 {
-  return surface.R;
+  //return surface.R;
   // TODO try out specular dominant dir instead:
-  //return surface.dominant_specular_dir;
+  return surface.dominant_specular_dir;
 }
 
 // TODO: improve performance by using a precomputed inverse influence_radius
