@@ -37,7 +37,7 @@ MaterialInstance::Ptr MaterialInstance::createDummyMaterial()
 {
   PlainColorMaterial::UniformData data;
 
-  data.diffuse = glm::vec3(0);
+  data.base_color = glm::vec3(0);
   data.emission = glm::vec3(1, 0, 1);
 
   return Ptr(new PlainColorMaterial(data));
@@ -79,13 +79,13 @@ MaterialInstance::Ptr PlainColorMaterial::fromJson(const QDir&, const QJsonObjec
 {
   UniformData uniformData;
 
-  if(!as_vec3(uniformData.diffuse, object["diffuse"], "PlainColorMaterial::fromJson (diffuse)"))
+  if(!as_vec3(uniformData.base_color, object["diffuse"], "PlainColorMaterial::fromJson (diffuse)"))
     return Ptr();
   if(object.contains("emission") && !as_vec3(uniformData.emission, object["emission"], "PlainColorMaterial::fromJson (emission)"))
     return Ptr();
 
-  uniformData.metallic = object["metallic"].toDouble(0);
-  uniformData.roughness = object["roughness"].toDouble(0.8);
+  uniformData.metal_mask = object["metal_mask"].toDouble(0);
+  uniformData.smoothness = object["smoothness"].toDouble(0.8);
 
   PlainColorMaterial* material = new PlainColorMaterial(uniformData);
 

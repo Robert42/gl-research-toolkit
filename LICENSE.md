@@ -31,4 +31,6 @@ SOFTWARE.
 - [Qt](http://www.qt.io/) (LGPL License)
 - [SDL](http://libsdl.org) (zlib license)
 
+# External Code-Snippets
 
+- Shader Code snippets from the Siggraph 2014 course [Moving Frostbite to PBR](http://www.frostbite.com/2014/11/moving-frostbite-to-pbr/).

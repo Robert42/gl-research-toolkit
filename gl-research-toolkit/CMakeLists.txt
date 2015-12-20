@@ -12,6 +12,9 @@ endif()
 if(NOT GLRT_SHADER_DIR)
 message(FATAL_ERROR "GLRT_SHADER_DIR must be set")
 endif()
+if(NOT GLRT_EXTERNAL_SHADER_DIR)
+message(FATAL_ERROR "GLRT_EXTERNAL_SHADER_DIR must be set")
+endif()
 
 
 option(GLRT_PROFILER "If Disabled, there the profiler is reducuced to elminate the overhead of the profiler." ON)
@@ -49,6 +52,7 @@ target_compile_definitions(
   PUBLIC
   GLRT_ASSET_DIR=\"${GLRT_ASSET_DIR}\"
   GLRT_SHADER_DIR=\"${GLRT_SHADER_DIR}\"
+  GLRT_EXTERNAL_SHADER_DIR=\"${GLRT_EXTERNAL_SHADER_DIR}\"
   GLRT_TEMP_SHADER_DIR=\"${GLRT_TEMP_SHADER_DIR}\"
   GLM_FORCE_RADIANS
   GLM_SWIZZLE

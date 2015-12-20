@@ -1,6 +1,7 @@
 #include <glrt/toolkit/shader-compiler.h>
 #include <glrt/toolkit/temp-shader-file.h>
 #include <glrt/toolkit/logger.h>
+#include <glrt/toolkit/antifreeze.h>
 
 #include <set>
 
@@ -29,7 +30,22 @@ public:
     if(messages.isEmpty())
       return false;
 
-    std::string message = messages.join("\n\n").toStdString();
+    Antifreeze::Sleep antifreeze;
+
+    QString message = messages.join("\n\n");
+
+    int len = 2048;
+    if(message.length() > len)
+    {
+      QString noteAboutRemovedLines("\n\n[...] Rest of the message (%0 lines) removed");
+
+      int linesVisibleBefore = message.count(QChar('\n'))+1;
+      message.resize(len-(noteAboutRemovedLines.length()+5));
+      int linesVisibleNow = message.count(QChar('\n'))+1;
+      int linesRemoved = linesVisibleBefore-linesVisibleNow;
+
+      message += noteAboutRemovedLines.arg(linesRemoved);
+    }
 
     enum Results : int
     {
@@ -44,7 +60,9 @@ public:
       {SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 2, "Recompile Shaders"},
     };
 
-    SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", message.c_str(), SDL_arraysize(buttons), buttons, nullptr};
+    std::string std = message.toStdString();
+
+    SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", std.c_str(), SDL_arraysize(buttons), buttons, nullptr};
 
     int result;
     if(SDL_ShowMessageBox(&msgBoxData, &result) < 0)
@@ -58,6 +76,8 @@ public:
       std::cout << "Aborted by user"<<std::endl;
       std::exit(-1);
     }
+
+    Q_UNUSED(antifreeze);
 
     return result!=INGORE;
   }

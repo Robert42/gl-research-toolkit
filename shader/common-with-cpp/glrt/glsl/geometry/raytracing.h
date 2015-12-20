@@ -2,37 +2,8 @@
 #error Do not include this file directly, instead, include <glrt/glsl/math.h>
 #endif
 
-// ======== Structs ==========================================================
 
-
-struct Sphere
-{
-  vec3 origin;
-  float radius;
-};
-
-struct Rect
-{
-  vec3 origin;
-  float half_width;
-  vec3 tangent1;
-  float half_height;
-  vec3 tangent2;
-};
-
-// https://de.wikipedia.org/wiki/Hessesche_Normalform
-struct Plane
-{
-  vec3 normal;
-  float d;
-};
-
-struct Ray
-{
-  vec3 origin;
-  vec3 direction;
-};
-
+#include "./structs.h"
 
 // ======== Ray ================================================================
 
@@ -171,8 +142,6 @@ float intersection_distance(in Plane plane, in Ray ray)
   return (plane.d - dot(ray.origin, plane.normal)) / dot(ray.direction, plane.normal);
 }
 
-// TODO test from here on
-
 bool intersection_test_unclamped(in Plane plane, in Ray ray, out(float) distance)
 {
   distance = intersection_distance(plane, ray);
@@ -210,20 +179,6 @@ bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
 
 // ======== Sphere =============================================================
 
-
-vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
-{
-  vec3 nearest_point = nearest_point_unclamped(ray, sphere.origin);
-
-  float distance_to_ray = distance(sphere.origin, nearest_point);
-  
-  float d = min(distance_to_ray, sphere.radius);
-
-  nearest_point = sphere.origin + d * (nearest_point - sphere.origin) / distance_to_ray;
-  
-  return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
-}
-
 bool intersects(in Sphere sphere, in Ray ray)
 {
   float d = sq_distance_to(ray, sphere.origin);
@@ -234,22 +189,30 @@ bool intersects(in Sphere sphere, in Ray ray)
 
 // ======== Rect =============================================================
 
-
-bool nearest_point_on_rect(in Rect rect, in Ray ray, out(vec3) nearest_point)
+vec2 map_point_to_rect_plane(in Rect rect, in vec3 point)
 {
-  Plane plane = plane_from_rect(rect);
-  vec3 plane_intersection_point;
-  
-  bool intersects = intersection_point_unclamped(plane, ray, plane_intersection_point);
-  
-  float w = dot(plane_intersection_point-rect.origin, rect.tangent1);
-  float h = dot(plane_intersection_point-rect.origin, rect.tangent2);
-  
-  w = clamp(w, -rect.half_width,  rect.half_width);
-  h = clamp(h, -rect.half_height, rect.half_height);
-  
-  nearest_point = rect.origin + w*rect.tangent1 + h*rect.tangent2;
-
-  return intersects;
+  return vec2(dot(point-rect.origin, rect.tangent1),
+              dot(point-rect.origin, rect.tangent2));
 }
+
+vec3 map_point_from_rect_plane(in Rect rect, in vec2 p)
+{
+  return rect.origin + p.x*rect.tangent1 + p.y*rect.tangent2;
+}
+
+vec2 clamp_point_to_rect(in vec2 half_size, in vec2 p)
+{
+  return clamp(p, -half_size, half_size);
+}
+
+vec2 clamp_point_to_rect(in Rect rect, in vec2 p)
+{
+  return clamp_point_to_rect(vec2(rect.half_width, rect.half_height), p);
+}
+
+vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
+{
+  return map_point_from_rect_plane(rect, clamp_point_to_rect(rect, map_point_to_rect_plane(rect, point)));
+}
+
 

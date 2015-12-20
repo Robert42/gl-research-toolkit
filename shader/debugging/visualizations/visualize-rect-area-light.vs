@@ -14,9 +14,9 @@ uniform LightBlock
 
 void main()
 {
-  vec3 tangent = rectAreaLight.tangent;
-  vec3 normal = rectAreaLight.normal;
-  vec3 bitangent = cross(normal, tangent);
+  vec3 tangent = rectAreaLight.tangent1;
+  vec3 bitangent = rectAreaLight.tangent2;
+  vec3 normal = cross(tangent, bitangent);
   
   vec3 ws_position = vertex_position.x*tangent*rectAreaLight.half_width +
                      vertex_position.y*bitangent*rectAreaLight.half_height +

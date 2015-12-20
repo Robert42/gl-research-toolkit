@@ -13,6 +13,12 @@
 #undef inout
 #endif
 
+#undef xyxy
+#undef xz
+#undef yw
+#undef xy
+#undef zw
+
 } // namespace glsl
 } // namespace glrt
 

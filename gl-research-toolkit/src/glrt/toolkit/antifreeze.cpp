@@ -1,5 +1,7 @@
 #include <glrt/toolkit/antifreeze.h>
 
+#define GLRT_USE_ANTIFREEZE 1
+
 /*! \class glrt::Antifreeze
 
 Workaround to prevents some drivers to freeze because of an endless loop within a shader.
@@ -32,6 +34,7 @@ void Antifreeze::nextFrame()
 
 void Antifreeze::prevent_freezes(Data* data)
 {
+#if GLRT_USE_ANTIFREEZE
   std::chrono::seconds sleepTime(data->numberSecondsToWait);
 
   quint32 last_id = data->frame_id;
@@ -49,7 +52,7 @@ void Antifreeze::prevent_freezes(Data* data)
 
     last_id = data->frame_id;
   }
-
+#endif
   delete data;
 }
 

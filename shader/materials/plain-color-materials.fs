@@ -9,30 +9,28 @@
 // TODO: improve performance by doing this in the vertex shader and just passing the MaterialOutput instance (flat, without interpolation)
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
-  vec3 diffuse_color;
-  float roughness;
+  vec3 base_color;
+  float smoothness;
   vec3 emission;
-  float metallic;
+  float metal_mask;
 }material_instance;
 
 void main()
 {
-  MaterialOutput material_output;
+  BaseMaterial material;
   
-  vec3 diffuse = material_instance.diffuse_color;
-  float roughness = material_instance.roughness;
-  vec3 emission = material_instance.emission;
-  float metallic = material_instance.metallic;
+  material.normal = fragment.normal;
+  material.smoothness = material_instance.smoothness;
+  material.base_color = material_instance.base_color;
+  material.metal_mask  = material_instance.metal_mask;
+  material.emission = material_instance.emission;
+  material.reflectance = 0.5f;
+  material.occlusion = 1;
   
-  material_output.color = vec4(diffuse, 1);
-  material_output.emission = vec3(emission);
-  material_output.roughness = roughness;
-  material_output.position = fragment.position;
-  material_output.metallic = metallic;
-  material_output.normal = fragment.normal;
-  material_output.occlusion = 0;
+  SurfaceData surface;
+  surface.position = fragment.position;
   
-  // No normal mapping here, so uv and tangent ar eunused
+  // No normal mapping here, so uv and tangent are unused
   
-  apply_material(material_output);
+  apply_material(material, surface, 1.f);
 }
