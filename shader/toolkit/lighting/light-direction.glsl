@@ -13,6 +13,9 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   
   vec3 reflection_direction = get_mrp_reflection_direction(surface);
   
+  float width = rect.half_width*2.f;
+  float height = rect.half_height*2.f;
+  
   vec3 half_axis1 = rect.tangent1*rect.half_width;
   vec3 half_axis2 = rect.tangent2*rect.half_height;
   vec3 axis1 = half_axis1*2.f;
@@ -21,19 +24,25 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   
   float t1 =_closestPointToLine_unclamped(origin,
                                           axis1,
-                                          sq(rect.half_width*2.f),
+                                          sq(width),
                                           reflection_direction);
   float t2 =_closestPointToLine_unclamped(origin,
                                           axis2,
-                                          sq(rect.half_height*2.f),
+                                          sq(height),
                                           reflection_direction);
 
-  vec2 t = vec2(t1, t2);
-  t = abs(t);
+  vec2 t_lines = vec2(t1, t2);
+  t_lines = abs(t_lines);
+  t_lines = clamp(t_lines, vec2(0), vec2(1));
   
-  PRINT_VALUE(t);
+  vec2 t_nearest_edge = vec2(dot(-origin, rect.tangent1) / width,
+                             dot(-origin, rect.tangent2) / height);
+  t_nearest_edge = clamp(t_nearest_edge, vec2(0), vec2(1));
   
-  t = clamp(t, vec2(0), vec2(1));
+  vec2 weight = abs(vec2(dot(reflection_direction, rect.tangent1),
+                         dot(reflection_direction, rect.tangent2)));
+                         
+  vec2 t = mix(t_lines, t_nearest_edge, sq(weight));
   
   vec3 nearest_point = origin + t.x*axis1 + t.y*axis2;
   
