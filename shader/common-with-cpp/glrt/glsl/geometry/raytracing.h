@@ -337,12 +337,6 @@ vec3 mrp_raytrace_2d(in Rect rect, in Ray ray)
     // FIXME use the 2d distance
     float d = distance(p3d[i], nearest_point(ray, p3d[i]));
     
-    //if(i==1)
-    {
-      PRINT_VALUE(p3d[i], true);
-      PRINT_VALUE(d);
-    }
-    
     smallestDistancePositive = t4[i] >= 0 && d<smallestDistancePositive ? d : smallestDistancePositive;
     smallestDistanceNegative = t4[i]  < 0 && d<smallestDistanceNegative ? d : smallestDistanceNegative;
   }
@@ -350,8 +344,6 @@ vec3 mrp_raytrace_2d(in Rect rect, in Ray ray)
   float t = isinf(smallestDistancePositive) ? smallestDistanceNegative : smallestDistancePositive;
   
   vec3 found_point = map_point_from_rect_plane(rect, ray2d_origin + ray2d_direction * t);
-  
-  PRINT_VALUE(found_point, true);
     
   return found_point;
 }

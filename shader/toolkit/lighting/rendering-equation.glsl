@@ -2,6 +2,8 @@
 
 #include <pbs/pbs.glsl>
 
+#include "light-direction.glsl"
+
 struct LightData
 {
   LightSource lightSource;
@@ -10,38 +12,6 @@ struct LightData
   float specularEnergyFactor;
   float distance_to_light;
 };
-
-vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Disk disk, in SurfaceData surface)
-{
-  // TODO
-  specularEnergyFactor = 1.f;
-  light_distance = length(disk.origin-surface.position);
-  return (disk.origin-surface.position) / light_distance;
-}
-
-vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Rect rect, in SurfaceData surface)
-{
-  vec3 nearest_point;
-  Ray ray;
-  ray.origin = surface.position;
-  ray.direction = get_mrp_reflection_direction(surface);
-  nearest_point = mrp(rect, ray) - surface.position;
-  
-  light_distance = length(nearest_point);
-  float radius = mix(rect.half_width, rect.half_height, 0.5f);
-  
-  vec3 l = nearest_point / light_distance;
-  
-  specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
-  
-  PRINT_VALUE(nearest_point+surface.position, true);
-  PRINT_VALUE(ray, true);
-  vec3 i;
-  if(intersection_point(plane_from_rect(rect), ray, i))
-    PRINT_VALUE(i, true);
-  
-  return l;
-}
 
 float light_falloff(in LightData light, in SurfaceData surface)
 {
