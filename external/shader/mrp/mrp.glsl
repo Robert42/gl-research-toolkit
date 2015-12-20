@@ -25,19 +25,33 @@ float light_falloff(float distance_for_influence, float influence_radius, float 
   return sq(saturate(1.f - sq(sq(distance_for_influence/influence_radius)))) / (sq(distance_to_light) + 1.f);
 }
 
+vec3 _closestPointToSphere(in Sphere sphere, in vec3 reflection_direction)
+{
+  // Equation 11
+  vec3 L = sphere.origin;
+  vec3 r = reflection_direction;
+  
+  vec3 centerToRay = dot(L, r)*r - L;
+  vec3 closesPoint = L + centerToRay * saturate(sphere.radius/length(centerToRay));
+  
+  return closesPoint;
+}
+
 vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Sphere sphere, in SurfaceData surface)
 {
   // Equation 11
-  vec3 L = sphere.origin - surface.position;
+  sphere.origin -= surface.position;
   vec3 r = get_mrp_reflection_direction(surface);
-  vec3 centerToRay = dot(L, r)*r - L;
-  vec3 closesPoint = L + centerToRay * saturate(sphere.radius/length(centerToRay));
+  
+  vec3 closesPoint = _closestPointToSphere(sphere, r);
   light_distance = length(closesPoint);
   vec3 l = closesPoint / light_distance;
   
   specularEnergyFactor = mrp_specular_correction_factor_area(sphere.radius, light_distance, surface);
   return l;
 }
+
+
 
 vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Tube tube, in SurfaceData surface)
 {
