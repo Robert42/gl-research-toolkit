@@ -43,7 +43,7 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   vec2 weight = abs(vec2(dot(reflection_direction, rect.tangent1),
                          dot(reflection_direction, rect.tangent2)));
                          
-  vec2 t = mix(t_lines, t_nearest_edge, weight*weight);
+  vec2 t = mix(t_lines, t_nearest_edge, 0);
   
   vec3 nearest_point = origin + t.x*axis1 + t.y*axis2;
   

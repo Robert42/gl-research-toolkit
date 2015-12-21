@@ -7,39 +7,46 @@
 struct LightData
 {
   LightSource lightSource;
-  vec3 direction_to_light;
+  vec3 direction_to_light_specular;
+  float distance_to_light_specular;
+  vec3 direction_to_light_diffuse;
+  float distance_to_light_diffuse;
   float illuminance;
   float specularEnergyFactor;
-  float distance_to_light;
 };
 
-float light_falloff(in LightData light, in SurfaceData surface)
+float light_falloff(in LightSource lightSource, in float distance_to_light, in SurfaceData surface)
 {
-  float distance_for_influence = length(light.lightSource.origin-surface.position);
-  float influence_radius = light.lightSource.influence_radius;
-  float distance_to_light = light.distance_to_light;
+  float distance_for_influence = length(lightSource.origin-surface.position);
+  float influence_radius = lightSource.influence_radius;
   
   return light_falloff(distance_for_influence, influence_radius, distance_to_light);
 }
 
 vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceData surface)
 {
-  vec3 L = light.direction_to_light;
+  vec3 L_specular = light.direction_to_light_specular;
+  vec3 L_diffuse  = light.direction_to_light_diffuse;
   vec3 V = surface.direction_to_camera;
   vec3 N = surface.normal;
   
-  BrdfData_WithLight brdf_l = init_brdf_data_with_light(N, L, V, light.specularEnergyFactor);
+  BrdfData_WithLight brdf_l_diffuse = init_brdf_data_with_light(N, L_diffuse, V);
+  BrdfData_WithLight brdf_l_specular = init_brdf_data_with_light(N, L_specular, V);
   
-  vec3 illuminance = light.illuminance * light.lightSource.luminous_power * light.lightSource.color * light_falloff(light, surface);
-  vec3 brdf = evaluate_brdf_for_material(brdf_g, brdf_l, surface);
-  float cos_factor = brdf_l.NdotL;
+  vec3 illuminance = light.illuminance * light.lightSource.luminous_power * light.lightSource.color;
+  vec3 brdf_specular = evaluate_specular_brdf_for_material(brdf_g, brdf_l_specular, surface) * light_falloff(light.lightSource, light.distance_to_light_specular, surface);
+  vec3 brdf_diffuse  = evaluate_diffuse_brdf_for_material( brdf_g, brdf_l_diffuse,  surface) * light_falloff(light.lightSource, light.distance_to_light_diffuse, surface);
+  float cos_factor_specular = brdf_l_specular.NdotL;
+  float cos_factor_diffuse  = brdf_l_diffuse.NdotL;
+  vec3 brdf = brdf_diffuse * cos_factor_diffuse + light.specularEnergyFactor * brdf_specular * cos_factor_specular;
   
-  return illuminance * brdf * cos_factor;
+  return illuminance * brdf;
 }
 
 
 vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
 {
+  float dummy;
   vec3 worldNormal = surface.normal;
   vec3 worldPosition = surface.position;
   vec3 viewDir = surface.direction_to_camera;
@@ -59,7 +66,8 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     light_data.lightSource = light.light;
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
-    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, sphere, surface, surface.dominant_specular_dir);
+    light_data.direction_to_light_specular = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light_specular, sphere, surface, surface.dominant_specular_dir);
+    light_data.direction_to_light_diffuse  = getDirectionToLight(dummy, light_data.distance_to_light_diffuse,  sphere, surface, surface.dominant_diffuse_dir);
     
     outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
@@ -79,7 +87,8 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     light_data.lightSource = light.light;
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
-    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, rect, surface, surface.dominant_specular_dir);
+    light_data.direction_to_light_specular = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light_specular, rect, surface, surface.dominant_specular_dir);
+    light_data.direction_to_light_diffuse  = getDirectionToLight(dummy, light_data.distance_to_light_diffuse,  rect, surface, surface.dominant_diffuse_dir);
     
     outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
