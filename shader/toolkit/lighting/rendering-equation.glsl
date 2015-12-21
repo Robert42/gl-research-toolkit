@@ -88,7 +88,9 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     light_data.lightSource = light.light;
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
     light_data.direction_to_light_specular = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light_specular, rect, surface, surface.dominant_specular_dir);
+    SUPPRESS_PRINT();
     light_data.direction_to_light_diffuse  = getDirectionToLight(dummy, light_data.distance_to_light_diffuse,  rect, surface, surface.dominant_diffuse_dir);
+    ALLOW_PRINT();
     
     outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }

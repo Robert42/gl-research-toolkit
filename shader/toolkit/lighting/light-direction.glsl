@@ -7,6 +7,22 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   return (disk.origin-surface.position) / light_distance;
 }
 
+void print_proj(Plane plane, vec3 p, vec3 offset)
+{
+  Ray ray;
+  ray.origin = vec3(0);
+  ray.direction = normalize(p);
+
+  vec3 ip;
+  intersection_point(plane, ray, ip);
+  PRINT_VALUE(ip+offset, true);
+
+  ray.origin = offset;
+  PRINT_VALUE(ray, true);
+}
+
+#define PRINT_PROJ(p) print_proj(rect_plane, p, surface.position)
+
 vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Rect rect, in SurfaceData surface, in vec3 dominant_reflection_direction)
 {
   // TODO improve performance
@@ -36,11 +52,15 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
       
     vec4 distances;
     
+    PRINT_PROJ(image_center);
+    
     for(int i=0; i<4; ++i)
     {
+      PRINT_PROJ(p[i]);
       int j = (i+1) % 4;
       p[i] = closestPointToLine_twoPoints(p[i], p[j], dominant_reflection_direction);
       distances[i] = sq(p[i]-image_center);
+        PRINT_PROJ(p[i]);
     }
     
     vec3 best_point = p[index_of_min_component(distances)];
@@ -58,8 +78,6 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   
   
   reflection_ray.origin = surface.position;
-  PRINT_VALUE(reflection_ray, true);
-  PRINT_VALUE(get_point(reflection_ray, light_distance), true);
   
   return l;
 }
