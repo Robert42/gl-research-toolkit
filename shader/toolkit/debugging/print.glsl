@@ -23,10 +23,31 @@ buffer DebuggingOutputBlock
 }debugging_buffer;
 #endif
 
+#ifdef SHADER_DEBUG_PRINTER
+int g_suppress_print=0;
+#endif
+
+void SUPPRESS_PRINT()
+{
+#ifdef SHADER_DEBUG_PRINTER
+  g_suppress_print++;
+#endif
+}
+
+void ALLOW_PRINT()
+{
+#ifdef SHADER_DEBUG_PRINTER
+  g_suppress_print--;
+#endif
+}
+
 bool is_fragment_to_debug()
 {
 #ifdef SHADER_DEBUG_PRINTER
-  return distance(gl_FragCoord.xy, debugging_buffer.fragment_coord+debugging_buffer.offset) <= debugging_buffer.treshold;
+  bool is_right_fragment = distance(gl_FragCoord.xy, debugging_buffer.fragment_coord+debugging_buffer.offset) <= debugging_buffer.treshold;
+  bool is_suppressed = g_suppress_print>0;
+  
+  return is_right_fragment && !is_suppressed;
 #else
   return false;
 #endif
