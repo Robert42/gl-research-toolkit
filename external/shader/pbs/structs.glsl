@@ -4,7 +4,6 @@ struct BrdfData_WithLight
   float NdotH;
   float LdotH;
   float NdotL;
-  float specularEnergyFactor;
 };
 
 struct BrdfData_Generic
@@ -37,9 +36,20 @@ struct SurfaceData
   vec3 R;
   float diffuse_occlusion;
   vec3 dominant_specular_dir;
+  vec3 dominant_diffuse_dir;
   float specular_occlusion;
   vec3 emission;
 };
+
+// listing 16
+vec3 getDiffuseDominantDir(vec3 N, vec3 V, float NdotV, float roughness)
+{
+    float a = 1.02341f * roughness - 1.51174f;
+    float b = -0.511705f * roughness + 0.755868f;
+    float lerpFactor = saturate((NdotV * a + b) * roughness);
+
+    return normalize(mix(N, V, lerpFactor));
+}
 
 // listing 16
 vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness)
@@ -86,6 +96,7 @@ void precomputeData(in BaseMaterial material,
   float specular_occlusion = computeSpecOcclusion(NdotV, AO, roughness);
   
   vec3 dominant_specular_dir = getSpecularDominantDirArea(N, R, NdotV, roughness);
+  vec3 dominant_diffuse_dir  = getDiffuseDominantDir(N, V, NdotV, roughness);
   
   surface_data.position = surface_position;
   surface_data.direction_to_camera = V;
@@ -97,6 +108,7 @@ void precomputeData(in BaseMaterial material,
   surface_data.f90 = f90;
   surface_data.R = R;
   surface_data.dominant_specular_dir = dominant_specular_dir;
+  surface_data.dominant_diffuse_dir  = dominant_diffuse_dir;
   surface_data.diffuse_occlusion = diffuse_occlusion;
   surface_data.specular_occlusion = specular_occlusion;
   surface_data.emission = emission;
@@ -105,7 +117,7 @@ void precomputeData(in BaseMaterial material,
   brdf_data.roughness         = roughness;
 }
 
-BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V, float specularEnergyFactor)
+BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V)
 {
   BrdfData_WithLight p;
   
@@ -115,7 +127,6 @@ BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V, fl
   p.NdotH                 = saturate(dot(N, H));
   p.LdotH                 = saturate(dot(L, H));
   p.NdotL                 = saturate(dot(N, L));
-  p.specularEnergyFactor  = specularEnergyFactor;
   
   return p;
 }
