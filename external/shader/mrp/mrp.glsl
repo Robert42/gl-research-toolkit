@@ -67,7 +67,7 @@ float _closestPointToLine_unclamped_approximated(vec3 start, vec3 startToEnd, fl
 vec3 closestPointToLine_twoPoints(vec3 start, vec3 end, in vec3 dominant_reflection_direction)
 {
   vec3 startToEnd = end - start;
-  return start + startToEnd * _closestPointToLine_unclamped(start, startToEnd, sq(startToEnd), dominant_reflection_direction);
+  return start + startToEnd * clamp(_closestPointToLine_unclamped(start, startToEnd, sq(startToEnd), dominant_reflection_direction), 0, 1);
 }
   
 

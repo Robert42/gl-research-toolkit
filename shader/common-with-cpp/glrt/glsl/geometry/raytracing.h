@@ -187,7 +187,7 @@ vec3 perspective_projection_unclamped(in Plane plane, in vec3 view_position, in 
   Ray ray;
   ray.direction = normalize(point-view_position);
   ray.origin = view_position;
-  
+      
   vec3 intersection_point;
   intersection_point_unclamped(plane, ray, intersection_point);
   return intersection_point;

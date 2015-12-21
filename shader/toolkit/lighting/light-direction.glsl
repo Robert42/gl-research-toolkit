@@ -23,13 +23,13 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
     const float image_plane = 1.f;
     
     vec3 image_center = get_point(reflection_ray, image_plane);
-    Plane projection_plane = plane_from_normal(dominant_reflection_direction, image_plane);
+    Plane projection_plane = plane_from_normal(reflection_ray.direction, image_plane);
     
     vec3 p[4];
-    p[0] = -rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
-    p[1] = -rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
-    p[2] =  rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
-    p[3] =  rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
+    p[0] = rect.origin + -rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
+    p[1] = rect.origin + -rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
+    p[2] = rect.origin +  rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
+    p[3] = rect.origin +  rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
     
     for(int i=0; i<4; ++i)
       p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
@@ -55,5 +55,11 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   vec3 l = reflection_ray.direction;
   
   specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
+  
+  
+  reflection_ray.origin = surface.position;
+  PRINT_VALUE(reflection_ray, true);
+  PRINT_VALUE(get_point(reflection_ray, light_distance), true);
+  
   return l;
 }
