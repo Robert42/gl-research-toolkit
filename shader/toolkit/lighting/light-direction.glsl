@@ -9,48 +9,50 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
 
 vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Rect rect, in SurfaceData surface, in vec3 dominant_reflection_direction)
 {
-  vec2 half_size = vec2(rect.half_width, rect.half_height);
+  // TODO improve performance
+  rect.origin -= surface.position;
   
-  vec3 reflection_direction = dominant_reflection_direction;
+  Plane rect_plane = plane_from_rect(rect);
   
-  float width = rect.half_width*2.f;
-  float height = rect.half_height*2.f;
+  Ray reflection_ray;
+  reflection_ray.direction = dominant_reflection_direction;
+  reflection_ray.origin = vec3(0);
   
-  vec3 half_axis1 = rect.tangent1*rect.half_width;
-  vec3 half_axis2 = rect.tangent2*rect.half_height;
-  vec3 axis1 = half_axis1*2.f;
-  vec3 axis2 = half_axis2*2.f;
-  vec3 origin = rect.origin - surface.position - half_axis1 - half_axis2;
+  if(!intersects_unclamped(rect, reflection_ray))
+  {
+    const float image_plane = 1.f;
+    
+    vec3 image_center = get_point(reflection_ray, image_plane);
+    Plane projection_plane = plane_from_normal(dominant_reflection_direction, image_plane);
+    
+    vec3 p[4];
+    p[0] = -rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
+    p[1] = -rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
+    p[2] =  rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
+    p[3] =  rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
+    
+    for(int i=0; i<4; ++i)
+      p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
+      
+    vec4 distances;
+    
+    for(int i=0; i<4; ++i)
+    {
+      int j = (i+1) % 4;
+      p[i] = closestPointToLine_twoPoints(p[i], p[j], dominant_reflection_direction);
+      distances[i] = sq(p[i]-image_center);
+    }
+    
+    vec3 best_point = p[index_of_min_component(distances)];
   
-  float t1 =_closestPointToLine_unclamped(origin,
-                                          axis1,
-                                          sq(width),
-                                          reflection_direction);
-  float t2 =_closestPointToLine_unclamped(origin,
-                                          axis2,
-                                          sq(height),
-                                          reflection_direction);
-
-  vec2 t_lines = vec2(t1, t2);
-  t_lines = abs(t_lines);
-  t_lines = clamp(t_lines, vec2(0), vec2(1));
+    reflection_ray.direction = normalize(best_point);
+  }
   
-  // try hiding the artifacts by using a fallback mode if the reflection ray is more parallel to the axis
-  vec2 t_nearest_edge = vec2(dot(-origin, rect.tangent1) / width,
-                             dot(-origin, rect.tangent2) / height);
-  t_nearest_edge = clamp(t_nearest_edge, vec2(0), vec2(1));
+  light_distance = intersection_distance(rect_plane, reflection_ray);
   
-  vec2 weight = abs(vec2(dot(reflection_direction, rect.tangent1),
-                         dot(reflection_direction, rect.tangent2)));
-                         
-  vec2 t = mix(t_lines, t_nearest_edge, 0);
-  
-  vec3 nearest_point = origin + t.x*axis1 + t.y*axis2;
-  
-  light_distance = length(nearest_point);
   float radius = mix(rect.half_width, rect.half_height, 0.5f);
   
-  vec3 l = nearest_point / light_distance;
+  vec3 l = reflection_ray.direction;
   
   specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
   return l;

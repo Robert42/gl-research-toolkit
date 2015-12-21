@@ -63,6 +63,12 @@ float _closestPointToLine_unclamped_approximated(vec3 start, vec3 startToEnd, fl
   // Equation 19
   return (dot(r, start) * dot(r, Ld) - dot(L0, Ld)) / (sqLineLength - sq(dot(r, Ld)));
 }
+
+vec3 closestPointToLine_twoPoints(vec3 start, vec3 end, in vec3 dominant_reflection_direction)
+{
+  vec3 startToEnd = end - start;
+  return start + startToEnd * _closestPointToLine_unclamped(start, startToEnd, sq(startToEnd), dominant_reflection_direction);
+}
   
 
 vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Tube tube, in SurfaceData surface, in vec3 dominant_reflection_direction)

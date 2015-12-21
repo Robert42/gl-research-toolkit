@@ -96,6 +96,11 @@ Plane plane_from_rect(in Rect rect)
   return plane_from_tangents(rect.tangent1, rect.tangent2, rect.origin);
 }
 
+Plane plane_for_projection(in Ray ray, float image_plane_distance)
+{
+  return plane_from_normal(ray.direction, get_point(ray, image_plane_distance));
+}
+
 // ---- distances
 
 // https://de.wikipedia.org/wiki/Hessesche_Normalform#Abstand_2
@@ -176,6 +181,18 @@ bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
   return intersects;
 }
 
+// TODO: what if point is equal wo view_position?
+vec3 perspective_projection_unclamped(in Plane plane, in vec3 view_position, in vec3 point)
+{
+  Ray ray;
+  ray.direction = normalize(point-view_position);
+  ray.origin = view_position;
+  
+  vec3 intersection_point;
+  intersection_point_unclamped(plane, ray, intersection_point);
+  return intersection_point;
+}
+
 
 // ======== Sphere =============================================================
 
@@ -215,4 +232,21 @@ vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
   return map_point_from_rect_plane(rect, clamp_point_to_rect(rect, map_point_to_rect_plane(rect, point)));
 }
 
+bool contains_mapped_point(in Rect rect, in vec2 p)
+{
+  return p.x >= -rect.half_width && p.y >= -rect.half_height && p.x <= rect.half_width && p.y <= rect.half_height;
+}
+
+bool contains_mapped_point(in Rect rect, in vec3 p)
+{
+  return contains_mapped_point(rect, map_point_to_rect_plane(rect, p));
+}
+
+bool intersects_unclamped(in Rect rect, in Ray ray)
+{
+  Plane plane = plane_from_rect(rect);
+  
+  vec3 p;
+  return intersection_point_unclamped(plane, ray, p) && contains_mapped_point(rect, p);
+}
 
