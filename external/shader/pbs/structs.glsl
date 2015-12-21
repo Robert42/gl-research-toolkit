@@ -42,6 +42,16 @@ struct SurfaceData
 };
 
 // listing 16
+float3 getDiffuseDominantDir(float3 N, float NdotV, float roughness)
+{
+    float a = 1.02341f * roughness - 1.51174f;
+    float b = -0.511705f * roughness + 0.755868f;
+    lerpFactor = saturate((NdotV * a + b) * roughness);
+
+    return normalize(lerp(N, V, lerpFactor));
+}
+
+// listing 16
 vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness)
 {
     // Simple linear approximation
