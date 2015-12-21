@@ -1,5 +1,5 @@
 
-vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Disk disk, in SurfaceData surface)
+vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Disk disk, in SurfaceData surface, in vec3 dominant_reflection_direction)
 {
   // TODO
   specularEnergyFactor = 1.f;
@@ -7,11 +7,11 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   return (disk.origin-surface.position) / light_distance;
 }
 
-vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Rect rect, in SurfaceData surface)
+vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Rect rect, in SurfaceData surface, in vec3 dominant_reflection_direction)
 {
   vec2 half_size = vec2(rect.half_width, rect.half_height);
   
-  vec3 reflection_direction = get_mrp_reflection_direction(surface);
+  vec3 reflection_direction = dominant_reflection_direction;
   
   float width = rect.half_width*2.f;
   float height = rect.half_height*2.f;

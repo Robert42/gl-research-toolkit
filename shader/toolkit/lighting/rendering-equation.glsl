@@ -59,7 +59,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     light_data.lightSource = light.light;
     light_data.illuminance = sphereLightIlluminance(worldNormal, worldPosition, sphere);
-    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, sphere, surface);
+    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, sphere, surface, surface.dominant_specular_dir);
     
     outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
@@ -79,7 +79,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     light_data.lightSource = light.light;
     light_data.illuminance = rectAreaLightIlluminance(worldPosition, worldNormal, rect);
-    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, rect, surface);
+    light_data.direction_to_light = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light, rect, surface, surface.dominant_specular_dir);
     
     outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
