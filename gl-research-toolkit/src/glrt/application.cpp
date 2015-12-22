@@ -2,6 +2,8 @@
 
 #include <glhelper/gl.hpp>
 
+#include <sdk/add_on/scriptstdstring/scriptstdstring.h>
+
 namespace glrt {
 
 
@@ -115,6 +117,8 @@ void Application::initAngelScript()
   scriptEngine = AngelScript::asCreateScriptEngine();
 
   AngelScriptIntegration::init_message_callback_qt(scriptEngine);
+  AngelScript::RegisterStdString(scriptEngine);
+  AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
 }
 
 void Application::deinitAngelScript()
