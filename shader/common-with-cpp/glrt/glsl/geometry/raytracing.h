@@ -7,6 +7,14 @@
 
 // ======== Ray ================================================================
 
+Ray ray_from_two_points(vec3 from, vec3 to)
+{
+  Ray r;
+  r.direction = normalize(to-from);
+  r.origin = from;
+  return r;
+}
+
 vec3 get_point(in Ray ray, float t)
 {
   return ray.origin + ray.direction * t;
@@ -16,12 +24,28 @@ vec3 get_point(in Ray ray, float t)
 
 vec3 nearest_point(in Ray ray, in vec3 point)
 {
-  return ray.origin + ray.direction * max(0.f, dot(ray.direction, point));
+  return ray.origin + ray.direction * max(0.f, dot(ray.direction, point-ray.origin));
 }
 
 vec3 nearest_point_unclamped(in Ray ray, in vec3 point)
 {
   return ray.origin + ray.direction * dot(ray.direction, point-ray.origin);
+}
+
+vec3 nearest_point_clamped(in Ray ray, in vec3 point, float min, float max)
+{
+  return ray.origin + ray.direction * clamp(dot(ray.direction, point-ray.origin), min, max);
+}
+
+vec3 nearest_point_to_line_segment(vec3 from, vec3 to, in vec3 point)
+{
+  Ray r;
+  r.direction = to-from;
+  r.origin = from;
+  float len = length(r.direction);
+  r.direction /= len;
+  
+  return nearest_point_clamped(r, point, 0.f, len);
 }
 
 // ---- distance
@@ -94,6 +118,11 @@ Plane plane_from_three_points(in vec3 a, in vec3 b, in vec3 c)
 Plane plane_from_rect(in Rect rect)
 {
   return plane_from_tangents(rect.tangent1, rect.tangent2, rect.origin);
+}
+
+Plane plane_for_projection(in Ray ray, float image_plane_distance)
+{
+  return plane_from_normal(ray.direction, get_point(ray, image_plane_distance));
 }
 
 // ---- distances
@@ -176,6 +205,18 @@ bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
   return intersects;
 }
 
+// TODO: what if point is equal wo view_position?
+vec3 perspective_projection_unclamped(in Plane plane, in vec3 view_position, in vec3 point)
+{
+  Ray ray;
+  ray.direction = normalize(point-view_position);
+  ray.origin = view_position;
+      
+  vec3 intersection_point;
+  intersection_point_unclamped(plane, ray, intersection_point);
+  return intersection_point;
+}
+
 
 // ======== Sphere =============================================================
 
@@ -215,4 +256,21 @@ vec3 clamp_point_to_rect(in Rect rect, in vec3 point)
   return map_point_from_rect_plane(rect, clamp_point_to_rect(rect, map_point_to_rect_plane(rect, point)));
 }
 
+bool contains_mapped_point(in Rect rect, in vec2 p)
+{
+  return p.x >= -rect.half_width && p.y >= -rect.half_height && p.x <= rect.half_width && p.y <= rect.half_height;
+}
+
+bool contains_mapped_point(in Rect rect, in vec3 p)
+{
+  return contains_mapped_point(rect, map_point_to_rect_plane(rect, p));
+}
+
+bool intersects_unclamped(in Rect rect, in Ray ray)
+{
+  Plane plane = plane_from_rect(rect);
+  
+  vec3 p;
+  return intersection_point_unclamped(plane, ray, p) && contains_mapped_point(rect, p);
+}
 

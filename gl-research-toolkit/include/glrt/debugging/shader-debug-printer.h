@@ -15,6 +15,7 @@ class ShaderDebugPrinter final
 {
 public:
   gui::TweakBarCBVar<bool> guiToggle;
+  bool clearScene;
 
   ShaderDebugPrinter();
   ~ShaderDebugPrinter();

@@ -7,51 +7,70 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   return (disk.origin-surface.position) / light_distance;
 }
 
+
 vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distance, in Rect rect, in SurfaceData surface, in vec3 dominant_reflection_direction)
 {
-  vec2 half_size = vec2(rect.half_width, rect.half_height);
-  
-  vec3 reflection_direction = dominant_reflection_direction;
-  
-  float width = rect.half_width*2.f;
-  float height = rect.half_height*2.f;
-  
-  vec3 half_axis1 = rect.tangent1*rect.half_width;
-  vec3 half_axis2 = rect.tangent2*rect.half_height;
-  vec3 axis1 = half_axis1*2.f;
-  vec3 axis2 = half_axis2*2.f;
-  vec3 origin = rect.origin - surface.position - half_axis1 - half_axis2;
-  
-  float t1 =_closestPointToLine_unclamped(origin,
-                                          axis1,
-                                          sq(width),
-                                          reflection_direction);
-  float t2 =_closestPointToLine_unclamped(origin,
-                                          axis2,
-                                          sq(height),
-                                          reflection_direction);
+  float rect_radius = mix(rect.half_width, rect.half_height, 0.5f);
 
-  vec2 t_lines = vec2(t1, t2);
-  t_lines = abs(t_lines);
-  t_lines = clamp(t_lines, vec2(0), vec2(1));
+  // TODO improve performance
+  rect.origin -= surface.position;
   
-  // try hiding the artifacts by using a fallback mode if the reflection ray is more parallel to the axis
-  vec2 t_nearest_edge = vec2(dot(-origin, rect.tangent1) / width,
-                             dot(-origin, rect.tangent2) / height);
-  t_nearest_edge = clamp(t_nearest_edge, vec2(0), vec2(1));
+  Plane rect_plane = plane_from_rect(rect);
   
-  vec2 weight = abs(vec2(dot(reflection_direction, rect.tangent1),
-                         dot(reflection_direction, rect.tangent2)));
-                         
-  vec2 t = mix(t_lines, t_nearest_edge, 0);
+  Ray reflection_ray;
+  reflection_ray.direction = dominant_reflection_direction;
+  reflection_ray.origin = vec3(0);
   
-  vec3 nearest_point = origin + t.x*axis1 + t.y*axis2;
+  Ray r = reflection_ray;
+  r.origin += surface.position;
   
-  light_distance = length(nearest_point);
-  float radius = mix(rect.half_width, rect.half_height, 0.5f);
   
-  vec3 l = nearest_point / light_distance;
+  if(!intersects_unclamped(rect, reflection_ray))
+  {
+    vec3 p[4];
+    p[0] = rect.origin + -rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
+    p[1] = rect.origin + -rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
+    p[2] = rect.origin +  rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
+    p[3] = rect.origin +  rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
+    
+    const float distance_to_projection_plane = min(rect.half_width, rect.half_height);
+    float image_plane = min4(dot(reflection_ray.direction, p[0]),
+                             dot(reflection_ray.direction, p[1]),
+                             dot(reflection_ray.direction, p[2]),
+                             dot(reflection_ray.direction, p[3]));
+    vec3 projection_center = reflection_ray.direction * (image_plane-distance_to_projection_plane);
+    reflection_ray.origin = projection_center;
+    
+    vec3 image_center = get_point(reflection_ray, distance_to_projection_plane);
+    Plane projection_plane = plane_from_normal(reflection_ray.direction, image_center);
+    
+    for(int i=0; i<4; ++i)
+      p[i] = perspective_projection_unclamped(projection_plane, projection_center, p[i]);
+      
+    vec4 distances;
+    vec3 nearest[4];
+    
+    for(int i=0; i<4; ++i)
+    {
+      int j = (i+1) % 4;
+      nearest[i] = nearest_point_to_line_segment(p[i], p[j], image_center);
+      distances[i] = sq(nearest[i]-image_center);
+    }
+    
+    int best_index = index_of_min_component(distances);
+    
+    vec3 best_point = nearest[best_index];
   
-  specularEnergyFactor = mrp_specular_correction_factor_area(radius, light_distance, surface);
+    reflection_ray.direction = normalize(best_point-projection_center);
+  }
+  
+  vec3 mrp;
+  intersection_point_unclamped(rect_plane, reflection_ray, mrp);
+  
+  light_distance = length(mrp);
+  vec3 l = mrp / light_distance;
+  
+  specularEnergyFactor = mrp_specular_correction_factor_area(rect_radius, light_distance, surface);
+  
   return l;
 }
