@@ -11,9 +11,17 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
     sdlWindow(system.sdlWindow),
     isRunning(true)
 {
+  scriptEngine = asCreateScriptEngine();
+
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_EXTERNAL_SHADER_DIR).absolutePath());
+}
+
+
+Application::~Application()
+{
+  scriptEngine->ShutDownAndRelease();
 }
 
 
