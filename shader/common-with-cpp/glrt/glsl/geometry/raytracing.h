@@ -24,7 +24,7 @@ vec3 get_point(in Ray ray, float t)
 
 vec3 nearest_point(in Ray ray, in vec3 point)
 {
-  return ray.origin + ray.direction * max(0.f, dot(ray.direction, point));
+  return ray.origin + ray.direction * max(0.f, dot(ray.direction, point-ray.origin));
 }
 
 vec3 nearest_point_unclamped(in Ray ray, in vec3 point)
