@@ -7,6 +7,14 @@
 
 // ======== Ray ================================================================
 
+Ray ray_from_two_points(vec3 from, vec3 to)
+{
+  Ray r;
+  r.direction = normalize(to-from);
+  r.origin = from;
+  return r;
+}
+
 vec3 get_point(in Ray ray, float t)
 {
   return ray.origin + ray.direction * t;
@@ -22,6 +30,22 @@ vec3 nearest_point(in Ray ray, in vec3 point)
 vec3 nearest_point_unclamped(in Ray ray, in vec3 point)
 {
   return ray.origin + ray.direction * dot(ray.direction, point-ray.origin);
+}
+
+vec3 nearest_point_clamped(in Ray ray, in vec3 point, float min, float max)
+{
+  return ray.origin + ray.direction * clamp(dot(ray.direction, point-ray.origin), min, max);
+}
+
+vec3 nearest_point_to_line_segment(vec3 from, vec3 to, in vec3 point)
+{
+  Ray r;
+  r.direction = to-from;
+  r.origin = from;
+  float len = length(r.direction);
+  r.direction /= len;
+  
+  return nearest_point_clamped(r, point, 0.f, len);
 }
 
 // ---- distance

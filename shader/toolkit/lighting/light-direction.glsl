@@ -54,16 +54,24 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
     
     PRINT_PROJ(image_center);
     
+    vec3 nearest[4];
+    
     for(int i=0; i<4; ++i)
     {
-      PRINT_PROJ(p[i]);
       int j = (i+1) % 4;
-      p[i] = closestPointToLine_twoPoints(p[i], p[j], dominant_reflection_direction);
-      distances[i] = sq(p[i]-image_center);
+      //nearest[i] = closestPointToLine_twoPoints(p[i], p[j], dominant_reflection_direction);
+      nearest[i] = nearest_point_to_line_segment(p[i], p[j], image_center);
+      distances[i] = sq(nearest[i]-image_center);
+      
+      if(i==0)
+      {
         PRINT_PROJ(p[i]);
+        PRINT_PROJ(p[j]);
+        PRINT_PROJ(nearest[i]);
+      }
     }
     
-    vec3 best_point = p[index_of_min_component(distances)];
+    vec3 best_point = nearest[index_of_min_component(distances)];
   
     reflection_ray.direction = normalize(best_point);
   }
