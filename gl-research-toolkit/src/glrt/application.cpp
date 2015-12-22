@@ -11,7 +11,7 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
     sdlWindow(system.sdlWindow),
     isRunning(true)
 {
-  scriptEngine = asCreateScriptEngine();
+  initAngelScript();
 
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
@@ -21,7 +21,7 @@ Application::Application(int argc, char** argv, const System::Settings& systemSe
 
 Application::~Application()
 {
-  scriptEngine->ShutDownAndRelease();
+  deinitAngelScript();
 }
 
 
@@ -110,6 +110,15 @@ bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
   }
 }
 
+void Application::initAngelScript()
+{
+  scriptEngine = asCreateScriptEngine();
+}
+
+void Application::deinitAngelScript()
+{
+  scriptEngine->ShutDownAndRelease();
+}
 
 } // namespace glrt
 
