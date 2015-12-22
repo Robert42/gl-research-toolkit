@@ -25,4 +25,4 @@ target_link_libraries(AntTweakBar INTERFACE ${GLEW_LIBRARY} ${OPENGL_gl_LIBRARY}
 add_subdirectory(shader EXCLUDE_FROM_ALL)
 
 ######## Angelscript ###########################################################
-add_subdirectory(angelscript-integration REQUIRED)
+add_subdirectory(angelscript-integration)
