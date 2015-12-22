@@ -101,6 +101,25 @@ void test_raytracing_plane()
   EXPECT_EQ(intersection_distance(plane2, ray4), 3);
 }
 
+void test_projection_plane()
+{
+  Plane projection_plane;
+  vec3 p[2];
+
+  projection_plane.normal = vec3(0, 0, 1);
+  projection_plane.d = 1;
+
+
+  p[0] = vec3(84, 46, 2);
+  p[1] = vec3(-84, -46, -2);
+
+  for(int i=0; i<2; ++i)
+  {
+    p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
+    EXPECT_NEAR(p[i], vec3(42, 23, 1));
+  }
+}
+
 
 int main(int argc, char** argv)
 {
@@ -111,6 +130,7 @@ int main(int argc, char** argv)
   test_ray_distance();
   test_ray_nearest_point();
   test_raytracing_plane();
+  test_projection_plane();
 
   return 0;
 }
