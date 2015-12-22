@@ -6,7 +6,8 @@ using glm::vec2;
 using glm::vec3;
 using glm::vec4;
 
-#define EXPECT_NEAR(value, expected) if(distance(value, expected) > 0.00001f){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
+#define EXPECT_NEAR_EPSILON(value, expected, epsilon) if(distance(value, expected) > epsilon){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
+#define EXPECT_NEAR(value, expected) EXPECT_NEAR_EPSILON(value, expected, 0.0001f)
 #define EXPECT_EQ(value, expected) if(value!=expected){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
 #define EXPECT_TRUE(value) EXPECT_EQ(value, true);
 #define EXPECT_FALSE(value) EXPECT_EQ(value, false);
@@ -118,6 +119,16 @@ void test_projection_plane()
     p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
     EXPECT_NEAR(p[i], vec3(42, 23, 1));
   }
+
+
+  projection_plane.normal = vec3(-0.794387, 0.571432, -0.205950);
+  projection_plane.d = 1;
+  p[0] = vec3(-0.150000, 0.317287, 0.569994);
+  p[1] = vec3(-0.150000, 0.087474, 0.762831);
+  for(int i=0; i<2; ++i)
+    p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
+  EXPECT_NEAR(p[0], vec3(-0.819333, 1.733090, 3.113433));
+  EXPECT_NEAR_EPSILON(p[1], vec3(-12.459891, 7.266071, 63.365238), 0.001f);
 }
 
 
