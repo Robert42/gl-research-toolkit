@@ -80,4 +80,5 @@ target_link_libraries(glrt
   glhelper
   Qt5::Gui
   AntTweakBar
+  angelscript
 )

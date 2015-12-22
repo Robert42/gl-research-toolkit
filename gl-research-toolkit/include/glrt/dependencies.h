@@ -14,6 +14,8 @@
 
 #include <AntTweakBar.h>
 
+#include <angelscript.h>
+
 #include <QDebug>
 #include <QString>
 #include <QDir>
