@@ -133,6 +133,8 @@ ShaderDebugPrinter::ShaderDebugPrinter()
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
     directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug))
 {
+  clearScene = false;
+
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
     this->active = active;
@@ -214,6 +216,9 @@ void ShaderDebugPrinter::draw()
 {
   if(!active)
     return;
+
+  if(clearScene)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   positionVisualization.render();
   directionVisualization.render();
