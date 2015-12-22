@@ -112,7 +112,9 @@ bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
 
 void Application::initAngelScript()
 {
-  scriptEngine = asCreateScriptEngine();
+  scriptEngine = AngelScript::asCreateScriptEngine();
+
+  AngelScriptIntegration::init_message_callback_qt(scriptEngine);
 }
 
 void Application::deinitAngelScript()

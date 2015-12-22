@@ -28,7 +28,7 @@ public:
   System system;
   Settings settings;
   SDL_Window* const sdlWindow;
-  asIScriptEngine* scriptEngine;
+  AngelScript::asIScriptEngine* scriptEngine;
 
   Profiler profiler;
 
