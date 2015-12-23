@@ -24,17 +24,9 @@
 namespace glrt {
 
 System::System(int& argc, char** argv, const Settings& settings)
-  : application(argc, argv),
-    splashscreen(defaultSplashscreenPixmap())
+  : application(argc, argv)
 {
-  splashscreen.show();
-  splashscreen.repaint();
-  application.processEvents();
-  for(int i=0; i<10; ++i)
-  {
-    QThread::currentThread()->msleep(10);
-    application.processEvents();
-  }
+  initSplashscreen(settings);
 
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]
   std::locale::global(std::locale("C"));
@@ -63,6 +55,19 @@ void System::showWindow()
   SDL_ShowWindow(sdlWindow);
 }
 
+void System::initSplashscreen(const Settings& settings)
+{
+  splashscreen.setPixmap(defaultSplashscreenPixmap(settings.windowTitle));
+  splashscreen.show();
+  splashscreen.repaint();
+  application.processEvents();
+  for(int i=0; i<10; ++i)
+  {
+    QThread::currentThread()->msleep(10);
+    application.processEvents();
+  }
+
+}
 
 void System::initSDL(const Settings& settings)
 {

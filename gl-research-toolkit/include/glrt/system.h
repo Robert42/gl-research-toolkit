@@ -45,7 +45,7 @@ public:
   SDL_Window* sdlWindow;
   SDL_GLContext sdlGlContext;
 
-  static QPixmap defaultSplashscreenPixmap();
+  static QPixmap defaultSplashscreenPixmap(const QString& title);
 
   System(int& argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
@@ -57,6 +57,7 @@ private:
   QSplashScreen splashscreen;
   Logger logger;
 
+  void initSplashscreen(const Settings& settings);
   void initSDL(const Settings& settings);
   void initGLEW(const Settings& settings);
   void verifyGLFeatures();
