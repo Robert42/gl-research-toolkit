@@ -119,7 +119,7 @@ void Application::initAngelScript()
   AngelScript::RegisterStdString(scriptEngine);
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
 
-  AngelScriptIntegration::init_glm(scriptEngine);
+  AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
 }
 
 void Application::deinitAngelScript()
