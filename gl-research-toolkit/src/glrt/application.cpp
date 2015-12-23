@@ -7,7 +7,7 @@
 namespace glrt {
 
 
-Application::Application(int argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
+Application::Application(int& argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
   : system(argc, argv, systemSettings),
     settings(applicationSettings),
     sdlWindow(system.sdlWindow),

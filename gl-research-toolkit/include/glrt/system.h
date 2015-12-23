@@ -4,7 +4,7 @@
 #include "dependencies.h"
 #include "toolkit/logger.h"
 
-#include <QCoreApplication>
+#include <QApplication>
 
 namespace glrt {
 
@@ -44,13 +44,13 @@ public:
   SDL_Window* sdlWindow;
   SDL_GLContext sdlGlContext;
 
-  System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
+  System(int& argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
 
   void showWindow();
 
 private:
-  QCoreApplication application;
+  QApplication application;
   Logger logger;
 
   void initSDL(const Settings& settings);

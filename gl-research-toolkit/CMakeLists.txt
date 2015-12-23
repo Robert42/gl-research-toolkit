@@ -21,7 +21,7 @@ option(GLRT_PROFILER "If Disabled, there the profiler is reducuced to elminate t
 
 
 find_package(SDL2 REQUIRED)
-find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 find_package(ASSIMP REQUIRED)
 
 
@@ -78,7 +78,7 @@ target_link_libraries(glrt
   ${SDL2_LIBRARIES}
   ${ASSIMP_LIBRARY}
   glhelper
-  Qt5::Gui
+  Qt5::Widgets
   AntTweakBar
   angelscript-addon-stdstring
   angelscript-interaction

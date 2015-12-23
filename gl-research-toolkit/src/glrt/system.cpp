@@ -21,7 +21,7 @@
 
 namespace glrt {
 
-System::System(int argc, char** argv, const Settings& settings)
+System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
 {
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]

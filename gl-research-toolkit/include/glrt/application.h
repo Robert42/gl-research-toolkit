@@ -33,7 +33,7 @@ public:
 
   bool isRunning;
 
-  Application(int argc, char** argv, const System::Settings& systemSettings = System::Settings::simpleWindow(), const Application::Settings& applicationSettings=Settings::techDemo());
+  Application(int& argc, char** argv, const System::Settings& systemSettings = System::Settings::simpleWindow(), const Application::Settings& applicationSettings=Settings::techDemo());
   ~Application();
 
   bool pollEvent(SDL_Event* event);
