@@ -21,7 +21,6 @@ set(SOURCE_FILES
   include/glrt/scene/static-mesh.h
   include/glrt/system.h
   include/glrt/toolkit/aligned-vector.h
-  include/glrt/toolkit/antifreeze.h
   include/glrt/toolkit/assimp-glm-converter.h
   include/glrt/toolkit/geometry.h
   include/glrt/toolkit/json.h
@@ -51,7 +50,6 @@ set(SOURCE_FILES
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/scene/static-mesh.cpp
   src/glrt/system.cpp
-  src/glrt/toolkit/antifreeze.cpp
   src/glrt/toolkit/json.cpp
   src/glrt/toolkit/logger.cpp
   src/glrt/toolkit/reloadable-shader.cpp

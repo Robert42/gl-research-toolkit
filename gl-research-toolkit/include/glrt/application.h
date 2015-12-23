@@ -4,7 +4,6 @@
 #include "system.h"
 #include "profiler.h"
 #include "debug-camera.h"
-#include "toolkit/antifreeze.h"
 
 namespace glrt {
 
@@ -43,8 +42,6 @@ public:
   void swapWindow();
 
 private:
-  Antifreeze antifreeze;
-
   bool handleEvent(const SDL_Event& event);
   bool handleWindowEvent(const SDL_WindowEvent& event);
   bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
