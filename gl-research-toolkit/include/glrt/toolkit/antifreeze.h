@@ -25,7 +25,7 @@ private:
   {
     std::atomic<quint32> frame_id;
     int numberSecondsToWait = 5;
-    bool running;
+    bool running = true;
   };
 
   Data* data;
