@@ -119,6 +119,8 @@ void Application::initAngelScript()
   AngelScriptIntegration::init_message_callback_qt(scriptEngine);
   AngelScript::RegisterStdString(scriptEngine);
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
+
+  AngelScriptIntegration::init_glm(scriptEngine);
 }
 
 void Application::deinitAngelScript()
