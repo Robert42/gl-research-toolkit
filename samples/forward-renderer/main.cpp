@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 
   scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
 
-  AngelScriptIntegration::callScript<void>(app.scriptEngine, GLRT_ASSET_DIR"/common/scripts/hello-world.as", "void main()", "test");
+  qInfo() << AngelScriptIntegration::callScript<int>(app.scriptEngine, GLRT_ASSET_DIR"/common/scripts/hello-world.as", "int main(int)", "test", 6);
 
   while(app.isRunning)
   {
