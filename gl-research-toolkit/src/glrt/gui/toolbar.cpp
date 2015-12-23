@@ -16,8 +16,7 @@ Toolbar::Toolbar()
 
 Toolbar::~Toolbar()
 {
-  if(tweakBar != nullptr)
-    TwDeleteBar(tweakBar);
+  Q_ASSERT_X(tweakBar == nullptr, "glrt::gui::Toolbar::~Toolbar()", "You forgot to call Toolbar::deinit()");
 }
 
 void Toolbar::init()
@@ -29,6 +28,13 @@ void Toolbar::init()
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Toggles the visibilty of other tweak bars");
   TwSetParam(tweakBar, nullptr, "position", TW_PARAM_INT32, 2, &pos);
   TwSetParam(tweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
+}
+
+void Toolbar::deinit()
+{
+  if(tweakBar != nullptr)
+    TwDeleteBar(tweakBar);
+  tweakBar = nullptr;
 }
 
 void Toolbar::registerTweakBar(TwBar *tweakBar, bool hideNow)

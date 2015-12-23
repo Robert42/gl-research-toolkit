@@ -19,6 +19,7 @@ public:
   static void unregisterTweakBar(TwBar* tweakBar);
 
   void init();
+  void deinit();
 
 private:
   static void setBarIconified(const bool *value, TwBar* bar);

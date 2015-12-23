@@ -27,7 +27,6 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     TwSetParam(nullptr, nullptr, "help", TW_PARAM_CSTRING, 1, settings.globalDescription.toStdString().c_str());
 
   toolbar.init();
-
 }
 
 
@@ -35,6 +34,10 @@ AntTweakBar::~AntTweakBar()
 {
   cameraSwitcher.clear();
   sceneSwitcher.clear();
+
+  toolbar.deinit();
+  TwTerminate();
+
 }
 
 
