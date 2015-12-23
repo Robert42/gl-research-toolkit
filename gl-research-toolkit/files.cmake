@@ -49,6 +49,7 @@ set(SOURCE_FILES
   src/glrt/scene/scene-renderer.cpp
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/scene/static-mesh.cpp
+  src/glrt/splashscreen.cpp
   src/glrt/system.cpp
   src/glrt/toolkit/json.cpp
   src/glrt/toolkit/logger.cpp

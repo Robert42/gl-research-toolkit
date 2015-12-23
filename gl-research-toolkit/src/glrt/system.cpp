@@ -3,6 +3,8 @@
 
 #include <glrt/glsl/layout-constants.h>
 
+#include <QThread>>
+
 
 /*! \namespace glrt
 \ingroup glrt
@@ -22,8 +24,18 @@
 namespace glrt {
 
 System::System(int& argc, char** argv, const Settings& settings)
-  : application(argc, argv)
+  : application(argc, argv),
+    splashscreen(defaultSplashscreenPixmap())
 {
+  splashscreen.show();
+  splashscreen.repaint();
+  application.processEvents();
+  for(int i=0; i<10; ++i)
+  {
+    QThread::currentThread()->msleep(10);
+    application.processEvents();
+  }
+
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]
   std::locale::global(std::locale("C"));
 
@@ -47,6 +59,7 @@ System::~System()
 
 void System::showWindow()
 {
+  splashscreen.finish(nullptr);
   SDL_ShowWindow(sdlWindow);
 }
 

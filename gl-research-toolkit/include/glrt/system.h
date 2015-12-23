@@ -5,6 +5,7 @@
 #include "toolkit/logger.h"
 
 #include <QApplication>
+#include <QSplashScreen>
 
 namespace glrt {
 
@@ -44,6 +45,8 @@ public:
   SDL_Window* sdlWindow;
   SDL_GLContext sdlGlContext;
 
+  static QPixmap defaultSplashscreenPixmap();
+
   System(int& argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
 
@@ -51,6 +54,7 @@ public:
 
 private:
   QApplication application;
+  QSplashScreen splashscreen;
   Logger logger;
 
   void initSDL(const Settings& settings);
