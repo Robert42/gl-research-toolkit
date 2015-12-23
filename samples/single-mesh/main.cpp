@@ -94,6 +94,8 @@ int main(int argc, char** argv)
   // reserve some GPU space for the uniforms
   gl::Buffer uniformBlock(sizeof(TestUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr);
 
+  app.showWindow();
+
   // ======== Main Loop ========
   glEnable(GL_DEPTH_TEST);
   while(app.isRunning)

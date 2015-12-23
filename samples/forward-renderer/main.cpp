@@ -31,6 +31,8 @@ int main(int argc, char** argv)
 
   qInfo() << AngelScriptIntegration::callScript<int>(app.scriptEngine, GLRT_ASSET_DIR"/common/scripts/hello-world.as", "int main(int)", "test", 6);
 
+  app.showWindow();
+
   while(app.isRunning)
   {
     SDL_Event event;

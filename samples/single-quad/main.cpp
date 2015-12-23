@@ -42,6 +42,9 @@ int main(int argc, char** argv)
   orangeShader.CreateProgram();
 
 
+  app.showWindow();
+
+
   while(app.isRunning)
   {
     SDL_Event event;

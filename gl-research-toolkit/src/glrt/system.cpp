@@ -45,6 +45,12 @@ System::~System()
 }
 
 
+void System::showWindow()
+{
+  SDL_ShowWindow(sdlWindow);
+}
+
+
 void System::initSDL(const Settings& settings)
 {
   CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0);
@@ -68,9 +74,6 @@ void System::initSDL(const Settings& settings)
   {
     CALL_SDL(SDL_GL_SetSwapInterval(0)  == 0);
   }
-
-
-  SDL_ShowWindow(sdlWindow);
 }
 
 

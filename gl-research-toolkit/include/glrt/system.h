@@ -47,6 +47,8 @@ public:
   System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
 
+  void showWindow();
+
 private:
   QCoreApplication application;
   Logger logger;

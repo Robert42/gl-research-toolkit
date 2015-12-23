@@ -51,6 +51,12 @@ float Application::update()
 }
 
 
+void Application::showWindow()
+{
+  system.showWindow();
+}
+
+
 void Application::swapWindow()
 {
   SDL_GL_SwapWindow(sdlWindow);

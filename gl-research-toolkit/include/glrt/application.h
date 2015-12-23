@@ -39,6 +39,7 @@ public:
   bool pollEvent(SDL_Event* event);
   float update();
 
+  void showWindow();
   void swapWindow();
 
 private:

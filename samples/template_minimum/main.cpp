@@ -8,6 +8,8 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("TemplateMinimum"));
 
+  app.showWindow();
+
   while(app.isRunning)
   {
     SDL_Event event;
