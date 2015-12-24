@@ -34,6 +34,7 @@ void showSplashscreenMessage(const QString& message)
 
   Logger::SuppressDebug suppressLog;
   qDebug() << "Show SplashScreen message: " << message;
+  Q_UNUSED(suppressLog);
 }
 
 
