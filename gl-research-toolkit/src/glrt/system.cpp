@@ -3,8 +3,6 @@
 
 #include <glrt/glsl/layout-constants.h>
 
-#include <QThread>>
-
 
 /*! \namespace glrt
 \ingroup glrt
@@ -51,22 +49,23 @@ System::~System()
 
 void System::showWindow()
 {
-  splashscreen.finish(nullptr);
+  Q_ASSERT(splashscreen != nullptr);
+  splashscreen->finish(nullptr);
+  delete splashscreen;
+  splashscreen = nullptr;
+
   SDL_ShowWindow(sdlWindow);
 }
 
 void System::initSplashscreen(const Settings& settings)
 {
-  splashscreen.setPixmap(defaultSplashscreenPixmap(settings.windowTitle));
-  splashscreen.show();
-  splashscreen.repaint();
-  application.processEvents();
-  for(int i=0; i<10; ++i)
-  {
-    QThread::currentThread()->msleep(10);
-    application.processEvents();
-  }
+  SplashscreenStyle* splashscreenStyle = settings.splashscreenStyle;
 
+  if(splashscreenStyle == nullptr)
+    splashscreenStyle = SplashscreenStyle::createFallbackStyle(settings.windowTitle);
+
+  Q_ASSERT(splashscreen == nullptr);
+  splashscreen = splashscreenStyle->createQSplashScreen(true);
 }
 
 void System::initSDL(const Settings& settings)

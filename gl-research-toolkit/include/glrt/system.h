@@ -3,6 +3,7 @@
 
 #include "dependencies.h"
 #include "toolkit/logger.h"
+#include "toolkit/splashscreen-style.h"
 
 #include <QApplication>
 #include <QSplashScreen>
@@ -16,6 +17,7 @@ public:
   {
     QString windowTitle = "Hello World :)";
     glm::ivec2 windowSize = glm::ivec2(640, 480);
+    SplashscreenStyle* splashscreenStyle = nullptr;
     int minOpenglVersion = 450;
     bool VSync = true;
 
@@ -45,8 +47,6 @@ public:
   SDL_Window* sdlWindow;
   SDL_GLContext sdlGlContext;
 
-  static QPixmap defaultSplashscreenPixmap(const QString& title);
-
   System(int& argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
 
@@ -54,7 +54,7 @@ public:
 
 private:
   QApplication application;
-  QSplashScreen splashscreen;
+  QSplashScreen* splashscreen = nullptr;
   Logger logger;
 
   void initSplashscreen(const Settings& settings);
