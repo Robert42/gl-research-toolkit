@@ -1,4 +1,5 @@
 #include <glrt/toolkit/splashscreen-style.h>
+#include <glrt/toolkit/logger.h>
 
 #include <QApplication>
 #include <QThread>
@@ -31,6 +32,7 @@ void showSplashscreenMessage(const QString& message)
   if(messageHandler)
     messageHandler(message);
 
+  Logger::SuppressDebug suppressLog;
   qDebug() << "Show SplashScreen message: " << message;
 }
 
