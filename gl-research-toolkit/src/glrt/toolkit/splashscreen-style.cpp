@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QThread>
+#include <QPainter>
 
 namespace glrt {
 
@@ -46,7 +47,11 @@ QSplashScreen* SplashscreenStyle::createQSplashScreen(bool takeOwnershipOfStyle)
         delete style;
     }
 
-    // #TODO paint
+    void drawContents(QPainter* painter) override final
+    {
+      style->paint(painter, message());
+    }
+
     // #TODO catch qdebug messages
   };
 
@@ -60,6 +65,8 @@ QSplashScreen* SplashscreenStyle::createQSplashScreen(bool takeOwnershipOfStyle)
     QThread::currentThread()->msleep(10);
     qApp->processEvents();
   }
+
+  splashscreen->showMessage("Hello World!");
 
   return splashscreen;
 }
@@ -107,11 +114,6 @@ SplashscreenStyle* SplashscreenStyle::createFallbackStyle(const QString& title, 
                        totalSize.width()-titleMargin*2,
                        totalSize.height()-titleMargin*2-messageAreaHeight);
 
-      QRectF messageArea(messageMargin,
-                         totalSize.height()-messageAreaHeight+messageMargin,
-                         totalSize.width()-messageMargin*2,
-                         messageAreaHeight-messageMargin*2);
-
       QRectF messageBGArea(0,
                            totalSize.height()-messageAreaHeight,
                            totalSize.width(),
@@ -140,7 +142,16 @@ SplashscreenStyle* SplashscreenStyle::createFallbackStyle(const QString& title, 
 
     void paint(QPainter* painter, const QString& message) override final
     {
-      // #TODO
+      QRectF messageArea(messageMargin,
+                         totalSize.height()-messageSize-messageMargin,
+                         totalSize.width()-messageMargin*2,
+                         messageSize);
+
+      QFont font = painter->font();
+      font.setPixelSize(messageSize);
+      painter->setFont(font);
+      painter->setPen(QPen(QColor::fromRgb(0x555753)));
+      painter->drawText(messageArea, Qt::AlignVCenter|Qt::AlignLeft, message);
     }
   };
 
