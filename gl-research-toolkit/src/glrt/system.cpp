@@ -21,9 +21,11 @@
 
 namespace glrt {
 
-System::System(int argc, char** argv, const Settings& settings)
+System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
 {
+  initSplashscreen(settings);
+
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]
   std::locale::global(std::locale("C"));
 
@@ -45,8 +47,31 @@ System::~System()
 }
 
 
+void System::showWindow()
+{
+  Q_ASSERT(splashscreen != nullptr);
+  splashscreen->finish(nullptr);
+  delete splashscreen;
+  splashscreen = nullptr;
+
+  SDL_ShowWindow(sdlWindow);
+}
+
+void System::initSplashscreen(const Settings& settings)
+{
+  SplashscreenStyle* splashscreenStyle = settings.splashscreenStyle;
+
+  if(splashscreenStyle == nullptr)
+    splashscreenStyle = SplashscreenStyle::createFallbackStyle(settings.windowTitle);
+
+  Q_ASSERT(splashscreen == nullptr);
+  splashscreen = splashscreenStyle->createQSplashScreen(true);
+}
+
 void System::initSDL(const Settings& settings)
 {
+  showSplashscreenMessage("init SDL");
+
   CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0);
 
   sdlWindow = SDL_CreateWindow(settings.windowTitle.toUtf8().data(),
@@ -68,14 +93,13 @@ void System::initSDL(const Settings& settings)
   {
     CALL_SDL(SDL_GL_SetSwapInterval(0)  == 0);
   }
-
-
-  SDL_ShowWindow(sdlWindow);
 }
 
 
 void System::initGLEW(const Settings& settings)
 {
+  showSplashscreenMessage("init GLEW");
+
   GLenum error =  glewInit();
   if(error != GLEW_OK)
     throw GLRT_EXCEPTION(QString("Initializing glew failed!\nError: %0").arg(reinterpret_cast<const char*>(glewGetErrorString(error))));
@@ -95,6 +119,8 @@ inline GLint print_gl_integer(GLenum variable, const char* variableName)
 
 void System::verifyGLFeatures()
 {
+  showSplashscreenMessage("verify OpenGL features");
+
   Logger::SuppressDebug suppressLog;
 
   // If a system doesn't support one of there numbers
@@ -115,6 +141,8 @@ void System::verifyGLFeatures()
 
 void System::verifyNVidiaFeatures()
 {
+  showSplashscreenMessage("verify NVidia OpenGL Extension");
+
   // See http://blog.icare3d.org/ for a more complete list of interesting Features
 
   // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fill_rectangle.txt

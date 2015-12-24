@@ -62,6 +62,8 @@ void Scene::update(float deltaTime)
 
 QMap<QString, QString> Scene::findAllScenes()
 {
+  showSplashscreenMessage("search Scenes");
+
   QMap<QString, QString> map;
 
   QDirIterator dirIterator(QDir(GLRT_ASSET_DIR), QDirIterator::Subdirectories|QDirIterator::FollowSymlinks);

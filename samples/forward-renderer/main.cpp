@@ -5,6 +5,8 @@
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/debugging/shader-debug-printer.h>
 
+#include <angelscript-integration/call-script.h>
+
 #include <glhelper/gl.hpp>
 
 
@@ -26,6 +28,10 @@ int main(int argc, char** argv)
   antweakbar.createProfilerBar(&app.profiler);
 
   scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
+
+  qInfo() << AngelScriptIntegration::callScript<int>(app.scriptEngine, GLRT_ASSET_DIR"/common/scripts/hello-world.as", "int main(int)", "test", 6);
+
+  app.showWindow();
 
   while(app.isRunning)
   {

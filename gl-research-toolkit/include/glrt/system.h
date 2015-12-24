@@ -3,8 +3,10 @@
 
 #include "dependencies.h"
 #include "toolkit/logger.h"
+#include "toolkit/splashscreen-style.h"
 
-#include <QCoreApplication>
+#include <QApplication>
+#include <QSplashScreen>
 
 namespace glrt {
 
@@ -15,6 +17,7 @@ public:
   {
     QString windowTitle = "Hello World :)";
     glm::ivec2 windowSize = glm::ivec2(640, 480);
+    SplashscreenStyle* splashscreenStyle = nullptr;
     int minOpenglVersion = 450;
     bool VSync = true;
 
@@ -44,13 +47,17 @@ public:
   SDL_Window* sdlWindow;
   SDL_GLContext sdlGlContext;
 
-  System(int argc, char** argv, const Settings& settings = Settings::simpleWindow());
+  System(int& argc, char** argv, const Settings& settings = Settings::simpleWindow());
   ~System();
 
+  void showWindow();
+
 private:
-  QCoreApplication application;
+  QApplication application;
+  QSplashScreen* splashscreen = nullptr;
   Logger logger;
 
+  void initSplashscreen(const Settings& settings);
   void initSDL(const Settings& settings);
   void initGLEW(const Settings& settings);
   void verifyGLFeatures();

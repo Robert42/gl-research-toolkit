@@ -5,6 +5,7 @@ add_custom_target(
   SOURCES
   mrp/mrp.glsl
   pbs/brdf.glsl
+  pbs/camera.glsl
   pbs/light.glsl
   pbs/material.glsl
   pbs/pbs.glsl

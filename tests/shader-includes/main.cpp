@@ -19,6 +19,8 @@ int main(int argc, char** argv)
   shader.CreateProgram();
   shader.Activate();
 
+  app.showWindow();
+
   while(app.isRunning)
   {
     SDL_Event event;

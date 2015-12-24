@@ -64,6 +64,10 @@ void Logger::messageHandler(QtMsgType msgType,
     std_stream = &std::cout;
     color = QString("#babdb6");
     break;
+  case QtInfoMsg:
+    std_stream = &std::cout;
+    color = QString("#729fcf");
+    break;
   case QtWarningMsg:
     std_stream = &std::cerr;
     color = QString("#fcaf3e");

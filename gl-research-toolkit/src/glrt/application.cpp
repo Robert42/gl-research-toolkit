@@ -2,18 +2,28 @@
 
 #include <glhelper/gl.hpp>
 
+#include <sdk/add_on/scriptstdstring/scriptstdstring.h>
+
 namespace glrt {
 
 
-Application::Application(int argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
+Application::Application(int& argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
   : system(argc, argv, systemSettings),
     settings(applicationSettings),
     sdlWindow(system.sdlWindow),
     isRunning(true)
 {
+  initAngelScript();
+
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_EXTERNAL_SHADER_DIR).absolutePath());
+}
+
+
+Application::~Application()
+{
+  deinitAngelScript();
 }
 
 
@@ -36,9 +46,14 @@ bool Application::pollEvent(SDL_Event* e)
 
 float Application::update()
 {
-  antifreeze.nextFrame();
   float frameDuration = profiler.update();
   return frameDuration;
+}
+
+
+void Application::showWindow()
+{
+  system.showWindow();
 }
 
 
@@ -102,6 +117,21 @@ bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
   }
 }
 
+void Application::initAngelScript()
+{
+  scriptEngine = AngelScript::asCreateScriptEngine();
+
+  AngelScriptIntegration::init_message_callback_qt(scriptEngine);
+  AngelScript::RegisterStdString(scriptEngine);
+  AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
+
+  AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
+}
+
+void Application::deinitAngelScript()
+{
+  scriptEngine->ShutDownAndRelease();
+}
 
 } // namespace glrt
 

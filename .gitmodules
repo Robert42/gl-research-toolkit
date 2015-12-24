@@ -13,3 +13,6 @@
 [submodule "external/assets/common"]
 	path = external/assets/common
 	url = git@github.com:Robert42/gl-research-toolkit-assets.git
+[submodule "external/angelscript-integration"]
+	path = external/angelscript-integration
+	url = git@github.com:Robert42/angelscript-integration.git

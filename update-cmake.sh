@@ -1,5 +1,9 @@
 #! /bin/bash
 
+cd ./external/angelscript-integration/integration
+./update-cmake.sh
+cd - > /dev/null
+
 cd ./external/shader
 ./update-cmake.sh
 cd - > /dev/null

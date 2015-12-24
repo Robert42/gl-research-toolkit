@@ -7,6 +7,7 @@ add_custom_target(
   common-with-cpp/glrt/glsl/compatibility/end.h
   common-with-cpp/glrt/glsl/debugging/printer-types.h
   common-with-cpp/glrt/glsl/geometry/raytracing.h
+  common-with-cpp/glrt/glsl/geometry/structs.h
   common-with-cpp/glrt/glsl/layout-constants.h
   common-with-cpp/glrt/glsl/math.h
   debugging/visualizations/common-debug-line-visualization.fs.glsl
@@ -42,6 +43,7 @@ add_custom_target(
   toolkit/debugging/print.glsl
   toolkit/geometry/transform.glsl
   toolkit/lighting/light-buffers.glsl
+  toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
 )

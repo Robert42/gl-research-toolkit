@@ -1,7 +1,6 @@
 #include <glrt/toolkit/shader-compiler.h>
 #include <glrt/toolkit/temp-shader-file.h>
 #include <glrt/toolkit/logger.h>
-#include <glrt/toolkit/antifreeze.h>
 
 #include <set>
 
@@ -29,8 +28,6 @@ public:
   {
     if(messages.isEmpty())
       return false;
-
-    Antifreeze::Sleep antifreeze;
 
     QString message = messages.join("\n\n");
 
@@ -77,8 +74,6 @@ public:
       std::exit(-1);
     }
 
-    Q_UNUSED(antifreeze);
-
     return result!=INGORE;
   }
 
@@ -115,6 +110,8 @@ ShaderCompiler::ShaderCompiler()
 
 bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
 {
+  showSplashscreenMessage("compile Shader");
+
   ShaderErrorDialog errorDialog;
 
   TempShaderFile tempShaderFile;
