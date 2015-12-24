@@ -70,6 +70,8 @@ void System::initSplashscreen(const Settings& settings)
 
 void System::initSDL(const Settings& settings)
 {
+  showSplashscreenMessage("init SDL");
+
   CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0);
 
   sdlWindow = SDL_CreateWindow(settings.windowTitle.toUtf8().data(),
@@ -96,6 +98,8 @@ void System::initSDL(const Settings& settings)
 
 void System::initGLEW(const Settings& settings)
 {
+  showSplashscreenMessage("init GLEW");
+
   GLenum error =  glewInit();
   if(error != GLEW_OK)
     throw GLRT_EXCEPTION(QString("Initializing glew failed!\nError: %0").arg(reinterpret_cast<const char*>(glewGetErrorString(error))));
@@ -115,6 +119,8 @@ inline GLint print_gl_integer(GLenum variable, const char* variableName)
 
 void System::verifyGLFeatures()
 {
+  showSplashscreenMessage("verify OpenGL features");
+
   Logger::SuppressDebug suppressLog;
 
   // If a system doesn't support one of there numbers
@@ -135,6 +141,8 @@ void System::verifyGLFeatures()
 
 void System::verifyNVidiaFeatures()
 {
+  showSplashscreenMessage("verify NVidia OpenGL Extension");
+
   // See http://blog.icare3d.org/ for a more complete list of interesting Features
 
   // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fill_rectangle.txt

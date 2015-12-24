@@ -15,6 +15,25 @@ SplashscreenStyle::~SplashscreenStyle()
 {
 }
 
+typedef std::function<void(const QString&)> MessageHandler;
+
+inline MessageHandler& getSplashscreenMessageHandler()
+{
+  static MessageHandler messageHandler;
+  return messageHandler;
+}
+
+
+void showSplashscreenMessage(const QString& message)
+{
+  MessageHandler& messageHandler = getSplashscreenMessageHandler();
+
+  if(messageHandler)
+    messageHandler(message);
+
+  qDebug() << "Show SplashScreen message: " << message;
+}
+
 
 /*!
 \brief Creates a new instance of QSplashScreen
@@ -39,10 +58,12 @@ QSplashScreen* SplashscreenStyle::createQSplashScreen(bool takeOwnershipOfStyle)
         takeOwnershipOfStyle(takeOwnershipOfStyle),
         style(style)
     {
+      getSplashscreenMessageHandler() = std::bind(&CustomSplashScreen::messageHandler, this, std::placeholders::_1);
     }
 
     ~CustomSplashScreen()
     {
+      getSplashscreenMessageHandler() = MessageHandler();
       if(takeOwnershipOfStyle)
         delete style;
     }
@@ -52,21 +73,19 @@ QSplashScreen* SplashscreenStyle::createQSplashScreen(bool takeOwnershipOfStyle)
       style->paint(painter, message());
     }
 
-    // #TODO catch qdebug messages
+    void messageHandler(const QString& message)
+    {
+      this->showMessage(message);
+      repaint();
+      qApp->processEvents();
+    }
   };
 
   QSplashScreen* splashscreen = new CustomSplashScreen(takeOwnershipOfStyle, this);
 
   splashscreen->show();
-  splashscreen->repaint();
+  QThread::currentThread()->msleep(50);
   qApp->processEvents();
-  for(int i=0; i<10; ++i)
-  {
-    QThread::currentThread()->msleep(10);
-    qApp->processEvents();
-  }
-
-  splashscreen->showMessage("Hello World!");
 
   return splashscreen;
 }

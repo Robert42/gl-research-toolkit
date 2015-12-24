@@ -110,6 +110,8 @@ ShaderCompiler::ShaderCompiler()
 
 bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
 {
+  showSplashscreenMessage("compile Shader");
+
   ShaderErrorDialog errorDialog;
 
   TempShaderFile tempShaderFile;

@@ -79,7 +79,10 @@ private:
   quint8 _[sizeof(T)*N];
 };
 
+void showSplashscreenMessage(const QString& message);
+
 } // namespace glrt
+
 
 #define GLRT_EXCEPTION(message) Exception(__FILE__, __LINE__, __FUNCTION__, message)
 
