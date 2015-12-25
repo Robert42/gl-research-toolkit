@@ -9,6 +9,7 @@
 #include <glrt/debugging/visualization-renderer.h>
 
 namespace glrt {
+namespace renderer {
 namespace debugging {
 
 class ShaderDebugPrinter final
@@ -53,6 +54,7 @@ private:
 };
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt
 
 #endif // GLRT_DEBUGGING_SHADERDEBUGPRINTER_H

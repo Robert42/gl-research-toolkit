@@ -9,6 +9,7 @@
 #include <QStack>
 
 namespace glrt {
+namespace renderer {
 namespace debugging {
 
 
@@ -90,6 +91,7 @@ private:
 
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt
 
 #endif // GLRT_DEBUGGING_DEBUGMESH_H

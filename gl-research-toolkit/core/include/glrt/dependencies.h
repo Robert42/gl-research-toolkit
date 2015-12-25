@@ -1,18 +1,12 @@
 #ifndef GLRT_DEPENDENCIES_H
 #define GLRT_DEPENDENCIES_H
 
-#include <GL/glew.h>
-
-#include <SDL2/SDL.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/string_cast.hpp>
-
-#include <AntTweakBar.h>
 
 #include <angelscript.h>
 #include <angelscript-integration/angelscript-integration.h>
@@ -81,8 +75,6 @@ private:
 
 void showSplashscreenMessage(const QString& message);
 
-} // namespace glrt
-
 
 #define GLRT_EXCEPTION(message) Exception(__FILE__, __LINE__, __FUNCTION__, message)
 
@@ -92,6 +84,7 @@ void showSplashscreenMessage(const QString& message);
 
 #define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << x;
 
-#define TWEAKBAR_BLENDER_AXIS " axisy=-z axisz=y "
+
+} // namespace glrt
 
 #endif // GLRT_DEPENDENCIES_H

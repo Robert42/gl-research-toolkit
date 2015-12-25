@@ -1,5 +1,5 @@
-#ifndef GLRT_DEBUGGING_DRAWCAMERAS_H
-#define GLRT_DEBUGGING_DRAWCAMERAS_H
+#ifndef GLRT_RENDERER_DEBUGGING_DRAWCAMERAS_H
+#define GLRT_RENDERER_DEBUGGING_DRAWCAMERAS_H
 
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/light-component.h>
@@ -18,6 +18,7 @@ class Scene;
 
 } // namespace scene
 
+namespace renderer {
 namespace debugging {
 
 
@@ -91,6 +92,7 @@ DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::P
 
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_DEBUGGING_DRAWCAMERAS_H
+#endif // GLRT_RENDERER_DEBUGGING_DRAWCAMERAS_H

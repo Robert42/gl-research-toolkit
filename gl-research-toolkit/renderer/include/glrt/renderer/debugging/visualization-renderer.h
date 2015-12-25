@@ -1,10 +1,11 @@
-#ifndef GLRT_DEBUGGING_VISUALIZATIONRENDERER_H
-#define GLRT_DEBUGGING_VISUALIZATIONRENDERER_H
+#ifndef GLRT_RENDERER_DEBUGGING_VISUALIZATIONRENDERER_H
+#define GLRT_RENDERER_DEBUGGING_VISUALIZATIONRENDERER_H
 
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/debugging/debug-line-visualisation.h>
 
 namespace glrt {
+namespace renderer {
 namespace debugging {
 
 
@@ -49,6 +50,7 @@ private:
 
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_DEBUGGING_VISUALIZATIONRENDERER_H
+#endif // GLRT_RENDERER_DEBUGGING_VISUALIZATIONRENDERER_H

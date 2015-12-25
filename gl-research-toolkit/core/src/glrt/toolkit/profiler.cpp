@@ -1,5 +1,4 @@
-#include <glrt/profiler.h>
-#include <glrt/gui/toolbar.h>
+#include <glrt/toolkit/profiler.h>
 
 #include <SDL2/SDL_timer.h>
 

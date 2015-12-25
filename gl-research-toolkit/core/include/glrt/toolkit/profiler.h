@@ -1,7 +1,7 @@
-#ifndef GLRT_PROFILER_H
-#define GLRT_PROFILER_H
+#ifndef GLRT_CORE_PROFILER_H
+#define GLRT_CORE_PROFILER_H
 
-#include "dependencies.h"
+#include <glrt/dependencies.h>
 
 namespace glrt {
 
@@ -67,4 +67,4 @@ public:
 #define PROFILE_SCOPE(name)
 #endif
 
-#endif // GLRT_PROFILER_H
+#endif // GLRT_CORE_PROFILER_H
