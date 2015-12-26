@@ -1,4 +1,4 @@
-#include <glrt/debug-camera.h>
+#include <glrt/scene/debug-camera.h>
 #include <glrt/toolkit/geometry.h>
 #include <glrt/toolkit/json.h>
 

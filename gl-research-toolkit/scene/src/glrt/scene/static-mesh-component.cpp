@@ -7,7 +7,7 @@ namespace scene {
 
 StaticMeshComponent::StaticMeshComponent(Entity& entity,
                                          bool movable,
-                                         const StaticMesh::Ptr& staticMesh,
+                                         const StaticMeshUuid& staticMesh,
                                          const MaterialInstance::Ptr& material,
                                          const glm::mat4& relativeTransform)
   : VisibleComponent(entity, movable, relativeTransform),

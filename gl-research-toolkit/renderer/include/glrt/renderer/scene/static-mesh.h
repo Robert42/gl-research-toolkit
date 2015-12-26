@@ -17,8 +17,6 @@ public:
   struct Vertex;
   typedef quint16 index_type;
 
-  typedef QSharedPointer<StaticMesh> Ptr;
-
   StaticMesh(StaticMesh&& mesh);
   StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices);
   ~StaticMesh();

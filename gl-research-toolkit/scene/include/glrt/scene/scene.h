@@ -2,11 +2,11 @@
 #define GLRT_SCENE_SCENE_H
 
 #include <glrt/dependencies.h>
-#include <glrt/scene/static-mesh.h>
+#include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/material.h>
 #include <glrt/scene/entity.h>
 #include <glrt/scene/light-component.h>
-#include <glrt/debug-camera.h>
+#include <glrt/scene/debug-camera.h>
 
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>

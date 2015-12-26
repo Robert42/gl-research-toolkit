@@ -4,8 +4,6 @@
 #include <glrt/toolkit/assimp-glm-converter.h>
 #include <glrt/toolkit/json.h>
 
-#include <glrt/glsl/layout-constants.h>
-
 #include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonArray>

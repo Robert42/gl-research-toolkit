@@ -18,6 +18,7 @@
 #include <QSharedPointer>
 #include <QSet>
 #include <QStack>
+#include <QUuid>
 
 #include <iostream>
 #include <memory>
@@ -25,6 +26,8 @@
 #include <functional>
 #include <thread>
 #include <atomic>
+
+#include <SDL2/SDL.h>
 
 
 // the unnecessary macros make my syntax highligh unpretty ;)

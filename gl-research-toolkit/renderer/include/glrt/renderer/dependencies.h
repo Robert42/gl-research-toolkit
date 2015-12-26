@@ -1,11 +1,10 @@
 #ifndef GLRT_DEPENDENCIES_H
 #define GLRT_DEPENDENCIES_H
 
-#include <glrt-scene/dependencies.h>
+#include <glrt/dependencies.h>
 
 #include <GL/glew.h>
 
-#include <SDL2/SDL.h>
 
 #include <AntTweakBar.h>
 

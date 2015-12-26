@@ -1,7 +1,7 @@
 #ifndef GLRT_DEBUGCAMERA_H
 #define GLRT_DEBUGCAMERA_H
 
-#include "dependencies.h"
+#include <glrt/dependencies.h>
 
 #include <glrt/scene/camera-parameter.h>
 
