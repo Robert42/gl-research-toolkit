@@ -1,4 +1,4 @@
-#include <glrt/scene/static-mesh.h>
+#include <glrt/renderer/static-mesh.h>
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
@@ -7,7 +7,7 @@
 #include <assimp/scene.h>
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
 const GLuint vertexBufferBinding = 0;
 const GLuint indexBufferBinding = 1;
@@ -285,6 +285,6 @@ void StaticMesh::draw(GLenum mode) const
 }
 
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
 

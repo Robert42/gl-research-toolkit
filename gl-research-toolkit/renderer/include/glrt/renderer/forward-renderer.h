@@ -1,15 +1,15 @@
-#ifndef GLRT_SCENE_FORWARDRENDERER_H
-#define GLRT_SCENE_FORWARDRENDERER_H
+#ifndef GLRT_RENDERER_FORWARDRENDERER_H
+#define GLRT_RENDERER_FORWARDRENDERER_H
 
 #include "scene-renderer.h"
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
 class ForwardRenderer final : public Renderer
 {
 public:
-  ForwardRenderer(Scene* scene);
+  ForwardRenderer(scene::Scene* scene);
 
   Pass plainColorMeshes;
   Pass texturedMeshes;
@@ -21,7 +21,7 @@ public:
   static QSet<QString> preprocessorBlock();
 };
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_SCENE_FORWARDRENDERER_H
+#endif // GLRT_RENDERER_FORWARDRENDERER_H

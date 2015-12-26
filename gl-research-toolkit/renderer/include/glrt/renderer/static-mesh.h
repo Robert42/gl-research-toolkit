@@ -1,5 +1,5 @@
-#ifndef GLRT_SCENE_STATICMESH_H
-#define GLRT_SCENE_STATICMESH_H
+#ifndef GLRT_RENDERER_STATICMESH_H
+#define GLRT_RENDERER_STATICMESH_H
 
 #include <glrt/dependencies.h>
 
@@ -9,7 +9,7 @@
 struct aiMesh;
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
 class StaticMesh final
 {
@@ -57,7 +57,7 @@ struct StaticMesh::Vertex
 };
 
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_SCENE_STATICMESH_H
+#endif // GLRT_RENDERER_STATICMESH_H

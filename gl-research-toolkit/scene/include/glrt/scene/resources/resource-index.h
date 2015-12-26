@@ -27,6 +27,8 @@ public:
   void loadNow(const QUuid& uuid);
 
 private:
+  friend class ResourceLoader;
+
   QSet<QUuid> unloadedRessources;
   QSet<QUuid> loadingRessources;
   QSet<QUuid> loadedRessources;

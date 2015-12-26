@@ -1,10 +1,10 @@
-#include <glrt/scene/material.h>
+#include <glrt/renderer/material.h>
 #include <glrt/toolkit/json.h>
 
 #include <QJsonArray>
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
 
 // ======== Material ===========================================================
@@ -96,6 +96,5 @@ MaterialInstance::Ptr PlainColorMaterial::fromJson(const QDir&, const QJsonObjec
 }
 
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
-

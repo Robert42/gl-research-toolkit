@@ -1,8 +1,9 @@
-#include <glrt/toolkit/temp-shader-file.h>
+#include <glrt/renderer/toolkit/temp-shader-file.h>
 
 #include <glhelperconfig.hpp>
 
 namespace glrt {
+namespace renderer {
 
 
 int TempShaderFile::instanceCounter = 0;
@@ -64,4 +65,5 @@ QDir TempShaderFile::tempDir()
 }
 
 
+} // namespace renderer
 } // namespace glrt

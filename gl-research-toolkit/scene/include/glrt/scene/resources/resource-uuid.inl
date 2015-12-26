@@ -9,10 +9,8 @@ namespace resources {
 
 template<class T>
 Uuid<T>::Uuid(const QUuid& uuid,
-              ResourceIndex* resourceIndex,
               ResourceLoader* resourceLoader)
   : _uuid(uuid),
-    resourceIndex(resourceIndex),
     resourceLoader(resourceLoader)
 {
 }

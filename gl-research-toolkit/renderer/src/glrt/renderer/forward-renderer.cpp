@@ -1,9 +1,9 @@
-#include <glrt/scene/forward-renderer.h>
+#include <glrt/renderer/forward-renderer.h>
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
-ForwardRenderer::ForwardRenderer(Scene* scene)
+ForwardRenderer::ForwardRenderer(scene::Scene* scene)
   : Renderer(scene),
     plainColorMeshes(this, MaterialInstance::Type::PLAIN_COLOR, "plain-color-materials", preprocessorBlock()),
     texturedMeshes(this, MaterialInstance::Type::TEXTURED_OPAQUE, "textured-meshes", preprocessorBlock()),
@@ -28,6 +28,6 @@ QSet<QString> ForwardRenderer::preprocessorBlock()
 }
 
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
 

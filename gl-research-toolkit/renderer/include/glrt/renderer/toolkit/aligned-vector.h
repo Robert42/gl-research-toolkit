@@ -1,9 +1,10 @@
-#ifndef GLRT_ALIGNEDVECTOR_H
-#define GLRT_ALIGNEDVECTOR_H
+#ifndef GLRT_RENDERER_ALIGNEDVECTOR_H
+#define GLRT_RENDERER_ALIGNEDVECTOR_H
 
-#include <glrt/dependencies.h>
+#include <glrt/renderer/dependencies.h>
 
 namespace glrt {
+namespace renderer {
 
 
 template<typename T>
@@ -91,6 +92,7 @@ private:
   std::vector<quint8> internal_vector;
 };
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_ALIGNEDVECTOR_H
+#endif // GLRT_RENDERER_ALIGNEDVECTOR_H

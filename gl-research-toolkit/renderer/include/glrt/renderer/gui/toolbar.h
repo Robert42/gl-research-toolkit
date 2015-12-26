@@ -1,10 +1,11 @@
-#ifndef GLRT_DEBUGGUI_H
-#define GLRT_DEBUGGUI_H
+#ifndef GLRT_RENDERER_DEBUGGUI_H
+#define GLRT_RENDERER_DEBUGGUI_H
 
 #include "../dependencies.h"
 
 
 namespace glrt {
+namespace renderer {
 namespace gui {
 
 class Toolbar final
@@ -30,6 +31,7 @@ private:
 };
 
 } // namespace gui
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_DEBUGGUI_H
+#endif // GLRT_RENDERER_DEBUGGUI_H

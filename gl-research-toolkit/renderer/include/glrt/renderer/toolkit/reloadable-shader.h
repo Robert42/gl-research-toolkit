@@ -1,11 +1,12 @@
-#ifndef GLRT_RELOADABLESHADER_H
-#define GLRT_RELOADABLESHADER_H
+#ifndef GLRT_RENDERER_RELOADABLESHADER_H
+#define GLRT_RENDERER_RELOADABLESHADER_H
 
 #include <glrt/dependencies.h>
 
 #include <glhelper/shaderobject.hpp>
 
 namespace glrt {
+namespace renderer {
 
 class ReloadableShader final
 {
@@ -37,6 +38,7 @@ private:
   QStringList wholeProprocessorBlock() const;
 };
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_RELOADABLESHADER_H
+#endif // GLRT_RENDERER_RELOADABLESHADER_H

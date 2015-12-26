@@ -1,12 +1,13 @@
-#include <glrt/toolkit/shader-compiler.h>
-#include <glrt/toolkit/temp-shader-file.h>
-#include <glrt/toolkit/logger.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/renderer/toolkit/temp-shader-file.h>
+#include <glrt/renderer/toolkit/logger.h>
 
 #include <set>
 
 #include <QRegularExpression>
 
 namespace glrt {
+namespace renderer {
 
 
 class ShaderErrorDialog final
@@ -183,5 +184,5 @@ const QMap<QString, gl::ShaderObject::ShaderType>& ShaderCompiler::shaderTypes()
 }
 
 
+} // namespace renderer
 } // namespace glrt
-

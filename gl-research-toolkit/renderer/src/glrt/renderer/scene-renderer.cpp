@@ -1,16 +1,17 @@
-#include <glrt/scene/scene-renderer.h>
+#include <glrt/glsl/layout-constants.h>
+
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/light-component.h>
 
-#include <glrt/glsl/layout-constants.h>
-#include <glrt/toolkit/aligned-vector.h>
-#include <glrt/toolkit/shader-compiler.h>
+#include <glrt/renderer/scene-renderer.h>
+#include <glrt/renderer/toolkit/aligned-vector.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
 
-Renderer::Renderer(Scene* scene)
+Renderer::Renderer(scene::Scene* scene)
   : scene(*scene),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
@@ -113,7 +114,7 @@ Renderer::Pass::~Pass()
 }
 
 
-bool orderByDrawCall(StaticMeshComponent* a, StaticMeshComponent*b)
+bool orderByDrawCall(scene::StaticMeshComponent* a, scene::StaticMeshComponent*b)
 {
   // Movables after unmovables
   if(!a->movable)
@@ -121,24 +122,24 @@ bool orderByDrawCall(StaticMeshComponent* a, StaticMeshComponent*b)
   if(a->movable)
     return false;
 
-  if(a->materialInstance.data() < b->materialInstance.data())
+  if(a->material.uuid() < b->material.uuid())
     return true;
-  if(a->materialInstance.data() > b->materialInstance.data())
+  if(a->material.uuid() > b->material.uuid())
     return false;
 
-  if(a->staticMesh.data() < b->staticMesh.data())
+  if(a->staticMesh.uuid() < b->staticMesh.uuid())
     return true;
-  if(a->staticMesh.data() > b->staticMesh.data())
+  if(a->staticMesh.uuid() > b->staticMesh.uuid())
     return false;
 
   return a < b;
 }
 
 
-std::function<bool(StaticMeshComponent* a)> allowOnly(MaterialInstance::Type type, bool movable)
+std::function<bool(scene::StaticMeshComponent* a)> allowOnly(MaterialInstance::Type type, bool movable)
 {
-  return [movable, type](StaticMeshComponent* a) {
-    return a->movable==movable && a->materialInstance->type == type;
+  return [movable, type](scene::StaticMeshComponent* a) {
+    return a->movable==movable && a->material.type == type;
   };
 }
 
@@ -199,7 +200,7 @@ void Renderer::Pass::renderStaticMeshes()
 
 inline void Renderer::Pass::updateCache()
 {
-  Scene& scene = renderer.scene;
+  scene::Scene& scene = renderer.scene;
 
   if(_cachedStaticStructureCacheIndex == scene._cachedStaticStructureCacheIndex)
     return;
@@ -207,7 +208,7 @@ inline void Renderer::Pass::updateCache()
   aligned_vector<MeshInstanceUniform> transformations(aligned_vector<MeshInstanceUniform>::Alignment::UniformBufferOffsetAlignment);
   meshInstanceUniformOffset = transformations.alignment();
 
-  QVector<StaticMeshComponent*> allStaticMeshComponents = scene.allComponentsWithType<StaticMeshComponent>(allowOnly(this->type, false));
+  QVector<scene::StaticMeshComponent*> allStaticMeshComponents = scene.allComponentsWithType<scene::StaticMeshComponent>(allowOnly(this->type, false));
 
   qSort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
 
@@ -227,7 +228,7 @@ inline void Renderer::Pass::updateCache()
 
     for(int i=0; i<allStaticMeshComponents.size(); ++i)
     {
-      StaticMeshComponent* staticMeshComponent = allStaticMeshComponents[i];
+      scene::StaticMeshComponent* staticMeshComponent = allStaticMeshComponents[i];
 
       transformations.push_back(staticMeshComponent->globalTransformation());
 
@@ -261,6 +262,6 @@ void Renderer::Pass::clearCache()
 }
 
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
 

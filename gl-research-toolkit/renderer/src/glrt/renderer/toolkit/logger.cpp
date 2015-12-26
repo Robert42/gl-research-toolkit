@@ -1,8 +1,9 @@
-#include <glrt/toolkit/logger.h>
+#include <glrt/renderer/toolkit/logger.h>
 
 #include <QCoreApplication>
 
 namespace glrt {
+namespace renderer {
 
 Logger* Logger::logger = nullptr;
 QStack<Logger::MessageHandler> Logger::handler;
@@ -133,5 +134,6 @@ bool Logger::SuppressDebug::handleMessage(QtMsgType type, const QMessageLogConte
 }
 
 
+} // namespace renderer
 } // namespace glrt
 

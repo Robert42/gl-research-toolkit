@@ -1,11 +1,12 @@
-#ifndef GLRT_APPLICATION_H
-#define GLRT_APPLICATION_H
+#ifndef GLRT_RENDERER_APPLICATION_H
+#define GLRT_RENDERER_APPLICATION_H
 
-#include "system.h"
-#include "profiler.h"
-#include "debug-camera.h"
+#include <glrt/toolkit/profiler.h>
+#include <glrt/scene/debug-camera.h>
+#include <glrt/renderer/system.h>
 
 namespace glrt {
+namespace renderer {
 
 class Application final
 {
@@ -51,6 +52,7 @@ private:
   void deinitAngelScript();
 };
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_APPLICATION_H
+#endif // GLRT_RENDERER_APPLICATION_H

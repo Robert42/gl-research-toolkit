@@ -1,12 +1,12 @@
-#ifndef GLRT_DEBUGGING_SHADERDEBUGPRINTER_H
-#define GLRT_DEBUGGING_SHADERDEBUGPRINTER_H
+#ifndef GLRT_RENDERER_DEBUGGING_SHADERDEBUGPRINTER_H
+#define GLRT_RENDERER_DEBUGGING_SHADERDEBUGPRINTER_H
 
 #include <glrt/dependencies.h>
 
 #include <glhelper/buffer.hpp>
 #include <glhelper/shaderobject.hpp>
-#include <glrt/gui/anttweakbar.h>
-#include <glrt/debugging/visualization-renderer.h>
+#include <glrt/renderer/gui/anttweakbar.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
 
 namespace glrt {
 namespace renderer {
@@ -57,4 +57,4 @@ private:
 } // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_DEBUGGING_SHADERDEBUGPRINTER_H
+#endif // GLRT_RENDERER_DEBUGGING_SHADERDEBUGPRINTER_H

@@ -5,8 +5,11 @@
 namespace glrt {
 
 
-DebugCamera::DebugCamera(SDL_Window* sdlWindow)
+DebugCamera::DebugCamera()
 {
+  Q_ASSERT(SDL_GetWindowFromID(0) != nullptr);
+
+  SDL_Window* sdlWindow = SDL_GetWindowFromID(0);
   SDL_GetWindowSize(sdlWindow, &this->windowSize.x, &this->windowSize.y);
 
   *this = scene::CameraParameter::defaultDebugCamera();

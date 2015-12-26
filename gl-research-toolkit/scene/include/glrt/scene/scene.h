@@ -2,22 +2,19 @@
 #define GLRT_SCENE_SCENE_H
 
 #include <glrt/dependencies.h>
-#include <glrt/scene/static-mesh-component.h>
-#include <glrt/scene/material.h>
 #include <glrt/scene/entity.h>
-#include <glrt/scene/light-component.h>
 #include <glrt/scene/debug-camera.h>
-
-#include <glhelper/shaderobject.hpp>
-#include <glhelper/buffer.hpp>
-#include <glhelper/texture2d.hpp>
-
-#include <QJsonObject>
+#include <glrt/scene/light-component.h>
 
 struct aiNode;
 struct aiScene;
 
 namespace glrt {
+
+namespace renderer {
+class Renderer;
+} // namespace renderer
+
 namespace scene {
 
 
@@ -36,7 +33,7 @@ public:
   Scene& operator=(const Scene&) = delete;
   Scene& operator=(Scene&&) = delete;
 
-  Scene(SDL_Window* sdlWindow);
+  Scene();
   ~Scene();
 
   bool handleEvents(const SDL_Event& event);
@@ -44,8 +41,7 @@ public:
 
   void clear();
   static QMap<QString, QString> findAllScenes();
-  bool loadFromFile(const QString& file);
-  bool fromJson(const QDir& dir, const QJsonObject& json);
+  void loadFromFile(const QString& filepath);
 
   void staticMeshStructureChanged();
 
@@ -63,7 +59,9 @@ signals:
   void sceneLoaded(bool success);
 
 private:
-  friend class Renderer;
+  // #FIXME Ugly hack
+  friend class renderer::Renderer;
+
   friend class Entity;
   quint64 _cachedStaticStructureCacheIndex;
 
@@ -71,24 +69,6 @@ private:
 
   void AddEntity(Entity* entity);
   void RemoveEntity(Entity* entity);
-
-private:
-  struct SceneAssets
-  {
-    const aiScene* scene;
-    QHash<QString, MaterialInstance::Ptr> materials;
-    QHash<QString, StaticMesh::Ptr> meshes;
-    QHash<int, MaterialInstance::Ptr> materialsForIndex;
-    QHash<int, StaticMesh::Ptr> meshesForIndex;
-    QMap<QString, CameraParameter> cameras;
-    QMap<QString, SphereAreaLightComponent::Data> sphereAreaLights;
-    QMap<QString, RectAreaLightComponent::Data> rectAreaLights;
-    MaterialInstance::Ptr fallbackMaterial;
-    glm::mat4 meshTransform;
-  };
-  bool loadFromColladaFile(const QString& file,
-                           SceneAssets assets);
-  bool loadEntitiesFromAssimp(const SceneAssets& assets, aiNode* node, glm::mat4 globalTransform);
 };
 
 

@@ -1,11 +1,12 @@
-#ifndef GLRT_SHADERCOMPILER_H
-#define GLRT_SHADERCOMPILER_H
+#ifndef GLRT_RENDERER_SHADERCOMPILER_H
+#define GLRT_RENDERER_SHADERCOMPILER_H
 
 #include <glrt/dependencies.h>
 
 #include <glhelper/shaderobject.hpp>
 
 namespace glrt {
+namespace renderer {
 
 class ShaderCompiler
 {
@@ -23,6 +24,7 @@ private:
   static const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes();
 };
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_SHADERCOMPILER_H
+#endif // GLRT_RENDERER_SHADERCOMPILER_H

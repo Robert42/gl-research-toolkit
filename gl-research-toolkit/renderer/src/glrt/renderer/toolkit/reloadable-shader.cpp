@@ -1,7 +1,8 @@
-#include <glrt/toolkit/reloadable-shader.h>
-#include <glrt/toolkit/shader-compiler.h>
+#include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
 
 namespace glrt {
+namespace renderer {
 
 
 QSet<QString> ReloadableShader::globalPreprocessorBlock;
@@ -74,5 +75,5 @@ QStringList ReloadableShader::wholeProprocessorBlock() const
 }
 
 
+} // namespace renderer
 } // namespace glrt
-

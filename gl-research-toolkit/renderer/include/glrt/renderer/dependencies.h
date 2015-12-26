@@ -1,5 +1,5 @@
-#ifndef GLRT_DEPENDENCIES_H
-#define GLRT_DEPENDENCIES_H
+#ifndef GLRT_RENDERER_DEPENDENCIES_H
+#define GLRT_RENDERER_DEPENDENCIES_H
 
 #include <glrt/dependencies.h>
 
@@ -10,4 +10,4 @@
 
 #define TWEAKBAR_BLENDER_AXIS " axisy=-z axisz=y "
 
-#endif // GLRT_DEPENDENCIES_H
+#endif // GLRT_RENDERER_DEPENDENCIES_H

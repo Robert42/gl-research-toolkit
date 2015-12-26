@@ -1,11 +1,12 @@
-#ifndef GLRT_LOGGER_H
-#define GLRT_LOGGER_H
+#ifndef GLRT_RENDERER_LOGGER_H
+#define GLRT_RENDERER_LOGGER_H
 
 #include <glrt/dependencies.h>
 
 #include <QXmlStreamWriter>
 
 namespace glrt {
+namespace renderer {
 
 class Logger final
 {
@@ -53,6 +54,7 @@ private:
 };
 
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_LOGGER_H
+#endif // GLRT_RENDERER_LOGGER_H

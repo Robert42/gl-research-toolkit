@@ -1,5 +1,5 @@
-#ifndef GLRT_DEBUGGING_DEBUGMESH_H
-#define GLRT_DEBUGGING_DEBUGMESH_H
+#ifndef GLRT_RENDERER_DEBUGGING_DEBUGMESH_H
+#define GLRT_RENDERER_DEBUGGING_DEBUGMESH_H
 
 #include <glrt/dependencies.h>
 
@@ -94,4 +94,4 @@ private:
 } // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_DEBUGGING_DEBUGMESH_H
+#endif // GLRT_RENDERER_DEBUGGING_DEBUGMESH_H

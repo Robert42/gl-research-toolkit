@@ -24,7 +24,6 @@ class Uuid
 public:
   // You have to make sure the given resourceIndex instance lives longer.
   explicit Uuid(const QUuid& uuid,
-                ResourceIndex* resourceIndex,
                 ResourceLoader* resourceLoader);
 
   const QUuid& uuid() const;
@@ -36,7 +35,6 @@ public:
 
 private:
   QUuid _uuid;
-  ResourceIndex* resourceIndex;
   ResourceLoader* resourceLoader;
 };
 
@@ -45,7 +43,9 @@ int qHash(const Uuid<T>& uuid, uint seed=0);
 
 
 class StaticMeshData;
+class MaterialData;
 typedef Uuid<StaticMeshData> StaticMeshUuid;
+typedef Uuid<MaterialData> MaterialDataUuid;
 
 
 } // namespace resources

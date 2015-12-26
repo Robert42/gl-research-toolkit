@@ -1,24 +1,24 @@
-#ifndef GLRT_GUI_ANTTWEAKBAR_H
-#define GLRT_GUI_ANTTWEAKBAR_H
+#ifndef GLRT_RENDERER_GUI_ANTTWEAKBAR_H
+#define GLRT_RENDERER_GUI_ANTTWEAKBAR_H
 
 
-#include <glrt/gui/toolbar.h>
+#include <glrt/renderer/gui/toolbar.h>
 
 #include <glrt/scene/camera-parameter.h>
 
 
 namespace glrt {
 
-
-class Application;
 class Profiler;
 
 namespace scene {
-
-class Renderer;
 class Scene;
-
 } // namspace scene
+
+namespace renderer {
+
+class Application;
+class Renderer;
 
 namespace debugging {
 
@@ -29,6 +29,9 @@ class ShaderDebugPrinter;
 
 namespace gui {
 
+
+using glrt::scene::CameraParameter;
+using glrt::scene::Scene;
 
 
 template<typename T>
@@ -190,7 +193,7 @@ public:
 
   // The caller owns the given instance.
   // You must ensure, that the given rederer lives longer than the created bar
-  TwBar* createDebugSceneBar(scene::Renderer* renderer);
+  TwBar* createDebugSceneBar(Renderer* renderer);
 
   // The caller owns the given instance.
   // You must ensure, that the given debugPrinter lives longer than the created bar.
@@ -205,7 +208,7 @@ public:
 
 private:
   TweakBarEnum<QString>::Ptr sceneSwitcher;
-  TweakBarEnum<scene::CameraParameter>::Ptr cameraSwitcher;
+  TweakBarEnum<CameraParameter>::Ptr cameraSwitcher;
 
   void updateAntTweakBarWindowSize();
 
@@ -213,7 +216,7 @@ private:
   bool unhandeledEvent(const SDL_Event& event);
 
 private slots:
-  void handleSceneLoaded(scene::Scene* scene);
+  void handleSceneLoaded(Scene* scene);
 };
 
 
@@ -260,6 +263,7 @@ inline TwType TweakBarCBVar<bool>::type()
 
 
 } // namespace gui
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_GUI_ANTTWEAKBAR_H
+#endif // GLRT_RENDERER_GUI_ANTTWEAKBAR_H

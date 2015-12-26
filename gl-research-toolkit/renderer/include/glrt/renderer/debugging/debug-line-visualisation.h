@@ -3,7 +3,7 @@
 
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/light-component.h>
-#include <glrt/toolkit/aligned-vector.h>
+#include <glrt/renderer/toolkit/aligned-vector.h>
 
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
@@ -20,7 +20,6 @@ class Scene;
 
 namespace renderer {
 namespace debugging {
-
 
 
 struct Arrow

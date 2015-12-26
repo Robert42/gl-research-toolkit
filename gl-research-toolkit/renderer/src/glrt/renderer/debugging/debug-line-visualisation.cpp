@@ -1,10 +1,10 @@
-#include <glrt/debugging/debug-line-visualisation.h>
-
-#include <glrt/scene/scene.h>
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/toolkit/shader-compiler.h>
+#include <glrt/scene/scene.h>
+#include <glrt/renderer/debugging/debug-line-visualisation.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
 
 namespace glrt {
+namespace renderer {
 namespace debugging {
 
 
@@ -169,5 +169,6 @@ void DebugLineVisualisation::draw()
 
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt
 

@@ -1,13 +1,13 @@
-#include <glrt/debugging/shader-debug-printer.h>
-
-#include <glrt/toolkit/shader-compiler.h>
-
-#include <glrt/glsl/debugging/printer-types.h>
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/toolkit/reloadable-shader.h>
+#include <glrt/glsl/debugging/printer-types.h>
+
+#include <glrt/renderer/debugging/shader-debug-printer.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/renderer/toolkit/reloadable-shader.h>
 
 
 namespace glrt {
+namespace renderer {
 namespace debugging {
 
 
@@ -275,4 +275,5 @@ void ShaderDebugPrinter::setMouseCoordinate(const glm::ivec2& mouseCoordinate, U
 
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt

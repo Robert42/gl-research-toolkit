@@ -1,7 +1,8 @@
-#include <glrt/debugging/visualization-renderer.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/scene/scene.h>
 
 namespace glrt {
+namespace renderer {
 namespace debugging {
 
 
@@ -131,5 +132,6 @@ void VisualizationRenderer::createVisualization()
 
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt
 

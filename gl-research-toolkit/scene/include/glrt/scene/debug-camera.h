@@ -19,7 +19,7 @@ public:
   QString loadedName;
   bool locked;
 
-  DebugCamera(SDL_Window* sdlWindow);
+  DebugCamera();
 
   bool handleEvents(const SDL_Event& event);
 

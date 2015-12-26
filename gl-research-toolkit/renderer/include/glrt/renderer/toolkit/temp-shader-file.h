@@ -1,9 +1,10 @@
-#ifndef GLRT_TEMPSHADERFILE_H
-#define GLRT_TEMPSHADERFILE_H
+#ifndef GLRT_RENDERER_TEMPSHADERFILE_H
+#define GLRT_RENDERER_TEMPSHADERFILE_H
 
 #include <glrt/dependencies.h>
 
 namespace glrt {
+namespace renderer {
 
 class TempShaderFile final
 {
@@ -22,6 +23,7 @@ private:
   static int instanceCounter;
 };
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_TEMPSHADERFILE_H
+#endif // GLRT_RENDERER_TEMPSHADERFILE_H

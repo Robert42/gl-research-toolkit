@@ -1,11 +1,12 @@
-#ifndef GLRT_SPLASHSCREENSTYLE_H
-#define GLRT_SPLASHSCREENSTYLE_H
+#ifndef GLRT_RENDERER_SPLASHSCREENSTYLE_H
+#define GLRT_RENDERER_SPLASHSCREENSTYLE_H
 
 #include <glrt/dependencies.h>
 #include <QPainter>
 #include <QSplashScreen>
 
 namespace glrt {
+namespace renderer {
 
 class SplashscreenStyle
 {
@@ -27,6 +28,7 @@ protected:
   virtual QPixmap createPixmap() = 0;
 };
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_SPLASHSCREENSTYLE_H
+#endif // GLRT_RENDERER_SPLASHSCREENSTYLE_H

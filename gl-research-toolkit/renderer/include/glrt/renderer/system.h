@@ -1,5 +1,5 @@
-#ifndef GLRT_WINDOW_H
-#define GLRT_WINDOW_H
+#ifndef GLRT_RENDERER_WINDOW_H
+#define GLRT_RENDERER_WINDOW_H
 
 #include "dependencies.h"
 #include "toolkit/logger.h"
@@ -9,6 +9,7 @@
 #include <QSplashScreen>
 
 namespace glrt {
+namespace renderer {
 
 class System final
 {
@@ -64,6 +65,7 @@ private:
   void verifyNVidiaFeatures();
 };
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_WINDOW_H
+#endif // GLRT_RENDERER_WINDOW_H

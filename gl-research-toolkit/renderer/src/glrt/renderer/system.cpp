@@ -1,5 +1,5 @@
-#include <glrt/system.h>
-#include <glrt/toolkit/temp-shader-file.h>
+#include <glrt/renderer/system.h>
+#include <glrt/renderer/toolkit/temp-shader-file.h>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -20,6 +20,7 @@
 
 
 namespace glrt {
+namespace renderer {
 
 System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
@@ -159,5 +160,5 @@ void System::verifyNVidiaFeatures()
 }
 
 
+} // namespace renderer
 } // namespace glrt
-

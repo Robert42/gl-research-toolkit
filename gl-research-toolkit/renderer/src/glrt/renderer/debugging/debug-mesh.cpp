@@ -1,8 +1,9 @@
-#include <glrt/debugging/debug-mesh.h>
+#include <glrt/renderer/debugging/debug-mesh.h>
 #include <glrt/toolkit/geometry.h>
 #include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
+namespace renderer {
 namespace debugging {
 
 
@@ -257,5 +258,6 @@ DebugMesh DebugMesh::Painter::toMesh() const
 
 
 } // namespace debugging
+} // namespace renderer
 } // namespace glrt
 

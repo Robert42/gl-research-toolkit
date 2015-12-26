@@ -1,14 +1,16 @@
-#ifndef GLRT_SCENE_RENDERER_H
-#define GLRT_SCENE_RENDERER_H
+#ifndef GLRT_RENDERER_RENDERER_H
+#define GLRT_RENDERER_RENDERER_H
 
 #include <glrt/scene/scene.h>
-#include <glrt/debugging/visualization-renderer.h>
-#include <glrt/toolkit/shader-storage-format.h>
-#include <glrt/toolkit/reloadable-shader.h>
+#include <glrt/renderer/material.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
+#include <glrt/renderer/static-mesh.h>
+#include <glrt/renderer/toolkit/shader-storage-format.h>
+#include <glrt/renderer/toolkit/reloadable-shader.h>
 
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
 class Renderer : public QObject
 {
@@ -18,7 +20,7 @@ public:
   class DirectLights;
   class Pass;
 
-  Scene& scene;
+  scene::Scene& scene;
   debugging::VisualizationRenderer visualizeCameras;
   debugging::VisualizationRenderer visualizeSphereAreaLights;
   debugging::VisualizationRenderer visualizeRectAreaLights;
@@ -30,7 +32,7 @@ public:
 
   DirectLights& directLights();
 
-  Renderer(Scene* scene);
+  Renderer(scene::Scene* scene);
   virtual ~Renderer();
 
   void render();
@@ -71,8 +73,8 @@ public:
   void bindShaderStoreageBuffers();
 
 private:
-  ShaderStorageFormat<SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
-  ShaderStorageFormat<RectAreaLightComponent> rectAreaShaderStorageBuffer;
+  ShaderStorageFormat<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
+  ShaderStorageFormat<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
 };
 
 
@@ -123,7 +125,7 @@ private:
 
 
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_SCENE_RENDERER_H
+#endif // GLRT_RENDERER_RENDERER_H

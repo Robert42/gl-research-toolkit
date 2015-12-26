@@ -5,11 +5,12 @@ set(SOURCE_FILES
   include/glrt/renderer/debugging/shader-debug-printer.h
   include/glrt/renderer/debugging/visualization-renderer.h
   include/glrt/renderer/dependencies.h
+  include/glrt/renderer/forward-renderer.h
   include/glrt/renderer/gui/anttweakbar.h
   include/glrt/renderer/gui/toolbar.h
-  include/glrt/renderer/scene/forward-renderer.h
-  include/glrt/renderer/scene/scene-renderer.h
-  include/glrt/renderer/scene/static-mesh.h
+  include/glrt/renderer/material.h
+  include/glrt/renderer/scene-renderer.h
+  include/glrt/renderer/static-mesh.h
   include/glrt/renderer/system.h
   include/glrt/renderer/toolkit/aligned-vector.h
   include/glrt/renderer/toolkit/logger.h
@@ -23,11 +24,12 @@ set(SOURCE_FILES
   src/glrt/renderer/debugging/debug-mesh.cpp
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
+  src/glrt/renderer/forward-renderer.cpp
   src/glrt/renderer/gui/anttweakbar.cpp
   src/glrt/renderer/gui/toolbar.cpp
-  src/glrt/renderer/scene/forward-renderer.cpp
-  src/glrt/renderer/scene/scene-renderer.cpp
-  src/glrt/renderer/scene/static-mesh.cpp
+  src/glrt/renderer/material.cpp
+  src/glrt/renderer/scene-renderer.cpp
+  src/glrt/renderer/static-mesh.cpp
   src/glrt/renderer/system.cpp
   src/glrt/renderer/toolkit/logger.cpp
   src/glrt/renderer/toolkit/reloadable-shader.cpp

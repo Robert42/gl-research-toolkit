@@ -1,11 +1,12 @@
-#include <glrt/toolkit/splashscreen-style.h>
-#include <glrt/toolkit/logger.h>
+#include <glrt/renderer/toolkit/splashscreen-style.h>
+#include <glrt/renderer/toolkit/logger.h>
 
 #include <QApplication>
 #include <QThread>
 #include <QPainter>
 
 namespace glrt {
+namespace renderer {
 
 
 SplashscreenStyle::SplashscreenStyle()
@@ -181,5 +182,5 @@ SplashscreenStyle* SplashscreenStyle::createFallbackStyle(const QString& title, 
 }
 
 
+} // namespace renderer
 } // namespace glrt
-

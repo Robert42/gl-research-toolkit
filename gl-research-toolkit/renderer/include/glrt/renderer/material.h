@@ -1,28 +1,23 @@
-#ifndef GLRT_SCENE_MATERIAL_H
-#define GLRT_SCENE_MATERIAL_H
+#ifndef GLRT_RENDERER_MATERIAL_H
+#define GLRT_RENDERER_MATERIAL_H
 
 #include <glrt/dependencies.h>
+
+#include <glrt/scene/resources/material-data.h>
 
 #include <glhelper/buffer.hpp>
 
 #include <QJsonObject>
 
 namespace glrt {
-namespace scene {
+namespace renderer {
 
 class MaterialInstance : public QObject
 {
   Q_OBJECT
 public:
   typedef QSharedPointer<MaterialInstance> Ptr;
-
-  enum class Type
-  {
-    PLAIN_COLOR,
-    TEXTURED_OPAQUE,
-    TEXTURED_MASKED,
-    TEXTURED_TRANSPARENT
-  };
+  typedef scene::resources::MaterialData::Type Type;
 
   const Type type;
   QString name;
@@ -44,13 +39,7 @@ class PlainColorMaterial : public MaterialInstance
 {
   Q_OBJECT
 public:
-  struct UniformData
-  {
-    glm::vec3 base_color = glm::vec3(1, 1, 1);
-    float smoothness = 0.2f;
-    glm::vec3 emission = glm::vec3(0);
-    float metal_mask = 0.f;
-  };
+  typedef glrt::scene::resources::PlainColorMaterialData UniformData;
 
   PlainColorMaterial(const UniformData& data);
 
@@ -58,7 +47,7 @@ public:
 };
 
 
-} // namespace scene
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_SCENE_MATERIAL_H
+#endif // GLRT_RENDERER_SCENE_MATERIAL_H

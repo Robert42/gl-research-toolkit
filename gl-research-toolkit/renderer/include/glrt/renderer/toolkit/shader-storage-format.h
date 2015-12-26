@@ -1,5 +1,5 @@
-#ifndef GLRT_SHADERSTORAGEFORMAT_H
-#define GLRT_SHADERSTORAGEFORMAT_H
+#ifndef GLRT_RENDERER_SHADERSTORAGEFORMAT_H
+#define GLRT_RENDERER_SHADERSTORAGEFORMAT_H
 
 
 #include <glrt/scene/entity.h>
@@ -10,6 +10,7 @@
 
 
 namespace glrt {
+namespace renderer {
 
 
 template<typename ElementType>
@@ -277,6 +278,7 @@ private:
 };
 
 
+} // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_SHADERSTORAGEFORMAT_H
+#endif // GLRT_RENDERER_SHADERSTORAGEFORMAT_H
