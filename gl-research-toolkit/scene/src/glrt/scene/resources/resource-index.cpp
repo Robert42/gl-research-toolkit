@@ -1,5 +1,7 @@
 #include <glrt/scene/resources/resource-index.h>
 
+#include <angelscript-integration/call-script.h>
+
 namespace glrt {
 namespace scene {
 namespace resources {
@@ -7,6 +9,11 @@ namespace resources {
 
 ResourceIndex::ResourceIndex()
 {
+}
+
+void ResourceIndex::loadIndex(AngelScript::asIScriptEngine* engine, const QString& filename)
+{
+  AngelScriptIntegration::callScript<void>(engine, filename.toStdString().c_str(), "void main()", "resource-index");
 }
 
 State ResourceIndex::stateOf(const QUuid& uuid) const

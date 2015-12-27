@@ -1,11 +1,10 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
+#include <glrt/scene/resources/resource-loader.h>
 #include <glrt/scene/scene.h>
 #include <glrt/renderer/forward-renderer.h>
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
-
-#include <angelscript-integration/call-script.h>
 
 #include <glhelper/gl.hpp>
 
@@ -13,6 +12,10 @@
 int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
+
+  glrt::scene::resources::ResourceIndex resourceIndex;
+  resourceIndex.loadIndex(app.scriptEngine,
+                          GLRT_ASSET_DIR"/asset-index");
 
   glrt::scene::Scene scene;
   glrt::renderer::ForwardRenderer renderer(&scene);
@@ -28,8 +31,6 @@ int main(int argc, char** argv)
   antweakbar.createProfilerBar(&app.profiler);
 
   scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
-
-  qInfo() << AngelScriptIntegration::callScript<int>(app.scriptEngine, GLRT_ASSET_DIR"/common/scripts/hello-world.as", "int main(int)", "test", 6);
 
   app.showWindow();
 
