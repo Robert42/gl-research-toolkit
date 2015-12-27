@@ -13,7 +13,7 @@ message(FATAL_ERROR "GLRT_EXTERNAL_SHADER_DIR must be set")
 endif()
 
 find_package(SDL2 REQUIRED)
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Core REQUIRED)
 
 add_library(glrt-core
   ${SOURCE_FILES}
@@ -57,7 +57,7 @@ target_link_libraries(glrt-core
   PUBLIC
   ${SDL2_LIBRARIES}
   ${ASSIMP_LIBRARY}
-  Qt5::Widgets
+  Qt5::Core
   AntTweakBar
   angelscript-addon-stdstring
   angelscript-interaction

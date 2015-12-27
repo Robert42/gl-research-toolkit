@@ -1,5 +1,7 @@
 include(files.cmake)
 
+find_package(Qt5Widgets REQUIRED)
+
 add_library(glrt
   ${SOURCE_FILES}
 )
@@ -15,4 +17,5 @@ target_link_libraries(glrt
   PUBLIC
   # glhelper # TODO use again
   glrt-scene
+  Qt5::Widgets
 )
