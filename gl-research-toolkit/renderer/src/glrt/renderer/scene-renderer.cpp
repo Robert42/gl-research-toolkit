@@ -197,10 +197,11 @@ void Renderer::Pass::renderStaticMeshes()
 
   renderer.staticMeshVertexArrayObject.ResetBinding();
 }
-/*
-#TODO uncomment
+
 inline void Renderer::Pass::updateCache()
 {
+  /*
+  #TODO uncomment
   scene::Scene& scene = renderer.scene;
 
   if(_cachedStaticStructureCacheIndex == scene._cachedStaticStructureCacheIndex)
@@ -253,8 +254,9 @@ inline void Renderer::Pass::updateCache()
   }
 
   _cachedStaticStructureCacheIndex = scene._cachedStaticStructureCacheIndex;
-}
 */
+}
+
 void Renderer::Pass::clearCache()
 {
   staticMeshInstance_Uniforms.clear();

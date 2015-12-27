@@ -103,6 +103,12 @@ QMap<QString, QString> Scene::findAllScenes()
 }
 
 
+void Scene::loadFromFile(const QString& filename)
+{
+  // #TODO
+}
+
+
 void Scene::staticMeshStructureChanged()
 {
   ++_cachedStaticStructureCacheIndex;
