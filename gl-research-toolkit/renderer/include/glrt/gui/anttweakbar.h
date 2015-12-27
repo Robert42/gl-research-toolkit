@@ -2,7 +2,7 @@
 #define GLRT_RENDERER_GUI_ANTTWEAKBAR_H
 
 
-#include <glrt/renderer/gui/toolbar.h>
+#include <glrt/gui/toolbar.h>
 
 #include <glrt/scene/camera-parameter.h>
 
@@ -10,6 +10,7 @@
 namespace glrt {
 
 class Profiler;
+class Application;
 
 namespace scene {
 class Scene;
@@ -17,7 +18,6 @@ class Scene;
 
 namespace renderer {
 
-class Application;
 class Renderer;
 
 namespace debugging {
@@ -25,7 +25,7 @@ namespace debugging {
 class ShaderDebugPrinter;
 
 } // namspace debugging
-
+} // namespace renderer
 
 namespace gui {
 
@@ -193,12 +193,12 @@ public:
 
   // The caller owns the given instance.
   // You must ensure, that the given rederer lives longer than the created bar
-  TwBar* createDebugSceneBar(Renderer* renderer);
+  TwBar* createDebugSceneBar(renderer::Renderer* renderer);
 
   // The caller owns the given instance.
   // You must ensure, that the given debugPrinter lives longer than the created bar.
   // Note: debugPritnercan be null
-  TwBar* createDebugShaderBar(debugging::ShaderDebugPrinter* debugPrinter=nullptr);
+  TwBar* createDebugShaderBar(renderer::debugging::ShaderDebugPrinter* debugPrinter=nullptr);
 
 
   bool handleEvents(const SDL_Event& event);
@@ -263,7 +263,6 @@ inline TwType TweakBarCBVar<bool>::type()
 
 
 } // namespace gui
-} // namespace renderer
 } // namespace glrt
 
 #endif // GLRT_RENDERER_GUI_ANTTWEAKBAR_H

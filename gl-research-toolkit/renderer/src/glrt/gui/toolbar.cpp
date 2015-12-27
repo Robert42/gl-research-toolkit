@@ -1,8 +1,7 @@
-#include <glrt/renderer/gui/toolbar.h>
+#include <glrt/gui/toolbar.h>
 
 
 namespace glrt {
-namespace renderer {
 namespace gui {
 
 const char* toolbarTitle = "Toolbar";
@@ -114,6 +113,5 @@ void Toolbar::getBarIconified(bool *value, TwBar* bar)
 
 
 } // namespace gui
-} // namespace renderer
 } // namespace glrt
 

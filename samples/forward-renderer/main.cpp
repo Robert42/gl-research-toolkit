@@ -1,9 +1,9 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
 #include <glrt/scene/scene.h>
-#include <glrt/scene/forward-renderer.h>
+#include <glrt/renderer/forward-renderer.h>
 #include <glrt/gui/anttweakbar.h>
-#include <glrt/debugging/shader-debug-printer.h>
+#include <glrt/renderer/debugging/shader-debug-printer.h>
 
 #include <angelscript-integration/call-script.h>
 
@@ -14,14 +14,14 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
-  glrt::scene::Scene scene(app.sdlWindow);
-  glrt::scene::ForwardRenderer renderer(&scene);
+  glrt::scene::Scene scene;
+  glrt::renderer::ForwardRenderer renderer(&scene);
 
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
                                                                                 ));
 
-  glrt::debugging::ShaderDebugPrinter shaderDebugPrinter;
+  glrt::renderer::debugging::ShaderDebugPrinter shaderDebugPrinter;
 
   antweakbar.createDebugSceneBar(&renderer);
   antweakbar.createDebugShaderBar(&shaderDebugPrinter);

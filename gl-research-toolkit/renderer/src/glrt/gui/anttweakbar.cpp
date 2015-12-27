@@ -1,12 +1,11 @@
 #include <glrt/toolkit/profiler.h>
-#include <glrt/renderer/gui/anttweakbar.h>
-#include <glrt/renderer/application.h>
+#include <glrt/application.h>
+#include <glrt/gui/anttweakbar.h>
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 
 namespace glrt {
-namespace renderer {
 namespace gui {
 
 
@@ -84,7 +83,7 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 }
 
 
-TwBar* AntTweakBar::createDebugSceneBar(Renderer* renderer)
+TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
 {
   scene::Scene& scene = renderer->scene;
 
@@ -114,11 +113,11 @@ TwBar* AntTweakBar::createDebugSceneBar(Renderer* renderer)
 
 void __reload_all_shaders(void*)
 {
-  ReloadableShader::reloadAll();
+  renderer::ReloadableShader::reloadAll();
 }
 
 
-TwBar* AntTweakBar::createDebugShaderBar(debugging::ShaderDebugPrinter* shaderDebugPrinter)
+TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter* shaderDebugPrinter)
 {
   TwBar* tweakBar = TwNewBar("Shader");
 
@@ -250,5 +249,4 @@ void AntTweakBar::updateAntTweakBarWindowSize()
 
 
 } // namespace gui
-} // namespace renderer
 } // namespace glrt

@@ -1,4 +1,4 @@
-#include <glrt/renderer/system.h>
+#include <glrt/system.h>
 #include <glrt/renderer/toolkit/temp-shader-file.h>
 
 #include <glrt/glsl/layout-constants.h>
@@ -20,7 +20,6 @@
 
 
 namespace glrt {
-namespace renderer {
 
 System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
@@ -36,7 +35,7 @@ System::System(int& argc, char** argv, const Settings& settings)
   verifyGLFeatures();
   verifyNVidiaFeatures();
 
-  TempShaderFile::init();
+  renderer::TempShaderFile::init();
 }
 
 
@@ -161,4 +160,3 @@ void System::verifyNVidiaFeatures()
 
 
 } // namespace renderer
-} // namespace glrt

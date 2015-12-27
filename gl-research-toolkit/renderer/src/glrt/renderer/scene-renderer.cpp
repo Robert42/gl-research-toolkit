@@ -135,14 +135,15 @@ bool orderByDrawCall(scene::StaticMeshComponent* a, scene::StaticMeshComponent*b
   return a < b;
 }
 
-
+/*
+#TODO uncomment
 std::function<bool(scene::StaticMeshComponent* a)> allowOnly(MaterialInstance::Type type, bool movable)
 {
   return [movable, type](scene::StaticMeshComponent* a) {
     return a->movable==movable && a->material.type == type;
   };
 }
-
+*/
 
 void Renderer::Pass::render()
 {
@@ -196,8 +197,8 @@ void Renderer::Pass::renderStaticMeshes()
 
   renderer.staticMeshVertexArrayObject.ResetBinding();
 }
-
-
+/*
+#TODO uncomment
 inline void Renderer::Pass::updateCache()
 {
   scene::Scene& scene = renderer.scene;
@@ -253,7 +254,7 @@ inline void Renderer::Pass::updateCache()
 
   _cachedStaticStructureCacheIndex = scene._cachedStaticStructureCacheIndex;
 }
-
+*/
 void Renderer::Pass::clearCache()
 {
   staticMeshInstance_Uniforms.clear();

@@ -5,7 +5,7 @@
 
 #include <glhelper/buffer.hpp>
 #include <glhelper/shaderobject.hpp>
-#include <glrt/renderer/gui/anttweakbar.h>
+#include <glrt/gui/anttweakbar.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 
 namespace glrt {

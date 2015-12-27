@@ -1,11 +1,10 @@
-#include <glrt/renderer/application.h>
+#include <glrt/application.h>
 
 #include <glhelper/gl.hpp>
 
 #include <sdk/add_on/scriptstdstring/scriptstdstring.h>
 
 namespace glrt {
-namespace renderer {
 
 
 Application::Application(int& argc, char** argv, const System::Settings& systemSettings, const Application::Settings& applicationSettings)
@@ -134,6 +133,5 @@ void Application::deinitAngelScript()
   scriptEngine->ShutDownAndRelease();
 }
 
-} // namespace renderer
 } // namespace glrt
 

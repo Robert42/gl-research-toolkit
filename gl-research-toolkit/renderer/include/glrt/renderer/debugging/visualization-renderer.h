@@ -1,7 +1,7 @@
 #ifndef GLRT_RENDERER_DEBUGGING_VISUALIZATIONRENDERER_H
 #define GLRT_RENDERER_DEBUGGING_VISUALIZATIONRENDERER_H
 
-#include <glrt/renderer/gui/anttweakbar.h>
+#include <glrt/gui/anttweakbar.h>
 #include <glrt/renderer/debugging/debug-line-visualisation.h>
 
 namespace glrt {

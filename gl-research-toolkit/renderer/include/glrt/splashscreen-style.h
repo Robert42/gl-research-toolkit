@@ -6,7 +6,6 @@
 #include <QSplashScreen>
 
 namespace glrt {
-namespace renderer {
 
 class SplashscreenStyle
 {
@@ -28,7 +27,6 @@ protected:
   virtual QPixmap createPixmap() = 0;
 };
 
-} // namespace renderer
 } // namespace glrt
 
 #endif // GLRT_RENDERER_SPLASHSCREENSTYLE_H

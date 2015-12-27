@@ -1,39 +1,39 @@
 set(SOURCE_FILES
-  include/glrt/renderer/application.h
+  include/glrt/application.h
+  include/glrt/gui/anttweakbar.h
+  include/glrt/gui/toolbar.h
+  include/glrt/logger.h
   include/glrt/renderer/debugging/debug-line-visualisation.h
   include/glrt/renderer/debugging/debug-mesh.h
   include/glrt/renderer/debugging/shader-debug-printer.h
   include/glrt/renderer/debugging/visualization-renderer.h
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
-  include/glrt/renderer/gui/anttweakbar.h
-  include/glrt/renderer/gui/toolbar.h
   include/glrt/renderer/material.h
   include/glrt/renderer/scene-renderer.h
   include/glrt/renderer/static-mesh.h
-  include/glrt/renderer/system.h
   include/glrt/renderer/toolkit/aligned-vector.h
-  include/glrt/renderer/toolkit/logger.h
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h
   include/glrt/renderer/toolkit/shader-storage-format.h
-  include/glrt/renderer/toolkit/splashscreen-style.h
   include/glrt/renderer/toolkit/temp-shader-file.h
-  src/glrt/renderer/application.cpp
+  include/glrt/splashscreen-style.h
+  include/glrt/system.h
+  src/glrt/application.cpp
+  src/glrt/gui/anttweakbar.cpp
+  src/glrt/gui/toolbar.cpp
+  src/glrt/logger.cpp
   src/glrt/renderer/debugging/debug-line-visualisation.cpp
   src/glrt/renderer/debugging/debug-mesh.cpp
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp
-  src/glrt/renderer/gui/anttweakbar.cpp
-  src/glrt/renderer/gui/toolbar.cpp
   src/glrt/renderer/material.cpp
   src/glrt/renderer/scene-renderer.cpp
   src/glrt/renderer/static-mesh.cpp
-  src/glrt/renderer/system.cpp
-  src/glrt/renderer/toolkit/logger.cpp
   src/glrt/renderer/toolkit/reloadable-shader.cpp
   src/glrt/renderer/toolkit/shader-compiler.cpp
-  src/glrt/renderer/toolkit/splashscreen-style.cpp
   src/glrt/renderer/toolkit/temp-shader-file.cpp
+  src/glrt/splashscreen-style.cpp
+  src/glrt/system.cpp
 )

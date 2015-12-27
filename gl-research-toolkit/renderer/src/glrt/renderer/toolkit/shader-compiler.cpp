@@ -1,6 +1,6 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/renderer/toolkit/temp-shader-file.h>
-#include <glrt/renderer/toolkit/logger.h>
+#include <glrt/logger.h>
 
 #include <set>
 
