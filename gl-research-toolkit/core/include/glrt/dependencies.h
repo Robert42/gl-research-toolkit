@@ -76,6 +76,8 @@ private:
   quint8 _[sizeof(T)*N];
 };
 
+extern AngelScript::asIScriptEngine* angelScriptEngine;
+
 void showSplashscreenMessage(const QString& message);
 
 

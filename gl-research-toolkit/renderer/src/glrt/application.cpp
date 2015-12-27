@@ -119,7 +119,7 @@ bool Application::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
 
 void Application::initAngelScript()
 {
-  scriptEngine = AngelScript::asCreateScriptEngine();
+  glrt::angelScriptEngine = this->scriptEngine = AngelScript::asCreateScriptEngine();
 
   AngelScriptIntegration::init_message_callback_qt(scriptEngine);
   AngelScript::RegisterStdString(scriptEngine);
@@ -131,6 +131,7 @@ void Application::initAngelScript()
 void Application::deinitAngelScript()
 {
   scriptEngine->ShutDownAndRelease();
+  glrt::angelScriptEngine = this->scriptEngine = nullptr;
 }
 
 } // namespace glrt

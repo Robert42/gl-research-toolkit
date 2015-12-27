@@ -18,7 +18,7 @@ public:
   ResourceIndex& operator=(const ResourceIndex&) = delete;
   ResourceIndex& operator=(ResourceIndex&&) = delete;
 
-  void loadIndex(AngelScript::asIScriptEngine* engine, const QString& filename);
+  void loadIndex(const QString& filename);
 
   State stateOf(const QUuid& uuid) const;
   bool isRegistered(const QUuid& uuid) const;

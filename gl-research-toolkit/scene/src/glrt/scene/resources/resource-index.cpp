@@ -11,9 +11,9 @@ ResourceIndex::ResourceIndex()
 {
 }
 
-void ResourceIndex::loadIndex(AngelScript::asIScriptEngine* engine, const QString& filename)
+void ResourceIndex::loadIndex(const QString& filename)
 {
-  AngelScriptIntegration::callScript<void>(engine, filename.toStdString().c_str(), "void main()", "resource-index");
+  AngelScriptIntegration::callScript<void>(angelScriptEngine, filename.toStdString().c_str(), "void main()", "resource-index");
 }
 
 State ResourceIndex::stateOf(const QUuid& uuid) const

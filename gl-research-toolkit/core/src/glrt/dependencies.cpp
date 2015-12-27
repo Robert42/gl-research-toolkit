@@ -70,4 +70,6 @@ Exception::Exception(const char* file, int line, const char* function, const QSt
   abort();
 }
 
+AngelScript::asIScriptEngine* angelScriptEngine = nullptr;
+
 } // namespace glrt
