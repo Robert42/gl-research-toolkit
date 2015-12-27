@@ -4,14 +4,10 @@
 
 namespace glrt {
 
+glm::ivec2 DebugCamera::windowSize;
 
 DebugCamera::DebugCamera()
 {
-  Q_ASSERT(SDL_GetWindowFromID(0) != nullptr);
-
-  SDL_Window* sdlWindow = SDL_GetWindowFromID(0);
-  SDL_GetWindowSize(sdlWindow, &this->windowSize.x, &this->windowSize.y);
-
   *this = scene::CameraParameter::defaultDebugCamera();
 
   movementMode = false;

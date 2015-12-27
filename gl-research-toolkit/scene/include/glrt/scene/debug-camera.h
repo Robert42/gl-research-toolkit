@@ -10,6 +10,7 @@ namespace glrt {
 class DebugCamera
 {
 public:
+  static glm::ivec2 windowSize;
   glm::mat4 projectionMatrix;
   glm::mat4 viewProjectionMatrix;
   glm::vec3 camera_position;
@@ -30,8 +31,6 @@ public:
   bool fromJson(const QJsonObject& json, const QMap<QString, scene::CameraParameter>& cameraParameter);
 
 private:
-  glm::ivec2 windowSize;
-
   glm::mat4 camera_orientation_inverse;
   bool movementMode;
 };

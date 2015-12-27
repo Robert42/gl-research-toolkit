@@ -1,5 +1,6 @@
 #include <glrt/system.h>
 #include <glrt/renderer/toolkit/temp-shader-file.h>
+#include <glrt/scene/debug-camera.h>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -81,6 +82,8 @@ void System::initSDL(const Settings& settings)
                                settings.windowSize.y,
                                SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
   CALL_SDL_CRITICAL(sdlWindow != nullptr);
+
+  DebugCamera::windowSize = settings.windowSize;
 
   sdlGlContext = SDL_GL_CreateContext(sdlWindow);
   CALL_SDL_CRITICAL(sdlGlContext != nullptr);
