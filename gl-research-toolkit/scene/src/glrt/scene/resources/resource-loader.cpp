@@ -55,7 +55,7 @@ void ResourceLoader::_loadResource(const QUuid& uuid, bool loadNow)
   // Hmm, this is not threadsave
   if(registeredStaticMeshFiles.contains(uuid))
   {
-    StaticMeshUuid staticMesh(uuid, this);
+    StaticMeshUuid staticMesh(uuid);
 
     if(!index.isLoading(uuid)) // Already loading?
       loadStaticMesh(staticMesh, loadStaticMeshFromFile(registeredStaticMeshFiles[uuid]));

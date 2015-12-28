@@ -8,10 +8,8 @@ namespace scene {
 namespace resources {
 
 template<class T>
-Uuid<T>::Uuid(const QUuid& uuid,
-              ResourceLoader* resourceLoader)
-  : _uuid(uuid),
-    resourceLoader(resourceLoader)
+Uuid<T>::Uuid(const QUuid& uuid)
+  : _uuid(uuid)
 {
 }
 

@@ -10,7 +10,7 @@ namespace scene {
 namespace resources {
 
 SceneLoader::SceneLoader(ResourceLoader* resourceLoader)
-  : fallbackMaterial(QUuid("{a8f3fb1b-1168-433b-aaf8-e24632cce156}"), resourceLoader),
+  : fallbackMaterial(QUuid("{a8f3fb1b-1168-433b-aaf8-e24632cce156}")),
     resourceLoader(resourceLoader)
 {
   // FIXME: register the fallback

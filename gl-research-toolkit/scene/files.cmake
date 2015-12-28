@@ -22,6 +22,7 @@ set(SOURCE_FILES
   src/glrt/scene/light-component.cpp
   src/glrt/scene/resources/resource-index.cpp
   src/glrt/scene/resources/resource-loader.cpp
+  src/glrt/scene/resources/resource-uuid.cpp
   src/glrt/scene/resources/scene-loader.cpp
   src/glrt/scene/resources/static-mesh-data.cpp
   src/glrt/scene/scene.cpp

@@ -1,4 +1,5 @@
 #include <glrt/application.h>
+#include <glrt/scene/resources/resource-uuid.h>
 #include <glrt/scene/resources/resource-index.h>
 
 #include <glhelper/gl.hpp>
@@ -122,11 +123,18 @@ void Application::initAngelScript()
 {
   glrt::angelScriptEngine = this->scriptEngine = AngelScript::asCreateScriptEngine();
 
+  this->scriptEngine->SetEngineProperty(AngelScript::asEP_REQUIRE_ENUM_SCOPE, 1);
+
   AngelScriptIntegration::init_message_callback_qt(scriptEngine);
+
+  asDWORD previousMask = scriptEngine->SetDefaultAccessMask(AngelScriptIntegration::ACCESS_MASK_ALL);
   AngelScript::RegisterStdString(scriptEngine);
+  scriptEngine->SetDefaultAccessMask(previousMask);
+
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
 
-  glrt::scene::resources::ResourceIndex::registerAngelScriptFunctions();
+  glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
+  glrt::scene::resources::Uuid<void>::registerAngelScriptAPI();
 
   AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
 }

@@ -18,7 +18,7 @@ public:
   ResourceIndex& operator=(const ResourceIndex&) = delete;
   ResourceIndex& operator=(ResourceIndex&&) = delete;
 
-  static void registerAngelScriptFunctions();
+  static void registerAngelScriptAPI();
 
   void loadIndex(const std::string& filename);
   void loadIndexedDirectory(const std::string& filename);

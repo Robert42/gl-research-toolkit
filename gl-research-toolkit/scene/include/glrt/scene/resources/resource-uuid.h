@@ -22,20 +22,14 @@ template<class _identifier>
 class Uuid
 {
 public:
-  // You have to make sure the given resourceIndex instance lives longer.
-  explicit Uuid(const QUuid& uuid,
-                ResourceLoader* resourceLoader);
+  explicit Uuid(const QUuid& uuid);
 
   const QUuid& uuid() const;
 
-  State state() const;
-  bool isRegistered() const;
-  bool isLoading() const;
-  bool isLoaded() const;
+  static void registerAngelScriptAPI();
 
 private:
   QUuid _uuid;
-  ResourceLoader* resourceLoader;
 };
 
 template<class T>

@@ -12,7 +12,7 @@ ResourceIndex::ResourceIndex()
 {
 }
 
-void ResourceIndex::registerAngelScriptFunctions()
+void ResourceIndex::registerAngelScriptAPI()
 {
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
