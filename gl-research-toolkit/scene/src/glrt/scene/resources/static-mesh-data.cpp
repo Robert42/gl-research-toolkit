@@ -4,10 +4,6 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
-StaticMeshData::StaticMeshData()
-{
-}
-
 bool StaticMeshData::isIndexed() const
 {
   return not indices.isEmpty();

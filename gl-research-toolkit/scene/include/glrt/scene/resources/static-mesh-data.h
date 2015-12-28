@@ -9,13 +9,17 @@ namespace resources {
 
 struct StaticMeshData
 {
-  QVector<int> indices;
-  QVector<glm::vec3> positions;
-  QVector<glm::vec3> normals;
-  QVector<glm::vec3> tangents;
-  QVector<glm::vec2> uvs;
+  struct Vertex
+  {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec3 tangent;
+    glm::vec2 uv;
+  };
+  typedef quint16 index_type;
 
-  StaticMeshData();
+  QVector<index_type> indices;
+  QVector<Vertex> vertices;
 
   bool isIndexed() const;
 };

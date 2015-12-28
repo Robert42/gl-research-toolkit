@@ -2,6 +2,7 @@
 #define GLRT_RENDERER_STATICMESH_H
 
 #include <glrt/dependencies.h>
+#include <glrt/scene/resources/static-mesh-data.h>
 
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
@@ -14,8 +15,8 @@ namespace renderer {
 class StaticMesh final
 {
 public:
-  struct Vertex;
-  typedef quint16 index_type;
+  typedef scene::resources::StaticMeshData::Vertex Vertex;
+  typedef scene::resources::StaticMeshData::index_type index_type;
 
   StaticMesh(StaticMesh&& mesh);
   StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices);
@@ -26,9 +27,8 @@ public:
   StaticMesh(const StaticMesh&) = delete;
   StaticMesh& operator=(const StaticMesh&) = delete;
 
-  static bool isValidFile(const QFileInfo& file, bool parseFile);
+  static bool isValidFileSuffix(const QFileInfo& file);
   static StaticMesh loadMeshFromFile(const QString& file, bool indexed=true);
-  static StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
   static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed = true);
   static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
 
@@ -48,13 +48,6 @@ private:
 };
 
 
-struct StaticMesh::Vertex
-{
-  glm::vec3 position;
-  glm::vec3 normal;
-  glm::vec3 tangent;
-  glm::vec2 uv;
-};
 
 
 } // namespace renderer

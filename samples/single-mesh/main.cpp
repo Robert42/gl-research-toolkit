@@ -116,7 +116,7 @@ int main(int argc, char** argv)
         QFileInfo droppedFile = QString::fromUtf8(event.drop.file);
         SDL_free(event.drop.file);
 
-        if(glrt::renderer::StaticMesh::isValidFile(droppedFile, true))
+        if(glrt::renderer::StaticMesh::isValidFileSuffix(droppedFile))
         {
           glrt::renderer::StaticMesh newMesh = glrt::renderer::StaticMesh::loadMeshFromFile(droppedFile.absoluteFilePath());
           std::swap(newMesh, mesh);

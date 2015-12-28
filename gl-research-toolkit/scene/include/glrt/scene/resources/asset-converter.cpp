@@ -1,17 +1,24 @@
 #include <glrt/scene/resources/asset-converter.h>
+#include <glrt/scene/resources/static-mesh-data.h>
+#include <glrt/toolkit/assimp-glm-converter.h>
+
 #include <QTemporaryDir>
 #include <QProcess>
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
 
-void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile);
+void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
 QString python_exportSceneAsObj(const QString& objFile);
 
-void convertStaticMesh_BlenderToCollada(const QFileInfo& meshFile, const QFileInfo& blenderFile)
+void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& blenderFile, bool indexed)
 {
   QTemporaryDir temporaryDir;
 
@@ -22,11 +29,13 @@ void convertStaticMesh_BlenderToCollada(const QFileInfo& meshFile, const QFileIn
 
   runBlenderWithPythonScript(python_exportSceneAsObj(tempFilePath), blenderFile);
 
-  convertStaticMesh_assimpToMesh(meshFile, tempFilePath);
+  convertStaticMesh_assimpToMesh(meshFile, tempFilePath, indexed);
 }
 
 void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename)
 {
+  bool indexed = false;// #TODO allow the script to choose, whether the mesh is indexed or not
+
   // #TODO update splashscreen (use a raii for splashscreen messages?)
 
   QFileInfo meshFile(QString::fromStdString(meshFilename));
@@ -36,9 +45,9 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
   //if(meshFile.lastModified() < sourceFile.lastModified())
   {
     if(sourceFile.suffix().toLower() == "blend")
-      convertStaticMesh_BlenderToCollada(meshFile, sourceFile);
+      convertStaticMesh_BlenderToObj(meshFile, sourceFile, indexed);
     else
-      convertStaticMesh_assimpToMesh(meshFile, sourceFile);
+      convertStaticMesh_assimpToMesh(meshFile, sourceFile, indexed);
   }
 }
 
@@ -85,10 +94,149 @@ QString python_exportSceneAsObj(const QString& objFile)
                  ")").arg(to_python_string(objFile));
 }
 
-void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile)
+
+StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
+
+void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed)
 {
   // #TODO update splashscreen (use a raii for splashscreen messages?)
   qDebug() << "convertStaticMesh_assimpToMesh("<<meshFile.absoluteFilePath()<<","<<sourceFile.absoluteFilePath()<<")";
+
+  Assimp::Importer importer;
+
+  glm::mat3 transform = glm::mat3(1, 0, 0,
+                                  0, 0, 1,
+                                  0,-1, 0);
+  QString sourceFilepath = sourceFile.filePath();
+
+  const aiScene* scene = importer.ReadFile(sourceFilepath.toStdString(),
+                                           (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
+                                           aiProcess_PreTransformVertices | // As we are loading everything into one mesh
+                                           aiProcess_ValidateDataStructure |
+                                           aiProcess_RemoveRedundantMaterials |
+                                           aiProcess_OptimizeMeshes |
+                                           aiProcess_OptimizeGraph |
+                                           aiProcess_ImproveCacheLocality |
+                                           aiProcess_FindDegenerates  |
+                                           aiProcess_FindInvalidData  |
+                                           aiProcess_CalcTangentSpace | // If there are no tangents, generate them
+                                           aiProcess_GenNormals | // If there are no normals, generate them
+                                           aiProcess_GenUVCoords  | // If there are no UVs auto generate some replacement
+                                           aiProcess_SortByPType  | // splits meshes with multiple primitive types into multiple meshes. This way we don't have to check, face is a line or a point
+                                           aiProcess_Triangulate // Triangulare quads into triangles
+                                           );
+
+  if(!scene)
+    throw GLRT_EXCEPTION(QString("Couldn't load mesh: %0").arg(importer.GetErrorString()));
+
+  if(!scene->HasMeshes())
+    throw GLRT_EXCEPTION(QString("Couldn't find any mesh in %0").arg(sourceFilepath));
+
+  StaticMeshData data = loadMeshFromAssimp(scene->mMeshes, scene->mNumMeshes, transform, QString("\n(in file <%0>)").arg(sourceFilepath), indexed);
+
+  QFile file(meshFile.absoluteFilePath());
+
+  if(!file.open(QFile::WriteOnly))
+    throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshFile.absoluteFilePath()));
+
+  QTextStream outputStream(&file);
+
+  outputStream << "TODO";
+}
+
+StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
+{
+  quint32 numVertices = 0;
+  quint32 numFaces = 0;
+
+  typedef StaticMeshData::index_type index_type;
+  typedef StaticMeshData::Vertex Vertex;
+
+  for(quint32 i=0; i<nMeshes; ++i)
+  {
+    const aiMesh* mesh = meshes[i];
+
+    // aiProcess_SortByPType guarants to contain only one type, so we can expect it to contain only one type-bit
+    if(mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+      continue;
+
+    if(!mesh->HasFaces())
+      throw GLRT_EXCEPTION(QString("No Faces%0").arg(context));
+
+    if(!mesh->HasNormals())
+      throw GLRT_EXCEPTION(QString("No Normals%0").arg(context));
+
+    if(!mesh->HasPositions())
+      throw GLRT_EXCEPTION(QString("No Positions%0").arg(context));
+
+    if(!mesh->HasTangentsAndBitangents())
+      throw GLRT_EXCEPTION(QString("No Tangents%0").arg(context));
+
+    // Quote http://learnopengl.com/?_escaped_fragment_=Advanced-Lighting/Normal-Mapping:
+    // > Also important to realize is that aiProcess_CalcTangentSpace doesn't always work.
+    // > Calculating tangents is based on texture coordinates and some model artists do certain
+    // > texture tricks like mirroring a texture surface over a model by also mirroring half of
+    // > the texture coordinates; this gives incorrect results when the mirroring is not taken
+    // > into account (which Assimp doesn't).
+    if(!mesh->HasTextureCoords(0))
+      throw GLRT_EXCEPTION(QString("No Texture Coordinates. HINT: You probably forgot to create a uv-map%0").arg(context));
+
+    numVertices += mesh->mNumVertices;
+    numFaces += mesh->mNumFaces;
+  }
+
+  if(numVertices == 0)
+    throw GLRT_EXCEPTION(QString("Couldn't find any vertices%0").arg(context));
+  if(numFaces == 0)
+    throw GLRT_EXCEPTION(QString("Couldn't find any faces%0").arg(context));
+
+  if(numVertices > std::numeric_limits<index_type>::max())
+    throw GLRT_EXCEPTION(QString("Too many vertices%0").arg(context));
+
+  QVector<Vertex> vertices;
+  QVector<index_type> indices;
+
+  vertices.reserve(numVertices);
+  indices.reserve(numFaces*3);
+
+  for(quint32 i=0; i<nMeshes; ++i)
+  {
+    const aiMesh* mesh = meshes[i];
+
+    // aiProcess_SortByPType guarants to contain only one type, so we can expect it to contain only one type-bit
+    if(mesh->mPrimitiveTypes != aiPrimitiveType_TRIANGLE)
+      continue;
+
+    index_type index_offset = vertices.size();
+
+    for(quint32 j = 0; j<mesh->mNumVertices; ++j)
+    {
+      Vertex vertex;
+      vertex.position = transform * to_glm_vec3(mesh->mVertices[j]);
+      vertex.normal = transform * to_glm_vec3(mesh->mNormals[j]);
+      vertex.tangent = transform * to_glm_vec3(mesh->mTangents[j]);
+      vertex.uv = to_glm_vec3(mesh->mTextureCoords[0][j]).xy();
+
+      vertices.push_back(vertex);
+    }
+
+    for(quint32 j = 0; j<mesh->mNumFaces; ++j)
+    {
+      const aiFace& face = mesh->mFaces[j];
+
+      if(face.mNumIndices != 3)
+        throw GLRT_EXCEPTION(QString("Unexpected non-triangle face in %0").arg(context));
+
+      indices.push_back(face.mIndices[0]+index_offset);
+      indices.push_back(face.mIndices[1]+index_offset);
+      indices.push_back(face.mIndices[2]+index_offset);
+    }
+  }
+
+  if(!indexed)
+    indices.clear();
+
+  return StaticMeshData{indices, vertices};
 }
 
 } // namespace resources
