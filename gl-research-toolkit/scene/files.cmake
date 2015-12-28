@@ -4,6 +4,8 @@ set(SOURCE_FILES
   include/glrt/scene/debug-camera.h
   include/glrt/scene/entity.h
   include/glrt/scene/light-component.h
+  include/glrt/scene/resources/asset-converter.cpp
+  include/glrt/scene/resources/asset-converter.h
   include/glrt/scene/resources/material-data.h
   include/glrt/scene/resources/resource-index.h
   include/glrt/scene/resources/resource-loader.h
