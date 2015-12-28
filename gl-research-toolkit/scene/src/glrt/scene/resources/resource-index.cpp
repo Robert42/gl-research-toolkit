@@ -19,6 +19,7 @@ void ResourceIndex::registerAngelScriptFunctions()
 
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", sizeof(ResourceIndex), AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadSubdirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -29,6 +30,11 @@ void ResourceIndex::loadIndex(const std::string& filename)
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING;
 
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(ResourceIndex@ index)", "resource-index", config, this);
+}
+
+void ResourceIndex::loadSubdirectory(const std::string& dir)
+{
+  loadIndex(dir+"/asset-index");
 }
 
 State ResourceIndex::stateOf(const QUuid& uuid) const

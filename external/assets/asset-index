@@ -1,4 +1,4 @@
 void main(ResourceIndex@ index)
 {
-  index.loadIndex("common/asset-index");
+  index.loadSubdirectory("common");
 }

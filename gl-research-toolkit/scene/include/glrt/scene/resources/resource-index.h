@@ -38,6 +38,7 @@ private:
   QSet<QUuid> loadedRessources;
 
   bool classInvariant();
+  void loadSubdirectory(const std::string& filename);
 };
 
 void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, ResourceIndex* value);
