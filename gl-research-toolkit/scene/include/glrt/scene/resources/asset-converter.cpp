@@ -34,7 +34,7 @@ void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& 
 
 void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename)
 {
-  bool indexed = false;// #TODO allow the script to choose, whether the mesh is indexed or not
+  bool indexed = true;// #TODO allow the script to choose, whether the mesh is indexed or not
 
   // #TODO update splashscreen (use a raii for splashscreen messages?)
 
@@ -95,7 +95,61 @@ QString python_exportSceneAsObj(const QString& objFile)
 }
 
 
+typedef StaticMeshData::index_type index_type;
+typedef StaticMeshData::Vertex Vertex;
+
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
+void writeToScriptLoadingStaticMesh(QTextStream& stream, const StaticMeshData& data)
+{
+  static_assert(sizeof(index_type)==2, "For uint16 as array type to be correct, index_type must be also a 16bit integer");
+  stream << "  array<uint16> indices";
+  if(!data.isIndexed())
+    stream << ";\n";
+  else
+  {
+    stream << " = \n";
+    stream << "  {";
+    int j=0;
+    for(index_type i : data.indices)
+    {
+      if(j!=0)
+        stream << ",";
+      if(j%16 == 0)
+        stream << "\n    " << i;
+      else
+        stream << " " << i;
+      j++;
+    }
+    stream << "\n  };\n";
+
+    stream << "  array<float> vertexData = \n";
+    stream << "  {";
+    j=0;
+    for(const Vertex& v : data.vertices)
+    {
+      if(j!=0)
+        stream << ",";
+      stream << "\n    ";
+
+      stream << v.position[0] << ", ";
+      stream << v.position[1] << ", ";
+      stream << v.position[2] << ", ";
+      stream << v.normal[0] << ", ";
+      stream << v.normal[1] << ", ";
+      stream << v.normal[2] << ", ";
+      stream << v.tangent[0] << ", ";
+      stream << v.tangent[1] << ", ";
+      stream << v.tangent[2] << ", ";
+      stream << v.uv[0] << ", ";
+      stream << v.uv[1];
+
+      j++;
+    }
+
+    stream << "\n  };\n";
+  }
+  stream << "  loadStaticMesh(uuid, indices, vertexData);\n";
+}
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed)
 {
@@ -141,16 +195,15 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 
   QTextStream outputStream(&file);
 
-  outputStream << "TODO";
+  outputStream << "void main(Uuid &in uuid)\n{\n";
+  writeToScriptLoadingStaticMesh(outputStream, data);
+  outputStream << "}";
 }
 
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
 {
   quint32 numVertices = 0;
   quint32 numFaces = 0;
-
-  typedef StaticMeshData::index_type index_type;
-  typedef StaticMeshData::Vertex Vertex;
 
   for(quint32 i=0; i<nMeshes; ++i)
   {
