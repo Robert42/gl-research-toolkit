@@ -1,4 +1,5 @@
 void main()
 {
+  ResourceIndex@ index;
   log_info("Hello World :D");
 }

@@ -18,6 +18,8 @@ public:
   ResourceIndex& operator=(const ResourceIndex&) = delete;
   ResourceIndex& operator=(ResourceIndex&&) = delete;
 
+  static void registerAngelScriptFunctions();
+
   void loadIndex(const QString& filename);
 
   State stateOf(const QUuid& uuid) const;

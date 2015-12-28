@@ -1,4 +1,5 @@
 #include <glrt/application.h>
+#include <glrt/scene/resources/resource-index.h>
 
 #include <glhelper/gl.hpp>
 
@@ -124,6 +125,8 @@ void Application::initAngelScript()
   AngelScriptIntegration::init_message_callback_qt(scriptEngine);
   AngelScript::RegisterStdString(scriptEngine);
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
+
+  glrt::scene::resources::ResourceIndex::registerAngelScriptFunctions();
 
   AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
 }

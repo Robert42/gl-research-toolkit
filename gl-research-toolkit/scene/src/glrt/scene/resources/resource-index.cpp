@@ -6,14 +6,29 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+using AngelScriptIntegration::AngelScriptCheck;
+
 
 ResourceIndex::ResourceIndex()
 {
 }
 
+void ResourceIndex::registerAngelScriptFunctions()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectType("ResourceIndex", sizeof(ResourceIndex), AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
 void ResourceIndex::loadIndex(const QString& filename)
 {
-  AngelScriptIntegration::callScript<void>(angelScriptEngine, filename.toStdString().c_str(), "void main()", "resource-index");
+  AngelScriptIntegration::ConfigCallScript config;
+  config.accessMask = ACCESS_MASK_RESOURCE_LOADING;
+
+  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.toStdString().c_str(), "void main()", "resource-index", config);
 }
 
 State ResourceIndex::stateOf(const QUuid& uuid) const

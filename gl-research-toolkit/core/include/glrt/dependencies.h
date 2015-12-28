@@ -63,6 +63,11 @@ QDebug operator<<(QDebug d, const glm::mat4& v);
 
 namespace glrt {
 
+using AngelScript::asDWORD;
+
+const asDWORD ACCESS_MASK_RESOURCE_LOADING = AngelScriptIntegration::ACCESS_MASK_USER;
+const asDWORD ACCESS_MASK_USER = ACCESS_MASK_RESOURCE_LOADING<<1;
+
 class Exception final
 {
 public:
