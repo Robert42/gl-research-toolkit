@@ -1,5 +1,4 @@
-void main()
+void main(ResourceIndex@ index)
 {
-  ResourceIndex@ index;
-  log_info("Hello World :D");
+  index.loadIndex("common/asset-index");
 }

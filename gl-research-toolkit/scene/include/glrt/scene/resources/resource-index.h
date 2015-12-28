@@ -20,7 +20,7 @@ public:
 
   static void registerAngelScriptFunctions();
 
-  void loadIndex(const QString& filename);
+  void loadIndex(const std::string& filename);
 
   State stateOf(const QUuid& uuid) const;
   bool isRegistered(const QUuid& uuid) const;
@@ -40,6 +40,7 @@ private:
   bool classInvariant();
 };
 
+void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, ResourceIndex* value);
 
 } // namespace resources
 } // namespace glrt

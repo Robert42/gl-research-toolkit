@@ -8,7 +8,6 @@ namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-
 ResourceIndex::ResourceIndex()
 {
 }
@@ -19,16 +18,17 @@ void ResourceIndex::registerAngelScriptFunctions()
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", sizeof(ResourceIndex), AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-void ResourceIndex::loadIndex(const QString& filename)
+void ResourceIndex::loadIndex(const std::string& filename)
 {
   AngelScriptIntegration::ConfigCallScript config;
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING;
 
-  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.toStdString().c_str(), "void main()", "resource-index", config);
+  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(ResourceIndex@ index)", "resource-index", config, this);
 }
 
 State ResourceIndex::stateOf(const QUuid& uuid) const
@@ -67,6 +67,12 @@ bool ResourceIndex::classInvariant()
                                     && (loadedRessources   & unloadedRessources).isEmpty();
 
   return everyRessourceHasOnlyOneState;
+}
+
+
+void pass_arg_to_angelscript(AngelScript::asIScriptContext* context, int i, ResourceIndex* value)
+{
+  context->SetArgObject(i, value);
 }
 
 
