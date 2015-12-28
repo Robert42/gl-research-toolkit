@@ -60,5 +60,6 @@ target_link_libraries(glrt-core
   Qt5::Core
   AntTweakBar
   angelscript-addon-stdstring
+  angelscript-addon-scriptarray
   angelscript-interaction
 )

@@ -7,25 +7,7 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
-class AssetConverter
-{
-public:
-  AssetConverter();
-  virtual ~AssetConverter();
-
-  static void registerAngelScriptAPI();
-
-  AssetConverter(const AssetConverter&) = delete;
-  AssetConverter(AssetConverter&&) = delete;
-  AssetConverter&operator=(const AssetConverter&) = delete;
-  AssetConverter&operator=(AssetConverter&&) = delete;
-};
-
-class StaticMeshConverter : public AssetConverter
-{
-public:
-  void convert(const std::string& sourceFile, const std::string& targetFile, const StaticMeshUuid& uuid);
-};
+void convertStaticMesh(const std::string& meshFile, const std::string& sourceFile);
 
 } // namespace resources
 } // namespace scene

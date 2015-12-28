@@ -6,6 +6,7 @@
 #include <glhelper/gl.hpp>
 
 #include <sdk/add_on/scriptstdstring/scriptstdstring.h>
+#include <sdk/add_on/scriptarray/scriptarray.h>
 
 namespace glrt {
 
@@ -130,13 +131,13 @@ void Application::initAngelScript()
 
   asDWORD previousMask = scriptEngine->SetDefaultAccessMask(AngelScriptIntegration::ACCESS_MASK_ALL);
   AngelScript::RegisterStdString(scriptEngine);
+  AngelScript::RegisterScriptArray(scriptEngine, true);
   scriptEngine->SetDefaultAccessMask(previousMask);
 
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
 
-  glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
   glrt::scene::resources::Uuid<void>::registerAngelScriptAPI();
-  glrt::scene::resources::AssetConverter::registerAngelScriptAPI();
+  glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
 
   AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
 }

@@ -24,7 +24,13 @@ class Uuid
 public:
   explicit Uuid(const QUuid& uuid);
 
-  const QUuid& uuid() const;
+  operator const QUuid&() const;
+  bool operator==(const QUuid& other) const;
+  bool operator!=(const QUuid& other) const;
+  bool operator>(const QUuid& other) const;
+  bool operator<(const QUuid& other) const;
+  bool operator>=(const QUuid& other) const;
+  bool operator<=(const QUuid& other) const;
 
   static void registerAngelScriptAPI();
 

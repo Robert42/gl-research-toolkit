@@ -8,6 +8,14 @@ namespace scene {
 namespace resources {
 
 
+struct StaticMeshImportSettings
+{
+  std::string sourceFile;
+  std::string targetFile;
+  std::string object_group_to_import;
+  bool apply_transformation;
+};
+
 class ResourceIndex final
 {
 public:
@@ -28,8 +36,7 @@ public:
   bool isLoading(const QUuid& uuid) const;
   bool isLoaded(const QUuid& uuid) const;
 
-  void startLoading(const QUuid& uuid);
-  void loadNow(const QUuid& uuid);
+  void registerAsset(const StaticMeshUuid& uuid, const std::string& mesh_file);
 
 private:
   friend class ResourceLoader;
@@ -37,6 +44,11 @@ private:
   QSet<QUuid> unloadedRessources;
   QSet<QUuid> loadingRessources;
   QSet<QUuid> loadedRessources;
+
+  QHash<StaticMeshUuid, QString> staticMeshAssetsFiles;
+
+  void _loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow);
+  void waitForAssetToBeLoaded(const QUuid& uuid);
 
   bool classInvariant();
 };

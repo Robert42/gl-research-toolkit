@@ -1,6 +1,4 @@
 void main(ResourceIndex@ index)
 {
-  Uuid x = StaticMeshUuid("{68541790-b137-4734-927b-e35807860124}");
-  log_info("uuid-test " + string(x));
   index.loadSubdirectory("common");
 }

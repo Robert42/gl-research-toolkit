@@ -10,7 +10,7 @@ ResourceLoader::ResourceLoader(ResourceIndex* index)
 {
 }
 
-void ResourceLoader::startLoading(const QUuid& uuid)
+void ResourceLoader::startLoadingFromFile(const QUuid& uuid)
 {
   Q_ASSERT(index.classInvariant());
 
@@ -21,7 +21,7 @@ void ResourceLoader::startLoading(const QUuid& uuid)
   if(!index.unloadedRessources.contains(uuid))
     throw GLRT_EXCEPTION(QString("Can't load an unregistered ressource"));
 
-  _loadResource(uuid, false);
+  loadResourceFromFile(uuid, false);
   index.unloadedRessources.remove(uuid);
   index.loadingRessources.insert(uuid);
   // # TODO: how to get notified, if the ressource is actally laoded?
@@ -29,7 +29,7 @@ void ResourceLoader::startLoading(const QUuid& uuid)
   Q_ASSERT(index.classInvariant());
 }
 
-void ResourceLoader::loadNow(const QUuid& uuid)
+void ResourceLoader::loadNowFromFile(const QUuid& uuid)
 {
   Q_ASSERT(index.classInvariant());
 
@@ -42,7 +42,7 @@ void ResourceLoader::loadNow(const QUuid& uuid)
   // # TODO: how to get notified, if the ressource is actally laoded?
 
   if(index.isLoading(uuid) || index.unloadedRessources.contains(uuid))
-    _loadResource(uuid, true);
+    loadResourceFromFile(uuid, true);
   else
     Q_UNREACHABLE();
 
@@ -50,23 +50,9 @@ void ResourceLoader::loadNow(const QUuid& uuid)
 }
 
 
-void ResourceLoader::_loadResource(const QUuid& uuid, bool loadNow)
+void ResourceLoader::loadResourceFromFile(const QUuid& uuid, bool loadNow)
 {
-  // Hmm, this is not threadsave
-  if(registeredStaticMeshFiles.contains(uuid))
-  {
-    StaticMeshUuid staticMesh(uuid);
-
-    if(!index.isLoading(uuid)) // Already loading?
-      loadStaticMesh(staticMesh, loadStaticMeshFromFile(registeredStaticMeshFiles[uuid]));
-    if(loadNow)
-      waitForStaticMeshToBeLoaded(staticMesh);
-  }
-}
-
-void ResourceLoader::registerStaticMeshFile(const StaticMeshUuid& uuid, const QString& filename)
-{
-  registeredStaticMeshFiles[uuid.uuid()] = filename;
+  index._loadResource(this, uuid, loadNow);
 }
 
 

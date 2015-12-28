@@ -1,4 +1,7 @@
 #include <glrt/scene/resources/resource-index.h>
+#include <glrt/scene/resources/resource-loader.h>
+#include <glrt/scene/resources/asset-converter.h>
+#include <QThread>
 
 #include <angelscript-integration/call-script.h>
 
@@ -20,6 +23,9 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", sizeof(ResourceIndex), AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(StaticMeshUuid &in uuid, string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(string &in meshFile, string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -64,6 +70,36 @@ bool ResourceIndex::isLoading(const QUuid& uuid) const
 bool ResourceIndex::isLoaded(const QUuid& uuid) const
 {
   return loadedRessources.contains(uuid);
+}
+
+void ResourceIndex::registerAsset(const StaticMeshUuid& uuid, const std::string& mesh_file)
+{
+  unloadedRessources.insert(uuid);
+  staticMeshAssetsFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(mesh_file));
+}
+
+void ResourceIndex::_loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow)
+{
+  StaticMeshUuid staticMeshUuid(uuid);
+
+  // #TODO managage state changes
+
+  if(staticMeshAssetsFiles.contains(staticMeshUuid))
+  {
+    // #TODO
+    //loader->loadStaticMesh(staticMeshUuid, );
+    if(loadNow)
+      waitForAssetToBeLoaded(uuid);
+  }else
+  {
+    qCritical() << "Trying to load resource with unregistered uuid " << uuid;
+  }
+}
+
+void ResourceIndex::waitForAssetToBeLoaded(const QUuid& uuid)
+{
+  while(!isLoaded(uuid))
+    QThread::currentThread()->msleep(5);
 }
 
 bool ResourceIndex::classInvariant()

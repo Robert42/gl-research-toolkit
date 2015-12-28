@@ -61,6 +61,11 @@ QDebug operator<<(QDebug d, const glm::mat4& v)
   return d << glm::to_string(v).c_str();
 }
 
+QDebug operator<<(QDebug d, const std::string& s)
+{
+  return d << QString::fromStdString(s);
+}
+
 
 namespace glrt {
 

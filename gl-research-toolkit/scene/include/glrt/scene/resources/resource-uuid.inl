@@ -7,22 +7,67 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+
 template<class T>
 Uuid<T>::Uuid(const QUuid& uuid)
   : _uuid(uuid)
 {
 }
 
+
 template<class T>
-const QUuid& Uuid<T>::uuid() const
+Uuid<T>::operator const QUuid&() const
 {
   return this->_uuid;
 }
 
+
+template<class T>
+bool Uuid<T>::operator==(const QUuid& other) const
+{
+  return this->_uuid == other;
+}
+
+
+template<class T>
+bool Uuid<T>::operator!=(const QUuid& other) const
+{
+  return this->_uuid != other;
+}
+
+
+template<class T>
+bool Uuid<T>::operator<(const QUuid& other) const
+{
+  return this->_uuid < other;
+}
+
+
+template<class T>
+bool Uuid<T>::operator>(const QUuid& other) const
+{
+  return this->_uuid > other;
+}
+
+
+template<class T>
+bool Uuid<T>::operator<=(const QUuid& other) const
+{
+  return this->_uuid <= other;
+}
+
+
+template<class T>
+bool Uuid<T>::operator>=(const QUuid& other) const
+{
+  return this->_uuid >= other;
+}
+
+
 template<class T>
 int qHash(const Uuid<T>& uuid, uint seed)
 {
-  return qHash(uuid._uuid, seed);
+  return qHash(QUuid(uuid), seed);
 }
 
 

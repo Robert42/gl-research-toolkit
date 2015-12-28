@@ -23,24 +23,16 @@ public:
   ResourceLoader& operator=(const ResourceLoader&) = delete;
   ResourceLoader& operator=(ResourceLoader&&) = delete;
 
-  void startLoading(const QUuid& uuid);
-  void loadNow(const QUuid& uuid);
+  void startLoadingFromFile(const QUuid& uuid);
+  void loadNowFromFile(const QUuid& uuid);
 
-  void registerStaticMeshFile(const StaticMeshUuid& uuid, const QString& filename);
   virtual void loadStaticMesh(const StaticMeshUuid& uuid, const StaticMeshData& staticMeshData) = 0;
-  virtual void waitForStaticMeshToBeLoaded(const StaticMeshUuid& uuid) = 0;
 
-  virtual void loadMaterial(const StaticMeshUuid& uuid, const MaterialData& materialData) = 0;
-  virtual void waitForMaterialToBeLoaded(const StaticMeshUuid& uuid) = 0;
+  void loadResourceFromFile(const QUuid& uuid, bool loadNow);
 
 private:
   ResourceIndex& index;
 
-  QHash<QUuid, QString> registeredStaticMeshFiles;
-
-  void _loadResource(const QUuid& uuid, bool loadNow);
-
-  StaticMeshData loadStaticMeshFromFile(const QString& filename) const;
 };
 
 } // namespace resources
