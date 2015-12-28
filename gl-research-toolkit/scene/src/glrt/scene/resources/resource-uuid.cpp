@@ -16,13 +16,14 @@ inline QUuid cast_custom_uuid_type(const QUuid& src)
   return src;
 }
 
-#define UUID_CHARS(n) "[a-fA-F0-9]{"#n"}"
 
 inline void init_custom_uuid_type(QUuid* in, const std::string& s)
 {
-  QString str = QString::fromStdString(s);
-
+#define UUID_CHARS(n) "[a-fA-F0-9]{"#n"}"
   static QRegularExpression regex("^\\{" UUID_CHARS(8) "-" UUID_CHARS(4) "-" UUID_CHARS(4) "-" UUID_CHARS(4) "-" UUID_CHARS(12) "\\}$");
+#undef UUID_CHARS
+
+  QString str = QString::fromStdString(s);
 
   if(regex.match(str).hasMatch())
   {
@@ -33,6 +34,7 @@ inline void init_custom_uuid_type(QUuid* in, const std::string& s)
     qWarning() << "Invalid uuid in script " << str << " replaced with " << *in;
   }
 }
+
 
 inline std::string cast_custom_uuid_to_string(QUuid* in)
 {
@@ -79,7 +81,6 @@ void Uuid<void>::registerAngelScriptAPI()
   RegisterUuidType("Uuid");
   RegisterCustomizedUuidType("StaticMeshUuid");
   RegisterCustomizedUuidType("MaterialDataUuid");
-
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
