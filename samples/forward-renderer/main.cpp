@@ -14,7 +14,7 @@ int main(int argc, char** argv)
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
   glrt::scene::resources::ResourceIndex resourceIndex;
-  resourceIndex.loadIndex(GLRT_ASSET_DIR"/asset-index");
+  resourceIndex.loadIndexedDirectory(GLRT_ASSET_DIR);
 
   glrt::scene::Scene scene;
   glrt::renderer::ForwardRenderer renderer(&scene);

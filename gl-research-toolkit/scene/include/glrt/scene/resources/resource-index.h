@@ -21,6 +21,7 @@ public:
   static void registerAngelScriptFunctions();
 
   void loadIndex(const std::string& filename);
+  void loadIndexedDirectory(const std::string& filename);
 
   State stateOf(const QUuid& uuid) const;
   bool isRegistered(const QUuid& uuid) const;
@@ -38,7 +39,6 @@ private:
   QSet<QUuid> loadedRessources;
 
   bool classInvariant();
-  void loadSubdirectory(const std::string& filename);
 };
 
 void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, ResourceIndex* value);
