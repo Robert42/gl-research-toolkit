@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 
   // ======== Setup the Meshes ========
   // The main mesh we want to load
-  glrt::renderer::StaticMesh mesh = glrt::renderer::StaticMesh::loadMeshFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.dae");
+  glrt::renderer::StaticMesh mesh = glrt::renderer::StaticMesh::loadMeshFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.mesh");
 
   // Get the Vertex Format of it
   gl::VertexArrayObject vertexArrayObject = glrt::renderer::StaticMesh::generateVertexArrayObject();

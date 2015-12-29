@@ -57,6 +57,19 @@ void StaticMeshLoader::loadStaticMesh(const StaticMeshUuid& uuid, const StaticMe
   loadStaticMeshImpl(uuid, indices, numIndices, vertices, numVertices);
 }
 
+void StaticMeshLoader::registerAngelScriptAPI()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectType("StaticMeshLoader", sizeof(StaticMeshLoader), AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("StaticMeshLoader", "void loadStaticMesh(string &in filename)", AngelScript::asMETHODPR(ResourceIndex,loadStaticMesh, (const StaticMeshUuid& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices), void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(string &in meshFile, string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
 
 // ======== ResourceLoader =====================================================
 
