@@ -7,6 +7,9 @@ namespace scene {
 namespace resources {
 
 
+using AngelScriptIntegration::AngelScriptCheck;
+
+
 void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, StaticMeshLoader* value)
 {
   context->SetArgObject(i, value);
@@ -32,7 +35,7 @@ void StaticMeshLoader::loadStaticMesh(const StaticMeshUuid& uuid, const std::str
   AngelScriptIntegration::ConfigCallScript config;
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING;
 
-  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filepath.c_str(), "void main(StaticMeshLoader@, StaticMeshUuid)", "static-mesh-loader", config, this, &uuid);
+  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filepath.c_str(), "void main(StaticMeshLoader@, StaticMeshUuid &in)", "static-mesh-loader", config, this, &uuid);
 }
 
 void StaticMeshLoader::loadStaticMesh(const StaticMeshUuid& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices)
@@ -63,9 +66,7 @@ void StaticMeshLoader::registerAngelScriptAPI()
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   r = angelScriptEngine->RegisterObjectType("StaticMeshLoader", sizeof(StaticMeshLoader), AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("StaticMeshLoader", "void loadStaticMesh(string &in filename)", AngelScript::asMETHODPR(ResourceIndex,loadStaticMesh, (const StaticMeshUuid& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices), void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-
-  r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(string &in meshFile, string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("StaticMeshLoader", "void loadStaticMesh(Uuid &in uuid, array<uint16> &in indices, array<float> &in vertices)", AngelScript::asMETHODPR(StaticMeshLoader, loadStaticMesh, (const StaticMeshUuid& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices), void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

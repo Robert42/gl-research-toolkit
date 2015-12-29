@@ -1,6 +1,7 @@
 #include <glrt/application.h>
 #include <glrt/scene/resources/resource-uuid.h>
 #include <glrt/scene/resources/resource-index.h>
+#include <glrt/scene/resources/resource-loader.h>
 #include <glrt/scene/resources/asset-converter.h>
 
 #include <glhelper/gl.hpp>
@@ -138,6 +139,7 @@ void Application::initAngelScript()
 
   glrt::scene::resources::Uuid<void>::registerAngelScriptAPI();
   glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
+  glrt::scene::resources::StaticMeshLoader::registerAngelScriptAPI();
 
   AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
 }

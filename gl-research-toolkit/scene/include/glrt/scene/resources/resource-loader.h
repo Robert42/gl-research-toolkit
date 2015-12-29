@@ -30,6 +30,8 @@ public:
   void loadStaticMesh(const StaticMeshUuid& uuid, const StaticMeshData& data);
   void loadStaticMesh(const StaticMeshUuid& uuid, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices);
 
+  static void registerAngelScriptAPI();
+
 protected:
   virtual void loadStaticMeshImpl(const StaticMeshUuid& uuid, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices) = 0;
 };
