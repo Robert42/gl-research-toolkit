@@ -22,6 +22,8 @@ struct StaticMeshData
   QVector<Vertex> vertices;
 
   bool isIndexed() const;
+
+  static StaticMeshData loadFromFile(const QString& filepath);
 };
 
 } // namespace resources

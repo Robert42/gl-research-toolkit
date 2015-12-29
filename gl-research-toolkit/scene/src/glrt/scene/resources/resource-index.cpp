@@ -86,8 +86,7 @@ void ResourceIndex::_loadResource(ResourceLoader* loader, const QUuid& uuid, boo
 
   if(staticMeshAssetsFiles.contains(staticMeshUuid))
   {
-    // #TODO
-    //loader->loadStaticMesh(staticMeshUuid, );
+    loader->loadStaticMesh(staticMeshUuid, staticMeshAssetsFiles[staticMeshUuid].toStdString());
     if(loadNow)
       waitForAssetToBeLoaded(uuid);
   }else

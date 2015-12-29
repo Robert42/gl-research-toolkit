@@ -99,7 +99,7 @@ typedef StaticMeshData::index_type index_type;
 typedef StaticMeshData::Vertex Vertex;
 
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
-void writeToScriptLoadingStaticMesh(QTextStream& stream, const StaticMeshData& data)
+void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, const StaticMeshData& data)
 {
   static_assert(sizeof(index_type)==2, "For uint16 as array type to be correct, index_type must be also a 16bit integer");
   stream << "  array<uint16> indices";
@@ -148,7 +148,7 @@ void writeToScriptLoadingStaticMesh(QTextStream& stream, const StaticMeshData& d
 
     stream << "\n  };\n";
   }
-  stream << "  loadStaticMesh(uuid, indices, vertexData);\n";
+  stream << "  loader.loadStaticMesh("<<uuid<<", indices, vertexData);\n";
 }
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed)
@@ -195,8 +195,8 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 
   QTextStream outputStream(&file);
 
-  outputStream << "void main(Uuid &in uuid)\n{\n";
-  writeToScriptLoadingStaticMesh(outputStream, data);
+  outputStream << "void main(StaticMeshLoader@ loader, StaticMeshUuid &in uuid)\n{\n";
+  writeToScriptLoadingStaticMesh(outputStream, "uuid", data);
   outputStream << "}";
 }
 

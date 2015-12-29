@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 
   // ======== Setup the Meshes ========
   // The main mesh we want to load
-  glrt::renderer::StaticMesh mesh = glrt::renderer::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.dae");
+  glrt::renderer::StaticMesh mesh = glrt::renderer::StaticMesh::loadMeshFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.dae");
 
   // Get the Vertex Format of it
   gl::VertexArrayObject vertexArrayObject = glrt::renderer::StaticMesh::generateVertexArrayObject();
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 
         if(glrt::renderer::StaticMesh::isValidFileSuffix(droppedFile))
         {
-          glrt::renderer::StaticMesh newMesh = glrt::renderer::StaticMesh::loadMeshFromFile(droppedFile.absoluteFilePath());
+          glrt::renderer::StaticMesh newMesh = glrt::renderer::StaticMesh::loadMeshFile(droppedFile.absoluteFilePath());
           std::swap(newMesh, mesh);
         }else
         {

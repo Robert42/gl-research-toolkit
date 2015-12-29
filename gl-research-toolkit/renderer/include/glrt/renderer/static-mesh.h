@@ -28,7 +28,8 @@ public:
   StaticMesh& operator=(const StaticMesh&) = delete;
 
   static bool isValidFileSuffix(const QFileInfo& file);
-  static StaticMesh loadMeshFromFile(const QString& file, bool indexed=true);
+  static StaticMesh loadMeshFile(const QString& file);
+  static StaticMesh create(const scene::resources::StaticMeshData& data);
   static StaticMesh createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed = true);
   static StaticMesh createAsArray(const StaticMesh::Vertex* vertices, int numVertices);
 

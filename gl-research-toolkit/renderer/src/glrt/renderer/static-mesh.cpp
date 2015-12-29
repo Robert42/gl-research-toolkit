@@ -1,3 +1,4 @@
+#include <glrt/scene/resources/resource-loader.h>
 #include <glrt/renderer/static-mesh.h>
 #include <glrt/glsl/layout-constants.h>
 
@@ -51,9 +52,18 @@ bool StaticMesh::isValidFileSuffix(const QFileInfo& file)
 }
 
 
-StaticMesh StaticMesh::loadMeshFromFile(const QString& file, bool indexed)
+StaticMesh StaticMesh::loadMeshFile(const QString& file)
 {
-  // #FIXME
+  return create(scene::resources::StaticMeshData::loadFromFile(file));
+}
+
+
+StaticMesh StaticMesh::create(const scene::resources::StaticMeshData& data)
+{
+  if(data.isIndexed())
+    return createIndexed(data.indices.data(), data.indices.length(), data.vertices.data(), data.vertices.length());
+  else
+    return createAsArray(data.vertices.data(), data.vertices.length());
 }
 
 

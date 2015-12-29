@@ -7,6 +7,20 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, QUuid* value)
+{
+  context->SetArgObject(i, value);
+}
+
+void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, StaticMeshUuid* value)
+{
+  context->SetArgObject(i, value);
+}
+
+void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, MaterialDataUuid* value)
+{
+  context->SetArgObject(i, value);
+}
 
 using AngelScriptIntegration::AngelScriptCheck;
 

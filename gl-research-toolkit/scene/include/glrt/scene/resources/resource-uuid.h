@@ -48,6 +48,11 @@ typedef Uuid<StaticMeshData> StaticMeshUuid;
 typedef Uuid<MaterialData> MaterialDataUuid;
 
 
+void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, QUuid* value);
+void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, StaticMeshUuid* value);
+void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, MaterialDataUuid* value);
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt
