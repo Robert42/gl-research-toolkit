@@ -1,9 +1,4 @@
 void main(ResourceIndex@ index)
 {
-  if(@index != null)
-    log_info("index is not null");
-  else
-    log_warning("index is NULL");
-    
   index.loadSubdirectory("common");
 }

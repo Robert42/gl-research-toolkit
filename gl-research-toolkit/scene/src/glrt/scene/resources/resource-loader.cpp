@@ -38,16 +38,18 @@ void StaticMeshLoader::loadStaticMesh(StaticMeshUuid uuid, const std::string& fi
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filepath.c_str(), "void main(StaticMeshLoader@, StaticMeshUuid &in)", "static-mesh-loader", config, this, &uuid);
 }
 
-void StaticMeshLoader::loadStaticMesh(const StaticMeshUuid& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices)
+void StaticMeshLoader::loadStaticMesh(const StaticMeshUuid& uuid, const AngelScript::CScriptArray* _indices, const AngelScript::CScriptArray* _vertices)
 {
-  if(indices->GetArrayObjectType() != angelScriptEngine->GetObjectTypeByName("uint16"))
-    throw GLRT_EXCEPTION("ResourceLoader::loadStaticMesh accepts an vertex array of the type array<uint16>");
-  if(vertices->GetArrayObjectType() != angelScriptEngine->GetObjectTypeByName("float"))
-    throw GLRT_EXCEPTION("ResourceLoader::loadStaticMesh accepts an vertex array of the type array<float>");
+  size_t numIndices = _indices->GetSize();
+  size_t numVertices = _vertices->GetSize();
 
-  loadStaticMesh(uuid,
-                 reinterpret_cast<const StaticMeshData::index_type*>(indices->At(0)), indices->GetSize(),
-                 reinterpret_cast<const StaticMeshData::Vertex*>(vertices->At(0)), vertices->GetSize()*sizeof(StaticMeshData::Vertex)/sizeof(float));
+  // _vertices is an array iof the type float, but we need the number of vertices
+  numVertices = (numVertices*sizeof(float)) / sizeof(StaticMeshData::Vertex);
+
+  const StaticMeshData::index_type* indices = reinterpret_cast<const StaticMeshData::index_type*>(_indices->At(0));
+  const StaticMeshData::Vertex* vertices = reinterpret_cast<const StaticMeshData::Vertex*>(_vertices->At(0));
+
+  loadStaticMesh(uuid, indices, numIndices, vertices, numVertices);
 }
 
 void StaticMeshLoader::loadStaticMesh(const StaticMeshUuid& uuid, const StaticMeshData& data)
