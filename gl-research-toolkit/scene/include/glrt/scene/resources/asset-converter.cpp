@@ -159,8 +159,8 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
   Assimp::Importer importer;
 
   glm::mat3 transform = glm::mat3(1, 0, 0,
-                                  0, 0, 1,
-                                  0,-1, 0);
+                                  0, 1, 0,
+                                  0, 0, 1);
   QString sourceFilepath = sourceFile.filePath();
 
   const aiScene* scene = importer.ReadFile(sourceFilepath.toStdString(),
