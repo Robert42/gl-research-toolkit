@@ -65,7 +65,7 @@ void StaticMeshLoader::registerAngelScriptAPI()
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  r = angelScriptEngine->RegisterObjectType("StaticMeshLoader", sizeof(StaticMeshLoader), AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectType("StaticMeshLoader", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("StaticMeshLoader", "void loadStaticMesh(const StaticMeshUuid &in uuid, const array<uint16> &in indices, const array<float> &in vertices)", AngelScript::asMETHODPR(StaticMeshLoader, loadStaticMesh, (const StaticMeshUuid& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices), void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
