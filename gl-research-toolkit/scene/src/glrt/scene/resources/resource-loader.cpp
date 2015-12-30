@@ -30,7 +30,7 @@ StaticMeshLoader::~StaticMeshLoader()
 {
 }
 
-void StaticMeshLoader::loadStaticMesh(const StaticMeshUuid& uuid, const std::string& filepath)
+void StaticMeshLoader::loadStaticMesh(StaticMeshUuid uuid, const std::string& filepath)
 {
   AngelScriptIntegration::ConfigCallScript config;
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING;

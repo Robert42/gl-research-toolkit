@@ -25,7 +25,7 @@ public:
   StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
   StaticMeshLoader& operator=(StaticMeshLoader&&) = delete;
 
-  void loadStaticMesh(const StaticMeshUuid& uuid, const std::string& filepath);
+  void loadStaticMesh(StaticMeshUuid uuid, const std::string& filepath);
   void loadStaticMesh(const StaticMeshUuid& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices);
   void loadStaticMesh(const StaticMeshUuid& uuid, const StaticMeshData& data);
   void loadStaticMesh(const StaticMeshUuid& uuid, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices);
