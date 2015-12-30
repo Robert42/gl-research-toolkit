@@ -16,7 +16,7 @@ namespace resources {
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
-QString python_exportSceneAsObj(const QString& objFile);
+QString python_exportSceneAsObjMesh(const QString& objFile);
 
 void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& blenderFile, bool indexed)
 {
@@ -27,7 +27,7 @@ void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& 
 
   QString tempFilePath = QDir(temporaryDir.path()).absoluteFilePath("exported.obj");
 
-  runBlenderWithPythonScript(python_exportSceneAsObj(tempFilePath), blenderFile);
+  runBlenderWithPythonScript(python_exportSceneAsObjMesh(tempFilePath), blenderFile);
 
   convertStaticMesh_assimpToMesh(meshFile, tempFilePath, indexed);
 }
@@ -68,7 +68,7 @@ QString to_python_string(QString str)
   return str.replace("\\", R"("'\\'")").replace("\"", "\\\"").prepend("r\"").append("\"");
 }
 
-QString python_exportSceneAsObj(const QString& objFile)
+QString python_exportSceneAsObjMesh(const QString& objFile)
 {
   return QString("import bpy\n"
                  "bpy.ops.export_scene.obj("
