@@ -4,6 +4,7 @@
 
 #include <QTemporaryDir>
 #include <QProcess>
+#include <QDateTime>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -12,6 +13,11 @@
 namespace glrt {
 namespace scene {
 namespace resources {
+
+inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile)
+{
+  return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
+}
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
 
@@ -41,8 +47,7 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
   QFileInfo meshFile(QString::fromStdString(meshFilename));
   QFileInfo sourceFile(QString::fromStdString(sourceFilename));
 
-  // #TODO comment in again
-  //if(meshFile.lastModified() < sourceFile.lastModified())
+  if(shouldConvert(meshFile, sourceFile))
   {
     if(sourceFile.suffix().toLower() == "blend")
       convertStaticMesh_BlenderToObj(meshFile, sourceFile, indexed);
