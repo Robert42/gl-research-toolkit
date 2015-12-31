@@ -169,7 +169,6 @@ void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, co
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed)
 {
-  // #TODO update splashscreen (use a raii for splashscreen messages?)
   qDebug() << "convertStaticMesh_assimpToMesh("<<meshFile.absoluteFilePath()<<","<<sourceFile.absoluteFilePath()<<")";
 
   Assimp::Importer importer;
