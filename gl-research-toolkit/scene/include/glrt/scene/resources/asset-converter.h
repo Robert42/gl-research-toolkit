@@ -8,6 +8,7 @@ namespace scene {
 namespace resources {
 
 void convertStaticMesh(const std::string& meshFile, const std::string& sourceFile);
+void convertSceneGraph(const std::string& sceneGraphFilename, const std::string& sourceFilename);
 
 } // namespace resources
 } // namespace scene

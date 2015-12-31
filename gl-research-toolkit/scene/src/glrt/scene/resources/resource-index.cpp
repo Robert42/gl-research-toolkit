@@ -26,6 +26,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(const StaticMeshUuid &in uuid, const string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterGlobalFunction("void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertSceneGraph), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

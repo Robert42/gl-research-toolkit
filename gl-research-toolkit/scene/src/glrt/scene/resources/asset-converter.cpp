@@ -56,6 +56,19 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
   }
 }
 
+void convertSceneGraph(const std::string& sceneGraphFilename, const std::string& sourceFilename)
+{
+  // #TODO update splashscreen (use a raii for splashscreen messages?)
+
+  QFileInfo sceneGraphFile(QString::fromStdString(sceneGraphFilename));
+  QFileInfo sourceFile(QString::fromStdString(sourceFilename));
+
+  if(shouldConvert(sceneGraphFile, sourceFile))
+  {
+    qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
+  }
+}
+
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile)
 {
