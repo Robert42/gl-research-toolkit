@@ -42,10 +42,10 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
 {
   bool indexed = true;// #TODO allow the script to choose, whether the mesh is indexed or not
 
-  // #TODO update splashscreen (use a raii for splashscreen messages?)
-
   QFileInfo meshFile(QString::fromStdString(meshFilename));
   QFileInfo sourceFile(QString::fromStdString(sourceFilename));
+
+  SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
 
   if(shouldConvert(meshFile, sourceFile))
   {
@@ -58,10 +58,10 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
 
 void convertSceneGraph(const std::string& sceneGraphFilename, const std::string& sourceFilename)
 {
-  // #TODO update splashscreen (use a raii for splashscreen messages?)
-
   QFileInfo sceneGraphFile(QString::fromStdString(sceneGraphFilename));
   QFileInfo sourceFile(QString::fromStdString(sourceFilename));
+
+  SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
 
   if(shouldConvert(sceneGraphFile, sourceFile))
   {
@@ -72,8 +72,6 @@ void convertSceneGraph(const std::string& sceneGraphFilename, const std::string&
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile)
 {
-  // #TODO update splashscreen (use a raii for splashscreen messages?)
-
   QString blenderProgram("blender"); // #TODO, search for blender instead of just assuming it in the PATH variable?
   QStringList arguments = {"--background", blenderFile.absoluteFilePath(), "--python-expr", pythonScript};
 

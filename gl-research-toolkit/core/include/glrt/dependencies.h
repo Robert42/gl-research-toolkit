@@ -85,7 +85,28 @@ private:
 
 extern AngelScript::asIScriptEngine* angelScriptEngine;
 
-void showSplashscreenMessage(const QString& message);
+class SplashscreenMessage final
+{
+public:
+  SplashscreenMessage(const QString& message);
+  ~SplashscreenMessage();
+
+  SplashscreenMessage(const SplashscreenMessage& splashscreenMessage) = delete;
+  SplashscreenMessage(SplashscreenMessage&& splashscreenMessage) = delete;
+  SplashscreenMessage& operator=(const SplashscreenMessage& splashscreenMessage) = delete;
+  SplashscreenMessage& operator=(SplashscreenMessage&& splashscreenMessage) = delete;
+
+  static void show(const QString& message);
+
+private:
+  static void push(const QString& message);
+  static QString pop();
+  static QStack<QString> messageStack;
+};
+
+#define SPLASHSCREEN_MESSAGE(message) \
+SplashscreenMessage __splashscreenMessage(message); \
+Q_UNUSED(__splashscreenMessage);
 
 
 #define GLRT_EXCEPTION(message) Exception(__FILE__, __LINE__, __FUNCTION__, message)

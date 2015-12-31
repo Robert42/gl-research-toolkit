@@ -111,7 +111,7 @@ ShaderCompiler::ShaderCompiler()
 
 bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
 {
-  showSplashscreenMessage("compile Shader");
+  SPLASHSCREEN_MESSAGE("compile Shader");
 
   ShaderErrorDialog errorDialog;
 

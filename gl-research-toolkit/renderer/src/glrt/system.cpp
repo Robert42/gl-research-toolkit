@@ -71,7 +71,7 @@ void System::initSplashscreen(const Settings& settings)
 
 void System::initSDL(const Settings& settings)
 {
-  showSplashscreenMessage("init SDL");
+  SPLASHSCREEN_MESSAGE("init SDL");
 
   CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0);
 
@@ -101,7 +101,7 @@ void System::initSDL(const Settings& settings)
 
 void System::initGLEW(const Settings& settings)
 {
-  showSplashscreenMessage("init GLEW");
+  SPLASHSCREEN_MESSAGE("init GLEW");
 
   GLenum error =  glewInit();
   if(error != GLEW_OK)
@@ -122,7 +122,7 @@ inline GLint print_gl_integer(GLenum variable, const char* variableName)
 
 void System::verifyGLFeatures()
 {
-  showSplashscreenMessage("verify OpenGL features");
+  SPLASHSCREEN_MESSAGE("verify OpenGL features");
 
   Logger::SuppressDebug suppressLog;
 
@@ -144,7 +144,7 @@ void System::verifyGLFeatures()
 
 void System::verifyNVidiaFeatures()
 {
-  showSplashscreenMessage("verify NVidia OpenGL Extension");
+  SPLASHSCREEN_MESSAGE("verify NVidia OpenGL Extension");
 
   // See http://blog.icare3d.org/ for a more complete list of interesting Features
 

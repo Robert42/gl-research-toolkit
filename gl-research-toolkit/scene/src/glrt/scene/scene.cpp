@@ -56,7 +56,7 @@ void Scene::update(float deltaTime)
 
 QMap<QString, QString> Scene::findAllScenes()
 {
-  showSplashscreenMessage("search Scenes");
+  SPLASHSCREEN_MESSAGE("search Scenes");
 
   QMap<QString, QString> map;
 
