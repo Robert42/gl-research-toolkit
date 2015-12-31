@@ -21,6 +21,7 @@ public:
   bool operator<=(const QUuid& other) const;
 
   static void registerAngelScriptAPI();
+  static void registerCustomizedUuidType(const char* innerType, bool declareInnerType);
 
 private:
   QUuid _uuid;

@@ -138,6 +138,8 @@ void Application::initAngelScript()
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
 
   glrt::Uuid<void>::registerAngelScriptAPI();
+  glrt::Uuid<void>::registerCustomizedUuidType("StaticMeshData", true);
+  glrt::Uuid<void>::registerCustomizedUuidType("MaterialData", true);
   glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
   glrt::scene::resources::StaticMeshLoader::registerAngelScriptAPI();
 

@@ -63,8 +63,10 @@ inline void RegisterUuidType(const char* name)
 }
 
 
-inline void RegisterCustomizedUuidType(const char* innerType, bool declareInnerType)
+template<>
+void Uuid<void>::registerCustomizedUuidType(const char* innerType, bool declareInnerType)
 {
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
   int r;
 
   std::string name = "Uuid<"+std::string(innerType)+">";
@@ -82,6 +84,7 @@ inline void RegisterCustomizedUuidType(const char* innerType, bool declareInnerT
   AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("QUuid", (name+" opConv()").c_str(), AngelScript::asFUNCTION(cast_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
   AngelScriptCheck(r);
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 
@@ -101,9 +104,6 @@ void Uuid<void>::registerAngelScriptAPI()
   AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("Uuid<T>", AngelScript::asBEHAVE_CONSTRUCT, "void ctor(const string &in)", AngelScript::asFUNCTION(init_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
   r = angelScriptEngine->RegisterObjectBehaviour("Uuid<T>", AngelScript::asBEHAVE_DESTRUCT, "void dtor()", AngelScript::asFUNCTION(deinit_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
-
-  RegisterCustomizedUuidType("StaticMeshData", true); // TODO: remove
-  RegisterCustomizedUuidType("MaterialData", true); // TODO: remove
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
