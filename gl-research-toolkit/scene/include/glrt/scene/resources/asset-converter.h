@@ -1,7 +1,7 @@
 #ifndef GLRT_SCENE_RESOURCES_ASSETCONVERTER_H
 #define GLRT_SCENE_RESOURCES_ASSETCONVERTER_H
 
-#include "resource-uuid.h"
+#include <glrt/dependencies.h>
 
 namespace glrt {
 namespace scene {

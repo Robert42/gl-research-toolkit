@@ -15,7 +15,7 @@ class MyMeshLoader final : public StaticMeshLoader
 public:
   StaticMeshData data;
 
-  void loadStaticMeshImpl(const StaticMeshUuid&, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices) override
+  void loadStaticMeshImpl(const Uuid<StaticMeshData>&, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices) override
   {
     data.indices.resize(numIndices);
     data.vertices.resize(numVertices);
@@ -27,7 +27,7 @@ public:
 StaticMeshData StaticMeshData::loadFromFile(const QString& filepath)
 {
   MyMeshLoader loader;
-  loader.loadStaticMesh(StaticMeshUuid(QUuid::createUuid()), filepath.toStdString());
+  loader.loadStaticMesh(Uuid<StaticMeshData>(QUuid::createUuid()), filepath.toStdString());
   return loader.data;
 }
 

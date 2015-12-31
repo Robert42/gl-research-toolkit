@@ -1,5 +1,5 @@
 #include <glrt/application.h>
-#include <glrt/scene/resources/resource-uuid.h>
+#include <glrt/scene/declarations.h>
 #include <glrt/scene/resources/resource-index.h>
 #include <glrt/scene/resources/resource-loader.h>
 #include <glrt/scene/resources/asset-converter.h>
@@ -137,7 +137,7 @@ void Application::initAngelScript()
 
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
 
-  glrt::scene::resources::Uuid<void>::registerAngelScriptAPI();
+  glrt::Uuid<void>::registerAngelScriptAPI();
   glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
   glrt::scene::resources::StaticMeshLoader::registerAngelScriptAPI();
 

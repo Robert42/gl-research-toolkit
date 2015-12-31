@@ -246,7 +246,7 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 
   QTextStream outputStream(&file);
 
-  outputStream << "void main(StaticMeshLoader@ loader, StaticMeshUuid &in uuid)\n{\n";
+  outputStream << "void main(StaticMeshLoader@ loader, Uuid<StaticMeshData> &in uuid)\n{\n";
   writeToScriptLoadingStaticMesh(outputStream, "uuid", data);
   outputStream << "}";
 }

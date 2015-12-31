@@ -44,6 +44,7 @@ target_compile_definitions(
   GLRT_TEMP_SHADER_DIR=\"${GLRT_TEMP_SHADER_DIR}\"
   GLM_FORCE_RADIANS
   GLM_SWIZZLE
+  GLM_STATIC_CONST_MEMBERS
 )
 
 target_compile_options(glrt-core

@@ -1,26 +1,10 @@
-#include <glrt/scene/resources/resource-uuid.h>
+#include <glrt/toolkit/uuid.h>
 #include <angelscript-integration/angelscript-integration.h>
 
 #include <QRegularExpression>
 
 namespace glrt {
-namespace scene {
-namespace resources {
 
-void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, QUuid* value)
-{
-  context->SetArgObject(i, value);
-}
-
-void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, StaticMeshUuid* value)
-{
-  context->SetArgObject(i, value);
-}
-
-void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, MaterialDataUuid* value)
-{
-  context->SetArgObject(i, value);
-}
 
 using AngelScriptIntegration::AngelScriptCheck;
 
@@ -50,6 +34,11 @@ inline void init_custom_uuid_type(QUuid* in, const std::string& s)
 }
 
 
+inline void deinit_custom_uuid_type(QUuid*)
+{
+}
+
+
 inline std::string cast_custom_uuid_to_string(QUuid* in)
 {
   return in->toString().toStdString();
@@ -74,15 +63,24 @@ inline void RegisterUuidType(const char* name)
 }
 
 
-inline void RegisterCustomizedUuidType(const char* name)
+inline void RegisterCustomizedUuidType(const char* innerType, bool declareInnerType)
 {
   int r;
 
-  RegisterUuidType(name);
+  std::string name = "Uuid<"+std::string(innerType)+">";
+  const char* name_cstr = name.c_str();
 
-  r = angelScriptEngine->RegisterObjectMethod(name, "Uuid opImplConv()", AngelScript::asFUNCTION(cast_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
+  if(declareInnerType)
+  {
+    r = angelScriptEngine->RegisterObjectType(innerType, 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT);
+    AngelScriptCheck(r);
+  }
+
+  RegisterUuidType(name_cstr);
+
+  r = angelScriptEngine->RegisterObjectMethod(name_cstr, "QUuid opImplConv()", AngelScript::asFUNCTION(cast_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
   AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("Uuid", (std::string(name)+" opConv()").c_str(), AngelScript::asFUNCTION(cast_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
+  r = angelScriptEngine->RegisterObjectMethod("QUuid", (name+" opConv()").c_str(), AngelScript::asFUNCTION(cast_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
   AngelScriptCheck(r);
 }
 
@@ -92,15 +90,24 @@ void Uuid<void>::registerAngelScriptAPI()
 {
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  RegisterUuidType("Uuid");
-  RegisterCustomizedUuidType("StaticMeshUuid");
-  RegisterCustomizedUuidType("MaterialDataUuid");
+  RegisterUuidType("QUuid");
+
+  int r;
+  r = angelScriptEngine->RegisterObjectType("Uuid<class T>",
+                                            sizeof(QUuid),
+                                            AngelScript::asOBJ_VALUE |
+                                            AngelScript::asOBJ_TEMPLATE |
+                                            AngelScript::asGetTypeTraits<QUuid>());
+  AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("Uuid<T>", AngelScript::asBEHAVE_CONSTRUCT, "void ctor(const string &in)", AngelScript::asFUNCTION(init_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
+  r = angelScriptEngine->RegisterObjectBehaviour("Uuid<T>", AngelScript::asBEHAVE_DESTRUCT, "void dtor()", AngelScript::asFUNCTION(deinit_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
+
+  RegisterCustomizedUuidType("StaticMeshData", true); // TODO: remove
+  RegisterCustomizedUuidType("MaterialData", true); // TODO: remove
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 
-} // namespace resources
-} // namespace scene
 } // namespace glrt
 

@@ -2,7 +2,6 @@
 #define GLRT_SCENE_STATICMESHCOMPONENT_H
 
 #include "entity.h"
-#include "resources/resource-uuid.h"
 
 namespace glrt {
 namespace scene {
@@ -11,10 +10,10 @@ class StaticMeshComponent final : public VisibleComponent
 {
   Q_OBJECT
 public:
-  const resources::StaticMeshUuid staticMesh;
-  const resources::MaterialDataUuid material;
+  const Uuid<resources::StaticMeshData> staticMesh;
+  const Uuid<resources::MaterialData> material;
 
-  StaticMeshComponent(Entity& entity, bool movable, const resources::StaticMeshUuid& staticMesh, const resources::MaterialDataUuid & material, const glm::mat4& relativeTransform=glm::mat4(1));
+  StaticMeshComponent(Entity& entity, bool movable, const Uuid<resources::StaticMeshData>& staticMesh, const Uuid<resources::MaterialData> & material, const glm::mat4& relativeTransform=glm::mat4(1));
   ~StaticMeshComponent();
 };
 

@@ -2,18 +2,18 @@ set(SOURCE_FILES
   include/glrt/scene/camera-component.h
   include/glrt/scene/camera-parameter.h
   include/glrt/scene/debug-camera.h
+  include/glrt/scene/declarations.h
   include/glrt/scene/entity.h
   include/glrt/scene/light-component.h
   include/glrt/scene/object.h
   include/glrt/scene/object.inl
   include/glrt/scene/resources/asset-converter.h
+  include/glrt/scene/resources/declarations.h
   include/glrt/scene/resources/material-data.h
   include/glrt/scene/resources/resource-index.h
+  include/glrt/scene/resources/resource-index.inl
   include/glrt/scene/resources/resource-loader.h
-  include/glrt/scene/resources/resource-uuid.h
-  include/glrt/scene/resources/resource-uuid-index.inl
-  include/glrt/scene/resources/resource-uuid.inl
-  include/glrt/scene/resources/resource-uuid-loader.inl
+  include/glrt/scene/resources/resource-loader.inl
   include/glrt/scene/resources/scene-loader.h
   include/glrt/scene/resources/static-mesh-data.h
   include/glrt/scene/scene.h
@@ -27,7 +27,6 @@ set(SOURCE_FILES
   src/glrt/scene/resources/asset-converter.cpp
   src/glrt/scene/resources/resource-index.cpp
   src/glrt/scene/resources/resource-loader.cpp
-  src/glrt/scene/resources/resource-uuid.cpp
   src/glrt/scene/resources/scene-loader.cpp
   src/glrt/scene/resources/static-mesh-data.cpp
   src/glrt/scene/scene.cpp

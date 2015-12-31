@@ -1,7 +1,7 @@
 #ifndef GLRT_SCENE_RESOURCES_SCENELOADER_H
 #define GLRT_SCENE_RESOURCES_SCENELOADER_H
 
-#include "resource-uuid.h"
+#include <glrt/toolkit/uuid.h>
 
 #include <glrt/scene/scene.h>
 #include <glrt/scene/static-mesh-component.h>
@@ -19,14 +19,14 @@ class SceneLoader final
 public:
   Scene resultingScene;
   const aiScene* scene;
-  QHash<QString, MaterialDataUuid> materials;
-  QHash<QString, StaticMeshUuid> meshes;
-  QHash<int, MaterialDataUuid> materialsForIndex;
-  QHash<int, StaticMeshUuid> meshesForIndex;
+  QHash<QString, Uuid<MaterialData>> materials;
+  QHash<QString, Uuid<StaticMeshData>> meshes;
+  QHash<int, Uuid<MaterialData>> materialsForIndex;
+  QHash<int, Uuid<StaticMeshData>> meshesForIndex;
   QMap<QString, CameraParameter> cameras;
   QMap<QString, SphereAreaLightComponent::Data> sphereAreaLights;
   QMap<QString, RectAreaLightComponent::Data> rectAreaLights;
-  MaterialDataUuid fallbackMaterial;
+  Uuid<MaterialData> fallbackMaterial;
   glm::mat4 meshTransform;
 
   SceneLoader(ResourceLoader* resourceLoader);

@@ -2,6 +2,7 @@
 #define GLRT_SCENE_ENTITY_H
 
 #include <glrt/dependencies.h>
+#include <glrt/scene/declarations.h>
 
 namespace glrt {
 namespace scene {

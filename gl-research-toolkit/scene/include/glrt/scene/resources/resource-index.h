@@ -1,7 +1,8 @@
 #ifndef GLRT_SCENE_RESOURCES_RESOURCEINDEX_H
 #define GLRT_SCENE_RESOURCES_RESOURCEINDEX_H
 
-#include "resource-uuid.h"
+#include <glrt/toolkit/uuid.h>
+#include <glrt/scene/declarations.h>
 
 namespace glrt {
 namespace scene {
@@ -36,7 +37,7 @@ public:
   bool isLoading(const QUuid& uuid) const;
   bool isLoaded(const QUuid& uuid) const;
 
-  void registerAsset(const StaticMeshUuid& uuid, const std::string& mesh_file);
+  void registerAsset(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file);
 
 private:
   friend class ResourceLoader;
@@ -45,7 +46,7 @@ private:
   QSet<QUuid> loadingRessources;
   QSet<QUuid> loadedRessources;
 
-  QHash<StaticMeshUuid, QString> staticMeshAssetsFiles;
+  QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
 
   void _loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow);
   void waitForAssetToBeLoaded(const QUuid& uuid);
@@ -53,12 +54,11 @@ private:
   bool classInvariant();
 };
 
-void pass_arg_to_angelscript(AngelScript::asIScriptContext*context, int i, ResourceIndex* value);
 
 } // namespace resources
 } // namespace glrt
 } // namespace scene
 
-#include "resource-uuid-index.inl"
+#include "resource-index.inl"
 
 #endif // GLRT_SCENE_RESOURCES_RESOURCEINDEX_H

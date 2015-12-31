@@ -26,6 +26,8 @@ struct StaticMeshData
   static StaticMeshData loadFromFile(const QString& filepath);
 };
 
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt

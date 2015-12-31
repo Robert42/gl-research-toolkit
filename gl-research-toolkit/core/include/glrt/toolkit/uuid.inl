@@ -1,11 +1,9 @@
-#ifndef GLRT_SCENE_RESOURCES_RESOURCEINDEX_INL
-#define GLRT_SCENE_RESOURCES_RESOURCEINDEX_INL
+#ifndef GLRT_UUID_INL
+#define GLRT_UUID_INL
 
-#include "resource-uuid.h"
+#include "uuid.h"
 
 namespace glrt {
-namespace scene {
-namespace resources {
 
 
 template<class T>
@@ -71,8 +69,6 @@ int qHash(const Uuid<T>& uuid, uint seed)
 }
 
 
-} // namespace resources
 } // namespace glrt
-} // namespace scene
 
-#endif // GLRT_SCENE_RESOURCES_RESOURCEINDEX_H
+#endif // GLRT_UUID_H

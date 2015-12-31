@@ -23,7 +23,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(const StaticMeshUuid &in uuid, const string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(const Uuid<StaticMeshData> &in uuid, const string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterGlobalFunction("void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertSceneGraph), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
@@ -73,7 +73,7 @@ bool ResourceIndex::isLoaded(const QUuid& uuid) const
   return loadedRessources.contains(uuid);
 }
 
-void ResourceIndex::registerAsset(const StaticMeshUuid& uuid, const std::string& mesh_file)
+void ResourceIndex::registerAsset(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file)
 {
   unloadedRessources.insert(uuid);
   staticMeshAssetsFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(mesh_file));
@@ -81,7 +81,7 @@ void ResourceIndex::registerAsset(const StaticMeshUuid& uuid, const std::string&
 
 void ResourceIndex::_loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow)
 {
-  StaticMeshUuid staticMeshUuid(uuid);
+  Uuid<StaticMeshData> staticMeshUuid(uuid);
 
   // #TODO managage state changes
 
@@ -109,12 +109,6 @@ bool ResourceIndex::classInvariant()
                                     && (loadedRessources   & unloadedRessources).isEmpty();
 
   return everyRessourceHasOnlyOneState;
-}
-
-
-void pass_arg_to_angelscript(AngelScript::asIScriptContext* context, int i, ResourceIndex* value)
-{
-  context->SetArgObject(i, value);
 }
 
 
