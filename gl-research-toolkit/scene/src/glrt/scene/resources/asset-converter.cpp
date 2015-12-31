@@ -40,7 +40,7 @@ void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& 
   convertStaticMesh_assimpToMesh(meshFile, tempFilePath, indexed);
 }
 
-void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile, bool indexed)
+void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile)
 {
   QTemporaryDir temporaryDir;
 
@@ -82,8 +82,8 @@ void convertSceneGraph(const std::string& sceneGraphFilename, const std::string&
   // #TODO uncomment
   if(shouldConvert(sceneGraphFile, sourceFile))
   {
-    qDebug() << "convertSceneGraph("<<sceneGraphFilename.fileName()<<", "<<sourceFile.fileName()<<")";
-    convertSceneGraph_BlenderToCollada(meshFile, sourceFile, indexed);
+    qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
+    convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile);
   }
 }
 
