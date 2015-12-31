@@ -254,6 +254,8 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile)
 {
   // #IMPLEMENT
+  Q_UNUSED(meshFile);
+  Q_UNUSED(sourceFile);
 }
 
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)

@@ -33,6 +33,8 @@ bool SceneLoader::loadFromFile(const QString& filename)
 
   return success;
   */
+  Q_UNUSED(filename);
+  return false;
 }
 
 

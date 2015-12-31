@@ -106,6 +106,7 @@ QMap<QString, QString> Scene::findAllScenes()
 void Scene::loadFromFile(const QString& filename)
 {
   // #TODO
+  Q_UNUSED(filename);
 }
 
 
