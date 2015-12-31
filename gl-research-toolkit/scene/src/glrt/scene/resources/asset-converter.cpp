@@ -20,9 +20,11 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
 }
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile);
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
 QString python_exportSceneAsObjMesh(const QString& objFile);
+QString python_exportSceneAsColladaSceneGraph(const QString& objFile);
 
 void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& blenderFile, bool indexed)
 {
@@ -36,6 +38,20 @@ void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& 
   runBlenderWithPythonScript(python_exportSceneAsObjMesh(tempFilePath), blenderFile);
 
   convertStaticMesh_assimpToMesh(meshFile, tempFilePath, indexed);
+}
+
+void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile, bool indexed)
+{
+  QTemporaryDir temporaryDir;
+
+  if(!temporaryDir.isValid())
+    throw GLRT_EXCEPTION("Couldn't convert file to scene-graph");
+
+  QString tempFilePath = QDir(temporaryDir.path()).absoluteFilePath("exported-scene.obj");
+
+  runBlenderWithPythonScript(python_exportSceneAsColladaSceneGraph(tempFilePath), blenderFile);
+
+  convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath);
 }
 
 void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename)
@@ -61,11 +77,13 @@ void convertSceneGraph(const std::string& sceneGraphFilename, const std::string&
   QFileInfo sceneGraphFile(QString::fromStdString(sceneGraphFilename));
   QFileInfo sourceFile(QString::fromStdString(sourceFilename));
 
-  SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
+  SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
 
+  // #TODO uncomment
   if(shouldConvert(sceneGraphFile, sourceFile))
   {
-    qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
+    qDebug() << "convertSceneGraph("<<sceneGraphFilename.fileName()<<", "<<sourceFile.fileName()<<")";
+    convertSceneGraph_BlenderToCollada(meshFile, sourceFile, indexed);
   }
 }
 
@@ -108,6 +126,24 @@ QString python_exportSceneAsObjMesh(const QString& objFile)
                  ", "
                  "axis_up='Z'"
                  ")").arg(to_python_string(objFile));
+}
+
+QString python_exportSceneAsColladaSceneGraph(const QString& colladaFile)
+{
+  return QString("import bpy\n"
+                 "bpy.ops.wm.collada_export("
+                 "filepath=%0"
+                 ", "
+                 "apply_modifiers=True"
+                 ", "
+                 "triangulate=True"
+                 ", "
+                 "use_object_instantiation=True"
+                 ", "
+                 "sort_by_name=True"
+                 ", "
+                 "export_transformation_type_selection='matrix'"
+                 ")").arg(to_python_string(colladaFile));
 }
 
 
@@ -213,6 +249,11 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
   outputStream << "void main(StaticMeshLoader@ loader, StaticMeshUuid &in uuid)\n{\n";
   writeToScriptLoadingStaticMesh(outputStream, "uuid", data);
   outputStream << "}";
+}
+
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile)
+{
+  // #IMPLEMENT
 }
 
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
