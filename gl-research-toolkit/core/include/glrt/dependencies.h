@@ -9,6 +9,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include <angelscript.h>
+#include <angelscript-integration/ref-counted-object.h>
 #include <angelscript-integration/angelscript-integration.h>
 
 #include <QDebug>
@@ -117,7 +118,18 @@ Q_UNUSED(__splashscreenMessage);
 
 #define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << x;
 
-
 } // namespace glrt
+
+
+template<class T>
+class base_of;
+
+#define DECLARE_BASECLASS(PARENT, CHILD) \
+  template<> \
+  class base_of<CHILD> \
+  { \
+    typedef PARENT type; \
+    base_of() = delete; \
+  }
 
 #endif // GLRT_DEPENDENCIES_H

@@ -4,6 +4,8 @@ set(SOURCE_FILES
   include/glrt/scene/debug-camera.h
   include/glrt/scene/entity.h
   include/glrt/scene/light-component.h
+  include/glrt/scene/object.h
+  include/glrt/scene/object.inl
   include/glrt/scene/resources/asset-converter.h
   include/glrt/scene/resources/material-data.h
   include/glrt/scene/resources/resource-index.h
@@ -21,6 +23,7 @@ set(SOURCE_FILES
   src/glrt/scene/debug-camera.cpp
   src/glrt/scene/entity.cpp
   src/glrt/scene/light-component.cpp
+  src/glrt/scene/object.cpp
   src/glrt/scene/resources/asset-converter.cpp
   src/glrt/scene/resources/resource-index.cpp
   src/glrt/scene/resources/resource-loader.cpp
