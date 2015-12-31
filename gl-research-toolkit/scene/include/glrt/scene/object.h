@@ -9,12 +9,15 @@ namespace scene {
 class Object : public AngelScriptIntegration::RefCountedObject
 {
 public:
-  Object();
+  const QUuid uuid;
 
 protected:
+  Object(const QUuid& uuid);
+
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 };
+
 
 } // namespace scene
 } // namespace glrt

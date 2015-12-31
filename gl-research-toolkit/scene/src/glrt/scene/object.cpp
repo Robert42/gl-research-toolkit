@@ -3,9 +3,10 @@
 namespace glrt {
 namespace scene {
 
-Object::Object()
-{
 
+Object::Object(const QUuid& uuid)
+  : uuid(uuid)
+{
 }
 
 } // namespace scene

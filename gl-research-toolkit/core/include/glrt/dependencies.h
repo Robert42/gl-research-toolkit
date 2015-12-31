@@ -129,6 +129,7 @@ class base_of;
   class base_of<CHILD> \
   { \
     typedef PARENT type; \
+    static_assert(std::is_base_of<PARENT, CHILD>::value, "CHILD must inherit from PARENT"); \
     base_of() = delete; \
   }
 
