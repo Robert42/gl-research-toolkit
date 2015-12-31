@@ -1,0 +1,10 @@
+set(SOURCE_FILES
+  include/glrt/dependencies.h
+  include/glrt/toolkit/assimp-glm-converter.h
+  include/glrt/toolkit/geometry.h
+  include/glrt/toolkit/json.h
+  include/glrt/toolkit/profiler.h
+  src/glrt/dependencies.cpp
+  src/glrt/toolkit/json.cpp
+  src/glrt/toolkit/profiler.cpp
+)

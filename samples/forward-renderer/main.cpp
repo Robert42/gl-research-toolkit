@@ -1,11 +1,10 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
+#include <glrt/scene/resources/resource-loader.h>
 #include <glrt/scene/scene.h>
-#include <glrt/scene/forward-renderer.h>
+#include <glrt/renderer/forward-renderer.h>
 #include <glrt/gui/anttweakbar.h>
-#include <glrt/debugging/shader-debug-printer.h>
-
-#include <angelscript-integration/call-script.h>
+#include <glrt/renderer/debugging/shader-debug-printer.h>
 
 #include <glhelper/gl.hpp>
 
@@ -14,22 +13,23 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
-  glrt::scene::Scene scene(app.sdlWindow);
-  glrt::scene::ForwardRenderer renderer(&scene);
+  glrt::scene::resources::ResourceIndex resourceIndex;
+  resourceIndex.loadIndexedDirectory(GLRT_ASSET_DIR);
+
+  glrt::scene::Scene scene;
+  glrt::renderer::ForwardRenderer renderer(&scene);
 
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
                                                                                 ));
 
-  glrt::debugging::ShaderDebugPrinter shaderDebugPrinter;
+  glrt::renderer::debugging::ShaderDebugPrinter shaderDebugPrinter;
 
   antweakbar.createDebugSceneBar(&renderer);
   antweakbar.createDebugShaderBar(&shaderDebugPrinter);
   antweakbar.createProfilerBar(&app.profiler);
 
   scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
-
-  qInfo() << AngelScriptIntegration::callScript<int>(app.scriptEngine, GLRT_ASSET_DIR"/common/scripts/hello-world.as", "int main(int)", "test", 6);
 
   app.showWindow();
 
