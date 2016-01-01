@@ -7,10 +7,14 @@ namespace glrt {
 
 
 template<class _identifier>
-class Uuid
+class Uuid final
 {
 public:
   explicit Uuid(const QUuid& uuid);
+
+  template<typename T>
+  Uuid(const Uuid<T>& uuid) : _uuid(uuid) {static_assert(std::is_base_of<_identifier, T>::value, "T must inherit from :identifier");}
+  Uuid(const Uuid<_identifier>& uuid) : _uuid(uuid) {}
 
   operator const QUuid&() const;
   bool operator==(const QUuid& other) const;
