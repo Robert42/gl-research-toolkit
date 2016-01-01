@@ -34,6 +34,26 @@ CoordFrame CoordFrame::operator *(const CoordFrame& other) const
   return f *= other;
 }
 
+
+glm::vec3 CoordFrame::transform_point(const glm::vec3& point) const
+{
+  glm::vec3 transformed_point;
+  _transform_point(&transformed_point,
+                   this->position, this->orientation, this->scaleFactor,
+                   point);
+  return transformed_point;
+}
+
+glm::vec3 CoordFrame::transform_direction(const glm::vec3& point) const
+{
+  glm::vec3 transformed_direction;
+  _transform_direction(&transformed_direction,
+                       this->position, this->orientation, this->scaleFactor,
+                       point);
+  return transformed_direction;
+}
+
+
 } // namespace scene
 } // namespace glrt
 

@@ -177,7 +177,7 @@ public:
   {
     deinit();
 
-    addComponents(scene::collectAllComponentsWithType<EntityComponentType>(scene, false));
+    addComponents(glrt::scene::collectAllComponentsWithType<EntityComponentType>(&scene, false));
   }
 
   void addComponents(const QVector<EntityComponentType*>& components)
@@ -186,13 +186,13 @@ public:
 
     for(EntityComponentType* component : components)
     {
-      if(component->movable)
+      if(component->isMovable)
       {
         // prevent adding the same component multiple times
         if(connections.contains(component))
           continue;
 
-        connections[component] = QObject::connect(component, &QObject::destroyed, std::bind(&this_type::handleDeletedComponent, this, std::placeholders::_1));
+        //connections[component] = QObject::connect(component, &QObject::destroyed, std::bind(&this_type::handleDeletedComponent, this, std::placeholders::_1)); #FIXME
         movableComponents.append(component);
       }else
       {
@@ -212,7 +212,7 @@ public:
       variadicElementBuffer.initStaticElements(newStaticComponents.length(),
                                               [&newStaticComponents](ElementType* element, int i) {
         EntityComponentType* component = newStaticComponents[i];
-        *element = component->globalTransformation() * component->data;
+        *element = component->get_globalCoordFrame() * component->data;
       });
     }
   }
@@ -233,7 +233,7 @@ public:
   {
     variadicElementBuffer.updateMovableElements([this](ElementType* element, int i) {
       EntityComponentType* component = movableComponents[i];
-      *element = component->globalTransformation() * component->data;
+      *element = component->get_globalCoordFrame() * component->data;
     });
   }
 

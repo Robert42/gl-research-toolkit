@@ -28,7 +28,7 @@ protected:
 
 private:
   QVector<Entity::Component*> _alLComponents;
-  QVector<Entity::SpatialComponent*> _rootSpatialComponents;
+  Entity::SpatialComponent* _rootSpatialComponent;
 };
 
 
@@ -45,6 +45,9 @@ class Entity::SpatialComponent : public Component
 {
 public:
   const bool isMovable : 1;
+
+  CoordFrame localCoordFrame;
+  CoordFrame get_globalCoordFrame() const;
 
   SpatialComponent(const Uuid<SpatialComponent>& uuid, bool isMovable);
 };

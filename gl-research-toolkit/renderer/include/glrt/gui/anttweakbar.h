@@ -34,12 +34,14 @@ using glrt::scene::CameraParameter;
 using glrt::scene::Scene;
 
 
-template<typename T>
+template<typename T, typename T_Map>
 class TweakBarEnum
 {
 public:
-  typedef QSharedPointer<TweakBarEnum<T>> Ptr;
-  typedef QMap<QString, T> Map;
+  typedef T_Map Map;
+  typedef QSharedPointer<TweakBarEnum<T, Map>> Ptr;
+
+  static_assert(std::is_same<typename T_Map::key_type, QString>::value, "Wxpecting keytype QString");
 
   Map map;
   const std::string name;
@@ -123,12 +125,12 @@ public:
 private:
   std::string tweakBarName;
 
-  static void getValue(int* value, TweakBarEnum<T>* wrapper)
+  static void getValue(int* value, TweakBarEnum<T, Map>* wrapper)
   {
     *value = wrapper->currentIndex;
   }
 
-  static void setValue(const int* value, TweakBarEnum<T>* wrapper)
+  static void setValue(const int* value, TweakBarEnum<T, Map>* wrapper)
   {
     if(wrapper->map.size() > *value && *value >= 0 && wrapper->valueChanged)
       wrapper->valueChanged(wrapper->map.values()[*value]);
@@ -207,8 +209,11 @@ public:
 
 
 private:
-  TweakBarEnum<QString>::Ptr sceneSwitcher;
-  TweakBarEnum<CameraParameter>::Ptr cameraSwitcher;
+  typedef TweakBarEnum<QString, QMap<QString,QString>> SceneEnumeration;
+  typedef TweakBarEnum<CameraParameter, QHash<QString, CameraParameter>> CameraEnumeration;
+
+  SceneEnumeration::Ptr sceneSwitcher;
+  CameraEnumeration::Ptr cameraSwitcher;
 
   void updateAntTweakBarWindowSize();
 
