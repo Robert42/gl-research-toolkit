@@ -117,9 +117,9 @@ Renderer::Pass::~Pass()
 bool orderByDrawCall(scene::StaticMeshComponent* a, scene::StaticMeshComponent*b)
 {
   // Movables after unmovables
-  if(!a->movable)
+  if(!a->isMovable)
     return true;
-  if(a->movable)
+  if(a->isMovable)
     return false;
 
   if(a->material < b->material)

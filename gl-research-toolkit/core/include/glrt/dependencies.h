@@ -86,6 +86,17 @@ private:
 
 extern AngelScript::asIScriptEngine* angelScriptEngine;
 
+template<typename T_parent, typename T_child>
+bool is_instance_of(const T_child* child)
+{
+  return dynamic_cast<const T_parent*>(child) != nullptr;
+}
+
+template<typename... T_arg>
+inline bool always_return_true(const T_arg&...){return true;}
+template<typename... T_arg>
+inline bool always_return_false(const T_arg&...){return true;}
+
 class SplashscreenMessage final
 {
 public:

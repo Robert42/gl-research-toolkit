@@ -1,5 +1,6 @@
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/collect-scene-data.h>
 
 namespace glrt {
 namespace renderer {
@@ -9,30 +10,33 @@ namespace debugging {
 VisualizationRenderer VisualizationRenderer::debugSceneCameras(scene::Scene* scene)
 {
   return VisualizationRenderer(scene, [scene](){
-    if(scene->sceneCameras().isEmpty())
+    QHash<QString, scene::CameraParameter> cameras = scene::collectNamedCameras(scene);
+    if(cameras.isEmpty())
       return DebugLineVisualisation::Ptr();
     else
-      return debugging::DebugLineVisualisation::drawCameras(scene->sceneCameras().values());
+      return debugging::DebugLineVisualisation::drawCameras(cameras.values());
   });
 }
 
 VisualizationRenderer VisualizationRenderer::debugSphereAreaLights(scene::Scene* scene)
 {
   return VisualizationRenderer(scene, [scene](){
-    if(scene->sphereAreaLights().isEmpty())
+    QHash<QString, scene::SphereAreaLightComponent::Data> sphereAreaLight = scene::collectNamedSphereAreaLights(scene);
+    if(sphereAreaLight.isEmpty())
       return DebugLineVisualisation::Ptr();
     else
-      return debugging::DebugLineVisualisation::drawSphereAreaLights(scene->sphereAreaLights().values());
+      return debugging::DebugLineVisualisation::drawSphereAreaLights(sphereAreaLight.values());
   });
 }
 
 VisualizationRenderer VisualizationRenderer::debugRectAreaLights(scene::Scene* scene)
 {
   return VisualizationRenderer(scene, [scene](){
-    if(scene->rectAreaLights().isEmpty())
+    QHash<QString, scene::RectAreaLightComponent::Data> rectAreaLights = scene::collectNamedRectAreaLights(scene);
+    if(rectAreaLights.isEmpty())
       return DebugLineVisualisation::Ptr();
     else
-      return debugging::DebugLineVisualisation::drawRectAreaLights(scene->rectAreaLights().values());
+      return debugging::DebugLineVisualisation::drawRectAreaLights(rectAreaLights.values());
   });
 }
 

@@ -4,7 +4,6 @@
 #include <glrt/dependencies.h>
 #include <glrt/scene/entity.h>
 #include <glrt/scene/debug-camera.h>
-#include <glrt/scene/light-component.h>
 
 struct aiNode;
 struct aiScene;
@@ -26,7 +25,7 @@ class Scene final : public QObject
 
 public:
   QString name, file;
-  DebugCamera debugCamera;
+  DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;
@@ -39,12 +38,12 @@ public:
   bool handleEvents(const SDL_Event& event);
   void update(float deltaTime);
 
+  const QVector<Entity*>& allEntities();
+
   void clear();
   static QMap<QString, QString> findAllScenes();
   void loadFromFile(const QString& filepath);
 
-  template<typename T>
-  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=[](T*){return true;}) const;
 signals:
   void clearScene();
   void sceneCleared();
@@ -54,22 +53,6 @@ signals:
 private:
   QVector<Entity*> _entities; // #TODO use an optimized array
 };
-
-
-template<typename T>
-QVector<T*> Scene::allComponentsWithType(const std::function<bool(T*)>& filter) const
-{
-  static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
-
-  QVector<T*> components;
-  components.reserve((_entities.size()+3) / 4);
-
-  for(Entity* e : _entities)
-    for(T* component : e->allComponentsWithType<T>(filter))
-      components.append(component);
-  return components;
-}
-
 
 } // namespace scene
 } // namespace glrt

@@ -20,12 +20,17 @@ public:
   typedef Uuid<LogicModule> LogicModuleUuid;
   typedef Uuid<Component> ComponentUuid;
 
+  template<typename T>
+  QVector<T*> allLogicModuleWithType(const std::function<bool(T*)>& filter=always_return_true) const;
+  template<typename T>
+  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true) const;
 
 protected:
   Entity(const Uuid<Entity>& uuid);
   ~Entity();
 
 private:
+  QVector<Entity::LogicModuleUuid*> _logicModules;
   QVector<Entity::Component*> _components;
 };
 

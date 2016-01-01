@@ -4,6 +4,7 @@
 
 #include <glrt/scene/entity.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/collect-scene-data.h>
 
 
 #include <glhelper/buffer.hpp>
@@ -176,7 +177,7 @@ public:
   {
     deinit();
 
-    addComponents(scene.allComponentsWithType<EntityComponentType>());
+    addComponents(scene::collectAllComponentsWithType<EntityComponentType>(scene, false));
   }
 
   void addComponents(const QVector<EntityComponentType*>& components)

@@ -11,6 +11,8 @@ class Object : public AngelScriptIntegration::RefCountedObject
 public:
   const QUuid uuid;
 
+  QString get_label() const;
+
 protected:
   Object(const QUuid& uuid);
 

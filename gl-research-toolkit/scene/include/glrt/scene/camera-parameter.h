@@ -8,7 +8,7 @@ class aiCamera;
 namespace glrt {
 namespace scene {
 
-struct CameraParameter final
+struct CameraParameter final // #TODO rename this class to Camera
 {
 public:
   glm::vec3 lookAt = glm::vec3(0, 0, -1);
