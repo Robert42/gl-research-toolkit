@@ -6,7 +6,7 @@
 namespace glrt {
 namespace scene {
 
-class StaticMeshComponent final : public Entity::Component
+class StaticMeshComponent final : public Entity::SpatialComponent
 {
 public:
   const Uuid<resources::StaticMeshData> staticMesh; // #TODO rename StaticMeshData to StaticMesh

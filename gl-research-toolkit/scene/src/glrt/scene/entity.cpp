@@ -19,20 +19,20 @@ Entity::~Entity()
 }
 
 
-// ======== Entity::LogicModule ================================================
+// ======== Entity::Component ================================================
 
 
-Entity::LogicModule::LogicModule(const Uuid<LogicModule>& uuid)
+Entity::Component::Component(const Uuid<Component>& uuid)
   : Object(uuid)
 {
 }
 
 
-// ======== Entity::Component ==================================================
+// ======== Entity::SpatialComponent ==================================================
 
 
-Entity::Component::Component(const Uuid<Component>& uuid, bool isMovable)
-  : Object(uuid),
+Entity::SpatialComponent::SpatialComponent(const Uuid<SpatialComponent>& uuid, bool isMovable)
+  : Component(uuid),
     isMovable(isMovable)
 {
 }

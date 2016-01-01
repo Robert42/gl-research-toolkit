@@ -5,7 +5,7 @@ namespace scene {
 
 
 CameraComponent::CameraComponent(const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter, bool isMovable)
-  : Component(uuid, isMovable),
+  : SpatialComponent(uuid, isMovable),
     cameraParameter(cameraParameter)
 {
 }

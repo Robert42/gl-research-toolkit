@@ -14,11 +14,8 @@ class Scene;
 class Entity : public scene::Object
 {
 public:
-  class LogicModule;
   class Component;
-
-  typedef Uuid<LogicModule> LogicModuleUuid;
-  typedef Uuid<Component> ComponentUuid;
+  class SpatialComponent;
 
   template<typename T>
   QVector<T*> allLogicModuleWithType(const std::function<bool(T*)>& filter=always_return_true) const;
@@ -30,26 +27,26 @@ protected:
   ~Entity();
 
 private:
-  QVector<Entity::LogicModuleUuid*> _logicModules;
-  QVector<Entity::Component*> _components;
+  QVector<Entity::Component*> _alLComponents;
+  QVector<Entity::SpatialComponent*> _rootSpatialComponents;
 };
 
 
-
-
-class Entity::LogicModule : public scene::Object
-{
-public:
-  LogicModule(const Uuid<LogicModule>& uuid);
-};
 
 
 class Entity::Component : public scene::Object
 {
 public:
+  Component(const Uuid<Component>& uuid);
+};
+
+
+class Entity::SpatialComponent : public Component
+{
+public:
   const bool isMovable : 1;
 
-  Component(const Uuid<Component>& uuid, bool isMovable);
+  SpatialComponent(const Uuid<SpatialComponent>& uuid, bool isMovable);
 };
 
 

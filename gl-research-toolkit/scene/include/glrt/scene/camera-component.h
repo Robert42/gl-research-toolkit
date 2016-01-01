@@ -7,7 +7,7 @@
 namespace glrt {
 namespace scene {
 
-class CameraComponent final : public Entity::Component
+class CameraComponent final : public Entity::SpatialComponent
 {
 public:
   CameraParameter cameraParameter;
