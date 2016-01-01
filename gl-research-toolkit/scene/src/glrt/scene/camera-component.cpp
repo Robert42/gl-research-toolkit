@@ -4,8 +4,8 @@ namespace glrt {
 namespace scene {
 
 
-CameraComponent::CameraComponent(Entity& entity, const CameraParameter& cameraParameter)
-  : VisibleComponent(entity, false),
+CameraComponent::CameraComponent(const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter, bool isMovable)
+  : Component(uuid, isMovable),
     cameraParameter(cameraParameter)
 {
 }

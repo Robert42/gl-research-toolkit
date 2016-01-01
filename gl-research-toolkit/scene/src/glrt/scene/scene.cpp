@@ -19,7 +19,6 @@ namespace scene {
 
 
 Scene::Scene()
-  : _cachedStaticStructureCacheIndex(0)
 {
 }
 
@@ -31,12 +30,6 @@ Scene::~Scene()
 void Scene::clear()
 {
   clearScene();
-
-  QSet<Entity*> entities;
-  entities.swap(this->_entities);
-
-  for(Entity* entity : entities)
-    delete entity;
 
   sceneCleared();
 }
@@ -107,68 +100,6 @@ void Scene::loadFromFile(const QString& filename)
 {
   // #TODO
   Q_UNUSED(filename);
-}
-
-
-void Scene::staticMeshStructureChanged()
-{
-  ++_cachedStaticStructureCacheIndex;
-}
-
-
-QMap<QString, CameraParameter> Scene::sceneCameras() const
-{
-  QMap<QString, CameraParameter> cameras;
-
-  QVector<CameraComponent*> cameraComponents = allComponentsWithType<CameraComponent>();
-
-  for(CameraComponent* c : cameraComponents)
-  {
-    cameras[c->entity.name] = c->globalTransformation() * c->cameraParameter;
-  }
-
-  return cameras;
-}
-
-
-QMap<QString, SphereAreaLightComponent::Data> Scene::sphereAreaLights() const
-{
-  QMap<QString, SphereAreaLightComponent::Data> lights;
-
-  QVector<SphereAreaLightComponent*> lightComponent = allComponentsWithType<SphereAreaLightComponent>();
-
-  for(SphereAreaLightComponent* c : lightComponent)
-  {
-    lights[c->entity.name] = c->globalTransformation() * c->data;
-  }
-
-  return lights;
-}
-
-
-QMap<QString, RectAreaLightComponent::Data> Scene::rectAreaLights() const
-{
-  QMap<QString, RectAreaLightComponent::Data> lights;
-
-  QVector<RectAreaLightComponent*> lightComponent = allComponentsWithType<RectAreaLightComponent>();
-
-  for(RectAreaLightComponent* c : lightComponent)
-  {
-    lights[c->entity.name] = c->globalTransformation() * c->data;
-  }
-
-  return lights;
-}
-
-
-void Scene::AddEntity(Entity* entity)
-{
-  _entities.insert(entity);
-}
-
-void Scene::RemoveEntity(Entity*entity)
-{
-  _entities.remove(entity);
 }
 
 

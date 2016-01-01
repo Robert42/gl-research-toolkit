@@ -151,7 +151,7 @@ class ShaderStorageFormat
 public:
   typedef ShaderStorageFormat<EntityComponentType, ElementType> this_type;
 
-  static_assert(std::is_base_of<scene::VisibleComponent, EntityComponentType>::value, "EntityComponentType must inherit VisibleComponent");
+  static_assert(std::is_base_of<scene::Entity::Component, EntityComponentType>::value, "EntityComponentType must inherit VisibleComponent");
 
   // important: the given scene instance must exist longer than this shader-storage instance
   ShaderStorageFormat(scene::Scene& scene, int capacityIncrement = 16)

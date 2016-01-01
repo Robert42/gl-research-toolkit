@@ -6,14 +6,13 @@
 namespace glrt {
 namespace scene {
 
-class StaticMeshComponent final : public VisibleComponent
+class StaticMeshComponent final : public Entity::Component
 {
-  Q_OBJECT
 public:
-  const Uuid<resources::StaticMeshData> staticMesh;
-  const Uuid<resources::MaterialData> material;
+  const Uuid<resources::StaticMeshData> staticMesh; // #TODO rename StaticMeshData to StaticMesh
+  const Uuid<resources::MaterialData> material; // #TODO rename MaterialData to Material
 
-  StaticMeshComponent(Entity& entity, bool movable, const Uuid<resources::StaticMeshData>& staticMesh, const Uuid<resources::MaterialData> & material, const glm::mat4& relativeTransform=glm::mat4(1));
+  StaticMeshComponent(const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMeshData>& staticMesh, const Uuid<resources::MaterialData> & material);
   ~StaticMeshComponent();
 };
 

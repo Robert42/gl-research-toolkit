@@ -26,9 +26,8 @@ struct LightSource
 static_assert(sizeof(LightSource)==32, "Please make sure the struct LightSource is std140 compatible");
 
 
-class SphereAreaLightComponent : public VisibleComponent
+class SphereAreaLightComponent : public Entity::Component
 {
-  Q_OBJECT
 public:
   struct Data
   {
@@ -50,13 +49,14 @@ public:
 
   Data data;
 
-  SphereAreaLightComponent(Entity& entity, const Data& data);
+  const bool isStatic : 1;
+
+  SphereAreaLightComponent(const Uuid<SphereAreaLightComponent>& uuid, const Data& data, bool isStatic, bool isMovable);
 };
 
 
-class RectAreaLightComponent : public VisibleComponent
+class RectAreaLightComponent : public Entity::Component
 {
-  Q_OBJECT
 public:
   struct Data
   {
@@ -82,7 +82,7 @@ public:
 
   Data data;
 
-  RectAreaLightComponent(Entity& entity, const Data& data);
+  RectAreaLightComponent(const Uuid<RectAreaLightComponent>& uuid, const Data& data, bool isMovable);
 };
 
 

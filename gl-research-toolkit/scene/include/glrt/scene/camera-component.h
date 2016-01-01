@@ -7,13 +7,12 @@
 namespace glrt {
 namespace scene {
 
-class CameraComponent final : public VisibleComponent
+class CameraComponent final : public Entity::Component
 {
-  Q_OBJECT
 public:
   CameraParameter cameraParameter;
 
-  CameraComponent(Entity& entity, const CameraParameter& cameraParameter);
+  CameraComponent(const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter, bool isMovable=false);
   ~CameraComponent();
 };
 

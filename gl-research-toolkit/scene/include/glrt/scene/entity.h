@@ -3,77 +3,54 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
+#include <glrt/scene/object.h>
+#include <glrt/scene/coord-frame.h>
 
 namespace glrt {
 namespace scene {
 
+
 class Scene;
-class Entity final : public QObject
+class Entity : public scene::Object
 {
-  Q_OBJECT
 public:
+  class LogicModule;
   class Component;
 
-  QString name;
-  glm::mat4 relativeTransform = glm::mat4(1);
-  Scene& scene;
+  typedef Uuid<LogicModule> LogicModuleUuid;
+  typedef Uuid<Component> ComponentUuid;
 
-  Entity(Scene& scene);
+
+protected:
+  Entity(const Uuid<Entity>& uuid);
   ~Entity();
-
-  QVector<Entity::Component*> components();
-
-  template<typename T>
-  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
-
-  glm::mat4 globalTransformation() const;
 
 private:
   QVector<Entity::Component*> _components;
 };
 
 
-class Entity::Component : public QObject
-{
-  Q_OBJECT
-public:
-  Entity& entity;
 
-  Component(Entity& entity);
+
+class Entity::LogicModule : public scene::Object
+{
+public:
+  LogicModule(const Uuid<LogicModule>& uuid);
 };
 
 
-class VisibleComponent : public Entity::Component
+class Entity::Component : public scene::Object
 {
 public:
-  const bool movable : 1;
-  glm::mat4 relativeTransform = glm::mat4(1);
+  const bool isMovable : 1;
 
-  VisibleComponent(Entity& entity, bool movable, const glm::mat4& relativeTransform=glm::mat4(1));
-
-  glm::mat4 globalTransformation() const;
+  Component(const Uuid<Component>& uuid, bool isMovable);
 };
-
-
-template<typename T>
-QVector<T*> Entity::allComponentsWithType(const std::function<bool(T*)>& filter)
-{
-  static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
-
-  QVector<T*> components;
-  components.reserve((_components.size()+3) / 4);
-
-  for(Component* c : _components)
-  {
-    T* component = qobject_cast<T*>(c);
-    if(component && filter(component))
-      components.append(component);
-  }
-  return components;
-}
 
 
 } // namespace scene
 } // namespace glrt
+
+DECLARE_BASECLASS(glrt::scene::Object, glrt::scene::Entity);
 
 #endif // GLRT_SCENE_ENTITY_H

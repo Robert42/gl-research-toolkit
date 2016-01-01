@@ -22,7 +22,7 @@ class StaticMeshComponent;
 
 class Scene final : public QObject
 {
-  Q_OBJECT
+  Q_OBJECT // #FIXME
 
 public:
   QString name, file;
@@ -43,15 +43,8 @@ public:
   static QMap<QString, QString> findAllScenes();
   void loadFromFile(const QString& filepath);
 
-  void staticMeshStructureChanged();
-
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=[](T*){return true;}) const;
-
-  QMap<QString, CameraParameter> sceneCameras() const;
-  QMap<QString, SphereAreaLightComponent::Data> sphereAreaLights() const;
-  QMap<QString, RectAreaLightComponent::Data> rectAreaLights() const;
-
 signals:
   void clearScene();
   void sceneCleared();
@@ -59,16 +52,7 @@ signals:
   void sceneLoaded(bool success);
 
 private:
-  // #FIXME Ugly hack
-  friend class renderer::Renderer;
-
-  friend class Entity;
-  quint64 _cachedStaticStructureCacheIndex;
-
-  QSet<Entity*> _entities;
-
-  void AddEntity(Entity* entity);
-  void RemoveEntity(Entity* entity);
+  QVector<Entity*> _entities; // #TODO use an optimized array
 };
 
 

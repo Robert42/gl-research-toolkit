@@ -1,6 +1,7 @@
 set(SOURCE_FILES
   include/glrt/scene/camera-component.h
   include/glrt/scene/camera-parameter.h
+  include/glrt/scene/coord-frame.h
   include/glrt/scene/debug-camera.h
   include/glrt/scene/declarations.h
   include/glrt/scene/entity.h
@@ -20,6 +21,7 @@ set(SOURCE_FILES
   include/glrt/scene/static-mesh-component.h
   src/glrt/scene/camera-component.cpp
   src/glrt/scene/camera-parameter.cpp
+  src/glrt/scene/coord-frame.cpp
   src/glrt/scene/debug-camera.cpp
   src/glrt/scene/entity.cpp
   src/glrt/scene/light-component.cpp
