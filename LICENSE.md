@@ -24,6 +24,7 @@ SOFTWARE.
 
 # External Dependencies used by this Toolkit
 
+- [AngelScript](http://www.angelcode.com/angelscript/) (zlib license)
 - [AntTweakBar](http://anttweakbar.sourceforge.net/doc/tools:anttweakbar) (zlib/libpng license)
 - [glew](http://glew.sourceforge.net/) (BSDL License)
 - [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
