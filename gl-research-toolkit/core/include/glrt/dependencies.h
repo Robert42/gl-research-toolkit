@@ -68,6 +68,10 @@ QDebug operator<<(QDebug d, const std::string& s);
 
 namespace glrt {
 
+
+using AngelScriptIntegration::ref;
+using AngelScriptIntegration::weakref;
+
 using AngelScript::asDWORD;
 
 const asDWORD ACCESS_MASK_RESOURCE_LOADING = AngelScriptIntegration::ACCESS_MASK_USER;

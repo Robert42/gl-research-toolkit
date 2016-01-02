@@ -22,6 +22,9 @@ public:
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true) const;
 
+  void addModularAttribute(ModularAttribute* modularAttribute);
+  void removeModularAttribute(ModularAttribute* modularAttribute);
+
 protected:
   Entity(const Uuid<Entity>& uuid);
   ~Entity();
@@ -32,12 +35,16 @@ private:
 };
 
 
-
-
 class Entity::ModularAttribute : public scene::Object
 {
 public:
   ModularAttribute(const Uuid<ModularAttribute>& uuid);
+
+  void set_entity(const ref<Entity>& entity);
+  weakref<Entity> get_entity();
+
+private:
+  weakref<Entity> entity;
 };
 
 
