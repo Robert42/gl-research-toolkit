@@ -14,11 +14,11 @@ class Scene;
 class Entity : public scene::Object
 {
 public:
+  class ModularAttribute;
   class Component;
-  class SpatialComponent;
 
   template<typename T>
-  QVector<T*> allLogicModuleWithType(const std::function<bool(T*)>& filter=always_return_true) const;
+  QVector<T*> allModularAttributeWithType(const std::function<bool(T*)>& filter=always_return_true) const;
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true) const;
 
@@ -27,21 +27,21 @@ protected:
   ~Entity();
 
 private:
-  QVector<Entity::Component*> _alLComponents;
-  Entity::SpatialComponent* _rootSpatialComponent;
+  QVector<Entity::ModularAttribute*> _allModularAttributes;
+  Entity::Component* _rootComponent;
 };
 
 
+
+
+class Entity::ModularAttribute : public scene::Object
+{
+public:
+  ModularAttribute(const Uuid<ModularAttribute>& uuid);
+};
 
 
 class Entity::Component : public scene::Object
-{
-public:
-  Component(const Uuid<Component>& uuid);
-};
-
-
-class Entity::SpatialComponent : public Component
 {
 public:
   const bool isMovable : 1;
@@ -49,7 +49,7 @@ public:
   CoordFrame localCoordFrame;
   CoordFrame get_globalCoordFrame() const;
 
-  SpatialComponent(const Uuid<SpatialComponent>& uuid, bool isMovable);
+  Component(const Uuid<Component>& uuid, bool isMovable);
 };
 
 

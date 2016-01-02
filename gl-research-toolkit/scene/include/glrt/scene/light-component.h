@@ -26,7 +26,7 @@ struct LightSource
 static_assert(sizeof(LightSource)==32, "Please make sure the struct LightSource is std140 compatible");
 
 
-class SphereAreaLightComponent : public Entity::SpatialComponent
+class SphereAreaLightComponent : public Entity::Component
 {
 public:
   struct Data
@@ -55,7 +55,7 @@ public:
 };
 
 
-class RectAreaLightComponent : public Entity::SpatialComponent
+class RectAreaLightComponent : public Entity::Component
 {
 public:
   struct Data

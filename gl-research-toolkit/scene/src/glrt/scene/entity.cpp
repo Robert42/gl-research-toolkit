@@ -13,7 +13,6 @@ Entity::Entity(const Uuid<Entity>& uuid)
 {
 }
 
-
 Entity::~Entity()
 {
 }
@@ -22,7 +21,7 @@ Entity::~Entity()
 // ======== Entity::Component ================================================
 
 
-Entity::Component::Component(const Uuid<Component>& uuid)
+Entity::ModularAttribute::ModularAttribute(const Uuid<ModularAttribute>& uuid)
   : Object(uuid)
 {
 }
@@ -31,8 +30,8 @@ Entity::Component::Component(const Uuid<Component>& uuid)
 // ======== Entity::SpatialComponent ==================================================
 
 
-Entity::SpatialComponent::SpatialComponent(const Uuid<SpatialComponent>& uuid, bool isMovable)
-  : Component(uuid),
+Entity::Component::Component(const Uuid<Component>& uuid, bool isMovable)
+  : Object(uuid),
     isMovable(isMovable)
 {
 }
