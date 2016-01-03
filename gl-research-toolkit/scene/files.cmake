@@ -7,6 +7,7 @@ set(SOURCE_FILES
   include/glrt/scene/debug-camera.h
   include/glrt/scene/declarations.h
   include/glrt/scene/entity.h
+  include/glrt/scene/entity.inl
   include/glrt/scene/light-component.h
   include/glrt/scene/object.h
   include/glrt/scene/object.inl

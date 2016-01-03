@@ -30,7 +30,7 @@ void Entity::removeModularAttribute(ModularAttribute* modularAttribute)
 }
 
 
-// ======== Entity::Component ================================================
+// ======== Entity::ModularAttribute ===========================================
 
 
 Entity::ModularAttribute::ModularAttribute(const Uuid<ModularAttribute>& uuid)
@@ -43,19 +43,24 @@ void Entity::ModularAttribute::set_entity(const ref<Entity>& entity)
   this->entity = entity;
 }
 
-weakref<Entity> Entity::ModularAttribute::get_entity()
+const weakref<Entity>& Entity::ModularAttribute::get_entity()
 {
   return entity;
 }
 
 
-// ======== Entity::SpatialComponent ==================================================
+// ======== Entity::Component ==================================================
 
 
 Entity::Component::Component(const Uuid<Component>& uuid, bool isMovable)
   : Object(uuid),
     isMovable(isMovable)
 {
+}
+
+CoordFrame Entity::Component::get_globalCoordFrame() const
+{
+  return CoordFrame(); // FIXME::::
 }
 
 

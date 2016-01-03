@@ -47,6 +47,12 @@ void Scene::update(float deltaTime)
 }
 
 
+const QVector<Entity*>& Scene::allEntities()
+{
+  return _entities;
+}
+
+
 QMap<QString, QString> Scene::findAllScenes()
 {
   SPLASHSCREEN_MESSAGE("search Scenes");

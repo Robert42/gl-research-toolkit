@@ -29,6 +29,10 @@ protected:
   Entity(const Uuid<Entity>& uuid);
   ~Entity();
 
+protected:
+  template<typename T>
+  static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
+
 private:
   QVector<Entity::ModularAttribute*> _allModularAttributes;
   Entity::Component* _rootComponent;
@@ -41,7 +45,11 @@ public:
   ModularAttribute(const Uuid<ModularAttribute>& uuid);
 
   void set_entity(const ref<Entity>& entity);
-  weakref<Entity> get_entity();
+  const weakref<Entity>& get_entity();
+
+protected:
+  template<typename T>
+  static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 
 private:
   weakref<Entity> entity;
@@ -57,6 +65,10 @@ public:
   CoordFrame get_globalCoordFrame() const;
 
   Component(const Uuid<Component>& uuid, bool isMovable);
+
+protected:
+  template<typename T>
+  static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 };
 
 
@@ -64,5 +76,9 @@ public:
 } // namespace glrt
 
 DECLARE_BASECLASS(glrt::scene::Object, glrt::scene::Entity);
+DECLARE_BASECLASS(glrt::scene::Object, glrt::scene::Entity::ModularAttribute);
+DECLARE_BASECLASS(glrt::scene::Object, glrt::scene::Entity::Component);
+
+#include "entity.inl"
 
 #endif // GLRT_SCENE_ENTITY_H
