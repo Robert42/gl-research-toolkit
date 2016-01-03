@@ -9,6 +9,7 @@ class Graph final : public RefCountedObject
 {
 public:
   static void registerObjectType(AngelScript::asIScriptEngine* engine);
+  static void registerObjectMethods(AngelScript::asIScriptEngine* engine);
 
   const ref<Node>& get_node(int index);
   int add_node(const ref<Node>& node);
@@ -22,6 +23,7 @@ class Edge final : public RefCountedObject
 {
 public:
   static void registerObjectType(AngelScript::asIScriptEngine* engine);
+  static void registerObjectMethods(AngelScript::asIScriptEngine* engine);
 
   const weakref<Graph>& get_graph();
   void set_graph(const weakref<Graph>& graph);
@@ -35,6 +37,7 @@ class Node final : public RefCountedObject
 {
 public:
   static void registerObjectType(AngelScript::asIScriptEngine* engine);
+  static void registerObjectMethods(AngelScript::asIScriptEngine* engine);
 
   const weakref<Graph>& get_graph();
   void set_graph(const weakref<Graph>& graph);
@@ -102,37 +105,68 @@ void Node::set_graph(const weakref<Graph>& graph)
 void Graph::registerObjectType(AngelScript::asIScriptEngine* engine)
 {
   const char* name = "Graph";
-  typedef Graph T_class;
-  typedef base_of<T_class>::type T_parent;
 
   int r = 0;
   r = engine->RegisterObjectType(name, 0, AngelScript::asOBJ_REF);AngelScriptCheck(r);
 
+}
+
+void Graph::registerObjectMethods(AngelScript::asIScriptEngine* engine)
+{
+  const char* name = "Graph";
+  typedef Graph T_class;
+  typedef base_of<T_class>::type T_parent;
+
+  int r = 0;
+
   T_parent::registerAsBaseOfClass<T_class>(engine, name);
+
+  r = engine->RegisterObjectMethod(name, "Node@ get_node(int index)", AngelScript::asMETHOD(T_class,get_node), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = engine->RegisterObjectMethod(name, "int add_node(int index, Node@ node)", AngelScript::asMETHOD(T_class,add_node), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 }
 
 void Edge::registerObjectType(AngelScript::asIScriptEngine* engine)
+{
+  const char* name = "Edge";
+
+  int r = 0;
+  r = engine->RegisterObjectType(name, 0, AngelScript::asOBJ_REF);AngelScriptCheck(r);
+}
+
+void Edge::registerObjectMethods(AngelScript::asIScriptEngine* engine)
 {
   const char* name = "Edge";
   typedef Edge T_class;
   typedef base_of<T_class>::type T_parent;
 
   int r = 0;
-  r = engine->RegisterObjectType(name, 0, AngelScript::asOBJ_REF);AngelScriptCheck(r);
 
   T_parent::registerAsBaseOfClass<T_class>(engine, name);
+
+  r = engine->RegisterObjectMethod(name, "Graph@ get_graph(int index)", AngelScript::asMETHOD(T_class,get_graph), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = engine->RegisterObjectMethod(name, "void set_graph(Graph@ graph)", AngelScript::asMETHOD(T_class,set_graph), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 }
 
 void Node::registerObjectType(AngelScript::asIScriptEngine* engine)
+{
+  const char* name = "Node";
+
+  int r = 0;
+  r = engine->RegisterObjectType(name, 0, AngelScript::asOBJ_REF);AngelScriptCheck(r);
+}
+
+void Node::registerObjectMethods(AngelScript::asIScriptEngine* engine)
 {
   const char* name = "Node";
   typedef Node T_class;
   typedef base_of<T_class>::type T_parent;
 
   int r = 0;
-  r = engine->RegisterObjectType(name, 0, AngelScript::asOBJ_REF);AngelScriptCheck(r);
 
   T_parent::registerAsBaseOfClass<T_class>(engine, name);
+
+  r = engine->RegisterObjectMethod(name, "Graph@ get_graph(int index)", AngelScript::asMETHOD(T_class,get_graph), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = engine->RegisterObjectMethod(name, "void set_graph(Graph@ graph)", AngelScript::asMETHOD(T_class,set_graph), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 }
 
 
@@ -144,4 +178,8 @@ void test_graph_with_accessors(AngelScript::asIScriptEngine* engine)
   Graph::registerObjectType(engine);
   Node::registerObjectType(engine);
   Edge::registerObjectType(engine);
+
+  Graph::registerObjectMethods(engine);
+  Node::registerObjectMethods(engine);
+  Edge::registerObjectMethods(engine);
 }
