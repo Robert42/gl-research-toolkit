@@ -35,11 +35,13 @@ struct CoordFrame final
                                const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
                                const glm::vec3& inPoint);
   static void _transform_direction(glm::vec3* outDirection,
-                                   const glm::quat& orientation, float scaleFactor,
+                                   const glm::quat& orientation,
                                    const glm::vec3& inDirection);
 };
 
 } // namespace scene
 } // namespace glrt
+
+#include "coord-frame.inl"
 
 #endif // GLRT_SCENE_COORDFRAME_H

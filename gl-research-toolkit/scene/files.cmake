@@ -4,6 +4,7 @@ set(SOURCE_FILES
   include/glrt/scene/collect-scene-data.h
   include/glrt/scene/collect-scene-data.inl
   include/glrt/scene/coord-frame.h
+  include/glrt/scene/coord-frame.inl
   include/glrt/scene/debug-camera.h
   include/glrt/scene/declarations.h
   include/glrt/scene/entity.h
