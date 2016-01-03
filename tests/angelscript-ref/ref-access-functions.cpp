@@ -175,6 +175,8 @@ void Node::registerObjectMethods(AngelScript::asIScriptEngine* engine)
 
 void test_graph_with_accessors(AngelScript::asIScriptEngine* engine)
 {
+  asDWORD previousMask = engine->SetDefaultAccessMask(ACESS_MASK_GRAPH);
+
   Graph::registerObjectType(engine);
   Node::registerObjectType(engine);
   Edge::registerObjectType(engine);
@@ -182,4 +184,11 @@ void test_graph_with_accessors(AngelScript::asIScriptEngine* engine)
   Graph::registerObjectMethods(engine);
   Node::registerObjectMethods(engine);
   Edge::registerObjectMethods(engine);
+
+  engine->SetDefaultAccessMask(previousMask);
+
+  AngelScriptIntegration::ConfigCallScript config;
+  config.accessMask = ACESS_MASK_GRAPH;
+
+  AngelScriptIntegration::callScriptExt<void>(engine, SCRIPT_DIR"/graph.as", "void main()", "graph-test", config);
 }
