@@ -127,7 +127,7 @@ void Graph::registerObjectMethods(AngelScript::asIScriptEngine* engine)
 
   T_parent::registerAsBaseOfClass<T_class>(engine, name);
 
-  r = engine->RegisterObjectBehaviour(name, AngelScript::asBEHAVE_FACTORY, "Graph@ f()", AngelScript::asFUNCTION(T_class::create), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
+  r = engine->RegisterObjectBehaviour(name, AngelScript::asBEHAVE_FACTORY, "Graph@ f()", asFUNCTION_WITH_REF(T_class::create), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
 
   r = engine->RegisterObjectMethod(name, "Node@ get_node(int index)", AngelScript::asMETHOD(T_class,get_node), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = engine->RegisterObjectMethod(name, "int add_node(int index, Node@ node)", AngelScript::asMETHOD(T_class,add_node), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
