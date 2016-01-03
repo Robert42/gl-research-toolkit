@@ -14,6 +14,8 @@ public:
   const ref<Node>& get_node(int index);
   int add_node(const ref<Node>& node);
 
+  static ref<Graph> create();
+
 private:
   QVector<ref<Edge>> edges;
   QVector<ref<Node>> nodes;
@@ -54,6 +56,10 @@ DECLARE_BASECLASS(RefCountedObject, Node);
 
 // =============================================================================
 
+ref<Graph> Graph::create()
+{
+  return ref<Graph>(new Graph);
+}
 
 const ref<Node>& Graph::get_node(int index)
 {
@@ -120,6 +126,8 @@ void Graph::registerObjectMethods(AngelScript::asIScriptEngine* engine)
   int r = 0;
 
   T_parent::registerAsBaseOfClass<T_class>(engine, name);
+
+  r = engine->RegisterObjectBehaviour(name, AngelScript::asBEHAVE_FACTORY, "Graph@ f()", AngelScript::asFUNCTION(T_class::create), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
 
   r = engine->RegisterObjectMethod(name, "Node@ get_node(int index)", AngelScript::asMETHOD(T_class,get_node), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = engine->RegisterObjectMethod(name, "int add_node(int index, Node@ node)", AngelScript::asMETHOD(T_class,add_node), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
