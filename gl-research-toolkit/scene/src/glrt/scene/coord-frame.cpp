@@ -52,7 +52,7 @@ glm::vec3 CoordFrame::transform_direction(const glm::vec3& point) const
 {
   glm::vec3 transformed_direction;
   _transform_direction(&transformed_direction,
-                       this->position, this->orientation, this->scaleFactor,
+                       this->orientation,
                        point);
   return transformed_direction;
 }
@@ -77,14 +77,14 @@ void CoordFrame::_transform_point(glm::vec3* outPoint,
                                   const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
                                   const glm::vec3& inPoint)
 {
-  // #IMPLEMENT
+  *outPoint = position + scaleFactor * (orientation * inPoint);
 }
 
 void CoordFrame::_transform_direction(glm::vec3* outDirection,
-                                      const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
+                                      const glm::quat& orientation,
                                       const glm::vec3& inDirection)
 {
-  // #IMPLEMENT
+  *outDirection = orientation * inDirection;
 }
 
 } // namespace scene

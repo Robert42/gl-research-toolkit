@@ -35,7 +35,7 @@ struct CoordFrame final
                                const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
                                const glm::vec3& inPoint);
   static void _transform_direction(glm::vec3* outDirection,
-                                   const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
+                                   const glm::quat& orientation, float scaleFactor,
                                    const glm::vec3& inDirection);
 };
 
