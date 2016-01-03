@@ -34,6 +34,10 @@ CoordFrame CoordFrame::operator *(const CoordFrame& other) const
   return f *= other;
 }
 
+glm::vec3 CoordFrame::operator *(const glm::vec3& point) const
+{
+  return this->transform_point(point);
+}
 
 glm::vec3 CoordFrame::transform_point(const glm::vec3& point) const
 {
@@ -55,28 +59,30 @@ glm::vec3 CoordFrame::transform_direction(const glm::vec3& point) const
 
 
 void CoordFrame::_concatenate(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
-                         const glm::vec3& aPosition, const glm::quat& aOrientation, float aScaleFactor,
-                         const glm::vec3& bPosition, const glm::quat& bOrientation, float bScaleFactor)
+                              const glm::vec3& aPosition, const glm::quat& aOrientation, float aScaleFactor,
+                              const glm::vec3& bPosition, const glm::quat& bOrientation, float bScaleFactor)
 {
-  // #IMPLEMENT
+  *outScaleFactor = aScaleFactor * bScaleFactor;
+  *outOrientation = aOrientation * bOrientation;
+  *outPosition = aPosition + aScaleFactor * (bOrientation * bPosition);
 }
 
 void CoordFrame::_coordinateFromMatrix(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
-                                  const glm::mat4& transform)
+                                       const glm::mat4& transform)
 {
   // #IMPLEMENT
 }
 
 void CoordFrame::_transform_point(glm::vec3* outPoint,
-                             const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
-                             const glm::vec3& inPoint)
+                                  const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
+                                  const glm::vec3& inPoint)
 {
   // #IMPLEMENT
 }
 
 void CoordFrame::_transform_direction(glm::vec3* outDirection,
-                                 const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
-                                 const glm::vec3& inDirection)
+                                      const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
+                                      const glm::vec3& inDirection)
 {
   // #IMPLEMENT
 }

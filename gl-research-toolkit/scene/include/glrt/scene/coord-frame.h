@@ -13,14 +13,15 @@ struct CoordFrame final
   glm::quat orientation;
 
   CoordFrame(const glm::ctor);
-  CoordFrame(const glm::vec3& position = glm::vec3(0),
-             const glm::quat& orientation = glm::quat::IDENTITY,
-             float scaleFactor = 1.f);
+  explicit CoordFrame(const glm::vec3& position = glm::vec3(0),
+                      const glm::quat& orientation = glm::quat::IDENTITY,
+                      float scaleFactor = 1.f);
   CoordFrame(const glm::mat4& transformation);
 
   CoordFrame& operator *=(const CoordFrame& other);
 
   CoordFrame operator *(const CoordFrame& other) const;
+  glm::vec3 operator *(const glm::vec3& point) const;
 
   glm::vec3 transform_point(const glm::vec3& point) const;
   glm::vec3 transform_direction(const glm::vec3& point) const;
