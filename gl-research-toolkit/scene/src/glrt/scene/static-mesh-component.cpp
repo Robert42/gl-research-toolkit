@@ -6,21 +6,19 @@ namespace scene {
 
 
 StaticMeshComponent::StaticMeshComponent(Entity& entity,
-                                         bool movable,
+                                         const Uuid<StaticMeshComponent>& uuid,
+                                         bool isMovable,
                                          const Uuid<resources::StaticMeshData>& staticMesh,
-                                         const Uuid<resources::MaterialData>& material,
-                                         const glm::mat4& relativeTransform)
-  : VisibleComponent(entity, movable, relativeTransform),
+                                         const Uuid<resources::MaterialData>& material)
+  : Entity::Component(entity, uuid, isMovable),
     staticMesh(staticMesh),
     material(material)
 {
-  entity.scene.staticMeshStructureChanged();
 }
 
 
 StaticMeshComponent::~StaticMeshComponent()
 {
-  entity.scene.staticMeshStructureChanged();
 }
 
 

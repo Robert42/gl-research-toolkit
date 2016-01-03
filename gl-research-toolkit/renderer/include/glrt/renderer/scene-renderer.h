@@ -14,7 +14,7 @@ namespace renderer {
 
 class Renderer : public QObject
 {
-  Q_OBJECT
+  Q_OBJECT // #FIXME
 public:
 
   class DirectLights;

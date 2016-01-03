@@ -15,9 +15,9 @@ struct LightSource
   glm::vec3 origin;
   float influence_radius;
 
-  friend LightSource operator*(const glm::mat4& t, LightSource lightSource)
+  friend LightSource operator*(const CoordFrame& t, LightSource lightSource)
   {
-    lightSource.origin = transform_point(t, lightSource.origin);
+    lightSource.origin = t.transform_point(lightSource.origin);
     return lightSource;
   }
 
@@ -26,9 +26,8 @@ struct LightSource
 static_assert(sizeof(LightSource)==32, "Please make sure the struct LightSource is std140 compatible");
 
 
-class SphereAreaLightComponent : public VisibleComponent
+class SphereAreaLightComponent : public Entity::Component
 {
-  Q_OBJECT
 public:
   struct Data
   {
@@ -37,7 +36,7 @@ public:
     float radius;
     padding<float, 3> _padding;
 
-    friend Data operator*(const glm::mat4& t, Data data)
+    friend Data operator*(const CoordFrame& t, Data data)
     {
       data.light = t * data.light;
 
@@ -50,13 +49,14 @@ public:
 
   Data data;
 
-  SphereAreaLightComponent(Entity& entity, const Data& data);
+  const bool isStatic : 1;
+
+  SphereAreaLightComponent(Entity& entity, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, bool isStatic, bool isMovable);
 };
 
 
-class RectAreaLightComponent : public VisibleComponent
+class RectAreaLightComponent : public Entity::Component
 {
-  Q_OBJECT
 public:
   struct Data
   {
@@ -67,11 +67,11 @@ public:
     glm::vec3 tangent2 = glm::vec3(0, 1, 0);
     float half_height;
 
-    friend Data operator*(const glm::mat4& t, Data data)
+    friend Data operator*(const CoordFrame& frame, Data data)
     {
-      data.light = t * data.light;
-      data.tangent1 = transform_direction(t, data.tangent1);
-      data.tangent2 = transform_direction(t, data.tangent2);
+      data.light = frame * data.light;
+      data.tangent1 = frame.transform_direction(data.tangent1);
+      data.tangent2 = frame.transform_direction(data.tangent2);
 
       return data;
     }
@@ -82,7 +82,7 @@ public:
 
   Data data;
 
-  RectAreaLightComponent(Entity& entity, const Data& data);
+  RectAreaLightComponent(Entity& entity, const Uuid<RectAreaLightComponent>& uuid, const Data& data, bool isMovable);
 };
 
 

@@ -66,6 +66,7 @@ QDebug operator<<(QDebug d, const std::string& s);
 
 namespace glrt {
 
+
 using AngelScript::asDWORD;
 
 const asDWORD ACCESS_MASK_RESOURCE_LOADING = AngelScriptIntegration::ACCESS_MASK_USER;
@@ -85,6 +86,17 @@ private:
 };
 
 extern AngelScript::asIScriptEngine* angelScriptEngine;
+
+template<typename T_parent, typename T_child>
+bool is_instance_of(const T_child* child)
+{
+  return dynamic_cast<const T_parent*>(child) != nullptr;
+}
+
+template<typename... T_arg>
+inline bool always_return_true(const T_arg&...){return true;}
+template<typename... T_arg>
+inline bool always_return_false(const T_arg&...){return true;}
 
 class SplashscreenMessage final
 {
@@ -120,17 +132,5 @@ Q_UNUSED(__splashscreenMessage);
 
 } // namespace glrt
 
-
-template<class T>
-class base_of;
-
-#define DECLARE_BASECLASS(PARENT, CHILD) \
-  template<> \
-  class base_of<CHILD> \
-  { \
-    typedef PARENT type; \
-    static_assert(std::is_base_of<PARENT, CHILD>::value, "CHILD must inherit from PARENT"); \
-    base_of() = delete; \
-  }
 
 #endif // GLRT_DEPENDENCIES_H

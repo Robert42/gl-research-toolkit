@@ -3,77 +3,75 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
+#include <glrt/scene/coord-frame.h>
 
 namespace glrt {
 namespace scene {
 
+
 class Scene;
-class Entity final : public QObject
+class Entity final
 {
-  Q_OBJECT
 public:
+  class ModularAttribute;
   class Component;
 
-  QString name;
-  glm::mat4 relativeTransform = glm::mat4(1);
   Scene& scene;
-
-  Entity(Scene& scene);
-  ~Entity();
-
-  QVector<Entity::Component*> components();
+  const Uuid<Entity> uuid;
 
   template<typename T>
-  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter);
+  QVector<T*> allModularAttributeWithType(const std::function<bool(T*)>& filter=always_return_true) const;
+  template<typename T>
+  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true) const;
 
-  glm::mat4 globalTransformation() const;
+protected:
+  Entity(Scene& scene, const Uuid<Entity>& uuid);
+  ~Entity();
+
+protected:
+  template<typename T>
+  static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 
 private:
-  QVector<Entity::Component*> _components;
+  QVector<Entity::ModularAttribute*> _allModularAttributes;
+  Entity::Component* _rootComponent;
 };
 
 
-class Entity::Component : public QObject
+class Entity::ModularAttribute
 {
-  Q_OBJECT
 public:
   Entity& entity;
+  Uuid<ModularAttribute> uuid;
 
-  Component(Entity& entity);
+  ModularAttribute(Entity& entity, const Uuid<ModularAttribute>& uuid);
+  virtual ~ModularAttribute();
 };
 
 
-class VisibleComponent : public Entity::Component
+class Entity::Component
 {
 public:
-  const bool movable : 1;
-  glm::mat4 relativeTransform = glm::mat4(1);
+  Entity& entity;
+  Uuid<Component> uuid;
 
-  VisibleComponent(Entity& entity, bool movable, const glm::mat4& relativeTransform=glm::mat4(1));
+  const bool isMovable : 1;
 
-  glm::mat4 globalTransformation() const;
+  CoordFrame localCoordFrame;
+  CoordFrame globalCoordFrame() const;
+
+  Component(Entity& entity, const Uuid<Component>& uuid, bool isMovable);
+  virtual ~Component();
+
+protected:
+  template<typename T>
+  static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 };
-
-
-template<typename T>
-QVector<T*> Entity::allComponentsWithType(const std::function<bool(T*)>& filter)
-{
-  static_assert(std::is_base_of<Entity::Component, T>::value, "T must inherit from Entity::Component");
-
-  QVector<T*> components;
-  components.reserve((_components.size()+3) / 4);
-
-  for(Component* c : _components)
-  {
-    T* component = qobject_cast<T*>(c);
-    if(component && filter(component))
-      components.append(component);
-  }
-  return components;
-}
 
 
 } // namespace scene
 } // namespace glrt
+
+#include "entity.inl"
 
 #endif // GLRT_SCENE_ENTITY_H
