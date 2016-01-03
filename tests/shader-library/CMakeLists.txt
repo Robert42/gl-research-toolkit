@@ -4,4 +4,3 @@ project(Test-Shader-Library)
 
 add_executable(test-shader-library main.cpp)
 target_link_libraries(test-shader-library glrt)
-target_compile_definitions(test-shader-library PRIVATE SHADER_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/shader\")

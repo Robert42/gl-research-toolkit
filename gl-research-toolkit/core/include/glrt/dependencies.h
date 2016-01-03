@@ -143,7 +143,7 @@ class base_of;
 
 #define DECLARE_BASECLASS(PARENT, CHILD) \
   template<> \
-  class base_of<CHILD> \
+  struct base_of<CHILD> \
   { \
     typedef PARENT type; \
     static_assert(std::is_base_of<PARENT, CHILD>::value, "CHILD must inherit from PARENT"); \
