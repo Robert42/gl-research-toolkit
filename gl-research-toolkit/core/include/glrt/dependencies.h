@@ -10,8 +10,6 @@
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>
-#include <angelscript-integration/ref.h>
-#include <angelscript-integration/weakref.h>
 #include <angelscript-integration/angelscript-integration.h>
 
 #include <QDebug>
@@ -68,9 +66,6 @@ QDebug operator<<(QDebug d, const std::string& s);
 
 namespace glrt {
 
-
-using AngelScriptIntegration::ref;
-using AngelScriptIntegration::weakref;
 
 using AngelScript::asDWORD;
 
@@ -137,17 +132,5 @@ Q_UNUSED(__splashscreenMessage);
 
 } // namespace glrt
 
-
-template<class T>
-class base_of;
-
-#define DECLARE_BASECLASS(PARENT, CHILD) \
-  template<> \
-  struct base_of<CHILD> \
-  { \
-    typedef PARENT type; \
-    static_assert(std::is_base_of<PARENT, CHILD>::value, "CHILD must inherit from PARENT"); \
-    base_of() = delete; \
-  }
 
 #endif // GLRT_DEPENDENCIES_H

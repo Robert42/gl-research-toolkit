@@ -51,7 +51,7 @@ public:
 
   const bool isStatic : 1;
 
-  SphereAreaLightComponent(const Uuid<SphereAreaLightComponent>& uuid, const Data& data, bool isStatic, bool isMovable);
+  SphereAreaLightComponent(Entity& entity, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, bool isStatic, bool isMovable);
 };
 
 
@@ -82,7 +82,7 @@ public:
 
   Data data;
 
-  RectAreaLightComponent(const Uuid<RectAreaLightComponent>& uuid, const Data& data, bool isMovable);
+  RectAreaLightComponent(Entity& entity, const Uuid<RectAreaLightComponent>& uuid, const Data& data, bool isMovable);
 };
 
 

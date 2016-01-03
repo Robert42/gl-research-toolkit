@@ -8,41 +8,6 @@ namespace scene {
 
 
 template<typename T>
-void Entity::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className)
-{
-  static_assert(std::is_base_of<Object, T>::value, "T must inherit from glrt::scene::Entity");
-
-  int r = 0;
-
-  base_of<Entity>::type::registerAsBaseOfClass<T>(engine, className);
-}
-
-template<typename T>
-void Entity::ModularAttribute::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className)
-{
-  static_assert(std::is_base_of<Object, T>::value, "T must inherit from glrt::scene::Entity::ModularAttribute");
-
-  int r = 0;
-
-  base_of<Entity::ModularAttribute>::type::registerAsBaseOfClass<T>(engine, className);
-
-  r = engine->RegisterObjectMethod(className, "void set_entity(Entity@)", asMETHOD_WITH_REF(Entity::ModularAttribute, set_entity), AngelScript::asCALL_THISCALL);
-  r = engine->RegisterObjectMethod(className, "Entity@ get_entity()", asMETHOD_WITH_REF(Entity::ModularAttribute, get_entity), AngelScript::asCALL_THISCALL);
-}
-
-template<typename T>
-void Entity::Component::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className)
-{
-  static_assert(std::is_base_of<Object, T>::value, "T must inherit from glrt::scene::Entity::Component");
-
-  int r = 0;
-
-  base_of<Entity::Component>::type::registerAsBaseOfClass<T>(engine, className);
-}
-
-// ========
-
-template<typename T>
 QVector<T*> Entity::allModularAttributeWithType(const std::function<bool(T*)>& filter) const
 {
   QVector<T*> result;

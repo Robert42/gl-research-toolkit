@@ -3,7 +3,6 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
-#include <glrt/scene/object.h>
 #include <glrt/scene/coord-frame.h>
 
 namespace glrt {
@@ -11,22 +10,22 @@ namespace scene {
 
 
 class Scene;
-class Entity : public scene::Object
+class Entity final
 {
 public:
   class ModularAttribute;
   class Component;
+
+  Scene& scene;
+  const Uuid<Entity> uuid;
 
   template<typename T>
   QVector<T*> allModularAttributeWithType(const std::function<bool(T*)>& filter=always_return_true) const;
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true) const;
 
-  void addModularAttribute(ModularAttribute* modularAttribute);
-  void removeModularAttribute(ModularAttribute* modularAttribute);
-
 protected:
-  Entity(const Uuid<Entity>& uuid);
+  Entity(Scene& scene, const Uuid<Entity>& uuid);
   ~Entity();
 
 protected:
@@ -39,32 +38,30 @@ private:
 };
 
 
-class Entity::ModularAttribute : public scene::Object
+class Entity::ModularAttribute
 {
 public:
-  ModularAttribute(const Uuid<ModularAttribute>& uuid);
+  Entity& entity;
+  Uuid<ModularAttribute> uuid;
 
-  void set_entity(const ref<Entity>& entity);
-  const weakref<Entity>& get_entity();
-
-protected:
-  template<typename T>
-  static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
-
-private:
-  weakref<Entity> entity;
+  ModularAttribute(Entity& entity, const Uuid<ModularAttribute>& uuid);
+  virtual ~ModularAttribute();
 };
 
 
-class Entity::Component : public scene::Object
+class Entity::Component
 {
 public:
+  Entity& entity;
+  Uuid<Component> uuid;
+
   const bool isMovable : 1;
 
   CoordFrame localCoordFrame;
-  CoordFrame get_globalCoordFrame() const;
+  CoordFrame globalCoordFrame() const;
 
-  Component(const Uuid<Component>& uuid, bool isMovable);
+  Component(Entity& entity, const Uuid<Component>& uuid, bool isMovable);
+  virtual ~Component();
 
 protected:
   template<typename T>
@@ -74,10 +71,6 @@ protected:
 
 } // namespace scene
 } // namespace glrt
-
-DECLARE_BASECLASS(glrt::scene::Object, glrt::scene::Entity);
-DECLARE_BASECLASS(glrt::scene::Object, glrt::scene::Entity::ModularAttribute);
-DECLARE_BASECLASS(glrt::scene::Object, glrt::scene::Entity::Component);
 
 #include "entity.inl"
 

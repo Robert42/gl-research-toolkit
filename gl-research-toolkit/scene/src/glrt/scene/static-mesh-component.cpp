@@ -5,11 +5,12 @@ namespace glrt {
 namespace scene {
 
 
-StaticMeshComponent::StaticMeshComponent(const Uuid<StaticMeshComponent>& uuid,
+StaticMeshComponent::StaticMeshComponent(Entity& entity,
+                                         const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
                                          const Uuid<resources::StaticMeshData>& staticMesh,
                                          const Uuid<resources::MaterialData>& material)
-  : Entity::Component(uuid, isMovable),
+  : Entity::Component(entity, uuid, isMovable),
     staticMesh(staticMesh),
     material(material)
 {

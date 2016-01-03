@@ -12,7 +12,7 @@ public:
   const Uuid<resources::StaticMeshData> staticMesh; // #TODO rename StaticMeshData to StaticMesh
   const Uuid<resources::MaterialData> material; // #TODO rename MaterialData to Material
 
-  StaticMeshComponent(const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMeshData>& staticMesh, const Uuid<resources::MaterialData> & material);
+  StaticMeshComponent(Entity& entity, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMeshData>& staticMesh, const Uuid<resources::MaterialData> & material);
   ~StaticMeshComponent();
 };
 

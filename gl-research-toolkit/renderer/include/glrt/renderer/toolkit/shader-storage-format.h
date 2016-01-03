@@ -212,7 +212,7 @@ public:
       variadicElementBuffer.initStaticElements(newStaticComponents.length(),
                                               [&newStaticComponents](ElementType* element, int i) {
         EntityComponentType* component = newStaticComponents[i];
-        *element = component->get_globalCoordFrame() * component->data;
+        *element = component->globalCoordFrame() * component->data;
       });
     }
   }
@@ -233,7 +233,7 @@ public:
   {
     variadicElementBuffer.updateMovableElements([this](ElementType* element, int i) {
       EntityComponentType* component = movableComponents[i];
-      *element = component->get_globalCoordFrame() * component->data;
+      *element = component->globalCoordFrame() * component->data;
     });
   }
 

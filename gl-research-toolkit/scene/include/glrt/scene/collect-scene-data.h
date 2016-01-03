@@ -10,7 +10,7 @@ namespace glrt {
 namespace scene {
 
 template<typename T_component>
-QVector<T_component*> collectAllComponentsWithType(Scene* scene, bool increaseReferenceCount, const std::function<bool(T_component*)>& filter=always_return_true<T_component*>);
+QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::function<bool(T_component*)>& filter=always_return_true<T_component*>);
 
 
 template<typename T_component, typename T_data>

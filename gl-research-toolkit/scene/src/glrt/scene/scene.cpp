@@ -35,6 +35,17 @@ void Scene::clear()
 }
 
 
+QString Scene::labelForUuid(const QUuid& uuid) const
+{
+  auto i = _labels.find(uuid);
+
+  if(i != _labels.end())
+    return i.value();
+
+  return uuid.toString();
+}
+
+
 bool Scene::handleEvents(const SDL_Event& event)
 {
   return debugCamera.handleEvents(event);

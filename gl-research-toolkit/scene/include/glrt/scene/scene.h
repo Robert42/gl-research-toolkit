@@ -35,6 +35,8 @@ public:
   Scene();
   ~Scene();
 
+  QString labelForUuid(const QUuid& uuid) const;
+
   bool handleEvents(const SDL_Event& event);
   void update(float deltaTime);
 
@@ -52,6 +54,7 @@ signals:
 
 private:
   QVector<Entity*> _entities; // #TODO use an optimized array
+  QHash<QUuid, QString> _labels;
 };
 
 } // namespace scene

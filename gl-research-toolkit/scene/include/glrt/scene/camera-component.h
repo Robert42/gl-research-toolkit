@@ -12,7 +12,7 @@ class CameraComponent final : public Entity::Component
 public:
   CameraParameter cameraParameter;
 
-  CameraComponent(const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter, bool isMovable=false);
+  CameraComponent(Entity& entity, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter, bool isMovable=false);
   ~CameraComponent();
 };
 

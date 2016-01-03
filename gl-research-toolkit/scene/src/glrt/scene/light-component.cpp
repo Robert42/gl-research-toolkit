@@ -20,8 +20,8 @@ bool LightSource::initFromJson(QJsonObject& json)
 // =============================================================================
 
 
-SphereAreaLightComponent::SphereAreaLightComponent(const Uuid<SphereAreaLightComponent>& uuid, const Data& data, bool isStatic, bool isMovable)
-  : Entity::Component(uuid, isMovable),
+SphereAreaLightComponent::SphereAreaLightComponent(Entity& entity, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, bool isStatic, bool isMovable)
+  : Entity::Component(entity, uuid, isMovable),
     data(data),
     isStatic(isStatic)
 {
@@ -42,8 +42,8 @@ bool SphereAreaLightComponent::Data::initFromJson(QJsonObject& json)
 // =============================================================================
 
 
-RectAreaLightComponent::RectAreaLightComponent(const Uuid<RectAreaLightComponent>& uuid, const Data& data, bool isMovable)
-  : Entity::Component(uuid, isMovable),
+RectAreaLightComponent::RectAreaLightComponent(Entity& entity, const Uuid<RectAreaLightComponent>& uuid, const Data& data, bool isMovable)
+  : Entity::Component(entity, uuid, isMovable),
     data(data)
 {
 }
