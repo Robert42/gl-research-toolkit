@@ -23,8 +23,7 @@ QVector<T*> Entity::allModularAttributeWithType(const std::function<bool(T*)>& f
 template<typename T>
 QVector<T*> Entity::allComponentsWithType(const std::function<bool(T*)>& filter) const
 {
-  //QVector<Component*> allComponents = this->allComponents(); // #IMPLEMENT!!!!!!!!!!!
-  QVector<Component*> allComponents; // this is dummy code to be removed
+  QVector<Component*> allComponents = this->allComponents();
 
   QVector<T*> result;
   result.reserve(allComponents.length());

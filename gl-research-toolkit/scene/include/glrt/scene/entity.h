@@ -19,10 +19,17 @@ public:
   Scene& scene;
   const Uuid<Entity> uuid;
 
+  CoordFrame globalCoordFrame() const;
+
   template<typename T>
   QVector<T*> allModularAttributeWithType(const std::function<bool(T*)>& filter=always_return_true) const;
   template<typename T>
   QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true) const;
+
+  const QVector<ModularAttribute*>& allModularAttributes();
+
+  QVector<Component*> allComponents() const;
+  Component* rootComponent() const;
 
 protected:
   Entity(Scene& scene, const Uuid<Entity>& uuid);
@@ -33,8 +40,8 @@ protected:
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 
 private:
-  QVector<Entity::ModularAttribute*> _allModularAttributes;
-  Entity::Component* _rootComponent;
+  QVector<ModularAttribute*> _allModularAttributes;
+  Component* _rootComponent;
 };
 
 
@@ -42,7 +49,7 @@ class Entity::ModularAttribute
 {
 public:
   Entity& entity;
-  Uuid<ModularAttribute> uuid;
+  const Uuid<ModularAttribute> uuid;
 
   ModularAttribute(Entity& entity, const Uuid<ModularAttribute>& uuid);
   virtual ~ModularAttribute();
@@ -53,19 +60,31 @@ class Entity::Component
 {
 public:
   Entity& entity;
-  Uuid<Component> uuid;
+  const Uuid<Component> uuid;
 
   const bool isMovable : 1;
-
-  CoordFrame localCoordFrame;
-  CoordFrame globalCoordFrame() const;
 
   Component(Entity& entity, const Uuid<Component>& uuid, bool isMovable);
   virtual ~Component();
 
+  Component* parent() const;
+  void setParent(Component* component);
+
+  QVector<Component*> children() const;
+  void collectSubtree(QVector<Component*>* subTree);
+
+  CoordFrame localCoordFrame() const;
+  CoordFrame globalCoordFrame() const;
+
 protected:
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
+
+private:
+  CoordFrame _localCoordFrame;
+
+  Component* _parent = nullptr;
+  QVector<Component*> _children;
 };
 
 
