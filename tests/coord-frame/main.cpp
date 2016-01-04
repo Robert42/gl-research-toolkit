@@ -1,4 +1,20 @@
 #include <glrt/scene/coord-frame.h>
+#include <glrt/glsl/math.h>
+
+using namespace glrt::glsl;
+
+namespace glm
+{
+float distance(const glrt::scene::CoordFrame& a, const glrt::scene::CoordFrame& b)
+{
+  return sqrt(sq(a.scaleFactor-b.scaleFactor)+
+              sq(a.position-b.position)+
+              sq(a.orientation.x-a.orientation.x)+
+              sq(a.orientation.y-a.orientation.y)+
+              sq(a.orientation.z-a.orientation.z)+
+              sq(a.orientation.w-a.orientation.w));
+}
+}
 
 #define EXPECT_NEAR_EPSILON(value, expected, epsilon) if(glm::distance(value, expected) > epsilon){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
 #define EXPECT_NEAR(value, expected) EXPECT_NEAR_EPSILON(value, expected, 0.0001f)
@@ -55,14 +71,7 @@ void test_to_matrix()
 
 void test_from_matrix()
 {
-  glrt::scene::CoordFrame c(ma);
-
-  EXPECT_NEAR(c.scaleFactor, a.scaleFactor);
-  EXPECT_NEAR(c.position, a.position);
-  EXPECT_NEAR(c.orientation.x, a.orientation.x);
-  EXPECT_NEAR(c.orientation.y, a.orientation.y);
-  EXPECT_NEAR(c.orientation.z, a.orientation.z);
-  EXPECT_NEAR(c.orientation.w, a.orientation.w);
+  EXPECT_NEAR(glrt::scene::CoordFrame(ma), a);
 }
 
 
