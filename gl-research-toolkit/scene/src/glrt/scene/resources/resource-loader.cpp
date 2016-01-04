@@ -40,6 +40,9 @@ void StaticMeshLoader::loadStaticMesh(const Uuid<StaticMeshData>& uuid, const An
   const StaticMeshData::Vertex* vertices = reinterpret_cast<const StaticMeshData::Vertex*>(_vertices->At(0));
 
   loadStaticMesh(uuid, indices, numIndices, vertices, numVertices);
+
+  _indices->Release();
+  _vertices->Release();
 }
 
 void StaticMeshLoader::loadStaticMesh(const Uuid<StaticMeshData>& uuid, const StaticMeshData& data)
@@ -58,7 +61,7 @@ void StaticMeshLoader::registerAngelScriptAPI()
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   r = angelScriptEngine->RegisterObjectType("StaticMeshLoader", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("StaticMeshLoader", "void loadStaticMesh(const Uuid<StaticMeshData> &in uuid, const array<uint16> &in indices, const array<float> &in vertices)", AngelScript::asMETHODPR(StaticMeshLoader, loadStaticMesh, (const Uuid<StaticMeshData>& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices), void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("StaticMeshLoader", "void loadStaticMesh(const Uuid<StaticMeshData> &in uuid, const array<uint16>@ indices, const array<float>@ vertices)", AngelScript::asMETHODPR(StaticMeshLoader, loadStaticMesh, (const Uuid<StaticMeshData>& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices), void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
