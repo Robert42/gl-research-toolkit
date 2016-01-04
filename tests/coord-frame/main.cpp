@@ -15,6 +15,11 @@ glrt::scene::CoordFrame b(glm::vec3(7, 8, 9),
                           glm::angleAxis(glm::radians(90.f), glm::vec3(1, 0, 0)),
                           3.f);
 
+glm::mat4 ma = glm::mat4(0, -0.5f, 0, 0,
+                         0.5f,  0, 0, 0,
+                         0,  0, 0.5f, 0,
+                         1,  2, 3, 1);
+
 void test_transformations()
 {
   EXPECT_NEAR(a* glm::vec3(0), glm::vec3(1, 2, 3));
@@ -42,12 +47,22 @@ void test_concatenation()
 
 void test_to_matrix()
 {
-  // #TODO
+  EXPECT_NEAR(ma[0], a.toMat4()[0]);
+  EXPECT_NEAR(ma[1], a.toMat4()[1]);
+  EXPECT_NEAR(ma[2], a.toMat4()[2]);
+  EXPECT_NEAR(ma[3], a.toMat4()[3]);
 }
 
 void test_from_matrix()
 {
-  // #TODO
+  glrt::scene::CoordFrame c(ma);
+
+  EXPECT_NEAR(c.scaleFactor, a.scaleFactor);
+  EXPECT_NEAR(c.position, a.position);
+  EXPECT_NEAR(c.orientation.x, a.orientation.x);
+  EXPECT_NEAR(c.orientation.y, a.orientation.y);
+  EXPECT_NEAR(c.orientation.z, a.orientation.z);
+  EXPECT_NEAR(c.orientation.w, a.orientation.w);
 }
 
 

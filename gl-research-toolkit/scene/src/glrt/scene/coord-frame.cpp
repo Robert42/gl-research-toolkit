@@ -57,6 +57,10 @@ glm::vec3 CoordFrame::transform_direction(const glm::vec3& point) const
   return transformed_direction;
 }
 
+glm::mat4 CoordFrame::toMat4() const
+{
+  return glm::translate(glm::mat4(1), this->position) * glm::toMat4(this->orientation) * glm::scale(glm::mat4(1), glm::vec3(this->scaleFactor));
+}
 
 } // namespace scene
 } // namespace glrt

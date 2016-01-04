@@ -26,11 +26,13 @@ struct CoordFrame final
   glm::vec3 transform_point(const glm::vec3& point) const;
   glm::vec3 transform_direction(const glm::vec3& point) const;
 
+  glm::mat4 toMat4() const;
+
   static void _concatenate(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
                            const glm::vec3& aPosition, const glm::quat& aOrientation, float aScaleFactor,
                            const glm::vec3& bPosition, const glm::quat& bOrientation, float bScaleFactor);
   static void _coordinateFromMatrix(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
-                                    const glm::mat4& transform);
+                                    glm::mat4 transform);
   static void _transform_point(glm::vec3* outPoint,
                                const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
                                const glm::vec3& inPoint);

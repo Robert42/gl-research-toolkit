@@ -19,11 +19,22 @@ inline void CoordFrame::_concatenate(glm::vec3* outPosition, glm::quat* outOrien
 }
 
 inline void CoordFrame::_coordinateFromMatrix(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
-                                              const glm::mat4& transform)
+                                              glm::mat4 transform)
 {
-  *outScaleFactor = (glm::length(transform[0].xyz()) + glm::length(transform[1].xyz()) + glm::length(transform[2].xyz())) / 3.f;
-  *outOrientation = glm::quat(transform);
+  transform[0][3] = 0;
+  transform[1][3] = 0;
+  transform[2][3] = 0;
+  transform[3][3] = 1;
+  glm::vec3 scale(glm::length(transform[0].xyz()),
+                  glm::length(transform[1].xyz()),
+                  glm::length(transform[2].xyz()));
+  *outScaleFactor = (scale.x + scale.y + scale.z) / 3.f;
+  transform[0] /= scale.x;
+  transform[1] /= scale.y;
+  transform[2] /= scale.z;
   *outPosition = transform[3].xyz();
+  transform[3] = glm::vec4(0);
+  *outOrientation = glm::quat(transform);
 }
 
 inline void CoordFrame::_transform_point(glm::vec3* outPoint,
