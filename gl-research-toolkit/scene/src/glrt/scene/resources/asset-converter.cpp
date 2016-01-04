@@ -72,15 +72,15 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
   }
 }
 
-void convertSceneGraph(const std::string& sceneGraphFilename, const std::string& sourceFilename)
+void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceFilename, const SceneGraphImportSettings &settings)
 {
-  QFileInfo sceneGraphFile(QString::fromStdString(sceneGraphFilename));
-  QFileInfo sourceFile(QString::fromStdString(sourceFilename));
+  QFileInfo sceneGraphFile(sceneGraphFilename);
+  QFileInfo sourceFile(sourceFilename);
 
   SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
 
   // #TODO uncomment
-  if(shouldConvert(sceneGraphFile, sourceFile))
+  //if(shouldConvert(sceneGraphFile, sourceFile))
   {
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
     convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile);
@@ -246,7 +246,7 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 
   QTextStream outputStream(&file);
 
-  outputStream << "void main(StaticMeshLoader@ loader, Uuid<StaticMeshData> &in uuid)\n{\n";
+  outputStream << "void main(StaticMeshLoader@ loader, Uuid<StaticMesh> &in uuid)\n{\n";
   writeToScriptLoadingStaticMesh(outputStream, "uuid", data);
   outputStream << "}";
 }

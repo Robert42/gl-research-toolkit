@@ -8,6 +8,7 @@
 
 #include <sdk/add_on/scriptstdstring/scriptstdstring.h>
 #include <sdk/add_on/scriptarray/scriptarray.h>
+#include <sdk/add_on/scriptdictionary/scriptdictionary.h>
 
 namespace glrt {
 
@@ -133,13 +134,15 @@ void Application::initAngelScript()
   asDWORD previousMask = scriptEngine->SetDefaultAccessMask(AngelScriptIntegration::ACCESS_MASK_ALL);
   AngelScript::RegisterStdString(scriptEngine);
   AngelScript::RegisterScriptArray(scriptEngine, true);
+  AngelScript::RegisterScriptDictionary(scriptEngine);
   scriptEngine->SetDefaultAccessMask(previousMask);
 
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
 
   glrt::Uuid<void>::registerAngelScriptAPI();
-  glrt::Uuid<void>::registerCustomizedUuidType("StaticMeshData", true);
-  glrt::Uuid<void>::registerCustomizedUuidType("MaterialData", true);
+  glrt::Uuid<void>::registerCustomizedUuidType("StaticMesh", true);
+  glrt::Uuid<void>::registerCustomizedUuidType("Material", true);
+  glrt::Uuid<void>::registerCustomizedUuidType("Light", true);
   glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
   glrt::scene::resources::StaticMeshLoader::registerAngelScriptAPI();
 

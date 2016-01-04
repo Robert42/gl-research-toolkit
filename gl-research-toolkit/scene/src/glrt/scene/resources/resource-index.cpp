@@ -4,12 +4,45 @@
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
+#include <angelscript-integration/collection-converter.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
+
+void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
+                               const std::string& sourceFilename,
+                               AngelScript::CScriptArray* meshesToImport,
+                               AngelScript::CScriptDictionary* meshUuids,
+                               AngelScript::CScriptDictionary* materialUuids,
+                               AngelScript::CScriptDictionary* lightUuids)
+{
+  SceneGraphImportSettings settings;
+
+  int uuidTypeId = angelScriptEngine->GetTypeIdByDecl("QUuid");
+
+  QSet<int> meshUuidTypeIds = {uuidTypeId, angelScriptEngine->GetTypeIdByDecl("Uuid<StaticMesh>")};
+  QSet<int> materialUuidTypeIds = {uuidTypeId, angelScriptEngine->GetTypeIdByDecl("Uuid<Material>")};
+  QSet<int> lightUuidTypeIds = {uuidTypeId, angelScriptEngine->GetTypeIdByDecl("Uuid<Light>")};
+
+  settings.meshesToImport = AngelScriptIntegration::scriptArrayToStringSet(meshesToImport);
+  settings.meshUuids = AngelScriptIntegration::scriptDictionaryToHash<QUuid>(meshUuids, meshUuidTypeIds);
+  settings.meshUuids = AngelScriptIntegration::scriptDictionaryToHash<QUuid>(materialUuids, materialUuidTypeIds);
+  settings.meshUuids = AngelScriptIntegration::scriptDictionaryToHash<QUuid>(lightUuids, lightUuidTypeIds);
+
+  meshesToImport->Release();
+  meshUuids->Release();
+  materialUuids->Release();
+  lightUuids->Release();
+
+  convertSceneGraph(QString::fromStdString(sceneGraphFilename),
+                    QString::fromStdString(sourceFilename),
+                    settings);
+}
+
+// --------------
 
 ResourceIndex::ResourceIndex()
 {
@@ -23,10 +56,10 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(const Uuid<StaticMeshData> &in uuid, const string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(const Uuid<StaticMesh> &in uuid, const string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterGlobalFunction("void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertSceneGraph), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterGlobalFunction("void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const array<string>@ meshesToImport={\".*\"}, const dictionary@ meshUuids={}, const dictionary@ materialUuids={}, const dictionary@ lightUuids={})", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
