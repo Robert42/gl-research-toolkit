@@ -59,7 +59,21 @@ glm::vec3 CoordFrame::transform_direction(const glm::vec3& point) const
 
 glm::mat4 CoordFrame::toMat4() const
 {
+  // #TODO make this also inline and optimize this
   return glm::translate(glm::mat4(1), this->position) * glm::toMat4(this->orientation) * glm::scale(glm::mat4(1), glm::vec3(this->scaleFactor));
+}
+
+CoordFrame CoordFrame::inverse() const
+{
+  CoordFrame i;
+  _inverse(&i.position, &i.orientation, &i.scaleFactor,
+           this->position, this->orientation, this->scaleFactor);
+  return i;
+}
+
+QDebug operator<<(QDebug debug, const CoordFrame& coordFrame)
+{
+  return debug << "CoordFrame(position: " << coordFrame.position << ", orientation: " << coordFrame.orientation << ", scale: " << coordFrame.scaleFactor << ")";
 }
 
 } // namespace scene

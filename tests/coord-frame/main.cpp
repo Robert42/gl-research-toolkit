@@ -74,6 +74,14 @@ void test_from_matrix()
   EXPECT_NEAR(glrt::scene::CoordFrame(ma), a);
 }
 
+void test_invert()
+{
+  EXPECT_NEAR(a*a.inverse(), glrt::scene::CoordFrame());
+  EXPECT_NEAR(a.inverse()*a, glrt::scene::CoordFrame());
+  EXPECT_NEAR(b*b.inverse(), glrt::scene::CoordFrame());
+  EXPECT_NEAR(b.inverse()*b, glrt::scene::CoordFrame());
+}
+
 
 int main(int argc, char** argv)
 {
@@ -87,6 +95,7 @@ int main(int argc, char** argv)
   test_concatenation();
   test_to_matrix();
   test_from_matrix();
+  test_invert();
 
   return 0;
 }

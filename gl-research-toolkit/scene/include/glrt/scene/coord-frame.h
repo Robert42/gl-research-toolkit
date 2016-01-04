@@ -27,6 +27,7 @@ struct CoordFrame final
   glm::vec3 transform_direction(const glm::vec3& point) const;
 
   glm::mat4 toMat4() const;
+  CoordFrame inverse() const;
 
   static void _concatenate(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
                            const glm::vec3& aPosition, const glm::quat& aOrientation, float aScaleFactor,
@@ -39,6 +40,8 @@ struct CoordFrame final
   static void _transform_direction(glm::vec3* outDirection,
                                    const glm::quat& orientation,
                                    const glm::vec3& inDirection);
+  static void _inverse(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
+                       const glm::vec3& inPosition, const glm::quat& inOrientation, float inScaleFactor);
 };
 
 QDebug operator<<(QDebug debug, const CoordFrame& coordFrame);
