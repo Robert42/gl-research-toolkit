@@ -59,8 +59,11 @@ glm::vec3 CoordFrame::transform_direction(const glm::vec3& point) const
 
 glm::mat4 CoordFrame::toMat4() const
 {
-  // #TODO make this also inline and optimize this
-  return glm::translate(glm::mat4(1), this->position) * glm::toMat4(this->orientation) * glm::scale(glm::mat4(1), glm::vec3(this->scaleFactor));
+  glm::mat4 m;
+
+  _to_mat4(reinterpret_cast<float*>(&m),
+           this->position, this->orientation, this->scaleFactor);
+  return m;
 }
 
 CoordFrame CoordFrame::inverse() const
