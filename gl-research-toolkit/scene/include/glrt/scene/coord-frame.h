@@ -41,6 +41,8 @@ struct CoordFrame final
                                    const glm::vec3& inDirection);
 };
 
+QDebug operator<<(QDebug debug, const CoordFrame& coordFrame);
+
 } // namespace scene
 } // namespace glrt
 

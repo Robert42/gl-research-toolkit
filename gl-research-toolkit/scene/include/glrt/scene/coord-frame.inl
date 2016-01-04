@@ -51,6 +51,13 @@ inline void CoordFrame::_transform_direction(glm::vec3* outDirection,
   *outDirection = orientation * inDirection;
 }
 
+inline void CoordFrame::_inverse(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
+                                 const glm::vec3& inPosition, const glm::quat& inOrientation, float inScaleFactor)
+{
+  *outScaleFactor = 1.f/inScaleFactor;
+  *outOrientation = glm::inverse(inOrientation);
+  *outPosition = - *outScaleFactor * (*outOrientation * inPosition);
+}
 
 } // namespace scene
 } // namespace glrt
