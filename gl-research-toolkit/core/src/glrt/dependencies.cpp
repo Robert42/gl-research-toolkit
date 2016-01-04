@@ -61,6 +61,11 @@ QDebug operator<<(QDebug d, const glm::mat4& v)
   return d << glm::to_string(v).c_str();
 }
 
+QDebug operator<<(QDebug d, const glm::quat& q)
+{
+  return d << "quat(axis: " << glm::axis(q) << ", angle: " << glm::degrees(glm::angle(q)) << ")";
+}
+
 QDebug operator<<(QDebug d, const std::string& s)
 {
   return d << QString::fromStdString(s);

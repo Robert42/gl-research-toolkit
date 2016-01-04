@@ -61,6 +61,8 @@ QDebug operator<<(QDebug d, const glm::mat2& v);
 QDebug operator<<(QDebug d, const glm::mat3& v);
 QDebug operator<<(QDebug d, const glm::mat4& v);
 
+QDebug operator<<(QDebug d, const glm::quat& q);
+
 QDebug operator<<(QDebug d, const std::string& s);
 
 
