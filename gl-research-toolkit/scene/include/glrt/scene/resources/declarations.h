@@ -22,6 +22,7 @@ class MaterialData; // #TODO rename to Material
 class StaticMeshData; // #TODO rename to StaticMesh
 class LightData; // #TODO rename to Light
 class CameraParameter; // #TODO rename to Camera
+class Entity; // #TODO rename to Node?
 
 
 } // namespace resources

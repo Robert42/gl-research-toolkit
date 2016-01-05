@@ -258,6 +258,7 @@ struct SceneGraphImportAssets
 {
   QVector<Uuid<MaterialData>> materials;
   QVector<Uuid<CameraParameter>> cameras;
+  QHash<QUuid, QString> labels;
   bool indexed = true;
 };
 
@@ -306,11 +307,16 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       assets.cameras[i] = settings.cameraUuids[n];
     else
       assets.cameras[i] = Uuid<CameraParameter>(QUuid::createUuid());
+    assets.labels[assets.cameras[i]] = n;
   }
+
+  // #TODO mesh uuids
+  // #TODO light uuids? => entity uuids!!!  append the lights to certain entities!!
 
   // #TODO cameras
   // #TODO lights
   // #TODO nodes
+  // #TODO meshes
 
 
   // #IMPLEMENT
@@ -422,6 +428,12 @@ void SceneGraphImportSettings::set_camerasToImport(AngelScript::CScriptArray* ca
   camerasToImport->Release();
 }
 
+void SceneGraphImportSettings::set_nodesToImport(AngelScript::CScriptArray* nodesToImport)
+{
+  this->nodesToImport = AngelScriptIntegration::scriptArrayToStringSet(nodesToImport);
+  nodesToImport->Release();
+}
+
 void SceneGraphImportSettings::set_meshUuids(AngelScript::CScriptDictionary* meshUuids)
 {
   int uuidTypeId = angelScriptEngine->GetTypeIdByDecl("QUuid");
@@ -452,6 +464,16 @@ void SceneGraphImportSettings::set_lightUuids(AngelScript::CScriptDictionary* li
   lightUuids->Release();
 }
 
+void SceneGraphImportSettings::set_nodeUuids(AngelScript::CScriptDictionary* nodeUuids)
+{
+  int uuidTypeId = angelScriptEngine->GetTypeIdByDecl("QUuid");
+  QSet<int> nodeUuidTypeIds = {uuidTypeId, angelScriptEngine->GetTypeIdByDecl("Uuid<Node>")};
+
+  this->nodeUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Entity>>(nodeUuids, nodeUuidTypeIds);
+
+  nodeUuids->Release();
+}
+
 void SceneGraphImportSettings::set_cameraUuids(AngelScript::CScriptDictionary* cameraUuids)
 {
   int uuidTypeId = angelScriptEngine->GetTypeIdByDecl("QUuid");
@@ -472,6 +494,11 @@ AngelScript::CScriptArray* SceneGraphImportSettings::get_camerasToImport()
   return AngelScriptIntegration::scriptArrayFromStringSet(this->camerasToImport, angelScriptEngine);
 }
 
+AngelScript::CScriptArray* SceneGraphImportSettings::get_nodesToImport()
+{
+  return AngelScriptIntegration::scriptArrayFromStringSet(this->nodesToImport, angelScriptEngine);
+}
+
 AngelScript::CScriptDictionary* SceneGraphImportSettings::get_meshUuids()
 {
   int meshUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<StaticMesh>");
@@ -488,6 +515,12 @@ AngelScript::CScriptDictionary* SceneGraphImportSettings::get_lightUuids()
 {
   int lightUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Light>");
   return AngelScriptIntegration::scriptDictionaryFromHash(this->lightUuids, lightUuidTypeId, angelScriptEngine);
+}
+
+AngelScript::CScriptDictionary* SceneGraphImportSettings::get_nodeUuids()
+{
+  int nodeUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Node>");
+  return AngelScriptIntegration::scriptDictionaryFromHash(this->nodeUuids, nodeUuidTypeId, angelScriptEngine);
 }
 
 AngelScript::CScriptDictionary* SceneGraphImportSettings::get_cameraUuids()
@@ -508,15 +541,19 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectBehaviour(name, AngelScript::asBEHAVE_FACTORY, (std::string(name)+"@ f()").c_str(), AngelScript::asFUNCTION(SceneGraphImportSettings::create), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "void set_meshesToImport(array<string>@ meshesToImport)", AngelScript::asMETHOD(SceneGraphImportSettings,set_meshesToImport), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "void set_camerasToImport(array<string>@ meshesToImport)", AngelScript::asMETHOD(SceneGraphImportSettings,set_camerasToImport), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(name, "void set_nodesToImport(array<string>@ meshesToImport)", AngelScript::asMETHOD(SceneGraphImportSettings,set_nodesToImport), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "void set_meshUuids(dictionary@ meshUuids)", AngelScript::asMETHOD(SceneGraphImportSettings,set_meshUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "void set_materialUuids(dictionary@ materialUuids)", AngelScript::asMETHOD(SceneGraphImportSettings,set_materialUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "void set_lightUuids(dictionary@ lightUuids)", AngelScript::asMETHOD(SceneGraphImportSettings,set_lightUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(name, "void set_nodeUuids(dictionary@ lightUuids)", AngelScript::asMETHOD(SceneGraphImportSettings,set_nodeUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "void set_cameraUuids(dictionary@ lightUuids)", AngelScript::asMETHOD(SceneGraphImportSettings,set_cameraUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "array<string>@ get_meshesToImport()", AngelScript::asMETHOD(SceneGraphImportSettings,get_meshesToImport), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "array<string>@ get_camerasToImport()", AngelScript::asMETHOD(SceneGraphImportSettings,get_camerasToImport), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(name, "array<string>@ get_nodesToImport()", AngelScript::asMETHOD(SceneGraphImportSettings,get_nodesToImport), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "dictionary@ get_meshUuids()", AngelScript::asMETHOD(SceneGraphImportSettings,get_meshUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "dictionary@ get_materialUuids()", AngelScript::asMETHOD(SceneGraphImportSettings,get_materialUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "dictionary@ get_lightUuids()", AngelScript::asMETHOD(SceneGraphImportSettings,get_lightUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(name, "dictionary@ get_nodeUuids()", AngelScript::asMETHOD(SceneGraphImportSettings,get_nodeUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(name, "dictionary@ get_cameraUuids()", AngelScript::asMETHOD(SceneGraphImportSettings,get_cameraUuids), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 }
 
