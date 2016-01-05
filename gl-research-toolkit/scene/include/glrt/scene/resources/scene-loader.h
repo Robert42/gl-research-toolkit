@@ -13,7 +13,7 @@
 namespace glrt {
 namespace scene {
 namespace resources {
-
+/*
 class SceneLoader final
 {
 public:
@@ -46,7 +46,7 @@ public:
 private:
   ResourceLoader* resourceLoader;
 };
-
+*/
 } // namespace resources
 } // namespace scene
 } // namespace glrt

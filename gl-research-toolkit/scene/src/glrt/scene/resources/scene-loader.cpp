@@ -8,7 +8,7 @@
 namespace glrt {
 namespace scene {
 namespace resources {
-
+/*
 SceneLoader::SceneLoader(ResourceLoader* resourceLoader)
   : fallbackMaterial(QUuid("{a8f3fb1b-1168-433b-aaf8-e24632cce156}")),
     resourceLoader(resourceLoader)
@@ -24,7 +24,7 @@ bool SceneLoader::loadFromFile(const QString& filename)
 
   QJsonDocument jsonDocument = readJsonFile(filename);
 
-  /*
+
   // #FIXME
   bool success = fromJson(QFileInfo(filename).dir(), jsonDocument.object());
 
@@ -32,13 +32,13 @@ bool SceneLoader::loadFromFile(const QString& filename)
   resultingScene.sceneLoaded(success);
 
   return success;
-  */
+
   Q_UNUSED(filename);
   return false;
 }
 
 
-/*
+
 #TODO
 bool SceneLoader::fromJson(const QDir& dir, const QJsonObject& json)
 {

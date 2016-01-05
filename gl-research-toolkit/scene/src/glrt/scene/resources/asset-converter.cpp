@@ -1,5 +1,6 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/static-mesh-data.h>
+#include <glrt/scene/camera-parameter.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <QTemporaryDir>
@@ -256,6 +257,7 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 struct SceneGraphImportAssets
 {
   QVector<Uuid<MaterialData>> materials;
+  QVector<Uuid<CameraParameter>> cameras;
   bool indexed = true;
 };
 
@@ -263,6 +265,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 {
   // #FIXME: register the fallback
   const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
+  const Uuid<CameraParameter> fallbackCamera("{ca07ea04-9396-4495-8c5f-25ecf4ca1e2d}");
 
   SceneGraphImportAssets assets;
 
@@ -294,6 +297,15 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(settings.materialUuids.contains(n) || settings.materialUuids.contains(n.remove("-material")))
         assets.materials[i] = settings.materialUuids[n];
     }
+  }
+
+  assets.cameras.resize(scene->mNumCameras);
+  assets.cameras.fill(fallbackCamera);
+  for(quint32 i=0; i<scene->mNumCameras; ++i)
+  {
+    QString n = scene->mCameras[i]->mName.C_Str();
+    if(settings.cameraUuids.contains(n) || settings.cameraUuids.contains(n.remove("-camera")))
+      assets.cameras[i] = settings.cameraUuids[n];
   }
 
   // #TODO cameras
@@ -445,7 +457,7 @@ void SceneGraphImportSettings::set_cameraUuids(AngelScript::CScriptDictionary* c
   int uuidTypeId = angelScriptEngine->GetTypeIdByDecl("QUuid");
   QSet<int> lightUuidTypeIds = {uuidTypeId, angelScriptEngine->GetTypeIdByDecl("Uuid<Camera>")};
 
-  this->cameraUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<CameraData>>(cameraUuids, lightUuidTypeIds);
+  this->cameraUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<CameraParameter>>(cameraUuids, lightUuidTypeIds);
 
   cameraUuids->Release();
 }

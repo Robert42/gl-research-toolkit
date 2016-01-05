@@ -17,7 +17,7 @@ struct SceneGraphImportSettings : public AngelScriptIntegration::RefCountedObjec
   QHash<QString, Uuid<StaticMeshData>> meshUuids;
   QHash<QString, Uuid<MaterialData>> materialUuids;
   QHash<QString, Uuid<LightData>> lightUuids;
-  QHash<QString, Uuid<CameraData>> cameraUuids;
+  QHash<QString, Uuid<CameraParameter>> cameraUuids;
 
   void set_meshesToImport(AngelScript::CScriptArray* meshesToImport);
   void set_camerasToImport(AngelScript::CScriptArray* camerasToImport);
