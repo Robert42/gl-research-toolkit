@@ -20,7 +20,7 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
 }
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
-void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile);
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile, const SceneGraphImportSettings& settings);
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
 QString python_exportSceneAsObjMesh(const QString& objFile);
@@ -40,18 +40,18 @@ void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& 
   convertStaticMesh_assimpToMesh(meshFile, tempFilePath, indexed);
 }
 
-void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile)
+void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile, const SceneGraphImportSettings &settings)
 {
   QTemporaryDir temporaryDir;
 
   if(!temporaryDir.isValid())
     throw GLRT_EXCEPTION("Couldn't convert file to scene-graph");
 
-  QString tempFilePath = QDir(temporaryDir.path()).absoluteFilePath("exported-scene.obj");
+  QString tempFilePath = QDir(temporaryDir.path()).absoluteFilePath("exported-scene.dae");
 
   runBlenderWithPythonScript(python_exportSceneAsColladaSceneGraph(tempFilePath), blenderFile);
 
-  convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath);
+  convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath, settings);
 }
 
 void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename)
@@ -83,7 +83,7 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   //if(shouldConvert(sceneGraphFile, sourceFile))
   {
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
-    convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile);
+    convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, settings);
   }
 }
 
@@ -251,11 +251,56 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
   outputStream << "}";
 }
 
-void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile)
+struct SceneGraphImportAssets
 {
+  QVector<Uuid<MaterialData>> materials;
+  bool indexed = true;
+};
+
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const SceneGraphImportSettings &settings)
+{
+  // #FIXME: register the fallback
+  const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
+
+  SceneGraphImportAssets assets;
+
+  Assimp::Importer importer;
+  const aiScene* scene = importer.ReadFile(sourceFile.absoluteFilePath().toStdString(),
+                                           (assets.indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
+                                           aiProcess_ValidateDataStructure |
+                                           aiProcess_ImproveCacheLocality |
+                                           aiProcess_FindDegenerates  |
+                                           aiProcess_FindInvalidData  |
+                                           aiProcess_CalcTangentSpace | // If there are no tangents, generate them
+                                           aiProcess_GenNormals | // If there are no normals, generate them
+                                           aiProcess_GenUVCoords  | // If there are no UVs auto generate some replacement
+                                           aiProcess_SortByPType  | // splits meshes with multiple primitive types into multiple meshes. This way we don't have to check, face is a line or a point
+                                           aiProcess_Triangulate // Triangulare quads into triangles
+                                           );
+
+  if(!scene)
+    throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
+
+  assets.materials.resize(scene->mNumMaterials);
+  assets.materials.fill(fallbackMaterial);
+  for(quint32 i=0; i<scene->mNumMaterials; ++i)
+  {
+    aiString name;
+    if(scene->mMaterials[i]->Get(AI_MATKEY_NAME, name) == aiReturn_SUCCESS)
+    {
+      QString n = name.C_Str();
+      if(settings.materialUuids.contains(n) || settings.materialUuids.contains(n.remove("-material")))
+        assets.materials[i] = Uuid<MaterialData>(settings.materialUuids[n]);
+    }
+  }
+
+  // #TODO cameras
+  // #TODO lights
+  // #TODO nodes
+
+
   // #IMPLEMENT
-  Q_UNUSED(meshFile);
-  Q_UNUSED(sourceFile);
+  Q_UNUSED(sceneGraphFile);
 }
 
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
