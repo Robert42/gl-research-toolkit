@@ -265,7 +265,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 {
   // #FIXME: register the fallback
   const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
-  const Uuid<CameraParameter> fallbackCamera("{ca07ea04-9396-4495-8c5f-25ecf4ca1e2d}");
 
   SceneGraphImportAssets assets;
 
@@ -300,12 +299,13 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   }
 
   assets.cameras.resize(scene->mNumCameras);
-  assets.cameras.fill(fallbackCamera);
   for(quint32 i=0; i<scene->mNumCameras; ++i)
   {
     QString n = scene->mCameras[i]->mName.C_Str();
     if(settings.cameraUuids.contains(n) || settings.cameraUuids.contains(n.remove("-camera")))
       assets.cameras[i] = settings.cameraUuids[n];
+    else
+      assets.cameras[i] = Uuid<CameraParameter>(QUuid::createUuid());
   }
 
   // #TODO cameras
