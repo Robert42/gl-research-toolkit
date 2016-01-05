@@ -10,7 +10,6 @@
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>
-#include <angelscript-integration/angelscript-integration.h>
 
 #include <QDebug>
 #include <QString>

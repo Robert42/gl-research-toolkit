@@ -18,8 +18,9 @@ enum class State
 
 class ResourceIndex;
 class ResourceLoader;
-class MaterialData;
-class StaticMeshData;
+class MaterialData; // #TODO rename to Material
+class StaticMeshData; // #TODO rename to StaticMesh
+class LightData; // #TODO rename to Light
 
 
 } // namespace resources
