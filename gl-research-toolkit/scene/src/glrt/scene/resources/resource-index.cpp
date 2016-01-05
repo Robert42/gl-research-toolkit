@@ -13,10 +13,12 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
                                const std::string& sourceFilename,
+                               const Uuid<ResourceGroup>* uuid,
                                SceneGraphImportSettings* settings)
 {
   convertSceneGraph(QString::fromStdString(sceneGraphFilename),
                     QString::fromStdString(sourceFilename),
+                    *uuid,
                     *settings);
 }
 
@@ -39,7 +41,7 @@ void ResourceIndex::registerAngelScriptAPI()
   SceneGraphImportSettings::registerType();
 
   r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterGlobalFunction("void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings)", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterGlobalFunction("void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const Uuid<ResourceGroup> &in uuid, const SceneGraphImportSettings@ settings)", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

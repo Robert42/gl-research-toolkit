@@ -56,6 +56,7 @@ void convertStaticMesh(const std::string& meshFile,
                        const std::string& sourceFile);
 void convertSceneGraph(const QString& sceneGraphFilename,
                        const QString& sourceFilename,
+                       const Uuid<ResourceGroup>& uuid,
                        const SceneGraphImportSettings& settings);
 
 } // namespace resources
