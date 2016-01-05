@@ -10,7 +10,7 @@ template<class _identifier>
 class Uuid final
 {
 public:
-  explicit Uuid(const QUuid& uuid);
+  explicit Uuid(const QUuid& uuid=QUuid());
 
   template<typename T>
   Uuid(const Uuid<T>& uuid) : _uuid(uuid) {static_assert(std::is_base_of<_identifier, T>::value, "T must inherit from :identifier");}
