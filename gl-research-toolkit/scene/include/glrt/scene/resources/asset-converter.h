@@ -41,10 +41,15 @@ struct SceneGraphImportSettings : public AngelScriptIntegration::RefCountedObjec
   AngelScript::CScriptDictionary* get_nodeUuids();
   AngelScript::CScriptDictionary* get_cameraUuids();
 
+  bool shouldImportMesh(const QString& name) const;
+  bool shouldImportCamera(const QString& name) const;
+  bool shouldImportNode(const QString& name) const;
+
   static void registerType();
 
 private:
   static SceneGraphImportSettings* create();
+  static bool shouldImport(const QString& name, const QSet<QString>& patternsToImport);
 };
 
 void convertStaticMesh(const std::string& meshFile,

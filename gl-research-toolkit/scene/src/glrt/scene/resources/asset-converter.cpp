@@ -5,6 +5,7 @@
 
 #include <QTemporaryDir>
 #include <QProcess>
+#include <QRegularExpression>
 #include <QDateTime>
 
 #include <assimp/Importer.hpp>
@@ -258,6 +259,9 @@ struct SceneGraphImportAssets
 {
   QVector<Uuid<MaterialData>> materials;
   QVector<Uuid<CameraParameter>> cameras;
+  QVector<Uuid<LightData>> lights;
+  QVector<Uuid<StaticMeshData>> meshes;
+  QHash<aiNode*, Uuid<Entity>> nodes;
   QHash<QUuid, QString> labels;
   bool indexed = true;
 };
@@ -266,6 +270,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 {
   // #FIXME: register the fallback
   const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
+  const Uuid<LightData> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
 
   SceneGraphImportAssets assets;
 
@@ -285,6 +290,12 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
   if(!scene)
     throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
+
+  QUuid sceneUuid("{f50b3c86-e1b1-4a86-9314-03f458f0b9dc}"); // #TODO this uuid could be passed
+
+  QVector<aiNode*> allNodesToImport;
+  QSet<aiCamera*> allCamerasToImport;
+  QSet<aiMesh*> allMeshesToImport;
 
   assets.materials.resize(scene->mNumMaterials);
   assets.materials.fill(fallbackMaterial);
@@ -306,12 +317,59 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(settings.cameraUuids.contains(n) || settings.cameraUuids.contains(n.remove("-camera")))
       assets.cameras[i] = settings.cameraUuids[n];
     else
-      assets.cameras[i] = Uuid<CameraParameter>(QUuid::createUuid());
+      assets.cameras[i] = Uuid<CameraParameter>(QUuid::createUuidV5(sceneUuid, n));
     assets.labels[assets.cameras[i]] = n;
+
+    if(settings.shouldImportCamera(n))
+      allCamerasToImport.insert(scene->mCameras[i]);
   }
 
-  // #TODO mesh uuids
-  // #TODO light uuids? => entity uuids!!!  append the lights to certain entities!!
+  // #FIXME: how to handle the same with different materials?
+  assets.meshes.resize(scene->mNumMeshes);
+  for(quint32 i=0; i<scene->mNumMeshes; ++i)
+  {
+    QString n = scene->mMeshes[i]->mName.C_Str();
+    if(settings.meshUuids.contains(n) || settings.meshUuids.contains(n.remove("-mesh")))
+      assets.meshes[i] = settings.meshUuids[n];
+    else
+      assets.meshes[i] = Uuid<StaticMeshData>(QUuid::createUuidV5(sceneUuid, n));
+    assets.labels[assets.meshes[i]] = n;
+
+    if(settings.shouldImportMesh(n))
+      allMeshesToImport.insert(scene->mMeshes[i]);
+  }
+
+  assets.lights.resize(scene->mNumLights);
+  for(quint32 i=0; i<scene->mNumLights; ++i)
+  {
+    QString n = scene->mLights[i]->mName.C_Str();
+    if(settings.lightUuids.contains(n) || settings.lightUuids.contains(n.remove("-light")))
+      assets.lights[i] = settings.lightUuids[n];
+    else
+      assets.lights[i] = fallbackLight;
+    assets.labels[assets.lights[i]] = n;
+  }
+
+  allNodesToImport.reserve(scene->mNumMeshes+scene->mNumLights+scene->mNumCameras+42);
+  QStack<aiNode*> nodes;
+  nodes.push(scene->mRootNode);
+  while(!nodes.isEmpty())
+  {
+    aiNode* node = nodes.pop();
+
+    for(quint32 i=0; i<node->mNumChildren; ++i)
+      nodes.push(node->mChildren[i]);
+
+    QString n = node->mName.C_Str();
+
+    if(settings.nodeUuids.contains(n) || settings.nodeUuids.contains(n.remove("-node")))
+      assets.nodes[node] = settings.nodeUuids[n];
+    else
+      assets.nodes[node] = Uuid<Entity>(QUuid::createUuidV5(sceneUuid, n));
+
+    if(settings.shouldImportNode(n))
+      allNodesToImport.append(node);
+  }
 
   // #TODO cameras
   // #TODO lights
@@ -527,6 +585,34 @@ AngelScript::CScriptDictionary* SceneGraphImportSettings::get_cameraUuids()
 {
   int cameraUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Camera>");
   return AngelScriptIntegration::scriptDictionaryFromHash(this->cameraUuids, cameraUuidTypeId, angelScriptEngine);
+}
+
+bool SceneGraphImportSettings::shouldImportMesh(const QString& name) const
+{
+  return shouldImport(name, meshesToImport) || shouldImport(name+"-mesh", meshesToImport);
+}
+
+bool SceneGraphImportSettings::shouldImportCamera(const QString& name) const
+{
+  return shouldImport(name, meshesToImport) || shouldImport(name+"-camera", meshesToImport);
+}
+
+bool SceneGraphImportSettings::shouldImportNode(const QString& name) const
+{
+  return shouldImport(name, meshesToImport) || shouldImport(name+"-node", meshesToImport);
+}
+
+bool SceneGraphImportSettings::shouldImport(const QString& name, const QSet<QString>& patternsToImport)
+{
+  for(const QString& pattern : patternsToImport)
+  {
+    QRegularExpression regex(pattern);
+
+    if(regex.match(name).hasMatch())
+      return true;
+  }
+
+  return false;
 }
 
 void SceneGraphImportSettings::registerType()
