@@ -336,8 +336,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
     QString n = scene->mMeshes[i]->mName.C_Str();
-    //if(n.isEmpty()) #FIXME!!!!!!!!  n is not allowed to be empty!
-    //  throw GLRT_EXCEPTION("meshes must have a name");
+    if(n.isEmpty())
+      throw GLRT_EXCEPTION("meshes must have a name");
 
     if(settings.meshUuids.contains(n))
       assets.meshes[i] = settings.meshUuids[n];
