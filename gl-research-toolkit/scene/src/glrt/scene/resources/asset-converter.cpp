@@ -387,6 +387,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   outputStream << "  Node@ node;\n";
   outputStream << "  Uuid<Node> nodeUuid;\n";
   outputStream << "  Uuid<Camera> cameraUuid;\n";
+  outputStream << "  Uuid<Light> lightUuid;\n";
 
   for(aiNode* assimp_node : allNodesToImport)
   {
@@ -424,7 +425,12 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       }
       if(isUsingLight)
       {
-      // #IMPLEMENT lights
+        Uuid<LightData> lightUuid = assets.lightUuids[n];
+        outputStream << "  lightUuid = Uuid<Light>(\"" << QUuid(lightUuid).toString() << "\");\n";
+        if(assets.labels.contains(lightUuid))
+          outputStream << "  group.labels[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
+        outputStream << "  group.add(lightUuid);\n";
+        outputStream << "  LightComponent(node: node, uuid: lightUuid);\n";
       }
     }
   }
