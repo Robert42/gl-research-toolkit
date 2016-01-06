@@ -1,7 +1,5 @@
 include(files.cmake)
 
-find_package(ASSIMP REQUIRED)
-
 if(NOT GLRT_ASSET_DIR)
 message(FATAL_ERROR "GLRT_ASSET_DIR must be set")
 endif()
@@ -32,7 +30,6 @@ target_include_directories(
   PUBLIC
   include
   ${GLM_INCLUDE_DIR}
-  ${ASSIMP_INCLUDE_DIR}
 )
 
 target_compile_definitions(
@@ -57,7 +54,7 @@ target_compile_options(glrt-core
 target_link_libraries(glrt-core
   PUBLIC
   ${SDL2_LIBRARIES}
-  ${ASSIMP_LIBRARY}
+  assimp
   Qt5::Core
   AntTweakBar
   angelscript-interaction

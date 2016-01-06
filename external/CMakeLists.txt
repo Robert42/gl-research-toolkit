@@ -16,6 +16,9 @@ add_subdirectory(glhelper)
 target_include_directories(glhelper PUBLIC ${GLM_INCLUDE_DIR})
 target_sources(glhelper PUBLIC ${GLHELPER_CONFIG_DIR}/glhelperconfig.hpp)
 
+######## Assimp #############################################################
+add_subdirectory(assimp EXCLUDE_FROM_ALL)
+
 ######## AntTweakBar ###########################################################
 set(ATB_OPENGL_HEADER "GL/glew.h")
 add_subdirectory(AntTweakBar EXCLUDE_FROM_ALL)
