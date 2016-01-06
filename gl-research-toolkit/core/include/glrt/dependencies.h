@@ -26,6 +26,7 @@
 #include <functional>
 #include <thread>
 #include <atomic>
+#include <cstring>
 
 #include <SDL2/SDL.h>
 

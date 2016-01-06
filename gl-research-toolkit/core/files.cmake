@@ -4,6 +4,8 @@ set(SOURCE_FILES
   include/glrt/toolkit/escape-string.h
   include/glrt/toolkit/geometry.h
   include/glrt/toolkit/json.h
+  include/glrt/toolkit/podarray.h
+  include/glrt/toolkit/podarray.inl
   include/glrt/toolkit/profiler.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl

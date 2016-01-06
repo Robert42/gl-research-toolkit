@@ -2,6 +2,7 @@
 #define GLRT_SCENE_RESOURCES_RESOURCEINDEX_H
 
 #include <glrt/toolkit/uuid.h>
+#include <glrt/toolkit/podarray.h>
 #include <glrt/scene/declarations.h>
 
 namespace glrt {
