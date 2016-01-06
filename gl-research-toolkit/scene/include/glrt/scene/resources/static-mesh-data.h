@@ -15,6 +15,8 @@ struct StaticMeshData
     glm::vec3 normal;
     glm::vec3 tangent;
     glm::vec2 uv;
+
+    bool operator==(const Vertex& other) const;
   };
   typedef quint16 index_type;
 
@@ -22,6 +24,8 @@ struct StaticMeshData
   QVector<Vertex> vertices;
 
   bool isIndexed() const;
+  bool operator==(const StaticMeshData& other) const;
+  bool operator!=(const StaticMeshData& other) const;
 
   static StaticMeshData loadFromFile(const QString& filepath);
 };

@@ -31,6 +31,27 @@ StaticMeshData StaticMeshData::loadFromFile(const QString& filepath)
   return loader.data;
 }
 
+bool StaticMeshData::operator==(const StaticMeshData& other) const
+{
+  if(this->indices.length()!=other.indices.length() || this->vertices.length()!=other.vertices.length())
+    return false;
+
+  return this->indices==other.indices && this->vertices==other.vertices;
+}
+
+bool StaticMeshData::Vertex::operator==(const Vertex& other) const
+{
+  return position==other.position
+      && normal==other.normal
+      && tangent==other.normal
+      && uv==other.uv;
+}
+
+bool StaticMeshData::operator!=(const StaticMeshData& other) const
+{
+  return !(*this == other);
+}
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt

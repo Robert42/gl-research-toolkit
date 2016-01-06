@@ -259,14 +259,21 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 struct SceneGraphImportAssets
 {
   QVector<Uuid<MaterialData>> materials;
+
   QHash<QString, Uuid<CameraParameter>> cameraUuids;
   QHash<QString, CameraParameter> cameras;
-  QHash<QString, Uuid<LightData>> lightUuids;
+
+  QVector<StaticMeshData> meshData;
+  QHash<QString, QSet<quint32>> meshInstances;
   QVector<Uuid<StaticMeshData>> meshes;
+  bool indexed = true;
+
+  QHash<QString, Uuid<LightData>> lightUuids;
+
   QHash<QString, Uuid<Entity>> nodeUuids;
   QHash<QString, aiNode*> nodes;
+
   QHash<QUuid, QString> labels;
-  bool indexed = true;
 };
 
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceGroup>& resourceGroupUuid, const SceneGraphImportSettings &settings)
@@ -336,18 +343,42 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.labels[cameraUuid] = n;
   }
 
-  // #FIXME: how to handle the same with different materials?
   assets.meshes.resize(scene->mNumMeshes);
+  assets.meshData.resize(scene->mNumMeshes);
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {
     QString n = scene->mMeshes[i]->mName.C_Str();
     if(n.isEmpty())
       throw GLRT_EXCEPTION("meshes must have a name");
 
-    Uuid<StaticMeshData> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("static-mesh[%0]").arg(i)), n));
+    StaticMeshData data = loadMeshFromAssimp(scene->mMeshes+i, 1, glm::mat3(1), QString(" while converting %0 to %1 (occured on mesh %2 (assimp index %3))").arg(sceneGraphFile.filePath()).arg(sceneGraphFile.fileName()).arg(n).arg(i), assets.indexed);;;
+
+    // Is the same instance already used (with a different material?)
+    quint32 useIndex = i;
+    for(quint32 j : assets.meshInstances[n])
+    {
+      if(assets.meshData[j] == data)
+      {
+        useIndex = j;
+        data = assets.meshData[j];
+      }
+    }
+
+    assets.meshData[i] = data;
+    assets.meshInstances[n].insert(useIndex);
+
+    Uuid<StaticMeshData> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("static-mesh[%0]").arg(useIndex)), n));
 
     if(settings.meshUuids.contains(n))
-      assets.meshes[i] = settings.meshUuids[n];
+    {
+      if(assets.meshInstances.size() > 1)
+        throw GLRT_EXCEPTION(QString("Can't assign a used defined meshUuid (%0) to mesh, where the same name (%1) is used for multiple mesh instances!").arg(QUuid(settings.meshUuids[n]).toString()).arg(n));
+      meshUuid = settings.meshUuids[n];
+    }
+
+    // Is this the second instance of the mesh just with a different material? => use the same uuid!!
+    if(useIndex < i)
+      meshUuid = assets.meshes[i];
 
     assets.meshes[i] = meshUuid;
 
