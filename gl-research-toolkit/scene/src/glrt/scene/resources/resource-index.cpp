@@ -14,12 +14,12 @@ using AngelScriptIntegration::AngelScriptCheck;
 void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
                                const std::string& sourceFilename,
                                const Uuid<ResourceGroup>* uuid,
-                               SceneGraphImportSettings* settings)
+                               SceneGraphImportSettings::AngelScriptInterface* settings)
 {
   convertSceneGraph(QString::fromStdString(sceneGraphFilename),
                     QString::fromStdString(sourceFilename),
                     *uuid,
-                    *settings);
+                    settings);
 }
 
 // --------------
