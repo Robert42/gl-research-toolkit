@@ -298,7 +298,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   QSet<aiMesh*> allMeshesToImport;
 
   assets.materials.resize(scene->mNumMaterials);
-  assets.materials.fill(fallbackMaterial);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
   {
     aiString name;
@@ -308,8 +307,12 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       n.remove(QRegularExpression("-material$"));
       if(n.isEmpty())
         throw GLRT_EXCEPTION("materials must have a name");
+
+      Uuid<MaterialData> materialUuid = fallbackMaterial;
+
       if(settings.materialUuids.contains(n))
-        assets.materials[i] = settings.materialUuids[n];
+        materialUuid = settings.materialUuids[n];
+      assets.materials[i] = materialUuid;
     }
   }
 
@@ -324,11 +327,13 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     assets.cameras[n] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
+    Uuid<CameraParameter> cameraUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("camera[%0]").arg(i)), n));
+
     if(settings.cameraUuids.contains(n))
-      assets.cameraUuids[n] = settings.cameraUuids[n];
-    else
-      assets.cameraUuids[n] = Uuid<CameraParameter>(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("camera")), n));
-    assets.labels[assets.cameraUuids[n]] = n;
+      cameraUuid = settings.cameraUuids[n];
+
+    assets.cameraUuids[n] = cameraUuid;
+    assets.labels[cameraUuid] = n;
   }
 
   // #FIXME: how to handle the same with different materials?
@@ -339,15 +344,17 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(n.isEmpty())
       throw GLRT_EXCEPTION("meshes must have a name");
 
+    Uuid<StaticMeshData> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("static-mesh[%0]").arg(i)), n));
+
     if(settings.meshUuids.contains(n))
       assets.meshes[i] = settings.meshUuids[n];
-    else
-      assets.meshes[i] = Uuid<StaticMeshData>(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("static-mesh")), n));
+
+    assets.meshes[i] = meshUuid;
 
     if(settings.shouldImportMesh(n))
       allMeshesToImport.insert(scene->mMeshes[i]);
 
-    assets.labels[assets.meshes[i]] = n;
+    assets.labels[meshUuid] = n;
   }
 
   for(quint32 i=0; i<scene->mNumLights; ++i)
@@ -356,12 +363,14 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(n.isEmpty())
       throw GLRT_EXCEPTION("lights must have a name");
 
-    if(settings.lightUuids.contains(n))
-      assets.lightUuids[n] = settings.lightUuids[n];
-    else
-      assets.lightUuids[n] = fallbackLight;
+    Uuid<LightData> lightUuid = fallbackLight;
 
-    assets.labels[assets.lightUuids[n]] = n;
+    if(settings.lightUuids.contains(n))
+      lightUuid = settings.lightUuids[n];
+
+    assets.lightUuids[n] = lightUuid;
+
+    assets.labels[lightUuid] = n;
   }
 
   allNodesToImport.reserve(scene->mNumMeshes+scene->mNumLights+scene->mNumCameras+42);
@@ -381,6 +390,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     else
       assets.nodeUuids[n] = Uuid<Entity>(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("node")), n));
 
+    assets.labels[assets.nodeUuids[n]] = n;
     assets.nodes[n] = node;
     if(settings.shouldImportNode(n))
       allNodesToImport.append(node);
@@ -436,14 +446,14 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(assets.labels.contains(nodeUuid))
         outputStream << "  group.labels[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
       outputStream << "  group.add(nodeUuid);\n";
-      outputStream << "  node = Node(scene: scene, uuid: nodeUuid);\n";
+      outputStream << "  node = Node::create(scene: scene, uuid: nodeUuid);\n";
       // #IMPLEMENT the transformation of the node by adding a root component
 
       if(isUsingMesh)
       {
-        for(int i=0; i<assimp_node->mNumMeshes; ++i)
+        for(size_t i=0; i<assimp_node->mNumMeshes; ++i)
         {
-          Uuid<StaticMeshData> meshUuid = assets.meshes[i];
+          Uuid<StaticMeshData> meshUuid = assets.meshes[assimp_node->mMeshes[i]];
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
           if(assets.labels.contains(meshUuid))
             outputStream << "  group.labels[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
