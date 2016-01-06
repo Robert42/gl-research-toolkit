@@ -282,6 +282,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
   const Uuid<LightData> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
 
+  bool fallbackMaterialIsUsed = false;
+  bool fallbackLightIsUsed = false;
+
   SceneGraphImportAssets assets;
 
   Assimp::Importer importer;
@@ -315,10 +318,17 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(n.isEmpty())
         throw GLRT_EXCEPTION("materials must have a name");
 
-      Uuid<MaterialData> materialUuid = fallbackMaterial;
+      Uuid<MaterialData> materialUuid;
 
       if(settings.materialUuids.contains(n))
+      {
         materialUuid = settings.materialUuids[n];
+      }else
+      {
+        materialUuid = fallbackMaterial;
+        fallbackMaterialIsUsed = true;
+        qWarning() << "NOT DEFINED MATERIAL!\n    Error converting " << sceneGraphFile.filePath() << " to " << sceneGraphFile.filePath() << ":\n    The material <<n<< is not provided, using the fallback material instead!!";
+      }
       assets.materials[i] = materialUuid;
     }
   }
@@ -394,10 +404,17 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(n.isEmpty())
       throw GLRT_EXCEPTION("lights must have a name");
 
-    Uuid<LightData> lightUuid = fallbackLight;
+    Uuid<LightData> lightUuid;
+
 
     if(settings.lightUuids.contains(n))
       lightUuid = settings.lightUuids[n];
+    else
+    {
+      lightUuid = fallbackLight;
+      qWarning() << "NOT DEFINED LIGHT!\n    Error converting " << sceneGraphFile.filePath() << " to " << sceneGraphFile.filePath() << ":\n    The light <<n<< is not provided, using the fallback light instead!!";
+      fallbackLightIsUsed = true;
+    }
 
     assets.lightUuids[n] = lightUuid;
 
@@ -453,6 +470,11 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   outputStream << "  Uuid<Camera> cameraUuid;\n";
   outputStream << "  Uuid<Light> lightUuid;\n";
   outputStream << "  Uuid<StaticMesh> meshUuid;\n";
+  outputStream << "  Uuid<Material> materialUuid;\n";
+  if(fallbackLightIsUsed)
+    outputStream << "  Uuid<Light> fallbackLight = \""<<QUuid(fallbackLight).toString()<<"\";\n";
+  if(fallbackMaterialIsUsed)
+    outputStream << "  Uuid<Material> fallbackMaterial = \""<<QUuid(fallbackMaterial).toString()<<"\";\n";
 
   if(!allMeshesToImport.isEmpty())
   {
@@ -485,11 +507,16 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         for(size_t i=0; i<assimp_node->mNumMeshes; ++i)
         {
           Uuid<StaticMeshData> meshUuid = assets.meshes[assimp_node->mMeshes[i]];
+          Uuid<MaterialData> materialUuid = assets.materials[scene->mMeshes[assimp_node->mMeshes[i]]->mMaterialIndex];
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
+          if(materialUuid == fallbackMaterial)
+            outputStream << "  materialUuid = fallbackMaterial;\n";
+          else
+            outputStream << "  materialUuid = Uuid<Material>(\"" << QUuid(materialUuid).toString() << "\");\n";
           if(assets.labels.contains(meshUuid))
             outputStream << "  group.labels[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
           outputStream << "  group.add(meshUuid);\n";
-          outputStream << "  StaticMeshComponent::create(node: node, uuid: meshUuid);\n";
+          outputStream << "  StaticMeshComponent::create(node: node, meshUuid: meshUuid, materialUuid: materialUuid);\n";
         }
       }
       if(isUsingCamera)
@@ -505,7 +532,10 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(isUsingLight)
       {
         Uuid<LightData> lightUuid = assets.lightUuids[n];
-        outputStream << "  lightUuid = Uuid<Light>(\"" << QUuid(lightUuid).toString() << "\");\n";
+        if(lightUuid == fallbackLight)
+          outputStream << "  lightUuid = fallbackLight;\n";
+        else
+          outputStream << "  lightUuid = Uuid<Light>(\"" << QUuid(lightUuid).toString() << "\");\n";
         if(assets.labels.contains(lightUuid))
           outputStream << "  group.labels[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
         outputStream << "  group.add(lightUuid);\n";
