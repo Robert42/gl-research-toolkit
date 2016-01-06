@@ -2,6 +2,7 @@
 #include <glrt/scene/resources/static-mesh-data.h>
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
+#include <glrt/toolkit/escape-string.h>
 
 #include <QTemporaryDir>
 #include <QProcess>
@@ -24,7 +25,7 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
 }
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
-void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile, const Uuid<ResourceGroup>& uuid, const SceneGraphImportSettings& settings);
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile, const Uuid<ResourceGroup>& resourceGroupUuid, const SceneGraphImportSettings& settings);
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
 QString python_exportSceneAsObjMesh(const QString& objFile);
@@ -258,15 +259,17 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 struct SceneGraphImportAssets
 {
   QVector<Uuid<MaterialData>> materials;
-  QVector<Uuid<CameraParameter>> cameras;
-  QVector<Uuid<LightData>> lights;
+  QHash<QString, Uuid<CameraParameter>> cameraUuids;
+  QHash<QString, CameraParameter> cameras;
+  QHash<QString, Uuid<LightData>> lightUuids;
   QVector<Uuid<StaticMeshData>> meshes;
-  QHash<aiNode*, Uuid<Entity>> nodes;
+  QHash<QString, Uuid<Entity>> nodeUuids;
+  QHash<QString, aiNode*> nodes;
   QHash<QUuid, QString> labels;
   bool indexed = true;
 };
 
-void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceGroup>& uuid, const SceneGraphImportSettings &settings)
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceGroup>& resourceGroupUuid, const SceneGraphImportSettings &settings)
 {
   // #FIXME: register the fallback
   const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
@@ -292,7 +295,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
 
   QVector<aiNode*> allNodesToImport;
-  QSet<aiCamera*> allCamerasToImport;
   QSet<aiMesh*> allMeshesToImport;
 
   assets.materials.resize(scene->mNumMaterials);
@@ -308,18 +310,21 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     }
   }
 
-  assets.cameras.resize(scene->mNumCameras);
   for(quint32 i=0; i<scene->mNumCameras; ++i)
   {
     QString n = scene->mCameras[i]->mName.C_Str();
-    if(settings.cameraUuids.contains(n) || settings.cameraUuids.contains(n.remove("-camera")))
-      assets.cameras[i] = settings.cameraUuids[n];
-    else
-      assets.cameras[i] = Uuid<CameraParameter>(QUuid::createUuidV5(uuid, n));
-    assets.labels[assets.cameras[i]] = n;
 
-    if(settings.shouldImportCamera(n))
-      allCamerasToImport.insert(scene->mCameras[i]);
+    if(!settings.shouldImportCamera(n))
+      continue;
+
+    assets.cameras[n] = CameraParameter::fromAssimp(*scene->mCameras[i]);
+
+    if(settings.cameraUuids.contains(n))
+      assets.cameraUuids[n] = settings.cameraUuids[n];
+    else
+      assets.cameraUuids[n] = Uuid<CameraParameter>(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("camera")), n));
+    assets.labels[assets.cameraUuids[n]] = n;
+
   }
 
   // #FIXME: how to handle the same with different materials?
@@ -330,22 +335,21 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(settings.meshUuids.contains(n) || settings.meshUuids.contains(n.remove("-mesh")))
       assets.meshes[i] = settings.meshUuids[n];
     else
-      assets.meshes[i] = Uuid<StaticMeshData>(QUuid::createUuidV5(uuid, n));
+      assets.meshes[i] = Uuid<StaticMeshData>(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("static-mesh")), n));
     assets.labels[assets.meshes[i]] = n;
 
     if(settings.shouldImportMesh(n))
       allMeshesToImport.insert(scene->mMeshes[i]);
   }
 
-  assets.lights.resize(scene->mNumLights);
   for(quint32 i=0; i<scene->mNumLights; ++i)
   {
     QString n = scene->mLights[i]->mName.C_Str();
-    if(settings.lightUuids.contains(n) || settings.lightUuids.contains(n.remove("-light")))
-      assets.lights[i] = settings.lightUuids[n];
+    if(settings.lightUuids.contains(n))
+      assets.lightUuids[n] = settings.lightUuids[n];
     else
-      assets.lights[i] = fallbackLight;
-    assets.labels[assets.lights[i]] = n;
+      assets.lightUuids[n] = fallbackLight;
+    assets.labels[assets.lightUuids[n]] = n;
   }
 
   allNodesToImport.reserve(scene->mNumMeshes+scene->mNumLights+scene->mNumCameras+42);
@@ -360,23 +364,71 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     QString n = node->mName.C_Str();
 
-    if(settings.nodeUuids.contains(n) || settings.nodeUuids.contains(n.remove("-node")))
-      assets.nodes[node] = settings.nodeUuids[n];
+    if(settings.nodeUuids.contains(n))
+      assets.nodeUuids[n] = settings.nodeUuids[n];
     else
-      assets.nodes[node] = Uuid<Entity>(QUuid::createUuidV5(uuid, n));
+      assets.nodeUuids[n] = Uuid<Entity>(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("node")), n));
 
+    assets.nodes[n] = node;
     if(settings.shouldImportNode(n))
       allNodesToImport.append(node);
   }
 
-  // #TODO cameras
-  // #TODO lights
-  // #TODO nodes
-  // #TODO meshes
 
+  QFile file(sceneGraphFile.absoluteFilePath());
 
-  // #IMPLEMENT
-  Q_UNUSED(sceneGraphFile);
+  if(!file.open(QFile::WriteOnly))
+    throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
+
+  QTextStream outputStream(&file);
+
+  outputStream << "void main(Scene@ scene)\n{\n";
+  outputStream << "  ResourceGroup group(Uuid<ResourceGroup>(\"" << QUuid(resourceGroupUuid).toString() << "\"));\n";
+  outputStream << "  Node@ node;\n";
+  outputStream << "  Uuid<Node> nodeUuid;\n";
+  outputStream << "  Uuid<Camera> cameraUuid;\n";
+
+  for(aiNode* assimp_node : allNodesToImport)
+  {
+    QString n = assimp_node->mName.C_Str();
+
+    Uuid<Entity> nodeUuid = assets.nodeUuids[n];
+
+    bool isUsingMesh = assimp_node->mNumMeshes > 0;
+    bool isUsingCamera = assets.cameras.contains(n);
+    bool isUsingLight = assets.lightUuids.contains(n);
+
+    if(isUsingMesh || isUsingCamera || isUsingLight)
+    {
+      outputStream << "\n";
+      outputStream << "  nodeUuid = Uuid<Node>(\"" << QUuid(nodeUuid).toString() << "\");\n";
+      if(assets.labels.contains(nodeUuid))
+        outputStream << "  group.labels[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
+      outputStream << "  group.add(nodeUuid);\n";
+      outputStream << "  node = Node(scene: scene, uuid: nodeUuid);\n";
+      // #IMPLEMENT the transformation of the node by adding a root component
+
+      if(isUsingMesh)
+      {
+      // #IMPLEMENT meshes
+      }
+      if(isUsingCamera)
+      {
+        const CameraParameter& camera = assets.cameras[n];
+        Uuid<CameraParameter> cameraUuid = assets.cameraUuids[n];
+        outputStream << "  cameraUuid = Uuid<Node>(\"" << QUuid(cameraUuid).toString() << "\");\n";
+        if(assets.labels.contains(cameraUuid))
+          outputStream << "  group.labels[cameraUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
+        outputStream << "  group.add(cameraUuid);\n";
+        outputStream << "  CameraComponent(node: node, uuid: cameraUuid, aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
+      }
+      if(isUsingLight)
+      {
+      // #IMPLEMENT lights
+      }
+    }
+  }
+  outputStream << "}";
 }
 
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)

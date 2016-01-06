@@ -21,12 +21,13 @@ class ResourceLoader;
 class MaterialData; // #TODO rename to Material
 class StaticMeshData; // #TODO rename to StaticMesh
 class LightData; // #TODO rename to Light
-class CameraParameter; // #TODO rename to Camera
 class Entity; // #TODO rename to Node?
 class ResourceGroup; // #TODO keep this? It's currently only used for the uuid of a scene graph.
 
-
 } // namespace resources
+
+class CameraParameter; // #TODO rename to Camera
+
 } // namespace scene
 } // namespace glrt
 
