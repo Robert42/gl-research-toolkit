@@ -327,7 +327,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       {
         materialUuid = fallbackMaterial;
         fallbackMaterialIsUsed = true;
-        qWarning() << "NOT DEFINED MATERIAL!\n    Error converting " << sceneGraphFile.filePath() << " to " << sceneGraphFile.filePath() << ":\n    The material <<n<< is not provided, using the fallback material instead!!";
+        qWarning() << "NOT DEFINED MATERIAL!\n    Error converting" << sceneGraphFile.filePath() << "to" << sceneGraphFile.filePath() << ":\n    The material"<<n<<"is not provided, using the fallback material instead!!";
       }
       assets.materials[i] = materialUuid;
     }
@@ -412,7 +412,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     else
     {
       lightUuid = fallbackLight;
-      qWarning() << "NOT DEFINED LIGHT!\n    Error converting " << sceneGraphFile.filePath() << " to " << sceneGraphFile.filePath() << ":\n    The light <<n<< is not provided, using the fallback light instead!!";
+      qWarning() << "NOT DEFINED LIGHT!\n    Error converting" << sceneGraphFile.filePath() << "to" << sceneGraphFile.filePath() << ":\n    The light"<<n<<"is not provided, using the fallback light instead!!";
       fallbackLightIsUsed = true;
     }
 
@@ -457,7 +457,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   if(!allMeshesToImport.isEmpty())
   {
     // #IMPLEMENT meshes
-    outputStream << "#include \"./" << escape_angelscript_string(meshesFile.fileName()) << "\"\n";
+    outputStream << "#include \"" << escape_angelscript_string(meshesFile.fileName()) << "\"\n";
     outputStream << "\n";
   }
 
