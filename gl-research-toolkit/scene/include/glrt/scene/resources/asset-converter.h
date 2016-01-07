@@ -19,7 +19,7 @@ struct SceneGraphImportSettings final
   QSet<QString> nodesToImport;
 
   QHash<QString, Uuid<StaticMeshData>> meshUuids;
-  QHash<QString, Uuid<MaterialData>> materialUuids;
+  QHash<QString, Uuid<Material>> materialUuids;
   QHash<QString, Uuid<LightSource>> lightUuids;
   QHash<QString, Uuid<Entity>> nodeUuids;
   QHash<QString, Uuid<CameraParameter>> cameraUuids;

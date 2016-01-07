@@ -42,6 +42,7 @@ public:
 
   void registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file);
   void registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light);
+  void registerMaterial(const Uuid<Material>& uuid, const Material& material);
 
 private:
   friend class ResourceLoader;
@@ -51,7 +52,8 @@ private:
   QSet<QUuid> loadedRessources;
 
   QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
-  QVector<LightSource> lightSources;
+  QHash<Uuid<LightSource>, LightSource> lightSources;
+  QHash<Uuid<Material>, Material> materials;
 
   void _loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow);
   void waitForAssetToBeLoaded(const QUuid& uuid);

@@ -17,14 +17,14 @@ class SceneLoader final
 public:
   Scene resultingScene;
   const aiScene* scene;
-  QHash<QString, Uuid<MaterialData>> materials;
+  QHash<QString, Uuid<Material>> materials;
   QHash<QString, Uuid<StaticMeshData>> meshes;
-  QHash<int, Uuid<MaterialData>> materialsForIndex;
+  QHash<int, Uuid<Material>> materialsForIndex;
   QHash<int, Uuid<StaticMeshData>> meshesForIndex;
   QMap<QString, CameraParameter> cameras;
   QMap<QString, SphereAreaLightComponent::Data> sphereAreaLights;
   QMap<QString, RectAreaLightComponent::Data> rectAreaLights;
-  Uuid<MaterialData> fallbackMaterial;
+  Uuid<Material> fallbackMaterial;
   glm::mat4 meshTransform;
 
   SceneLoader(ResourceLoader* resourceLoader);

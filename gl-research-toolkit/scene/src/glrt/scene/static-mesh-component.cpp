@@ -9,7 +9,7 @@ StaticMeshComponent::StaticMeshComponent(Entity& entity,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
                                          const Uuid<resources::StaticMeshData>& staticMesh,
-                                         const Uuid<resources::MaterialData>& material)
+                                         const Uuid<resources::Material>& material)
   : Entity::Component(entity, uuid, isMovable),
     staticMesh(staticMesh),
     material(material)

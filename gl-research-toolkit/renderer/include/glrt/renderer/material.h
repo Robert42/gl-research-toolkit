@@ -3,7 +3,7 @@
 
 #include <glrt/dependencies.h>
 
-#include <glrt/scene/resources/material-data.h>
+#include <glrt/scene/resources/material.h>
 
 #include <glhelper/buffer.hpp>
 
@@ -15,7 +15,7 @@ class MaterialInstance : public QObject
   Q_OBJECT // #FIXME
 public:
   typedef QSharedPointer<MaterialInstance> Ptr;
-  typedef scene::resources::MaterialData::Type Type;
+  typedef scene::resources::Material::Type Type;
 
   const Type type;
   QString name;
@@ -33,7 +33,7 @@ class PlainColorMaterial : public MaterialInstance
 {
   Q_OBJECT // #FIXME
 public:
-  typedef glrt::scene::resources::PlainColorMaterialData UniformData;
+  typedef glrt::scene::resources::Material::PlainColor UniformData;
 
   PlainColorMaterial(const UniformData& data);
 };

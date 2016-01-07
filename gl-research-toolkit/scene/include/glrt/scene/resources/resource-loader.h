@@ -6,7 +6,6 @@
 #include "resource-index.h"
 
 #include "static-mesh-data.h"
-#include "material-data.h"
 
 #include <sdk/add_on/scriptarray/scriptarray.h>
 

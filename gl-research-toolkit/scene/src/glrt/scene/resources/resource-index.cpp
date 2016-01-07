@@ -1,6 +1,7 @@
 #include <glrt/scene/resources/resource-index.h>
 #include <glrt/scene/resources/resource-loader.h>
 #include <glrt/scene/resources/asset-converter.h>
+#include <glrt/scene/resources/material.h>
 #include <glrt/scene/light-component.h>
 #include <QThread>
 
@@ -35,6 +36,7 @@ void ResourceIndex::registerAngelScriptAPI()
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
+  Material::registerAngelScriptTypes();
   LightSource::registerAngelScriptTypes();
 
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
@@ -45,6 +47,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerStaticMesh(const Uuid<StaticMesh> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerStaticMesh), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerLightSource(const Uuid<LightSource> &in uuid, const LightSource &in light)", AngelScript::asMETHOD(ResourceIndex,registerLightSource), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
 
@@ -107,7 +110,14 @@ void ResourceIndex::registerLightSource(const Uuid<LightSource>& uuid, const Lig
 {
   // #TODO validate, that the uuid is not laready used
   loadedRessources.insert(uuid);
-  lightSources.append(light);
+  lightSources[uuid] = light;
+}
+
+void ResourceIndex::registerMaterial(const Uuid<Material>& uuid, const Material& material)
+{
+  // #TODO validate, that the uuid is not laready used
+  loadedRessources.insert(uuid);
+  materials[uuid] = material;
 }
 
 void ResourceIndex::_loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow)

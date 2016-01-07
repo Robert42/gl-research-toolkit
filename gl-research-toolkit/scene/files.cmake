@@ -13,7 +13,6 @@ set(SOURCE_FILES
   include/glrt/scene/resources/asset-converter.h
   include/glrt/scene/resources/declarations.h
   include/glrt/scene/resources/light-source.h
-  include/glrt/scene/resources/material-data.h
   include/glrt/scene/resources/material.h
   include/glrt/scene/resources/resource-index.h
   include/glrt/scene/resources/resource-index.inl

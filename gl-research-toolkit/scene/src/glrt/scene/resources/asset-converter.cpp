@@ -258,7 +258,7 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 
 struct SceneGraphImportAssets
 {
-  QVector<Uuid<MaterialData>> materials;
+  QVector<Uuid<Material>> materials;
 
   QHash<QString, Uuid<CameraParameter>> cameraUuids;
   QHash<QString, CameraParameter> cameras;
@@ -279,7 +279,7 @@ struct SceneGraphImportAssets
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
 {
   // #FIXME: register the fallback
-  const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
+  const Uuid<Material> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
   const Uuid<LightSource> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
 
   bool fallbackMaterialIsUsed = false;
@@ -318,7 +318,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(n.isEmpty())
         throw GLRT_EXCEPTION("materials must have a name");
 
-      Uuid<MaterialData> materialUuid;
+      Uuid<Material> materialUuid;
 
       if(settings.materialUuids.contains(n))
       {
@@ -506,7 +506,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         for(size_t i=0; i<assimp_node->mNumMeshes; ++i)
         {
           Uuid<StaticMeshData> meshUuid = assets.meshes[assimp_node->mMeshes[i]];
-          Uuid<MaterialData> materialUuid = assets.materials[scene->mMeshes[assimp_node->mMeshes[i]]->mMaterialIndex];
+          Uuid<Material> materialUuid = assets.materials[scene->mMeshes[assimp_node->mMeshes[i]]->mMaterialIndex];
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
           if(materialUuid == fallbackMaterial)
             outputStream << "  materialUuid = fallbackMaterial;\n";
@@ -680,7 +680,7 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   as_nodesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
 
   as_meshUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMeshData>>(), meshUuidTypeId, angelScriptEngine);
-  as_materialUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<MaterialData>>(), materialUuidTypeId, angelScriptEngine);
+  as_materialUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Material>>(), materialUuidTypeId, angelScriptEngine);
   as_lightUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<LightSource>>(), lightUuidTypeId, angelScriptEngine);
   as_nodeUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Entity>>(), nodeUuidTypeId, angelScriptEngine);
   as_cameraUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<CameraParameter>>(), cameraUuidTypeId, angelScriptEngine);
@@ -746,7 +746,7 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   nodesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_nodesToImport);
 
   meshUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMeshData>>(interface->as_meshUuids, {uuidTypeId, staticMeshUuidTypeId});
-  materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<MaterialData>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
+  materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Material>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
   lightUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<LightSource>>(interface->as_lightUuids, {uuidTypeId, lightUuidTypeId});
   nodeUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Entity>>(interface->as_nodeUuids, {uuidTypeId, nodeUuidTypeId});
   cameraUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<CameraParameter>>(interface->as_cameraUuids, {uuidTypeId, cameraUuidTypeId});
