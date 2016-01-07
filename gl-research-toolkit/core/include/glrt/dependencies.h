@@ -130,7 +130,7 @@ Q_UNUSED(__splashscreenMessage);
 #define CALL_SDL(x) __CALL_SDL(x,)
 #define CALL_SDL_CRITICAL(x) __CALL_SDL(x,abort();)
 
-#define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << x;
+#define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << (x);
 
 } // namespace glrt
 

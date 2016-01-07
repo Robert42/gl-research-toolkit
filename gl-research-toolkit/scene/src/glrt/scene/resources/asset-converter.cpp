@@ -471,6 +471,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     bool isFirst = true;
     for(uint32_t i : allMeshesToImport)
     {
+      if(!isFirst)
+        meshOutputStream << "\n";
+      meshOutputStream << "  // " << scene->mMeshes[i]->mName.C_Str() << "  (" << i << ")" << "\n";
       writeToScriptLoadingStaticMesh(meshOutputStream, QString("Uuid<StaticMesh>(\"%0\")").arg(QUuid(assets.meshes[i]).toString()), assets.meshData[i], isFirst);
       isFirst = false;
     }
