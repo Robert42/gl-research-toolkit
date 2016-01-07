@@ -3,6 +3,8 @@
 
 #include <glrt/dependencies.h>
 
+#include <glrt/toolkit/assimp-glm-converter.h>
+
 namespace glrt {
 namespace scene {
 
@@ -17,6 +19,7 @@ struct CoordFrame final
                       const glm::quat& orientation = glm::quat::IDENTITY,
                       float scaleFactor = 1.f);
   CoordFrame(const glm::mat4& transformation);
+  CoordFrame(const aiMatrix4x4& transformation);
 
   CoordFrame& operator *=(const CoordFrame& other);
 
@@ -28,6 +31,8 @@ struct CoordFrame final
 
   glm::mat4 toMat4() const;
   CoordFrame inverse() const;
+
+  QString as_angelscript_fast() const;
 
   static void _concatenate(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
                            const glm::vec3& aPosition, const glm::quat& aOrientation, float aScaleFactor,

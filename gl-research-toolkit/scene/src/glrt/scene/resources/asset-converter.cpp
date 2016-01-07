@@ -1,6 +1,7 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/static-mesh-data.h>
 #include <glrt/scene/camera.h>
+#include <glrt/scene/coord-frame.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 #include <glrt/toolkit/escape-string.h>
 
@@ -490,8 +491,10 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     bool isUsingMesh = assimp_node->mNumMeshes > 0;
     bool isUsingCamera = assets.cameras.contains(n);
     bool isUsingLight = assets.lightUuids.contains(n);
+    bool isUsingComponent = isUsingMesh || isUsingCamera || isUsingLight;
+    bool isImportingNode = true;
 
-    if(isUsingMesh || isUsingCamera || isUsingLight)
+    if(isImportingNode)
     {
       outputStream << "\n";
       outputStream << "  nodeUuid = Uuid<Node>(\"" << QUuid(nodeUuid).toString() << "\");\n";
@@ -499,7 +502,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         outputStream << "  group.labels[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
       outputStream << "  group.add(nodeUuid);\n";
       outputStream << "  node = Node::create(scene: scene, uuid: nodeUuid);\n";
-      // #IMPLEMENT the transformation of the node by adding a root component
 
       if(isUsingMesh)
       {
@@ -539,6 +541,16 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           outputStream << "  group.labels[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
         outputStream << "  group.add(lightUuid);\n";
         outputStream << "  LightComponent::create(node: node, uuid: lightUuid);\n";
+      }
+      if(!isUsingComponent)
+      {
+        outputStream << "  Component::create(node: node, uuid: \"" << QUuid::createUuidV5(nodeUuid, QString("missing-root-node-for-transformation")).toString() << "\");\n";
+      }
+
+      if(isUsingComponent)
+      {
+        CoordFrame frame(assimp_node->mTransformation);
+        outputStream << "  node.rootComponent.localTransformation = "<< frame.as_angelscript_fast() <<";\n";
       }
     }
   }

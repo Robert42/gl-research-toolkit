@@ -21,6 +21,11 @@ CoordFrame::CoordFrame(const glm::mat4& transformation)
   _coordinateFromMatrix(&this->position, &this->orientation, &this->scaleFactor, transformation);
 }
 
+CoordFrame::CoordFrame(const aiMatrix4x4& transformation)
+  : CoordFrame(to_glm_mat4(transformation))
+{
+}
+
 CoordFrame& CoordFrame::operator *=(const CoordFrame& other)
 {
   _concatenate(&this->position, &this->orientation, &this->scaleFactor, this->position, this->orientation, this->scaleFactor, other.position, other.orientation, other.scaleFactor);
@@ -72,6 +77,11 @@ CoordFrame CoordFrame::inverse() const
   _inverse(&i.position, &i.orientation, &i.scaleFactor,
            this->position, this->orientation, this->scaleFactor);
   return i;
+}
+
+QString CoordFrame::as_angelscript_fast() const
+{
+  return QString("CoordFrame(vec3(%0, %1, %2), quat(%3, %4, %5, %6), %7)").arg(this->position.x).arg(this->position.y).arg(this->position.z).arg(this->orientation.x).arg(this->orientation.y).arg(this->orientation.z).arg(this->orientation.w).arg(this->scaleFactor);
 }
 
 QDebug operator<<(QDebug debug, const CoordFrame& coordFrame)
