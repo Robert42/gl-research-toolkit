@@ -157,10 +157,13 @@ typedef StaticMeshData::index_type index_type;
 typedef StaticMeshData::Vertex Vertex;
 
 StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
-void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, const StaticMeshData& data)
+void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, const StaticMeshData& data, bool isFirst)
 {
   static_assert(sizeof(index_type)==2, "For uint16 as array type to be correct, index_type must be also a 16bit integer");
-  stream << "  array<uint16> indices";
+  stream << "  ";
+  if(isFirst)
+    stream << "array<uint16> ";
+  stream << "indices";
   if(!data.isIndexed())
     stream << ";\n";
   else
@@ -180,7 +183,10 @@ void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, co
     }
     stream << "\n  };\n";
 
-    stream << "  array<float> vertexData = \n";
+    stream << "  ";
+    if(isFirst)
+      stream << "array<float> ";
+    stream << "vertexData = \n";
     stream << "  {";
     j=0;
     for(const Vertex& v : data.vertices)
@@ -253,7 +259,7 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
   QTextStream outputStream(&file);
 
   outputStream << "void main(StaticMeshLoader@ loader, Uuid<StaticMesh> &in uuid)\n{\n";
-  writeToScriptLoadingStaticMesh(outputStream, "uuid", data);
+  writeToScriptLoadingStaticMesh(outputStream, "uuid", data, true);
   outputStream << "}";
 }
 
@@ -306,7 +312,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
 
   QVector<aiNode*> allNodesToImport;
-  QSet<uint32_t> allMeshesToImport;
+  QVector<uint32_t> allMeshesToImport;
 
   assets.materials.resize(scene->mNumMaterials);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
@@ -394,7 +400,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.meshes[i] = meshUuid;
 
     if(settings.shouldImportMesh(n))
-      allMeshesToImport.insert(i);
+      allMeshesToImport.append(i);
 
     assets.labels[meshUuid] = n;
   }
@@ -462,8 +468,12 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshesFile.absoluteFilePath()));
     QTextStream meshOutputStream(&meshFile);
     meshOutputStream << "void main(StaticMeshLoader@ loader)\n{\n";
+    bool isFirst = true;
     for(uint32_t i : allMeshesToImport)
-      writeToScriptLoadingStaticMesh(meshOutputStream, QString("Uuid<StaticMesh>(\"%0\")").arg(QUuid(assets.meshes[i]).toString()), assets.meshData[i]);
+    {
+      writeToScriptLoadingStaticMesh(meshOutputStream, QString("Uuid<StaticMesh>(\"%0\")").arg(QUuid(assets.meshes[i]).toString()), assets.meshData[i], isFirst);
+      isFirst = false;
+    }
     meshOutputStream << "}";
 
     outputStream << "#include \"" << escape_angelscript_string(meshesFile.fileName()) << "\"\n";
