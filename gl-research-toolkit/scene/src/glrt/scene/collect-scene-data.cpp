@@ -4,14 +4,14 @@ namespace glrt {
 namespace scene {
 
 
-QVector<CameraParameter> collectCameras(Scene* scene)
+QVector<Camera> collectCameras(Scene* scene)
 {
-  return collectData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->cameraParameter;});
+  return collectData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->cameraParameter;});
 }
 
-QHash<QString, CameraParameter> collectNamedCameras(Scene* scene)
+QHash<QString, Camera> collectNamedCameras(Scene* scene)
 {
-  return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->cameraParameter;});
+  return collectNamedData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->cameraParameter;});
 }
 
 

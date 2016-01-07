@@ -1,7 +1,7 @@
 #ifndef GLRT_RENDERER_DEBUGGING_DRAWCAMERAS_H
 #define GLRT_RENDERER_DEBUGGING_DRAWCAMERAS_H
 
-#include <glrt/scene/camera-parameter.h>
+#include <glrt/scene/camera.h>
 #include <glrt/scene/light-component.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
 
@@ -45,7 +45,7 @@ public:
   template<typename UniformType>
   static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData, gl::ShaderObject&& shaderObject);
 
-  static Ptr drawCameras(const QList<scene::CameraParameter>& sceneCameras);
+  static Ptr drawCameras(const QList<scene::Camera>& sceneCameras);
   static Ptr drawSphereAreaLights(const QList<scene::SphereAreaLightComponent::Data>& sphereAreaLights);
   static Ptr drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights);
   static Ptr drawPositions(const QVector<glm::vec3>& positions);

@@ -21,7 +21,7 @@ public:
   QHash<QString, Uuid<StaticMeshData>> meshes;
   QHash<int, Uuid<Material>> materialsForIndex;
   QHash<int, Uuid<StaticMeshData>> meshesForIndex;
-  QMap<QString, CameraParameter> cameras;
+  QMap<QString, Camera> cameras;
   QMap<QString, SphereAreaLightComponent::Data> sphereAreaLights;
   QMap<QString, RectAreaLightComponent::Data> rectAreaLights;
   Uuid<Material> fallbackMaterial;

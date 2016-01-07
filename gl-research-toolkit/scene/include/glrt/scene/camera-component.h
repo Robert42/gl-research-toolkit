@@ -2,7 +2,7 @@
 #define GLRT_SCENE_CAMERACOMPONENT_H
 
 #include "entity.h"
-#include "camera-parameter.h"
+#include "camera.h"
 
 namespace glrt {
 namespace scene {
@@ -10,9 +10,9 @@ namespace scene {
 class CameraComponent final : public Entity::Component
 {
 public:
-  CameraParameter cameraParameter;
+  Camera cameraParameter;
 
-  CameraComponent(Entity& entity, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter, bool isMovable=false);
+  CameraComponent(Entity& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable=false);
   ~CameraComponent();
 };
 

@@ -4,7 +4,7 @@
 
 #include <glrt/gui/toolbar.h>
 
-#include <glrt/scene/camera-parameter.h>
+#include <glrt/scene/camera.h>
 
 
 namespace glrt {
@@ -30,7 +30,7 @@ class ShaderDebugPrinter;
 namespace gui {
 
 
-using glrt::scene::CameraParameter;
+using glrt::scene::Camera;
 using glrt::scene::Scene;
 
 
@@ -210,7 +210,7 @@ public:
 
 private:
   typedef TweakBarEnum<QString, QMap<QString,QString>> SceneEnumeration;
-  typedef TweakBarEnum<CameraParameter, QHash<QString, CameraParameter>> CameraEnumeration;
+  typedef TweakBarEnum<Camera, QHash<QString, Camera>> CameraEnumeration;
 
   SceneEnumeration::Ptr sceneSwitcher;
   CameraEnumeration::Ptr cameraSwitcher;

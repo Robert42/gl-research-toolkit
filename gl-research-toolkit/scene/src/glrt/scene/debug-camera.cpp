@@ -7,7 +7,7 @@ glm::ivec2 DebugCamera::windowSize;
 
 DebugCamera::DebugCamera()
 {
-  *this = scene::CameraParameter::defaultDebugCamera();
+  *this = scene::Camera::defaultDebugCamera();
 
   movementMode = false;
 
@@ -98,7 +98,7 @@ void DebugCamera::update(float deltaTime)
 }
 
 
-void DebugCamera::operator=(const scene::CameraParameter& cameraParameter)
+void DebugCamera::operator=(const scene::Camera& cameraParameter)
 {
   this->projectionMatrix = cameraParameter.projectionMatrix(windowSize.x, windowSize.y);
   this->camera_orientation_inverse = cameraParameter.viewMatrix();

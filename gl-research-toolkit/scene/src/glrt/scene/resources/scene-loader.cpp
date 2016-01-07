@@ -206,7 +206,7 @@ bool SceneLoader::loadFromColladaFile(const QString& file)
   }
 
   for(quint32 i=0; i<scene->mNumCameras; ++i)
-    assets.cameras[scene->mCameras[i]->mName.C_Str()] = CameraParameter::fromAssimp(*scene->mCameras[i]);
+    assets.cameras[scene->mCameras[i]->mName.C_Str()] = Camera::fromAssimp(*scene->mCameras[i]);
 
   for(quint32 i=0; i<scene->mNumMeshes; ++i)
   {

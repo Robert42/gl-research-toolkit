@@ -98,7 +98,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   sceneSwitcher->valueChanged = [&scene](const QString& file){scene.loadFromFile(file);};
 
   cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
-  cameraSwitcher->valueChanged = [&scene](const scene::CameraParameter& p){scene.debugCamera = p;};
+  cameraSwitcher->valueChanged = [&scene](const scene::Camera& p){scene.debugCamera = p;};
   TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
 
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");

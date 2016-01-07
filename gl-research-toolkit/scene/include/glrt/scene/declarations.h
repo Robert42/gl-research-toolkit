@@ -9,8 +9,7 @@ namespace scene {
 
 class Entity;
 class LightComponent;
-
-class CameraParameter; // #TODO rename to Camera
+class Camera;
 
 } // namespace scene
 } // namespace glrt
