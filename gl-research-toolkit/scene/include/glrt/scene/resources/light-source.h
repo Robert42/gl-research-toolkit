@@ -9,7 +9,7 @@ namespace scene {
 namespace resources {
 
 
-struct LightSource
+struct LightSource final
 {
   enum class Interactivity
   {
@@ -24,12 +24,14 @@ struct LightSource
     RECT_AREA_LIGHT,
   };
 
-  struct AreaLightCommon
+  struct AreaLightCommon final
   {
-    glm::vec3 color;
-    float luminous_power;
-    glm::vec3 origin;
-    float influence_radius;
+    glm::vec3 color = glm::vec3(1);
+    float luminous_power = 25.f;
+    glm::vec3 origin = glm::vec3(0);
+    float influence_radius = INFINITY; // #TODO test, whether the influence radius is already working
+
+    AreaLightCommon(){}
 
     friend AreaLightCommon operator*(const CoordFrame& t, AreaLightCommon lightSource)
     {
@@ -39,12 +41,14 @@ struct LightSource
   };
   static_assert(sizeof(AreaLightCommon)==32, "Please make sure the struct LightSource is std140 compatible");
 
-  struct SphereAreaLight
+  struct SphereAreaLight final
   {
     AreaLightCommon areaLightCommon;
 
-    float radius;
+    float radius = 0.01f;
     padding<float, 3> _padding;
+
+    SphereAreaLight(){}
 
     friend SphereAreaLight operator*(const CoordFrame& t, SphereAreaLight data)
     {
@@ -55,14 +59,14 @@ struct LightSource
   };
   static_assert(sizeof(SphereAreaLight)==48, "Please make sure the struct SphereAreaLightComponent::Data is std140 compatible");
 
-  struct RectAreaLight
+  struct RectAreaLight final
   {
     AreaLightCommon areaLightCommon;
 
     glm::vec3 tangent1 = glm::vec3(-1, 0, 0);
-    float half_width;
+    float half_width = 1.f;
     glm::vec3 tangent2 = glm::vec3(0, 1, 0);
-    float half_height;
+    float half_height = 1.f;
 
     friend RectAreaLight operator*(const CoordFrame& frame, RectAreaLight data)
     {
@@ -83,6 +87,8 @@ struct LightSource
   };
   Type type;
 
+  LightSource(const RectAreaLight& rectAreaLight);
+  LightSource(const SphereAreaLight& sphereAreaLight=SphereAreaLight());
   LightComponent* createLightComponent(Entity& entity, const Uuid<LightComponent>& uuid, Interactivity interactivity);
 
   static void registerAngelScriptTypes();

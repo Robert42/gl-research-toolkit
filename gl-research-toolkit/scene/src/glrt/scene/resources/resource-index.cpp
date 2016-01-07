@@ -43,7 +43,8 @@ void ResourceIndex::registerAngelScriptAPI()
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(const Uuid<StaticMesh> &in uuid, const string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerStaticMesh(const Uuid<StaticMesh> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerStaticMesh), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerLightSource(const Uuid<LightSource> &in uuid, const LightSource &in light)", AngelScript::asMETHOD(ResourceIndex,registerLightSource), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
 
@@ -56,7 +57,7 @@ void ResourceIndex::registerAngelScriptAPI()
 void ResourceIndex::loadIndex(const std::string& filename)
 {
   AngelScriptIntegration::ConfigCallScript config;
-  config.accessMask = ACCESS_MASK_RESOURCE_LOADING;
+  config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
 
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(ResourceIndex@ index)", "resource-index", config, this);
 }
@@ -95,10 +96,18 @@ bool ResourceIndex::isLoaded(const QUuid& uuid) const
   return loadedRessources.contains(uuid);
 }
 
-void ResourceIndex::registerAsset(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file)
+void ResourceIndex::registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file)
 {
+  // #TODO validate, that the uuid is not laready used
   unloadedRessources.insert(uuid);
   staticMeshAssetsFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(mesh_file));
+}
+
+void ResourceIndex::registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light)
+{
+  // #TODO validate, that the uuid is not laready used
+  loadedRessources.insert(uuid);
+  lightSources.append(light);
 }
 
 void ResourceIndex::_loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow)
