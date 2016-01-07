@@ -13,18 +13,19 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
                                const std::string& sourceFilename,
-                               const Uuid<ResourceGroup>* uuid,
-                               SceneGraphImportSettings::AngelScriptInterface* settings)
+                               SceneGraphImportSettings::AngelScriptInterface* settings,
+                               const ResourceIndex* resourceIndex)
 {
   convertSceneGraph(QString::fromStdString(sceneGraphFilename),
                     QString::fromStdString(sourceFilename),
-                    *uuid,
+                    resourceIndex->uuid,
                     settings);
 }
 
 // --------------
 
-ResourceIndex::ResourceIndex()
+ResourceIndex::ResourceIndex(const Uuid<ResourceIndex>& uuid)
+  : uuid(uuid)
 {
 }
 
@@ -34,14 +35,17 @@ void ResourceIndex::registerAngelScriptAPI()
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+
+  glrt::Uuid<void>::registerCustomizedUuidType("ResourceIndex", false);
+
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerAsset(const Uuid<StaticMesh> &in uuid, const string &in mesh_file)", AngelScript::asMETHOD(ResourceIndex,registerAsset), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
 
-  r = angelScriptEngine->RegisterGlobalFunction("void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterGlobalFunction("void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const Uuid<ResourceGroup> &in uuid, const SceneGraphImportSettings@ settings)", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings)", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

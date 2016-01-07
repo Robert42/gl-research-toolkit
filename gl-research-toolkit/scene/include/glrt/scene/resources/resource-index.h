@@ -21,7 +21,9 @@ struct StaticMeshImportSettings
 class ResourceIndex final
 {
 public:
-  ResourceIndex();
+  ResourceIndex(const Uuid<ResourceIndex>& uuid);
+
+  const Uuid<ResourceIndex> uuid;
 
   ResourceIndex(const ResourceIndex&) = delete;
   ResourceIndex(ResourceIndex&&) = delete;

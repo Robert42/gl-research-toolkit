@@ -37,10 +37,10 @@ private:
 };
 
 void convertStaticMesh(const std::string& meshFile,
-                       const std::string& sourceFile);
+                       const std::string& sourceFile, ResourceIndex*);
 void convertSceneGraph(const QString& sceneGraphFilename,
                        const QString& sourceFilename,
-                       const Uuid<ResourceGroup>& uuid,
+                       const Uuid<ResourceIndex>& uuid,
                        const SceneGraphImportSettings& settings);
 
 } // namespace resources

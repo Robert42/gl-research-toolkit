@@ -25,7 +25,7 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
 }
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
-void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile, const Uuid<ResourceGroup>& resourceGroupUuid, const SceneGraphImportSettings& settings);
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings& settings);
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
 QString python_exportSceneAsObjMesh(const QString& objFile);
@@ -45,7 +45,7 @@ void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& 
   convertStaticMesh_assimpToMesh(meshFile, tempFilePath, indexed);
 }
 
-void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile, const Uuid<ResourceGroup>& uuid, const SceneGraphImportSettings &settings)
+void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
 {
   QTemporaryDir temporaryDir;
 
@@ -56,10 +56,10 @@ void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const Q
 
   runBlenderWithPythonScript(python_exportSceneAsColladaSceneGraph(tempFilePath), blenderFile);
 
-  convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath, uuid, settings);
+  convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath, resourceIndexUuid, settings);
 }
 
-void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename)
+void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename, ResourceIndex*)
 {
   bool indexed = true;// #TODO allow the script to choose, whether the mesh is indexed or not
 
@@ -77,7 +77,7 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
   }
 }
 
-void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceFilename, const Uuid<ResourceGroup>& uuid, const SceneGraphImportSettings &settings)
+void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceFilename, const Uuid<ResourceIndex>& uuid, const SceneGraphImportSettings &settings)
 {
   QFileInfo sceneGraphFile(sceneGraphFilename);
   QFileInfo sourceFile(sourceFilename);
@@ -276,7 +276,7 @@ struct SceneGraphImportAssets
   QHash<QUuid, QString> labels;
 };
 
-void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceGroup>& resourceGroupUuid, const SceneGraphImportSettings &settings)
+void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
 {
   // #FIXME: register the fallback
   const Uuid<MaterialData> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
@@ -344,7 +344,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     assets.cameras[n] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
-    Uuid<CameraParameter> cameraUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("camera[%0]").arg(i)), n));
+    Uuid<CameraParameter> cameraUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("camera[%0]").arg(i)), n));
 
     if(settings.cameraUuids.contains(n))
       cameraUuid = settings.cameraUuids[n];
@@ -377,7 +377,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.meshData[i] = data;
     assets.meshInstances[n].insert(useIndex);
 
-    Uuid<StaticMeshData> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("static-mesh[%0]").arg(useIndex)), n));
+    Uuid<StaticMeshData> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("static-mesh[%0]").arg(useIndex)), n));
 
     if(settings.meshUuids.contains(n))
     {
@@ -436,7 +436,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(settings.nodeUuids.contains(n))
       assets.nodeUuids[n] = settings.nodeUuids[n];
     else
-      assets.nodeUuids[n] = Uuid<Entity>(QUuid::createUuidV5(QUuid::createUuidV5(resourceGroupUuid, QString("node")), n));
+      assets.nodeUuids[n] = Uuid<Entity>(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("node")), n));
 
     assets.labels[assets.nodeUuids[n]] = n;
     assets.nodes[n] = node;
@@ -461,8 +461,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     outputStream << "\n";
   }
 
-  outputStream << "void main(Scene@ scene)\n{\n";
-  outputStream << "  ResourceGroup group(Uuid<ResourceGroup>(\"" << QUuid(resourceGroupUuid).toString() << "\"));\n";
+  outputStream << "void main(ResourceIndex@ index, Scene@ scene)\n{\n";
   outputStream << "  scene.loadGroup(group);\n";
   outputStream << "\n";
   outputStream << "  Node@ node;\n";

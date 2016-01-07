@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
-  glrt::scene::resources::ResourceIndex resourceIndex;
+  glrt::scene::resources::ResourceIndex resourceIndex(glrt::Uuid<glrt::scene::resources::ResourceIndex>("{cf685c44-8d67-4531-b4f2-964acef0ec10}"));
   resourceIndex.loadIndexedDirectory(GLRT_ASSET_DIR);
 
   glrt::scene::Scene scene;
