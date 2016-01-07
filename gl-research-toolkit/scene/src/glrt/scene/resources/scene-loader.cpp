@@ -1,10 +1,5 @@
 #include <glrt/scene/resources/scene-loader.h>
 
-#include <QJsonDocument>
-#include <QJsonValue>
-#include <QJsonArray>
-#include <glrt/toolkit/json.h>
-
 namespace glrt {
 namespace scene {
 namespace resources {

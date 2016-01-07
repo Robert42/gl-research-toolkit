@@ -21,6 +21,14 @@ Uuid<T>::operator const QUuid&() const
 
 
 template<class T>
+template<class T_target>
+Uuid<T_target> Uuid<T>::cast() const
+{
+  return Uuid<T_target>(this->_uuid);
+}
+
+
+template<class T>
 bool Uuid<T>::operator==(const QUuid& other) const
 {
   return this->_uuid == other;

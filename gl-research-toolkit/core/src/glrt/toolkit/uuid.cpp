@@ -51,8 +51,8 @@ inline void RegisterUuidType(const char* name)
   r = angelScriptEngine->RegisterObjectType(name,
                                             sizeof(QUuid),
                                             AngelScript::asOBJ_VALUE |
-                                            AngelScript::asOBJ_APP_PRIMITIVE |
-                                            AngelScript::asOBJ_POD);
+                                            AngelScript::asOBJ_POD |
+                                            AngelScript::asOBJ_APP_CLASS_CDAK);
   AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectBehaviour(name, AngelScript::asBEHAVE_CONSTRUCT, "void ctor(string &in)", AngelScript::asFUNCTION(init_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);

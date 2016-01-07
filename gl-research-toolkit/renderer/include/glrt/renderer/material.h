@@ -7,8 +7,6 @@
 
 #include <glhelper/buffer.hpp>
 
-#include <QJsonObject>
-
 namespace glrt {
 namespace renderer {
 
@@ -23,11 +21,7 @@ public:
   QString name;
   gl::Buffer uniformBuffer;
 
-  static MaterialInstance::Ptr fromJson(const QDir& dir, const QJsonObject& object);
   static MaterialInstance::Ptr createDummyMaterial();
-
-protected:
-  bool parseCommonJson(const QJsonObject& object, const QString& expectedType);
 
 private:
   friend class PlainColorMaterial;
@@ -42,8 +36,6 @@ public:
   typedef glrt::scene::resources::PlainColorMaterialData UniformData;
 
   PlainColorMaterial(const UniformData& data);
-
-  static MaterialInstance::Ptr fromJson(const QDir& dir, const QJsonObject& object);
 };
 
 

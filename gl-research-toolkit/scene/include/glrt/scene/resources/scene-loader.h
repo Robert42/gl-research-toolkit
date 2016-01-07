@@ -8,8 +8,6 @@
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/resource-loader.h>
 
-#include <QJsonObject>
-
 namespace glrt {
 namespace scene {
 namespace resources {

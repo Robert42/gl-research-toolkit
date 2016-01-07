@@ -2,7 +2,6 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
-#include <glrt/toolkit/json.h>
 
 #include <QFile>
 #include <QDirIterator>
@@ -69,7 +68,7 @@ QMap<QString, QString> Scene::findAllScenes()
   SPLASHSCREEN_MESSAGE("search Scenes");
 
   QMap<QString, QString> map;
-
+/* #TODO
   QDirIterator dirIterator(QDir(GLRT_ASSET_DIR), QDirIterator::Subdirectories|QDirIterator::FollowSymlinks);
 
   while(dirIterator.hasNext())
@@ -108,7 +107,7 @@ QMap<QString, QString> Scene::findAllScenes()
       map[name] = absoluteFilename;
     }
   }
-
+*/
   return map;
 }
 

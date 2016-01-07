@@ -12,7 +12,9 @@ set(SOURCE_FILES
   include/glrt/scene/light-component.h
   include/glrt/scene/resources/asset-converter.h
   include/glrt/scene/resources/declarations.h
+  include/glrt/scene/resources/light-source.h
   include/glrt/scene/resources/material-data.h
+  include/glrt/scene/resources/material.h
   include/glrt/scene/resources/resource-index.h
   include/glrt/scene/resources/resource-index.inl
   include/glrt/scene/resources/resource-loader.h
@@ -29,6 +31,8 @@ set(SOURCE_FILES
   src/glrt/scene/entity.cpp
   src/glrt/scene/light-component.cpp
   src/glrt/scene/resources/asset-converter.cpp
+  src/glrt/scene/resources/light-source.cpp
+  src/glrt/scene/resources/material.cpp
   src/glrt/scene/resources/resource-index.cpp
   src/glrt/scene/resources/resource-loader.cpp
   src/glrt/scene/resources/scene-loader.cpp

@@ -1,7 +1,7 @@
 #ifndef GLRT_SCENE_RESOURCES_ASSETCONVERTER_H
 #define GLRT_SCENE_RESOURCES_ASSETCONVERTER_H
 
-#include "declarations.h"
+#include <glrt/scene/declarations.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
 
@@ -20,7 +20,7 @@ struct SceneGraphImportSettings final
 
   QHash<QString, Uuid<StaticMeshData>> meshUuids;
   QHash<QString, Uuid<MaterialData>> materialUuids;
-  QHash<QString, Uuid<LightData>> lightUuids;
+  QHash<QString, Uuid<LightSource>> lightUuids;
   QHash<QString, Uuid<Entity>> nodeUuids;
   QHash<QString, Uuid<CameraParameter>> cameraUuids;
 

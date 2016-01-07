@@ -28,8 +28,6 @@ public:
 
   void operator=(const scene::CameraParameter& cameraParameter);
 
-  bool fromJson(const QJsonObject& json, const QMap<QString, scene::CameraParameter>& cameraParameter);
-
 private:
   glm::mat4 camera_orientation_inverse;
   bool movementMode;

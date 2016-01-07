@@ -137,18 +137,18 @@ void Application::initAngelScript()
   AngelScript::RegisterScriptDictionary(scriptEngine);
   scriptEngine->SetDefaultAccessMask(previousMask);
 
+  AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
+
   AngelScriptIntegration::init_logging_functions_qt(scriptEngine);
+
 
   glrt::Uuid<void>::registerAngelScriptAPI();
   glrt::Uuid<void>::registerCustomizedUuidType("StaticMesh", true);
   glrt::Uuid<void>::registerCustomizedUuidType("Material", true);
-  glrt::Uuid<void>::registerCustomizedUuidType("Light", true);
   glrt::Uuid<void>::registerCustomizedUuidType("Camera", true);
   glrt::Uuid<void>::registerCustomizedUuidType("Node", true);
   glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
   glrt::scene::resources::StaticMeshLoader::registerAngelScriptAPI();
-
-  AngelScriptIntegration::init_glm(scriptEngine, AngelScriptIntegration::GlmFlags::NO_SWIZZLE);
 }
 
 void Application::deinitAngelScript()

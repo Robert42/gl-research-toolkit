@@ -18,15 +18,11 @@ enum class State
 
 class ResourceIndex;
 class ResourceLoader;
+class LightSource;
 class MaterialData; // #TODO rename to Material
 class StaticMeshData; // #TODO rename to StaticMesh
-class LightData; // #TODO rename to Light
-class Entity; // #TODO rename to Node?
 
 } // namespace resources
-
-class CameraParameter; // #TODO rename to Camera
-
 } // namespace scene
 } // namespace glrt
 

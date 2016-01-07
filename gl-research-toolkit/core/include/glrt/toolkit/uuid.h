@@ -16,6 +16,9 @@ public:
   Uuid(const Uuid<T>& uuid) : _uuid(uuid) {static_assert(std::is_base_of<_identifier, T>::value, "T must inherit from: identifier");}
   Uuid(const Uuid<_identifier>& uuid) : _uuid(uuid) {}
 
+  template<typename T>
+  Uuid<T> cast() const;
+
   operator const QUuid&() const;
   bool operator==(const QUuid& other) const;
   bool operator!=(const QUuid& other) const;

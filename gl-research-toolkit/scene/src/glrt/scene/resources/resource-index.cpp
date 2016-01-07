@@ -1,6 +1,7 @@
 #include <glrt/scene/resources/resource-index.h>
 #include <glrt/scene/resources/resource-loader.h>
 #include <glrt/scene/resources/asset-converter.h>
+#include <glrt/scene/light-component.h>
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
@@ -33,6 +34,8 @@ void ResourceIndex::registerAngelScriptAPI()
 {
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  LightSource::registerAngelScriptTypes();
 
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
 
