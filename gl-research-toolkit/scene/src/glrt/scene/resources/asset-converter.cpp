@@ -306,7 +306,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
 
   QVector<aiNode*> allNodesToImport;
-  QSet<aiMesh*> allMeshesToImport;
+  QSet<uint32_t> allMeshesToImport;
 
   assets.materials.resize(scene->mNumMaterials);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
@@ -394,7 +394,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.meshes[i] = meshUuid;
 
     if(settings.shouldImportMesh(n))
-      allMeshesToImport.insert(scene->mMeshes[i]);
+      allMeshesToImport.insert(i);
 
     assets.labels[meshUuid] = n;
   }
@@ -457,7 +457,15 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
   if(!allMeshesToImport.isEmpty())
   {
-    // #IMPLEMENT meshes
+    QFile meshFile(meshesFile.absoluteFilePath());
+    if(!meshFile.open(QFile::WriteOnly))
+      throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshesFile.absoluteFilePath()));
+    QTextStream meshOutputStream(&meshFile);
+    meshOutputStream << "void main(StaticMeshLoader@ loader)\n{\n";
+    for(uint32_t i : allMeshesToImport)
+      writeToScriptLoadingStaticMesh(meshOutputStream, QString("Uuid<StaticMesh>(\"%0\")").arg(QUuid(assets.meshes[i]).toString()), assets.meshData[i]);
+    meshOutputStream << "}";
+
     outputStream << "#include \"" << escape_angelscript_string(meshesFile.fileName()) << "\"\n";
     outputStream << "\n";
   }
