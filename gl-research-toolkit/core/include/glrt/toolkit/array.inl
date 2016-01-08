@@ -117,7 +117,7 @@ inline int ArrayTraits_Unordered_Toolkit<T>::new_capacity(int prev_capacity, int
   Q_ASSERT(current_length >= 0);
   Q_ASSERT(elements_to_add >= 0);
 
-  return current_length + elements_to_add*4;
+  return glm::max(prev_capacity, current_length + elements_to_add + current_length/2);
 }
 
 template<typename T>
