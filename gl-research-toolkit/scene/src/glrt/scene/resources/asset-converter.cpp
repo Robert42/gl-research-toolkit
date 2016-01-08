@@ -312,8 +312,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   if(!scene)
     throw GLRT_EXCEPTION(QString("Couldn't load scene: %0").arg(importer.GetErrorString()));
 
-  QVector<aiNode*> allNodesToImport;
-  QVector<uint32_t> allMeshesToImport;
+   // use a QMap to sort the meshes by uuid to get a better consistency when working with git
+  QMap<QUuid, aiNode*> allNodesToImport;
+  QMap<QUuid, uint32_t> allMeshesToImport;
 
   assets.materials.resize(scene->mNumMaterials);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
@@ -402,7 +403,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     {
       // This is the first instance of this mesh? Also one that should be imported? => import it!
       if(settings.shouldImportMesh(n))
-        allMeshesToImport.append(i);
+        allMeshesToImport[meshUuid] = i;
     }
 
     assets.meshes[i] = meshUuid;
@@ -432,7 +433,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.labels[lightUuid] = n;
   }
 
-  allNodesToImport.reserve(scene->mNumMeshes+scene->mNumLights+scene->mNumCameras+42);
   QStack<aiNode*> nodes;
   nodes.push(scene->mRootNode);
   while(!nodes.isEmpty())
@@ -444,15 +444,17 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     QString n = node->mName.C_Str();
 
-    if(settings.nodeUuids.contains(n))
-      assets.nodeUuids[n] = settings.nodeUuids[n];
-    else
-      assets.nodeUuids[n] = Uuid<Entity>(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("node")), n));
+    Uuid<Entity> nodeUuid = Uuid<Entity>(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("node")), n));
 
-    assets.labels[assets.nodeUuids[n]] = n;
+    if(settings.nodeUuids.contains(n))
+      nodeUuid = settings.nodeUuids[n];
+
+    assets.nodeUuids[n] = nodeUuid;
+
+    assets.labels[nodeUuid] = n;
     assets.nodes[n] = node;
     if(settings.shouldImportNode(n))
-      allNodesToImport.append(node);
+      allNodesToImport[nodeUuid] = node;
   }
 
   QFileInfo meshesFile(sceneGraphFile.filePath()+".mesh");
@@ -473,7 +475,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     QTextStream meshOutputStream(&meshFile);
     meshOutputStream << "void loadMeshes(StaticMeshLoader@ loader)\n{\n";
     bool isFirst = true;
-    for(uint32_t i : allMeshesToImport)
+    for(uint32_t i : allMeshesToImport.values())
     {
       if(!isFirst)
         meshOutputStream << "\n";
@@ -508,7 +510,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     outputStream << "  loadMeshes(loader);\n\n";
   }
 
-  for(aiNode* assimp_node : allNodesToImport)
+  for(aiNode* assimp_node : allNodesToImport.values())
   {
     QString n = assimp_node->mName.C_Str();
 
@@ -523,6 +525,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(isImportingNode)
     {
       outputStream << "\n";
+      outputStream << " // ======== Node \"" << n << "\" ========\n";
       outputStream << "  nodeUuid = Uuid<Node>(\"" << QUuid(nodeUuid).toString() << "\");\n";
       if(assets.labels.contains(nodeUuid))
         outputStream << "  group.labels[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
@@ -531,10 +534,20 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
       if(isUsingMesh)
       {
+        QMap<QUuid, int> meshesOfNode;
         for(size_t i=0; i<assimp_node->mNumMeshes; ++i)
         {
-          Uuid<StaticMeshData> meshUuid = assets.meshes[assimp_node->mMeshes[i]];
-          Uuid<Material> materialUuid = assets.materials[scene->mMeshes[assimp_node->mMeshes[i]]->mMaterialIndex];
+          int globalMeshIndex = assimp_node->mMeshes[i];
+          Uuid<StaticMeshData> meshUuid = assets.meshes[globalMeshIndex];
+          meshesOfNode[meshUuid] = globalMeshIndex;
+        }
+
+        for(int i : meshesOfNode.values())
+        {
+          aiMesh* mesh = scene->mMeshes[i];
+          Uuid<StaticMeshData> meshUuid = assets.meshes[i];
+          Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
+          outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
           if(materialUuid == fallbackMaterial)
             outputStream << "  materialUuid = fallbackMaterial;\n";
@@ -550,6 +563,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       {
         const Camera& camera = assets.cameras[n];
         Uuid<Camera> cameraUuid = assets.cameraUuids[n];
+        outputStream << " // Camera \"" << n << "\"\n";
         outputStream << "  cameraUuid = Uuid<Node>(\"" << QUuid(cameraUuid).toString() << "\");\n";
         if(assets.labels.contains(cameraUuid))
           outputStream << "  group.labels[cameraUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
@@ -559,6 +573,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(isUsingLight)
       {
         Uuid<LightSource> lightUuid = assets.lightUuids[n];
+        outputStream << " // Light \"" << n << "\"\n";
         if(lightUuid == fallbackLight)
           outputStream << "  lightUuid = fallbackLight;\n";
         else
