@@ -317,7 +317,8 @@ Array<T, T_traits>::Array(Array&& other)
   other._data = nullptr;
   other._length = nullptr;
   other._capacity = nullptr;
-  traits::clear_cache(&other.trait_cache);
+  traits::init_cache(&this->trait_cache);
+  traits::swap_cache(&this->trait_cache, &other.trait_cache);
 }
 
 template<typename T, class T_traits>
