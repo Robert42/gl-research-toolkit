@@ -1,4 +1,4 @@
-#include <glrt/toolkit/podarray.h>
+#include <glrt/toolkit/array.h>
 
 #include <testing-framework.h>
 

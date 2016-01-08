@@ -1,10 +1,10 @@
 set(SOURCE_FILES
   include/glrt/dependencies.h
+  include/glrt/toolkit/array.h
+  include/glrt/toolkit/array.inl
   include/glrt/toolkit/assimp-glm-converter.h
   include/glrt/toolkit/escape-string.h
   include/glrt/toolkit/geometry.h
-  include/glrt/toolkit/podarray.h
-  include/glrt/toolkit/podarray.inl
   include/glrt/toolkit/profiler.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl

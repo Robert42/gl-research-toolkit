@@ -1,33 +1,27 @@
-#ifndef GLRT_PODARRAY_INL
-#define GLRT_PODARRAY_INL
+#ifndef GLRT_ARRAY_INL
+#define GLRT_ARRAY_INL
 
-#include "podarray.h"
+#include "array.h"
 
 namespace glrt {
 
-inline bool ranges_overlap(int range1_begin, int range1_end, int range2_begin, int range2_end)
+
+
+template<typename T>
+void ArrayTraits_Unsorted_dCmImO<T>::change_location(T* dest, const T* src, int count)
 {
-  return (range1_begin>=range2_begin && range1_begin<range2_end)
-      || (range2_begin>=range2_begin && range2_begin<range1_end)
-      || (range1_begin>=range2_begin && range1_begin<range2_end)
-      || (range2_begin>=range2_begin && range2_begin<range1_end);
+  std::memcpy(dest, src, sizeof(T)*count);
 }
 
 template<typename T>
-void DefaultTraits<T>::copy(T* dest, const T* src, int count)
-{
-  std::memmove(dest, src, sizeof(T)*count);
-}
-
-template<typename T>
-void DefaultTraits<T>::copy_single(T* dest, const T* src)
+void ArrayTraits_Unsorted_dCmImO<T>::change_location_single(T* dest, const T* src)
 {
   if(dest != src)
     new(dest)T(*src);
 }
 
 template<typename T>
-int DefaultTraits<T>::new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache)
+int ArrayTraits_Unsorted_dCmImO<T>::new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache)
 {
   Q_UNUSED(cache);
 
@@ -39,7 +33,7 @@ int DefaultTraits<T>::new_capacity(int prev_capacity, int current_length, int el
 }
 
 template<typename T>
-int DefaultTraits<T>::adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache)
+int ArrayTraits_Unsorted_dCmImO<T>::adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache)
 {
   Q_UNUSED(cache);
 
@@ -54,36 +48,36 @@ int DefaultTraits<T>::adapt_capacity_after_removing_elements(int prev_capacity, 
 }
 
 template<typename T>
-int DefaultTraits<T>::append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
+int ArrayTraits_Unsorted_dCmImO<T>::append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  copy_single(data+prev_length, &value);
+  change_location_single(data+prev_length, &value);
   return prev_length;
 }
 
 template<typename T>
-int DefaultTraits<T>::extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
+int ArrayTraits_Unsorted_dCmImO<T>::extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  copy(data+prev_length, values, num_values);
+  change_location(data+prev_length, values, num_values);
   return prev_length;
 }
 
 template<typename T>
-void DefaultTraits<T>::remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
+void ArrayTraits_Unsorted_dCmImO<T>::remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  copy_single(data+index, data+prev_length-1);
+  change_location_single(data+index, data+prev_length-1);
 }
 
 template<typename T>
-void DefaultTraits<T>::remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
+void ArrayTraits_Unsorted_dCmImO<T>::remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
@@ -111,7 +105,7 @@ void DefaultTraits<T>::remove(T* data, int prev_length, const int first_index, i
 
 
 template<typename T, class T_traits>
-PodArray<T, T_traits>::PodArray()
+Array<T, T_traits>::Array()
   : _data(nullptr),
     _capacity(0),
     _length(0)
@@ -120,13 +114,13 @@ PodArray<T, T_traits>::PodArray()
 }
 
 template<typename T, class T_traits>
-PodArray<T, T_traits>::~PodArray()
+Array<T, T_traits>::~Array()
 {
   clear();
 }
 
 template<typename T, class T_traits>
-PodArray<T, T_traits>::PodArray(PodArray&& other)
+Array<T, T_traits>::Array(Array&& other)
   : _data(other._data),
     _length(other._length)
 {
@@ -137,14 +131,14 @@ PodArray<T, T_traits>::PodArray(PodArray&& other)
 }
 
 template<typename T, class T_traits>
-PodArray<T, T_traits>& PodArray<T, T_traits>::operator=(PodArray<T, T_traits>&& other)
+Array<T, T_traits>& Array<T, T_traits>::operator=(Array<T, T_traits>&& other)
 {
   this->swap(other);
   return *this;
 }
 
 template<typename T, class T_traits>
-void PodArray<T, T_traits>::swap(PodArray& other)
+void Array<T, T_traits>::swap(Array& other)
 {
   std::swap(this->_data, other._data);
   std::swap(this->_capacity, other._capacity);
@@ -154,14 +148,14 @@ void PodArray<T, T_traits>::swap(PodArray& other)
 
 
 template<typename T, class T_traits>
-int PodArray<T, T_traits>::capacity() const
+int Array<T, T_traits>::capacity() const
 {
   return _capacity;
 }
 
 
 template<typename T, class T_traits>
-void PodArray<T, T_traits>::clear()
+void Array<T, T_traits>::clear()
 {
   _capacity = 0;
   _length = 0;
@@ -171,7 +165,7 @@ void PodArray<T, T_traits>::clear()
 }
 
 template<typename T, class T_traits>
-void PodArray<T, T_traits>::setCapacity(int capacity)
+void Array<T, T_traits>::setCapacity(int capacity)
 {
   Q_ASSERT(capacity >= 0);
 
@@ -188,7 +182,7 @@ void PodArray<T, T_traits>::setCapacity(int capacity)
       this->_capacity = capacity;
       this->_length = glm::min(this->_length, capacity);
 
-      traits::copy(this->_data, old_data, this->_length);
+      traits::change_location(this->_data, old_data, this->_length);
 
       delete[] old_data;
     }
@@ -196,7 +190,7 @@ void PodArray<T, T_traits>::setCapacity(int capacity)
 }
 
 template<typename T, class T_traits>
-void PodArray<T, T_traits>::ensureCapacity(int minCapacity)
+void Array<T, T_traits>::ensureCapacity(int minCapacity)
 {
   Q_ASSERT(capacity >= 0);
 
@@ -204,7 +198,7 @@ void PodArray<T, T_traits>::ensureCapacity(int minCapacity)
 }
 
 template<typename T, class T_traits>
-void PodArray<T, T_traits>::reserve(int minCapacity)
+void Array<T, T_traits>::reserve(int minCapacity)
 {
   Q_ASSERT(capacity >= 0);
 
@@ -213,20 +207,20 @@ void PodArray<T, T_traits>::reserve(int minCapacity)
 
 
 template<typename T, class T_traits>
-T* PodArray<T, T_traits>::data()
+T* Array<T, T_traits>::data()
 {
   return _data;
 }
 
 template<typename T, class T_traits>
-const T* PodArray<T, T_traits>::data() const
+const T* Array<T, T_traits>::data() const
 {
   return _data;
 }
 
 
 template<typename T, class T_traits>
-T& PodArray<T, T_traits>::at(int i)
+T& Array<T, T_traits>::at(int i)
 {
   Q_ASSERT(i>=0);
   Q_ASSERT(i<_length);
@@ -234,7 +228,7 @@ T& PodArray<T, T_traits>::at(int i)
 }
 
 template<typename T, class T_traits>
-const T& PodArray<T, T_traits>::at(int i) const
+const T& Array<T, T_traits>::at(int i) const
 {
   Q_ASSERT(i>=0);
   Q_ASSERT(i<_length);
@@ -243,25 +237,25 @@ const T& PodArray<T, T_traits>::at(int i) const
 
 
 template<typename T, class T_traits>
-T& PodArray<T, T_traits>::operator[](int i)
+T& Array<T, T_traits>::operator[](int i)
 {
   return at(i);
 }
 
 template<typename T, class T_traits>
-const T& PodArray<T, T_traits>::operator[](int i) const
+const T& Array<T, T_traits>::operator[](int i) const
 {
   return at(i);
 }
 
 template<typename T, class T_traits>
-int PodArray<T, T_traits>::length() const
+int Array<T, T_traits>::length() const
 {
   return _length;
 }
 
 template<typename T, class T_traits>
-int PodArray<T, T_traits>::append(const T& value, const hint_type& hint)
+int Array<T, T_traits>::append(const T& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1, &this->trait_cache));
 
@@ -278,13 +272,13 @@ int PodArray<T, T_traits>::append(const T& value, const hint_type& hint)
 
 template<typename T, class T_traits>
 template<typename T_other_traits>
-int PodArray<T, T_traits>::extend(const PodArray<T, T_other_traits>& values, const hint_type& hint)
+int Array<T, T_traits>::extend(const Array<T, T_other_traits>& values, const hint_type& hint)
 {
   return extend(values.data(), values.length(), hint);
 }
 
 template<typename T, class T_traits>
-int PodArray<T, T_traits>::extend(const T* values, int num_values, const hint_type& hint)
+int Array<T, T_traits>::extend(const T* values, int num_values, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values, &this->trait_cache));
 
@@ -299,7 +293,7 @@ int PodArray<T, T_traits>::extend(const T* values, int num_values, const hint_ty
 }
 
 template<typename T, class T_traits>
-void PodArray<T, T_traits>::remove(int index, const hint_type& hint)
+void Array<T, T_traits>::remove(int index, const hint_type& hint)
 {
   traits::remove_single(this->data(), this->length(), index, hint, &this->trait_cache);
 
@@ -311,7 +305,7 @@ void PodArray<T, T_traits>::remove(int index, const hint_type& hint)
 }
 
 template<typename T, class T_traits>
-void PodArray<T, T_traits>::remove(int index, int num_to_remove, const hint_type& hint)
+void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& hint)
 {
   traits::remove(this->data(), this->length(), index, num_to_remove, hint, &this->trait_cache);
 
@@ -327,10 +321,10 @@ void PodArray<T, T_traits>::remove(int index, int num_to_remove, const hint_type
 
 
 template<typename T, class T_traits>
-void std::swap(glrt::PodArray<T, T_traits>& a, glrt::PodArray<T, T_traits>& b)
+void std::swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b)
 {
   a.swap(b);
 }
 
 
-#endif // GLRT_PODARRAY_INL
+#endif // GLRT_ARRAY_INL
