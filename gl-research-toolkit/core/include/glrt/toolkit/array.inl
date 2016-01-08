@@ -6,6 +6,17 @@
 namespace glrt {
 
 
+/*! \class glrt::ArrayTraits_Unordered_Toolkit
+
+Trait for working with unordered arrays. When removing a value from the array,
+it may be swapped with the last value, so the index of a value might change.
+
+The good news: indicers are guaranteed to be the same, as long as no items are
+removed. Even if so, two different array, both with ArrayTraits_Unordered_Toolkit
+traits will have the values consistently changed.
+*/
+
+
 template<typename T>
 template<typename T_int>
 inline bool ArrayTraits_Unordered_Toolkit<T>::ranges_overlap(T_int range1_begin, T_int range1_end, T_int range2_begin, T_int range2_end)
@@ -258,6 +269,24 @@ void ArrayTraits_Unordered_Toolkit<T>::remove_cCD(T* data, int prev_length, cons
 }
 
 // =============================================================================
+
+/*! \class glrt::Array
+
+An array optimized for performant storage of values.
+
+\part Traits
+
+The main difference between classical vector types and this array type is, that
+the traits can influence the behavior better.
+
+For example one trait could decide to keep an unordered array, so removing a value
+can be done by replacing the removed value wit the last and decrease the array
+length by one. This way removing elements from this array can have very fast algorithms.
+
+Traits can also change the behavior in different ways, for example integers don't
+need the destructor to be called when elements are removed and objects can be moved
+by only moving the raw bytes of the buffer.
+*/
 
 
 template<typename T, class T_traits>
