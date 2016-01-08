@@ -5,6 +5,7 @@ namespace glrt {
 
 glm::ivec2 DebugCamera::windowSize;
 
+// TODO: remove the debug camera, instead, define some sort of controller which is able to control any node/component
 DebugCamera::DebugCamera()
 {
   *this = scene::Camera::defaultDebugCamera();

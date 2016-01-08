@@ -14,7 +14,7 @@ QHash<QString, Camera> collectNamedCameras(Scene* scene)
   return collectNamedData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->cameraParameter;});
 }
 
-
+// #TODO: use the new PodArray type?
 QVector<SphereAreaLightComponent::Data> collectSphereAreaLights(Scene* scene)
 {
   return collectData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->data;});

@@ -8,8 +8,8 @@
 namespace glrt {
 namespace scene {
 
-
 class Scene;
+// #TOOD: rename to Node?
 class Entity final
 {
 public:
