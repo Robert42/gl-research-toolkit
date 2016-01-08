@@ -1,6 +1,8 @@
 #include <glrt/scene/coord-frame.h>
 #include <glrt/glsl/math.h>
 
+#include <testing-framework.h>
+
 using namespace glrt::glsl;
 
 namespace glm
@@ -16,11 +18,6 @@ float distance(const glrt::scene::CoordFrame& a, const glrt::scene::CoordFrame& 
 }
 }
 
-#define EXPECT_NEAR_EPSILON(value, expected, epsilon) if(glm::distance(value, expected) > epsilon){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
-#define EXPECT_NEAR(value, expected) EXPECT_NEAR_EPSILON(value, expected, 0.0001f)
-#define EXPECT_EQ(value, expected) if(value!=expected){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
-#define EXPECT_TRUE(value) EXPECT_EQ(value, true);
-#define EXPECT_FALSE(value) EXPECT_EQ(value, false);
 
 glm::vec3 all_dimensions[6];
 
@@ -85,8 +82,7 @@ void test_invert()
 
 int main(int argc, char** argv)
 {
-  Q_UNUSED(argc);
-  Q_UNUSED(argv);
+  TestingApplication testing_application(argc, argv);
 
   for(int i=0; i<6; ++i)
     all_dimensions[i][i/2] = (i%2==0 ? 1 : -1);
@@ -97,5 +93,5 @@ int main(int argc, char** argv)
   test_from_matrix();
   test_invert();
 
-  return 0;
+  return testing_application.result();
 }
