@@ -14,6 +14,10 @@ it may be swapped with the last value, so the index of a value might change.
 The good news: indicers are guaranteed to be the same, as long as no items are
 removed. Even if so, two different array, both with ArrayTraits_Unordered_Toolkit
 traits will have the values consistently changed.
+
+if removing one element, it is guaranted, that (if the removed element is not the
+last one) the new index of the last value will be the previous index of the removed
+value.
 */
 
 
