@@ -8,20 +8,20 @@ namespace glrt {
 
 
 template<typename T>
-void ArrayTraits_Unsorted_dCmImO<T>::change_location(T* dest, const T* src, int count)
+void ArrayTraits_Unsorted_Toolkit<T>::change_location(T* dest, const T* src, int count)
 {
   std::memcpy(dest, src, sizeof(T)*count);
 }
 
 template<typename T>
-void ArrayTraits_Unsorted_dCmImO<T>::change_location_single(T* dest, const T* src)
+void ArrayTraits_Unsorted_Toolkit<T>::change_location_single(T* dest, const T* src)
 {
   if(dest != src)
     new(dest)T(*src);
 }
 
 template<typename T>
-int ArrayTraits_Unsorted_dCmImO<T>::new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache)
+int ArrayTraits_Unsorted_Toolkit<T>::new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache)
 {
   Q_UNUSED(cache);
 
@@ -33,7 +33,7 @@ int ArrayTraits_Unsorted_dCmImO<T>::new_capacity(int prev_capacity, int current_
 }
 
 template<typename T>
-int ArrayTraits_Unsorted_dCmImO<T>::adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache)
+int ArrayTraits_Unsorted_Toolkit<T>::adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache)
 {
   Q_UNUSED(cache);
 
@@ -48,7 +48,7 @@ int ArrayTraits_Unsorted_dCmImO<T>::adapt_capacity_after_removing_elements(int p
 }
 
 template<typename T>
-int ArrayTraits_Unsorted_dCmImO<T>::append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
+int ArrayTraits_Unsorted_Toolkit<T>::append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
@@ -58,7 +58,7 @@ int ArrayTraits_Unsorted_dCmImO<T>::append(T* data, int prev_length, const T& va
 }
 
 template<typename T>
-int ArrayTraits_Unsorted_dCmImO<T>::extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
+int ArrayTraits_Unsorted_Toolkit<T>::extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
@@ -68,7 +68,7 @@ int ArrayTraits_Unsorted_dCmImO<T>::extend(T* data, int prev_length, const T* va
 }
 
 template<typename T>
-void ArrayTraits_Unsorted_dCmImO<T>::remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
+void ArrayTraits_Unsorted_Toolkit<T>::remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
@@ -77,7 +77,7 @@ void ArrayTraits_Unsorted_dCmImO<T>::remove_single(T* data, int prev_length, con
 }
 
 template<typename T>
-void ArrayTraits_Unsorted_dCmImO<T>::remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
+void ArrayTraits_Unsorted_Toolkit<T>::remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);

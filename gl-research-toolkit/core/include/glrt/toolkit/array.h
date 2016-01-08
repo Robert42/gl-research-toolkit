@@ -17,7 +17,7 @@ namespace glrt {
 // mO: move Operator
 
 template<typename T>
-class ArrayTraits_Unsorted_dCmImO
+struct ArrayTraits_Unsorted_Toolkit
 {
   typedef uint32_t hint_type;
   typedef uint32_t cache_type;
@@ -41,12 +41,33 @@ class ArrayTraits_Unsorted_dCmImO
 };
 
 template<typename T>
-class ArrayTraits_Unsorted_POD
+struct ArrayTraits_Unsorted_dCmImO : public ArrayTraits_Unsorted_Toolkit<T>
+{
+  typedef typename ArrayTraits_Unsorted_Toolkit<T>::hint_type hint_type;
+  typedef typename ArrayTraits_Unsorted_Toolkit<T>::cache_type cache_type;
+
+  static void change_location(T* dest, const T* src, int count);
+  static void change_location_single(T* dest, const T* src);
+  static int new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache);
+  static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
+
+  static void init_cache(cache_type*){}
+  static void clear_cache(cache_type*){}
+  static void swap_cache(cache_type*, cache_type*){}
+
+  static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
+  static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
+  static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
+  static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
+};
+
+template<typename T>
+struct ArrayTraits_Unsorted_POD : public ArrayTraits_Unsorted_dCmImO<T>
 {
 };
 
 template<typename T>
-class ArrayTraits_Unsorted_cCdCmCDaOmO
+struct ArrayTraits_Unsorted_cCdCmCDaOmO : public ArrayTraits_Unsorted_Toolkit<T>
 {
 public:
 };
