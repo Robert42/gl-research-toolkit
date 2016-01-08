@@ -14,6 +14,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+
 namespace glrt {
 namespace scene {
 namespace resources {
@@ -470,7 +471,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(!meshFile.open(QFile::WriteOnly))
       throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshesFile.absoluteFilePath()));
     QTextStream meshOutputStream(&meshFile);
-    meshOutputStream << "void main(StaticMeshLoader@ loader)\n{\n";
+    meshOutputStream << "void loadMeshes(StaticMeshLoader@ loader)\n{\n";
     bool isFirst = true;
     for(uint32_t i : allMeshesToImport)
     {
@@ -486,9 +487,10 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     outputStream << "\n";
   }
 
-  outputStream << "void main(ResourceIndex@ index, Scene@ scene)\n{\n";
+  outputStream << "void main(ResourceLoader@ loader, Scene@ scene)\n{\n";
   outputStream << "  scene.loadGroup(group);\n";
   outputStream << "\n";
+  outputStream << "  ResourceIndex@ index = loader.index;\n";
   outputStream << "  Node@ node;\n";
   outputStream << "  Uuid<Node> nodeUuid;\n";
   outputStream << "  Uuid<Camera> cameraUuid;\n";
@@ -503,7 +505,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   if(!allMeshesToImport.isEmpty())
   {
     outputStream << "\n";
-    outputStream << "  loadMeshes(group);\n\n";
+    outputStream << "  loadMeshes(loader);\n\n";
   }
 
   for(aiNode* assimp_node : allNodesToImport)
