@@ -22,8 +22,8 @@ struct ArrayTraits_Unordered_Toolkit
   typedef uint32_t hint_type;
   typedef uint32_t cache_type;
 
-  static const hint_type default_append_hint = hint_type(0xffffffff);
-  static const hint_type default_remove_hint = hint_type(0xffffffff);
+  static hint_type default_append_hint(){return hint_type(0xffffffff);}
+  static hint_type default_remove_hint(){return hint_type(0xffffffff);}
 
   static void change_location_mI(T* dest, const T* src, int count);
   static void change_location_single_mI(T* dest, const T* src);
@@ -191,14 +191,14 @@ public:
 
   int length() const;
 
-  int append(T&& value, const hint_type& hint=traits::default_append_hint);
-  int append(const T& value, const hint_type& hint=traits::default_append_hint);
+  int append(T&& value, const hint_type& hint=traits::default_append_hint());
+  int append(const T& value, const hint_type& hint=traits::default_append_hint());
   template<typename T_other_trait>
-  int extend(const Array<T, T_other_trait>& values, const hint_type& hint=traits::default_append_hint);
-  int extend(const T* values, int num_values, const hint_type& hint=traits::default_append_hint);
+  int extend(const Array<T, T_other_trait>& values, const hint_type& hint=traits::default_append_hint());
+  int extend(const T* values, int num_values, const hint_type& hint=traits::default_append_hint());
 
-  void remove(int index, const hint_type& hint=traits::default_remove_hint);
-  void remove(int index, int num_to_remove, const hint_type& hint=traits::default_remove_hint);
+  void remove(int index, const hint_type& hint=traits::default_remove_hint());
+  void remove(int index, int num_to_remove, const hint_type& hint=traits::default_remove_hint());
 
 private:
   cache_type trait_cache;
