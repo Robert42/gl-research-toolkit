@@ -17,7 +17,7 @@ namespace glrt {
 // mO: move Operator
 
 template<typename T>
-struct ArrayTraits_Unsorted_Toolkit
+struct ArrayTraits_Unordered_Toolkit
 {
   typedef uint32_t hint_type;
   typedef uint32_t cache_type;
@@ -25,14 +25,50 @@ struct ArrayTraits_Unsorted_Toolkit
   static const hint_type default_append_hint = hint_type(0xffffffff);
   static const hint_type default_remove_hint = hint_type(0xffffffff);
 
-  static void change_location(T* dest, const T* src, int count);
-  static void change_location_single(T* dest, const T* src);
+  static void change_location_mI(T* dest, const T* src, int count);
+  static void change_location_single_mI(T* dest, const T* src);
+  static void change_location_cC(T* dest, const T* src, int count);
+  static void change_location_single_cC(T* dest, const T* src);
   static int new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache);
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
 
   static void init_cache(cache_type*){}
   static void clear_cache(cache_type*){}
+  static void delete_cache(cache_type*){}
   static void swap_cache(cache_type*, cache_type*){}
+
+  static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache);
+  static int append_mI(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
+  static int extend_mI(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
+  static int append_cC(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
+  static int extend_cC(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
+
+  static void remove_single_mI(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
+  static void remove_mI(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
+  static void remove_single_mOD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
+  static void remove_mOD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
+  static void remove_single_cCD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
+  static void remove_cCD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
+
+protected:
+  template<typename T_int>
+  static bool ranges_overlap(T_int range1_begin, T_int range1_end, T_int range2_begin, T_int range2_end);
+  static bool ranges_overlap(const T* instanceA, const T* instanceB, int na=1, int nb=1);
+
+  static void values_used_to_fill_gaps(int* first, int* count, int prev_length, const int gap_start, int num_values);
+
+  static void swap_instances_mO(const T* a, const T* b, int n);
+  static void call_instance_destructors_D(const T* a, int n);
+};
+
+template<typename T>
+struct ArrayTraits_Unordered_dCmImO : public ArrayTraits_Unordered_Toolkit<T>
+{
+  typedef typename ArrayTraits_Unordered_Toolkit<T>::hint_type hint_type;
+  typedef typename ArrayTraits_Unordered_Toolkit<T>::cache_type cache_type;
+
+  static void change_location(T* dest, const T* src, int count);
+  static void change_location_single(T* dest, const T* src);
 
   static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
   static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
@@ -41,33 +77,12 @@ struct ArrayTraits_Unsorted_Toolkit
 };
 
 template<typename T>
-struct ArrayTraits_Unsorted_dCmImO : public ArrayTraits_Unsorted_Toolkit<T>
-{
-  typedef typename ArrayTraits_Unsorted_Toolkit<T>::hint_type hint_type;
-  typedef typename ArrayTraits_Unsorted_Toolkit<T>::cache_type cache_type;
-
-  static void change_location(T* dest, const T* src, int count);
-  static void change_location_single(T* dest, const T* src);
-  static int new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache);
-  static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
-
-  static void init_cache(cache_type*){}
-  static void clear_cache(cache_type*){}
-  static void swap_cache(cache_type*, cache_type*){}
-
-  static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
-  static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
-  static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
-  static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
-};
-
-template<typename T>
-struct ArrayTraits_Unsorted_POD : public ArrayTraits_Unsorted_dCmImO<T>
+struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_dCmImO<T>
 {
 };
 
 template<typename T>
-struct ArrayTraits_Unsorted_cCdCmCDaOmO : public ArrayTraits_Unsorted_Toolkit<T>
+struct ArrayTraits_Unordered_cCdCmCDaOmO : public ArrayTraits_Unordered_Toolkit<T>
 {
 public:
 };
@@ -78,7 +93,7 @@ struct DefaultTraits;
 template<>
 struct DefaultTraits<int>
 {
-  typedef ArrayTraits_Unsorted_POD<int> type;
+  typedef ArrayTraits_Unordered_POD<int> type;
 };
 
 
@@ -119,6 +134,7 @@ public:
 
   int length() const;
 
+  int append(T&& value, const hint_type& hint=traits::default_append_hint);
   int append(const T& value, const hint_type& hint=traits::default_append_hint);
   template<typename T_other_trait>
   int extend(const Array<T, T_other_trait>& values, const hint_type& hint=traits::default_append_hint);
