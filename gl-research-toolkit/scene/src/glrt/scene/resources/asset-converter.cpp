@@ -492,7 +492,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   outputStream << "void main(ResourceLoader@ loader, Scene@ scene)\n{\n";
   outputStream << "  scene.loadGroup(group);\n";
   outputStream << "\n";
-  outputStream << "  ResourceIndex@ index = loader.index;\n";
   outputStream << "  Node@ node;\n";
   outputStream << "  Uuid<Node> nodeUuid;\n";
   outputStream << "  Uuid<Camera> cameraUuid;\n";
@@ -525,7 +524,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(isImportingNode)
     {
       outputStream << "\n";
-      outputStream << " // ======== Node \"" << n << "\" ========\n";
+      outputStream << "// ======== Node \"" << n << "\" ========\n";
       outputStream << "  nodeUuid = Uuid<Node>(\"" << QUuid(nodeUuid).toString() << "\");\n";
       if(assets.labels.contains(nodeUuid))
         outputStream << "  group.labels[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
@@ -563,7 +562,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       {
         const Camera& camera = assets.cameras[n];
         Uuid<Camera> cameraUuid = assets.cameraUuids[n];
-        outputStream << " // Camera \"" << n << "\"\n";
+        outputStream << "  // Camera \"" << n << "\"\n";
         outputStream << "  cameraUuid = Uuid<Node>(\"" << QUuid(cameraUuid).toString() << "\");\n";
         if(assets.labels.contains(cameraUuid))
           outputStream << "  group.labels[cameraUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
@@ -573,7 +572,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(isUsingLight)
       {
         Uuid<LightSource> lightUuid = assets.lightUuids[n];
-        outputStream << " // Light \"" << n << "\"\n";
+        outputStream << "  // Light \"" << n << "\"\n";
         if(lightUuid == fallbackLight)
           outputStream << "  lightUuid = fallbackLight;\n";
         else
@@ -586,6 +585,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(!isUsingComponent)
       {
         outputStream << "  Component::create(node: node, uuid: \"" << QUuid::createUuidV5(nodeUuid, QString("missing-root-node-for-transformation")).toString() << "\");\n";
+        isUsingComponent = true;
       }
 
       if(isUsingComponent)
