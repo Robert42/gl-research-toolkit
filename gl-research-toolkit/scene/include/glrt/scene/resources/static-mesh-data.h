@@ -17,6 +17,7 @@ struct StaticMeshData
     glm::vec2 uv;
 
     bool operator==(const Vertex& other) const;
+    bool isNearlyTheSame(const Vertex& other, float epsilon) const;
   };
   typedef quint16 index_type;
 

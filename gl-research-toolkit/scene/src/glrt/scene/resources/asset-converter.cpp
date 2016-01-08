@@ -395,13 +395,16 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     // Is this the second instance of the mesh just with a different material? => use the same uuid!!
     if(useIndex < i)
-      meshUuid = assets.meshes[i];
+    {
+      meshUuid = assets.meshes[useIndex];
+    }else
+    {
+      // This is the first instance of this mesh? Also one that should be imported? => import it!
+      if(settings.shouldImportMesh(n))
+        allMeshesToImport.append(i);
+    }
 
     assets.meshes[i] = meshUuid;
-
-    if(settings.shouldImportMesh(n))
-      allMeshesToImport.append(i);
-
     assets.labels[meshUuid] = n;
   }
 
@@ -473,7 +476,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     {
       if(!isFirst)
         meshOutputStream << "\n";
-      meshOutputStream << "  // " << scene->mMeshes[i]->mName.C_Str() << "  (" << i << ")" << "\n";
+      meshOutputStream << "  // " << scene->mMeshes[i]->mName.C_Str() << "  -- (assimp index: " << i << ")" << "\n";
       writeToScriptLoadingStaticMesh(meshOutputStream, QString("Uuid<StaticMesh>(\"%0\")").arg(QUuid(assets.meshes[i]).toString()), assets.meshData[i], isFirst);
       isFirst = false;
     }

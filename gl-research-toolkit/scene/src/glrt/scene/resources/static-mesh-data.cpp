@@ -36,7 +36,18 @@ bool StaticMeshData::operator==(const StaticMeshData& other) const
   if(this->indices.length()!=other.indices.length() || this->vertices.length()!=other.vertices.length())
     return false;
 
-  return this->indices==other.indices && this->vertices==other.vertices;
+  if(this->indices!=other.indices)
+    return false;
+
+  float epsilon = 1.e-4f;
+
+  for(int i=0; i<this->vertices.length(); ++i)
+  {
+    if(!this->vertices[i].isNearlyTheSame(other.vertices[i], epsilon))
+      return false;
+  }
+
+  return true;
 }
 
 bool StaticMeshData::Vertex::operator==(const Vertex& other) const
@@ -45,6 +56,14 @@ bool StaticMeshData::Vertex::operator==(const Vertex& other) const
       && normal==other.normal
       && tangent==other.normal
       && uv==other.uv;
+}
+
+bool StaticMeshData::Vertex::isNearlyTheSame(const Vertex& other, float epsilon) const
+{
+  return glm::distance(position, other.position) <= epsilon
+      && glm::distance(normal, other.normal) <= epsilon
+      && glm::distance(tangent, other.tangent) <= epsilon
+      && glm::distance(uv, other.uv) <= epsilon;
 }
 
 bool StaticMeshData::operator!=(const StaticMeshData& other) const
