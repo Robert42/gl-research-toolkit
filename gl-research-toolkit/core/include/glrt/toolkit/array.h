@@ -37,7 +37,7 @@ struct ArrayTraits_Unordered_Toolkit
   static void delete_cache(cache_type*){}
   static void swap_cache(cache_type*, cache_type*){}
 
-  static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache);
+  static int append_mC(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache);
   static int append_mI(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
   static int extend_mI(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
   static int append_cC(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
@@ -62,29 +62,86 @@ protected:
 };
 
 template<typename T>
-struct ArrayTraits_Unordered_dCmImO : public ArrayTraits_Unordered_Toolkit<T>
+struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
 {
   typedef typename ArrayTraits_Unordered_Toolkit<T>::hint_type hint_type;
   typedef typename ArrayTraits_Unordered_Toolkit<T>::cache_type cache_type;
 
-  static void change_location(T* dest, const T* src, int count);
-  static void change_location_single(T* dest, const T* src);
+  static void change_location(T* dest, const T* src, int count)
+  {
+    change_location_mI(dest, src, count);
+  }
 
-  static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
-  static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
-  static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
-  static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
+  static void change_location_single(T* dest, const T* src)
+  {
+    change_location_single_mI(dest, src);
+  }
+
+  static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
+  {
+    return append(data, prev_length, value, hint, cache);
+  }
+
+  static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
+  {
+    return append_mI(data, prev_length, value, hint, cache);
+  }
+
+  static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
+  {
+    return extend_mI(data, prev_length, values, num_values, hint, cache);
+  }
+
+  static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
+  {
+    remove_single_mI(data, prev_length, index, hint, cache);
+  }
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
+  {
+    remove_mI(data, prev_length, first_index, num_values, hint, cache);
+  }
+};
+
+// Thought for OpenGL Wrapper
+template<typename T>
+struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
+{
+  typedef typename ArrayTraits_Unordered_Toolkit<T>::hint_type hint_type;
+  typedef typename ArrayTraits_Unordered_Toolkit<T>::cache_type cache_type;
+
+  static void change_location(T* dest, const T* src, int count)
+  {
+    change_location_mI(dest, src, count);
+  }
+
+  static void change_location_single(T* dest, const T* src)
+  {
+    change_location_single_mI(dest, src);
+  }
+
+  static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
+  {
+    return append_mC(data, prev_length, value, hint, cache);
+  }
+
+  static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache) = delete;
+  static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache) = delete;
+
+  static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
+  {
+    remove_single_mOD(data, prev_length, index, hint, cache);
+  }
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
+  {
+    remove_mOD(data, prev_length, first_index, num_values, hint, cache);
+  }
 };
 
 template<typename T>
-struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_dCmImO<T>
+struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_mI<T>
 {
-};
-
-template<typename T>
-struct ArrayTraits_Unordered_cCdCmCDaOmO : public ArrayTraits_Unordered_Toolkit<T>
-{
-public:
 };
 
 template<typename T>

@@ -121,7 +121,7 @@ inline int ArrayTraits_Unordered_Toolkit<T>::adapt_capacity_after_removing_eleme
 }
 
 template<typename T>
-inline int ArrayTraits_Unordered_Toolkit<T>::append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
+inline int ArrayTraits_Unordered_Toolkit<T>::append_mC(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
