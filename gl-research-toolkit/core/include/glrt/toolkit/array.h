@@ -25,10 +25,10 @@ struct ArrayTraits_Unordered_Toolkit
   static hint_type default_append_hint(){return hint_type(0xffffffff);}
   static hint_type default_remove_hint(){return hint_type(0xffffffff);}
 
-  static void copy_mI(T* dest, const T* src, int count);
-  static void copy_single_mI(T* dest, const T* src);
-  static void copy_cC(T* dest, const T* src, int count);
-  static void copy_single_cC(T* dest, const T* src);
+  static void copy_construct_mI(T* dest, const T* src, int count);
+  static void copy_construct_single_mI(T* dest, const T* src);
+  static void copy_construct_cC(T* dest, const T* src, int count);
+  static void copy_construct_single_cC(T* dest, const T* src);
   static int new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache);
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
 
@@ -50,6 +50,9 @@ struct ArrayTraits_Unordered_Toolkit
   static void remove_single_cCD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
   static void remove_cCD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
 
+  static void destruct_single_D(T* data);
+  static void destruct_D(T* data, int length);
+
 protected:
   template<typename T_int>
   static bool ranges_overlap(T_int range1_begin, T_int range1_end, T_int range2_begin, T_int range2_end);
@@ -68,14 +71,14 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
-  static void copy(T* dest, const T* src, int count)
+  static void copy_construct(T* dest, const T* src, int count)
   {
-    parent_type::copy_mI(dest, src, count);
+    parent_type::copy_construct_mI(dest, src, count);
   }
 
-  static void copy_single(T* dest, const T* src)
+  static void copy_construct_single(T* dest, const T* src)
   {
-    parent_type::copy_single_mI(dest, src);
+    parent_type::copy_construct_single_mI(dest, src);
   }
 
   static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
@@ -102,6 +105,10 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
   {
     parent_type::remove_mI(data, prev_length, first_index, num_values, hint, cache);
   }
+
+  static void destruct(T*, int)
+  {
+  }
 };
 
 // Thought for OpenGL Wrapper
@@ -112,14 +119,14 @@ struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
-  static void copy(T* dest, const T* src, int count)
+  static void copy_construct(T* dest, const T* src, int count)
   {
-    parent_type::copy_mI(dest, src, count);
+    parent_type::copy_construct_mI(dest, src, count);
   }
 
-  static void copy_single(T* dest, const T* src)
+  static void copy_construct_single(T* dest, const T* src)
   {
-    parent_type::copy_single_mI(dest, src);
+    parent_type::copy_construct_single_mI(dest, src);
   }
 
   static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
@@ -138,6 +145,11 @@ struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
   static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
   {
     parent_type::remove_mOD(data, prev_length, first_index, num_values, hint, cache);
+  }
+
+  static void destruct(T* data, int length)
+  {
+    parent_type::destruct_D(data, length);
   }
 };
 
@@ -214,6 +226,9 @@ private:
   T* _data;
   int _capacity;
   int _length;
+
+  static T* allocate_memory(int n);
+  static void free_memory(T* data);
 };
 
 template<typename T, typename T_traits>

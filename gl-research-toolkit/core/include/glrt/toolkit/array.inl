@@ -81,31 +81,31 @@ inline void ArrayTraits_Unordered_Toolkit<T>::values_used_to_fill_gaps(int* firs
 
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::copy_mI(T* dest, const T* src, int count)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_construct_mI(T* dest, const T* src, int count)
 {
   Q_ASSERT(!ranges_overlap(dest, src, count));
   std::memcpy(dest, src, sizeof(T)*count);
 }
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::copy_single_mI(T* dest, const T* src)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_construct_single_mI(T* dest, const T* src)
 {
-  copy_mI(dest, src, 1);
+  copy_construct_mI(dest, src, 1);
 }
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::copy_single_cC(T* dest, const T* src)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_construct_single_cC(T* dest, const T* src)
 {
   Q_ASSERT(!ranges_overlap(dest, src, 1));
   new(dest)T(*src);
 }
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::copy_cC(T* dest, const T* src, int count)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_construct_cC(T* dest, const T* src, int count)
 {
   Q_ASSERT(!ranges_overlap(dest, src, count));
   for(int i=0; i<count; ++i)
-    copy_single_cC(dest+i, src+i);
+    copy_construct_single_cC(dest+i, src+i);
 }
 
 template<typename T>
@@ -151,7 +151,7 @@ inline int ArrayTraits_Unordered_Toolkit<T>::append_mI(T* data, int prev_length,
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  copy_single_mI(data+prev_length, &value);
+  copy_construct_single_mI(data+prev_length, &value);
   return prev_length;
 }
 
@@ -161,7 +161,7 @@ inline int ArrayTraits_Unordered_Toolkit<T>::extend_mI(T* data, int prev_length,
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  copy_mI(data+prev_length, values, num_values);
+  copy_construct_mI(data+prev_length, values, num_values);
   return prev_length;
 }
 
@@ -189,17 +189,23 @@ inline int ArrayTraits_Unordered_Toolkit<T>::extend_cC(T* data, int prev_length,
 template<typename T>
 inline void ArrayTraits_Unordered_Toolkit<T>::remove_single_mI(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
 {
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index<prev_length);
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
   int last = prev_length-1;
   if(index != last)
-    copy_single_mI(data+index, data+last);
+    copy_construct_single_mI(data+index, data+last);
 }
 
 template<typename T>
 void ArrayTraits_Unordered_Toolkit<T>::remove_mI(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
 {
+  Q_ASSERT(first_index>=0);
+  Q_ASSERT(first_index<prev_length);
+  Q_ASSERT(first_index+num_values>=0);
+  Q_ASSERT(first_index+num_values<=prev_length);
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
@@ -208,24 +214,30 @@ void ArrayTraits_Unordered_Toolkit<T>::remove_mI(T* data, int prev_length, const
 
   values_used_to_fill_gaps(&first_value_to_copy, &num_values_to_copy, prev_length, first_index, num_values);
 
-  copy_mI(data+first_index, data+first_value_to_copy, num_values_to_copy);
+  copy_construct_mI(data+first_index, data+first_value_to_copy, num_values_to_copy);
 }
 
 template<typename T>
 inline void ArrayTraits_Unordered_Toolkit<T>::remove_single_mOD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
 {
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index<prev_length);
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
   int last = prev_length-1;
   if(index != last)
     data[index] = std::move(data[last]);
-  data[last].~T();
+  destruct_single_D(data+last);
 }
 
 template<typename T>
 void ArrayTraits_Unordered_Toolkit<T>::remove_mOD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
 {
+  Q_ASSERT(first_index>=0);
+  Q_ASSERT(first_index<prev_length);
+  Q_ASSERT(first_index+num_values>=0);
+  Q_ASSERT(first_index+num_values<=prev_length);
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
@@ -242,22 +254,28 @@ void ArrayTraits_Unordered_Toolkit<T>::remove_mOD(T* data, int prev_length, cons
 template<typename T>
 inline void ArrayTraits_Unordered_Toolkit<T>::remove_single_cCD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
 {
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index<prev_length);
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
   int last = prev_length-1;
-  data[index].~T();
+  destruct_single_D(data+index);
 
   if(index != last)
   {
-    new(data+index)T(data[last]);
-    data[last].~T();
+    copy_construct_single_cC(data+index, data+last);
+    destruct_single_D(data+last);
   }
 }
 
 template<typename T>
 void ArrayTraits_Unordered_Toolkit<T>::remove_cCD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
 {
+  Q_ASSERT(first_index>=0);
+  Q_ASSERT(first_index<prev_length);
+  Q_ASSERT(first_index+num_values>=0);
+  Q_ASSERT(first_index+num_values<=prev_length);
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
@@ -267,9 +285,27 @@ void ArrayTraits_Unordered_Toolkit<T>::remove_cCD(T* data, int prev_length, cons
   values_used_to_fill_gaps(&first_value_to_copy, &num_values_to_copy, prev_length, first_index, num_values);
 
   call_instance_destructors_D(data+first_index, num_values);
-  copy_cC(data+first_index, data+first_value_to_copy, num_values_to_copy);
+  copy_construct_cC(data+first_index, data+first_value_to_copy, num_values_to_copy);
 
   call_instance_destructors_D(data+prev_length-num_values_to_copy, num_values_to_copy);
+}
+
+template<typename T>
+inline void ArrayTraits_Unordered_Toolkit<T>::destruct_single_D(T* data)
+{
+  Q_ASSERT(data!=nullptr);
+
+  (data)->~T();
+}
+
+template<typename T>
+inline void ArrayTraits_Unordered_Toolkit<T>::destruct_D(T* data, int length)
+{
+  Q_ASSERT(data!=nullptr);
+  Q_ASSERT(length>0);
+
+  for(int i=0; i<length; ++i)
+    destruct_single_D(data+i);
 }
 
 // =============================================================================
@@ -305,9 +341,13 @@ Array<T, T_traits>::Array()
 template<typename T, class T_traits>
 Array<T, T_traits>::~Array()
 {
+  if(_data != nullptr)
+  {
+    traits::destruct(_data, _length);
+    free_memory(_data);
+  }
   _capacity = 0;
   _length = 0;
-  delete[] _data;
   _data = nullptr;
 
   traits::delete_cache(&this->trait_cache);
@@ -356,9 +396,13 @@ int Array<T, T_traits>::capacity() const
 template<typename T, class T_traits>
 void Array<T, T_traits>::clear()
 {
+  if(_data != nullptr)
+  {
+    traits::destruct(_data, _length);
+    free_memory(_data);
+  }
   _capacity = 0;
   _length = 0;
-  delete[] _data;
   _data = nullptr;
   traits::clear_cache(&this->trait_cache);
 }
@@ -376,20 +420,21 @@ void Array<T, T_traits>::setCapacity(int capacity)
       return;
     }
 
-    if(capacity < length())
-    Q_ASSERT(length() <= capacity);
-
     T* old_data = this->_data;
+    int old_length = this->_length;
 
-    this->_data = new T[capacity];
+    this->_data = allocate_memory(capacity);
     this->_capacity = capacity;
     this->_length = glm::min(this->_length, capacity);
 
     // move the elements to the new buffer.
-    traits::copy(this->_data, old_data, this->_length);
+    traits::copy_construct(this->_data, old_data, this->_length);
 
-    // The destructors are called here
-    delete[] old_data;
+    if(old_data != nullptr)
+    {
+      traits::destruct(old_data, old_length);
+      free_memory(old_data);
+    }
   }
 }
 
@@ -573,6 +618,27 @@ QVector<T> Array<T, T_traits>::toQVector() const
   for(int i=0; i<this->length(); ++i)
     v[i] = this->at(i);
   return v;
+}
+
+
+template<typename T, class T_traits>
+T* Array<T, T_traits>::allocate_memory(int n)
+{
+  Q_ASSERT(n!=0);
+
+  void* buffer = malloc(n*sizeof(T));
+
+  if(buffer == nullptr)
+    throw GLRT_EXCEPTION("Out of memory");
+
+  return reinterpret_cast<T*>(buffer);
+}
+
+template<typename T, class T_traits>
+void Array<T, T_traits>::free_memory(T* data)
+{
+  Q_ASSERT(data!=nullptr);
+  free(data);
 }
 
 
