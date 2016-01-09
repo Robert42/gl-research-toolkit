@@ -108,22 +108,23 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
 template<typename T>
 struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
 {
-  typedef typename ArrayTraits_Unordered_Toolkit<T>::hint_type hint_type;
-  typedef typename ArrayTraits_Unordered_Toolkit<T>::cache_type cache_type;
+  typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
+  typedef typename parent_type::hint_type hint_type;
+  typedef typename parent_type::cache_type cache_type;
 
   static void copy(T* dest, const T* src, int count)
   {
-    copy_mI(dest, src, count);
+    parent_type::copy_mI(dest, src, count);
   }
 
   static void copy_single(T* dest, const T* src)
   {
-    copy_single_mI(dest, src);
+    parent_type::copy_single_mI(dest, src);
   }
 
   static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
   {
-    return append_mC(data, prev_length, value, hint, cache);
+    return parent_type::append_mC(data, prev_length, std::move(value), hint, cache);
   }
 
   static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache) = delete;
@@ -131,12 +132,12 @@ struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
 
   static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
   {
-    remove_single_mOD(data, prev_length, index, hint, cache);
+    parent_type::remove_single_mOD(data, prev_length, index, hint, cache);
   }
 
   static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
   {
-    remove_mOD(data, prev_length, first_index, num_values, hint, cache);
+    parent_type::remove_mOD(data, prev_length, first_index, num_values, hint, cache);
   }
 };
 

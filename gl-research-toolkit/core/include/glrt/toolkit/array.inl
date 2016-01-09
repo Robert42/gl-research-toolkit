@@ -470,7 +470,7 @@ int Array<T, T_traits>::append(T&& value, const hint_type& hint)
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1, &this->trait_cache));
 
   // the trait must assume, that there's enough space
-  int new_index = traits::append_move(this->data(), this->length(), value, hint, &this->trait_cache);
+  int new_index = traits::append_move(this->data(), this->length(), std::move(value), hint, &this->trait_cache);
 
   _length++;
 
