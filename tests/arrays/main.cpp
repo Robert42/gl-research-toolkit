@@ -93,23 +93,34 @@ void test_array_operators()
 
 void test_swap()
 {
-  StateSpy::globalState().clear();
+  StateSpy::clear();
   Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array1;
   Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array2;
 
-  EXPECT_TRUE(StateSpy::globalState().isEmpty());
+  EXPECT_TRUE(StateSpy::log().isEmpty());
 
   array1.append(StateSpy());
   array2.append(StateSpy());
 
-  EXPECT_FALSE(StateSpy::globalState().isEmpty());
-  StateSpy::globalState().clear();
-  EXPECT_TRUE(StateSpy::globalState().isEmpty());
+  EXPECT_FALSE(StateSpy::log().isEmpty());
+  StateSpy::clear();
+  EXPECT_TRUE(StateSpy::log().isEmpty());
 
   array1.swap(array2);
 
   // No copying/moving/anything should happen during swapping
-  EXPECT_TRUE(StateSpy::globalState().isEmpty());
+  EXPECT_TRUE(StateSpy::log().isEmpty());
+}
+
+void test_clean()
+{
+  StateSpy::clear();
+  StateSpy::enabledDebugPrint = true;
+  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array1;
+  array1.append(StateSpy());
+  array1.append(StateSpy());
+  array1.append(StateSpy());
+  StateSpy::enabledDebugPrint = false;
 }
 
 
@@ -121,6 +132,7 @@ int main(int argc, char** argv)
   test_array_operators();
   test_unordered_array_trait();
   test_swap();
+  test_clean();
 
   return testing_application.result();
 }
