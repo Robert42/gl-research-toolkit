@@ -7,7 +7,13 @@
 class StateSpy
 {
 public:
-  typedef QMap<int, QString> State;
+  struct EnablePrinting
+  {
+    EnablePrinting(){enabledDebugPrint=true;}
+    EnablePrinting(const EnablePrinting&)=delete;
+    EnablePrinting& operator=(const EnablePrinting&)=delete;
+    ~EnablePrinting(){enabledDebugPrint=false;}
+  };
 
   int index;
 
@@ -17,16 +23,20 @@ public:
 
   ~StateSpy();
 
+  StateSpy& operator=(const StateSpy& s);
+  StateSpy& operator=(StateSpy&& s);
+
   void print(const QString& s);
-  QString& state();
 
   static void clear();
   static QString log();
   static bool enabledDebugPrint;
 
 private:
+  static int _nextIndex;
+
   static int nextIndex();
-  static State& globalState();
+  static QString& globalState();
 };
 
 #endif // STATESPY_H

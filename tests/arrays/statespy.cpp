@@ -2,6 +2,7 @@
 #include <QDebug>
 
 bool StateSpy::enabledDebugPrint = false;
+int StateSpy::_nextIndex = 0;
 
 StateSpy::StateSpy()
   : index(nextIndex())
@@ -26,39 +27,43 @@ StateSpy::~StateSpy()
   print(QString("destructed"));
 }
 
-
-QString& StateSpy::state()
+StateSpy& StateSpy::operator=(const StateSpy& s)
 {
-  return globalState()[index];
+  print(QString("assignment operator from %0").arg(s.index));
+  return *this;
+}
+
+StateSpy& StateSpy::operator=(StateSpy&& s)
+{
+  print(QString("move operator from %0").arg(s.index));
+  return *this;
 }
 
 void StateSpy::print(const QString& s)
 {
-  globalState()[-1] += QString("%0: %1\n").arg(index).arg(s);
-  state() += s + '\n';
+  globalState() += QString("%0: %1\n").arg(index).arg(s);
   if(enabledDebugPrint)
     qDebug() << QString("%0: %1").arg(index).arg(s);
 }
 
 void StateSpy::clear()
 {
+  _nextIndex = 0;
   globalState().clear();
 }
 
 QString StateSpy::log()
 {
-  if(globalState().contains(-1))
-    return globalState()[-1];
-  return "";
+  return globalState();
 }
 
-StateSpy::State& StateSpy::globalState()
+QString& StateSpy::globalState()
 {
-  static State s;
+  static QString s;
   return s;
 }
 
 int StateSpy::nextIndex()
 {
-  return globalState().isEmpty() ? 0 : globalState().keys().last()+1;
+  return _nextIndex++;
 }
