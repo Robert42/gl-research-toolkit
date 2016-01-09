@@ -3,7 +3,10 @@
 
 #include <testing-framework.h>
 
+#include "statespy.h"
+
 using glrt::Array;
+
 
 
 void test_unordered_array_trait();
@@ -88,6 +91,27 @@ void test_array_operators()
   EXPECT_EQ(array1[2], 2);
 }
 
+void test_swap()
+{
+  StateSpy::globalState().clear();
+  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array1;
+  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array2;
+
+  EXPECT_TRUE(StateSpy::globalState().isEmpty());
+
+  array1.append(StateSpy());
+  array2.append(StateSpy());
+
+  EXPECT_FALSE(StateSpy::globalState().isEmpty());
+  StateSpy::globalState().clear();
+  EXPECT_TRUE(StateSpy::globalState().isEmpty());
+
+  array1.swap(array2);
+
+  // No copying/moving/anything should happen during swapping
+  EXPECT_TRUE(StateSpy::globalState().isEmpty());
+}
+
 
 int main(int argc, char** argv)
 {
@@ -96,6 +120,7 @@ int main(int argc, char** argv)
   test_array_constructors();
   test_array_operators();
   test_unordered_array_trait();
+  test_swap();
 
   return testing_application.result();
 }
