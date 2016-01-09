@@ -25,10 +25,10 @@ struct ArrayTraits_Unordered_Toolkit
   static hint_type default_append_hint(){return hint_type(0xffffffff);}
   static hint_type default_remove_hint(){return hint_type(0xffffffff);}
 
-  static void change_location_mI(T* dest, const T* src, int count);
-  static void change_location_single_mI(T* dest, const T* src);
-  static void change_location_cC(T* dest, const T* src, int count);
-  static void change_location_single_cC(T* dest, const T* src);
+  static void copy_mI(T* dest, const T* src, int count);
+  static void copy_single_mI(T* dest, const T* src);
+  static void copy_cC(T* dest, const T* src, int count);
+  static void copy_single_cC(T* dest, const T* src);
   static int new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache);
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
 
@@ -64,17 +64,18 @@ protected:
 template<typename T>
 struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
 {
-  typedef typename ArrayTraits_Unordered_Toolkit<T>::hint_type hint_type;
-  typedef typename ArrayTraits_Unordered_Toolkit<T>::cache_type cache_type;
+  typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
+  typedef typename parent_type::hint_type hint_type;
+  typedef typename parent_type::cache_type cache_type;
 
-  static void change_location(T* dest, const T* src, int count)
+  static void copy(T* dest, const T* src, int count)
   {
-    change_location_mI(dest, src, count);
+    parent_type::copy_mI(dest, src, count);
   }
 
-  static void change_location_single(T* dest, const T* src)
+  static void copy_single(T* dest, const T* src)
   {
-    change_location_single_mI(dest, src);
+    parent_type::copy_single_mI(dest, src);
   }
 
   static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
@@ -84,22 +85,22 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
 
   static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
   {
-    return append_mI(data, prev_length, value, hint, cache);
+    return parent_type::append_mI(data, prev_length, value, hint, cache);
   }
 
   static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
   {
-    return extend_mI(data, prev_length, values, num_values, hint, cache);
+    return parent_type::extend_mI(data, prev_length, values, num_values, hint, cache);
   }
 
   static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
   {
-    remove_single_mI(data, prev_length, index, hint, cache);
+    parent_type::remove_single_mI(data, prev_length, index, hint, cache);
   }
 
   static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
   {
-    remove_mI(data, prev_length, first_index, num_values, hint, cache);
+    parent_type::remove_mI(data, prev_length, first_index, num_values, hint, cache);
   }
 };
 
@@ -110,14 +111,14 @@ struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
   typedef typename ArrayTraits_Unordered_Toolkit<T>::hint_type hint_type;
   typedef typename ArrayTraits_Unordered_Toolkit<T>::cache_type cache_type;
 
-  static void change_location(T* dest, const T* src, int count)
+  static void copy(T* dest, const T* src, int count)
   {
-    change_location_mI(dest, src, count);
+    copy_mI(dest, src, count);
   }
 
-  static void change_location_single(T* dest, const T* src)
+  static void copy_single(T* dest, const T* src)
   {
-    change_location_single_mI(dest, src);
+    copy_single_mI(dest, src);
   }
 
   static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
@@ -169,6 +170,7 @@ public:
   Array(const Array&) = delete;
   Array& operator=(const Array&) = delete;
 
+  Array(const std::initializer_list<T>& init_with_values);
   Array(Array&& other);
   Array& operator=(Array&& other);
 
@@ -190,6 +192,7 @@ public:
   const T& operator[](int i) const;
 
   int length() const;
+  bool isEmpty() const;
 
   int append(T&& value, const hint_type& hint=traits::default_append_hint());
   int append(const T& value, const hint_type& hint=traits::default_append_hint());
@@ -200,12 +203,20 @@ public:
   void remove(int index, const hint_type& hint=traits::default_remove_hint());
   void remove(int index, int num_to_remove, const hint_type& hint=traits::default_remove_hint());
 
+  bool operator==(const Array& other) const;
+  bool operator!=(const Array& other) const;
+
+  QVector<T> toQVector() const;
+
 private:
   cache_type trait_cache;
   T* _data;
   int _capacity;
   int _length;
 };
+
+template<typename T, typename T_traits>
+QDebug operator<<(QDebug d, const Array<T, T_traits>& array);
 
 
 } // namespace glrt

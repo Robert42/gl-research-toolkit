@@ -81,31 +81,31 @@ inline void ArrayTraits_Unordered_Toolkit<T>::values_used_to_fill_gaps(int* firs
 
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::change_location_mI(T* dest, const T* src, int count)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_mI(T* dest, const T* src, int count)
 {
   Q_ASSERT(!ranges_overlap(dest, src, count));
   std::memcpy(dest, src, sizeof(T)*count);
 }
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::change_location_single_mI(T* dest, const T* src)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_single_mI(T* dest, const T* src)
 {
-  change_location_mI(dest, src, 1);
+  copy_mI(dest, src, 1);
 }
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::change_location_single_cC(T* dest, const T* src)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_single_cC(T* dest, const T* src)
 {
   Q_ASSERT(!ranges_overlap(dest, src, 1));
   new(dest)T(*src);
 }
 
 template<typename T>
-inline void ArrayTraits_Unordered_Toolkit<T>::change_location_cC(T* dest, const T* src, int count)
+inline void ArrayTraits_Unordered_Toolkit<T>::copy_cC(T* dest, const T* src, int count)
 {
   Q_ASSERT(!ranges_overlap(dest, src, count));
   for(int i=0; i<count; ++i)
-    change_location_single_cC(dest+i, src+i);
+    copy_single_cC(dest+i, src+i);
 }
 
 template<typename T>
@@ -151,7 +151,7 @@ inline int ArrayTraits_Unordered_Toolkit<T>::append_mI(T* data, int prev_length,
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  change_location_single_mI(data+prev_length, &value);
+  copy_single_mI(data+prev_length, &value);
   return prev_length;
 }
 
@@ -161,7 +161,7 @@ inline int ArrayTraits_Unordered_Toolkit<T>::extend_mI(T* data, int prev_length,
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  change_location_mI(data+prev_length, values, num_values);
+  copy_mI(data+prev_length, values, num_values);
   return prev_length;
 }
 
@@ -194,7 +194,7 @@ inline void ArrayTraits_Unordered_Toolkit<T>::remove_single_mI(T* data, int prev
 
   int last = prev_length-1;
   if(index != last)
-    change_location_single_mI(data+index, data+last);
+    copy_single_mI(data+index, data+last);
 }
 
 template<typename T>
@@ -208,7 +208,7 @@ void ArrayTraits_Unordered_Toolkit<T>::remove_mI(T* data, int prev_length, const
 
   values_used_to_fill_gaps(&first_value_to_copy, &num_values_to_copy, prev_length, first_index, num_values);
 
-  change_location_mI(data+first_index, data+first_value_to_copy, num_values_to_copy);
+  copy_mI(data+first_index, data+first_value_to_copy, num_values_to_copy);
 }
 
 template<typename T>
@@ -267,7 +267,7 @@ void ArrayTraits_Unordered_Toolkit<T>::remove_cCD(T* data, int prev_length, cons
   values_used_to_fill_gaps(&first_value_to_copy, &num_values_to_copy, prev_length, first_index, num_values);
 
   call_instance_destructors_D(data+first_index, num_values);
-  change_location_cC(data+first_index, data+first_value_to_copy, num_values_to_copy);
+  copy_cC(data+first_index, data+first_value_to_copy, num_values_to_copy);
 
   call_instance_destructors_D(data+prev_length-num_values_to_copy, num_values_to_copy);
 }
@@ -314,15 +314,19 @@ Array<T, T_traits>::~Array()
 }
 
 template<typename T, class T_traits>
-Array<T, T_traits>::Array(Array&& other)
-  : _data(other._data),
-    _length(other._length)
+Array<T, T_traits>::Array(const std::initializer_list<T>& init_with_values)
+  : Array()
 {
-  other._data = nullptr;
-  other._length = nullptr;
-  other._capacity = nullptr;
-  traits::init_cache(&this->trait_cache);
-  traits::swap_cache(&this->trait_cache, &other.trait_cache);
+  ensureCapacity(init_with_values.size());
+  for(const T& value : init_with_values)
+    append(value);
+}
+
+template<typename T, class T_traits>
+Array<T, T_traits>::Array(Array&& other)
+  : Array()
+{
+  this->swap(other);
 }
 
 template<typename T, class T_traits>
@@ -338,7 +342,7 @@ void Array<T, T_traits>::swap(Array& other)
   std::swap(this->_data, other._data);
   std::swap(this->_capacity, other._capacity);
   std::swap(this->_length, other._length);
-  traits::swap_cache(&this->trait_cache, other.trait_cache);
+  traits::swap_cache(&this->trait_cache, &other.trait_cache);
 }
 
 
@@ -369,33 +373,38 @@ void Array<T, T_traits>::setCapacity(int capacity)
     if(capacity == 0)
     {
       this->clear();
-    }else
-    {
-      T* old_data = this->_data;
-
-      this->_data = new T[capacity];
-      this->_capacity = capacity;
-      this->_length = glm::min(this->_length, capacity);
-
-      traits::change_location(this->_data, old_data, this->_length);
-
-      delete[] old_data;
+      return;
     }
+
+    if(capacity < length())
+    Q_ASSERT(length() <= capacity);
+
+    T* old_data = this->_data;
+
+    this->_data = new T[capacity];
+    this->_capacity = capacity;
+    this->_length = glm::min(this->_length, capacity);
+
+    // move the elements to the new buffer.
+    traits::copy(this->_data, old_data, this->_length);
+
+    // The destructors are called here
+    delete[] old_data;
   }
 }
 
 template<typename T, class T_traits>
 void Array<T, T_traits>::ensureCapacity(int minCapacity)
 {
-  Q_ASSERT(capacity >= 0);
+  Q_ASSERT(capacity() >= 0);
 
-  setCapacity(glm::min(minCapacity, this->capacity()));
+  setCapacity(glm::max(minCapacity, this->capacity()));
 }
 
 template<typename T, class T_traits>
 void Array<T, T_traits>::reserve(int minCapacity)
 {
-  Q_ASSERT(capacity >= 0);
+  Q_ASSERT(capacity() >= 0);
 
   ensureCapacity(minCapacity);
 }
@@ -447,6 +456,12 @@ template<typename T, class T_traits>
 int Array<T, T_traits>::length() const
 {
   return _length;
+}
+
+template<typename T, class T_traits>
+bool Array<T, T_traits>::isEmpty() const
+{
+  return _length==0;
 }
 
 template<typename T, class T_traits>
@@ -525,6 +540,46 @@ void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& h
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), num_to_remove, &this->trait_cache);
   if(new_capacity >= 0)
     setCapacity(new_capacity);
+}
+
+template<typename T, class T_traits>
+bool Array<T, T_traits>::operator==(const Array& other) const
+{
+  if(this->length() != other.length())
+    return false;
+
+  int n = this->length();
+
+  for(int i=0; i<n; ++i)
+  {
+    if(this->at(i) != other.at(i))
+      return false;
+  }
+
+  return true;
+}
+
+template<typename T, class T_traits>
+bool Array<T, T_traits>::operator!=(const Array& other) const
+{
+  return !this->operator ==(other);
+}
+
+template<typename T, class T_traits>
+QVector<T> Array<T, T_traits>::toQVector() const
+{
+  QVector<T> v;
+  v.resize(this->length());
+  for(int i=0; i<this->length(); ++i)
+    v[i] = this->at(i);
+  return v;
+}
+
+
+template<typename T, typename T_traits>
+QDebug operator<<(QDebug d, const Array<T, T_traits>& array)
+{
+  return d << array.toQVector();
 }
 
 
