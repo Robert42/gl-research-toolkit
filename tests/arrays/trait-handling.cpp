@@ -51,7 +51,7 @@ struct TestTrait
 
   static void init_cache(cache_type* c)
   {
-    EXPECT_EQ(c, TestTrait<T>::cache_ptr());
+    TestTrait<T>::cache_ptr() = c;
 
     *c = "init_cache";
   }
@@ -67,7 +67,10 @@ struct TestTrait
   {
     EXPECT_EQ(c, TestTrait<T>::cache_ptr());
 
-    *c = "delete_cache";
+    static QString s;
+
+    TestTrait<T>::cache_ptr() = &s;
+    *TestTrait<T>::cache_ptr() = "delete_cache";
   }
 
   static void swap_cache(cache_type* a, cache_type* b)
@@ -142,5 +145,9 @@ struct TestTrait
 
 void test_trait_handling()
 {
-  Array<int, TestTrait<int>> array;
+  {
+    Array<int, TestTrait<int>> array;
+    EXPECT_EQ(*TestTrait<int>::cache_ptr(), "init_cache");
+  }
+  EXPECT_EQ(*TestTrait<int>::cache_ptr(), "delete_cache");
 }
