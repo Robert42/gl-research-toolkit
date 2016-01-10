@@ -561,7 +561,7 @@ int Array<T, T_traits>::append_move(T&& value, const hint_type& hint)
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::extend_move(const T* values, int num_values, const hint_type& hint)
+int Array<T, T_traits>::extend_move(T* values, int num_values, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values, &this->trait_cache));
 

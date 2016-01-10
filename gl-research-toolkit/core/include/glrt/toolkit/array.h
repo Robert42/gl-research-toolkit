@@ -156,7 +156,7 @@ struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_c
     return parent_type::append_mC(data, prev_length, std::move(value), hint, cache);
   }
 
-  static int extend_move(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
+  static int extend_move(T* data, int prev_length, T* values, int num_values, const hint_type& hint, cache_type* cache)
   {
     return parent_type::extend_mC(data, prev_length, values, num_values, hint, cache);
   }
@@ -251,7 +251,7 @@ public:
   bool isEmpty() const;
 
   int append_move(T&& value, const hint_type& hint=traits::default_append_hint());
-  int extend_move(const T* values, int num_values, const hint_type& hint=traits::default_append_hint());
+  int extend_move(T* values, int num_values, const hint_type& hint=traits::default_append_hint());
 
   int append_copy(const T& value, const hint_type& hint=traits::default_append_hint());
   template<typename T_other_trait>
