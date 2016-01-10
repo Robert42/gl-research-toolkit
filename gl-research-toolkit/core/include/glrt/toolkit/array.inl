@@ -56,9 +56,9 @@ template<typename T_int>
 inline bool ArrayTraits_Unordered_Toolkit<T, T_c>::ranges_overlap(T_int range1_begin, T_int range1_end, T_int range2_begin, T_int range2_end)
 {
   return (range1_begin>=range2_begin && range1_begin<range2_end)
-      || (range1_end  >=range2_begin && range1_end  <range2_end)
+      || (range1_end  > range2_begin && range1_end  <range2_end)
       || (range2_begin>=range1_begin && range2_begin<range1_end)
-      || (range2_end  >=range1_begin && range2_end  <range1_end);
+      || (range2_end  > range1_begin && range2_end  <range1_end);
 }
 
 template<typename T, typename T_c>
