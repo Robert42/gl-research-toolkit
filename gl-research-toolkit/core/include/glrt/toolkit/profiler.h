@@ -42,13 +42,17 @@ private:
     int line;
     int depth;
 
-    QDataStream& operator<<(QDataStream& stream);
+    void write(QDataStream& stream) const;
   };
 
   static Profiler* activeProfiler;
 
   std::vector<RecordedScope> recordedScopes;
   int currentDepth;
+
+  QVector<const char*> strings_to_send;
+
+  void send_data(QDataStream& stream);
 };
 
 class Profiler::Scope final

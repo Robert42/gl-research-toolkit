@@ -81,11 +81,23 @@ void Profiler::deactivate()
 }
 
 
+void Profiler::send_data(QDataStream& stream)
+{
+  stream << strings_to_send.length();
+  for(const char* str : strings_to_send)
+    stream << quintptr(str) << QString(str);
+
+  stream << int(recordedScopes.size());
+  for(const RecordedScope& s : recordedScopes)
+    s.write(stream);
+}
+
+
 // ======== Profiler::RecordedScope ============================================
 
-QDataStream& Profiler::RecordedScope::operator<<(QDataStream& stream)
+void Profiler::RecordedScope::write(QDataStream& stream) const
 {
-  return stream << time << quintptr(file) << quintptr(function) << quintptr(name) << line << depth;
+  stream << time << quintptr(file) << quintptr(function) << quintptr(name) << line << depth;
 }
 
 // ======== Profiler::Scope ====================================================
