@@ -99,8 +99,8 @@ void test_swap()
 
   EXPECT_TRUE(StateSpy::log().isEmpty());
 
-  array1.append_move(StateSpy());
-  array2.append_move(StateSpy());
+  array1.append(StateSpy());
+  array2.append(StateSpy());
 
   EXPECT_FALSE(StateSpy::log().isEmpty());
   StateSpy::clearLog();
@@ -119,7 +119,7 @@ void test_append_move()
   {
     StateSpy::clearIndex();
     StateSpyArray array;
-    array.append_move(StateSpy());
+    array.append(StateSpy());
 
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
@@ -137,14 +137,14 @@ void test_append_move()
     StateSpy::clearIndex();
     StateSpyArray array;
 
-    array.append_move(StateSpy());
+    array.append(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
               "1: move constructor from 0\n"
               "0: destructed\n");
     StateSpy::clearLog();
 
-    array.append_move(StateSpy());
+    array.append(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "2: default constructor\n"
               "3: move constructor from 2\n"
@@ -163,21 +163,21 @@ void test_append_move()
     StateSpy::clearIndex();
     StateSpyArray array;
 
-    array.append_move(StateSpy());
+    array.append(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
               "1: move constructor from 0\n"
               "0: destructed\n");
     StateSpy::clearLog();
 
-    array.append_move(StateSpy());
+    array.append(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "2: default constructor\n"
               "3: move constructor from 2\n"
               "2: destructed\n");
     StateSpy::clearLog();
 
-    array.append_move(StateSpy());
+    array.append(StateSpy());
     EXPECT_EQ(array.capacity(), 4);
     EXPECT_EQ(StateSpy::log(),
               "4: default constructor\n"
@@ -205,7 +205,10 @@ void test_append_copy()
   {
     StateSpy::clearIndex();
     StateSpyArray array;
-    array.append_copy(StateSpy());
+    {
+      StateSpy s;
+      array.append(s);
+    }
 
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
@@ -223,14 +226,20 @@ void test_append_copy()
     StateSpy::clearIndex();
     StateSpyArray array;
 
-    array.append_copy(StateSpy());
+    {
+      StateSpy s;
+      array.append(s);
+    }
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
               "1: copy constructor from 0\n"
               "0: destructed\n");
     StateSpy::clearLog();
 
-    array.append_copy(StateSpy());
+    {
+      StateSpy s;
+      array.append(s);
+    }
     EXPECT_EQ(StateSpy::log(),
               "2: default constructor\n"
               "3: copy constructor from 2\n"
@@ -249,21 +258,30 @@ void test_append_copy()
     StateSpy::clearIndex();
     StateSpyArray array;
 
-    array.append_copy(StateSpy());
+    {
+      StateSpy s;
+      array.append(s);
+    }
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
               "1: copy constructor from 0\n"
               "0: destructed\n");
     StateSpy::clearLog();
 
-    array.append_copy(StateSpy());
+    {
+      StateSpy s;
+      array.append(s);
+    }
     EXPECT_EQ(StateSpy::log(),
               "2: default constructor\n"
               "3: copy constructor from 2\n"
               "2: destructed\n");
     StateSpy::clearLog();
 
-    array.append_copy(StateSpy());
+    {
+      StateSpy s;
+      array.append(s);
+    }
     EXPECT_EQ(array.capacity(), 4);
     EXPECT_EQ(StateSpy::log(),
               "4: default constructor\n"

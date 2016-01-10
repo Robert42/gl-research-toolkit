@@ -258,6 +258,9 @@ public:
   int extend_copy(const Array<T, T_other_trait>& values, const hint_type& hint=traits::default_append_hint());
   int extend_copy(const T* values, int num_values, const hint_type& hint=traits::default_append_hint());
 
+  int append(const T& value, const hint_type& hint=traits::default_append_hint());
+  int append(T&& value, const hint_type& hint=traits::default_append_hint());
+
   void remove(int index, const hint_type& hint=traits::default_remove_hint());
   void remove(int index, int num_to_remove, const hint_type& hint=traits::default_remove_hint());
 

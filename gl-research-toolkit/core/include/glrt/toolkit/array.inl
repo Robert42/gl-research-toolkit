@@ -614,6 +614,18 @@ int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_
 }
 
 template<typename T, class T_traits>
+int Array<T, T_traits>::append(const T& value, const hint_type& hint)
+{
+  return append_copy(value, hint);
+}
+
+template<typename T, class T_traits>
+int Array<T, T_traits>::append(T&& value, const hint_type& hint)
+{
+  return append_move(std::move(value), hint);
+}
+
+template<typename T, class T_traits>
 void Array<T, T_traits>::remove(int index, const hint_type& hint)
 {
   traits::remove_single(this->data(), this->length(), index, hint, &this->trait_cache);
