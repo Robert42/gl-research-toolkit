@@ -32,9 +32,11 @@ public:
   Profiler(const Profiler&) = delete;
   ~Profiler();
 
+
   float update();
   void activate();
   void deactivate();
+  bool isActive() const;
 private:
   struct RecordedScope
   {

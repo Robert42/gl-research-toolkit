@@ -61,7 +61,7 @@ float Profiler::update()
 {
 #ifdef GLRT_PROFILER
   recordedScopes.clear();
-  if(activeProfiler != nullptr)
+  if(this->isActive())
   {
     recordedScopes.reserve(2048);
 
@@ -76,11 +76,18 @@ float Profiler::update()
 }
 
 
+bool Profiler::isActive() const
+{
+  return activeProfiler == this;
+}
+
+
 void Profiler::activate()
 {
   activeProfiler = this;
   recordedScopes.clear();
   tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_PROFILER_DEFAULT_PORT);
+  tcpSocket.waitForConnected(1000);
 }
 
 
