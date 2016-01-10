@@ -6,6 +6,8 @@ Dialog::Dialog(QWidget *parent) :
   ui(new Ui::Dialog)
 {
   ui->setupUi(this);
+
+  ui->spinBox_Port->setValue(GLRT_PROFILER_DEFAULT_PORT);
 }
 
 Dialog::~Dialog()
