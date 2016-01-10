@@ -99,8 +99,8 @@ void test_swap()
 
   EXPECT_TRUE(StateSpy::log().isEmpty());
 
-  array1.append(StateSpy());
-  array2.append(StateSpy());
+  array1.append_move(StateSpy());
+  array2.append_move(StateSpy());
 
   EXPECT_FALSE(StateSpy::log().isEmpty());
   StateSpy::clearLog();
@@ -112,14 +112,14 @@ void test_swap()
   EXPECT_TRUE(StateSpy::log().isEmpty());
 }
 
-void test_append()
+void test_append_move()
 {
   StateSpy::clearLog();
 
   {
     StateSpy::clearIndex();
     StateSpyArray array;
-    array.append(StateSpy());;
+    array.append_move(StateSpy());
 
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
@@ -137,14 +137,14 @@ void test_append()
     StateSpy::clearIndex();
     StateSpyArray array;
 
-    array.append(StateSpy());
+    array.append_move(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
               "1: move constructor from 0\n"
               "0: destructed\n");
     StateSpy::clearLog();
 
-    array.append(StateSpy());
+    array.append_move(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "2: default constructor\n"
               "3: move constructor from 2\n"
@@ -163,21 +163,21 @@ void test_append()
     StateSpy::clearIndex();
     StateSpyArray array;
 
-    array.append(StateSpy());
+    array.append_move(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
               "1: move constructor from 0\n"
               "0: destructed\n");
     StateSpy::clearLog();
 
-    array.append(StateSpy());
+    array.append_move(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "2: default constructor\n"
               "3: move constructor from 2\n"
               "2: destructed\n");
     StateSpy::clearLog();
 
-    array.append(StateSpy());
+    array.append_move(StateSpy());
     EXPECT_EQ(array.capacity(), 4);
     EXPECT_EQ(StateSpy::log(),
               "4: default constructor\n"
@@ -198,10 +198,120 @@ void test_append()
 
 }
 
-void test_extend()
+void test_append_copy()
+{
+  StateSpy::clearLog();
+
+  {
+    StateSpy::clearIndex();
+    StateSpyArray array;
+    array.append_copy(StateSpy());
+
+    EXPECT_EQ(StateSpy::log(),
+              "0: default constructor\n"
+              "1: copy constructor from 0\n"
+              "0: destructed\n");
+    StateSpy::clearLog();
+
+    EXPECT_EQ(array.capacity(), 2);
+  }
+  EXPECT_EQ(StateSpy::log(),
+            "1: destructed\n");
+  StateSpy::clearLog();
+
+  {
+    StateSpy::clearIndex();
+    StateSpyArray array;
+
+    array.append_copy(StateSpy());
+    EXPECT_EQ(StateSpy::log(),
+              "0: default constructor\n"
+              "1: copy constructor from 0\n"
+              "0: destructed\n");
+    StateSpy::clearLog();
+
+    array.append_copy(StateSpy());
+    EXPECT_EQ(StateSpy::log(),
+              "2: default constructor\n"
+              "3: copy constructor from 2\n"
+              "2: destructed\n");
+    StateSpy::clearLog();
+
+    EXPECT_EQ(array.capacity(), 2);
+  }
+
+  EXPECT_EQ(StateSpy::log(),
+            "1: destructed\n"
+            "3: destructed\n");
+  StateSpy::clearLog();
+
+  {
+    StateSpy::clearIndex();
+    StateSpyArray array;
+
+    array.append_copy(StateSpy());
+    EXPECT_EQ(StateSpy::log(),
+              "0: default constructor\n"
+              "1: copy constructor from 0\n"
+              "0: destructed\n");
+    StateSpy::clearLog();
+
+    array.append_copy(StateSpy());
+    EXPECT_EQ(StateSpy::log(),
+              "2: default constructor\n"
+              "3: copy constructor from 2\n"
+              "2: destructed\n");
+    StateSpy::clearLog();
+
+    array.append_copy(StateSpy());
+    EXPECT_EQ(array.capacity(), 4);
+    EXPECT_EQ(StateSpy::log(),
+              "4: default constructor\n"
+              "5: move constructor from 1\n"
+              "6: move constructor from 3\n"
+              "1: destructed\n"
+              "3: destructed\n"
+              "7: copy constructor from 4\n"
+              "4: destructed\n");
+    StateSpy::clearLog();
+  }
+
+  EXPECT_EQ(StateSpy::log(),
+            "5: destructed\n"
+            "6: destructed\n"
+            "7: destructed\n");
+  StateSpy::clearLog();
+
+}
+
+void test_extend_copy()
 {
   StateSpy::EnablePrinting print;
+
+  StateSpy::clearLog();
+
+  {
+    StateSpy::clearIndex();
+    StateSpyArray array;
+
+
+    StateSpy ab[2];
+
+    array.extend_copy(ab, 2);
+
+    EXPECT_EQ(StateSpy::log(),
+              "TODO");
+    StateSpy::clearLog();
+
+    EXPECT_EQ(array.capacity(), 2);
+  }
+
+
   Q_UNUSED(print);
+}
+
+void test_extend_move()
+{
 }
 
 void test_remove()
@@ -227,8 +337,10 @@ int main(int argc, char** argv)
   test_array_constructors();
   test_array_operators();
   test_swap();
-  test_append();
-  test_extend();
+  test_append_move();
+  test_append_copy();
+  //test_extend_move();
+  //test_extend_copy();
   test_remove();
 
   return testing_application.result();

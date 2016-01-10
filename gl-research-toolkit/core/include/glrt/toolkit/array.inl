@@ -172,6 +172,16 @@ inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_mC(T* data, int prev_le
 }
 
 template<typename T, typename T_c>
+inline int ArrayTraits_Unordered_Toolkit<T, T_c>::extend_mC(T* data, int prev_length, T* values, int num_values, const hint_type& hint, cache_type* cache)
+{
+  Q_UNUSED(hint);
+  Q_UNUSED(cache);
+
+  move_construct_mC(data+prev_length, values, num_values);
+  return prev_length;
+}
+
+template<typename T, typename T_c>
 inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_POD(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
@@ -384,7 +394,7 @@ Array<T, T_traits>::Array(const std::initializer_list<T>& init_with_values)
 {
   ensureCapacity(init_with_values.size());
   for(const T& value : init_with_values)
-    append(value);
+    append_copy(value);
 }
 
 template<typename T, class T_traits>
@@ -535,7 +545,7 @@ bool Array<T, T_traits>::isEmpty() const
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::append(T&& value, const hint_type& hint)
+int Array<T, T_traits>::append_move(T&& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1, &this->trait_cache));
 
@@ -551,12 +561,27 @@ int Array<T, T_traits>::append(T&& value, const hint_type& hint)
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::append(const T& value, const hint_type& hint)
+int Array<T, T_traits>::extend_move(const T* values, int num_values, const hint_type& hint)
+{
+  ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values, &this->trait_cache));
+
+  int new_index = traits::extend_move(this->data(), this->length(), values, num_values, hint, &this->trait_cache);
+
+  _length += num_values;
+
+  Q_ASSERT(new_index>=0);
+  Q_ASSERT(new_index<=_length-num_values);
+
+  return new_index;
+}
+
+template<typename T, class T_traits>
+int Array<T, T_traits>::append_copy(const T& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1, &this->trait_cache));
 
   // the trait must assume, that there's enough space
-  int new_index = traits::append(this->data(), this->length(), value, hint, &this->trait_cache);
+  int new_index = traits::append_copy(this->data(), this->length(), value, hint, &this->trait_cache);
 
   _length++;
 
@@ -568,17 +593,17 @@ int Array<T, T_traits>::append(const T& value, const hint_type& hint)
 
 template<typename T, class T_traits>
 template<typename T_other_traits>
-int Array<T, T_traits>::extend(const Array<T, T_other_traits>& values, const hint_type& hint)
+int Array<T, T_traits>::extend_copy(const Array<T, T_other_traits>& values, const hint_type& hint)
 {
-  return extend(values.data(), values.length(), hint);
+  return extend_copy(values.data(), values.length(), hint);
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::extend(const T* values, int num_values, const hint_type& hint)
+int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values, &this->trait_cache));
 
-  int new_index = traits::extend(this->data(), this->length(), values, num_values, hint, &this->trait_cache);
+  int new_index = traits::extend_copy(this->data(), this->length(), values, num_values, hint, &this->trait_cache);
 
   _length += num_values;
 
