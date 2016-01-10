@@ -524,6 +524,7 @@ void test_remove()
 {
   StateSpy::clearLog();
 
+  // test removing single
   {
     StateSpy::clearIndex();
     StateSpyArray array = {StateSpy()};
@@ -531,22 +532,58 @@ void test_remove()
               "0: default constructor\n"
               "1: copy constructor from 0\n"
               "0: destructed\n");
+    StateSpy::clearLog();
     EXPECT_FALSE(array.isEmpty());
     EXPECT_EQ(array.capacity(), 2);
     array.remove(0);
     EXPECT_TRUE(array.isEmpty());
     EXPECT_EQ(array.capacity(), 0);
+    EXPECT_EQ(StateSpy::log(),
+              "1: destructed\n");
     StateSpy::clearLog();
   }
+  EXPECT_EQ(StateSpy::log(),
+            "");
+  StateSpy::clearLog();
+
+  {
+    StateSpy::clearIndex();
+    StateSpyArray array = {StateSpy(), StateSpy()};
+    EXPECT_EQ(StateSpy::log(),
+              "0: default constructor\n"
+              "1: default constructor\n"
+              "2: copy constructor from 0\n"
+              "3: copy constructor from 1\n"
+              "1: destructed\n"
+              "0: destructed\n");
+    StateSpy::clearLog();
+    EXPECT_EQ(array.length(), 2);
+    EXPECT_EQ(array.capacity(), 2);
+    array.remove(0);
+    EXPECT_EQ(array.length(), 1);
+    EXPECT_EQ(array.capacity(), 2);
+    EXPECT_EQ(StateSpy::log(),
+              "2: move operator from 3\n"
+              "3: destructed\n");
+    StateSpy::clearLog();
+    array.remove(0);
+    EXPECT_EQ(array.length(), 0);
+    EXPECT_EQ(array.capacity(), 0);
+    EXPECT_EQ(StateSpy::log(),
+              "2: destructed\n");
+    StateSpy::clearLog();
+  }
+  EXPECT_EQ(StateSpy::log(),
+            "");
+  StateSpy::clearLog();
 
   StateSpy::EnablePrinting print;
-  // test removing single
 
-  // test removing single changing cache
+  // test removing single changing internal buffer
 
   // test removing multiple
 
-  // test removing multiple changing cache
+  // test removing multiple changing internal buffer
 
   Q_UNUSED(print);
 }
