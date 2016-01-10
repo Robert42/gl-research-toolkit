@@ -18,8 +18,9 @@ public:
   quint64 elapsedTimeAsMicroseconds() const;
 };
 
-class Profiler final
+class Profiler final : public QObject
 {
+  Q_OBJECT
 public:
   class Scope;
 
@@ -28,6 +29,7 @@ public:
   bool printFramerate = false;
 
   Profiler();
+  Profiler(const Profiler&) = delete;
   ~Profiler();
 
   float update();
@@ -56,6 +58,9 @@ private:
 
   void send_data_through_tcp();
   void send_data(QDataStream& stream);
+
+private slots:
+  void connectionError();
 };
 
 class Profiler::Scope final

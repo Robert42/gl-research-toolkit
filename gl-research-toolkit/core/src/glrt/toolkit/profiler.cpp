@@ -46,6 +46,8 @@ Profiler* Profiler::activeProfiler = nullptr;
 
 Profiler::Profiler()
 {
+  connect(&tcpSocket, &QTcpSocket::disconnected, this, &Profiler::deactivate);
+  connect(&tcpSocket, SIGNAL(Profiler::error), this, SLOT(connectionError));
 }
 
 
@@ -109,6 +111,12 @@ void Profiler::send_data(QDataStream& stream)
   stream << int(recordedScopes.size());
   for(const RecordedScope& s : recordedScopes)
     s.write(stream);
+}
+
+void Profiler::connectionError()
+{
+  qWarning() << tcpSocket.errorString();
+  deactivate();
 }
 
 
