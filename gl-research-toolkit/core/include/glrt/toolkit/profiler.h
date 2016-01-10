@@ -41,6 +41,8 @@ private:
     const char* name;
     int line;
     int depth;
+
+    QDataStream& operator<<(QDataStream& stream);
   };
 
   static Profiler* activeProfiler;

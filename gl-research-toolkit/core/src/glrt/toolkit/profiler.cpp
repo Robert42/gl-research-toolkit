@@ -2,6 +2,8 @@
 
 #include <SDL2/SDL_timer.h>
 
+#include <QDataStream>
+
 
 namespace glrt {
 
@@ -78,6 +80,13 @@ void Profiler::deactivate()
     activeProfiler = nullptr;
 }
 
+
+// ======== Profiler::RecordedScope ============================================
+
+QDataStream& Profiler::RecordedScope::operator<<(QDataStream& stream)
+{
+  return stream << time << quintptr(file) << quintptr(function) << quintptr(name) << line << depth;
+}
 
 // ======== Profiler::Scope ====================================================
 
