@@ -61,6 +61,7 @@ private:
 
 private slots:
   void connectionError();
+  void readStringsToWrite();
 };
 
 class Profiler::Scope final

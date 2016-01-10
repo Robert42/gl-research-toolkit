@@ -47,7 +47,8 @@ Profiler* Profiler::activeProfiler = nullptr;
 Profiler::Profiler()
 {
   connect(&tcpSocket, &QTcpSocket::disconnected, this, &Profiler::deactivate);
-  connect(&tcpSocket, SIGNAL(Profiler::error), this, SLOT(connectionError));
+  connect(&tcpSocket, &QTcpSocket::readyRead, this, &Profiler::readStringsToWrite);
+  connect(&tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(connectionError()));
 }
 
 
@@ -117,6 +118,18 @@ void Profiler::connectionError()
 {
   qWarning() << tcpSocket.errorString();
   deactivate();
+}
+
+void Profiler::readStringsToWrite()
+{
+  QDataStream stream(&tcpSocket);
+
+  while(!stream.atEnd())
+  {
+    quintptr ptr;
+    stream >> ptr;
+    strings_to_send.append(reinterpret_cast<char*>(ptr));
+  }
 }
 
 
