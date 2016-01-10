@@ -615,6 +615,7 @@ void test_remove()
     array.remove(0);
     EXPECT_EQ(array.length(), 0);
     EXPECT_EQ(array.capacity(), 0);
+    EXPECT_EQ(array.data(), nullptr);
     EXPECT_EQ(StateSpy::log(),
               "6: destructed\n");
     StateSpy::clearLog();
@@ -624,8 +625,10 @@ void test_remove()
   StateSpy::clearLog();
 
   // test removing multiple
+  // #TODO
 
   // test removing multiple changing internal buffer
+  // #TODO
 }
 
 int main(int argc, char** argv)
@@ -642,6 +645,9 @@ int main(int argc, char** argv)
   test_extend_copy();
   test_destructor();
   test_remove();
+  // #TODO: test ensureCapacity
+
+  // #TODO: Test all trait functions in action. Goal: each code line in the functions should be executed at least once.
 
   return testing_application.result();
 }
