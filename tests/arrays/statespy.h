@@ -1,6 +1,8 @@
 #ifndef STATESPY_H
 #define STATESPY_H
 
+#include <glrt/toolkit/array.h>
+
 #include <QString>
 #include <QMap>
 
@@ -39,5 +41,7 @@ private:
   static int nextIndex();
   static QString& globalState();
 };
+
+typedef glrt::Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
 
 #endif // STATESPY_H

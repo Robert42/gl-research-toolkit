@@ -1,5 +1,4 @@
 #include <testing-framework.h>
-#include <glrt/toolkit/array.h>
 
 #include <testing-framework.h>
 
@@ -96,8 +95,7 @@ void test_swap()
   StateSpy::clearIndex();
   StateSpy::clearLog();
 
-  Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy>> array1;
-  Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy>> array2;
+  StateSpyArray array1, array2;
 
   EXPECT_TRUE(StateSpy::log().isEmpty());
 
@@ -116,7 +114,6 @@ void test_swap()
 
 void test_append()
 {
-  typedef  Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
   StateSpy::clearLog();
 
   {
