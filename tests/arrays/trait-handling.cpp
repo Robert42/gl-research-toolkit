@@ -8,7 +8,7 @@ using glrt::Array;
 void test_capacity_traits()
 {
   int cache;
-  typedef glrt::ArrayCapacityTraits_Capacity_Blocks<int, 16, 64> capacity_blocks;
+  typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
 
   EXPECT_EQ(capacity_blocks::new_capacity(0, 0, 0, &cache), 0);
   EXPECT_EQ(capacity_blocks::new_capacity(1024, 0, 0, &cache), 1024);

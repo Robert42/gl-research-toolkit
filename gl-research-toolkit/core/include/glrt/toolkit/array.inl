@@ -6,9 +6,9 @@
 namespace glrt {
 
 
-template<typename T, int block_size_append, int block_size_remove>
+template<int block_size_append, int block_size_remove>
 template<typename cache_type>
-inline int ArrayCapacityTraits_Capacity_Blocks<T, block_size_append, block_size_remove>::new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache)
+inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_remove>::new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache)
 {
   Q_UNUSED(prev_capacity);
   Q_UNUSED(cache);
@@ -20,9 +20,9 @@ inline int ArrayCapacityTraits_Capacity_Blocks<T, block_size_append, block_size_
   return glm::max(prev_capacity, glm::ceilMultiple(current_length+elements_to_add, block_size_append));
 }
 
-template<typename T, int block_size_append, int block_size_remove>
+template<int block_size_append, int block_size_remove>
 template<typename cache_type>
-inline int ArrayCapacityTraits_Capacity_Blocks<T, block_size_append, block_size_remove>::adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache)
+inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_remove>::adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache)
 {
   Q_UNUSED(prev_capacity);
   Q_UNUSED(cache);

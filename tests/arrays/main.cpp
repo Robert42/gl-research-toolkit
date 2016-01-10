@@ -117,7 +117,7 @@ void test_clean()
   StateSpy::clear();
 
   {
-    Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array;
+    Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> array;
     array.append(StateSpy());;
 
     EXPECT_EQ(StateSpy::log(),

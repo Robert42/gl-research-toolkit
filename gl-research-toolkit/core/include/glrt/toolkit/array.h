@@ -16,7 +16,7 @@ namespace glrt {
 // aO: assignment Operator
 // mO: move Operator
 
-template<typename T, int block_size_append=128, int block_size_remove=512>
+template<int block_size_append=128, int block_size_remove=512>
 struct ArrayCapacityTraits_Capacity_Blocks
 {
   static_assert(block_size_append>0, "The block_size_append must be > 0");
@@ -28,7 +28,7 @@ struct ArrayCapacityTraits_Capacity_Blocks
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
 };
 
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 {
   typedef uint32_t hint_type;
@@ -74,7 +74,7 @@ protected:
   static void call_instance_destructors_D(const T* a, int n);
 };
 
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
   typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
@@ -122,7 +122,7 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T, T_capa
 };
 
 // Thought for OpenGL Wrapper
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
   typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
@@ -163,7 +163,7 @@ struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T, T
   }
 };
 
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_mI<T, T_capacity_traits>
 {
 };
@@ -247,8 +247,8 @@ QDebug operator<<(QDebug d, const Array<T, T_traits>& array);
 
 } // namespace glrt
 
-template<typename T>
-void std::swap(glrt::Array<T>& a, glrt::Array<T>& b);
+template<typename T, class T_traits>
+void std::swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b);
 
 #include "array.inl"
 
