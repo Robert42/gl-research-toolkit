@@ -93,7 +93,9 @@ void test_array_operators()
 
 void test_swap()
 {
-  StateSpy::clear();
+  StateSpy::clearIndex();
+  StateSpy::clearLog();
+
   Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array1;
   Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array2;
 
@@ -103,7 +105,7 @@ void test_swap()
   array2.append(StateSpy());
 
   EXPECT_FALSE(StateSpy::log().isEmpty());
-  StateSpy::clear();
+  StateSpy::clearLog();
   EXPECT_TRUE(StateSpy::log().isEmpty());
 
   array1.swap(array2);
@@ -115,9 +117,10 @@ void test_swap()
 void test_append()
 {
   typedef  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
-  StateSpy::clear();
+  StateSpy::clearLog();
 
   {
+    StateSpy::clearIndex();
     StateSpyArray array;
     array.append(StateSpy());;
 
@@ -125,40 +128,35 @@ void test_append()
               "0: default constructor\n"
               "1: move constructor from 0\n"
               "0: destructed\n");
-
-    StateSpy::clear();
+    StateSpy::clearLog();
   }
-
   EXPECT_EQ(StateSpy::log(),
             "1: destructed\n");
-
-  StateSpy::clear();
+  StateSpy::clearLog();
 
   {
+    StateSpy::clearIndex();
     StateSpyArray array;
-    array.append(StateSpy());
 
+    array.append(StateSpy());
     EXPECT_EQ(StateSpy::log(),
               "0: default constructor\n"
               "1: move constructor from 0\n"
               "0: destructed\n");
+    StateSpy::clearLog();
 
     array.append(StateSpy());
-
     EXPECT_EQ(StateSpy::log(),
-              "0: default constructor\n"
-              "1: move constructor from 0\n"
-              "0: destructed\n"
               "2: default constructor\n"
               "3: move constructor from 2\n"
               "2: destructed\n");
-    StateSpy::clear();
+    StateSpy::clearLog();
   }
 
   EXPECT_EQ(StateSpy::log(),
             "1: destructed\n"
             "3: destructed\n");
-  StateSpy::clear();
+  StateSpy::clearLog();
 
 
   StateSpy::EnablePrinting print;

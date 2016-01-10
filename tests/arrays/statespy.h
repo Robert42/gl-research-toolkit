@@ -28,7 +28,8 @@ public:
 
   void print(const QString& s);
 
-  static void clear();
+  static void clearLog();
+  static void clearIndex();
   static QString log();
   static bool enabledDebugPrint;
 

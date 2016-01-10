@@ -46,10 +46,14 @@ void StateSpy::print(const QString& s)
     qDebug() << QString("%0: %1").arg(index).arg(s);
 }
 
-void StateSpy::clear()
+void StateSpy::clearLog()
+{
+  globalState().clear();
+}
+
+void StateSpy::clearIndex()
 {
   _nextIndex = 0;
-  globalState().clear();
 }
 
 QString StateSpy::log()
