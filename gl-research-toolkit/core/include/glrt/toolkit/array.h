@@ -16,8 +16,20 @@ namespace glrt {
 // aO: assignment Operator
 // mO: move Operator
 
-template<typename T>
-struct ArrayTraits_Unordered_Toolkit
+template<typename T, int block_size_append=128, int block_size_remove=512>
+struct ArrayCapacityTraits_Capacity_Blocks
+{
+  static_assert(block_size_append>0, "The block_size_append must be > 0");
+  static_assert(block_size_remove>0, "The block_size_remove must be > 0");
+
+  template<typename cache_type>
+  static int new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache);
+  template<typename cache_type>
+  static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
+};
+
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 {
   typedef uint32_t hint_type;
   typedef uint32_t cache_type;
@@ -29,8 +41,6 @@ struct ArrayTraits_Unordered_Toolkit
   static void copy_construct_single_mI(T* dest, const T* src);
   static void copy_construct_cC(T* dest, const T* src, int count);
   static void copy_construct_single_cC(T* dest, const T* src);
-  static int new_capacity(int prev_capacity, int current_length, int elements_to_add, cache_type* cache);
-  static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
 
   static void init_cache(cache_type*){}
   static void clear_cache(cache_type*){}
@@ -64,8 +74,8 @@ protected:
   static void call_instance_destructors_D(const T* a, int n);
 };
 
-template<typename T>
-struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
   typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
   typedef typename parent_type::hint_type hint_type;
@@ -112,8 +122,8 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T>
 };
 
 // Thought for OpenGL Wrapper
-template<typename T>
-struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
   typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
   typedef typename parent_type::hint_type hint_type;
@@ -153,8 +163,8 @@ struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T>
   }
 };
 
-template<typename T>
-struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_mI<T>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<T>>
+struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_mI<T, T_capacity_traits>
 {
 };
 

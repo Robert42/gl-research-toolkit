@@ -9,7 +9,7 @@ using glrt::Array;
 
 
 
-void test_unordered_array_trait();
+void test_capacity_traits();
 
 void test_array_constructors()
 {
@@ -170,11 +170,13 @@ int main(int argc, char** argv)
 {
   TestingApplication testing_application(argc, argv);
 
+  test_capacity_traits();
+  /*
   test_array_constructors();
   test_array_operators();
-  test_unordered_array_trait();
   test_swap();
   test_clean();
+  */
 
   return testing_application.result();
 }
