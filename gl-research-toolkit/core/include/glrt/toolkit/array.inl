@@ -74,10 +74,18 @@ inline bool ArrayTraits_Unordered_Toolkit<T, T_c>::ranges_overlap(const T* insta
 template<typename T, typename T_c>
 void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_instances_mO(const T* a, const T* b, int n)
 {
-  Q_ASSERT(!ranges_overlap(a, b, n, n));
+  Q_ASSERT(!ranges_overlap(a, b, n));
 
   for(int i=0; i<n; ++i)
     a[i] = std::move(b[i]);
+}
+
+template<typename T, typename T_c>
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_single_instance_mO(const T* a, const T* b)
+{
+  Q_ASSERT(!ranges_overlap(a, b, 1));
+
+  *a = std::move(*b);
 }
 
 template<typename T, typename T_c>
@@ -111,16 +119,16 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::values_used_to_fill_gaps(int*
 
 
 template<typename T, typename T_c>
-inline void ArrayTraits_Unordered_Toolkit<T, T_c>::copy_construct_mI(T* dest, const T* src, int count)
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::copy_construct_POD(T* dest, const T* src, int count)
 {
   Q_ASSERT(!ranges_overlap(dest, src, count));
   std::memcpy(dest, src, sizeof(T)*count);
 }
 
 template<typename T, typename T_c>
-inline void ArrayTraits_Unordered_Toolkit<T, T_c>::copy_construct_single_mI(T* dest, const T* src)
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::copy_construct_single_POD(T* dest, const T* src)
 {
-  copy_construct_mI(dest, src, 1);
+  copy_construct_POD(dest, src, 1);
 }
 
 template<typename T, typename T_c>
@@ -139,32 +147,47 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::copy_construct_cC(T* dest, co
 }
 
 template<typename T, typename T_c>
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::move_construct_mC(T* dest, T* src, int count)
+{
+  Q_ASSERT(!ranges_overlap(dest, src, count));
+  for(int i=0; i<count; ++i)
+    move_construct_single_mC(dest+i, src+i);
+}
+
+template<typename T, typename T_c>
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::move_construct_single_mC(T* dest, T* src)
+{
+  Q_ASSERT(!ranges_overlap(dest, src, 1));
+  new(dest)T(std::move(*src));
+}
+
+template<typename T, typename T_c>
 inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_mC(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  new(data+prev_length)T(std::move(value));
+  move_construct_single_mC(data+prev_length, &value);
   return prev_length;
 }
 
 template<typename T, typename T_c>
-inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_mI(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
+inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_POD(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  copy_construct_single_mI(data+prev_length, &value);
+  copy_construct_single_POD(data+prev_length, &value);
   return prev_length;
 }
 
 template<typename T, typename T_c>
-inline int ArrayTraits_Unordered_Toolkit<T, T_c>::extend_mI(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
+inline int ArrayTraits_Unordered_Toolkit<T, T_c>::extend_POD(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
 {
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  copy_construct_mI(data+prev_length, values, num_values);
+  copy_construct_POD(data+prev_length, values, num_values);
   return prev_length;
 }
 
@@ -174,7 +197,7 @@ inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_cC(T* data, int prev_le
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  new(data+prev_length)T(value);
+  copy_construct_single_cC(data+prev_length, &value);
   return prev_length;
 }
 
@@ -184,13 +207,12 @@ inline int ArrayTraits_Unordered_Toolkit<T, T_c>::extend_cC(T* data, int prev_le
   Q_UNUSED(hint);
   Q_UNUSED(cache);
 
-  for(int i=0; i<num_values; ++i)
-    new(data+i)T(values[i]);
+  copy_construct_cC(data+prev_length, values, num_values);
   return prev_length;
 }
 
 template<typename T, typename T_c>
-inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_mI(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_POD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
 {
   Q_ASSERT(index>=0);
   Q_ASSERT(index<prev_length);
@@ -199,11 +221,11 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_mI(T* data, int
 
   int last = prev_length-1;
   if(index != last)
-    copy_construct_single_mI(data+index, data+last);
+    copy_construct_single_POD(data+index, data+last);
 }
 
 template<typename T, typename T_c>
-void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_mI(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
+void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_POD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
 {
   Q_ASSERT(first_index>=0);
   Q_ASSERT(first_index<prev_length);
@@ -217,7 +239,7 @@ void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_mI(T* data, int prev_length, 
 
   values_used_to_fill_gaps(&first_value_to_copy, &num_values_to_copy, prev_length, first_index, num_values);
 
-  copy_construct_mI(data+first_index, data+first_value_to_copy, num_values_to_copy);
+  copy_construct_POD(data+first_index, data+first_value_to_copy, num_values_to_copy);
 }
 
 template<typename T, typename T_c>
@@ -230,7 +252,7 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_mOD(T* data, in
 
   int last = prev_length-1;
   if(index != last)
-    data[index] = std::move(data[last]);
+    swap_single_instance_mO(data+index, data + last);
   destruct_single_D(data+last);
 }
 
@@ -431,7 +453,7 @@ void Array<T, T_traits>::setCapacity(int capacity)
     this->_length = glm::min(this->_length, capacity);
 
     // move the elements to the new buffer.
-    traits::copy_construct(this->_data, old_data, this->_length);
+    traits::move_construct(this->_data, old_data, this->_length);
 
     if(old_data != nullptr)
     {

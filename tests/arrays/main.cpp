@@ -96,8 +96,8 @@ void test_swap()
   StateSpy::clearIndex();
   StateSpy::clearLog();
 
-  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array1;
-  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array2;
+  Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy>> array1;
+  Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy>> array2;
 
   EXPECT_TRUE(StateSpy::log().isEmpty());
 
@@ -116,7 +116,7 @@ void test_swap()
 
 void test_append()
 {
-  typedef  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
+  typedef  Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
   StateSpy::clearLog();
 
   {
@@ -129,6 +129,8 @@ void test_append()
               "1: move constructor from 0\n"
               "0: destructed\n");
     StateSpy::clearLog();
+
+    EXPECT_EQ(array.capacity(), 2);
   }
   EXPECT_EQ(StateSpy::log(),
             "1: destructed\n");
@@ -151,6 +153,8 @@ void test_append()
               "3: move constructor from 2\n"
               "2: destructed\n");
     StateSpy::clearLog();
+
+    EXPECT_EQ(array.capacity(), 2);
   }
 
   EXPECT_EQ(StateSpy::log(),
@@ -158,11 +162,65 @@ void test_append()
             "3: destructed\n");
   StateSpy::clearLog();
 
+  {
+    StateSpy::clearIndex();
+    StateSpyArray array;
 
+    array.append(StateSpy());
+    EXPECT_EQ(StateSpy::log(),
+              "0: default constructor\n"
+              "1: move constructor from 0\n"
+              "0: destructed\n");
+    StateSpy::clearLog();
+
+    array.append(StateSpy());
+    EXPECT_EQ(StateSpy::log(),
+              "2: default constructor\n"
+              "3: move constructor from 2\n"
+              "2: destructed\n");
+    StateSpy::clearLog();
+
+    array.append(StateSpy());
+    EXPECT_EQ(array.capacity(), 4);
+    EXPECT_EQ(StateSpy::log(),
+              "4: default constructor\n"
+              "5: move constructor from 1\n"
+              "6: move constructor from 3\n"
+              "1: destructed\n"
+              "3: destructed\n"
+              "7: move constructor from 4\n"
+              "4: destructed\n");
+    StateSpy::clearLog();
+  }
+
+  EXPECT_EQ(StateSpy::log(),
+            "5: destructed\n"
+            "6: destructed\n"
+            "7: destructed\n");
+  StateSpy::clearLog();
+
+}
+
+void test_extend()
+{
   StateSpy::EnablePrinting print;
   Q_UNUSED(print);
 }
 
+void test_remove()
+{
+  StateSpy::EnablePrinting print;
+
+  // test removing single
+
+  // test removing single changing cache
+
+  // test removing multiple
+
+  // test removing multiple changing cache
+
+  Q_UNUSED(print);
+}
 
 int main(int argc, char** argv)
 {
@@ -173,6 +231,8 @@ int main(int argc, char** argv)
   test_array_operators();
   test_swap();
   test_append();
+  test_extend();
+  test_remove();
 
   return testing_application.result();
 }

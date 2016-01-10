@@ -9,10 +9,10 @@ namespace glrt {
 // dC: default constructor
 // mC: move constructor
 // D: Destructor
-// mI: movable Instance: just copy the bytes to a new location and don't use the
-//                       old location anymore and you are fine. Examples are all
-//                       primitive types, pod structs like glm::vec3, also
-//                       gl wrapper like the buffer object of glhelper.
+// POD: just copy the bytes to a new location and you are fine.
+//      Use it for plain old data.
+//      Examples are primitive types (bool, int, float),
+//      pod structs like glm::vec3.
 // aO: assignment Operator
 // mO: move Operator
 
@@ -37,10 +37,13 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
   static hint_type default_append_hint(){return hint_type(0xffffffff);}
   static hint_type default_remove_hint(){return hint_type(0xffffffff);}
 
-  static void copy_construct_mI(T* dest, const T* src, int count);
-  static void copy_construct_single_mI(T* dest, const T* src);
+  static void copy_construct_POD(T* dest, const T* src, int count);
+  static void copy_construct_single_POD(T* dest, const T* src);
   static void copy_construct_cC(T* dest, const T* src, int count);
   static void copy_construct_single_cC(T* dest, const T* src);
+
+  static void move_construct_mC(T* dest, T* src, int count);
+  static void move_construct_single_mC(T* dest, T* src);
 
   static void init_cache(cache_type*){}
   static void clear_cache(cache_type*){}
@@ -48,13 +51,13 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
   static void swap_cache(cache_type*, cache_type*){}
 
   static int append_mC(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache);
-  static int append_mI(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
-  static int extend_mI(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
+  static int append_POD(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
+  static int extend_POD(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
   static int append_cC(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache);
   static int extend_cC(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache);
 
-  static void remove_single_mI(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
-  static void remove_mI(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
+  static void remove_single_POD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
+  static void remove_POD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
   static void remove_single_mOD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
   static void remove_mOD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
   static void remove_single_cCD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
@@ -71,24 +74,26 @@ protected:
   static void values_used_to_fill_gaps(int* first, int* count, int prev_length, const int gap_start, int num_values);
 
   static void swap_instances_mO(const T* a, const T* b, int n);
+  static void swap_single_instance_mO(const T* a, const T* b);
   static void call_instance_destructors_D(const T* a, int n);
 };
 
+// Plain old data, int POD struct like vec3
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
   typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
-  static void copy_construct(T* dest, const T* src, int count)
+  static void move_construct(T* dest, T* src, int count)
   {
-    parent_type::copy_construct_mI(dest, src, count);
+    parent_type::copy_construct_POD(dest, src, count);
   }
 
-  static void copy_construct_single(T* dest, const T* src)
+  static void move_construct_single(T* dest, T* src)
   {
-    parent_type::copy_construct_single_mI(dest, src);
+    parent_type::copy_construct_single_POD(dest, src);
   }
 
   static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
@@ -98,22 +103,22 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T, T_capa
 
   static int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
   {
-    return parent_type::append_mI(data, prev_length, value, hint, cache);
+    return parent_type::append_POD(data, prev_length, value, hint, cache);
   }
 
   static int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
   {
-    return parent_type::extend_mI(data, prev_length, values, num_values, hint, cache);
+    return parent_type::extend_POD(data, prev_length, values, num_values, hint, cache);
   }
 
   static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
   {
-    parent_type::remove_single_mI(data, prev_length, index, hint, cache);
+    parent_type::remove_single_POD(data, prev_length, index, hint, cache);
   }
 
   static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
   {
-    parent_type::remove_mI(data, prev_length, first_index, num_values, hint, cache);
+    parent_type::remove_POD(data, prev_length, first_index, num_values, hint, cache);
   }
 
   static void destruct(T*, int)
@@ -121,22 +126,23 @@ struct ArrayTraits_Unordered_mI : public ArrayTraits_Unordered_Toolkit<T, T_capa
   }
 };
 
-// Thought for OpenGL Wrapper
+// Class with move constructor, move operator and destructor
+// (Thought for OpenGL Wrapper)
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
   typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
-  static void copy_construct(T* dest, const T* src, int count)
+  static void move_construct(T* dest, T* src, int count)
   {
-    parent_type::copy_construct_mI(dest, src, count);
+    parent_type::move_construct_mC(dest, src, count);
   }
 
-  static void copy_construct_single(T* dest, const T* src)
+  static void move_construct_single(T* dest, T* src)
   {
-    parent_type::copy_construct_single_mI(dest, src);
+    parent_type::move_construct_single_mC(dest, src);
   }
 
   static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
@@ -163,9 +169,54 @@ struct ArrayTraits_Unordered_mCmOmID : public ArrayTraits_Unordered_Toolkit<T, T
   }
 };
 
+// Class with copy constructor, move operator and destructor
+// (Thought for OpenGL Wrapper)
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_mI<T, T_capacity_traits>
+struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
+  typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
+  typedef typename parent_type::hint_type hint_type;
+  typedef typename parent_type::cache_type cache_type;
+
+  static void move_construct(T* dest, T* src, int count)
+  {
+    parent_type::move_construct_mC(dest, src, count);
+  }
+
+  static void move_construct_single(T* dest, T* src)
+  {
+    parent_type::move_construct_single_mC(dest, src);
+  }
+
+  static int append_move(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache)
+  {
+    return parent_type::append_mC(data, prev_length, std::move(value), hint, cache);
+  }
+
+  int append(T* data, int prev_length, const T& value, const hint_type& hint, cache_type* cache)
+  {
+    return parent_type::append_cC(data, prev_length, value, hint, cache);
+  }
+
+  int extend(T* data, int prev_length, const T* values, int num_values, const hint_type& hint, cache_type* cache)
+  {
+    return parent_type::extend_cCC(data, prev_length, values, num_values, hint, cache);
+  }
+
+  static void remove_single(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
+  {
+    parent_type::remove_single_mOD(data, prev_length, index, hint, cache);
+  }
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
+  {
+    parent_type::remove_mOD(data, prev_length, first_index, num_values, hint, cache);
+  }
+
+  static void destruct(T* data, int length)
+  {
+    parent_type::destruct_D(data, length);
+  }
 };
 
 template<typename T>
