@@ -52,7 +52,8 @@ private:
 
   QVector<const char*> strings_to_send;
 
-  void send_data(QDataStream& stream);
+  void send_data_through_tcp(int port) const;
+  void send_data(QDataStream& stream) const;
 };
 
 class Profiler::Scope final

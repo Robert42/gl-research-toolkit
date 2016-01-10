@@ -57,10 +57,15 @@ float Profiler::update()
 {
 #ifdef GLRT_PROFILER
   recordedScopes.clear();
-  recordedScopes.reserve(2048);
+  if(activeProfiler != nullptr)
+  {
+    recordedScopes.reserve(2048);
 
-  if(printFramerate)
-    qDebug() << 1.f / timer.elapsedTimeAsSeconds();
+    if(printFramerate)
+      qDebug() << 1.f / timer.elapsedTimeAsSeconds();
+
+    send_data_through_tcp(GLRT_PROFILER_DEFAULT_PORT);
+  }
 #endif
 
   return timer.restart();
@@ -80,6 +85,9 @@ void Profiler::deactivate()
     activeProfiler = nullptr;
 }
 
+void Profiler::send_data_through_tcp(int port) const
+{
+}
 
 void Profiler::send_data(QDataStream& stream)
 {
