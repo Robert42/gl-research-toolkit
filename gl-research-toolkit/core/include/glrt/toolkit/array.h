@@ -74,8 +74,8 @@ protected:
 
   static void values_used_to_fill_gaps(int* first, int* count, int prev_length, const int gap_start, int num_values);
 
-  static void swap_instances_mO(const T* a, const T* b, int n);
-  static void swap_single_instance_mO(const T* a, const T* b);
+  static void swap_instances_mO(T* a, T* b, int n);
+  static void swap_single_instance_mO(T* a, T* b);
   static void call_instance_destructors_D(const T* a, int n);
 };
 

@@ -72,7 +72,7 @@ inline bool ArrayTraits_Unordered_Toolkit<T, T_c>::ranges_overlap(const T* insta
 }
 
 template<typename T, typename T_c>
-void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_instances_mO(const T* a, const T* b, int n)
+void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_instances_mO(T* a, T* b, int n)
 {
   Q_ASSERT(!ranges_overlap(a, b, n));
 
@@ -81,7 +81,7 @@ void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_instances_mO(const T* a, const 
 }
 
 template<typename T, typename T_c>
-inline void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_single_instance_mO(const T* a, const T* b)
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_single_instance_mO(T* a, T* b)
 {
   Q_ASSERT(!ranges_overlap(a, b, 1));
 
@@ -337,7 +337,7 @@ template<typename T, typename T_c>
 inline void ArrayTraits_Unordered_Toolkit<T, T_c>::destruct_D(T* data, int length)
 {
   Q_ASSERT(data!=nullptr);
-  Q_ASSERT(length>0);
+  Q_ASSERT(length>=0);
 
   for(int i=0; i<length; ++i)
     destruct_single_D(data+i);
@@ -478,7 +478,12 @@ void Array<T, T_traits>::ensureCapacity(int minCapacity)
 {
   Q_ASSERT(capacity() >= 0);
 
-  setCapacity(glm::max(minCapacity, this->capacity()));
+  int oldCapacity = this->capacity();
+  int newCapacity = T_traits::new_capacity(oldCapacity, this->length(), glm::max(0, minCapacity-this->length()), &this->trait_cache);
+
+  Q_ASSERT(newCapacity >= minCapacity);
+
+  setCapacity(newCapacity);
 }
 
 template<typename T, class T_traits>
