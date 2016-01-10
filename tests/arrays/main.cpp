@@ -112,12 +112,13 @@ void test_swap()
   EXPECT_TRUE(StateSpy::log().isEmpty());
 }
 
-void test_clean()
+void test_append()
 {
+  typedef  Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
   StateSpy::clear();
 
   {
-    Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> array;
+    StateSpyArray array;
     array.append(StateSpy());;
 
     EXPECT_EQ(StateSpy::log(),
@@ -136,10 +137,8 @@ void test_clean()
 
   StateSpy::clear();
 
-  StateSpy::EnablePrinting print;
-
   {
-    Array<StateSpy, glrt::ArrayTraits_Unordered_mCmOmID<StateSpy>> array;
+    StateSpyArray array;
     array.append(StateSpy());
 
     EXPECT_EQ(StateSpy::log(),
@@ -149,20 +148,25 @@ void test_clean()
 
     array.append(StateSpy());
 
-    qDebug() << "";
+    EXPECT_EQ(StateSpy::log(),
+              "0: default constructor\n"
+              "1: move constructor from 0\n"
+              "0: destructed\n"
+              "2: default constructor\n"
+              "3: move constructor from 2\n"
+              "2: destructed\n");
   }
 
   EXPECT_EQ(StateSpy::log(),
             "0: default constructor\n"
             "1: move constructor from 0\n"
             "0: destructed\n"
-            "3: copy constructor\n"
             "2: default constructor\n"
-            "4: move constructor from 2\n"
-            "2: destructed\n");
+            "3: move constructor from 2\n"
+            "2: destructed\n"
+            "1: destructed\n"
+            "3: destructed\n");
   StateSpy::clear();
-
-  Q_UNUSED(print);
 }
 
 
@@ -171,12 +175,10 @@ int main(int argc, char** argv)
   TestingApplication testing_application(argc, argv);
 
   test_capacity_traits();
-  /*
   test_array_constructors();
   test_array_operators();
   test_swap();
-  test_clean();
-  */
+  test_append();
 
   return testing_application.result();
 }
