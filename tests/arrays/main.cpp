@@ -126,13 +126,10 @@ void test_append()
               "1: move constructor from 0\n"
               "0: destructed\n");
 
-    qDebug() << "";
+    StateSpy::clear();
   }
 
   EXPECT_EQ(StateSpy::log(),
-            "0: default constructor\n"
-            "1: move constructor from 0\n"
-            "0: destructed\n"
             "1: destructed\n");
 
   StateSpy::clear();
@@ -155,18 +152,17 @@ void test_append()
               "2: default constructor\n"
               "3: move constructor from 2\n"
               "2: destructed\n");
+    StateSpy::clear();
   }
 
   EXPECT_EQ(StateSpy::log(),
-            "0: default constructor\n"
-            "1: move constructor from 0\n"
-            "0: destructed\n"
-            "2: default constructor\n"
-            "3: move constructor from 2\n"
-            "2: destructed\n"
             "1: destructed\n"
             "3: destructed\n");
   StateSpy::clear();
+
+
+  StateSpy::EnablePrinting print;
+  Q_UNUSED(print);
 }
 
 
