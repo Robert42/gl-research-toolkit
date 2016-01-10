@@ -3,6 +3,7 @@
 #include <SDL2/SDL_timer.h>
 
 #include <QDataStream>
+#include <QHostAddress>
 
 
 namespace glrt {
@@ -64,7 +65,7 @@ float Profiler::update()
     if(printFramerate)
       qDebug() << 1.f / timer.elapsedTimeAsSeconds();
 
-    send_data_through_tcp(GLRT_PROFILER_DEFAULT_PORT);
+    send_data_through_tcp();
   }
 #endif
 
@@ -76,17 +77,26 @@ void Profiler::activate()
 {
   activeProfiler = this;
   recordedScopes.clear();
+  tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_PROFILER_DEFAULT_PORT);
 }
 
 
 void Profiler::deactivate()
 {
   if(activeProfiler == this)
+  {
     activeProfiler = nullptr;
+    tcpSocket.disconnectFromHost();
+  }
 }
 
-void Profiler::send_data_through_tcp(int port) const
+void Profiler::send_data_through_tcp()
 {
+  if(tcpSocket.isOpen())
+  {
+    QDataStream stream(&tcpSocket);
+    send_data(stream);
+  }
 }
 
 void Profiler::send_data(QDataStream& stream)
@@ -94,6 +104,7 @@ void Profiler::send_data(QDataStream& stream)
   stream << strings_to_send.length();
   for(const char* str : strings_to_send)
     stream << quintptr(str) << QString(str);
+  strings_to_send.clear();
 
   stream << int(recordedScopes.size());
   for(const RecordedScope& s : recordedScopes)

@@ -14,6 +14,7 @@ endif()
 
 find_package(SDL2 REQUIRED)
 find_package(Qt5Core REQUIRED)
+find_package(Qt5Network REQUIRED)
 
 add_library(glrt-core
   ${SOURCE_FILES}
@@ -59,6 +60,7 @@ target_link_libraries(glrt-core
   ${SDL2_LIBRARIES}
   ${ASSIMP_LIBRARY}
   Qt5::Core
+  Qt5::Network
   AntTweakBar
   angelscript-interaction
 )

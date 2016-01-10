@@ -2,6 +2,7 @@
 #define GLRT_CORE_PROFILER_H
 
 #include <glrt/dependencies.h>
+#include <QTcpSocket>
 
 namespace glrt {
 
@@ -51,9 +52,10 @@ private:
   int currentDepth;
 
   QVector<const char*> strings_to_send;
+  QTcpSocket tcpSocket;
 
-  void send_data_through_tcp(int port) const;
-  void send_data(QDataStream& stream) const;
+  void send_data_through_tcp();
+  void send_data(QDataStream& stream);
 };
 
 class Profiler::Scope final
