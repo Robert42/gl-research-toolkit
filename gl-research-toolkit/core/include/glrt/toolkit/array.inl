@@ -31,7 +31,7 @@ inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_rem
   Q_ASSERT(current_length >= 0);
   Q_ASSERT(elements_removed >= 0);
 
-  return glm::min(prev_capacity, glm::ceilMultiple(current_length-elements_removed, block_size_remove));
+  return glm::min(prev_capacity, glm::ceilMultiple(current_length, block_size_remove));
 }
 
 
@@ -636,10 +636,10 @@ void Array<T, T_traits>::remove(int index, const hint_type& hint)
   traits::remove_single(this->data(), this->length(), index, hint, &this->trait_cache);
 
   _length -= 1;
+  Q_ASSERT(_length >= 0);
 
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), 1, &this->trait_cache);
-  if(new_capacity >= 0)
-    setCapacity(new_capacity);
+  setCapacity(new_capacity);
 }
 
 template<typename T, class T_traits>
@@ -648,10 +648,10 @@ void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& h
   traits::remove(this->data(), this->length(), index, num_to_remove, hint, &this->trait_cache);
 
   _length -= num_to_remove;
+  Q_ASSERT(_length >= 0);
 
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), num_to_remove, &this->trait_cache);
-  if(new_capacity >= 0)
-    setCapacity(new_capacity);
+  setCapacity(new_capacity);
 }
 
 template<typename T, class T_traits>

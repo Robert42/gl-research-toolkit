@@ -26,5 +26,6 @@ void test_capacity_traits()
   EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 100, 1, &cache), 100);
   EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(1024, 66, 1, &cache), 128);
   EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 66, 1, &cache), 100);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 65, 1, &cache), 64);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 65, 1, &cache), 100);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 64, 1, &cache), 64);
 }
