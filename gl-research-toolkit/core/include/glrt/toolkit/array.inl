@@ -283,7 +283,7 @@ void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_mOD(T* data, int prev_length,
 
   swap_instances_mO(data+first_index, data+first_value_to_copy, num_values_to_copy);
 
-  call_instance_destructors_D(data+prev_length-num_values_to_copy, num_values_to_copy);
+  call_instance_destructors_D(data+prev_length-num_values, num_values);
 }
 
 template<typename T, typename T_c>
@@ -322,7 +322,7 @@ void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_cCD(T* data, int prev_length,
   call_instance_destructors_D(data+first_index, num_values);
   copy_construct_cC(data+first_index, data+first_value_to_copy, num_values_to_copy);
 
-  call_instance_destructors_D(data+prev_length-num_values_to_copy, num_values_to_copy);
+  call_instance_destructors_D(data+prev_length-num_values, num_values);
 }
 
 template<typename T, typename T_c>
