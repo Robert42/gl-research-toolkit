@@ -60,7 +60,109 @@ void test_capacity_trait_rangecheck()
   EXPECT_FALSE(traits::ranges_overlap(0, 5, 60, 70));
 }
 
+void test_swap_instances_mO()
+{
+  StateSpy::clearIndex();
+  typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
+  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+
+  StateSpy instances[4];
+  StateSpy::clearLog();
+
+  traits::swap_instances_mO(instances+0, instances+1, 1);
+  EXPECT_EQ(StateSpy::log(),
+            "0: move operator from 1\n");
+  StateSpy::clearLog();
+
+  traits::swap_instances_mO(instances+2, instances+0, 2);
+  EXPECT_EQ(StateSpy::log(),
+            "2: move operator from 0\n"
+            "3: move operator from 1\n");
+  StateSpy::clearLog();
+}
+
+void test_swap_single_instance_mO()
+{
+  StateSpy::clearIndex();
+  typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
+  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+
+  StateSpy instances[4];
+  StateSpy::clearLog();
+
+  traits::swap_single_instance_mO(instances+1, instances+0);
+  EXPECT_EQ(StateSpy::log(),
+            "0: move operator from 1\n");
+  StateSpy::clearLog();
+}
+
+void test_call_instance_destructors_D()
+{
+  StateSpy::clearIndex();
+  typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
+  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+
+  StateSpy instances[4];
+  StateSpy::clearLog();
+
+  traits::call_instance_destructors_D(instances, 4);
+  EXPECT_EQ(StateSpy::log(),
+            "0: destructed\n"
+            "1: destructed\n"
+            "2: destructed\n"
+            "3: destructed\n");
+  StateSpy::clearLog();
+}
+
+void test_values_used_to_fill_gaps()
+{
+  typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
+  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  int first, count;
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 0, 4);
+  EXPECT_EQ(first, 4);
+  EXPECT_EQ(count, 0);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 1, 3);
+  EXPECT_EQ(first, 4);
+  EXPECT_EQ(count, 0);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 2, 2);
+  EXPECT_EQ(first, 4);
+  EXPECT_EQ(count, 0);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 3, 1);
+  EXPECT_EQ(first, 4);
+  EXPECT_EQ(count, 0);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 4, 0);
+  EXPECT_EQ(first, 4);
+  EXPECT_EQ(count, 0);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 2, 1);
+  EXPECT_EQ(first, 3);
+  EXPECT_EQ(count, 1);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 1, 1);
+  EXPECT_EQ(first, 3);
+  EXPECT_EQ(count, 1);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 0, 1);
+  EXPECT_EQ(first, 3);
+  EXPECT_EQ(count, 1);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 0, 0);
+  EXPECT_EQ(first, 4);
+  EXPECT_EQ(count, 0);
+
+  traits::values_used_to_fill_gaps(&first, &count, 4, 0, 3);
+  EXPECT_EQ(first,3);
+  EXPECT_EQ(count, 1);
+}
+
 void test_traits()
 {
   test_capacity_traits();
+  test_values_used_to_fill_gaps();
 }

@@ -98,6 +98,8 @@ void ArrayTraits_Unordered_Toolkit<T, T_c>::call_instance_destructors_D(const T*
 template<typename T, typename T_c>
 inline void ArrayTraits_Unordered_Toolkit<T, T_c>::values_used_to_fill_gaps(int* first, int* count, int prev_length, const int gap_start, int gap_length)
 {
+  Q_ASSERT(gap_start>=0);
+  Q_ASSERT(gap_length>=0);
   Q_ASSERT(prev_length>=gap_start+gap_length);
 
   int& first_value_to_copy = *first;
