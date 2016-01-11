@@ -28,14 +28,13 @@ public:
   QString name, file;
   DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
+  Scene(resources::ResourceManager* resourceManager);
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;
   Scene& operator=(const Scene&) = delete;
   Scene& operator=(Scene&&) = delete;
 
   ~Scene();
-
-  QString labelForUuid(const QUuid& uuid) const;
 
   bool handleEvents(const SDL_Event& event);
   void update(float deltaTime);
@@ -53,12 +52,7 @@ signals:
   void sceneLoaded(bool success);
 
 private:
-  friend class resources::ResourceManager;
-
   QVector<Entity*> _entities; // #TODO use an optimized array
-  QHash<QUuid, QString> _labels;
-
-  Scene(resources::ResourceManager& resourceManager);
 };
 
 } // namespace scene

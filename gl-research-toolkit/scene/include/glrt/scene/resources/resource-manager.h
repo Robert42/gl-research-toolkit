@@ -7,14 +7,17 @@
 namespace glrt {
 namespace scene {
 
+class Scene;
+
 namespace resources {
 
 
 class ResourceManager
 {
 public:
+  typedef ResourceIndex Index;
+
   StaticMeshLoader& staticMeshLoader;
-  Scene scene;
 
   ResourceManager(StaticMeshLoader* staticMeshLoader);
   ResourceManager(ResourceManager&&) = delete;
@@ -23,7 +26,10 @@ public:
 
   virtual ~ResourceManager();
 
-  void loadScene(const Uuid<Scene>& sceneUuid);
+  QString labelForResourceUuid(const QUuid& uuid, const QString& fallback);
+  QString labelForResourceUuid(const QUuid& uuid);
+
+  virtual Index* indexForResourceUuid(const QUuid& uuid, Index* fallback=nullptr) = 0;
 };
 
 

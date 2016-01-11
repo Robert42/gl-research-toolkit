@@ -42,12 +42,17 @@ public:
 
   bool isRegistered(const QUuid& uuid) const;
 
+  QString labelForUuid(const QUuid& uuid, const QString& fallback) const;
+  QString labelForUuid(const QUuid& uuid) const;
+
 private:
   QSet<QUuid> allRegisteredResources;
 
   QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;
+
+  QHash<QUuid, QString> _labels;
 
   void validateNotYetRegistered(const QUuid& uuid) const;
 };

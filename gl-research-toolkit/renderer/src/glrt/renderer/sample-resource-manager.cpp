@@ -15,6 +15,14 @@ SampleResourceManager::~SampleResourceManager()
 {
 }
 
+SampleResourceManager::Index* SampleResourceManager::indexForResourceUuid(const QUuid& uuid, Index* fallback)
+{
+  if(index.isRegistered(uuid))
+    return &index;
+  else
+    return fallback;
+}
+
 
 } // namespace renderer
 } // namespace glrt

@@ -7,13 +7,15 @@
 namespace glrt {
 namespace renderer {
 
-class SampleResourceManager : public scene::resources::ResourceManager
+class SampleResourceManager final : public scene::resources::ResourceManager
 {
 public:
   glrt::scene::resources::ResourceIndex index;
 
   SampleResourceManager();
   ~SampleResourceManager();
+
+  Index* indexForResourceUuid(const QUuid& uuid, Index* fallback=nullptr) final override;
 };
 
 } // namespace renderer

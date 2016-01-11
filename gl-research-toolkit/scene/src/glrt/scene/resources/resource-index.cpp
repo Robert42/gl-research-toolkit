@@ -69,9 +69,27 @@ void ResourceIndex::loadIndexedDirectory(const std::string& dir)
   loadIndex(dir+"/asset-index");
 }
 
+/*! \note This is one of the few methods which can be called with \c{this==nullptr}
+ */
 bool ResourceIndex::isRegistered(const QUuid& uuid) const
 {
+  if(this == nullptr)
+    return false;
   return allRegisteredResources.contains(uuid);
+}
+
+/*! \note This is one of the few methods which can be called with \c{this==nullptr}
+ */
+QString ResourceIndex::labelForUuid(const QUuid& uuid, const QString& fallback) const
+{
+  if(this == nullptr)
+    return fallback;
+  return _labels.value(uuid, fallback);
+}
+
+QString ResourceIndex::labelForUuid(const QUuid& uuid) const
+{
+  return labelForUuid(uuid, uuid.toString());
 }
 
 void ResourceIndex::registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file)

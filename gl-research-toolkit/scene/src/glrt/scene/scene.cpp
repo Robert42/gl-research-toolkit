@@ -18,10 +18,10 @@ namespace scene {
 // ======== Scene ==============================================================
 
 /*!
-\warning The resourceManager takes the ownership of the scene
+\warning The resourceManager instance must live longer than this scene instance
 */
-Scene::Scene(resources::ResourceManager& resourceManager)
-  : resourceManager(resourceManager)
+Scene::Scene(resources::ResourceManager* resourceManager)
+  : resourceManager(*resourceManager)
 {
 }
 
@@ -35,17 +35,6 @@ void Scene::clear()
   clearScene();
 
   sceneCleared();
-}
-
-
-QString Scene::labelForUuid(const QUuid& uuid) const
-{
-  auto i = _labels.find(uuid);
-
-  if(i != _labels.end())
-    return i.value();
-
-  return uuid.toString();
 }
 
 

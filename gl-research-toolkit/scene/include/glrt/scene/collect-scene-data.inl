@@ -2,6 +2,7 @@
 #define GLRT_SCENE_COLLECTSCENEDATA_INL
 
 #include "collect-scene-data.h"
+#include "resources/resource-manager.h"
 
 namespace glrt {
 namespace scene {
@@ -45,7 +46,7 @@ QHash<QString, T_data> collectNamedData(Scene* scene, const std::function<T_data
   data.reserve(components.length());
 
   for(T_component* component : components)
-    data[scene->labelForUuid(component->uuid)] = get_data(component);
+    data[scene->resourceManager.labelForResourceUuid(component->uuid)] = get_data(component);
 
   return data;
 }
