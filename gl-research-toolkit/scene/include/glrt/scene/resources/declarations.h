@@ -20,6 +20,7 @@ class ResourceIndex;
 class ResourceManager;
 class LightSource;
 class Material;
+class Scene;
 class StaticMeshData; // #TODO rename to StaticMesh
 
 } // namespace resources
