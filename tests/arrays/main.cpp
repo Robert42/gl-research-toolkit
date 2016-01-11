@@ -662,9 +662,6 @@ void test_remove()
   EXPECT_EQ(StateSpy::log(),
             "");
   StateSpy::clearLog();
-
-  // test removing multiple changing internal buffer
-  // #TODO
 }
 
 int main(int argc, char** argv)
