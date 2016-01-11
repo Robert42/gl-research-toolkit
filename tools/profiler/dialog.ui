@@ -66,13 +66,6 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="labelStatus">
-     <property name="text">
-      <string>No Connection</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QTabWidget" name="tabWidget_Games">
      <property name="currentIndex">
       <number>0</number>
