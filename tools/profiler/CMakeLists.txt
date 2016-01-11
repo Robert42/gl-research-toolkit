@@ -22,4 +22,4 @@ add_executable(profiler
 )
 
 target_include_directories(profiler PRIVATE ${UI_HEADER_DIR})
-target_link_libraries(profiler Qt5::Widgets Qt5::Network)
+target_link_libraries(profiler Qt5::Widgets Qt5::Network glrt)

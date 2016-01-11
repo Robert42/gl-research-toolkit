@@ -1,4 +1,5 @@
 #include <glrt/toolkit/profiler.h>
+#include <glrt/toolkit/network.h>
 
 #include <SDL2/SDL_timer.h>
 
@@ -106,8 +107,12 @@ void Profiler::send_data_through_tcp()
 {
   if(tcpSocket.isOpen())
   {
-    QDataStream stream(&tcpSocket);
+    QBuffer networkBuffer;
+    networkBuffer.open(QIODevice::WriteOnly);
+    QDataStream stream(&networkBuffer);
     send_data(stream);
+
+    Network::writeAtomic(&tcpSocket, networkBuffer.buffer());
   }
 }
 
@@ -131,6 +136,9 @@ void Profiler::connectionError()
 
 void Profiler::readStringsToWrite()
 {
+  if(tcpSocket.bytesAvailable() < int(sizeof(quintptr)))
+    return;
+
   QDataStream stream(&tcpSocket);
 
   while(!stream.atEnd())

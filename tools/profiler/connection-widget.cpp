@@ -1,6 +1,8 @@
 #include "connection-widget.h"
 #include "ui_connection-widget.h"
 
+#include <glrt/toolkit/network.h>
+
 ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
   QWidget(parent),
   applicationName("Connected Game"),
@@ -27,7 +29,12 @@ ConnectionWidget::~ConnectionWidget()
 
 void ConnectionWidget::dataReceived()
 {
-  QDataStream stream(tcpSocket);
+  QBuffer networkBuffer;
+  networkBuffer.open(QIODevice::ReadOnly);
+  if(!glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 10000))
+    return;
+
+  QDataStream stream(&networkBuffer);
 
   int n;
   stream >> n;
@@ -64,7 +71,5 @@ void ConnectionWidget::dataReceived()
 void ConnectionWidget::requestString(quintptr ptr)
 {
   if(!strings.contains(ptr))
-  {
     tcpSocket->write(reinterpret_cast<char*>(&ptr), sizeof(quintptr));
-  }
 }

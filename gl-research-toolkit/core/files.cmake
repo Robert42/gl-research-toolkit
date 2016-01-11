@@ -3,11 +3,13 @@ set(SOURCE_FILES
   include/glrt/toolkit/assimp-glm-converter.h
   include/glrt/toolkit/geometry.h
   include/glrt/toolkit/json.h
+  include/glrt/toolkit/network.h
   include/glrt/toolkit/profiler.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl
   src/glrt/dependencies.cpp
   src/glrt/toolkit/json.cpp
+  src/glrt/toolkit/network.cpp
   src/glrt/toolkit/profiler.cpp
   src/glrt/toolkit/uuid.cpp
 )
