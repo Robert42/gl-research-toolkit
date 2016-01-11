@@ -67,7 +67,6 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
   static void destruct_single_D(T* data);
   static void destruct_D(T* data, int length);
 
-protected:
   template<typename T_int>
   static bool ranges_overlap(T_int range1_begin, T_int range1_end, T_int range2_begin, T_int range2_end);
   static bool ranges_overlap(const T* instanceA, const T* instanceB, int na=1, int nb=1);

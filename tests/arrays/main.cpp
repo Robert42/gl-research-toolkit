@@ -8,7 +8,7 @@ using glrt::Array;
 
 
 
-void test_capacity_traits();
+void test_traits();
 
 void test_array_constructors()
 {
@@ -692,13 +692,21 @@ void test_ensureCapacity()
   array.ensureCapacity(1);
 
   EXPECT_EQ(array.capacity(), 4);
+
+  array.setCapacity(0);
+
+  EXPECT_EQ(array.capacity(), 0);
+
+  array.setCapacity(0);
+
+  EXPECT_EQ(array.capacity(), 0);
 }
 
 int main(int argc, char** argv)
 {
   TestingApplication testing_application(argc, argv);
 
-  test_capacity_traits();
+  test_traits();
   test_array_constructors();
   test_array_operators();
   test_swap();
