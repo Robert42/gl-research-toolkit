@@ -84,13 +84,14 @@ void ConnectionWidget::dataReceived()
   stream >> n;
   for(int i=0; i<n; ++i)
   {
-    quint64 time;
+    quint64 cpuTime;
+    quint64 gpuTime;
     quintptr file;
     quintptr function;
     quintptr name;
     int line;
     int depth;
-    stream >> time >> file >> function >> name >> line >> depth;
+    stream >> cpuTime >> gpuTime >> file >> function >> name >> line >> depth;
 
     requestString(file);
     requestString(function);

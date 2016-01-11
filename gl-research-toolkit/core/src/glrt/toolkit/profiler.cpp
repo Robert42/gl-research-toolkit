@@ -158,7 +158,7 @@ void Profiler::readStringsToWrite()
 
 void Profiler::RecordedScope::write(QDataStream& stream) const
 {
-  stream << time << quintptr(file) << quintptr(function) << quintptr(name) << line << depth;
+  stream << cpuTime << gpuTime << quintptr(file) << quintptr(function) << quintptr(name) << line << depth;
 }
 
 // ======== Profiler::Scope ====================================================
@@ -175,14 +175,14 @@ Profiler::Scope::Scope(const char *file, int line, const char *function, const c
   int depth = activeProfiler->currentDepth++;
 
   index = activeProfiler->recordedScopes.size();
-  activeProfiler->recordedScopes.push_back(RecordedScope{MAX_TIME, file, function, name, line, depth});
+  activeProfiler->recordedScopes.push_back(RecordedScope{MAX_TIME, MAX_TIME, file, function, name, line, depth});
 
   this->timer.restart();
 }
 
 Profiler::Scope::~Scope()
 {
-  quint64 elapsedTime = this->timer.elapsedTimeAsMicroseconds();
+  quint64 elapsedCpuTime = this->timer.elapsedTimeAsMicroseconds();
 
   if(!activeProfiler)
     return;
@@ -195,7 +195,7 @@ Profiler::Scope::~Scope()
     return;
 
   activeProfiler->currentDepth--;
-  activeProfiler->recordedScopes[this->index].time = elapsedTime;
+  activeProfiler->recordedScopes[this->index].cpuTime = elapsedCpuTime;
 }
 
 } // namespace glrt

@@ -41,7 +41,8 @@ public:
 private:
   struct RecordedScope
   {
-    quint64 time;
+    quint64 cpuTime;
+    quint64 gpuTime;
     const char* file;
     const char* function;
     const char* name;
