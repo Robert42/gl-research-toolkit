@@ -10,8 +10,10 @@ ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
   ui->setupUi(this);
 
   requestString(0);
+  tcpSocket->flush();
 
   connect(tcpSocket, SIGNAL(aboutToClose()), this, SLOT(deleteLater()));
+  connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
   connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
 }
 
@@ -56,13 +58,13 @@ void ConnectionWidget::dataReceived()
     requestString(function);
     requestString(name);
   }
+  tcpSocket->flush();
 }
 
 void ConnectionWidget::requestString(quintptr ptr)
 {
   if(!strings.contains(ptr))
   {
-    QDataStream stream(tcpSocket);
-    stream << ptr;
+    tcpSocket->write(reinterpret_cast<char*>(&ptr), sizeof(quintptr));
   }
 }
