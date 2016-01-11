@@ -51,9 +51,9 @@ void StateSpy::clearLog()
   globalState().clear();
 }
 
-void StateSpy::clearIndex()
+void StateSpy::clearIndex(int nextIndex)
 {
-  _nextIndex = 0;
+  _nextIndex = nextIndex;
 }
 
 QString StateSpy::log()

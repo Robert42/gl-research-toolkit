@@ -61,6 +61,8 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
   static void remove_POD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
   static void remove_single_mOD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
   static void remove_mOD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
+  static void remove_single_aOD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
+  static void remove_aOD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
   static void remove_single_cCD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache);
   static void remove_cCD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache);
 
@@ -75,6 +77,8 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 
   static void swap_instances_mO(T* a, T* b, int n);
   static void swap_single_instance_mO(T* a, T* b);
+  static void copy_instances_aO(T* a, T* b, int n);
+  static void copy_single_instance_aO(T* a, T* b);
   static void call_instance_destructors_D(const T* a, int n);
 };
 

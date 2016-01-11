@@ -89,6 +89,23 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::swap_single_instance_mO(T* a,
 }
 
 template<typename T, typename T_c>
+void ArrayTraits_Unordered_Toolkit<T, T_c>::copy_instances_aO(T* a, T* b, int n)
+{
+  Q_ASSERT(!ranges_overlap(a, b, n));
+
+  for(int i=0; i<n; ++i)
+    a[i] = b[i];
+}
+
+template<typename T, typename T_c>
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::copy_single_instance_aO(T* a, T* b)
+{
+  Q_ASSERT(!ranges_overlap(a, b, 1));
+
+  *a = *b;
+}
+
+template<typename T, typename T_c>
 void ArrayTraits_Unordered_Toolkit<T, T_c>::call_instance_destructors_D(const T* a, int n)
 {
   for(int i=0; i<n; ++i)
@@ -289,6 +306,40 @@ void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_mOD(T* data, int prev_length,
 }
 
 template<typename T, typename T_c>
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_aOD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
+{
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index<prev_length);
+  Q_UNUSED(hint);
+  Q_UNUSED(cache);
+
+  int last = prev_length-1;
+  if(index != last)
+    copy_single_instance_aO(data+index, data + last);
+  destruct_single_D(data+last);
+}
+
+template<typename T, typename T_c>
+void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_aOD(T* data, int prev_length, const int first_index, int num_values, const hint_type& hint, cache_type* cache)
+{
+  Q_ASSERT(first_index>=0);
+  Q_ASSERT(first_index<prev_length);
+  Q_ASSERT(first_index+num_values>=0);
+  Q_ASSERT(first_index+num_values<=prev_length);
+  Q_UNUSED(hint);
+  Q_UNUSED(cache);
+
+  int first_value_to_copy;
+  int num_values_to_copy;
+
+  values_used_to_fill_gaps(&first_value_to_copy, &num_values_to_copy, prev_length, first_index, num_values);
+
+  copy_instances_aO(data+first_index, data+first_value_to_copy, num_values_to_copy);
+
+  call_instance_destructors_D(data+prev_length-num_values, num_values);
+}
+
+template<typename T, typename T_c>
 inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_cCD(T* data, int prev_length, const int index, const hint_type& hint, cache_type* cache)
 {
   Q_ASSERT(index>=0);
@@ -300,10 +351,8 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_cCD(T* data, in
   destruct_single_D(data+index);
 
   if(index != last)
-  {
     copy_construct_single_cC(data+index, data+last);
-    destruct_single_D(data+last);
-  }
+  destruct_single_D(data+last);
 }
 
 template<typename T, typename T_c>
@@ -324,7 +373,7 @@ void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_cCD(T* data, int prev_length,
   call_instance_destructors_D(data+first_index, num_values);
   copy_construct_cC(data+first_index, data+first_value_to_copy, num_values_to_copy);
 
-  call_instance_destructors_D(data+prev_length-num_values, num_values);
+  call_instance_destructors_D(data+prev_length-num_values_to_copy, num_values_to_copy);
 }
 
 template<typename T, typename T_c>

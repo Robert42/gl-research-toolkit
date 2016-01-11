@@ -31,7 +31,7 @@ public:
   void print(const QString& s);
 
   static void clearLog();
-  static void clearIndex();
+  static void clearIndex(int nextIndex=0);
   static QString log();
   static bool enabledDebugPrint;
 
