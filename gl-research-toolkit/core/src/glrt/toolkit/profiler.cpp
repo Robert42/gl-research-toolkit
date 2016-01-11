@@ -44,7 +44,8 @@ quint64 Timer::elapsedTimeAsMicroseconds() const
 Profiler* Profiler::activeProfiler = nullptr;
 
 
-Profiler::Profiler()
+Profiler::Profiler(const QString& applicationName)
+  : applicationName(applicationName)
 {
   connect(&tcpSocket, &QTcpSocket::disconnected, this, &Profiler::deactivate);
   connect(&tcpSocket, &QTcpSocket::readyRead, this, &Profiler::readStringsToWrite);
@@ -112,9 +113,9 @@ void Profiler::send_data_through_tcp()
 
 void Profiler::send_data(QDataStream& stream)
 {
-  stream << strings_to_send.length();
-  for(const char* str : strings_to_send)
-    stream << quintptr(str) << QString(str);
+  stream << int(strings_to_send.size());
+  for(quintptr ptr : strings_to_send.keys())
+    stream << ptr << strings_to_send[ptr];
   strings_to_send.clear();
 
   stream << int(recordedScopes.size());
@@ -136,7 +137,11 @@ void Profiler::readStringsToWrite()
   {
     quintptr ptr;
     stream >> ptr;
-    strings_to_send.append(reinterpret_cast<char*>(ptr));
+    if(ptr == 0)
+      strings_to_send[0] = applicationName;
+    else
+      strings_to_send[ptr] = reinterpret_cast<char*>(ptr);
+
   }
 }
 

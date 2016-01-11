@@ -27,6 +27,7 @@ private slots:
   void on_toolButton_UndoPort_clicked();
   void update_widgets_to_connection_state();
   void update_undo_button();
+  void updateTabNames();
 
   void newConnection();
 };

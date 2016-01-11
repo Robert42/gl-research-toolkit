@@ -27,8 +27,9 @@ public:
   Timer timer;
   float frameDuration;
   bool printFramerate = false;
+  QString applicationName;
 
-  Profiler();
+  Profiler(const QString& applicationName);
   Profiler(const Profiler&) = delete;
   ~Profiler();
 
@@ -55,7 +56,7 @@ private:
   std::vector<RecordedScope> recordedScopes;
   int currentDepth;
 
-  QVector<const char*> strings_to_send;
+  QHash<quintptr, QString> strings_to_send;
   QTcpSocket tcpSocket;
 
   void send_data_through_tcp();

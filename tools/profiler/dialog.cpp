@@ -55,6 +55,16 @@ void Dialog::update_undo_button()
   ui->toolButton_UndoPort->setVisible(ui->spinBox_Port->value() != GLRT_PROFILER_DEFAULT_PORT);
 }
 
+void Dialog::updateTabNames()
+{
+  for(int i=0; i<ui->tabWidget_Games->count(); ++i)
+  {
+    ConnectionWidget* w = qobject_cast<ConnectionWidget*>(ui->tabWidget_Games->widget(i));
+
+    ui->tabWidget_Games->setTabText(i, w->applicationName);
+  }
+}
+
 void Dialog::newConnection()
 {
   while(server.hasPendingConnections())
@@ -63,7 +73,9 @@ void Dialog::newConnection()
 
     ConnectionWidget* connectionWidget = new ConnectionWidget(socket);
     connect(ui->btnStopServer, SIGNAL(clicked(bool)), connectionWidget, SLOT(deleteLater()));
+    connect(connectionWidget, SIGNAL(applicationNameChanged(QString)), this, SLOT(updateTabNames()));
 
-    ui->tabWidget_Games->addTab(connectionWidget, "Connection");
+
+    ui->tabWidget_Games->addTab(connectionWidget, connectionWidget->applicationName);
   }
 }
