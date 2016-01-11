@@ -1,5 +1,4 @@
 #include <glrt/scene/resources/resource-index.h>
-#include <glrt/scene/resources/resource-loader.h>
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/scene/light-component.h>
@@ -70,86 +69,36 @@ void ResourceIndex::loadIndexedDirectory(const std::string& dir)
   loadIndex(dir+"/asset-index");
 }
 
-State ResourceIndex::stateOf(const QUuid& uuid) const
-{
-  if(loadedRessources.contains(uuid))
-    return State::LOADED;
-  else if(loadingRessources.contains(uuid))
-    return State::LOADING;
-  else if(unloadedRessources.contains(uuid))
-    return State::REGISTERED;
-  else
-    return State::NONE;
-}
-
 bool ResourceIndex::isRegistered(const QUuid& uuid) const
 {
-  return unloadedRessources.contains(uuid)
-      || isLoading(uuid)
-      || isLoaded(uuid);
-}
-
-bool ResourceIndex::isLoading(const QUuid& uuid) const
-{
-  return loadingRessources.contains(uuid);
-}
-
-bool ResourceIndex::isLoaded(const QUuid& uuid) const
-{
-  return loadedRessources.contains(uuid);
+  return allRegisteredResources.contains(uuid);
 }
 
 void ResourceIndex::registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file)
 {
-  // #TODO validate, that the uuid is not laready used
-  unloadedRessources.insert(uuid);
+  validateNotYetRegistered(uuid);
+  allRegisteredResources.insert(uuid);
   staticMeshAssetsFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(mesh_file));
 }
 
 void ResourceIndex::registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light)
 {
-  // #TODO validate, that the uuid is not laready used
-  loadedRessources.insert(uuid);
+  validateNotYetRegistered(uuid);
+  allRegisteredResources.insert(uuid);
   lightSources[uuid] = light;
 }
 
 void ResourceIndex::registerMaterial(const Uuid<Material>& uuid, const Material& material)
 {
-  // #TODO validate, that the uuid is not laready used
-  loadedRessources.insert(uuid);
+  validateNotYetRegistered(uuid);
+  allRegisteredResources.insert(uuid);
   materials[uuid] = material;
 }
 
-void ResourceIndex::_loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow)
+void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const
 {
-  Uuid<StaticMeshData> staticMeshUuid(uuid);
-
-  // #TODO managage state changes
-
-  if(staticMeshAssetsFiles.contains(staticMeshUuid))
-  {
-    loader->loadStaticMesh(staticMeshUuid, staticMeshAssetsFiles[staticMeshUuid].toStdString());
-    if(loadNow)
-      waitForAssetToBeLoaded(uuid);
-  }else
-  {
-    qCritical() << "Trying to load resource with unregistered uuid " << uuid;
-  }
-}
-
-void ResourceIndex::waitForAssetToBeLoaded(const QUuid& uuid)
-{
-  while(!isLoaded(uuid))
-    QThread::currentThread()->msleep(5);
-}
-
-bool ResourceIndex::classInvariant()
-{
-  bool everyRessourceHasOnlyOneState = (unloadedRessources & loadingRessources).isEmpty()
-                                    && (loadedRessources   & loadingRessources).isEmpty()
-                                    && (loadedRessources   & unloadedRessources).isEmpty();
-
-  return everyRessourceHasOnlyOneState;
+  if(isRegistered(uuid))
+    throw GLRT_EXCEPTION(QString("The uuid %0 is already in use!").arg(uuid.toString()));
 }
 
 

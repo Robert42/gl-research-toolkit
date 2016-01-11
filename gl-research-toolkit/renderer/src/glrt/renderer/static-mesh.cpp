@@ -1,4 +1,4 @@
-#include <glrt/scene/resources/resource-loader.h>
+#include <glrt/scene/resources/static-mesh-loader.h>
 #include <glrt/renderer/static-mesh.h>
 #include <glrt/glsl/layout-constants.h>
 

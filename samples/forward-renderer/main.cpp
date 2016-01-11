@@ -1,6 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
-#include <glrt/scene/resources/resource-loader.h>
+#include <glrt/scene/resources/static-mesh-loader.h>
 #include <glrt/scene/scene.h>
 #include <glrt/renderer/forward-renderer.h>
 #include <glrt/gui/anttweakbar.h>

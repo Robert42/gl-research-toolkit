@@ -1,5 +1,5 @@
 #include <glrt/scene/resources/static-mesh-data.h>
-#include <glrt/scene/resources/resource-loader.h>
+#include <glrt/scene/resources/static-mesh-loader.h>
 
 namespace glrt {
 namespace scene {

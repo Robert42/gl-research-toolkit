@@ -1,7 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/scene/declarations.h>
-#include <glrt/scene/resources/resource-index.h>
-#include <glrt/scene/resources/resource-loader.h>
+#include <glrt/scene/resources/static-mesh-loader.h>
 #include <glrt/scene/resources/asset-converter.h>
 
 #include <glhelper/gl.hpp>

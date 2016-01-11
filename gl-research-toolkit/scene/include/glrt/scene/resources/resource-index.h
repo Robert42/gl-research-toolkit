@@ -34,30 +34,20 @@ public:
   void loadIndex(const std::string& filename);
   void loadIndexedDirectory(const std::string& filename);
 
-  State stateOf(const QUuid& uuid) const;
-  bool isRegistered(const QUuid& uuid) const;
-  bool isLoading(const QUuid& uuid) const;
-  bool isLoaded(const QUuid& uuid) const;
-
   void registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file);
   void registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light);
   void registerMaterial(const Uuid<Material>& uuid, const Material& material);
 
-private:
-  friend class ResourceLoader;
+  bool isRegistered(const QUuid& uuid) const;
 
-  QSet<QUuid> unloadedRessources;
-  QSet<QUuid> loadingRessources;
-  QSet<QUuid> loadedRessources;
+private:
+  QSet<QUuid> allRegisteredResources;
 
   QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;
 
-  void _loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow);
-  void waitForAssetToBeLoaded(const QUuid& uuid);
-
-  bool classInvariant();
+  void validateNotYetRegistered(const QUuid& uuid) const;
 };
 
 
