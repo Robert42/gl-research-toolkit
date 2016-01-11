@@ -1,6 +1,10 @@
 #include "dialog.h"
 #include "ui_dialog.h"
 
+#include "connection-widget.h"
+
+#include <QTcpSocket>
+
 Dialog::Dialog(QWidget *parent) :
   QDialog(parent),
   ui(new Ui::Dialog)
@@ -12,6 +16,8 @@ Dialog::Dialog(QWidget *parent) :
 
   on_btnStartServer_clicked();
   ui->tabWidget_Games->clear();
+
+  connect(&server, SIGNAL(newConnection()), this, SLOT(newConnection()));
 
 }
 
@@ -47,4 +53,17 @@ void Dialog::on_toolButton_UndoPort_clicked()
 void Dialog::update_undo_button()
 {
   ui->toolButton_UndoPort->setVisible(ui->spinBox_Port->value() != GLRT_PROFILER_DEFAULT_PORT);
+}
+
+void Dialog::newConnection()
+{
+  while(server.hasPendingConnections())
+  {
+    QTcpSocket* socket = server.nextPendingConnection();
+
+    ConnectionWidget* connectionWidget = new ConnectionWidget(socket);
+    connect(ui->btnStopServer, SIGNAL(clicked(bool)), connectionWidget, SLOT(deleteLater()));
+
+    ui->tabWidget_Games->addTab(connectionWidget, "Connection");
+  }
 }
