@@ -2,6 +2,7 @@
 #define DIALOG_H
 
 #include <QDialog>
+#include <QTcpServer>
 
 namespace Ui {
 class Dialog;
@@ -17,6 +18,12 @@ public:
 
 private:
   Ui::Dialog *ui;
+
+  QTcpServer server;
+
+private slots:
+  void on_btnStartServer_clicked();
+  void on_btnStopServer_clicked();
 };
 
 #endif // DIALOG_H
