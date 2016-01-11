@@ -3,6 +3,8 @@
 
 #include <glrt/toolkit/uuid.h>
 #include <glrt/scene/declarations.h>
+#include <glrt/scene/resources/light-source.h>
+#include <glrt/scene/resources/material.h>
 
 namespace glrt {
 namespace scene {

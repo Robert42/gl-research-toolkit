@@ -1,9 +1,10 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
-#include <glrt/scene/resources/static-mesh-loader.h>
+#include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/scene.h>
-#include <glrt/renderer/forward-renderer.h>
 #include <glrt/gui/anttweakbar.h>
+#include <glrt/renderer/sample-source-manager.h>
+#include <glrt/renderer/forward-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 
 #include <glhelper/gl.hpp>
@@ -13,8 +14,7 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
-  glrt::scene::resources::ResourceIndex resourceIndex(glrt::Uuid<glrt::scene::resources::ResourceIndex>("{cf685c44-8d67-4531-b4f2-964acef0ec10}"));
-  resourceIndex.loadIndexedDirectory(GLRT_ASSET_DIR);
+  glrt::renderer::SampleResourceManager resourceManager;
 
   glrt::scene::Scene scene;
   glrt::renderer::ForwardRenderer renderer(&scene);
