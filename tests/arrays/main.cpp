@@ -625,7 +625,43 @@ void test_remove()
   StateSpy::clearLog();
 
   // test removing multiple
-  // #TODO
+  {
+    StateSpy::clearIndex();
+    StateSpyArray_CapacityBock_2_2 array = {StateSpy(), StateSpy(), StateSpy()};
+    EXPECT_EQ(StateSpy::log(),
+              "0: default constructor\n"
+              "1: default constructor\n"
+              "2: default constructor\n"
+              "3: copy constructor from 0\n"
+              "4: copy constructor from 1\n"
+              "5: copy constructor from 2\n"
+              "2: destructed\n"
+              "1: destructed\n"
+              "0: destructed\n");
+    StateSpy::clearLog();
+    EXPECT_EQ(array.length(), 3);
+    EXPECT_EQ(array.capacity(), 4);
+    array.remove(0, 2);
+    EXPECT_EQ(array.length(), 1);
+    EXPECT_EQ(array.capacity(), 2);
+    EXPECT_EQ(StateSpy::log(),
+              "3: move operator from 5\n"
+              "4: destructed\n"
+              "5: destructed\n"
+              "6: move constructor from 3\n"
+              "3: destructed\n");
+    StateSpy::clearLog();
+    array.remove(0, 1);
+    EXPECT_EQ(array.length(), 0);
+    EXPECT_EQ(array.capacity(), 0);
+    EXPECT_EQ(array.data(), nullptr);
+    EXPECT_EQ(StateSpy::log(),
+              "6: destructed\n");
+    StateSpy::clearLog();
+  }
+  EXPECT_EQ(StateSpy::log(),
+            "");
+  StateSpy::clearLog();
 
   // test removing multiple changing internal buffer
   // #TODO
