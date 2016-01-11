@@ -87,7 +87,8 @@ void Profiler::activate()
   activeProfiler = this;
   recordedScopes.clear();
   tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_PROFILER_DEFAULT_PORT);
-  tcpSocket.waitForConnected(1000);
+  if(!tcpSocket.waitForConnected(1000))
+    deactivate();
 }
 
 
@@ -96,7 +97,7 @@ void Profiler::deactivate()
   if(activeProfiler == this)
   {
     activeProfiler = nullptr;
-    tcpSocket.disconnectFromHost();
+    tcpSocket.abort();
   }
 }
 

@@ -8,7 +8,7 @@ ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
 {
   ui->setupUi(this);
 
-  connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
+  connect(tcpSocket, SIGNAL(aboutToClose()), this, SLOT(deleteLater()));
 }
 
 ConnectionWidget::~ConnectionWidget()
