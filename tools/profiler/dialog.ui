@@ -63,6 +63,16 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_UndoPort">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset theme="edit-undo"/>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

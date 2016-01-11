@@ -24,7 +24,9 @@ private:
 private slots:
   void on_btnStartServer_clicked();
   void on_btnStopServer_clicked();
+  void on_toolButton_UndoPort_clicked();
   void update_widgets_to_connection_state();
+  void update_undo_button();
 };
 
 #endif // DIALOG_H
