@@ -31,13 +31,11 @@ struct ArrayCapacityTraits_Capacity_Blocks
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 {
-  enum class HintType{DefaultHint};
-  enum class CacheType{DefaultCache};
-  typedef HintType hint_type;
-  typedef CacheType cache_type;
+  enum class hint_type{DefaultHint};
+  enum class cache_type{DefaultCache};
 
-  static hint_type default_append_hint(){return HintType::DefaultHint;}
-  static hint_type default_remove_hint(){return CacheType::DefaultCache;}
+  static hint_type default_append_hint(){return hint_type::DefaultHint;}
+  static hint_type default_remove_hint(){return hint_type::DefaultHint;}
 
   static void copy_construct_POD(T* dest, const T* src, int count);
   static void copy_construct_single_POD(T* dest, const T* src);
@@ -85,7 +83,7 @@ protected:
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
+  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
@@ -139,7 +137,7 @@ struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_cap
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T> parent_type;
+  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
@@ -187,7 +185,7 @@ struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_c
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_mCmOD<T> parent_type;
+  typedef ArrayTraits_Unordered_mCmOD<T, T_capacity_traits> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
