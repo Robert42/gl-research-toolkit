@@ -183,8 +183,7 @@ struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_c
   }
 };
 
-// Class with copy constructor, move operator and destructor
-// (Thought for OpenGL Wrapper)
+// Class with copy constructor, move constructor, move operator and destructor
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_capacity_traits>
 {
