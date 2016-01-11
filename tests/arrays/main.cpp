@@ -664,6 +664,36 @@ void test_remove()
   StateSpy::clearLog();
 }
 
+void test_ensureCapacity()
+{
+  StateSpyArray array;
+  EXPECT_EQ(array.capacity(), 0);
+
+  array.ensureCapacity(0);
+
+  EXPECT_EQ(array.capacity(), 0);
+
+  array.ensureCapacity(1);
+
+  EXPECT_EQ(array.capacity(), 2);
+
+  array.ensureCapacity(2);
+
+  EXPECT_EQ(array.capacity(), 2);
+
+  array.ensureCapacity(0);
+
+  EXPECT_EQ(array.capacity(), 2);
+
+  array.ensureCapacity(3);
+
+  EXPECT_EQ(array.capacity(), 4);
+
+  array.ensureCapacity(1);
+
+  EXPECT_EQ(array.capacity(), 4);
+}
+
 int main(int argc, char** argv)
 {
   TestingApplication testing_application(argc, argv);
@@ -678,7 +708,7 @@ int main(int argc, char** argv)
   test_extend_copy();
   test_destructor();
   test_remove();
-  // #TODO: test ensureCapacity
+  test_ensureCapacity();
 
   // #TODO: Test all trait functions in action. Goal: each code line in the functions should be executed at least once.
 
