@@ -31,11 +31,13 @@ struct ArrayCapacityTraits_Capacity_Blocks
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 {
-  typedef uint32_t hint_type;
-  typedef uint32_t cache_type;
+  enum class HintType{DefaultHint};
+  enum class CacheType{DefaultCache};
+  typedef HintType hint_type;
+  typedef CacheType cache_type;
 
-  static hint_type default_append_hint(){return hint_type(0xffffffff);}
-  static hint_type default_remove_hint(){return hint_type(0xffffffff);}
+  static hint_type default_append_hint(){return HintType::DefaultHint;}
+  static hint_type default_remove_hint(){return CacheType::DefaultCache;}
 
   static void copy_construct_POD(T* dest, const T* src, int count);
   static void copy_construct_single_POD(T* dest, const T* src);
