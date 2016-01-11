@@ -39,7 +39,7 @@ public:
   void registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file);
   void registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light);
   void registerMaterial(const Uuid<Material>& uuid, const Material& material);
-  void registerSceneFile(const Uuid<Scene>& uuid, const std::string& scene_file);
+  void registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file);
 
   bool isRegistered(const QUuid& uuid) const;
 
@@ -52,7 +52,7 @@ private:
   QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;
-  QHash<Uuid<Scene>, QString> sceneFiles;
+  QHash<Uuid<SceneLayer>, QString> scenelayerFiles;
 
   QHash<QUuid, QString> _labels;
 

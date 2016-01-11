@@ -489,8 +489,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     outputStream << "\n";
   }
 
-  outputStream << "void main(ResourceLoader@ loader, Scene@ scene)\n{\n";
-  outputStream << "  scene.loadGroup(group);\n";
+  outputStream << "void main(SceneLayer@ sceneLayer)\n{\n";
   outputStream << "\n";
   outputStream << "  Node@ node;\n";
   outputStream << "  Uuid<Node> nodeUuid;\n";
@@ -506,7 +505,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   if(!allMeshesToImport.isEmpty())
   {
     outputStream << "\n";
-    outputStream << "  loadMeshes(loader);\n\n";
+    outputStream << "  loadMeshes(sceneLayer.staticMeshLoader);\n\n";
   }
 
   for(aiNode* assimp_node : allNodesToImport.values())
@@ -527,8 +526,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       outputStream << "// ======== Node \"" << n << "\" ========\n";
       outputStream << "  nodeUuid = Uuid<Node>(\"" << QUuid(nodeUuid).toString() << "\");\n";
       if(assets.labels.contains(nodeUuid))
-        outputStream << "  group.labels[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
-      outputStream << "  group.add(nodeUuid);\n";
+        outputStream << "  sceneLayer.labels[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
+      outputStream << "  sceneLayer.add(nodeUuid);\n";
       outputStream << "  node = Node::create(scene: scene, uuid: nodeUuid);\n";
 
       if(isUsingMesh)
@@ -553,8 +552,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           else
             outputStream << "  materialUuid = Uuid<Material>(\"" << QUuid(materialUuid).toString() << "\");\n";
           if(assets.labels.contains(meshUuid))
-            outputStream << "  group.labels[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
-          outputStream << "  group.add(meshUuid);\n";
+            outputStream << "  sceneLayer.labels[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
+          outputStream << "  sceneLayer.add(meshUuid);\n";
           outputStream << "  StaticMeshComponent::create(node: node, meshUuid: meshUuid, materialUuid: materialUuid);\n";
         }
       }
@@ -565,8 +564,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         outputStream << "  // Camera \"" << n << "\"\n";
         outputStream << "  cameraUuid = Uuid<Node>(\"" << QUuid(cameraUuid).toString() << "\");\n";
         if(assets.labels.contains(cameraUuid))
-          outputStream << "  group.labels[cameraUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
-        outputStream << "  group.add(cameraUuid);\n";
+          outputStream << "  sceneLayer.labels[cameraUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
+        outputStream << "  sceneLayer.add(cameraUuid);\n";
         outputStream << "  CameraComponent::create(node: node, uuid: cameraUuid, aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
       }
       if(isUsingLight)
@@ -578,8 +577,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         else
           outputStream << "  lightUuid = Uuid<LightSource>(\"" << QUuid(lightUuid).toString() << "\");\n";
         if(assets.labels.contains(lightUuid))
-          outputStream << "  group.labels[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
-        outputStream << "  group.add(lightUuid);\n";
+          outputStream << "  sceneLayer.labels[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
+        outputStream << "  sceneLayer.add(lightUuid);\n";
         outputStream << "  LightComponent::create(node: node, uuid: lightUuid);\n";
       }
       if(!isUsingComponent)

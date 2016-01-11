@@ -47,7 +47,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerStaticMesh(const Uuid<StaticMesh> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerStaticMesh), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerLightSource(const Uuid<LightSource> &in uuid, const LightSource &in light)", AngelScript::asMETHOD(ResourceIndex,registerLightSource), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneLayerFile(const Uuid<SceneLayer> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneLayerFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
 
@@ -114,11 +114,11 @@ void ResourceIndex::registerMaterial(const Uuid<Material>& uuid, const Material&
   materials[uuid] = material;
 }
 
-void ResourceIndex::registerSceneFile(const Uuid<Scene>& uuid, const std::string& scene_file)
+void ResourceIndex::registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file)
 {
   validateNotYetRegistered(uuid);
   allRegisteredResources.insert(uuid);
-  sceneFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(scene_file));
+  scenelayerFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(file));
 }
 
 void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const
