@@ -6,7 +6,8 @@ namespace resources {
 
 
 ResourceManager::ResourceManager(StaticMeshLoader* staticMeshLoader)
-  : staticMeshLoader(*staticMeshLoader)
+  : staticMeshLoader(*staticMeshLoader),
+    scene(*this)
 {
 }
 

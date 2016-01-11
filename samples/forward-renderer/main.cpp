@@ -15,8 +15,8 @@ int main(int argc, char** argv)
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
   glrt::renderer::SampleResourceManager resourceManager;
+  glrt::scene::Scene& scene = resourceManager.scene;
 
-  glrt::scene::Scene scene;
   glrt::renderer::ForwardRenderer renderer(&scene);
 
   glrt::gui::AntTweakBar antweakbar(&app,

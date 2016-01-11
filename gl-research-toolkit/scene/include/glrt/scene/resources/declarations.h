@@ -17,7 +17,7 @@ enum class State
 };
 
 class ResourceIndex;
-class ResourceLoader;
+class ResourceManager;
 class LightSource;
 class Material;
 class StaticMeshData; // #TODO rename to StaticMesh

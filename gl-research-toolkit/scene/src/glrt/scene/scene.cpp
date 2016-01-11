@@ -1,6 +1,7 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
+#include <glrt/scene/resources/resource-manager.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <QFile>
@@ -16,8 +17,11 @@ namespace scene {
 
 // ======== Scene ==============================================================
 
-
-Scene::Scene()
+/*!
+\warning The resourceManager takes the ownership of the scene
+*/
+Scene::Scene(resources::ResourceManager& resourceManager)
+  : resourceManager(resourceManager)
 {
 }
 

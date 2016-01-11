@@ -2,6 +2,7 @@
 #define GLRT_SCENE_SCENE_H
 
 #include <glrt/dependencies.h>
+#include <glrt/scene/declarations.h>
 #include <glrt/scene/entity.h>
 #include <glrt/scene/debug-camera.h>
 
@@ -21,9 +22,9 @@ class StaticMeshComponent;
 
 class Scene final : public QObject
 {
-  Q_OBJECT // #FIXME
-
+  Q_OBJECT
 public:
+  resources::ResourceManager& resourceManager;
   QString name, file;
   DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
@@ -32,7 +33,6 @@ public:
   Scene& operator=(const Scene&) = delete;
   Scene& operator=(Scene&&) = delete;
 
-  Scene();
   ~Scene();
 
   QString labelForUuid(const QUuid& uuid) const;
@@ -53,8 +53,12 @@ signals:
   void sceneLoaded(bool success);
 
 private:
+  friend class resources::ResourceManager;
+
   QVector<Entity*> _entities; // #TODO use an optimized array
   QHash<QUuid, QString> _labels;
+
+  Scene(resources::ResourceManager& resourceManager);
 };
 
 } // namespace scene
