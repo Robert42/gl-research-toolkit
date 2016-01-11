@@ -29,14 +29,45 @@ ConnectionWidget::~ConnectionWidget()
 
 void ConnectionWidget::dataReceived()
 {
+  int n;
   QBuffer networkBuffer;
   networkBuffer.open(QIODevice::ReadOnly);
-  if(!glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 10000))
+
+  bool hasData = false;
+#if 1 // Use the newsest frame
+  do
+  {
+    networkBuffer.seek(0);
+    networkBuffer.buffer().clear();
+    hasData = glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 10000);
+
+
+    QDataStream stream(&networkBuffer);
+    stream >> n;
+    for(int i=0; i<n; ++i)
+    {
+      quintptr ptr;
+      stream >> ptr >> strings[ptr];
+
+      if(ptr == 0 && applicationName!=strings[ptr])
+      {
+        applicationName = strings[ptr];
+        applicationNameChanged(applicationName);
+      }
+    }
+
+    if(tcpSocket->bytesAvailable() > 0 && hasData)
+      continue;
+  }while(false);
+#else // Don't skip any data
+  hasData = glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 10000);
+#endif
+
+  if(!hasData)
     return;
 
   QDataStream stream(&networkBuffer);
 
-  int n;
   stream >> n;
   for(int i=0; i<n; ++i)
   {
