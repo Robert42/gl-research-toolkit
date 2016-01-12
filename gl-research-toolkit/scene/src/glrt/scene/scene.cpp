@@ -14,6 +14,8 @@
 namespace glrt {
 namespace scene {
 
+using AngelScriptIntegration::AngelScriptCheck;
+
 
 // ======== Scene ==============================================================
 
@@ -109,6 +111,18 @@ void Scene::loadFromFile(const QString& filename)
 {
   // #TODO
   Q_UNUSED(filename);
+}
+
+void Scene::registerAngelScriptAPI()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectType("Scene", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+
+  glrt::Uuid<void>::registerCustomizedUuidType("Scene", false);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 

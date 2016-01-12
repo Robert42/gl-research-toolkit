@@ -45,6 +45,8 @@ public:
   static QMap<QString, QString> findAllScenes();
   void loadFromFile(const QString& filepath);
 
+  static void registerAngelScriptAPI();
+
 signals:
   void clearScene();
   void sceneCleared();

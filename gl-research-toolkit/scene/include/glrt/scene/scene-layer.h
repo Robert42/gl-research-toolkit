@@ -20,6 +20,8 @@ public:
 
   QList<Node*> allNodes() const;
 
+  static void registerAngelScriptAPI();
+
 private:
   friend class Node;
   QHash<Uuid<Node>, Node*> _nodes;

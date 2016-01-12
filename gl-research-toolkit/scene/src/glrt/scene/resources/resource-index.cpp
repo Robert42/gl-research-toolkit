@@ -2,6 +2,7 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/scene-layer.h>
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
@@ -37,6 +38,8 @@ void ResourceIndex::registerAngelScriptAPI()
 
   Material::registerAngelScriptTypes();
   LightSource::registerAngelScriptTypes();
+  SceneLayer::registerAngelScriptAPI();
+  Scene::registerAngelScriptAPI();
 
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
 
