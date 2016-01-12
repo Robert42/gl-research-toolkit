@@ -12,19 +12,22 @@ public:
   const Uuid<SceneLayer> uuid;
   Scene& scene;
 
-  SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene);
   ~SceneLayer();
 
   SceneLayer(const SceneLayer&) = delete;
   SceneLayer(SceneLayer&&) = delete;
 
   QList<Node*> allNodes() const;
+  void loadSceneGraph(const std::string& filename);
 
   static void registerAngelScriptAPI();
 
 private:
   friend class Node;
+  friend class Scene;
   QHash<Uuid<Node>, Node*> _nodes;
+
+  SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene);
 };
 
 } // namespace scene

@@ -1,4 +1,5 @@
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-layer.h>
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/resources/resource-manager.h>
@@ -63,6 +64,7 @@ QList<SceneLayer*> Scene::allLayers()
 void Scene::load(const Uuid<Scene>& scene)
 {
   SPLASHSCREEN_MESSAGE("Loading Scene");
+  clear();
 
   std::string filename = this->resourceManager.sceneFileForUuid(scene).toStdString();
 
@@ -71,14 +73,20 @@ void Scene::load(const Uuid<Scene>& scene)
 
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
-  clear();
 }
 
-void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayer)
+void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)
 {
-  std::string filename = this->resourceManager.sceneLayerFileForUuid(sceneLayer).toStdString();
+  SPLASHSCREEN_MESSAGE("Loading Scene-Layer");
 
-  qInfo() << "SceneLayer: " << filename.c_str();
+  std::string filename = this->resourceManager.sceneLayerFileForUuid(sceneLayerUuid).toStdString();
+
+  AngelScriptIntegration::ConfigCallScript config;
+  config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
+
+  SceneLayer* sceneLayer = new SceneLayer(sceneLayerUuid, *this);
+
+  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(SceneLayer@ sceneLayer)", "scene-layer-file", config, sceneLayer);
 }
 
 void Scene::registerAngelScriptAPI()
