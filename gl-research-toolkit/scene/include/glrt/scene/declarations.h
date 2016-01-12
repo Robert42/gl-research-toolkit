@@ -10,6 +10,7 @@ namespace scene {
 class Node;
 class LightComponent;
 class Camera;
+class Scene;
 class SceneLayer;
 
 } // namespace scene
