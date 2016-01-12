@@ -22,7 +22,7 @@ public:
 
 private:
   friend class Node;
-  QMap<Uuid<Node>, Node*> _nodes;// #TODO use fast array
+  QHash<Uuid<Node>, Node*> _nodes;
 };
 
 } // namespace scene

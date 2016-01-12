@@ -54,7 +54,7 @@ signals:
 private:
   friend class SceneLayer;
 
-  QMap<Uuid<SceneLayer>, SceneLayer*> _layers; // #TODO use fast array
+  QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
 };
 
 } // namespace scene
