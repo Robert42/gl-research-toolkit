@@ -1,6 +1,7 @@
 #include <glrt/toolkit/profiler.h>
 #include <glrt/application.h>
 #include <glrt/gui/anttweakbar.h>
+#include <glrt/scene/resources/resource-collector.h>
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
@@ -94,8 +95,8 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
 
   sceneSwitcher = SceneEnumeration::Ptr(new SceneEnumeration("CurrentSceneEnum", tweakBar, "Current Scene", ""));
-  sceneSwitcher->init(scene::Scene::findAllScenes());
-  sceneSwitcher->valueChanged = [&scene](const QString& file){scene.loadFromFile(file);};
+  sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, allRegisteredScenes(scene.resourceManager));
+  sceneSwitcher->valueChanged = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
   cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
   cameraSwitcher->valueChanged = [&scene](const scene::Camera& p){scene.debugCamera = p;};

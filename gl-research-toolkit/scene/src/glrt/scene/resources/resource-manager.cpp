@@ -14,14 +14,45 @@ ResourceManager::~ResourceManager()
 {
 }
 
-QString ResourceManager::labelForResourceUuid(const QUuid& uuid, const QString& fallback)
+QString ResourceManager::labelForResourceUuid(const QUuid& uuid, const QString& fallback) const
 {
-  return indexForResourceUuid(uuid)->labelForUuid(uuid, fallback);
+  return indexForResourceUuid(uuid)->labels.value(uuid, fallback);
 }
 
-QString ResourceManager::labelForResourceUuid(const QUuid& uuid)
+QString ResourceManager::labelForResourceUuid(const QUuid& uuid) const
 {
-  return indexForResourceUuid(uuid)->labelForUuid(uuid);
+  return indexForResourceUuid(uuid)->labels.value(uuid, uuid.toString());
+}
+
+void ResourceManager::foreachIndex(const std::function<bool(const Index* index)>& lambda) const
+{
+  foreachIndexImpl(lambda);
+  lambda(&Index::fallback);
+}
+
+QList<const ResourceIndex*> ResourceManager::allIndices() const
+{
+  QList<const Index*> all;
+
+  foreachIndex([&all](const Index* index){all.append(index);return false;});
+
+  return all;
+}
+
+const ResourceIndex* ResourceManager::indexForResourceUuid(const QUuid& uuid, const Index* fallback) const
+{
+  const Index* returnedIndex = fallback;
+
+  foreachIndex([&returnedIndex, &uuid](const Index* index){
+    if(index->isRegistered(uuid))
+    {
+      returnedIndex = index;
+      return true;
+    }
+    return false;
+  });
+
+  return returnedIndex;
 }
 
 

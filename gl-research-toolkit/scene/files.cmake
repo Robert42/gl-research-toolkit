@@ -14,6 +14,7 @@ set(SOURCE_FILES
   include/glrt/scene/resources/declarations.h
   include/glrt/scene/resources/light-source.h
   include/glrt/scene/resources/material.h
+  include/glrt/scene/resources/resource-collector.h
   include/glrt/scene/resources/resource-index.h
   include/glrt/scene/resources/resource-index.inl
   include/glrt/scene/resources/resource-manager.h
@@ -32,6 +33,7 @@ set(SOURCE_FILES
   src/glrt/scene/resources/asset-converter.cpp
   src/glrt/scene/resources/light-source.cpp
   src/glrt/scene/resources/material.cpp
+  src/glrt/scene/resources/resource-collector.cpp
   src/glrt/scene/resources/resource-index.cpp
   src/glrt/scene/resources/resource-manager.cpp
   src/glrt/scene/resources/static-mesh-data.cpp

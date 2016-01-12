@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   antweakbar.createDebugShaderBar(&shaderDebugPrinter);
   antweakbar.createProfilerBar(&app.profiler);
 
-  scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
+  scene.load(glrt::renderer::SampleResourceManager::cornellBoxScene());
 
   app.showWindow();
 

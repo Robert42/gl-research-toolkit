@@ -10,12 +10,15 @@ namespace renderer {
 class SampleResourceManager final : public scene::resources::ResourceManager
 {
 public:
-  glrt::scene::resources::ResourceIndex index;
+  Index index;
+
+  static Uuid<scene::Scene> cornellBoxScene();
 
   SampleResourceManager();
   ~SampleResourceManager();
 
-  Index* indexForResourceUuid(const QUuid& uuid, Index* fallback=nullptr) final override;
+protected:
+  void foreachIndexImpl(const std::function<bool(const Index*)>& lambda) const final override;
 };
 
 } // namespace renderer

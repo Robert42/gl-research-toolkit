@@ -1,5 +1,6 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/static-mesh-data.h>
+#include <glrt/scene/resources/resource-index.h>
 #include <glrt/scene/camera.h>
 #include <glrt/scene/coord-frame.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
@@ -286,10 +287,6 @@ struct SceneGraphImportAssets
 
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
 {
-  // #FIXME: register the fallback
-  const Uuid<Material> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
-  const Uuid<LightSource> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
-
   bool fallbackMaterialIsUsed = false;
   bool fallbackLightIsUsed = false;
 
@@ -334,7 +331,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         materialUuid = settings.materialUuids[n];
       }else
       {
-        materialUuid = fallbackMaterial;
+        materialUuid = uuids::fallbackMaterial;
         fallbackMaterialIsUsed = true;
         qWarning() << "NOT DEFINED MATERIAL!\n    Error converting" << sceneGraphFile.filePath() << "to" << sceneGraphFile.filePath() << ":\n    The material"<<n<<"is not provided, using the fallback material instead!!";
       }
@@ -423,7 +420,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       lightUuid = settings.lightUuids[n];
     else
     {
-      lightUuid = fallbackLight;
+      lightUuid = uuids::fallbackLight;
       qWarning() << "NOT DEFINED LIGHT!\n    Error converting" << sceneGraphFile.filePath() << "to" << sceneGraphFile.filePath() << ":\n    The light"<<n<<"is not provided, using the fallback light instead!!";
       fallbackLightIsUsed = true;
     }
@@ -498,9 +495,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   outputStream << "  Uuid<StaticMesh> meshUuid;\n";
   outputStream << "  Uuid<Material> materialUuid;\n";
   if(fallbackLightIsUsed)
-    outputStream << "  Uuid<LightSource> fallbackLight = \""<<QUuid(fallbackLight).toString()<<"\";\n";
+    outputStream << "  Uuid<LightSource> fallbackLight = \""<<QUuid(uuids::fallbackLight).toString()<<"\";\n";
   if(fallbackMaterialIsUsed)
-    outputStream << "  Uuid<Material> fallbackMaterial = \""<<QUuid(fallbackMaterial).toString()<<"\";\n";
+    outputStream << "  Uuid<Material> fallbackMaterial = \""<<QUuid(uuids::fallbackMaterial).toString()<<"\";\n";
 
   if(!allMeshesToImport.isEmpty())
   {
@@ -547,7 +544,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
           outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
-          if(materialUuid == fallbackMaterial)
+          if(materialUuid == uuids::fallbackMaterial)
             outputStream << "  materialUuid = fallbackMaterial;\n";
           else
             outputStream << "  materialUuid = Uuid<Material>(\"" << QUuid(materialUuid).toString() << "\");\n";
@@ -572,7 +569,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       {
         Uuid<LightSource> lightUuid = assets.lightUuids[n];
         outputStream << "  // Light \"" << n << "\"\n";
-        if(lightUuid == fallbackLight)
+        if(lightUuid == uuids::fallbackLight)
           outputStream << "  lightUuid = fallbackLight;\n";
         else
           outputStream << "  lightUuid = Uuid<LightSource>(\"" << QUuid(lightUuid).toString() << "\");\n";

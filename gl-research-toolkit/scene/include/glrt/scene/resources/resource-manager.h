@@ -26,10 +26,15 @@ public:
 
   virtual ~ResourceManager();
 
-  QString labelForResourceUuid(const QUuid& uuid, const QString& fallback);
-  QString labelForResourceUuid(const QUuid& uuid);
+  QString labelForResourceUuid(const QUuid& uuid, const QString& fallback) const;
+  QString labelForResourceUuid(const QUuid& uuid) const;
 
-  virtual Index* indexForResourceUuid(const QUuid& uuid, Index* fallback=nullptr) = 0;
+  void foreachIndex(const std::function<bool(const Index* index)>& lambda) const;
+  QList<const Index*> allIndices() const;
+  const Index* indexForResourceUuid(const QUuid& uuid, const Index* fallback=&Index::fallback) const;
+
+protected:
+  virtual void foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const = 0;
 };
 
 

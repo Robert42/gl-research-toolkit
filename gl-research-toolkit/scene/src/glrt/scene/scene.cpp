@@ -58,59 +58,11 @@ QList<SceneLayer*> Scene::allLayers()
 }
 
 
-QMap<QString, QString> Scene::findAllScenes()
+void Scene::load(const Uuid<Scene>& scene)
 {
-  SPLASHSCREEN_MESSAGE("search Scenes");
-
-  QMap<QString, QString> map;
-/* #TODO
-  QDirIterator dirIterator(QDir(GLRT_ASSET_DIR), QDirIterator::Subdirectories|QDirIterator::FollowSymlinks);
-
-  while(dirIterator.hasNext())
-  {
-    QDir dir = dirIterator.next();
-
-    if(dir.dirName() == ".")
-      continue;
-
-    for(const QFileInfo& fileInfo : dir.entryList({"*.scene"}, QDir::Dirs|QDir::Files|QDir::Readable, QDir::Name))
-    {
-      QString absoluteFilename = dir.absoluteFilePath(fileInfo.fileName());
-      QJsonObject json = readJsonFile(absoluteFilename).object();
-
-      if(!json.contains("name"))
-      {
-        qWarning() << "The scene " << absoluteFilename << " has no name";
-        continue;
-      }
-
-      QJsonValue value = json["name"];
-      QString name = value.toString();
-
-      if(name.isEmpty())
-      {
-        qWarning() << "The scene " << absoluteFilename << " has an empty name";
-        continue;
-      }
-
-      if(map.contains(name))
-      {
-        qWarning() << "The scene-name " << name << " is used twice. Once for " << map[name] << " and once for " << absoluteFilename;
-        continue;
-      }
-
-      map[name] = absoluteFilename;
-    }
-  }
-*/
-  return map;
-}
-
-
-void Scene::loadFromFile(const QString& filename)
-{
+  clear();
   // #TODO
-  Q_UNUSED(filename);
+  Q_UNUSED(scene);
 }
 
 void Scene::registerAngelScriptAPI()

@@ -15,12 +15,15 @@ SampleResourceManager::~SampleResourceManager()
 {
 }
 
-SampleResourceManager::Index* SampleResourceManager::indexForResourceUuid(const QUuid& uuid, Index* fallback)
+void SampleResourceManager::foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const
 {
-  if(index.isRegistered(uuid))
-    return &index;
-  else
-    return fallback;
+  lambda(&index);
+}
+
+
+Uuid<scene::Scene> SampleResourceManager::cornellBoxScene()
+{
+  return Uuid<scene::Scene>("{158da3d3-ef79-4895-add4-f2fe22c0dbff}");
 }
 
 

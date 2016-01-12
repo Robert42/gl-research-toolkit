@@ -26,9 +26,13 @@ void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
 
 // --------------
 
+const ResourceIndex ResourceIndex::fallback(uuids::fallbackIndex);
+
 ResourceIndex::ResourceIndex(const Uuid<ResourceIndex>& uuid)
   : uuid(uuid)
 {
+  if(this==&fallback)
+    registerFallbackIndex();
 }
 
 void ResourceIndex::registerAngelScriptAPI()
@@ -63,6 +67,8 @@ void ResourceIndex::registerAngelScriptAPI()
 
 void ResourceIndex::loadIndex(const std::string& filename)
 {
+  SPLASHSCREEN_MESSAGE("Loading Asset-Index");
+
   AngelScriptIntegration::ConfigCallScript config;
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
 
@@ -81,20 +87,6 @@ bool ResourceIndex::isRegistered(const QUuid& uuid) const
   if(this == nullptr)
     return false;
   return allRegisteredResources.contains(uuid);
-}
-
-/*! \note This is one of the few methods which can be called with \c{this==nullptr}
- */
-QString ResourceIndex::labelForUuid(const QUuid& uuid, const QString& fallback) const
-{
-  if(this == nullptr)
-    return fallback;
-  return _labels.value(uuid, fallback);
-}
-
-QString ResourceIndex::labelForUuid(const QUuid& uuid) const
-{
-  return labelForUuid(uuid, uuid.toString());
 }
 
 void ResourceIndex::registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file)
@@ -138,6 +130,14 @@ void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const
     throw GLRT_EXCEPTION(QString("The uuid %0 is already in use!").arg(uuid.toString()));
 }
 
+void ResourceIndex::registerFallbackIndex()
+{
+  Material::PlainColor fallbackMaterial;
+  fallbackMaterial.base_color = glm::vec3(0);
+  fallbackMaterial.emission = glm::vec3(1,0,1);
+  registerMaterial(uuids::fallbackMaterial, fallbackMaterial);
+  registerLightSource(uuids::fallbackLight, LightSource::SphereAreaLight());
+}
 
 } // namespace resources
 } // namespace glrt

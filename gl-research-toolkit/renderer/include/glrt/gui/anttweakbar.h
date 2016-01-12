@@ -3,6 +3,8 @@
 
 
 #include <glrt/gui/toolbar.h>
+#include <glrt/toolkit/uuid.h>
+#include <glrt/scene/resources/resource-manager.h>
 
 #include <glrt/scene/camera.h>
 
@@ -41,7 +43,7 @@ public:
   typedef T_Map Map;
   typedef QSharedPointer<TweakBarEnum<T, Map>> Ptr;
 
-  static_assert(std::is_same<typename T_Map::key_type, QString>::value, "Wxpecting keytype QString");
+  static_assert(std::is_same<typename T_Map::key_type, QString>::value, "Expecting keytype QString");
 
   Map map;
   const std::string name;
@@ -64,6 +66,17 @@ public:
 
     if(tweakBar)
       TwRemoveVar(tweakBar, name.c_str());
+  }
+
+  template<typename T_uuid_inner_type>
+  void initWithUuids(const glrt::scene::resources::ResourceManager& resourceManager, const QList<Uuid<T_uuid_inner_type>>& values)
+  {
+    Map map;
+
+    for(const Uuid<T_uuid_inner_type>& value : values)
+      map[resourceManager.labelForResourceUuid(value)] = value;
+
+    init(map);
   }
 
   void init(const Map& map)
@@ -209,7 +222,7 @@ public:
 
 
 private:
-  typedef TweakBarEnum<QString, QMap<QString,QString>> SceneEnumeration;
+  typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
   typedef TweakBarEnum<Camera, QHash<QString, Camera>> CameraEnumeration;
 
   SceneEnumeration::Ptr sceneSwitcher;

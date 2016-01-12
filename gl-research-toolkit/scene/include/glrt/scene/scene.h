@@ -42,8 +42,7 @@ public:
   QList<SceneLayer*> allLayers();
 
   void clear();
-  static QMap<QString, QString> findAllScenes();
-  void loadFromFile(const QString& filepath);
+  void load(const Uuid<Scene>& scene);
 
   static void registerAngelScriptAPI();
 
