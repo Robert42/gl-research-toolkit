@@ -14,6 +14,14 @@ ResourceManager::~ResourceManager()
 {
 }
 
+QList<Uuid<Scene> > ResourceManager::allRegisteredScenes()
+{
+  QList<Uuid<Scene> > uuids;
+  for(const ResourceIndex* index : this->allIndices())
+    uuids.append(index->sceneFiles.keys());
+  return uuids;
+}
+
 QString ResourceManager::labelForResourceUuid(const QUuid& uuid, const QString& fallback) const
 {
   return indexForResourceUuid(uuid)->labels.value(uuid, fallback);
@@ -22,6 +30,11 @@ QString ResourceManager::labelForResourceUuid(const QUuid& uuid, const QString& 
 QString ResourceManager::labelForResourceUuid(const QUuid& uuid) const
 {
   return indexForResourceUuid(uuid)->labels.value(uuid, uuid.toString());
+}
+
+QString ResourceManager::sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback) const
+{
+  return indexForResourceUuid(uuid)->sceneFiles.value(uuid, fallback);
 }
 
 void ResourceManager::foreachIndex(const std::function<bool(const Index* index)>& lambda) const

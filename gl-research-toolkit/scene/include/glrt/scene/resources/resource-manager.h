@@ -26,8 +26,12 @@ public:
 
   virtual ~ResourceManager();
 
+  QList<Uuid<Scene>> allRegisteredScenes();
+
   QString labelForResourceUuid(const QUuid& uuid, const QString& fallback) const;
   QString labelForResourceUuid(const QUuid& uuid) const;
+
+  QString sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback=QString()) const;
 
   void foreachIndex(const std::function<bool(const Index* index)>& lambda) const;
   QList<const Index*> allIndices() const;

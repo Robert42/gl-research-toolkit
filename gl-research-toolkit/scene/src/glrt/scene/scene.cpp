@@ -61,6 +61,9 @@ QList<SceneLayer*> Scene::allLayers()
 void Scene::load(const Uuid<Scene>& scene)
 {
   clear();
+
+  qDebug() << "LOAD SCENE" << this->resourceManager.sceneFileForUuid(scene);
+
   // #TODO
   Q_UNUSED(scene);
 }
