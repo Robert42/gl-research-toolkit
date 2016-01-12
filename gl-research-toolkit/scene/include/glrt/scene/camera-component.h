@@ -1,18 +1,18 @@
 #ifndef GLRT_SCENE_CAMERACOMPONENT_H
 #define GLRT_SCENE_CAMERACOMPONENT_H
 
-#include "entity.h"
+#include "node.h"
 #include "camera.h"
 
 namespace glrt {
 namespace scene {
 
-class CameraComponent final : public Entity::Component
+class CameraComponent final : public Node::Component
 {
 public:
   Camera cameraParameter;
 
-  CameraComponent(Entity& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable=false);
+  CameraComponent(Node& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable=false);
   ~CameraComponent();
 };
 

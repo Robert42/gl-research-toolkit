@@ -1,21 +1,28 @@
-#include <glrt/scene/entity.h>
+#include <glrt/scene/node.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-layer.h>
 
 namespace glrt {
 namespace scene {
 
 
-// ======== Entity =============================================================
+// ======== Node =============================================================
 
 
-Entity::Entity(Scene& scene, const Uuid<Entity>& uuid)
-  : scene(scene),
+Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
+  : sceneLayer(sceneLayer),
     uuid(uuid)
 {
+  if(sceneLayer._nodes.contains(uuid))
+    throw GLRT_EXCEPTION("Same uuid used twice");
+
+  sceneLayer._nodes[uuid] = this;
 }
 
-Entity::~Entity()
+Node::~Node()
 {
+  sceneLayer._nodes.remove(uuid);
+
   QVector<ModularAttribute*> allModularAttributes = this->allModularAttributes();
   for(ModularAttribute* a : allModularAttributes)
     delete a;
@@ -26,48 +33,48 @@ Entity::~Entity()
   Q_ASSERT(rootComponent == nullptr);
 }
 
-CoordFrame Entity::globalCoordFrame() const
+CoordFrame Node::globalCoordFrame() const
 {
   return rootComponent()->globalCoordFrame();
 }
 
-const QVector<Entity::ModularAttribute*>& Entity::allModularAttributes()
+const QVector<Node::ModularAttribute*>& Node::allModularAttributes()
 {
   return _allModularAttributes;
 }
 
-QVector<Entity::Component*> Entity::allComponents() const
+QVector<Node::Component*> Node::allComponents() const
 {
-  QVector<Entity::Component*> components;
+  QVector<Node::Component*> components;
   rootComponent()->collectSubtree(&components);
   return components;
 }
 
-Entity::Component* Entity::rootComponent() const
+Node::Component* Node::rootComponent() const
 {
   return _rootComponent;
 }
 
-// ======== Entity::ModularAttribute ===========================================
+// ======== Node::ModularAttribute ===========================================
 
 
-Entity::ModularAttribute::ModularAttribute(Entity& entity, const Uuid<ModularAttribute>& uuid)
+Node::ModularAttribute::ModularAttribute(Node& entity, const Uuid<ModularAttribute>& uuid)
   : entity(entity),
     uuid(uuid)
 {
   entity._allModularAttributes.append(this);
 }
 
-Entity::ModularAttribute::~ModularAttribute()
+Node::ModularAttribute::~ModularAttribute()
 {
   entity._allModularAttributes.removeOne(this);
 }
 
 
-// ======== Entity::Component ==================================================
+// ======== Node::Component ==================================================
 
 
-Entity::Component::Component(Entity& entity, const Uuid<Component>& uuid, bool isMovable)
+Node::Component::Component(Node& entity, const Uuid<Component>& uuid, bool isMovable)
   : entity(entity),
     uuid(uuid),
     isMovable(isMovable)
@@ -75,7 +82,7 @@ Entity::Component::Component(Entity& entity, const Uuid<Component>& uuid, bool i
   this->setParent(entity.rootComponent());
 }
 
-Entity::Component::~Component()
+Node::Component::~Component()
 {
   if(parent())
     parent()->_children.removeOne(this);
@@ -88,7 +95,7 @@ Entity::Component::~Component()
 }
 
 
-Entity::Component* Entity::Component::parent() const
+Node::Component* Node::Component::parent() const
 {
   if(this == nullptr)
     return nullptr;
@@ -100,7 +107,7 @@ Entity::Component* Entity::Component::parent() const
  *
  * \note This Method is able to accept nullptr as this value and also component to be nullptr.
  */
-void Entity::Component::setParent(Component* component)
+void Node::Component::setParent(Component* component)
 {
   if(this == nullptr)
     return;
@@ -128,10 +135,10 @@ void Entity::Component::setParent(Component* component)
 }
 
 
-QVector<Entity::Component*> Entity::Component::children() const
+QVector<Node::Component*> Node::Component::children() const
 {
   if(this == nullptr)
-    return QVector<Entity::Component*>();
+    return QVector<Node::Component*>();
 
   return this->_children;
 }
@@ -142,7 +149,7 @@ QVector<Entity::Component*> Entity::Component::children() const
  *
  * \note This Method is able to accept nullptr as this value.
  */
-void Entity::Component::collectSubtree(QVector<Component*>* subTree)
+void Node::Component::collectSubtree(QVector<Component*>* subTree)
 {
   if(this == nullptr)
     return;
@@ -154,7 +161,7 @@ void Entity::Component::collectSubtree(QVector<Component*>* subTree)
 }
 
 
-CoordFrame Entity::Component::localCoordFrame() const
+CoordFrame Node::Component::localCoordFrame() const
 {
   return _localCoordFrame;
 }
@@ -164,7 +171,7 @@ CoordFrame Entity::Component::localCoordFrame() const
  *
  * \note This Method is able to accept nullptr as this value.
  */
-CoordFrame Entity::Component::globalCoordFrame() const
+CoordFrame Node::Component::globalCoordFrame() const
 {
   if(this == nullptr)
     return CoordFrame();

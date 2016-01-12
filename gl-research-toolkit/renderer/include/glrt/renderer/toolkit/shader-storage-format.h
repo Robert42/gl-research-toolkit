@@ -2,7 +2,7 @@
 #define GLRT_RENDERER_SHADERSTORAGEFORMAT_H
 
 
-#include <glrt/scene/entity.h>
+#include <glrt/scene/node.h>
 #include <glrt/scene/scene.h>
 #include <glrt/scene/collect-scene-data.h>
 
@@ -146,13 +146,13 @@ private:
 };
 
 
-template<class EntityComponentType, typename ElementType = typename EntityComponentType::Data>
+template<class NodeComponentType, typename ElementType = typename NodeComponentType::Data>
 class ShaderStorageFormat
 {
 public:
-  typedef ShaderStorageFormat<EntityComponentType, ElementType> this_type;
+  typedef ShaderStorageFormat<NodeComponentType, ElementType> this_type;
 
-  static_assert(std::is_base_of<scene::Entity::Component, EntityComponentType>::value, "EntityComponentType must inherit Entity::Component");
+  static_assert(std::is_base_of<scene::Node::Component, NodeComponentType>::value, "NodeComponentType must inherit Node::Component");
 
   // important: the given scene instance must exist longer than this shader-storage instance
   ShaderStorageFormat(scene::Scene& scene, int capacityIncrement = 16)
@@ -177,14 +177,14 @@ public:
   {
     deinit();
 
-    addComponents(glrt::scene::collectAllComponentsWithType<EntityComponentType>(&scene, false));
+    addComponents(glrt::scene::collectAllComponentsWithType<NodeComponentType>(&scene, false));
   }
 
-  void addComponents(const QVector<EntityComponentType*>& components)
+  void addComponents(const QVector<NodeComponentType*>& components)
   {
-    QVector<EntityComponentType*> newStaticComponents;
+    QVector<NodeComponentType*> newStaticComponents;
 
-    for(EntityComponentType* component : components)
+    for(NodeComponentType* component : components)
     {
       if(component->isMovable)
       {
@@ -211,13 +211,13 @@ public:
     {
       variadicElementBuffer.initStaticElements(newStaticComponents.length(),
                                               [&newStaticComponents](ElementType* element, int i) {
-        EntityComponentType* component = newStaticComponents[i];
+        NodeComponentType* component = newStaticComponents[i];
         *element = component->globalCoordFrame() * component->data;
       });
     }
   }
 
-  void removeComponent(EntityComponentType* component)
+  void removeComponent(NodeComponentType* component)
   {
     if(connections.contains(component))
     {
@@ -232,7 +232,7 @@ public:
   void update()
   {
     variadicElementBuffer.updateMovableElements([this](ElementType* element, int i) {
-      EntityComponentType* component = movableComponents[i];
+      NodeComponentType* component = movableComponents[i];
       *element = component->globalCoordFrame() * component->data;
     });
   }
@@ -247,9 +247,9 @@ private:
   QMetaObject::Connection sceneLoadedConnection;
 
   VariadicElementBuffer<ElementType> variadicElementBuffer;
-  QHash<EntityComponentType*, QMetaObject::Connection> connections;
-  QVector<EntityComponentType*> movableComponents;
-  QSet<EntityComponentType*> staticComponents;
+  QHash<NodeComponentType*, QMetaObject::Connection> connections;
+  QVector<NodeComponentType*> movableComponents;
+  QSet<NodeComponentType*> staticComponents;
 
 
   void deinit()
@@ -273,7 +273,7 @@ private:
 
   void handleDeletedComponent(QObject* object)
   {
-    EntityComponentType* component = reinterpret_cast<EntityComponentType*>(object);
+    NodeComponentType* component = reinterpret_cast<NodeComponentType*>(object);
     removeComponent(component);
   }
 };

@@ -3,7 +3,7 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
-#include <glrt/scene/entity.h>
+#include <glrt/scene/node.h>
 #include <glrt/scene/debug-camera.h>
 
 struct aiNode;
@@ -39,7 +39,7 @@ public:
   bool handleEvents(const SDL_Event& event);
   void update(float deltaTime);
 
-  const QVector<Entity*>& allEntities();
+  QList<SceneLayer*> allLayers();
 
   void clear();
   static QMap<QString, QString> findAllScenes();
@@ -52,7 +52,9 @@ signals:
   void sceneLoaded(bool success);
 
 private:
-  QVector<Entity*> _entities; // #TODO use an optimized array
+  friend class SceneLayer;
+
+  QMap<Uuid<SceneLayer>, SceneLayer*> _layers; // #TODO use fast array
 };
 
 } // namespace scene

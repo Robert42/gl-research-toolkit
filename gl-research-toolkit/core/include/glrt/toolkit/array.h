@@ -212,6 +212,12 @@ struct DefaultTraits<int>
   typedef ArrayTraits_Unordered_POD<int> type;
 };
 
+template<typename T>
+struct DefaultTraits<T*>
+{
+  typedef ArrayTraits_Unordered_POD<T*> type;
+};
+
 
 template<typename T, class T_traits = typename DefaultTraits<T>::type>
 class Array final

@@ -3,6 +3,7 @@
 
 #include "collect-scene-data.h"
 #include "resources/resource-manager.h"
+#include "scene-layer.h"
 
 namespace glrt {
 namespace scene {
@@ -10,14 +11,19 @@ namespace scene {
 template<typename T_component>
 QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::function<bool(T_component*)>& filter)
 {
-  static_assert(std::is_base_of<Entity::Component, T_component>::value, "T_component must inherit from Entity::Component");
+  static_assert(std::is_base_of<Node::Component, T_component>::value, "T_component must inherit from Node::Component");
 
   QVector<T_component*> components;
-  components.reserve((scene->allEntities().length()+3) / 4);
+  int totalNumberEntites = 0;
+  for(const SceneLayer* layer : scene->allLayers())
+    totalNumberEntites += layer->allNodes().length();
 
-  for(Entity* e : scene->allEntities())
-    for(T_component* component : e->allComponentsWithType<T_component>(filter))
-      components.append(component);
+  components.reserve(totalNumberEntites / 2);
+
+  for(const SceneLayer* layer : scene->allLayers())
+    for(Node* n : layer->allNodes())
+      for(T_component* component : n->allComponentsWithType<T_component>(filter))
+        components.append(component);
 
   return components;
 }

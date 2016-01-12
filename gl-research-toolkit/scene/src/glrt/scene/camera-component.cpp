@@ -4,7 +4,7 @@ namespace glrt {
 namespace scene {
 
 
-CameraComponent::CameraComponent(Entity& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable)
+CameraComponent::CameraComponent(Node& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable)
   : Component(entity, uuid, isMovable),
     cameraParameter(cameraParameter)
 {

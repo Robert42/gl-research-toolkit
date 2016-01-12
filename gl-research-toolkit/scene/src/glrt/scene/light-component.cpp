@@ -7,8 +7,8 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 
-LightComponent::LightComponent(Entity &entity, const Uuid<LightComponent> &uuid, Interactivity interactivity)
-  : Entity::Component(entity, uuid, interactivity==Interactivity::MOVABLE),
+LightComponent::LightComponent(Node &entity, const Uuid<LightComponent> &uuid, Interactivity interactivity)
+  : Node::Component(entity, uuid, interactivity==Interactivity::MOVABLE),
     isStatic(interactivity==Interactivity::STATIC)
 {
 }
@@ -17,7 +17,7 @@ LightComponent::LightComponent(Entity &entity, const Uuid<LightComponent> &uuid,
 // =============================================================================
 
 
-SphereAreaLightComponent::SphereAreaLightComponent(Entity& entity, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
+SphereAreaLightComponent::SphereAreaLightComponent(Node& entity, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
   : LightComponent(entity, uuid, interactivity),
     data(data)
 {
@@ -27,7 +27,7 @@ SphereAreaLightComponent::SphereAreaLightComponent(Entity& entity, const Uuid<Sp
 // =============================================================================
 
 
-RectAreaLightComponent::RectAreaLightComponent(Entity& entity, const Uuid<RectAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
+RectAreaLightComponent::RectAreaLightComponent(Node& entity, const Uuid<RectAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
   : LightComponent(entity, uuid, interactivity),
     data(data)
 {

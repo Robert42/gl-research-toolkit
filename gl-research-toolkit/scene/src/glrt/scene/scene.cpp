@@ -50,9 +50,9 @@ void Scene::update(float deltaTime)
 }
 
 
-const QVector<Entity*>& Scene::allEntities()
+QList<SceneLayer*> Scene::allLayers()
 {
-  return _entities;
+  return _layers.values();
 }
 
 

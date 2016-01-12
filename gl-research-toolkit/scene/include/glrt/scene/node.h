@@ -8,16 +8,18 @@
 namespace glrt {
 namespace scene {
 
-class Scene;
-// #TOOD: rename to Node?
-class Entity final
+class SceneLayer;
+class Node final
 {
 public:
   class ModularAttribute;
   class Component;
 
-  Scene& scene;
-  const Uuid<Entity> uuid;
+  SceneLayer& sceneLayer;
+  const Uuid<Node> uuid;
+
+  Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid);
+  ~Node();
 
   CoordFrame globalCoordFrame() const;
 
@@ -31,40 +33,32 @@ public:
   QVector<Component*> allComponents() const;
   Component* rootComponent() const;
 
-protected:
-  Entity(Scene& scene, const Uuid<Entity>& uuid);
-  ~Entity();
-
-protected:
-  template<typename T>
-  static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
-
 private:
   QVector<ModularAttribute*> _allModularAttributes;
   Component* _rootComponent;
 };
 
 
-class Entity::ModularAttribute
+class Node::ModularAttribute
 {
 public:
-  Entity& entity;
+  Node& entity;
   const Uuid<ModularAttribute> uuid;
 
-  ModularAttribute(Entity& entity, const Uuid<ModularAttribute>& uuid);
+  ModularAttribute(Node& entity, const Uuid<ModularAttribute>& uuid);
   virtual ~ModularAttribute();
 };
 
 
-class Entity::Component
+class Node::Component
 {
 public:
-  Entity& entity;
+  Node& entity;
   const Uuid<Component> uuid;
 
   const bool isMovable : 1;
 
-  Component(Entity& entity, const Uuid<Component>& uuid, bool isMovable);
+  Component(Node& entity, const Uuid<Component>& uuid, bool isMovable);
   virtual ~Component();
 
   Component* parent() const;
@@ -91,6 +85,6 @@ private:
 } // namespace scene
 } // namespace glrt
 
-#include "entity.inl"
+#include "node.inl"
 
 #endif // GLRT_SCENE_ENTITY_H

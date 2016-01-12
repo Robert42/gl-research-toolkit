@@ -7,9 +7,10 @@
 namespace glrt {
 namespace scene {
 
-class Entity;
+class Node;
 class LightComponent;
 class Camera;
+class SceneLayer;
 
 } // namespace scene
 } // namespace glrt

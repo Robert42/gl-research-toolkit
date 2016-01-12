@@ -19,14 +19,14 @@ LightSource::LightSource(const SphereAreaLight& sphereAreaLight)
 {
 }
 
-LightComponent* LightSource::createLightComponent(Entity& entity, const Uuid<LightComponent>& uuid, LightComponent::Interactivity interactivity)
+LightComponent* LightSource::createLightComponent(Node& node, const Uuid<LightComponent>& uuid, LightComponent::Interactivity interactivity)
 {
   switch(type)
   {
   case Type::SPHERE_AREA_LIGHT:
-    return new SphereAreaLightComponent(entity, uuid.cast<SphereAreaLightComponent>(), sphere_area_light, interactivity);
+    return new SphereAreaLightComponent(node, uuid.cast<SphereAreaLightComponent>(), sphere_area_light, interactivity);
   case Type::RECT_AREA_LIGHT:
-    return new RectAreaLightComponent(entity, uuid.cast<RectAreaLightComponent>(), rect_area_light, interactivity);
+    return new RectAreaLightComponent(node, uuid.cast<RectAreaLightComponent>(), rect_area_light, interactivity);
   default:
     Q_UNREACHABLE();
   }

@@ -1,14 +1,14 @@
 #ifndef GLRT_SCENE_ENTITY_INL
 #define GLRT_SCENE_ENTITY_INL
 
-#include "entity.h"
+#include "node.h"
 
 namespace glrt {
 namespace scene {
 
 
 template<typename T>
-QVector<T*> Entity::allModularAttributeWithType(const std::function<bool(T*)>& filter) const
+QVector<T*> Node::allModularAttributeWithType(const std::function<bool(T*)>& filter) const
 {
   QVector<T*> result;
   result.reserve(this->_allModularAttributes.length());
@@ -21,7 +21,7 @@ QVector<T*> Entity::allModularAttributeWithType(const std::function<bool(T*)>& f
 }
 
 template<typename T>
-QVector<T*> Entity::allComponentsWithType(const std::function<bool(T*)>& filter) const
+QVector<T*> Node::allComponentsWithType(const std::function<bool(T*)>& filter) const
 {
   QVector<Component*> allComponents = this->allComponents();
 
