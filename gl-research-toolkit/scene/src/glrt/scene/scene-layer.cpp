@@ -30,7 +30,8 @@ QList<Node*> SceneLayer::allNodes() const
 
 void SceneLayer::loadSceneGraph(const std::string& filename)
 {
-  qInfo() << "loadSceneGraph(" << filename.c_str() << ")";
+  std::string absoluteFilename = QDir::current().absoluteFilePath(QString::fromStdString(filename)).toStdString();
+  qInfo() << "loadSceneGraph(" << absoluteFilename.c_str() << ")";
 }
 
 void SceneLayer::registerAngelScriptAPI()
