@@ -37,6 +37,11 @@ QString ResourceManager::sceneFileForUuid(const Uuid<Scene>& uuid, const QString
   return indexForResourceUuid(uuid)->sceneFiles.value(uuid, fallback);
 }
 
+QString ResourceManager::sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, const QString& fallback) const
+{
+  return indexForResourceUuid(uuid)->sceneLayerFiles.value(uuid, fallback);
+}
+
 void ResourceManager::foreachIndex(const std::function<bool(const Index* index)>& lambda) const
 {
   foreachIndexImpl(lambda);

@@ -32,6 +32,7 @@ public:
   QString labelForResourceUuid(const QUuid& uuid) const;
 
   QString sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback=QString()) const;
+  QString sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, const QString& fallback=QString()) const;
 
   void foreachIndex(const std::function<bool(const Index* index)>& lambda) const;
   QList<const Index*> allIndices() const;

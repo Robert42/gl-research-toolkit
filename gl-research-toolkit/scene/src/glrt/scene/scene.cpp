@@ -11,6 +11,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include <angelscript-integration/call-script.h>
+
 namespace glrt {
 namespace scene {
 
@@ -60,12 +62,23 @@ QList<SceneLayer*> Scene::allLayers()
 
 void Scene::load(const Uuid<Scene>& scene)
 {
+  SPLASHSCREEN_MESSAGE("Loading Scene");
+
+  std::string filename = this->resourceManager.sceneFileForUuid(scene).toStdString();
+
+  AngelScriptIntegration::ConfigCallScript config;
+  config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
+
+  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
+
   clear();
+}
 
-  qDebug() << "LOAD SCENE" << this->resourceManager.sceneFileForUuid(scene);
+void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayer)
+{
+  std::string filename = this->resourceManager.sceneLayerFileForUuid(sceneLayer).toStdString();
 
-  // #TODO
-  Q_UNUSED(scene);
+  qInfo() << "SceneLayer: " << filename.c_str();
 }
 
 void Scene::registerAngelScriptAPI()
@@ -76,6 +89,8 @@ void Scene::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectType("Scene", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
 
   glrt::Uuid<void>::registerCustomizedUuidType("Scene", false);
+
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "void loadSceneLayer(const Uuid<SceneLayer> &in uuid)", AngelScript::asMETHOD(Scene,loadSceneLayer), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

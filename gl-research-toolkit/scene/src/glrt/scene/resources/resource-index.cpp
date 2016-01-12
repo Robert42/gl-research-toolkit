@@ -114,7 +114,7 @@ void ResourceIndex::registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const s
 {
   validateNotYetRegistered(uuid);
   allRegisteredResources.insert(uuid);
-  scenelayerFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(file));
+  sceneLayerFiles[uuid] = QDir::current().absoluteFilePath(QString::fromStdString(file));
 }
 
 void ResourceIndex::registerSceneFile(const Uuid<Scene>& uuid, const std::string& file)

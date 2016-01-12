@@ -59,7 +59,7 @@ public:
   QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;
-  QHash<Uuid<SceneLayer>, QString> scenelayerFiles;
+  QHash<Uuid<SceneLayer>, QString> sceneLayerFiles;
 
   QHash<QUuid, QString> labels;
 
