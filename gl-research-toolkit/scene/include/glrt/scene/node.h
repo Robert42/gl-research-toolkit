@@ -23,6 +23,9 @@ public:
 
   CoordFrame globalCoordFrame() const;
 
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
+
   template<typename T>
   QVector<T*> allModularAttributeWithType(const std::function<bool(T*)>& filter=always_return_true) const;
   template<typename T>

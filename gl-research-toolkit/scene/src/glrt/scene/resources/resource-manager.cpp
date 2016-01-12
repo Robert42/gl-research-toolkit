@@ -1,8 +1,19 @@
 #include <glrt/scene/resources/resource-manager.h>
+#include <glrt/scene/scene-layer.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
+
+using AngelScriptIntegration::AngelScriptCheck;
+
+
+resources::StaticMeshLoader* get_staticMeshLoader(resources::ResourceManager* resourceManager)
+{
+  return &resourceManager->staticMeshLoader;
+}
+
+// -------- ResourceManager ----------------------------------------------------
 
 
 ResourceManager::ResourceManager(StaticMeshLoader* staticMeshLoader)
@@ -45,6 +56,10 @@ QString ResourceManager::sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, con
 void ResourceManager::foreachIndex(const std::function<bool(const Index* index)>& lambda) const
 {
   foreachIndexImpl(lambda);
+
+  for(const SceneLayer* sceneLayer : _sceneLayers)
+    lambda(&sceneLayer->index);
+
   lambda(&Index::fallback);
 }
 
@@ -71,6 +86,26 @@ const ResourceIndex* ResourceManager::indexForResourceUuid(const QUuid& uuid, co
   });
 
   return returnedIndex;
+}
+
+void ResourceManager::registerAngelScriptAPIDeclarations()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectType("ResourceManager", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void ResourceManager::registerAngelScriptAPI()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectMethod("ResourceManager", "StaticMeshLoader@ get_staticMeshLoader()", AngelScript::asFUNCTION(get_staticMeshLoader), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 

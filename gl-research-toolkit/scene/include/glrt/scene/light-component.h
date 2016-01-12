@@ -16,6 +16,9 @@ public:
   const bool isStatic : 1;
 
   LightComponent(Node& entity, const Uuid<LightComponent>& uuid, Interactivity interactivity);
+
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
 };
 
 

@@ -26,6 +26,9 @@ public:
 
   virtual ~ResourceManager();
 
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
+
   QList<Uuid<Scene>> allRegisteredScenes();
 
   QString labelForResourceUuid(const QUuid& uuid, const QString& fallback) const;
@@ -40,6 +43,10 @@ public:
 
 protected:
   virtual void foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const = 0;
+
+private:
+  friend class SceneLayer;
+  QList<SceneLayer*> _sceneLayers;
 };
 
 

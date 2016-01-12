@@ -14,6 +14,9 @@ public:
 
   StaticMeshComponent(Node& entity, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMeshData>& staticMesh, const Uuid<resources::Material> & material);
   ~StaticMeshComponent();
+
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
 };
 
 } // namespace scene

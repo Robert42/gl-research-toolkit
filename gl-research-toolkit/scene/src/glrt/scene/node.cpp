@@ -2,8 +2,18 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-layer.h>
 
+#include <angelscript-integration/call-script.h>
+
 namespace glrt {
 namespace scene {
+
+
+using AngelScriptIntegration::AngelScriptCheck;
+
+inline Node* create_node(SceneLayer* scenelayer, const Uuid<Node>& uuid)
+{
+  return new Node(*scenelayer, uuid);
+}
 
 
 // ======== Node =============================================================
@@ -53,6 +63,28 @@ QVector<Node::Component*> Node::allComponents() const
 Node::Component* Node::rootComponent() const
 {
   return _rootComponent;
+}
+
+void Node::registerAngelScriptAPIDeclarations()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectType("Node", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+
+  glrt::Uuid<void>::registerCustomizedUuidType("Node", false);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void Node::registerAngelScriptAPI()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectMethod("SceneLayer", "Node@ newNode(Uuid<Node> &in uuid)", AngelScript::asFUNCTION(create_node), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 // ======== Node::ModularAttribute ===========================================

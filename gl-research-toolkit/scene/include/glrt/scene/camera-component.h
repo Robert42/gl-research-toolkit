@@ -14,6 +14,9 @@ public:
 
   CameraComponent(Node& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable=false);
   ~CameraComponent();
+
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
 };
 
 } // namespace scene

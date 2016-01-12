@@ -144,9 +144,8 @@ void Application::initAngelScript()
   glrt::Uuid<void>::registerAngelScriptAPI();
   glrt::Uuid<void>::registerCustomizedUuidType("StaticMesh", true);
   glrt::Uuid<void>::registerCustomizedUuidType("Camera", true);
-  glrt::Uuid<void>::registerCustomizedUuidType("Node", true);
-  glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
   glrt::scene::resources::StaticMeshLoader::registerAngelScriptAPI();
+  glrt::scene::resources::ResourceIndex::registerAngelScriptAPI();
 }
 
 void Application::deinitAngelScript()

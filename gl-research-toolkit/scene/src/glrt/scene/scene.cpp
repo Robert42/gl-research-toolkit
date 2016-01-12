@@ -20,6 +20,12 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 
+resources::ResourceManager* get_resourceManager(Scene* scene)
+{
+  return &scene->resourceManager;
+}
+
+
 // ======== Scene ==============================================================
 
 /*!
@@ -89,7 +95,7 @@ void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(SceneLayer@ sceneLayer)", "scene-layer-file", config, sceneLayer);
 }
 
-void Scene::registerAngelScriptAPI()
+void Scene::registerAngelScriptAPIDeclarations()
 {
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
@@ -98,7 +104,16 @@ void Scene::registerAngelScriptAPI()
 
   glrt::Uuid<void>::registerCustomizedUuidType("Scene", false);
 
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void Scene::registerAngelScriptAPI()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void loadSceneLayer(const Uuid<SceneLayer> &in uuid)", AngelScript::asMETHOD(Scene,loadSceneLayer), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "ResourceManager@ get_resourceManager()", AngelScript::asFUNCTION(get_resourceManager), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

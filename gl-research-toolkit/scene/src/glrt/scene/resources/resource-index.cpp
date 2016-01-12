@@ -1,8 +1,12 @@
 #include <glrt/scene/resources/resource-index.h>
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/material.h>
+#include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/scene-layer.h>
+#include <glrt/scene/static-mesh-component.h>
+#include <glrt/scene/camera-component.h>
+#include <glrt/scene/light-component.h>
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
@@ -24,6 +28,16 @@ void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
                     settings);
 }
 
+inline void set_label(ResourceIndex* index, const QUuid& uuid, const std::string& l)
+{
+  index->labels[uuid] = QString::fromStdString(l);
+}
+
+inline std::string get_label(ResourceIndex* index, const QUuid& uuid)
+{
+  return index->labels[uuid].toStdString();
+}
+
 // --------------
 
 const ResourceIndex ResourceIndex::fallback(uuids::fallbackIndex);
@@ -40,14 +54,23 @@ void ResourceIndex::registerAngelScriptAPI()
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  Material::registerAngelScriptTypes();
-  LightSource::registerAngelScriptTypes();
-  SceneLayer::registerAngelScriptAPI();
-  Scene::registerAngelScriptAPI();
-
   r = angelScriptEngine->RegisterObjectType("ResourceIndex", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
 
   glrt::Uuid<void>::registerCustomizedUuidType("ResourceIndex", false);
+
+  ResourceManager::registerAngelScriptAPIDeclarations();
+  SceneLayer::registerAngelScriptAPIDeclarations();
+  Scene::registerAngelScriptAPIDeclarations();
+  Node::registerAngelScriptAPIDeclarations();
+  StaticMeshComponent::registerAngelScriptAPIDeclarations();
+
+  Material::registerAngelScriptTypes();
+  LightSource::registerAngelScriptTypes();
+  ResourceManager::registerAngelScriptAPI();
+  SceneLayer::registerAngelScriptAPI();
+  Scene::registerAngelScriptAPI();
+  Node::registerAngelScriptAPI();
+  StaticMeshComponent::registerAngelScriptAPI();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
@@ -61,6 +84,9 @@ void ResourceIndex::registerAngelScriptAPI()
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings)", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void set_label(const QUuid &in uuid, const string &in label)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "string get_label(const QUuid &in uuid)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

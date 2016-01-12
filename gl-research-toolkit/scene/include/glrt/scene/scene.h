@@ -46,6 +46,7 @@ public:
 
   void loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid);
 
+  static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
 signals:
