@@ -13,6 +13,7 @@ include(cmake/package-helper.cmake)
 
 
 find_package_overide_root(GLEW_ROOT GLEW REQUIRED)
+find_package_overide_root(QT5_ROOT Qt5Widgets 5.5 REQUIRED)
 
 set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(GLRT_ASSET_DIR ${GLRT_DIR}/external/assets)
