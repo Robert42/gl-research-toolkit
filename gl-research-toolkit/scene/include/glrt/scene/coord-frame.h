@@ -34,6 +34,9 @@ struct CoordFrame final
 
   QString as_angelscript_fast() const;
 
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
+
   static void _concatenate(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
                            const glm::vec3& aPosition, const glm::quat& aOrientation, float aScaleFactor,
                            const glm::vec3& bPosition, const glm::quat& bOrientation, float bScaleFactor);

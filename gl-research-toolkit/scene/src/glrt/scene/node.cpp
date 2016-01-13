@@ -74,6 +74,8 @@ void Node::registerAngelScriptAPIDeclarations()
 
   glrt::Uuid<void>::registerCustomizedUuidType("Node", false);
 
+  Component::registerAngelScriptAPIDeclarations();
+
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
@@ -83,6 +85,10 @@ void Node::registerAngelScriptAPI()
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   r = angelScriptEngine->RegisterObjectMethod("SceneLayer", "Node@ newNode(Uuid<Node> &in uuid)", AngelScript::asFUNCTION(create_node), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Node", "NodeComponent@ get_rootComponent()", AngelScript::asMETHOD(Node, rootComponent), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+
+
+  Component::registerAngelScriptAPI();
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -198,6 +204,13 @@ CoordFrame Node::Component::localCoordFrame() const
   return _localCoordFrame;
 }
 
+
+void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
+{
+  this->_localCoordFrame = coordFrame;
+}
+
+
 /*!
  * Returns the global transformation of the given component.
  *
@@ -211,6 +224,28 @@ CoordFrame Node::Component::globalCoordFrame() const
   return parent()->globalCoordFrame() * localCoordFrame();
 }
 
+
+void Node::Component::registerAngelScriptAPIDeclarations()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectType("NodeComponent", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+
+  glrt::Uuid<void>::registerCustomizedUuidType("NodeComponent", false);
+  // #TODO conversion for uuids?
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void Node::Component::registerAngelScriptAPI()
+{
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  Node::Component::registerAsBaseOfClass<Component>(angelScriptEngine, "NodeComponent");
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
 
 
 } // namespace scene

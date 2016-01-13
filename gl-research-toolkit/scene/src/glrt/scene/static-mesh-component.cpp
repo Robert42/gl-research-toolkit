@@ -50,6 +50,8 @@ void StaticMeshComponent::registerAngelScriptAPI()
 
   r = angelScriptEngine->RegisterObjectMethod("Node", "StaticMeshComponent@ newStaticMeshComponent(const Uuid<StaticMeshComponent> &in uuid, bool isMovable, const Uuid<StaticMesh> &in meshUuid, const Uuid<Material> &in materialUuid)", AngelScript::asFUNCTION(createStaticMeshComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
+  Node::Component::registerAsBaseOfClass<StaticMeshComponent>(angelScriptEngine, "StaticMeshComponent");
+
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 

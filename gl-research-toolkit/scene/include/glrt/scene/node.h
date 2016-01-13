@@ -73,6 +73,11 @@ public:
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
 
+  void set_localCoordFrame(const CoordFrame& coordFrame);
+
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
+
 protected:
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);

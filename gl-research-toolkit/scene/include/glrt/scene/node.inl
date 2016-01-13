@@ -36,6 +36,23 @@ QVector<T*> Node::allComponentsWithType(const std::function<bool(T*)>& filter) c
 }
 
 
+template<typename T>
+void Node::Component::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className)
+{
+  int r;
+  r = engine->RegisterObjectMethod(className, "CoordFrame get_localTransformation()", AngelScript::asMETHOD(Component, localCoordFrame), AngelScript::asCALL_THISCALL);
+  AngelScriptIntegration::AngelScriptCheck(r);
+
+  r = engine->RegisterObjectMethod(className, "void set_localTransformation(const CoordFrame &in coordFrame)", AngelScript::asMETHOD(Component, set_localCoordFrame), AngelScript::asCALL_THISCALL);
+  AngelScriptIntegration::AngelScriptCheck(r);
+
+  r = engine->RegisterObjectMethod(className, "NodeComponent@ opImplConv()", AngelScript::asFUNCTION((AngelScriptIntegration::wrap_static_cast<Component,T>)), AngelScript::asCALL_CDECL_OBJFIRST);
+  AngelScriptIntegration::AngelScriptCheck(r);
+  r = engine->RegisterObjectMethod("NodeComponent", (std::string(className)+"@ opConv()").c_str(), AngelScript::asFUNCTION((AngelScriptIntegration::wrap_static_cast<T, Component>)), AngelScript::asCALL_CDECL_OBJFIRST);
+  AngelScriptIntegration::AngelScriptCheck(r);
+}
+
+
 } // namespace scene
 } // namespace glrt
 
