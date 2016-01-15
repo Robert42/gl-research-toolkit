@@ -65,6 +65,11 @@ Node::Component* Node::rootComponent() const
   return _rootComponent;
 }
 
+resources::ResourceManager& Node::resourceManager()
+{
+  return sceneLayer.scene.resourceManager;
+}
+
 void Node::registerAngelScriptAPIDeclarations()
 {
   int r;
@@ -233,16 +238,25 @@ void Node::Component::registerAngelScriptAPIDeclarations()
   r = angelScriptEngine->RegisterObjectType("NodeComponent", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
 
   glrt::Uuid<void>::registerCustomizedUuidType("NodeComponent", false);
-  // #TODO conversion for uuids?
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
+inline Node::Component* createEmptyComponent(Node* node,
+                                             const Uuid<Node::Component>& uuid,
+                                             bool isMovable)
+{
+  return new Node::Component(*node, uuid, isMovable);
+}
+
 void Node::Component::registerAngelScriptAPI()
 {
+  int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   Node::Component::registerAsBaseOfClass<Component>(angelScriptEngine, "NodeComponent");
+
+  r = angelScriptEngine->RegisterObjectMethod("Node", "NodeComponent@ newEmptyComponent(const Uuid<Component> &in uuid, bool isMovable)", AngelScript::asFUNCTION(createEmptyComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

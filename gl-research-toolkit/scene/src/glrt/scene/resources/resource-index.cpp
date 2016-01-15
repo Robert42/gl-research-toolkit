@@ -63,6 +63,7 @@ void ResourceIndex::registerAngelScriptAPI()
   Scene::registerAngelScriptAPIDeclarations();
   Node::registerAngelScriptAPIDeclarations();
   StaticMeshComponent::registerAngelScriptAPIDeclarations();
+  CameraComponent::registerAngelScriptAPIDeclarations();
 
   Material::registerAngelScriptTypes();
   LightSource::registerAngelScriptTypes();
@@ -71,6 +72,7 @@ void ResourceIndex::registerAngelScriptAPI()
   Scene::registerAngelScriptAPI();
   Node::registerAngelScriptAPI();
   StaticMeshComponent::registerAngelScriptAPI();
+  CameraComponent::registerAngelScriptAPI();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);

@@ -36,6 +36,8 @@ public:
   QVector<Component*> allComponents() const;
   Component* rootComponent() const;
 
+  resources::ResourceManager& resourceManager();
+
 private:
   QVector<ModularAttribute*> _allModularAttributes;
   Component* _rootComponent;

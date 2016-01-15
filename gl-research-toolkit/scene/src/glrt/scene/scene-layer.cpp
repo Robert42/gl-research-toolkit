@@ -40,6 +40,8 @@ SceneLayer::SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene)
 SceneLayer::~SceneLayer()
 {
   scene._layers.remove(uuid);
+
+  // #TODO: delete all nodes
 }
 
 QList<Node*> SceneLayer::allNodes() const

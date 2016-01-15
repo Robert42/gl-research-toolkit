@@ -43,6 +43,16 @@ QString ResourceManager::labelForResourceUuid(const QUuid& uuid) const
   return indexForResourceUuid(uuid)->labels.value(uuid, uuid.toString());
 }
 
+LightSource ResourceManager::lightSourceForUuid(const Uuid<LightSource>& uuid) const
+{
+  return indexForResourceUuid(uuid)->lightSources.value(uuid, Index::fallback.lightSources[uuids::fallbackLight]);
+}
+
+Material ResourceManager::materialSourceForUuid(const Uuid<Material>& uuid) const
+{
+  return indexForResourceUuid(uuid)->materials.value(uuid, Index::fallback.materials[uuids::fallbackMaterial]);
+}
+
 QString ResourceManager::sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback) const
 {
   return indexForResourceUuid(uuid)->sceneFiles.value(uuid, fallback);

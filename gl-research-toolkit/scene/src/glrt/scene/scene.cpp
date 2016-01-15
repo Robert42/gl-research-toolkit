@@ -45,6 +45,8 @@ void Scene::clear()
 {
   clearScene();
 
+  // #TODO: delete all SCENE LAYERS
+
   sceneCleared();
 }
 

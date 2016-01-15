@@ -492,7 +492,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   outputStream << "\n";
   outputStream << "  Node@ node;\n";
   outputStream << "  Uuid<Node> nodeUuid;\n";
-  outputStream << "  Uuid<Camera> cameraUuid;\n";
   outputStream << "  Uuid<LightSource> lightUuid;\n";
   outputStream << "  Uuid<StaticMesh> meshUuid;\n";
   outputStream << "  Uuid<Material> materialUuid;\n";
@@ -560,10 +559,10 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         const Camera& camera = assets.cameras[n];
         Uuid<Camera> cameraUuid = assets.cameraUuids[n];
         outputStream << "  // Camera \"" << n << "\"\n";
-        outputStream << "  cameraUuid = Uuid<Node>(\"" << QUuid(cameraUuid).toString() << "\");\n";
         if(assets.labels.contains(cameraUuid))
           outputStream << "  sceneLayer.index.label[cameraUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
-        outputStream << "  node.newCameraComponent(uuid: cameraUuid, aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
+        outputStream << "  node.newCameraComponentuuid: Uuid<CameraComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(cameraUuid).toString()), QString("LightComponent[%0]").arg(0)).toString() << "\"), "
+                     << "isMovable: false, aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
       }
       if(isUsingLight)
       {
@@ -575,11 +574,12 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           outputStream << "  lightUuid = Uuid<LightSource>(\"" << QUuid(lightUuid).toString() << "\");\n";
         if(assets.labels.contains(lightUuid))
           outputStream << "  sceneLayer.index.label[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
-        outputStream << "  node.createLightComponent(uuid: lightUuid);\n";
+        outputStream << "  node.newLightComponent(uuid: Uuid<LightComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(lightUuid).toString()), QString("LightComponent[%0]").arg(0)).toString() << "\"), "
+                     << "lightUuid: lightUuid, interactivity: LightSourceInteractivity.STATIC);\n";
       }
       if(!isUsingComponent)
       {
-        outputStream << "  node.newEmptyComponent(uuid: \"" << QUuid::createUuidV5(nodeUuid, QString("missing-root-node-for-transformation")).toString() << "\");\n";
+        outputStream << "  node.newEmptyComponent(uuid: \"" << QUuid::createUuidV5(nodeUuid, QString("missing-root-node-for-transformation")).toString() << "\", isMovable: false);\n";
         isUsingComponent = true;
       }
 

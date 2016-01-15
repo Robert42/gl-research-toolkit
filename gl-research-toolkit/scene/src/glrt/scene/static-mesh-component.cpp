@@ -33,9 +33,8 @@ void StaticMeshComponent::registerAngelScriptAPIDeclarations()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-
-inline StaticMeshComponent* createStaticMeshComponent(const Uuid<StaticMeshComponent>& uuid,
-                                                      Node* node,
+inline StaticMeshComponent* createStaticMeshComponent(Node* node,
+                                                      const Uuid<StaticMeshComponent>& uuid,
                                                       bool isMovable,
                                                       const Uuid<resources::StaticMeshData>& meshUuid,
                                                       const Uuid<resources::Material>& materialUuid)
