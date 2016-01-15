@@ -1,6 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
-#include <glrt/renderer/static-mesh.h>
+#include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/gui/anttweakbar.h>
 
 #include <glhelper/gl.hpp>
@@ -72,10 +72,10 @@ int main(int argc, char** argv)
 
   // ======== Setup the Meshes ========
   // The main mesh we want to load
-  glrt::renderer::StaticMesh mesh = glrt::renderer::StaticMesh::loadMeshFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.mesh");
+  glrt::renderer::StaticMeshBuffer mesh = glrt::renderer::StaticMeshBuffer::loadMeshFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.mesh");
 
   // Get the Vertex Format of it
-  gl::VertexArrayObject vertexArrayObject = glrt::renderer::StaticMesh::generateVertexArrayObject();
+  gl::VertexArrayObject vertexArrayObject = glrt::renderer::StaticMeshBuffer::generateVertexArrayObject();
 
   // ======== Setup the Shader ========
   // load and compile the shader
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
         QFileInfo droppedFile = QString::fromUtf8(event.drop.file);
         SDL_free(event.drop.file);
 
-        if(glrt::renderer::StaticMesh::isValidFileSuffix(droppedFile))
+        if(glrt::renderer::StaticMeshBuffer::isValidFileSuffix(droppedFile))
         {
-          glrt::renderer::StaticMesh newMesh = glrt::renderer::StaticMesh::loadMeshFile(droppedFile.absoluteFilePath());
+          glrt::renderer::StaticMeshBuffer newMesh = glrt::renderer::StaticMeshBuffer::loadMeshFile(droppedFile.absoluteFilePath());
           std::swap(newMesh, mesh);
         }else
         {

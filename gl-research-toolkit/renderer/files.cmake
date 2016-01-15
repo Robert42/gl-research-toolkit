@@ -12,7 +12,7 @@ set(SOURCE_FILES
   include/glrt/renderer/material.h
   include/glrt/renderer/sample-source-manager.h
   include/glrt/renderer/scene-renderer.h
-  include/glrt/renderer/static-mesh.h
+  include/glrt/renderer/static-mesh-buffer.h
   include/glrt/renderer/toolkit/aligned-vector.h
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h
@@ -32,7 +32,7 @@ set(SOURCE_FILES
   src/glrt/renderer/material.cpp
   src/glrt/renderer/sample-resource-manager.cpp
   src/glrt/renderer/scene-renderer.cpp
-  src/glrt/renderer/static-mesh.cpp
+  src/glrt/renderer/static-mesh-buffer.cpp
   src/glrt/renderer/toolkit/reloadable-shader.cpp
   src/glrt/renderer/toolkit/shader-compiler.cpp
   src/glrt/renderer/toolkit/temp-shader-file.cpp

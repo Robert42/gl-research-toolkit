@@ -4,7 +4,7 @@
 #include <glrt/scene/scene.h>
 #include <glrt/renderer/material.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
-#include <glrt/renderer/static-mesh.h>
+#include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/renderer/toolkit/shader-storage-format.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 
@@ -109,7 +109,7 @@ private:
   };
   struct MeshRange
   {
-    StaticMesh* mesh;
+    StaticMeshBuffer* mesh;
     int begin, end;
   };
 

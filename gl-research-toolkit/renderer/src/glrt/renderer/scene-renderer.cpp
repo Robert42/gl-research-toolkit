@@ -17,7 +17,7 @@ Renderer::Renderer(scene::Scene* scene)
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    staticMeshVertexArrayObject(std::move(StaticMesh::generateVertexArrayObject())),
+    staticMeshVertexArrayObject(std::move(StaticMeshBuffer::generateVertexArrayObject())),
     _directLights(new DirectLights(this))
 {
 }
@@ -169,7 +169,7 @@ void Renderer::Pass::renderStaticMeshes()
   MaterialInstanceRange* materialInstanceRange = &materialInstanceRanges[0];
   MeshRange* meshInstanceRange = &meshRanges[0];
   gl::Buffer* buffer = staticMeshInstance_Uniforms.data();
-  StaticMesh* mesh;
+  StaticMeshBuffer* mesh;
 
   mesh= meshInstanceRange->mesh;
   mesh->bind(renderer.staticMeshVertexArrayObject);
