@@ -34,9 +34,15 @@ LightComponent* LightComponent::createForLightSource(Node& node,
 
 void LightComponent::registerAngelScriptAPIDeclarations()
 {
+  int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  glrt::Uuid<void>::registerCustomizedUuidType("LightComponentComponent", true);
+  glrt::Uuid<void>::registerCustomizedUuidType("LightComponent", true);
+
+  r = angelScriptEngine->RegisterEnum("LightSourceInteractivity"); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("LightSourceInteractivity", "STATIC", int(Interactivity::STATIC)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("LightSourceInteractivity", "DYNAMIC", int(Interactivity::DYNAMIC)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("LightSourceInteractivity", "MOVABLE", int(Interactivity::MOVABLE)); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -57,7 +63,7 @@ void LightComponent::registerAngelScriptAPI()
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  r = angelScriptEngine->RegisterObjectMethod("Node", "LightComponent@ newLightComponent(const Uuid<StaticMeshComponent> &in uuid, LightSourceInteractivity interactivity, const Uuid<LightSource> &in lightSourceUuid)", AngelScript::asFUNCTION(createLightComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Node", "LightComponent@ newLightComponent(const Uuid<LightComponent> &in uuid, LightSourceInteractivity interactivity, const Uuid<LightSource> &in lightSourceUuid)", AngelScript::asFUNCTION(createLightComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   Node::Component::registerAsBaseOfClass<LightComponent>(angelScriptEngine, "LightComponent");
 
