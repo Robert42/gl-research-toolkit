@@ -112,12 +112,12 @@ Node::ModularAttribute::~ModularAttribute()
 // ======== Node::Component ==================================================
 
 
-Node::Component::Component(Node& entity, const Uuid<Component>& uuid, bool isMovable)
-  : entity(entity),
+Node::Component::Component(Node& node, const Uuid<Component>& uuid, bool isMovable)
+  : entity(node),
     uuid(uuid),
     isMovable(isMovable)
 {
-  this->setParent(entity.rootComponent());
+  this->setParent(node.rootComponent());
 }
 
 Node::Component::~Component()

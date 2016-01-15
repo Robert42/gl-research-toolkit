@@ -8,7 +8,7 @@ namespace scene {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-StaticMeshComponent::StaticMeshComponent(Node& entity,
+StaticMeshComponent::StaticMeshComponent(Node& entity, // #TODO rename all entity/entities to node
                                          const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
                                          const Uuid<resources::StaticMeshData>& staticMesh,

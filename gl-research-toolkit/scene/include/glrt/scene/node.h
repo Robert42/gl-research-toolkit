@@ -61,7 +61,7 @@ public:
 
   const bool isMovable : 1;
 
-  Component(Node& entity, const Uuid<Component>& uuid, bool isMovable);
+  Component(Node& node, const Uuid<Component>& uuid, bool isMovable);
   virtual ~Component();
 
   Component* parent() const;
