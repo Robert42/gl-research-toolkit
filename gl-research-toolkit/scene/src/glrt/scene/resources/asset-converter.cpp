@@ -784,7 +784,7 @@ bool SceneGraphImportSettings::shouldImport(const QString& name, const QSet<QStr
 
 SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interface)
 {
-  int uuidTypeId = angelScriptEngine->GetTypeIdByDecl("QUuid");
+  int uuidTypeId = angelScriptEngine->GetTypeIdByDecl("BaseUuid");
   int staticMeshUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<StaticMesh>");
   int materialUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Material>");
   int lightUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<LightSource>");
