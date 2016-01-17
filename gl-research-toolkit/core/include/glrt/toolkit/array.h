@@ -28,14 +28,35 @@ struct ArrayCapacityTraits_Capacity_Blocks
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed, cache_type* cache);
 };
 
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
+struct ArrayBucketTraits_NoBuckets
 {
   enum class hint_type{DefaultHint};
   enum class cache_type{DefaultCache};
 
   static hint_type default_append_hint(){return hint_type::DefaultHint;}
   static hint_type default_remove_hint(){return hint_type::DefaultHint;}
+
+  static int remap_index(int index, cache_type* c, hint_type hint)
+  {
+    Q_UNUSED(c);
+    Q_UNUSED(hint);
+    return index;
+  }
+
+  static void init_cache(cache_type*){}
+  static void clear_cache(cache_type*){}
+  static void delete_cache(cache_type*){}
+  static void swap_cache(cache_type*, cache_type*){}
+};
+
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>, class T_bucket_traits=ArrayBucketTraits_NoBuckets>
+struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
+{
+  typedef typename T_bucket_traits::cache_type cache_type;
+  typedef typename T_bucket_traits::hint_type hint_type;
+
+  static hint_type default_append_hint(){return T_bucket_traits::default_append_hint();}
+  static hint_type default_remove_hint(){return T_bucket_traits::default_remove_hint();}
 
   static void copy_construct_POD(T* dest, const T* src, int count);
   static void copy_construct_single_POD(T* dest, const T* src);
@@ -45,10 +66,10 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
   static void move_construct_mC(T* dest, T* src, int count);
   static void move_construct_single_mC(T* dest, T* src);
 
-  static void init_cache(cache_type*){}
-  static void clear_cache(cache_type*){}
-  static void delete_cache(cache_type*){}
-  static void swap_cache(cache_type*, cache_type*){}
+  static void init_cache(cache_type* c){T_bucket_traits::init_cache(c);}
+  static void clear_cache(cache_type* c){T_bucket_traits::clear_cache(c);}
+  static void delete_cache(cache_type* c){T_bucket_traits::delete_cache(c);}
+  static void swap_cache(cache_type* a, cache_type* b){T_bucket_traits::init_cache(a, b);}
 
   static int append_mC(T* data, int prev_length, T&& value, const hint_type& hint, cache_type* cache);
   static int extend_mC(T* data, int prev_length, T* values, int num_values, const hint_type& hint, cache_type* cache);
@@ -83,10 +104,10 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 };
 
 // Plain old data, int POD struct like vec3
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>, class T_bucket_traits=ArrayBucketTraits_NoBuckets>
+struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits, T_bucket_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits, T_bucket_traits> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
@@ -137,10 +158,10 @@ struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_cap
 
 // Class with move constructor, move operator and destructor
 // (Thought for OpenGL Wrapper)
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>, class T_bucket_traits=ArrayBucketTraits_NoBuckets>
+struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits, T_bucket_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits, T_bucket_traits> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
@@ -177,17 +198,17 @@ struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_c
     parent_type::remove_mOD(data, prev_length, first_index, num_values, hint, cache);
   }
 
-  static void destruct(T* data, int length)
+  static void destruct(T* data, int first, int length)
   {
-    parent_type::destruct_D(data, length);
+    parent_type::destruct_D(data, first, length);
   }
 };
 
 // Class with copy constructor, move constructor, move operator and destructor
-template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_capacity_traits>
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>, class T_bucket_traits=ArrayBucketTraits_NoBuckets>
+struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_capacity_traits, T_bucket_traits>
 {
-  typedef ArrayTraits_Unordered_mCmOD<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_Unordered_mCmOD<T, T_capacity_traits, T_bucket_traits> parent_type;
   typedef typename parent_type::hint_type hint_type;
   typedef typename parent_type::cache_type cache_type;
 
