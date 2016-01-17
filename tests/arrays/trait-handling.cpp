@@ -12,24 +12,24 @@ void test_capacity_traits()
   int cache;
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
 
-  EXPECT_EQ(capacity_blocks::new_capacity(0, 0, 0, &cache), 0);
-  EXPECT_EQ(capacity_blocks::new_capacity(1024, 0, 0, &cache), 1024);
-  EXPECT_EQ(capacity_blocks::new_capacity(0, 0, 1, &cache), 16);
-  EXPECT_EQ(capacity_blocks::new_capacity(0, 1, 0, &cache), 16);
-  EXPECT_EQ(capacity_blocks::new_capacity(0, 15, 1, &cache), 16);
-  EXPECT_EQ(capacity_blocks::new_capacity(0, 15, 2, &cache), 32);
-  EXPECT_EQ(capacity_blocks::new_capacity(0, 16, 1, &cache), 32);
-  EXPECT_EQ(capacity_blocks::new_capacity(1024, 16, 1, &cache), 1024);
+  EXPECT_EQ(capacity_blocks::new_capacity(0, 0, 0), 0);
+  EXPECT_EQ(capacity_blocks::new_capacity(1024, 0, 0), 1024);
+  EXPECT_EQ(capacity_blocks::new_capacity(0, 0, 1), 16);
+  EXPECT_EQ(capacity_blocks::new_capacity(0, 1, 0), 16);
+  EXPECT_EQ(capacity_blocks::new_capacity(0, 15, 1), 16);
+  EXPECT_EQ(capacity_blocks::new_capacity(0, 15, 2), 32);
+  EXPECT_EQ(capacity_blocks::new_capacity(0, 16, 1), 32);
+  EXPECT_EQ(capacity_blocks::new_capacity(1024, 16, 1), 1024);
 
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(32, 16, 1, &cache), 32);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(64, 16, 1, &cache), 64);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(1024, 16, 1, &cache), 64);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(1024, 100, 1, &cache), 128);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 100, 1, &cache), 100);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(1024, 66, 1, &cache), 128);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 66, 1, &cache), 100);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 65, 1, &cache), 100);
-  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 64, 1, &cache), 64);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(32, 16, 1), 32);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(64, 16, 1), 64);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(1024, 16, 1), 64);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(1024, 100, 1), 128);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 100, 1), 100);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(1024, 66, 1), 128);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 66, 1), 100);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 65, 1), 100);
+  EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 64, 1), 64);
 }
 
 void test_capacity_trait_rangecheck()
@@ -185,12 +185,12 @@ void test_remove_single_mOD()
   StateSpy instances[4];
   StateSpy::clearLog();
 
-  traits::remove_single_mOD(instances, 4, 3, traits::default_remove_hint(), nullptr);
+  traits::remove_single_mOD(instances, 4, 3);
   EXPECT_EQ(StateSpy::log(),
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_single_mOD(instances, 4, 0, traits::default_remove_hint(), nullptr);
+  traits::remove_single_mOD(instances, 4, 0);
   EXPECT_EQ(StateSpy::log(),
             "0: move operator from 3\n"
             "3: destructed\n");
@@ -206,18 +206,18 @@ void test_remove_mOD()
   StateSpy instances[4];
   StateSpy::clearLog();
 
-  traits::remove_mOD(instances, 4, 3, 1, traits::default_remove_hint(), nullptr);
+  traits::remove_mOD(instances, 4, 3, 1);
   EXPECT_EQ(StateSpy::log(),
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_mOD(instances, 4, 0, 1, traits::default_remove_hint(), nullptr);
+  traits::remove_mOD(instances, 4, 0, 1);
   EXPECT_EQ(StateSpy::log(),
             "0: move operator from 3\n"
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_mOD(instances, 4, 0, 2, traits::default_remove_hint(), nullptr);
+  traits::remove_mOD(instances, 4, 0, 2);
   EXPECT_EQ(StateSpy::log(),
             "0: move operator from 2\n"
             "1: move operator from 3\n"
@@ -225,7 +225,7 @@ void test_remove_mOD()
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_mOD(instances, 4, 1, 2, traits::default_remove_hint(), nullptr);
+  traits::remove_mOD(instances, 4, 1, 2);
   EXPECT_EQ(StateSpy::log(),
             "1: move operator from 3\n"
             "2: destructed\n"
@@ -242,12 +242,12 @@ void test_remove_single_aOD()
   StateSpy instances[4];
   StateSpy::clearLog();
 
-  traits::remove_single_aOD(instances, 4, 3, traits::default_remove_hint(), nullptr);
+  traits::remove_single_aOD(instances, 4, 3);
   EXPECT_EQ(StateSpy::log(),
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_single_aOD(instances, 4, 0, traits::default_remove_hint(), nullptr);
+  traits::remove_single_aOD(instances, 4, 0);
   EXPECT_EQ(StateSpy::log(),
             "0: assignment operator from 3\n"
             "3: destructed\n");
@@ -263,18 +263,18 @@ void test_remove_aOD()
   StateSpy instances[4];
   StateSpy::clearLog();
 
-  traits::remove_aOD(instances, 4, 3, 1, traits::default_remove_hint(), nullptr);
+  traits::remove_aOD(instances, 4, 3, 1);
   EXPECT_EQ(StateSpy::log(),
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_aOD(instances, 4, 0, 1, traits::default_remove_hint(), nullptr);
+  traits::remove_aOD(instances, 4, 0, 1);
   EXPECT_EQ(StateSpy::log(),
             "0: assignment operator from 3\n"
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_aOD(instances, 4, 0, 2, traits::default_remove_hint(), nullptr);
+  traits::remove_aOD(instances, 4, 0, 2);
   EXPECT_EQ(StateSpy::log(),
             "0: assignment operator from 2\n"
             "1: assignment operator from 3\n"
@@ -282,7 +282,7 @@ void test_remove_aOD()
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_aOD(instances, 4, 1, 2, traits::default_remove_hint(), nullptr);
+  traits::remove_aOD(instances, 4, 1, 2);
   EXPECT_EQ(StateSpy::log(),
             "1: assignment operator from 3\n"
             "2: destructed\n"
@@ -299,12 +299,12 @@ void test_remove_single_cCD()
   StateSpy instances[4];
   StateSpy::clearLog();
 
-  traits::remove_single_mOD(instances, 4, 3, traits::default_remove_hint(), nullptr);
+  traits::remove_single_mOD(instances, 4, 3);
   EXPECT_EQ(StateSpy::log(),
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_single_mOD(instances, 4, 0, traits::default_remove_hint(), nullptr);
+  traits::remove_single_mOD(instances, 4, 0);
   EXPECT_EQ(StateSpy::log(),
             "0: move operator from 3\n"
             "3: destructed\n");
@@ -320,12 +320,12 @@ void test_remove_cCD()
   StateSpy instances[4];
   StateSpy::clearLog();
 
-  traits::remove_cCD(instances, 4, 3, 1, traits::default_remove_hint(), nullptr);
+  traits::remove_cCD(instances, 4, 3, 1);
   EXPECT_EQ(StateSpy::log(),
             "3: destructed\n");
   StateSpy::clearLog();
 
-  traits::remove_cCD(instances, 4, 0, 1, traits::default_remove_hint(), nullptr);
+  traits::remove_cCD(instances, 4, 0, 1);
   EXPECT_EQ(StateSpy::log(),
             "0: destructed\n"
             "4: copy constructor from 3\n"
@@ -337,7 +337,7 @@ void test_remove_cCD()
     instances[i].index = i;
   StateSpy::clearLog();
 
-  traits::remove_cCD(instances, 4, 0, 2, traits::default_remove_hint(), nullptr);
+  traits::remove_cCD(instances, 4, 0, 2);
   EXPECT_EQ(StateSpy::log(),
             "0: destructed\n"
             "1: destructed\n"
@@ -352,7 +352,7 @@ void test_remove_cCD()
     instances[i].index = i;
   StateSpy::clearLog();
 
-  traits::remove_cCD(instances, 4, 1, 2, traits::default_remove_hint(), nullptr);
+  traits::remove_cCD(instances, 4, 1, 2);
   EXPECT_EQ(StateSpy::log(),
             "1: destructed\n"
             "2: destructed\n"
