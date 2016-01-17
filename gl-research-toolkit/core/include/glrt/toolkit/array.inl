@@ -377,17 +377,17 @@ by only moving the raw bytes of the buffer.
 */
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-Array<T, T_traits, T_bucket_traits>::Array()
+template<typename T, class T_traits>
+Array<T, T_traits>::Array()
   : _data(nullptr),
     _capacity(0),
     _length(0)
 {
-  bucket_traits::init_cache(&this->trait_cache);
+  traits::init_cache(&this->trait_cache);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-Array<T, T_traits, T_bucket_traits>::~Array()
+template<typename T, class T_traits>
+Array<T, T_traits>::~Array()
 {
   if(_data != nullptr)
   {
@@ -398,11 +398,11 @@ Array<T, T_traits, T_bucket_traits>::~Array()
   _length = 0;
   _data = nullptr;
 
-  bucket_traits::delete_cache(&this->trait_cache);
+  traits::delete_cache(&this->trait_cache);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-Array<T, T_traits, T_bucket_traits>::Array(const std::initializer_list<T>& init_with_values)
+template<typename T, class T_traits>
+Array<T, T_traits>::Array(const std::initializer_list<T>& init_with_values)
   : Array()
 {
   ensureCapacity(init_with_values.size());
@@ -410,39 +410,39 @@ Array<T, T_traits, T_bucket_traits>::Array(const std::initializer_list<T>& init_
     append_copy(value);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-Array<T, T_traits, T_bucket_traits>::Array(Array&& other)
+template<typename T, class T_traits>
+Array<T, T_traits>::Array(Array&& other)
   : Array()
 {
   this->swap(other);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-Array<T, T_traits, T_bucket_traits>& Array<T, T_traits, T_bucket_traits>::operator=(Array<T, T_traits, T_bucket_traits>&& other)
+template<typename T, class T_traits>
+Array<T, T_traits>& Array<T, T_traits>::operator=(Array<T, T_traits>&& other)
 {
   this->swap(other);
   return *this;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::swap(Array& other)
+template<typename T, class T_traits>
+void Array<T, T_traits>::swap(Array& other)
 {
   std::swap(this->_data, other._data);
   std::swap(this->_capacity, other._capacity);
   std::swap(this->_length, other._length);
-  bucket_traits::swap_cache(&this->trait_cache, &other.trait_cache);
+  traits::swap_cache(&this->trait_cache, &other.trait_cache);
 }
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::capacity() const
+template<typename T, class T_traits>
+int Array<T, T_traits>::capacity() const
 {
   return _capacity;
 }
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::clear()
+template<typename T, class T_traits>
+void Array<T, T_traits>::clear()
 {
   if(_data != nullptr)
   {
@@ -452,11 +452,11 @@ void Array<T, T_traits, T_bucket_traits>::clear()
   _capacity = 0;
   _length = 0;
   _data = nullptr;
-  bucket_traits::clear_cache(&this->trait_cache);
+  traits::clear_cache(&this->trait_cache);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::setCapacity(int capacity)
+template<typename T, class T_traits>
+void Array<T, T_traits>::setCapacity(int capacity)
 {
   Q_ASSERT(capacity >= 0);
 
@@ -473,7 +473,12 @@ void Array<T, T_traits, T_bucket_traits>::setCapacity(int capacity)
 
     this->_data = allocate_memory(capacity);
     this->_capacity = capacity;
-    this->_length = glm::min(this->_length, capacity);
+
+    if(this->_length > capacity)
+    {
+      this->_length = capacity;
+      traits::capacity_reduced(capacity, &this->trait_cache);
+    }
 
     // move the elements to the new buffer.
     traits::move_construct(this->_data, old_data, this->_length);
@@ -486,8 +491,8 @@ void Array<T, T_traits, T_bucket_traits>::setCapacity(int capacity)
   }
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::ensureCapacity(int minCapacity)
+template<typename T, class T_traits>
+void Array<T, T_traits>::ensureCapacity(int minCapacity)
 {
   Q_ASSERT(capacity() >= 0);
 
@@ -499,8 +504,8 @@ void Array<T, T_traits, T_bucket_traits>::ensureCapacity(int minCapacity)
   setCapacity(newCapacity);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::reserve(int minCapacity)
+template<typename T, class T_traits>
+void Array<T, T_traits>::reserve(int minCapacity)
 {
   Q_ASSERT(capacity() >= 0);
 
@@ -508,29 +513,29 @@ void Array<T, T_traits, T_bucket_traits>::reserve(int minCapacity)
 }
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-T* Array<T, T_traits, T_bucket_traits>::data()
+template<typename T, class T_traits>
+T* Array<T, T_traits>::data()
 {
   return _data;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-const T* Array<T, T_traits, T_bucket_traits>::data() const
+template<typename T, class T_traits>
+const T* Array<T, T_traits>::data() const
 {
   return _data;
 }
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-T& Array<T, T_traits, T_bucket_traits>::at(int i)
+template<typename T, class T_traits>
+T& Array<T, T_traits>::at(int i)
 {
   Q_ASSERT(i>=0);
   Q_ASSERT(i<_length);
   return *(_data+i);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-const T& Array<T, T_traits, T_bucket_traits>::at(int i) const
+template<typename T, class T_traits>
+const T& Array<T, T_traits>::at(int i) const
 {
   Q_ASSERT(i>=0);
   Q_ASSERT(i<_length);
@@ -538,37 +543,39 @@ const T& Array<T, T_traits, T_bucket_traits>::at(int i) const
 }
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-T& Array<T, T_traits, T_bucket_traits>::operator[](int i)
+template<typename T, class T_traits>
+T& Array<T, T_traits>::operator[](int i)
 {
   return at(i);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-const T& Array<T, T_traits, T_bucket_traits>::operator[](int i) const
+template<typename T, class T_traits>
+const T& Array<T, T_traits>::operator[](int i) const
 {
   return at(i);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::length() const
+template<typename T, class T_traits>
+int Array<T, T_traits>::length() const
 {
   return _length;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-bool Array<T, T_traits, T_bucket_traits>::isEmpty() const
+template<typename T, class T_traits>
+bool Array<T, T_traits>::isEmpty() const
 {
   return _length==0;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::append_move(T&& value, const hint_type& hint)
+template<typename T, class T_traits>
+int Array<T, T_traits>::append_move(T&& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
+  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+
   // the trait must assume, that there's enough space
-  int new_index = traits::append_move(this->data(), this->length(), std::move(value));
+  int new_index = traits::append_move(bucket.data, bucket.length, std::move(value));
 
   _length++;
 
@@ -578,12 +585,14 @@ int Array<T, T_traits, T_bucket_traits>::append_move(T&& value, const hint_type&
   return new_index;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::extend_move(T* values, int num_values, const hint_type& hint)
+template<typename T, class T_traits>
+int Array<T, T_traits>::extend_move(T* values, int num_values, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  int new_index = traits::extend_move(this->data(), this->length(), values, num_values);
+  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
+
+  int new_index = traits::extend_move(bucket.data, bucket.length, values, num_values);
 
   _length += num_values;
 
@@ -593,13 +602,15 @@ int Array<T, T_traits, T_bucket_traits>::extend_move(T* values, int num_values, 
   return new_index;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::append_copy(const T& value, const hint_type& hint)
+template<typename T, class T_traits>
+int Array<T, T_traits>::append_copy(const T& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
+  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+
   // the trait must assume, that there's enough space
-  int new_index = traits::append_copy(this->data(), this->length(), value);
+  int new_index = traits::append_copy(bucket.data, bucket.length, value);
 
   _length++;
 
@@ -610,12 +621,14 @@ int Array<T, T_traits, T_bucket_traits>::append_copy(const T& value, const hint_
 }
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::extend_copy(const T* values, int num_values, const hint_type& hint)
+template<typename T, class T_traits>
+int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  int new_index = traits::extend_copy(this->data(), this->length(), values, num_values);
+  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
+
+  int new_index = traits::extend_copy(bucket.data, bucket.length, values, num_values);
 
   _length += num_values;
 
@@ -625,22 +638,24 @@ int Array<T, T_traits, T_bucket_traits>::extend_copy(const T* values, int num_va
   return new_index;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::append(const T& value, const hint_type& hint)
+template<typename T, class T_traits>
+int Array<T, T_traits>::append(const T& value, const hint_type& hint)
 {
-  return append_copy(value);
+  return append_copy(value, hint);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-int Array<T, T_traits, T_bucket_traits>::append(T&& value, const hint_type& hint)
+template<typename T, class T_traits>
+int Array<T, T_traits>::append(T&& value, const hint_type& hint)
 {
-  return append_move(std::move(value));
+  return append_move(std::move(value), hint);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::remove(int index, const hint_type& hint)
+template<typename T, class T_traits>
+void Array<T, T_traits>::remove(int index, const hint_type& hint)
 {
-  traits::remove_single(this->data(), this->length(), index);
+  auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+
+  traits::remove_single(bucket.data, bucket.length, index);
 
   _length -= 1;
   Q_ASSERT(_length >= 0);
@@ -649,10 +664,12 @@ void Array<T, T_traits, T_bucket_traits>::remove(int index, const hint_type& hin
   setCapacity(new_capacity);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::remove(int index, int num_to_remove, const hint_type& hint)
+template<typename T, class T_traits>
+void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& hint)
 {
-  traits::remove(this->data(), this->length(), index, num_to_remove);
+  auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), num_to_remove, &this->trait_cache, hint);
+
+  traits::remove(bucket.data, bucket.length, index, num_to_remove);
 
   _length -= num_to_remove;
   Q_ASSERT(_length >= 0);
@@ -661,8 +678,8 @@ void Array<T, T_traits, T_bucket_traits>::remove(int index, int num_to_remove, c
   setCapacity(new_capacity);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-bool Array<T, T_traits, T_bucket_traits>::operator==(const Array& other) const
+template<typename T, class T_traits>
+bool Array<T, T_traits>::operator==(const Array& other) const
 {
   if(this->length() != other.length())
     return false;
@@ -678,14 +695,14 @@ bool Array<T, T_traits, T_bucket_traits>::operator==(const Array& other) const
   return true;
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-bool Array<T, T_traits, T_bucket_traits>::operator!=(const Array& other) const
+template<typename T, class T_traits>
+bool Array<T, T_traits>::operator!=(const Array& other) const
 {
   return !this->operator ==(other);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-QVector<T> Array<T, T_traits, T_bucket_traits>::toQVector() const
+template<typename T, class T_traits>
+QVector<T> Array<T, T_traits>::toQVector() const
 {
   QVector<T> v;
   v.resize(this->length());
@@ -695,8 +712,8 @@ QVector<T> Array<T, T_traits, T_bucket_traits>::toQVector() const
 }
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-T* Array<T, T_traits, T_bucket_traits>::allocate_memory(int n)
+template<typename T, class T_traits>
+T* Array<T, T_traits>::allocate_memory(int n)
 {
   Q_ASSERT(n!=0);
 
@@ -708,8 +725,8 @@ T* Array<T, T_traits, T_bucket_traits>::allocate_memory(int n)
   return reinterpret_cast<T*>(buffer);
 }
 
-template<typename T, class T_traits, class T_bucket_traits>
-void Array<T, T_traits, T_bucket_traits>::free_memory(T* data)
+template<typename T, class T_traits>
+void Array<T, T_traits>::free_memory(T* data)
 {
   Q_ASSERT(data!=nullptr);
   free(data);
@@ -726,8 +743,8 @@ QDebug operator<<(QDebug d, const Array<T, T_traits>& array)
 } // namespace glrt
 
 
-template<typename T, class T_traits, class T_bucket_traits>
-void std::swap(glrt::Array<T, T_traits, T_bucket_traits>& a, glrt::Array<T, T_traits, T_bucket_traits>& b)
+template<typename T, class T_traits>
+void std::swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b)
 {
   a.swap(b);
 }

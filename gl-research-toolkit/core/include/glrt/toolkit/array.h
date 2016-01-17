@@ -26,36 +26,57 @@ struct ArrayCapacityTraits_Capacity_Blocks
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed);
 };
 
+template<typename T>
 struct ArrayBucketTraits_NoBuckets
 {
   enum class hint_type{DefaultHint};
   enum class cache_type{DefaultCache};
 
+  struct Bucket
+  {
+    T* data;
+    int length;
+  };
+
   static hint_type default_append_hint(){return hint_type::DefaultHint;}
   static hint_type default_remove_hint(){return hint_type::DefaultHint;}
-
-  static int remap_index(int index, cache_type* c, hint_type hint)
-  {
-    Q_UNUSED(c);
-    Q_UNUSED(hint);
-    return index;
-  }
-
-  static int remap_length(int length, cache_type* c, hint_type hint)
-  {
-    Q_UNUSED(c);
-    Q_UNUSED(hint);
-    return length;
-  }
 
   static void init_cache(cache_type*){}
   static void clear_cache(cache_type*){}
   static void delete_cache(cache_type*){}
   static void swap_cache(cache_type*, cache_type*){}
+
+  static void capacity_reduced(int, cache_type*){}
+
+  static Bucket bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, hint_type hint)
+  {
+    Q_UNUSED(num_values_to_add);
+    Q_UNUSED(cache);
+    Q_UNUSED(hint);
+
+    Bucket bucket;
+    bucket.data = data;
+    bucket.length = length;
+
+    return bucket;
+  }
+
+  static Bucket bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, hint_type hint)
+  {
+    Q_UNUSED(num_values_to_remove);
+    Q_UNUSED(cache);
+    Q_UNUSED(hint);
+
+    Bucket bucket;
+    bucket.data = data;
+    bucket.length = length;
+
+    return bucket;
+  }
 };
 
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
+struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits, public ArrayBucketTraits_NoBuckets<T>
 {
   static void copy_construct_POD(T* dest, const T* src, int count);
   static void copy_construct_single_POD(T* dest, const T* src);
@@ -228,14 +249,13 @@ struct DefaultTraits<T*>
 
 
 
-template<typename T, class T_traits = typename DefaultTraits<T>::type, class T_bucket_traits=ArrayBucketTraits_NoBuckets>
+template<typename T, class T_traits = typename DefaultTraits<T>::type>
 class Array final
 {
 public:
   typedef T_traits traits;
-  typedef T_bucket_traits bucket_traits;
-  typedef typename bucket_traits::hint_type hint_type;
-  typedef typename bucket_traits::cache_type cache_type;
+  typedef typename traits::hint_type hint_type;
+  typedef typename traits::cache_type cache_type;
 
   Array();
   ~Array();
@@ -268,17 +288,17 @@ public:
   int length() const;
   bool isEmpty() const;
 
-  int append_move(T&& value, const hint_type& hint=bucket_traits::default_append_hint());
-  int extend_move(T* values, int num_values, const hint_type& hint=bucket_traits::default_append_hint());
+  int append_move(T&& value, const hint_type& hint=traits::default_append_hint());
+  int extend_move(T* values, int num_values, const hint_type& hint=traits::default_append_hint());
 
-  int append_copy(const T& value, const hint_type& hint=bucket_traits::default_append_hint());
-  int extend_copy(const T* values, int num_values, const hint_type& hint=bucket_traits::default_append_hint());
+  int append_copy(const T& value, const hint_type& hint=traits::default_append_hint());
+  int extend_copy(const T* values, int num_values, const hint_type& hint=traits::default_append_hint());
 
-  int append(const T& value, const hint_type& hint=bucket_traits::default_append_hint());
-  int append(T&& value, const hint_type& hint=bucket_traits::default_append_hint());
+  int append(const T& value, const hint_type& hint=traits::default_append_hint());
+  int append(T&& value, const hint_type& hint=traits::default_append_hint());
 
-  void remove(int index, const hint_type& hint=bucket_traits::default_remove_hint());
-  void remove(int index, int num_to_remove, const hint_type& hint=bucket_traits::default_remove_hint());
+  void remove(int index, const hint_type& hint=traits::default_remove_hint());
+  void remove(int index, int num_to_remove, const hint_type& hint=traits::default_remove_hint());
 
   bool operator==(const Array& other) const;
   bool operator!=(const Array& other) const;
@@ -302,8 +322,8 @@ QDebug operator<<(QDebug d, const Array<T, T_traits>& array);
 } // namespace glrt
 
 namespace std {
-template<typename T, class T_traits, class T_bucket_traits>
-void swap(glrt::Array<T, T_traits, T_bucket_traits>& a, glrt::Array<T, T_traits, T_bucket_traits>& b);
+template<typename T, class T_traits>
+void swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b);
 } // namespace std
 
 #include "array.inl"
