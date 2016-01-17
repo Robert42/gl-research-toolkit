@@ -33,6 +33,7 @@
 
 
 // the unnecessary macros make my syntax highligh unpretty ;)
+// #TODO remove
 #ifdef __GNUC__
 #ifdef bool
 #undef bool

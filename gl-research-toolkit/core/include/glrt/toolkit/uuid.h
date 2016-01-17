@@ -16,6 +16,7 @@ namespace std {
 
     result_type operator()(const QUuid& uuid) const
     {
+      // #TODO this is slow
       return hash<std::string>{}(uuid.toString().toStdString());
     }
   };
