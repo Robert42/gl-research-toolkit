@@ -647,12 +647,6 @@ int Array<T, T_traits>::append_copy(const T& value, const hint_type& hint)
   return new_index;
 }
 
-template<typename T, class T_traits>
-template<typename T_other_traits>
-int Array<T, T_traits>::extend_copy(const Array<T, T_other_traits>& values, const hint_type& hint)
-{
-  return extend_copy(values.data(), values.length(), hint);
-}
 
 template<typename T, class T_traits>
 int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_type& hint)

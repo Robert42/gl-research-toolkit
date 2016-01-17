@@ -219,6 +219,7 @@ struct DefaultTraits<T*>
 };
 
 
+
 template<typename T, class T_traits = typename DefaultTraits<T>::type>
 class Array final
 {
@@ -262,8 +263,6 @@ public:
   int extend_move(T* values, int num_values, const hint_type& hint=traits::default_append_hint());
 
   int append_copy(const T& value, const hint_type& hint=traits::default_append_hint());
-  template<typename T_other_trait>
-  int extend_copy(const Array<T, T_other_trait>& values, const hint_type& hint=traits::default_append_hint());
   int extend_copy(const T* values, int num_values, const hint_type& hint=traits::default_append_hint());
 
   int append(const T& value, const hint_type& hint=traits::default_append_hint());
@@ -293,8 +292,10 @@ QDebug operator<<(QDebug d, const Array<T, T_traits>& array);
 
 } // namespace glrt
 
+namespace std {
 template<typename T, class T_traits>
-void std::swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b);
+void swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b);
+} // namespace std
 
 #include "array.inl"
 
