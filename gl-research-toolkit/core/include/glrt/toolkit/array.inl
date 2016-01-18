@@ -572,7 +572,7 @@ int Array<T, T_traits>::append_move(T&& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
-  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
 
   // the trait must assume, that there's enough space
   int new_index = traits::append_move(bucket.data, bucket.length, std::move(value));
@@ -590,7 +590,7 @@ int Array<T, T_traits>::extend_move(T* values, int num_values, const hint_type& 
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
+  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
 
   int new_index = traits::extend_move(bucket.data, bucket.length, values, num_values);
 
@@ -607,7 +607,7 @@ int Array<T, T_traits>::append_copy(const T& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
-  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
 
   // the trait must assume, that there's enough space
   int new_index = traits::append_copy(bucket.data, bucket.length, value);
@@ -626,7 +626,7 @@ int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  auto bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
+  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
 
   int new_index = traits::extend_copy(bucket.data, bucket.length, values, num_values);
 
@@ -654,7 +654,7 @@ template<typename T, class T_traits>
 void Array<T, T_traits>::remove(int index, const hint_type& hint)
 {
   {
-    auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+    typename traits::bucket_remove bucket = traits::bucket_for_removing_values(this->data(), this->length(), 1, &this->trait_cache, hint);
 
     traits::remove_single(bucket.data, bucket.length, index);
 
@@ -672,7 +672,7 @@ template<typename T, class T_traits>
 void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& hint)
 {
   {
-    auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), num_to_remove, &this->trait_cache, hint);
+    typename traits::bucket_remove bucket = traits::bucket_for_removing_values(this->data(), this->length(), num_to_remove, &this->trait_cache, hint);
 
     traits::remove(bucket.data, bucket.length, index, num_to_remove);
 

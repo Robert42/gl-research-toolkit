@@ -125,24 +125,71 @@ struct ArrayBucketTraits_ByNumberOfBuckets_Base
   typedef typename _hint_helper::type hint_type;
   typedef typename _cache_helper::type cache_type;
 
-  struct Bucket
+  struct base_bucket
   {
     T* data;
     int length;
+    int bucketId;
+
+    base_bucket(typename inner_traits::bucket_append&& inner_bucket, int bucketId)
+      : data(inner_bucket.data),
+        length(inner_bucket.length),
+        bucketId(bucketId)
+    {
+      inner_bucket.data = nullptr;
+    }
+
+    base_bucket(typename inner_traits::bucket_remove&& inner_bucket, int bucketId)
+      : data(inner_bucket.data),
+        length(inner_bucket.length),
+        bucketId(bucketId)
+    {
+      inner_bucket.data = nullptr;
+    }
+
+    base_bucket(base_bucket&& other)
+      : data(other.data),
+        length(other.length),
+        bucketId(other.bucketId)
+    {
+      other.data = nullptr;
+    }
+
+    base_bucket(const base_bucket&) = delete;
+    base_bucket& operator=(const base_bucket&) = delete;
+    base_bucket& operator=(base_bucket&&) = delete;
+  };
+
+  struct bucket_append : public base_bucket
+  {
+    bucket_append(bucket_append&& other)
+      : base_bucket(std::move(other))
+    {
+    }
+
+    bucket_append(typename inner_traits::bucket_append&& inner_bucket, int bucketId)
+      : base_bucket(std::move(inner_bucket), bucketId)
+    {
+      inner_bucket.data = nullptr;
+    }
+  };
+
+  struct bucket_remove : public base_bucket
+  {
+    bucket_remove(bucket_remove&& other)
+      : base_bucket(std::move(other))
+    {
+    }
+
+    bucket_remove(typename inner_traits::bucket_remove&& inner_bucket, int bucketId)
+      : base_bucket(std::move(inner_bucket), bucketId)
+    {
+      inner_bucket.data = nullptr;
+    }
   };
 
   static hint_type default_append_hint(){return make_default_hint(0, inner_traits::default_append_hint());}
   static hint_type default_remove_hint(){return make_default_hint(0, inner_traits::default_remove_hint());}
-
-  static void capacity_reduced(int, cache_type*){}
-
-  static Bucket bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, hint_type hint)
-  {
-  }
-
-  static Bucket bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, hint_type hint)
-  {
-  }
 };
 
 } // namespace implementation
@@ -153,11 +200,13 @@ struct ArrayBucketTraits_NoBuckets
   typedef implementation::dummy_array_hint_type hint_type;
   typedef implementation::dummy_array_cache_type cache_type;
 
-  struct Bucket
+  struct bucket_append
   {
     T* data;
     int length;
   };
+
+  typedef bucket_append bucket_remove;
 
   static hint_type default_append_hint(){return hint_type::DefaultHint;}
   static hint_type default_remove_hint(){return hint_type::DefaultHint;}
@@ -169,26 +218,26 @@ struct ArrayBucketTraits_NoBuckets
 
   static void capacity_reduced(int, cache_type*){}
 
-  static Bucket bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, hint_type hint)
+  static bucket_append bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, hint_type hint)
   {
     Q_UNUSED(num_values_to_add);
     Q_UNUSED(cache);
     Q_UNUSED(hint);
 
-    Bucket bucket;
+    bucket_append bucket;
     bucket.data = data;
     bucket.length = length;
 
     return bucket;
   }
 
-  static Bucket bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, hint_type hint)
+  static bucket_remove bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, hint_type hint)
   {
     Q_UNUSED(num_values_to_remove);
     Q_UNUSED(cache);
     Q_UNUSED(hint);
 
-    Bucket bucket;
+    bucket_remove bucket;
     bucket.data = data;
     bucket.length = length;
 
@@ -453,8 +502,41 @@ struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayB
 {
   typedef implementation::ArrayBucketTraits_ByNumberOfBuckets_Base<T, T_inner_traits, Array<int>> parent_type;
 
+  typedef typename parent_type::_hint_helper _hint_helper;
+  typedef typename parent_type::_cache_helper _cache_helper;
+
   typedef typename parent_type::cache_type cache_type;
   typedef typename parent_type::hint_type hint_type;
+
+  typedef typename parent_type::bucket_append bucket_append;
+  typedef typename parent_type::inner_trait inner_trait;
+
+  struct bucket_remove : public parent_type::bucket_remove
+  {
+    Array<int>& bucketLimits;
+
+    bucket_remove(typename inner_trait::bucket_remove&& inner_bucket, int bucketId, Array<int>& bucketLimits)
+      : parent_type::bucket_remove(std::move(inner_bucket), bucketId),
+        bucketLimits(bucketLimits)
+    {
+    }
+
+    bucket_remove(bucket_remove&& other)
+      : parent_type::bucket_remove(std::move(other))
+    {
+    }
+
+    ~bucket_remove()
+    {
+      Q_ASSERT(this->bucketId >= 0);
+
+      if(this->data!=nullptr)
+      {
+        while((bucketLimits.length() > 2 && bucketLimits.last()==bucketLimits.last(1)) || (bucketLimits.length() == 1 && bucketLimits.last() == 0))
+          bucketLimits.removeLast();
+      }
+    }
+  };
 
   static void init_cache(cache_type* c)
   {
@@ -477,6 +559,33 @@ struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayB
     a->this_cache.swap(b->this_cache);
     T_inner_traits::clear_cache(a->next_cache(), b->next_cache);
   }
+
+
+  static void capacity_reduced(int, cache_type*){}
+
+  static bucket_append bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, const hint_type& hint)
+  {
+    int bucketId = hint.head;
+    Array<int>& bucketLimits = cache->head;
+
+    int lastValue = bucketLimits.isEmpty() ? 0 : bucketLimits.last();
+    while(bucketLimits.length() <= bucketId)
+      bucketLimits.append(lastValue);
+
+    bucket_append bucket(inner_trait::bucket_for_appending_values(data, length, num_values_to_add, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId);
+
+    return bucket;
+  }
+
+  static bucket_remove bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, const hint_type& hint)
+  {
+    int bucketId = hint.head;
+    Array<int>& bucketLimits = cache->head;
+
+    bucket_remove bucket(inner_trait::bucket_for_removing_values(data, length, num_values_to_remove, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId, bucketLimits);
+
+    return bucket;
+  }
 };
 
 template<typename T, typename T_inner_traits, int N>
@@ -484,8 +593,15 @@ struct ArrayBucketTraits_FixedNumberOfBuckets : public implementation::ArrayBuck
 {
   typedef implementation::ArrayBucketTraits_ByNumberOfBuckets_Base<T, T_inner_traits, int[N]> parent_type;
 
+  typedef typename parent_type::_hint_helper _hint_helper;
+  typedef typename parent_type::_cache_helper _cache_helper;
+
   typedef typename parent_type::cache_type cache_type;
   typedef typename parent_type::hint_type hint_type;
+
+  typedef typename parent_type::bucket_append bucket_append;
+  typedef typename parent_type::bucket_remove bucket_remove;
+  typedef typename parent_type::inner_trait inner_trait;
 
   static void init_cache(cache_type* c)
   {
@@ -515,6 +631,24 @@ struct ArrayBucketTraits_FixedNumberOfBuckets : public implementation::ArrayBuck
     for(int i=0; i<N; ++i)
       std::swap(va[i], vb[i]);
     T_inner_traits::swap_cache(a->next_cache(), b->next_cache());
+  }
+
+  static bucket_append bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, const hint_type& hint)
+  {
+    int bucketId = hint.head;
+
+    bucket_append bucket(inner_trait::bucket_for_appending_values(data, length, num_values_to_add, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId);
+
+    return bucket;
+  }
+
+  static bucket_remove bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, const hint_type& hint)
+  {
+    int bucketId = hint.head;
+
+    bucket_remove bucket(inner_trait::bucket_for_removing_values(data, length, num_values_to_remove, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId);
+
+    return bucket;
   }
 };
 
