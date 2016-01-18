@@ -5,6 +5,7 @@ set(SOURCE_FILES
   include/glrt/toolkit/assimp-glm-converter.h
   include/glrt/toolkit/escape-string.h
   include/glrt/toolkit/geometry.h
+  include/glrt/toolkit/linked-tuple.h
   include/glrt/toolkit/profiler.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl
