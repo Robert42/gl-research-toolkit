@@ -30,6 +30,12 @@ public:
       tail(tail_values...)
   {
   }
+
+  LinkedTuple(const T& head_value, const LinkedTuple<T_tail...>& tail)
+    : head(head_value),
+      tail(tail)
+  {
+  }
 };
 
 template<typename T, typename... T_tail>
@@ -50,6 +56,12 @@ template<typename... T>
 LinkedTuple<T...> make_linked_tuple(const T&... values)
 {
   return LinkedTuple<T...>(values...);
+}
+
+template<typename T_head, typename... T_tail>
+LinkedTuple<T_head, T_tail...> make_linked_tuple(const T_head& value, const LinkedTuple<T_tail...>& tail)
+{
+  return LinkedTuple<T_head, T_tail...>(value, tail);
 }
 
 } // namespace glrt

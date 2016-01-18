@@ -2,6 +2,7 @@
 #define GLRT_ARRAY_H
 
 #include <glrt/dependencies.h>
+#include <glrt/toolkit/linked-tuple.h>
 
 namespace glrt {
 
@@ -33,63 +34,96 @@ enum class dummy_array_cache_type{DefaultCache};
 template<typename T_this_hint, typename T_inner_hint>
 struct combined_hint_type
 {
-  T_this_hint this_hint;
+  typedef LinkedTuple<T_this_hint, T_inner_hint> type;
 
-  const T_inner_hint& next_hint() const
+  static T_inner_hint& inner_hint(const type& hint)
   {
-    return _next_hint;
+    return hint.tail.head;
   }
 
-  T_inner_hint& next_hint()
+  static type make_default_hint(const T_this_hint& value, const T_inner_hint& inner_value)
   {
-    return _next_hint;
+    return make_linked_tuple<T_this_hint, T_inner_hint>(value, inner_value);
+  }
+};
+
+template<typename T_this_hint, typename... T_inner_hint>
+struct combined_hint_type<T_this_hint, LinkedTuple<T_inner_hint...>>
+{
+  typedef LinkedTuple<T_this_hint, T_inner_hint...> type;
+
+  static LinkedTuple<T_inner_hint...>& inner_hint(const type& hint)
+  {
+    return hint.tail;
   }
 
-private:
-  T_inner_hint _next_hint;
+  static type make_default_hint(const T_this_hint& value, const LinkedTuple<T_inner_hint...>& inner_value)
+  {
+    return make_linked_tuple<T_this_hint, T_inner_hint...>(value, inner_value);
+  }
 };
 
 template<typename T_this_hint>
 struct combined_hint_type<T_this_hint, dummy_array_hint_type>
 {
-  T_this_hint this_hint;
-  dummy_array_hint_type next_hint(){return dummy_array_hint_type::DefaultHint;}
+  typedef T_this_hint type;
+
+  static dummy_array_hint_type inner_hint(const type&)
+  {
+    return dummy_array_hint_type::DefaultHint;
+  }
+
+  static type make_default_hint(const T_this_hint& value, dummy_array_hint_type)
+  {
+    return value;
+  }
 };
+
 
 template<typename T_this_cache, typename T_inner_cache>
 struct combined_cache_type
 {
-  T_this_cache this_cache;
+  typedef LinkedTuple<T_this_cache, T_inner_cache> type;
 
-  const T_inner_cache& next_cache() const
+  static T_inner_cache& inner_cache(const type& cache)
   {
-    return cache;
+    return cache.tail.head;
   }
+};
 
-  T_inner_cache& next_cache()
+template<typename T_this_cache, typename... T_inner_cache>
+struct combined_cache_type<T_this_cache, LinkedTuple<T_inner_cache...>>
+{
+  typedef LinkedTuple<T_this_cache, T_inner_cache...> type;
+
+  static LinkedTuple<T_inner_cache...>& inner_cache(const type& cache)
   {
-    return cache;
+    return cache.tail;
   }
-
-private:
-  T_inner_cache cache;
 };
 
 template<typename T_this_cache>
 struct combined_cache_type<T_this_cache, dummy_array_cache_type>
 {
-  typedef combined_cache_type<T_this_cache, dummy_array_cache_type> this_type;
-  T_this_cache this_cache;
+  typedef T_this_cache type;
 
-  dummy_array_cache_type next_cache(){return dummy_array_cache_type::DefaultCache;}
+  static dummy_array_cache_type inner_cache(const type&)
+  {
+    return dummy_array_cache_type::DefaultCache;
+  }
 };
 
 
 template<typename T, typename T_inner_traits, typename T_this_cache>
 struct ArrayBucketTraits_ByNumberOfBuckets_Base
 {
-  typedef combined_hint_type<int, typename T_inner_traits::hint_type> hint_type;
-  typedef combined_cache_type<T_this_cache, typename T_inner_traits::cache_type> cache_type;
+  typedef T_inner_traits inner_traits;
+
+  typedef combined_hint_type<int, typename inner_traits::hint_type> _hint_helper;
+  typedef combined_cache_type<T_this_cache, typename inner_traits::cache_type> _cache_helper;
+
+  typedef typename _hint_helper::type hint_type;
+  typedef typename _cache_helper::type cache_type;
 
   struct Bucket
   {
@@ -97,8 +131,8 @@ struct ArrayBucketTraits_ByNumberOfBuckets_Base
     int length;
   };
 
-  static hint_type default_append_hint(){return 0;}
-  static hint_type default_remove_hint(){return 0;}
+  static hint_type default_append_hint(){return make_default_hint(0, inner_traits::default_append_hint());}
+  static hint_type default_remove_hint(){return make_default_hint(0, inner_traits::default_remove_hint());}
 
   static void capacity_reduced(int, cache_type*){}
 
