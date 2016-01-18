@@ -653,12 +653,16 @@ int Array<T, T_traits>::append(T&& value, const hint_type& hint)
 template<typename T, class T_traits>
 void Array<T, T_traits>::remove(int index, const hint_type& hint)
 {
-  auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+  {
+    auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), 1, &this->trait_cache, hint);
 
-  traits::remove_single(bucket.data, bucket.length, index);
+    traits::remove_single(bucket.data, bucket.length, index);
 
-  _length -= 1;
-  Q_ASSERT(_length >= 0);
+    _length -= 1;
+    Q_ASSERT(_length >= 0);
+
+    // Block thought for the destructor of the bucket (otherwise it may have problems with changing the capacity)
+  }
 
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), 1);
   setCapacity(new_capacity);
@@ -667,12 +671,16 @@ void Array<T, T_traits>::remove(int index, const hint_type& hint)
 template<typename T, class T_traits>
 void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& hint)
 {
-  auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), num_to_remove, &this->trait_cache, hint);
+  {
+    auto bucket = traits::bucket_for_removing_values(this->data(), this->length(), num_to_remove, &this->trait_cache, hint);
 
-  traits::remove(bucket.data, bucket.length, index, num_to_remove);
+    traits::remove(bucket.data, bucket.length, index, num_to_remove);
 
-  _length -= num_to_remove;
-  Q_ASSERT(_length >= 0);
+    _length -= num_to_remove;
+    Q_ASSERT(_length >= 0);
+
+    // Block thought for the destructor of the bucket (otherwise it may have problems with changing the capacity)
+  }
 
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), num_to_remove);
   setCapacity(new_capacity);
