@@ -26,11 +26,98 @@ struct ArrayCapacityTraits_Capacity_Blocks
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed);
 };
 
+namespace implementation {
+enum class dummy_array_hint_type{DefaultHint};
+enum class dummy_array_cache_type{DefaultCache};
+
+template<typename T_this_hint, typename T_inner_hint>
+struct combined_hint_type
+{
+  T_this_hint this_hint;
+
+  const T_inner_hint& next_hint() const
+  {
+    return _next_hint;
+  }
+
+  T_inner_hint& next_hint()
+  {
+    return _next_hint;
+  }
+
+private:
+  T_inner_hint _next_hint;
+};
+
+template<typename T_this_hint>
+struct combined_hint_type<T_this_hint, dummy_array_hint_type>
+{
+  T_this_hint this_hint;
+  dummy_array_hint_type next_hint(){return dummy_array_hint_type::DefaultHint;}
+};
+
+template<typename T_this_cache, typename T_inner_cache>
+struct combined_cache_type
+{
+  T_this_cache this_cache;
+
+  const T_inner_cache& next_cache() const
+  {
+    return cache;
+  }
+
+  T_inner_cache& next_cache()
+  {
+    return cache;
+  }
+
+private:
+  T_inner_cache cache;
+};
+
+template<typename T_this_cache>
+struct combined_cache_type<T_this_cache, dummy_array_cache_type>
+{
+  typedef combined_cache_type<T_this_cache, dummy_array_cache_type> this_type;
+  T_this_cache this_cache;
+
+  dummy_array_cache_type next_cache(){return dummy_array_cache_type::DefaultCache;}
+};
+
+
+template<typename T, typename T_inner_traits, typename T_this_cache>
+struct ArrayBucketTraits_ByNumberOfBuckets_Base
+{
+  typedef combined_hint_type<int, typename T_inner_traits::hint_type> hint_type;
+  typedef combined_cache_type<T_this_cache, typename T_inner_traits::cache_type> cache_type;
+
+  struct Bucket
+  {
+    T* data;
+    int length;
+  };
+
+  static hint_type default_append_hint(){return 0;}
+  static hint_type default_remove_hint(){return 0;}
+
+  static void capacity_reduced(int, cache_type*){}
+
+  static Bucket bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, hint_type hint)
+  {
+  }
+
+  static Bucket bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, hint_type hint)
+  {
+  }
+};
+
+} // namespace implementation
+
 template<typename T>
 struct ArrayBucketTraits_NoBuckets
 {
-  enum class hint_type{DefaultHint};
-  enum class cache_type{DefaultCache};
+  typedef implementation::dummy_array_hint_type hint_type;
+  typedef implementation::dummy_array_cache_type cache_type;
 
   struct Bucket
   {
@@ -306,10 +393,10 @@ public:
   QVector<T> toQVector() const;
 
 private:
-  cache_type trait_cache;
   T* _data;
   int _capacity;
   int _length;
+  cache_type trait_cache;
 
   static T* allocate_memory(int n);
   static void free_memory(T* data);
@@ -317,6 +404,77 @@ private:
 
 template<typename T, typename T_traits>
 QDebug operator<<(QDebug d, const Array<T, T_traits>& array);
+
+
+template<typename T, typename T_inner_traits>
+struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayBucketTraits_ByNumberOfBuckets_Base<T, T_inner_traits, Array<int>>
+{
+  typedef implementation::ArrayBucketTraits_ByNumberOfBuckets_Base<T, T_inner_traits, Array<int>> parent_type;
+
+  typedef typename parent_type::cache_type cache_type;
+  typedef typename parent_type::hint_type hint_type;
+
+  static void init_cache(cache_type* c)
+  {
+    T_inner_traits::clear_cache(c->next_cache());
+  }
+
+  static void clear_cache(cache_type* c)
+  {
+    c->this_cache.clear();
+    T_inner_traits::clear_cache(c->next_cache());
+  }
+
+  static void delete_cache(cache_type* c)
+  {
+    T_inner_traits::clear_cache(c->next_cache());
+  }
+
+  static void swap_cache(cache_type* a, cache_type* b)
+  {
+    a->this_cache.swap(b->this_cache);
+    T_inner_traits::clear_cache(a->next_cache(), b->next_cache);
+  }
+};
+
+template<typename T, typename T_inner_traits, int N>
+struct ArrayBucketTraits_FixedNumberOfBuckets : public implementation::ArrayBucketTraits_ByNumberOfBuckets_Base<T, T_inner_traits, int[N]>
+{
+  typedef implementation::ArrayBucketTraits_ByNumberOfBuckets_Base<T, T_inner_traits, int[N]> parent_type;
+
+  typedef typename parent_type::cache_type cache_type;
+  typedef typename parent_type::hint_type hint_type;
+
+  static void init_cache(cache_type* c)
+  {
+    int* v = c->this_cache;
+    for(int i=0; i<N; ++i)
+      v[i] = 0;
+    T_inner_traits::clear_cache(c->next_cache());
+  }
+
+  static void clear_cache(cache_type* c)
+  {
+    int* v = c->this_cache;
+    for(int i=0; i<N; ++i)
+      v[i] = 0;
+    T_inner_traits::clear_cache(c->next_cache());
+  }
+
+  static void delete_cache(cache_type* c)
+  {
+    T_inner_traits::delete_cache(c->next_cache());
+  }
+
+  static void swap_cache(cache_type* a, cache_type* b)
+  {
+    int* va = a->this_cache;
+    int* vb = b->this_cache;
+    for(int i=0; i<N; ++i)
+      std::swap(va[i], vb[i]);
+    T_inner_traits::swap_cache(a->next_cache(), b->next_cache());
+  }
+};
 
 
 } // namespace glrt
