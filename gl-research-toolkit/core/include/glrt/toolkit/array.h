@@ -403,6 +403,11 @@ public:
   T& at(int i);
   const T& at(int i) const;
 
+  T& first(int i=0){return at(i);}
+  const T& first(int i=0) const {return at(i);}
+  T& last(int i=0){return at(length()-1-i);}
+  const T& last(int i=0) const {return at(length()-1-i);}
+
   T& operator[](int i);
   const T& operator[](int i) const;
 
@@ -420,6 +425,9 @@ public:
 
   void remove(int index, const hint_type& hint=traits::default_remove_hint());
   void remove(int index, int num_to_remove, const hint_type& hint=traits::default_remove_hint());
+
+  void removeFirst(const hint_type& hint=traits::default_remove_hint()){remove(0, hint);}
+  void removeLast(const hint_type& hint=traits::default_remove_hint()){remove(length()-1, hint);}
 
   bool operator==(const Array& other) const;
   bool operator!=(const Array& other) const;
