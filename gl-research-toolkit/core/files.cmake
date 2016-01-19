@@ -1,5 +1,6 @@
 set(SOURCE_FILES
   include/glrt/dependencies.h
+  include/glrt/toolkit/array-bucket-traits.h
   include/glrt/toolkit/array.h
   include/glrt/toolkit/array.inl
   include/glrt/toolkit/assimp-glm-converter.h
