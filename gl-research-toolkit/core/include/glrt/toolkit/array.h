@@ -135,7 +135,7 @@ struct ArrayTraits_Unordered_Primitive : public ArrayTraits_Unordered_Toolkit<T,
 
   static int append_copy(T* data, int prev_length, T value, cache_type*, const hint_type&)
   {
-    return append_Primitive(data, prev_length, value);
+    return parent_type::append_Primitive(data, prev_length, value);
   }
 
   static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
