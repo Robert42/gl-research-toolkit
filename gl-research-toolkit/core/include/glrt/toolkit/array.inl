@@ -572,10 +572,8 @@ int Array<T, T_traits>::append_move(T&& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
-  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
-
   // the trait must assume, that there's enough space
-  int new_index = traits::append_move(bucket.data, bucket.length, std::move(value));
+  int new_index = traits::append_move(this->data(), this->length(), std::move(value), &this->trait_cache, hint);
 
   _length++;
 
@@ -590,9 +588,7 @@ int Array<T, T_traits>::extend_move(T* values, int num_values, const hint_type& 
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
-
-  int new_index = traits::extend_move(bucket.data, bucket.length, values, num_values);
+  int new_index = traits::extend_move(this->data(), this->length(), values, num_values, &this->trait_cache, hint);
 
   _length += num_values;
 
@@ -607,10 +603,8 @@ int Array<T, T_traits>::append_copy(const T& value, const hint_type& hint)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
-  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), 1, &this->trait_cache, hint);
-
   // the trait must assume, that there's enough space
-  int new_index = traits::append_copy(bucket.data, bucket.length, value);
+  int new_index = traits::append_copy(this->data(), this->length(), value, &this->trait_cache, hint);
 
   _length++;
 
@@ -626,9 +620,7 @@ int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  typename traits::bucket_append bucket = traits::bucket_for_appending_values(this->data(), this->length(), num_values, &this->trait_cache, hint);
-
-  int new_index = traits::extend_copy(bucket.data, bucket.length, values, num_values);
+  int new_index = traits::extend_copy(this->data(), this->length(), values, num_values, &this->trait_cache, hint);
 
   _length += num_values;
 
@@ -653,16 +645,10 @@ int Array<T, T_traits>::append(T&& value, const hint_type& hint)
 template<typename T, class T_traits>
 void Array<T, T_traits>::remove(int index, const hint_type& hint)
 {
-  {
-    typename traits::bucket_remove bucket = traits::bucket_for_removing_values(this->data(), this->length(), 1, &this->trait_cache, hint);
+  traits::remove_single(this->data(), this->length(), index, &this->trait_cache, hint);
 
-    traits::remove_single(bucket.data, bucket.length, index);
-
-    _length -= 1;
-    Q_ASSERT(_length >= 0);
-
-    // Block thought for the destructor of the bucket (otherwise it may have problems with changing the capacity)
-  }
+  _length -= 1;
+  Q_ASSERT(_length >= 0);
 
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), 1);
   setCapacity(new_capacity);
@@ -671,16 +657,10 @@ void Array<T, T_traits>::remove(int index, const hint_type& hint)
 template<typename T, class T_traits>
 void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& hint)
 {
-  {
-    typename traits::bucket_remove bucket = traits::bucket_for_removing_values(this->data(), this->length(), num_to_remove, &this->trait_cache, hint);
+  traits::remove(this->data(), this->length(), index, num_to_remove, &this->trait_cache, hint);
 
-    traits::remove(bucket.data, bucket.length, index, num_to_remove);
-
-    _length -= num_to_remove;
-    Q_ASSERT(_length >= 0);
-
-    // Block thought for the destructor of the bucket (otherwise it may have problems with changing the capacity)
-  }
+  _length -= num_to_remove;
+  Q_ASSERT(_length >= 0);
 
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), num_to_remove);
   setCapacity(new_capacity);
