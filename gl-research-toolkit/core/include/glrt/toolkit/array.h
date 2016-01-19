@@ -483,6 +483,24 @@ struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayB
     // #TODO
   }
 
+  static int append_move(T* data, int prev_length, T&& value, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static int extend_move(T* data, int prev_length, const T* values, int num_values, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static int append_copy(T* data, int prev_length, const T& value, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static void remove_single(T* data, int prev_length, const int index, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
 };
 
 template<typename T, typename T_inner_traits, int N>
@@ -527,6 +545,24 @@ struct ArrayBucketTraits_FixedNumberOfBuckets : public implementation::ArrayBuck
       std::swap(va[i], vb[i]);
     T_inner_traits::swap_cache(a->next_cache(), b->next_cache());
   }
+
+  static int append_move(T* data, int prev_length, T&& value, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static int extend_move(T* data, int prev_length, const T* values, int num_values, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static int append_copy(T* data, int prev_length, const T& value, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static void remove_single(T* data, int prev_length, const int index, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type* cache, const hint_type& hint)
+  = delete; // #TODO
 
 };
 
