@@ -72,11 +72,13 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits, public ArrayBuc
 
   static int append_mC(T* data, int prev_length, T&& value);
   static int extend_mC(T* data, int prev_length, T* values, int num_values);
+  static int append_Primitive(T* data, int prev_length, T value);
   static int append_POD(T* data, int prev_length, const T& value);
   static int extend_POD(T* data, int prev_length, const T* values, int num_values);
   static int append_cC(T* data, int prev_length, const T& value);
   static int extend_cC(T* data, int prev_length, const T* values, int num_values);
 
+  static void remove_single_Primitive(T* data, int prev_length, const int index);
   static void remove_single_POD(T* data, int prev_length, const int index);
   static void remove_POD(T* data, int prev_length, const int first_index, int num_values);
   static void remove_single_mOD(T* data, int prev_length, const int index);
@@ -102,7 +104,61 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits, public ArrayBuc
   static void call_instance_destructors_D(const T* a, int n);
 };
 
-// Plain old data, int POD struct like vec3
+// Primitives, like int or float
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
+struct ArrayTraits_Unordered_Primitive : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+{
+  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+
+  typedef typename parent_type::cache_type cache_type;
+  typedef typename parent_type::hint_type hint_type;
+
+  static void move_construct(T* dest, T* src, int count)
+  {
+    parent_type::copy_construct_POD(dest, src, count);
+  }
+
+  static void move_construct_single(T* dest, T* src)
+  {
+    *dest = *src;
+  }
+
+  static int append_move(T* data, int prev_length, T value, cache_type*, const hint_type&)
+  {
+    return append_copy(data, prev_length, value);
+  }
+
+  static int extend_move(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
+  {
+    return extend_copy(data, prev_length, values, num_values);
+  }
+
+  static int append_copy(T* data, int prev_length, T value, cache_type*, const hint_type&)
+  {
+    return append_Primitive(data, prev_length, value);
+  }
+
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
+  {
+    return parent_type::extend_POD(data, prev_length, values, num_values);
+  }
+
+  static void remove_single(T* data, int prev_length, const int index, cache_type*, const hint_type&)
+  {
+    parent_type::remove_single_Primitive(data, prev_length, index);
+  }
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type*, const hint_type&)
+  {
+    parent_type::remove_POD(data, prev_length, first_index, num_values);
+  }
+
+  static void destruct(T*, int)
+  {
+  }
+};
+
+// Plain old data, POD struct like vec3
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
 {
@@ -231,13 +287,13 @@ struct DefaultTraits;
 template<>
 struct DefaultTraits<int>
 {
-  typedef ArrayTraits_Unordered_POD<int> type;
+  typedef ArrayTraits_Unordered_Primitive<int> type;
 };
 
 template<typename T>
 struct DefaultTraits<T*>
 {
-  typedef ArrayTraits_Unordered_POD<T*> type;
+  typedef ArrayTraits_Unordered_Primitive<T*> type;
 };
 
 

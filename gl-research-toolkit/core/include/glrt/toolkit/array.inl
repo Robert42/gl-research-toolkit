@@ -191,6 +191,13 @@ inline int ArrayTraits_Unordered_Toolkit<T, T_c>::extend_mC(T* data, int prev_le
 }
 
 template<typename T, typename T_c>
+inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_Primitive(T* data, int prev_length, T value)
+{
+  data[prev_length] = value;
+  return prev_length;
+}
+
+template<typename T, typename T_c>
 inline int ArrayTraits_Unordered_Toolkit<T, T_c>::append_POD(T* data, int prev_length, const T& value)
 {
   copy_construct_single_POD(data+prev_length, &value);
@@ -227,6 +234,16 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_POD(T* data, in
   int last = prev_length-1;
   if(index != last)
     copy_construct_single_POD(data+index, data+last);
+}
+
+template<typename T, typename T_c>
+inline void ArrayTraits_Unordered_Toolkit<T, T_c>::remove_single_Primitive(T* data, int prev_length, const int index)
+{
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index<prev_length);
+
+  int last = prev_length-1;
+  data[index] = data[last];
 }
 
 template<typename T, typename T_c>
