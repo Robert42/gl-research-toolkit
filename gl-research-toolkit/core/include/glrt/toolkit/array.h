@@ -129,20 +129,15 @@ struct ArrayBucketTraits_ByNumberOfBuckets_Base
   {
     T* data;
     int length;
-    int bucketId;
 
-    base_bucket(typename inner_traits::bucket_append&& inner_bucket, int bucketId)
-      : data(inner_bucket.data),
-        length(inner_bucket.length),
-        bucketId(bucketId)
+    base_bucket(typename inner_traits::bucket_append&& inner_bucket, int bucketId, const int* bucketLimits, int nBucketLimits)
+      : base_bucket(inner_bucket.data, inner_bucket.length, bucketId, bucketLimits, nBucketLimits)
     {
       inner_bucket.data = nullptr;
     }
 
-    base_bucket(typename inner_traits::bucket_remove&& inner_bucket, int bucketId)
-      : data(inner_bucket.data),
-        length(inner_bucket.length),
-        bucketId(bucketId)
+    base_bucket(typename inner_traits::bucket_remove&& inner_bucket, int bucketId, const int* bucketLimits, int nBucketLimits)
+      : base_bucket(inner_bucket.data, inner_bucket.length, bucketId, bucketLimits, nBucketLimits)
     {
       inner_bucket.data = nullptr;
     }
@@ -150,7 +145,9 @@ struct ArrayBucketTraits_ByNumberOfBuckets_Base
     base_bucket(base_bucket&& other)
       : data(other.data),
         length(other.length),
-        bucketId(other.bucketId)
+        bucketId(other.bucketId),
+        bucketLimits(other.bucketLimits),
+        nBucketLimits(other.nBucketLimits)
     {
       other.data = nullptr;
     }
@@ -158,38 +155,111 @@ struct ArrayBucketTraits_ByNumberOfBuckets_Base
     base_bucket(const base_bucket&) = delete;
     base_bucket& operator=(const base_bucket&) = delete;
     base_bucket& operator=(base_bucket&&) = delete;
+
+  protected:
+    int bucketId;
+    const int* bucketLimits;
+    int nBucketLimits;
+
+  private:
+    base_bucket(T* data, int length, int bucketId, const int* bucketLimits, int nBucketLimits)
+      : data(data),
+        length(length),
+        bucketId(bucketId),
+        bucketLimits(bucketLimits),
+        nBucketLimits(nBucketLimits)
+    {
+      Q_ASSERT(nBucketLimits>bucketId);
+    }
   };
 
   struct bucket_append : public base_bucket
   {
     bucket_append(bucket_append&& other)
-      : base_bucket(std::move(other))
+      : base_bucket(std::move(other)),
+        nElementsToAdd(other.nElementsToAdd)
     {
     }
 
-    bucket_append(typename inner_traits::bucket_append&& inner_bucket, int bucketId)
-      : base_bucket(std::move(inner_bucket), bucketId)
+    bucket_append(typename inner_traits::bucket_append&& inner_bucket, int bucketId, int nElementsToAdd, const int* bucketLimits, int nBucketLimits)
+      : base_bucket(std::move(inner_bucket), bucketId, bucketLimits, nBucketLimits),
+        nElementsToAdd(nElementsToAdd)
     {
-      inner_bucket.data = nullptr;
+
+      // #TODO add gaps where to add the new elements
     }
+
+    ~bucket_append()
+    {
+      const int bucketId = base_bucket::bucketId;
+      const int nBucketLimits = base_bucket::nBucketLimits;
+      int* bucketLimits = base_bucket::bucketLimits;
+
+      for(int i=bucketId; i<nBucketLimits; ++i)
+        bucketLimits[bucketId] += nElementsToAdd;
+    }
+
+  protected:
+    int nElementsToAdd;
   };
 
   struct bucket_remove : public base_bucket
   {
     bucket_remove(bucket_remove&& other)
-      : base_bucket(std::move(other))
+      : base_bucket(std::move(other)),
+        nElementsToRemove(other.nElementsToRemove)
     {
     }
 
-    bucket_remove(typename inner_traits::bucket_remove&& inner_bucket, int bucketId)
-      : base_bucket(std::move(inner_bucket), bucketId)
+    bucket_remove(typename inner_traits::bucket_remove&& inner_bucket, int bucketId, int nElementsToRemove, const int* bucketLimits, int nBucketLimits)
+      : base_bucket(std::move(inner_bucket), bucketId, bucketLimits, nBucketLimits),
+        nElementsToRemove(nElementsToRemove)
     {
-      inner_bucket.data = nullptr;
     }
+
+    ~bucket_remove()
+    {
+      const int bucketId = base_bucket::bucketId;
+      const int nBucketLimits = base_bucket::nBucketLimits;
+      int* bucketLimits = base_bucket::bucketLimits;
+
+      for(int i=bucketId; i<nBucketLimits; ++i)
+      {
+        // #TODO fill up gaps
+
+        bucketLimits[bucketId] -= nElementsToRemove;
+      }
+    }
+
+  protected:
+    int nElementsToRemove;
   };
 
   static hint_type default_append_hint(){return make_default_hint(0, inner_traits::default_append_hint());}
   static hint_type default_remove_hint(){return make_default_hint(0, inner_traits::default_remove_hint());}
+
+protected:
+  void fit_range(T*& data, int& length, int bucketId, const int* bucketLimits, int nBucketLimits)
+  {
+    if(bucketId>=nBucketLimits)
+    {
+      data += length;
+      length = 0;
+    }else
+    {
+      int bucketBegin = 0;
+      if(bucketId > 1)
+        bucketBegin = bucketLimits[bucketId-1];
+      int bucketEnd = bucketLimits[bucketId];
+
+      Q_ASSERT(bucketBegin >= 0);
+      Q_ASSERT(bucketEnd >= 0);
+      Q_ASSERT(length >= bucketBegin+bucketEnd);
+
+      data += bucketBegin;
+      length = bucketEnd-bucketBegin;
+    }
+  }
 };
 
 } // namespace implementation
@@ -513,11 +583,11 @@ struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayB
 
   struct bucket_remove : public parent_type::bucket_remove
   {
-    Array<int>& bucketLimits;
+    Array<int>& bucketLimitsArray;
 
-    bucket_remove(typename inner_trait::bucket_remove&& inner_bucket, int bucketId, Array<int>& bucketLimits)
-      : parent_type::bucket_remove(std::move(inner_bucket), bucketId),
-        bucketLimits(bucketLimits)
+    bucket_remove(typename inner_trait::bucket_remove&& inner_bucket, int bucketId, int nElementsToRemove, const int* bucketLimits, int nBucketLimits, Array<int>& bucketLimitsArray)
+      : parent_type::bucket_remove(std::move(inner_bucket), bucketId, nElementsToRemove, bucketLimits, nBucketLimits),
+        bucketLimitsArray(bucketLimitsArray)
     {
     }
 
@@ -532,8 +602,8 @@ struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayB
 
       if(this->data!=nullptr)
       {
-        while((bucketLimits.length() > 2 && bucketLimits.last()==bucketLimits.last(1)) || (bucketLimits.length() == 1 && bucketLimits.last() == 0))
-          bucketLimits.removeLast();
+        while((bucketLimitsArray.length() > 2 && bucketLimitsArray.last()==bucketLimitsArray.last(1)) || (bucketLimitsArray.length() == 1 && bucketLimitsArray.last() == 0))
+          bucketLimitsArray.removeLast();
       }
     }
   };
@@ -568,11 +638,13 @@ struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayB
     int bucketId = hint.head;
     Array<int>& bucketLimits = cache->head;
 
+    parent_type::fit_range(data, length, bucketId, bucketLimits.data(), bucketLimits.length());
+
     int lastValue = bucketLimits.isEmpty() ? 0 : bucketLimits.last();
     while(bucketLimits.length() <= bucketId)
       bucketLimits.append(lastValue);
 
-    bucket_append bucket(inner_trait::bucket_for_appending_values(data, length, num_values_to_add, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId);
+    bucket_append bucket(inner_trait::bucket_for_appending_values(data, length, num_values_to_add, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId, num_values_to_add, bucketLimits.data(), bucketLimits.length());
 
     return bucket;
   }
@@ -582,7 +654,9 @@ struct ArrayBucketTraits_VariableNumberOfBuckets : public implementation::ArrayB
     int bucketId = hint.head;
     Array<int>& bucketLimits = cache->head;
 
-    bucket_remove bucket(inner_trait::bucket_for_removing_values(data, length, num_values_to_remove, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId, bucketLimits);
+    parent_type::fit_range(data, length, bucketId, bucketLimits.data(), bucketLimits.length());
+
+    bucket_remove bucket(inner_trait::bucket_for_removing_values(data, length, num_values_to_remove, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId, num_values_to_remove, bucketLimits.data(), bucketLimits.length(), bucketLimits);
 
     return bucket;
   }
@@ -636,8 +710,11 @@ struct ArrayBucketTraits_FixedNumberOfBuckets : public implementation::ArrayBuck
   static bucket_append bucket_for_appending_values(T* data, int length, int num_values_to_add, cache_type* cache, const hint_type& hint)
   {
     int bucketId = hint.head;
+    int* bucketLimits = cache->head;
 
-    bucket_append bucket(inner_trait::bucket_for_appending_values(data, length, num_values_to_add, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId);
+    parent_type::fit_range(data, length, bucketId, bucketLimits, N);
+
+    bucket_append bucket(inner_trait::bucket_for_appending_values(data, length, num_values_to_add, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId, num_values_to_add, bucketLimits, N);
 
     return bucket;
   }
@@ -645,11 +722,15 @@ struct ArrayBucketTraits_FixedNumberOfBuckets : public implementation::ArrayBuck
   static bucket_remove bucket_for_removing_values(T* data, int length, int num_values_to_remove, cache_type* cache, const hint_type& hint)
   {
     int bucketId = hint.head;
+    int* bucketLimits = cache->head;
 
-    bucket_remove bucket(inner_trait::bucket_for_removing_values(data, length, num_values_to_remove, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId);
+    parent_type::fit_range(data, length, bucketId, bucketLimits, N);
+
+    bucket_remove bucket(inner_trait::bucket_for_removing_values(data, length, num_values_to_remove, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint)), bucketId, num_values_to_remove, bucketLimits, N);
 
     return bucket;
   }
+
 };
 
 
