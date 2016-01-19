@@ -156,6 +156,12 @@ struct ArrayBucketTraits_BucketCache_VariableNum
   {
     return cache->length();
   }
+
+  static void add_buckets_if_necessary(int requestedNumBuckets, cache_type* cache)
+  {
+    while(requestedNumBuckets > cache->length())
+      cache->append(0);
+  }
 };
 
 
@@ -203,6 +209,12 @@ struct ArrayBucketTraits_BucketCache_FixedNum
   static int numberBucketsAvialable(cache_type*)
   {
     return N;
+  }
+
+  static void add_buckets_if_necessary(int requestedNumBuckets, cache_type*)
+  {
+    qCritical() << "ArrayBucketTraits_BucketCache_FixedNum<"<<N<<">: requestedNumBuckets ("<<requestedNumBuckets<<") is not allowed to be larger than N ("<<N<<")";
+    Q_ASSERT(requestedNumBuckets < N);
   }
 };
 
@@ -275,76 +287,96 @@ struct ArrayBucketTraits_ByNumberOfBuckets_Base : public T_inner_traits
   {
     int index_offset = prepare_buckets_for_adding_values(data, prev_length, 1, cache, hint);
 
-    return index_offset + inner_traits::extend_move(data, prev_length, value, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint));
+    return index_offset + inner_traits::append_copy(data, prev_length, value, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint));
   }
 
   static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type* cache, const hint_type& hint)
   {
     int index_offset = prepare_buckets_for_adding_values(data, prev_length, num_values, cache, hint);
 
-    return index_offset + inner_traits::extend_move(data, prev_length, values, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint));
+    return index_offset + inner_traits::extend_copy(data, prev_length, values, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint));
   }
 
-  static void remove_single(T* data, int prev_length, const int index, cache_type* cache, const hint_type& hint)
-  {
-    int index_offset = prepare_buckets_for_removing_values(data, prev_length, 1, cache, hint);
+  static void remove_single(T* data, int prev_length, const int index, cache_type* cache, const hint_type& hint);  // #TODO implement
 
-    return index_offset + inner_traits::extend_move(data, prev_length, index, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint));
-  }
-
-  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type* cache, const hint_type& hint)
-  {
-    int index_offset = prepare_buckets_for_removing_values(data, prev_length, num_values, cache, hint);
-
-    return index_offset + inner_traits::extend_move(data, prev_length, first_index, _cache_helper::inner_cache(cache), _hint_helper::inner_hint(hint));
-  }
+  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type* cache, const hint_type& hint); // #TODO implement
 
 protected:
-  static int bucketId(const hint_type& hint)
+  static int get_bucketId(const hint_type& hint)
   {
-    return _hint_helper::current_hint(hint);
+    int bucketId = _hint_helper::current_hint(hint);
+    Q_ASSERT(bucketId >= 0);
+    return bucketId;
   }
 
-  static int* bucketLimits(cache_type* cache)
+  static int* get_bucketLimits(cache_type* cache)
   {
-    return cache_traits::bucketLimits(_hint_helper::current_cache(cache));
+    int* bucketLimits = cache_traits::bucketLimits(_hint_helper::current_cache(cache));
+
+    Q_ASSERT(bucketLimits!=nullptr);
+
+    return bucketLimits;
   }
 
-  static int numberBucketsAvialable(cache_type* cache)
+  static int get_numberBucketsAvialable(cache_type* cache)
   {
-    return cache_traits::numberBucketsAvialable(_hint_helper::current_cache(cache));
+    int nBucketLimits = cache_traits::numberBucketsAvialable(_hint_helper::current_cache(cache));
+    Q_ASSERT(nBucketLimits >= 0);
+    return nBucketLimits;
   }
 
   static int prepare_buckets_for_adding_values(T*& data, int& length, int nBucketsToAdd, cache_type* cache, const hint_type& hint)
   {
-    // #TODO
+    int bucketId = get_bucketId(hint);
+    int* bucketLimits = get_bucketLimits(cache);
+    int nBucketLimits = get_numberBucketsAvialable(cache);
+
+    cache_traits::add_buckets_if_necessary(bucketId, _hint_helper::current_cache(cache));
+
+    int bucketBegin = get_bucket_begin(bucketId, bucketLimits, nBucketLimits, length);
+    int bucketEnd = get_bucket_end(bucketId, bucketLimits, nBucketLimits, length);
+
+    inner_traits::insert_uninitialized_gap_by_expanding_to_uninitialized_area(data, length, bucketEnd, nBucketsToAdd); // #TODO implement
+
+    adaptLimits(bucketId, bucketLimits, nBucketLimits, nBucketsToAdd);
+
+    data += bucketBegin;
+    length = bucketEnd - bucketBegin;
+
+    return bucketBegin;
   }
 
-  static int prepare_buckets_for_removing_values(T*& data, int& length, int nBucketsToRemove, cache_type* cache, const hint_type& hint)
+  static int get_bucket_begin(int bucketId, const int* bucketLimits, int nBucketLimits, int bufferLength)
   {
-    // #TODO
+    Q_ASSERT(nBucketLimits > bucketId);
+
+    int bucketBegin = bucketId>0 ? bucketLimits[bucketId-1] : 0;
+    int bucketEnd = bucketLimits[bucketId];
+
+    Q_ASSERT(bucketBegin >= 0);
+    Q_ASSERT(bucketEnd >= 0);
+    Q_ASSERT(bucketBegin <= bucketEnd);
+    Q_ASSERT(bufferLength >= bucketEnd);
+
+    return bucketBegin;
   }
 
-  static void fit_range(T*& data, int& length, int bucketId, const int* bucketLimits, int nBucketLimits)
+  static int get_bucket_end(int bucketId, const int* bucketLimits, int nBucketLimits, int bufferLength)
   {
-    if(bucketId>=nBucketLimits)
-    {
-      data += length;
-      length = 0;
-    }else
-    {
-      int bucketBegin = 0;
-      if(bucketId > 1)
-        bucketBegin = bucketLimits[bucketId-1];
-      int bucketEnd = bucketLimits[bucketId];
+    Q_ASSERT(nBucketLimits > bucketId);
 
-      Q_ASSERT(bucketBegin >= 0);
-      Q_ASSERT(bucketEnd >= 0);
-      Q_ASSERT(length >= bucketBegin+bucketEnd);
+    int bucketEnd = bucketLimits[bucketId];
 
-      data += bucketBegin;
-      length = bucketEnd-bucketBegin;
-    }
+    Q_ASSERT(bucketEnd >= 0);
+    Q_ASSERT(bufferLength >= bucketEnd);
+
+    return bucketEnd;
+  }
+
+  static void adaptLimits(int bucketId, int* bucketLimits, int nBucketLimits, int offset)
+  {
+    for(int i=bucketId; i<nBucketLimits; ++i)
+      bucketLimits[i] += offset;
   }
 };
 
