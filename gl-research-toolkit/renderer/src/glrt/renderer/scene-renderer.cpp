@@ -122,28 +122,26 @@ bool orderByDrawCall(scene::StaticMeshComponent* a, scene::StaticMeshComponent*b
   if(a->isMovable)
     return false;
 
-  if(a->material < b->material)
+  if(a->materialUuid < b->materialUuid)
     return true;
-  if(a->material > b->material)
+  if(a->materialUuid > b->materialUuid)
     return false;
 
-  if(a->staticMesh < b->staticMesh)
+  if(a->staticMeshUuid < b->staticMeshUuid)
     return true;
-  if(a->staticMesh > b->staticMesh)
+  if(a->staticMeshUuid > b->staticMeshUuid)
     return false;
 
   return a < b;
 }
 
-/*
-#TODO uncomment
-std::function<bool(scene::StaticMeshComponent* a)> allowOnly(MaterialInstance::Type type, bool movable)
+
+std::function<bool(scene::StaticMeshComponent* a)> allowOnly(scene::resources::Material::Type type, bool movable)
 {
-  return [movable, type](scene::StaticMeshComponent* a) {
-    return a->movable==movable && a->material.type == type;
+  return [type, movable](scene::StaticMeshComponent* a) -> bool {
+    return a->isMovable==movable && a->material().type == type;
   };
 }
-*/
 
 void Renderer::Pass::render()
 {

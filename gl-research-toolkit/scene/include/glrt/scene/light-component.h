@@ -15,7 +15,7 @@ public:
   typedef resources::LightSource::Interactivity Interactivity;
   const bool isStatic : 1;
 
-  LightComponent(Node& entity, const Uuid<LightComponent>& uuid, Interactivity interactivity);
+  LightComponent(Node& node, const Uuid<LightComponent>& uuid, Interactivity interactivity);
 
   static LightComponent* createForLightSource(Node& node, const Uuid<LightComponent>& uuid, Interactivity interactivity, const resources::LightSource& lightSource);
 

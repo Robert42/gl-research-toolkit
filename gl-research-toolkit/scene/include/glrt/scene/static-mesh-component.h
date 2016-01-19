@@ -9,14 +9,16 @@ namespace scene {
 class StaticMeshComponent final : public Node::Component
 {
 public:
-  const Uuid<resources::StaticMeshData> staticMesh; // #TODO rename StaticMeshData to StaticMesh
-  const Uuid<resources::Material> material;
+  const Uuid<resources::StaticMeshData> staticMeshUuid; // #TODO rename StaticMeshData to StaticMesh
+  const Uuid<resources::Material> materialUuid;
 
-  StaticMeshComponent(Node& entity, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMeshData>& staticMesh, const Uuid<resources::Material> & material);
+  StaticMeshComponent(Node& node, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMeshData>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
   ~StaticMeshComponent();
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
+
+  resources::Material material() const;
 };
 
 } // namespace scene

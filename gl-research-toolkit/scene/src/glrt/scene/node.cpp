@@ -118,7 +118,7 @@ Node::ModularAttribute::~ModularAttribute()
 
 
 Node::Component::Component(Node& node, const Uuid<Component>& uuid, bool isMovable)
-  : entity(node),
+  : node(node),
     uuid(uuid),
     isMovable(isMovable)
 {
@@ -157,17 +157,17 @@ void Node::Component::setParent(Component* component)
 
   if(component == nullptr)
   {
-    if(this->entity.rootComponent() != nullptr)
+    if(this->node.rootComponent() != nullptr)
       throw GLRT_EXCEPTION("Only one root allowed at once");
 
     if(this->parent() != nullptr)
       this->parent()->_children.removeOne(this);
 
     this->_parent = nullptr;
-    this->entity._rootComponent = this;
+    this->node._rootComponent = this;
   }else
   {
-    Q_ASSERT(&component->entity == &this->entity);
+    Q_ASSERT(&component->node == &this->node);
 
     if(this->parent() != nullptr)
       this->parent()->_children.removeOne(this);

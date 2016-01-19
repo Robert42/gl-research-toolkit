@@ -58,7 +58,7 @@ public:
 class Node::Component
 {
 public:
-  Node& entity;
+  Node& node;
   const Uuid<Component> uuid;
 
   const bool isMovable : 1;

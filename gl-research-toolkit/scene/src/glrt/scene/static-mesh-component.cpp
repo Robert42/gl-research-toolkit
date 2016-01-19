@@ -1,5 +1,7 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/resources/material.h>
+#include <glrt/scene/resources/resource-manager.h>
 
 #include <angelscript-integration/call-script.h>
 
@@ -12,10 +14,10 @@ StaticMeshComponent::StaticMeshComponent(Node& entity, // #TODO rename all entit
                                          const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
                                          const Uuid<resources::StaticMeshData>& staticMesh,
-                                         const Uuid<resources::Material>& material)
+                                         const Uuid<resources::Material>& materialUuid)
   : Node::Component(entity, uuid, isMovable),
-    staticMesh(staticMesh),
-    material(material)
+    staticMeshUuid(staticMesh),
+    materialUuid(materialUuid)
 {
 }
 
@@ -52,6 +54,11 @@ void StaticMeshComponent::registerAngelScriptAPI()
   Node::Component::registerAsBaseOfClass<StaticMeshComponent>(angelScriptEngine, "StaticMeshComponent");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+resources::Material StaticMeshComponent::material() const
+{
+  return this->node.resourceManager().materialSourceForUuid(this->materialUuid);
 }
 
 
