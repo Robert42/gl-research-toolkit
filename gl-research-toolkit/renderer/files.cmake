@@ -9,7 +9,6 @@ set(SOURCE_FILES
   include/glrt/renderer/debugging/visualization-renderer.h
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
-  include/glrt/renderer/material.h
   include/glrt/renderer/sample-source-manager.h
   include/glrt/renderer/scene-renderer.h
   include/glrt/renderer/static-mesh-buffer.h
@@ -29,7 +28,6 @@ set(SOURCE_FILES
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp
-  src/glrt/renderer/material.cpp
   src/glrt/renderer/sample-resource-manager.cpp
   src/glrt/renderer/scene-renderer.cpp
   src/glrt/renderer/static-mesh-buffer.cpp

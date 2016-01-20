@@ -5,10 +5,10 @@ namespace renderer {
 
 ForwardRenderer::ForwardRenderer(scene::Scene* scene)
   : Renderer(scene),
-    plainColorMeshes(this, MaterialInstance::Type::PLAIN_COLOR, "plain-color-materials", preprocessorBlock()),
-    texturedMeshes(this, MaterialInstance::Type::TEXTURED_OPAQUE, "textured-meshes", preprocessorBlock()),
-    maskedMeshes(this, MaterialInstance::Type::TEXTURED_MASKED, "masked-meshes", preprocessorBlock()),
-    transparentMeshes(this, MaterialInstance::Type::TEXTURED_TRANSPARENT, "transparent-meshes", preprocessorBlock())
+    plainColorMeshes(this, scene::resources::Material::Type::PLAIN_COLOR, "plain-color-materials", preprocessorBlock()),
+    texturedMeshes(this, scene::resources::Material::Type::TEXTURED_OPAQUE, "textured-meshes", preprocessorBlock()),
+    maskedMeshes(this, scene::resources::Material::Type::TEXTURED_MASKED, "masked-meshes", preprocessorBlock()),
+    transparentMeshes(this, scene::resources::Material::Type::TEXTURED_TRANSPARENT, "transparent-meshes", preprocessorBlock())
 {
 }
 

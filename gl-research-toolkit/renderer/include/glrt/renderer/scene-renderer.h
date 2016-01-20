@@ -2,7 +2,7 @@
 #define GLRT_RENDERER_RENDERER_H
 
 #include <glrt/scene/scene.h>
-#include <glrt/renderer/material.h>
+#include <glrt/scene/resources/material.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/renderer/toolkit/shader-storage-format.h>
@@ -81,12 +81,12 @@ private:
 class Renderer::Pass final
 {
 public:
-  const MaterialInstance::Type type;
+  const scene::resources::Material::Type type;
   Renderer& renderer;
   ReloadableShader shader;
 
-  Pass(Renderer* renderer, MaterialInstance::Type type, ReloadableShader&& shader);
-  Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock);
+  Pass(Renderer* renderer, scene::resources::Material::Type type, ReloadableShader&& shader);
+  Pass(Renderer* renderer, scene::resources::Material::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock);
   ~Pass();
 
   Pass(const Pass&) = delete;
@@ -104,7 +104,6 @@ private:
 
   struct MaterialInstanceRange
   {
-    MaterialInstance* materialInstance;
     int begin, end;
   };
   struct MeshRange

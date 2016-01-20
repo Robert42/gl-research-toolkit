@@ -92,14 +92,14 @@ void Renderer::DirectLights::bindShaderStoreageBuffers()
 // ======== Pass ===============================================================
 
 
-Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, ReloadableShader&& shader)
+Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, ReloadableShader&& shader)
   : type(type),
     renderer(*renderer),
     shader(std::move(shader))
 {
 }
 
-Renderer::Pass::Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock)
+Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock)
   : Pass(renderer,
          type,
          std::move(ReloadableShader(materialName,
@@ -169,16 +169,19 @@ void Renderer::Pass::renderStaticMeshes()
   gl::Buffer* buffer = staticMeshInstance_Uniforms.data();
   StaticMeshBuffer* mesh;
 
+  int materialUniformPos = 0;
+
   mesh= meshInstanceRange->mesh;
   mesh->bind(renderer.staticMeshVertexArrayObject);
-  materialInstanceRange->materialInstance->uniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK);
+  materialUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, materialUniformPos, materialUniformSize);
 
   for(int i=0; i<N; ++i)
   {
     if(materialInstanceRange->end == i)
     {
       ++materialInstanceRange;
-      materialInstanceRange->materialInstance->uniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK);
+      materialUniformPos += materialUniformOffset;
+      materialUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, materialUniformPos, materialUniformSize);
     }
     if(meshInstanceRange->end == i)
     {
