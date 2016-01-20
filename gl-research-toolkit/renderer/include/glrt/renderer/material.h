@@ -12,7 +12,7 @@ namespace renderer {
 
 class MaterialInstance : public QObject
 {
-  Q_OBJECT // #FIXME
+  Q_OBJECT
 public:
   typedef QSharedPointer<MaterialInstance> Ptr;
   typedef scene::resources::Material::Type Type;
@@ -31,7 +31,7 @@ private:
 
 class PlainColorMaterial : public MaterialInstance
 {
-  Q_OBJECT // #FIXME
+  Q_OBJECT
 public:
   typedef glrt::scene::resources::Material::PlainColor UniformData;
 

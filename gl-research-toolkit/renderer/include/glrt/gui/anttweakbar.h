@@ -156,7 +156,7 @@ private:
 
 class AntTweakBar final : public QObject
 {
-  Q_OBJECT // #FIXME
+  Q_OBJECT
 public:
   struct Settings final
   {
