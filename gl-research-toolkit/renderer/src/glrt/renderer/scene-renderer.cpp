@@ -95,7 +95,8 @@ void Renderer::DirectLights::bindShaderStoreageBuffers()
 Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, ReloadableShader&& shader)
   : type(type),
     renderer(*renderer),
-    shader(std::move(shader))
+    shader(std::move(shader)),
+    materialBuffer(MaterialBuffer::Type::PLAIN_COLOR)
 {
 }
 
@@ -169,19 +170,16 @@ void Renderer::Pass::renderStaticMeshes()
   gl::Buffer* buffer = staticMeshInstance_Uniforms.data();
   StaticMeshBuffer* mesh;
 
-  int materialUniformPos = 0;
-
   mesh= meshInstanceRange->mesh;
   mesh->bind(renderer.staticMeshVertexArrayObject);
-  materialUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, materialUniformPos, materialUniformSize);
+  materialBuffer.bind(0);
 
   for(int i=0; i<N; ++i)
   {
     if(materialInstanceRange->end == i)
     {
       ++materialInstanceRange;
-      materialUniformPos += materialUniformOffset;
-      materialUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, materialUniformPos, materialUniformSize);
+      materialBuffer.bind(1);
     }
     if(meshInstanceRange->end == i)
     {

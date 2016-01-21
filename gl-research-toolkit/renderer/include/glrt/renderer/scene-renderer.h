@@ -7,6 +7,7 @@
 #include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/renderer/toolkit/shader-storage-format.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/material-buffer.h>
 
 
 namespace glrt {
@@ -111,6 +112,8 @@ private:
     StaticMeshBuffer* mesh;
     int begin, end;
   };
+
+  MaterialBuffer materialBuffer;
 
   std::vector<MaterialInstanceRange> materialInstanceRanges;
   std::vector<MeshRange> meshRanges;
