@@ -1,5 +1,5 @@
-#ifndef GLRT_SCENE_RESOURCES_STATICMESHDATA_H
-#define GLRT_SCENE_RESOURCES_STATICMESHDATA_H
+#ifndef GLRT_SCENE_RESOURCES_STATICMESH_H
+#define GLRT_SCENE_RESOURCES_STATICMESH_H
 
 #include <glrt/dependencies.h>
 
@@ -7,7 +7,7 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
-struct StaticMeshData
+struct StaticMesh
 {
   struct Vertex
   {
@@ -25,10 +25,10 @@ struct StaticMeshData
   QVector<Vertex> vertices;
 
   bool isIndexed() const;
-  bool operator==(const StaticMeshData& other) const;
-  bool operator!=(const StaticMeshData& other) const;
+  bool operator==(const StaticMesh& other) const;
+  bool operator!=(const StaticMesh& other) const;
 
-  static StaticMeshData loadFromFile(const QString& filepath);
+  static StaticMesh loadFromFile(const QString& filepath);
 };
 
 
@@ -37,4 +37,4 @@ struct StaticMeshData
 } // namespace scene
 } // namespace glrt
 
-#endif // GLRT_SCENE_RESOURCES_STATICMESHDATA_H
+#endif // GLRT_SCENE_RESOURCES_STATICMESH_H

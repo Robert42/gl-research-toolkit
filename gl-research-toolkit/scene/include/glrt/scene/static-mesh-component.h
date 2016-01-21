@@ -9,10 +9,10 @@ namespace scene {
 class StaticMeshComponent final : public Node::Component
 {
 public:
-  const Uuid<resources::StaticMeshData> staticMeshUuid; // #TODO rename StaticMeshData to StaticMesh
+  const Uuid<resources::StaticMesh> staticMeshUuid;
   const Uuid<resources::Material> materialUuid;
 
-  StaticMeshComponent(Node& node, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMeshData>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
+  StaticMeshComponent(Node& node, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMesh>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
   ~StaticMeshComponent();
 
   static void registerAngelScriptAPIDeclarations();

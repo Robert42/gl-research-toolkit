@@ -54,11 +54,11 @@ bool StaticMeshBuffer::isValidFileSuffix(const QFileInfo& file)
 
 StaticMeshBuffer StaticMeshBuffer::loadMeshFile(const QString& file)
 {
-  return create(scene::resources::StaticMeshData::loadFromFile(file));
+  return create(scene::resources::StaticMesh::loadFromFile(file));
 }
 
 
-StaticMeshBuffer StaticMeshBuffer::create(const scene::resources::StaticMeshData& data)
+StaticMeshBuffer StaticMeshBuffer::create(const scene::resources::StaticMesh& data)
 {
   if(data.isIndexed())
     return createIndexed(data.indices.data(), data.indices.length(), data.vertices.data(), data.vertices.length());

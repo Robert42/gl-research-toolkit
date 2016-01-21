@@ -36,6 +36,8 @@ public:
 
   Material(const PlainColor& plainColor = PlainColor());
 
+  const void* data() const;
+
   static void registerAngelScriptTypes();
 };
 

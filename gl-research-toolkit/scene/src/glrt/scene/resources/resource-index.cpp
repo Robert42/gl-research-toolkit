@@ -119,7 +119,7 @@ bool ResourceIndex::isRegistered(const QUuid& uuid) const
   return allRegisteredResources.contains(uuid);
 }
 
-void ResourceIndex::registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file)
+void ResourceIndex::registerStaticMesh(const Uuid<StaticMesh>& uuid, const std::string& mesh_file)
 {
   validateNotYetRegistered(uuid);
   allRegisteredResources.insert(uuid);

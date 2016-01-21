@@ -45,7 +45,7 @@ public:
   void loadIndex(const std::string& filename);
   void loadIndexedDirectory(const std::string& filename);
 
-  void registerStaticMesh(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file);
+  void registerStaticMesh(const Uuid<StaticMesh>& uuid, const std::string& mesh_file);
   void registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light);
   void registerMaterial(const Uuid<Material>& uuid, const Material& material);
   void registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file);
@@ -56,7 +56,7 @@ public:
   QSet<QUuid> allRegisteredResources;
 
   QHash<Uuid<Scene>, QString> sceneFiles;
-  QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
+  QHash<Uuid<StaticMesh>, QString> staticMeshAssetsFiles;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;
   QHash<Uuid<SceneLayer>, QString> sceneLayerFiles;

@@ -2,7 +2,7 @@
 #define GLRT_RENDERER_STATICMESH_H
 
 #include <glrt/dependencies.h>
-#include <glrt/scene/resources/static-mesh-data.h>
+#include <glrt/scene/resources/static-mesh.h>
 
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
@@ -15,8 +15,8 @@ namespace renderer {
 class StaticMeshBuffer final
 {
 public:
-  typedef scene::resources::StaticMeshData::Vertex Vertex;
-  typedef scene::resources::StaticMeshData::index_type index_type;
+  typedef scene::resources::StaticMesh::Vertex Vertex;
+  typedef scene::resources::StaticMesh::index_type index_type;
 
   StaticMeshBuffer(StaticMeshBuffer&& mesh);
   StaticMeshBuffer(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices);
@@ -29,7 +29,7 @@ public:
 
   static bool isValidFileSuffix(const QFileInfo& file);
   static StaticMeshBuffer loadMeshFile(const QString& file);
-  static StaticMeshBuffer create(const scene::resources::StaticMeshData& data);
+  static StaticMeshBuffer create(const scene::resources::StaticMesh& data);
   static StaticMeshBuffer createIndexed(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices, bool indexed = true);
   static StaticMeshBuffer createAsArray(const StaticMeshBuffer::Vertex* vertices, int numVertices);
 

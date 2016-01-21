@@ -6,6 +6,7 @@
 #include <glhelper/buffer.hpp>
 
 #include <glrt/scene/resources/material.h>
+#include <glrt/renderer/declarations.h>
 
 namespace glrt {
 namespace renderer {
@@ -15,9 +16,13 @@ class MaterialBuffer final
 public:
   typedef scene::resources::Material::Type Type;
 
+  struct Initializer;
+
   const Type type;
 
+
   MaterialBuffer(Type type);
+  ~MaterialBuffer();
 
   MaterialBuffer(const MaterialBuffer&)=delete;
   MaterialBuffer(MaterialBuffer&&)=delete;
@@ -27,13 +32,27 @@ public:
   void bind(int i);
 
 private:
-  gl::Buffer buffer;
+  gl::Buffer* buffer;
   int blockOffset;
   int dataSize;
+
 
   template<typename T>
   void initBlockOffset();
 };
+
+struct MaterialBuffer::Initializer
+{
+  MaterialBuffer& buffer;
+  int materialsAdded;
+  QVector<quint8> data;
+
+  Initializer(MaterialBuffer& buffer, int expectedNumberMaterials);
+  ~Initializer();
+
+  void append(const Material& material);
+};
+
 
 } // namespace renderer
 } // namespace glrt

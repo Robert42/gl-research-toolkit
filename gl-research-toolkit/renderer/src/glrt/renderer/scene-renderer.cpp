@@ -2,6 +2,7 @@
 
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/collect-scene-data.h>
 
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
@@ -54,6 +55,10 @@ Renderer::DirectLights& Renderer::directLights()
 }
 
 
+StaticMeshBuffer* Renderer::staticMeshForUuid(const Uuid<StaticMesh>& uuid)
+{
+  return nullptr; // #FIXME
+}
 
 
 // ======== DirectLights =======================================================
@@ -96,8 +101,10 @@ Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, 
   : type(type),
     renderer(*renderer),
     shader(std::move(shader)),
-    materialBuffer(MaterialBuffer::Type::PLAIN_COLOR)
+    materialBuffer(MaterialBuffer::Type::PLAIN_COLOR),
+    isDirty(true)
 {
+  // #FIXME connect with signals from the scene
 }
 
 Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock)
@@ -199,17 +206,16 @@ void Renderer::Pass::renderStaticMeshes()
 
 inline void Renderer::Pass::updateCache()
 {
-  /*
-  #TODO uncomment
-  scene::Scene& scene = renderer.scene;
-
-  if(_cachedStaticStructureCacheIndex == scene._cachedStaticStructureCacheIndex)
+  if(!isDirty)
     return;
+  isDirty = false;
+
+  scene::Scene& scene = renderer.scene;
 
   aligned_vector<MeshInstanceUniform> transformations(aligned_vector<MeshInstanceUniform>::Alignment::UniformBufferOffsetAlignment);
   meshInstanceUniformOffset = transformations.alignment();
 
-  QVector<scene::StaticMeshComponent*> allStaticMeshComponents = scene.allComponentsWithType<scene::StaticMeshComponent>(allowOnly(this->type, false));
+  QVector<scene::StaticMeshComponent*> allStaticMeshComponents = glrt::scene::collectAllComponentsWithType<glrt::scene::StaticMeshComponent>(&scene, allowOnly(this->type, false));
 
   qSort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
 
@@ -217,31 +223,37 @@ inline void Renderer::Pass::updateCache()
 
   if(!allStaticMeshComponents.isEmpty())
   {
-    materialInstanceRanges.reserve(allStaticMeshComponents.size());
-    meshRanges.reserve(allStaticMeshComponents.size());
-    transformations.reserve(allStaticMeshComponents.size());
+    materialInstanceRanges.reserve(allStaticMeshComponents.length());
+    meshRanges.reserve(allStaticMeshComponents.length());
+    transformations.reserve(allStaticMeshComponents.length());
 
-    materialInstanceRanges.push_back(MaterialInstanceRange{allStaticMeshComponents[0]->materialInstance.data(), 0, 1});
-    meshRanges.push_back(MeshRange(MeshRange{allStaticMeshComponents[0]->staticMesh.data(), 0, 1}));
+    materialInstanceRanges.push_back(MaterialInstanceRange{0, 1});
+    meshRanges.push_back(MeshRange(MeshRange{renderer.staticMeshForUuid(allStaticMeshComponents[0]->staticMeshUuid), 0, 1}));
 
     MaterialInstanceRange* lastMaterialInstanceRange = &materialInstanceRanges[materialInstanceRanges.size()-1];
     MeshRange* lastMeshRange = &meshRanges[meshRanges.size()-1];
+    Uuid<Material> lastMaterial = allStaticMeshComponents[0]->materialUuid;
+    MaterialBuffer::Initializer materials(materialBuffer, allStaticMeshComponents.length());
+
+    materials.append(allStaticMeshComponents[0]->material());
 
     for(int i=0; i<allStaticMeshComponents.size(); ++i)
     {
       scene::StaticMeshComponent* staticMeshComponent = allStaticMeshComponents[i];
 
-      transformations.push_back(staticMeshComponent->globalTransformation());
+      transformations.push_back(staticMeshComponent->globalCoordFrame().toMat4());
 
-      if(staticMeshComponent->materialInstance.data() != lastMaterialInstanceRange->materialInstance)
+      if(staticMeshComponent->materialUuid != lastMaterial)
       {
-        materialInstanceRanges.push_back(MaterialInstanceRange{staticMeshComponent->materialInstance.data(), i, i+1});
+        materials.append(staticMeshComponent->material());
+        materialInstanceRanges.push_back(MaterialInstanceRange{i, i+1});
         lastMaterialInstanceRange = &materialInstanceRanges[materialInstanceRanges.size()-1];
       }
 
-      if(staticMeshComponent->staticMesh.data() != lastMeshRange->mesh)
+      StaticMeshBuffer* currentStaticMesh = renderer.staticMeshForUuid(staticMeshComponent->staticMeshUuid);
+      if(currentStaticMesh != lastMeshRange->mesh)
       {
-        meshRanges.push_back(MeshRange(MeshRange{staticMeshComponent->staticMesh.data(), i, i+1}));
+        meshRanges.push_back(MeshRange(MeshRange{currentStaticMesh, i, i+1}));
         lastMeshRange = &meshRanges[meshRanges.size()-1];
       }
 
@@ -251,9 +263,6 @@ inline void Renderer::Pass::updateCache()
 
     staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
   }
-
-  _cachedStaticStructureCacheIndex = scene._cachedStaticStructureCacheIndex;
-*/
 }
 
 void Renderer::Pass::clearCache()

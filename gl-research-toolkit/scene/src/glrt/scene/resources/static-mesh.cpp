@@ -1,11 +1,11 @@
-#include <glrt/scene/resources/static-mesh-data.h>
+#include <glrt/scene/resources/static-mesh.h>
 #include <glrt/scene/resources/static-mesh-loader.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
 
-bool StaticMeshData::isIndexed() const
+bool StaticMesh::isIndexed() const
 {
   return not indices.isEmpty();
 }
@@ -13,25 +13,25 @@ bool StaticMeshData::isIndexed() const
 class MyMeshLoader final : public StaticMeshLoader
 {
 public:
-  StaticMeshData data;
+  StaticMesh data;
 
-  void loadStaticMeshImpl(const Uuid<StaticMeshData>&, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices) override
+  void loadStaticMeshImpl(const Uuid<StaticMesh>&, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices) override
   {
     data.indices.resize(numIndices);
     data.vertices.resize(numVertices);
-    memcpy(data.indices.data(), indices, numIndices*sizeof(StaticMeshData::index_type));
-    memcpy(data.vertices.data(), vertices, numVertices*sizeof(StaticMeshData::Vertex));
+    memcpy(data.indices.data(), indices, numIndices*sizeof(StaticMesh::index_type));
+    memcpy(data.vertices.data(), vertices, numVertices*sizeof(StaticMesh::Vertex));
   }
 };
 
-StaticMeshData StaticMeshData::loadFromFile(const QString& filepath)
+StaticMesh StaticMesh::loadFromFile(const QString& filepath)
 {
   MyMeshLoader loader;
-  loader.loadStaticMesh(Uuid<StaticMeshData>(QUuid::createUuid()), filepath.toStdString());
+  loader.loadStaticMesh(Uuid<StaticMesh>(QUuid::createUuid()), filepath.toStdString());
   return loader.data;
 }
 
-bool StaticMeshData::operator==(const StaticMeshData& other) const
+bool StaticMesh::operator==(const StaticMesh& other) const
 {
   if(this->indices.length()!=other.indices.length() || this->vertices.length()!=other.vertices.length())
     return false;
@@ -50,7 +50,7 @@ bool StaticMeshData::operator==(const StaticMeshData& other) const
   return true;
 }
 
-bool StaticMeshData::Vertex::operator==(const Vertex& other) const
+bool StaticMesh::Vertex::operator==(const Vertex& other) const
 {
   return position==other.position
       && normal==other.normal
@@ -58,7 +58,7 @@ bool StaticMeshData::Vertex::operator==(const Vertex& other) const
       && uv==other.uv;
 }
 
-bool StaticMeshData::Vertex::isNearlyTheSame(const Vertex& other, float epsilon) const
+bool StaticMesh::Vertex::isNearlyTheSame(const Vertex& other, float epsilon) const
 {
   return glm::distance(position, other.position) <= epsilon
       && glm::distance(normal, other.normal) <= epsilon
@@ -66,7 +66,7 @@ bool StaticMeshData::Vertex::isNearlyTheSame(const Vertex& other, float epsilon)
       && glm::distance(uv, other.uv) <= epsilon;
 }
 
-bool StaticMeshData::operator!=(const StaticMeshData& other) const
+bool StaticMesh::operator!=(const StaticMesh& other) const
 {
   return !(*this == other);
 }

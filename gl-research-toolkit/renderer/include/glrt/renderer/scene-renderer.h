@@ -8,6 +8,7 @@
 #include <glrt/renderer/toolkit/shader-storage-format.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 #include <glrt/renderer/material-buffer.h>
+#include <glrt/renderer/declarations.h>
 
 
 namespace glrt {
@@ -17,7 +18,6 @@ class Renderer : public QObject
 {
   Q_OBJECT
 public:
-
   class DirectLights;
   class Pass;
 
@@ -56,6 +56,10 @@ private:
   DirectLights* _directLights = nullptr;
 
   void updateSceneUniform();
+
+  QHash<Uuid<StaticMesh>, StaticMeshBuffer*> staticMeshes;
+
+  StaticMeshBuffer* staticMeshForUuid(const Uuid<StaticMesh>& uuid);
 
 
   void debugCameraPositions();
@@ -115,10 +119,12 @@ private:
 
   MaterialBuffer materialBuffer;
 
-  std::vector<MaterialInstanceRange> materialInstanceRanges;
-  std::vector<MeshRange> meshRanges;
+  QVector<MaterialInstanceRange> materialInstanceRanges;
+  QVector<MeshRange> meshRanges;
   QSharedPointer<gl::Buffer> staticMeshInstance_Uniforms;
   GLint meshInstanceUniformOffset = 0;
+
+  bool isDirty;
 
   void renderStaticMeshes();
   void updateCache();

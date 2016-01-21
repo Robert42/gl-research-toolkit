@@ -13,7 +13,7 @@ using AngelScriptIntegration::AngelScriptCheck;
 StaticMeshComponent::StaticMeshComponent(Node& entity, // #TODO rename all entity/entities to node
                                          const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
-                                         const Uuid<resources::StaticMeshData>& staticMesh,
+                                         const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
   : Node::Component(entity, uuid, isMovable),
     staticMeshUuid(staticMesh),
@@ -38,7 +38,7 @@ void StaticMeshComponent::registerAngelScriptAPIDeclarations()
 inline StaticMeshComponent* createStaticMeshComponent(Node* node,
                                                       const Uuid<StaticMeshComponent>& uuid,
                                                       bool isMovable,
-                                                      const Uuid<resources::StaticMeshData>& meshUuid,
+                                                      const Uuid<resources::StaticMesh>& meshUuid,
                                                       const Uuid<resources::Material>& materialUuid)
 {
   return new StaticMeshComponent(*node, uuid, isMovable, meshUuid, materialUuid);

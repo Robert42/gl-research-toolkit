@@ -5,7 +5,7 @@
 
 #include "resource-index.h"
 
-#include "static-mesh-data.h"
+#include "static-mesh.h"
 
 #include <sdk/add_on/scriptarray/scriptarray.h>
 
@@ -25,15 +25,15 @@ public:
   StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
   StaticMeshLoader& operator=(StaticMeshLoader&&) = delete;
 
-  void loadStaticMesh(Uuid<StaticMeshData> uuid, const std::string& filepath);
-  void loadStaticMesh(const Uuid<StaticMeshData>& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices);
-  void loadStaticMesh(const Uuid<StaticMeshData>& uuid, const StaticMeshData& data);
-  void loadStaticMesh(const Uuid<StaticMeshData>& uuid, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices);
+  void loadStaticMesh(Uuid<StaticMesh> uuid, const std::string& filepath);
+  void loadStaticMesh(const Uuid<StaticMesh>& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices);
+  void loadStaticMesh(const Uuid<StaticMesh>& uuid, const StaticMesh& data);
+  void loadStaticMesh(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices);
 
   static void registerAngelScriptAPI();
 
 protected:
-  virtual void loadStaticMeshImpl(const Uuid<StaticMeshData>& uuid, const StaticMeshData::index_type* indices, size_t numIndices, const StaticMeshData::Vertex* vertices, size_t numVertices) = 0;
+  virtual void loadStaticMeshImpl(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices) = 0;
 };
 
 

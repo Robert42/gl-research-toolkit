@@ -7,6 +7,7 @@ set(SOURCE_FILES
   include/glrt/renderer/debugging/debug-mesh.h
   include/glrt/renderer/debugging/shader-debug-printer.h
   include/glrt/renderer/debugging/visualization-renderer.h
+  include/glrt/renderer/declarations.h
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
   include/glrt/renderer/material-buffer.h

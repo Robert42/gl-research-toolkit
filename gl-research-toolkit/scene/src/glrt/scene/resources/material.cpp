@@ -44,6 +44,10 @@ void Material::registerAngelScriptTypes()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
+const void* Material::data() const
+{
+  return &plainColor;
+}
 
 } // namespace resources
 } // namespace scene

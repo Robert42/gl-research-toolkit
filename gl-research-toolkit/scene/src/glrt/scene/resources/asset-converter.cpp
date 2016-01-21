@@ -1,5 +1,5 @@
 #include <glrt/scene/resources/asset-converter.h>
-#include <glrt/scene/resources/static-mesh-data.h>
+#include <glrt/scene/resources/static-mesh.h>
 #include <glrt/scene/resources/resource-index.h>
 #include <glrt/scene/camera.h>
 #include <glrt/scene/coord-frame.h>
@@ -155,11 +155,11 @@ QString python_exportSceneAsColladaSceneGraph(const QString& colladaFile)
 }
 
 
-typedef StaticMeshData::index_type index_type;
-typedef StaticMeshData::Vertex Vertex;
+typedef StaticMesh::index_type index_type;
+typedef StaticMesh::Vertex Vertex;
 
-StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
-void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, const StaticMeshData& data, int i)
+StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
+void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, const StaticMesh& data, int i)
 {
   static_assert(sizeof(index_type)==2, "For uint16 as array type to be correct, index_type must be also a 16bit integer");
   stream << "  ";
@@ -253,7 +253,7 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
   if(!scene->HasMeshes())
     throw GLRT_EXCEPTION(QString("Couldn't find any mesh in %0").arg(sourceFilepath));
 
-  StaticMeshData data = loadMeshFromAssimp(scene->mMeshes, scene->mNumMeshes, transform, QString("\n(in file <%0>)").arg(sourceFilepath), indexed);
+  StaticMesh data = loadMeshFromAssimp(scene->mMeshes, scene->mNumMeshes, transform, QString("\n(in file <%0>)").arg(sourceFilepath), indexed);
 
   QFile file(meshFile.absoluteFilePath());
 
@@ -274,9 +274,9 @@ struct SceneGraphImportAssets
   QHash<QString, Uuid<Camera>> cameraUuids;
   QHash<QString, Camera> cameras;
 
-  QVector<StaticMeshData> meshData;
+  QVector<StaticMesh> meshData;
   QHash<QString, QSet<quint32>> meshInstances;
-  QVector<Uuid<StaticMeshData>> meshes;
+  QVector<Uuid<StaticMesh>> meshes;
   bool indexed = true;
 
   QHash<QString, Uuid<LightSource>> lightUuids;
@@ -369,7 +369,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(n.isEmpty())
       throw GLRT_EXCEPTION("meshes must have a name");
 
-    StaticMeshData data = loadMeshFromAssimp(scene->mMeshes+i, 1, glm::mat3(1), QString(" while converting %0 to %1 (occured on mesh %2 (assimp index %3))").arg(sceneGraphFile.filePath()).arg(sceneGraphFile.fileName()).arg(n).arg(i), assets.indexed);;;
+    StaticMesh data = loadMeshFromAssimp(scene->mMeshes+i, 1, glm::mat3(1), QString(" while converting %0 to %1 (occured on mesh %2 (assimp index %3))").arg(sceneGraphFile.filePath()).arg(sceneGraphFile.fileName()).arg(n).arg(i), assets.indexed);;;
 
     // Is the same instance already used (with a different material?)
     quint32 useIndex = i;
@@ -385,7 +385,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.meshData[i] = data;
     assets.meshInstances[n].insert(useIndex);
 
-    Uuid<StaticMeshData> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("static-mesh[%0]").arg(useIndex)), n));
+    Uuid<StaticMesh> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("static-mesh[%0]").arg(useIndex)), n));
 
     if(settings.meshUuids.contains(n))
     {
@@ -534,14 +534,14 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         for(size_t i=0; i<assimp_node->mNumMeshes; ++i)
         {
           int globalMeshIndex = assimp_node->mMeshes[i];
-          Uuid<StaticMeshData> meshUuid = assets.meshes[globalMeshIndex];
+          Uuid<StaticMesh> meshUuid = assets.meshes[globalMeshIndex];
           meshesOfNode[meshUuid] = globalMeshIndex;
         }
 
         for(int i : meshesOfNode.values())
         {
           aiMesh* mesh = scene->mMeshes[i];
-          Uuid<StaticMeshData> meshUuid = assets.meshes[i];
+          Uuid<StaticMesh> meshUuid = assets.meshes[i];
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
           outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
@@ -595,7 +595,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   outputStream << "}";
 }
 
-StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
+StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
 {
   quint32 numVertices = 0;
   quint32 numFaces = 0;
@@ -684,7 +684,7 @@ StaticMeshData loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::m
   if(!indexed)
     indices.clear();
 
-  return StaticMeshData{indices, vertices};
+  return StaticMesh{indices, vertices};
 }
 
 
@@ -729,7 +729,7 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   as_camerasToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_nodesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
 
-  as_meshUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMeshData>>(), meshUuidTypeId, angelScriptEngine);
+  as_meshUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMesh>>(), meshUuidTypeId, angelScriptEngine);
   as_materialUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Material>>(), materialUuidTypeId, angelScriptEngine);
   as_lightUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<LightSource>>(), lightUuidTypeId, angelScriptEngine);
   as_nodeUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Node>>(), nodeUuidTypeId, angelScriptEngine);
@@ -795,7 +795,7 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   camerasToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_camerasToImport);
   nodesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_nodesToImport);
 
-  meshUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMeshData>>(interface->as_meshUuids, {uuidTypeId, staticMeshUuidTypeId});
+  meshUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMesh>>(interface->as_meshUuids, {uuidTypeId, staticMeshUuidTypeId});
   materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Material>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
   lightUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<LightSource>>(interface->as_lightUuids, {uuidTypeId, lightUuidTypeId});
   nodeUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Node>>(interface->as_nodeUuids, {uuidTypeId, nodeUuidTypeId});
