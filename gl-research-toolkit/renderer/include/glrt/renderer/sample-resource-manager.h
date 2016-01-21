@@ -3,6 +3,7 @@
 
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/resources/resource-index.h>
+#include <glrt/renderer/static-mesh-buffer-manager.h>
 
 namespace glrt {
 namespace renderer {
@@ -11,6 +12,7 @@ class SampleResourceManager final : public scene::resources::ResourceManager
 {
 public:
   Index index;
+  StaticMeshBufferManager* staticMeshBufferManager;
 
   static Uuid<scene::Scene> cornellBoxScene();
 

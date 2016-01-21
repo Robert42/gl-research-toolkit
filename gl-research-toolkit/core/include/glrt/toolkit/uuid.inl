@@ -34,6 +34,13 @@ QUuid Uuid<T>::toQUuid() const
 
 
 template<class T>
+QString Uuid<T>::toString() const
+{
+  return this->_index.toQUuid().toString();
+}
+
+
+template<class T>
 template<class T_target>
 Uuid<T_target> Uuid<T>::cast() const
 {

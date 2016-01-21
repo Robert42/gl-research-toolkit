@@ -72,6 +72,7 @@ public:
   operator QUuid() const;
 
   QUuid toQUuid() const;
+  QString toString() const;
 
   bool operator==(const this_type& other) const;
   bool operator!=(const this_type& other) const;

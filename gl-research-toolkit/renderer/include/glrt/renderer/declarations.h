@@ -7,6 +7,7 @@ namespace glrt {
 namespace renderer {
 
 using glrt::scene::resources::StaticMesh;
+using glrt::scene::resources::StaticMeshLoader;
 using glrt::scene::resources::Material;
 
 } // namespace renderer

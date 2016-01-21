@@ -3,7 +3,7 @@
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/scene.h>
 #include <glrt/gui/anttweakbar.h>
-#include <glrt/renderer/sample-source-manager.h>
+#include <glrt/renderer/sample-resource-manager.h>
 #include <glrt/renderer/forward-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 
@@ -17,7 +17,7 @@ int main(int argc, char** argv)
   glrt::renderer::SampleResourceManager resourceManager;
   glrt::scene::Scene scene(&resourceManager);
 
-  glrt::renderer::ForwardRenderer renderer(&scene);
+  glrt::renderer::ForwardRenderer renderer(&scene, &resourceManager);
 
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample

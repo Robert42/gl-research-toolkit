@@ -12,6 +12,7 @@ class LightComponent;
 class Camera;
 class Scene;
 class SceneLayer;
+class StaticMeshComponent;
 
 } // namespace scene
 } // namespace glrt

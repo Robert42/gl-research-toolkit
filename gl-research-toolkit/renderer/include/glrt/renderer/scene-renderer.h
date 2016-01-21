@@ -4,7 +4,7 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
-#include <glrt/renderer/static-mesh-buffer.h>
+#include <glrt/renderer/static-mesh-buffer-manager.h>
 #include <glrt/renderer/toolkit/shader-storage-format.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 #include <glrt/renderer/material-buffer.h>
@@ -22,6 +22,8 @@ public:
   class Pass;
 
   scene::Scene& scene;
+  StaticMeshBufferManager& staticMeshBufferManager;
+
   debugging::VisualizationRenderer visualizeCameras;
   debugging::VisualizationRenderer visualizeSphereAreaLights;
   debugging::VisualizationRenderer visualizeRectAreaLights;
@@ -33,7 +35,7 @@ public:
 
   DirectLights& directLights();
 
-  Renderer(scene::Scene* scene);
+  Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager);
   virtual ~Renderer();
 
   void render();
@@ -56,11 +58,6 @@ private:
   DirectLights* _directLights = nullptr;
 
   void updateSceneUniform();
-
-  QHash<Uuid<StaticMesh>, StaticMeshBuffer*> staticMeshes;
-
-  StaticMeshBuffer* staticMeshForUuid(const Uuid<StaticMesh>& uuid);
-
 
   void debugCameraPositions();
 };

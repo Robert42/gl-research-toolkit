@@ -11,9 +11,11 @@ set(SOURCE_FILES
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
   include/glrt/renderer/material-buffer.h
-  include/glrt/renderer/sample-source-manager.h
+  include/glrt/renderer/sample-resource-manager.h
   include/glrt/renderer/scene-renderer.h
   include/glrt/renderer/static-mesh-buffer.h
+  include/glrt/renderer/static-mesh-buffer-manager.cpp
+  include/glrt/renderer/static-mesh-buffer-manager.h
   include/glrt/renderer/toolkit/aligned-vector.h
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h

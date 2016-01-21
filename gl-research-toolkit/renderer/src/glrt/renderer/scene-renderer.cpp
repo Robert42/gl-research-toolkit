@@ -12,8 +12,9 @@ namespace glrt {
 namespace renderer {
 
 
-Renderer::Renderer(scene::Scene* scene)
+Renderer::Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager)
   : scene(*scene),
+    staticMeshBufferManager(*staticMeshBufferManager),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
@@ -52,12 +53,6 @@ void Renderer::updateSceneUniform()
 Renderer::DirectLights& Renderer::directLights()
 {
   return *this->_directLights;
-}
-
-
-StaticMeshBuffer* Renderer::staticMeshForUuid(const Uuid<StaticMesh>& uuid)
-{
-  return nullptr; // #FIXME
 }
 
 
@@ -228,7 +223,7 @@ inline void Renderer::Pass::updateCache()
     transformations.reserve(allStaticMeshComponents.length());
 
     materialInstanceRanges.push_back(MaterialInstanceRange{0, 1});
-    meshRanges.push_back(MeshRange(MeshRange{renderer.staticMeshForUuid(allStaticMeshComponents[0]->staticMeshUuid), 0, 1}));
+    meshRanges.push_back(MeshRange(MeshRange{renderer.staticMeshBufferManager.meshForUuid(allStaticMeshComponents[0]->staticMeshUuid), 0, 1}));
 
     MaterialInstanceRange* lastMaterialInstanceRange = &materialInstanceRanges[materialInstanceRanges.size()-1];
     MeshRange* lastMeshRange = &meshRanges[meshRanges.size()-1];
@@ -250,7 +245,7 @@ inline void Renderer::Pass::updateCache()
         lastMaterialInstanceRange = &materialInstanceRanges[materialInstanceRanges.size()-1];
       }
 
-      StaticMeshBuffer* currentStaticMesh = renderer.staticMeshForUuid(staticMeshComponent->staticMeshUuid);
+      StaticMeshBuffer* currentStaticMesh = renderer.staticMeshBufferManager.meshForUuid(staticMeshComponent->staticMeshUuid);
       if(currentStaticMesh != lastMeshRange->mesh)
       {
         meshRanges.push_back(MeshRange(MeshRange{currentStaticMesh, i, i+1}));

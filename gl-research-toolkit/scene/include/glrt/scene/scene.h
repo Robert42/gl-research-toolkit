@@ -55,6 +55,10 @@ signals:
   void sceneLoadedExt(scene::Scene* scene, bool success);
   void sceneLoaded(bool success);
 
+  void CameraComponentAdded(LightComponent* component);
+  void LightComponentAdded(LightComponent* component);
+  void StaticMeshComponentAdded(StaticMeshComponent* component);
+
 private:
   friend class SceneLayer;
 

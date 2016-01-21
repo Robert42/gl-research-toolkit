@@ -21,6 +21,7 @@ class ResourceManager;
 class LightSource;
 class Material;
 class StaticMesh;
+class StaticMeshLoader;
 
 } // namespace resources
 } // namespace scene
