@@ -115,6 +115,10 @@ public:
 
   static void show(const QString& message);
 
+  typedef std::function<void(const QString&)> MessageHandler;
+
+  static MessageHandler& getSplashscreenMessageHandler();
+
 private:
   static void push(const QString& message);
   static QString pop();

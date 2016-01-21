@@ -71,7 +71,7 @@ UuidIndex::index_type UuidIndex::indexForUuid(const QUuid& uuid)
 // ======== Uuid & AngelScript =================================================
 
 
-inline QUuid cast_custom_uuid_type(const Uuid<void>& src)
+inline Uuid<void> cast_custom_uuid_type(const Uuid<void>& src)
 {
   return src;
 }

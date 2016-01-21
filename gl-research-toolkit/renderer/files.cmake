@@ -2,7 +2,6 @@ set(SOURCE_FILES
   include/glrt/application.h
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
-  include/glrt/logger.h
   include/glrt/renderer/debugging/debug-line-visualisation.h
   include/glrt/renderer/debugging/debug-mesh.h
   include/glrt/renderer/debugging/shader-debug-printer.h
@@ -26,7 +25,6 @@ set(SOURCE_FILES
   src/glrt/application.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
-  src/glrt/logger.cpp
   src/glrt/renderer/debugging/debug-line-visualisation.cpp
   src/glrt/renderer/debugging/debug-mesh.cpp
   src/glrt/renderer/debugging/shader-debug-printer.cpp

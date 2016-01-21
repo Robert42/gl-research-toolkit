@@ -1,4 +1,4 @@
-#include <glrt/logger.h>
+#include <glrt/toolkit/logger.h>
 
 #include <QCoreApplication>
 

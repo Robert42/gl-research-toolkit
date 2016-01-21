@@ -1,9 +1,9 @@
 #ifndef GLRT_SYSTEM_H
 #define GLRT_SYSTEM_H
 
-#include "renderer/dependencies.h"
-#include "logger.h"
-#include "splashscreen-style.h"
+#include <glrt/renderer/dependencies.h>
+#include <glrt/toolkit/logger.h>
+#include <glrt/splashscreen-style.h>
 
 #include <QApplication>
 #include <QSplashScreen>
