@@ -69,7 +69,7 @@ public:
   template<typename T>
   Uuid<T> cast() const;
 
-  operator QUuid() const;
+  operator QUuid() const; // #TODO: avoid using QUuid to prevent mixing both when using angelscript. Instead, write a common BaseClass GenericUuid, to binary compatibility is always guaranteed
 
   QUuid toQUuid() const;
   QString toString() const;

@@ -159,10 +159,10 @@ void Uuid<void>::registerAngelScriptAPI()
 
   int r;
   r = angelScriptEngine->RegisterObjectType("Uuid<class T>",
-                                            sizeof(QUuid),
+                                            sizeof(Uuid<void>),
                                             AngelScript::asOBJ_VALUE |
                                             AngelScript::asOBJ_TEMPLATE |
-                                            AngelScript::asGetTypeTraits<QUuid>());
+                                            AngelScript::asGetTypeTraits<Uuid<void>>());
   AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("Uuid<T>", AngelScript::asBEHAVE_CONSTRUCT, "void ctor(const string &in)", AngelScript::asFUNCTION(init_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
   r = angelScriptEngine->RegisterObjectBehaviour("Uuid<T>", AngelScript::asBEHAVE_DESTRUCT, "void dtor()", AngelScript::asFUNCTION(deinit_custom_uuid_type), AngelScript::asCALL_CDECL_OBJFIRST);
