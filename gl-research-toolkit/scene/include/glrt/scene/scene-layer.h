@@ -7,8 +7,9 @@
 namespace glrt {
 namespace scene {
 
-class SceneLayer final
+class SceneLayer final : public QObject
 {
+  Q_OBJECT
 public:
   const Uuid<SceneLayer> uuid;
   Scene& scene;

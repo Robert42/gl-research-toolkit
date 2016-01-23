@@ -14,8 +14,9 @@ namespace scene {
 namespace resources {
 
 
-class StaticMeshLoader
+class StaticMeshLoader : public QObject
 {
+  Q_OBJECT
 public:
   StaticMeshLoader();
   virtual ~StaticMeshLoader();

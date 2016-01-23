@@ -19,6 +19,7 @@ resources::StaticMeshLoader* get_staticMeshLoader(resources::ResourceManager* re
 ResourceManager::ResourceManager(StaticMeshLoader* staticMeshLoader)
   : staticMeshLoader(*staticMeshLoader)
 {
+  staticMeshLoader->setParent(this);
 }
 
 ResourceManager::~ResourceManager()

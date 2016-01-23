@@ -45,7 +45,13 @@ void Scene::clear()
 {
   clearScene();
 
-  // #TODO: delete all SCENE LAYERS
+  // the destructor of a scene layers removes the layer from the _layers hash.
+  // So the list of all layers have to be copied in order to be able to go with
+  // a foreach loop over it.
+  QList<SceneLayer*> layers = _layers.values();
+  _layers.clear();
+  for(SceneLayer* l : layers)
+    delete l;
 
   sceneCleared();
 }
@@ -81,6 +87,7 @@ void Scene::load(const Uuid<Scene>& scene)
 
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
+  angelScriptEngine->GarbageCollect();
 }
 
 void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)

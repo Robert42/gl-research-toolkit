@@ -27,7 +27,8 @@ inline resources::ResourceIndex* get_index(SceneLayer* sceneLayer)
 \warning The scene takes ownership over the layer
  */
 SceneLayer::SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene)
-  : uuid(uuid),
+  : QObject(&scene),
+    uuid(uuid),
     scene(scene),
     index(Uuid<resources::ResourceIndex>(QUuid::createUuidV5(QUuid(uuid), QString("index for scene-layer"))))
 {

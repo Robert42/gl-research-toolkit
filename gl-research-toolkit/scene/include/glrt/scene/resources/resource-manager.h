@@ -12,8 +12,9 @@ class Scene;
 namespace resources {
 
 
-class ResourceManager
+class ResourceManager : public QObject
 {
+  Q_OBJECT
 public:
   typedef ResourceIndex Index;
 
