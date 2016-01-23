@@ -3,6 +3,7 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/resources/resource-manager.h>
+#include <glrt/scene/collect-scene-data.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <QFile>
@@ -86,6 +87,11 @@ void Scene::load(const Uuid<Scene>& scene)
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
   angelScriptEngine->GarbageCollect();
+
+  // #TODO camera handling shouldn't be done by the scene
+  QVector<Camera> cameras = collectCameras(this);
+  if(!cameras.isEmpty())
+    this->debugCamera = cameras.first();
 
   bool success = true; // #FIXME: really find out, whether this was a success
   sceneLoadedExt(this, success);
