@@ -3,6 +3,8 @@
 
 #include <glrt/dependencies.h>
 
+#include <glrt/scene/coord-frame.h>
+
 class aiCamera;
 
 namespace glrt {
@@ -26,7 +28,7 @@ public:
   static Camera fromAssimp(const aiCamera& camera);
   static Camera defaultDebugCamera();
 
-  friend Camera operator*(const glm::mat4& t, Camera camera);
+  friend Camera operator*(const CoordFrame& frame, Camera camera);
 
   glm::mat4 inverseViewMatrix() const;
   glm::mat4 viewMatrix() const;

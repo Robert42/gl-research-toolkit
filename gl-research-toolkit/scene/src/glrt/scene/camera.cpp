@@ -65,11 +65,11 @@ glm::mat4 Camera::projectionMatrix(int width, int height) const
   return projectionMatrix(float(width) / float(height));
 }
 
-Camera operator*(const glm::mat4& t, Camera camera)
+Camera operator*(const CoordFrame& frame, Camera camera)
 {
-  camera.lookAt = transform_direction(t, camera.lookAt);
-  camera.upVector = transform_direction(t, camera.upVector);
-  camera.position = transform_point(t, camera.position);
+  camera.lookAt = frame.transform_direction(camera.lookAt);
+  camera.upVector = frame.transform_direction(camera.upVector);
+  camera.position = frame.transform_point(camera.position);
   return camera;
 }
 
