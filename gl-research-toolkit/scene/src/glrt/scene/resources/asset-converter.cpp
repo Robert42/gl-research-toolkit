@@ -87,8 +87,7 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
 
   SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
 
-  // #TODO uncomment
-  //if(shouldConvert(sceneGraphFile, sourceFile))
+  if(shouldConvert(sceneGraphFile, sourceFile))
   {
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
     convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, uuid, settings);
