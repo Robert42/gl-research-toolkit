@@ -100,7 +100,7 @@ bool is_instance_of(const T_child* child)
 template<typename... T_arg>
 inline bool always_return_true(const T_arg&...){return true;}
 template<typename... T_arg>
-inline bool always_return_false(const T_arg&...){return true;}
+inline bool always_return_false(const T_arg&...){return false;}
 
 class SplashscreenMessage final
 {

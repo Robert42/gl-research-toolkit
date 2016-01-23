@@ -177,7 +177,7 @@ public:
   {
     deinit();
 
-    addComponents(glrt::scene::collectAllComponentsWithType<NodeComponentType>(&scene, false));
+    addComponents(glrt::scene::collectAllComponentsWithType<NodeComponentType>(&scene));
   }
 
   void addComponents(const QVector<NodeComponentType*>& components)
