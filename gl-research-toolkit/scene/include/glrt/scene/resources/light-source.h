@@ -53,6 +53,7 @@ struct LightSource final
     friend SphereAreaLight operator*(const CoordFrame& t, SphereAreaLight data)
     {
       data.areaLightCommon = t * data.areaLightCommon;
+      data.radius = t.scaleFactor * data.radius;
 
       return data;
     }
@@ -71,6 +72,8 @@ struct LightSource final
     friend RectAreaLight operator*(const CoordFrame& frame, RectAreaLight data)
     {
       data.areaLightCommon = frame * data.areaLightCommon;
+      data.half_width = frame.scaleFactor * data.half_width;
+      data.half_height = frame.scaleFactor * data.half_height;
       data.tangent1 = frame.transform_direction(data.tangent1);
       data.tangent2 = frame.transform_direction(data.tangent2);
 
