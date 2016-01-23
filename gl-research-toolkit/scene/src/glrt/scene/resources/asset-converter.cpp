@@ -235,7 +235,6 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
                                            aiProcess_ValidateDataStructure |
                                            aiProcess_RemoveRedundantMaterials |
                                            aiProcess_OptimizeMeshes |
-                                           aiProcess_OptimizeGraph |
                                            aiProcess_ImproveCacheLocality |
                                            aiProcess_FindDegenerates  |
                                            aiProcess_FindInvalidData  |
