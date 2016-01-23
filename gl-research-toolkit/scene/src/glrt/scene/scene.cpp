@@ -43,8 +43,6 @@ Scene::~Scene()
 
 void Scene::clear()
 {
-  clearScene();
-
   // the destructor of a scene layers removes the layer from the _layers hash.
   // So the list of all layers have to be copied in order to be able to go with
   // a foreach loop over it.
@@ -88,6 +86,10 @@ void Scene::load(const Uuid<Scene>& scene)
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
   angelScriptEngine->GarbageCollect();
+
+  bool success = true; // #FIXME: really find out, whether this was a success
+  sceneLoadedExt(this, success);
+  sceneLoaded(success);
 }
 
 void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)
