@@ -174,14 +174,17 @@ void Renderer::Pass::renderStaticMeshes()
 
   mesh= meshInstanceRange->mesh;
   mesh->bind(renderer.staticMeshVertexArrayObject);
-  materialBuffer.bind(0);
+
+  int material = 0;
+  materialBuffer.bind(material);
 
   for(int i=0; i<N; ++i)
   {
     if(materialInstanceRange->end == i)
     {
       ++materialInstanceRange;
-      materialBuffer.bind(1);
+      ++material;
+      materialBuffer.bind(material);
     }
     if(meshInstanceRange->end == i)
     {
@@ -199,11 +202,65 @@ void Renderer::Pass::renderStaticMeshes()
   renderer.staticMeshVertexArrayObject.ResetBinding();
 }
 
+struct Renderer::Pass::StaticMeshBufferVerification
+{
+  QHash<int, Uuid<Material>> materials;
+  QHash<int, Uuid<StaticMesh>> meshes;
+
+  struct Instance
+  {
+    int material;
+    int mesh;
+  };
+
+  QVector<Instance> instances;
+
+  void appendMaterial(const Uuid<Material>& material)
+  {
+    materials[materials.size()] = material;
+  }
+
+  void appendStaticMesh(const Uuid<StaticMesh>& mesh)
+  {
+    meshes[meshes.size()] = mesh;
+  }
+
+  void addInstance()
+  {
+    instances.push_back(Instance{materials.size()-1, meshes.size()-1});
+  }
+
+  void verify(const QVector<scene::StaticMeshComponent*>& comparison,
+              const QVector<MaterialInstanceRange>& materialRanges,
+              const QVector<MeshRange>& meshRanges) const
+  {
+    Q_ASSERT(comparison.length() == instances.length());
+    Q_ASSERT(materialRanges.length() == materials.size());
+    Q_ASSERT(meshRanges.length() == meshes.size());
+
+    for(int i=0; i<comparison.length(); ++i)
+    {
+      Q_ASSERT(comparison[i]->materialUuid == materials[instances[i].material]);
+      Q_ASSERT(comparison[i]->staticMeshUuid == meshes[instances[i].mesh]);
+    }
+
+    for(int i=0; i<materialRanges.size(); ++i)
+      for(int j=materialRanges[i].begin; j<materialRanges[i].end; ++j)
+        Q_ASSERT(instances[j].material == i);
+
+    for(int i=0; i<meshRanges.size(); ++i)
+      for(int j=meshRanges[i].begin; j<meshRanges[i].end; ++j)
+        Q_ASSERT(instances[j].mesh == i);
+  }
+};
+
 inline void Renderer::Pass::updateCache()
 {
   if(!isDirty)
     return;
   isDirty = false;
+
+  StaticMeshBufferVerification verification;
 
   scene::Scene& scene = renderer.scene;
 
@@ -222,15 +279,11 @@ inline void Renderer::Pass::updateCache()
     meshRanges.reserve(allStaticMeshComponents.length());
     transformations.reserve(allStaticMeshComponents.length());
 
-    materialInstanceRanges.push_back(MaterialInstanceRange{0, 1});
-    meshRanges.push_back(MeshRange(MeshRange{renderer.staticMeshBufferManager.meshForUuid(allStaticMeshComponents[0]->staticMeshUuid), 0, 1}));
-
-    MaterialInstanceRange* lastMaterialInstanceRange = &materialInstanceRanges[materialInstanceRanges.size()-1];
-    MeshRange* lastMeshRange = &meshRanges[meshRanges.size()-1];
-    Uuid<Material> lastMaterial = allStaticMeshComponents[0]->materialUuid;
+    MeshRange* lastMeshRange = nullptr;
+    MaterialInstanceRange* lastMaterialInstanceRange = nullptr;
+    Uuid<StaticMesh> lastMesh;
+    Uuid<Material> lastMaterial;
     MaterialBuffer::Initializer materials(materialBuffer, allStaticMeshComponents.length());
-
-    materials.append(allStaticMeshComponents[0]->material());
 
     for(int i=0; i<allStaticMeshComponents.size(); ++i)
     {
@@ -241,20 +294,28 @@ inline void Renderer::Pass::updateCache()
       if(staticMeshComponent->materialUuid != lastMaterial)
       {
         materials.append(staticMeshComponent->material());
+        verification.appendMaterial(staticMeshComponent->materialUuid);
         materialInstanceRanges.push_back(MaterialInstanceRange{i, i+1});
         lastMaterialInstanceRange = &materialInstanceRanges[materialInstanceRanges.size()-1];
       }
 
       StaticMeshBuffer* currentStaticMesh = renderer.staticMeshBufferManager.meshForUuid(staticMeshComponent->staticMeshUuid);
-      if(currentStaticMesh != lastMeshRange->mesh)
+      if(staticMeshComponent->staticMeshUuid != lastMesh)
       {
+        verification.appendStaticMesh(staticMeshComponent->staticMeshUuid);
         meshRanges.push_back(MeshRange(MeshRange{currentStaticMesh, i, i+1}));
         lastMeshRange = &meshRanges[meshRanges.size()-1];
       }
 
+      Q_ASSERT(lastMeshRange!=nullptr);
+      Q_ASSERT(lastMaterialInstanceRange!=nullptr);
+
+      verification.addInstance();
       lastMaterialInstanceRange->end = i+1;
       lastMeshRange->end = i+1;
     }
+
+    verification.verify(allStaticMeshComponents, materialInstanceRanges, meshRanges);
 
     staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
   }

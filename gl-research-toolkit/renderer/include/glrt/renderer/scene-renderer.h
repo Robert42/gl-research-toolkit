@@ -104,6 +104,7 @@ private:
 
   quint64 _cachedStaticStructureCacheIndex = 0;
 
+  // #TODO rename MaterialInstanceRange to MaterialRange
   struct MaterialInstanceRange
   {
     int begin, end;
@@ -113,6 +114,8 @@ private:
     StaticMeshBuffer* mesh;
     int begin, end;
   };
+
+  struct StaticMeshBufferVerification;
 
   MaterialBuffer materialBuffer;
 
