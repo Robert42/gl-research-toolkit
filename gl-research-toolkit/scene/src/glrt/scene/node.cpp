@@ -21,7 +21,8 @@ inline Node* create_node(SceneLayer* scenelayer, const Uuid<Node>& uuid)
 
 Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
   : sceneLayer(sceneLayer),
-    uuid(uuid)
+    uuid(uuid),
+    _rootComponent(nullptr)
 {
   if(sceneLayer._nodes.contains(uuid))
     throw GLRT_EXCEPTION("Same uuid used twice");
