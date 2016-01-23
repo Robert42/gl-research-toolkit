@@ -192,7 +192,7 @@ public:
         if(connections.contains(component))
           continue;
 
-        //connections[component] = QObject::connect(component, &QObject::destroyed, std::bind(&this_type::handleDeletedComponent, this, std::placeholders::_1)); #FIXME
+        connections[component] = QObject::connect(component, &QObject::destroyed, std::bind(&this_type::handleDeletedComponent, this, std::placeholders::_1));
         movableComponents.append(component);
       }else
       {

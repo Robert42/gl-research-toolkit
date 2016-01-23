@@ -37,6 +37,7 @@ Node::~Node()
   QVector<ModularAttribute*> allModularAttributes = this->allModularAttributes();
   for(ModularAttribute* a : allModularAttributes)
     delete a;
+  // #TODO instead of deleting it manually, use the QObject system?
   Q_ASSERT(this->allModularAttributes().isEmpty());
 
   Component* rootComponent = this->rootComponent();

@@ -44,8 +44,9 @@ private:
 };
 
 
-class Node::ModularAttribute
+class Node::ModularAttribute : public QObject
 {
+  Q_OBJECT
 public:
   Node& entity;
   const Uuid<ModularAttribute> uuid;
@@ -55,8 +56,9 @@ public:
 };
 
 
-class Node::Component
+class Node::Component : public QObject
 {
+  Q_OBJECT
 public:
   Node& node;
   const Uuid<Component> uuid;
