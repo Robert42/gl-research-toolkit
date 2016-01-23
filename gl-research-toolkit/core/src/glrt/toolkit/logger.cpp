@@ -101,6 +101,7 @@ void Logger::messageHandler(QtMsgType msgType,
       logger->logStream.writeEndElement();
       logger->logStream.writeEmptyElement("br");
       logger->logStream.writeEmptyElement("br");
+      getLogFile()->flush();
   }
 
   bool alreadyHandeled = false;
