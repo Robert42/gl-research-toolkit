@@ -135,7 +135,7 @@ bool orderByDrawCall(const scene::StaticMeshComponent* a, const scene::StaticMes
   if(a->staticMeshUuid > b->staticMeshUuid)
     return false;
 
-  return a < b;
+  return a->uuid < b->uuid;
 }
 
 
@@ -212,7 +212,7 @@ inline void Renderer::Pass::updateCache()
 
   QVector<scene::StaticMeshComponent*> allStaticMeshComponents = glrt::scene::collectAllComponentsWithType<glrt::scene::StaticMeshComponent>(&scene, allowOnly(this->type, false));
 
-  qSort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
+  std::sort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
 
   clearCache();
 
