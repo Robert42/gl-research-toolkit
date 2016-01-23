@@ -104,8 +104,7 @@ private:
 
   quint64 _cachedStaticStructureCacheIndex = 0;
 
-  // #TODO rename MaterialInstanceRange to MaterialRange
-  struct MaterialInstanceRange
+  struct MaterialRange
   {
     int begin, end;
   };
@@ -119,7 +118,7 @@ private:
 
   MaterialBuffer materialBuffer;
 
-  QVector<MaterialInstanceRange> materialInstanceRanges;
+  QVector<MaterialRange> materialRanges;
   QVector<MeshRange> meshRanges;
   QSharedPointer<gl::Buffer> staticMeshInstance_Uniforms;
   GLint meshInstanceUniformOffset = 0;

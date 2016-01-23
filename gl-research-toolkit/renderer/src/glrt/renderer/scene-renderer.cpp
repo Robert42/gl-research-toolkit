@@ -155,19 +155,19 @@ void Renderer::Pass::render()
 
 void Renderer::Pass::renderStaticMeshes()
 {
-  if(materialInstanceRanges.empty())
+  if(materialRanges.empty())
     return;
 
   glEnable(GL_CULL_FACE);
 
-  const int N = materialInstanceRanges[materialInstanceRanges.size()-1].end;
+  const int N = materialRanges[materialRanges.size()-1].end;
 
   this->shader.shaderObject.Activate();
 
   renderer.staticMeshVertexArrayObject.Bind();
   renderer.directLights().bindShaderStoreageBuffers();
 
-  MaterialInstanceRange* materialInstanceRange = &materialInstanceRanges[0];
+  MaterialRange* materialInstanceRange = &materialRanges[0];
   MeshRange* meshInstanceRange = &meshRanges[0];
   gl::Buffer* buffer = staticMeshInstance_Uniforms.data();
   StaticMeshBuffer* mesh;
@@ -231,7 +231,7 @@ struct Renderer::Pass::StaticMeshBufferVerification
   }
 
   void verify(const QVector<scene::StaticMeshComponent*>& comparison,
-              const QVector<MaterialInstanceRange>& materialRanges,
+              const QVector<MaterialRange>& materialRanges,
               const QVector<MeshRange>& meshRanges) const
   {
     Q_ASSERT(comparison.length() == instances.length());
@@ -275,12 +275,12 @@ inline void Renderer::Pass::updateCache()
 
   if(!allStaticMeshComponents.isEmpty())
   {
-    materialInstanceRanges.reserve(allStaticMeshComponents.length());
+    materialRanges.reserve(allStaticMeshComponents.length());
     meshRanges.reserve(allStaticMeshComponents.length());
     transformations.reserve(allStaticMeshComponents.length());
 
     MeshRange* lastMeshRange = nullptr;
-    MaterialInstanceRange* lastMaterialInstanceRange = nullptr;
+    MaterialRange* lastMaterialInstanceRange = nullptr;
     Uuid<StaticMesh> lastMesh;
     Uuid<Material> lastMaterial;
     MaterialBuffer::Initializer materials(materialBuffer, allStaticMeshComponents.length());
@@ -295,8 +295,8 @@ inline void Renderer::Pass::updateCache()
       {
         materials.append(staticMeshComponent->material());
         verification.appendMaterial(staticMeshComponent->materialUuid);
-        materialInstanceRanges.push_back(MaterialInstanceRange{i, i+1});
-        lastMaterialInstanceRange = &materialInstanceRanges[materialInstanceRanges.size()-1];
+        materialRanges.push_back(MaterialRange{i, i+1});
+        lastMaterialInstanceRange = &materialRanges[materialRanges.size()-1];
       }
 
       StaticMeshBuffer* currentStaticMesh = renderer.staticMeshBufferManager.meshForUuid(staticMeshComponent->staticMeshUuid);
@@ -315,7 +315,7 @@ inline void Renderer::Pass::updateCache()
       lastMeshRange->end = i+1;
     }
 
-    verification.verify(allStaticMeshComponents, materialInstanceRanges, meshRanges);
+    verification.verify(allStaticMeshComponents, materialRanges, meshRanges);
 
     staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
   }
@@ -324,7 +324,7 @@ inline void Renderer::Pass::updateCache()
 void Renderer::Pass::clearCache()
 {
   staticMeshInstance_Uniforms.clear();
-  materialInstanceRanges.clear();
+  materialRanges.clear();
   materialBuffer.clear();
   meshRanges.clear();
 }
