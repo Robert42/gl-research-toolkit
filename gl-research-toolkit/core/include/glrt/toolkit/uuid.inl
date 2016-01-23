@@ -64,32 +64,28 @@ bool Uuid<T>::operator!=(const this_type& other) const
 template<class T>
 bool Uuid<T>::operator<(const this_type& other) const
 {
-  // #FIXME: use QUuid::operator<
-  return this->_index.index < other._index.index;
+  return this->toQUuid() < other.toQUuid();
 }
 
 
 template<class T>
 bool Uuid<T>::operator>(const this_type& other) const
 {
-  // #FIXME: use QUuid::operator>
-  return this->_index.index > other._index.index;
+  return this->toQUuid() > other.toQUuid();
 }
 
 
 template<class T>
 bool Uuid<T>::operator<=(const this_type& other) const
 {
-  // #FIXME: use QUuid::operator<=
-  return this->_index.index <= other._index.index;
+  return this->toQUuid() <= other.toQUuid();
 }
 
 
 template<class T>
 bool Uuid<T>::operator>=(const this_type& other) const
 {
-  // #FIXME: use QUuid::operator>=
-  return this->_index.index >= other._index.index;
+  return this->toQUuid() >= other.toQUuid();
 }
 
 
