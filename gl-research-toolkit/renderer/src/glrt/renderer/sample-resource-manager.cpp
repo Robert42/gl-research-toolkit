@@ -27,6 +27,12 @@ Uuid<scene::Scene> SampleResourceManager::cornellBoxScene()
 }
 
 
+Uuid<scene::Scene> SampleResourceManager::cornellBoxRoughnessScene()
+{
+  return Uuid<scene::Scene>("{297e2f65-220b-42d7-ae10-1b9b45a75f7c}");
+}
+
+
 } // namespace renderer
 } // namespace glrt
 

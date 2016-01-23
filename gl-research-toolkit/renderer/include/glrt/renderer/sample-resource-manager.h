@@ -15,6 +15,7 @@ public:
   StaticMeshBufferManager* staticMeshBufferManager;
 
   static Uuid<scene::Scene> cornellBoxScene();
+  static Uuid<scene::Scene> cornellBoxRoughnessScene();
 
   SampleResourceManager();
   ~SampleResourceManager();

@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   antweakbar.createDebugShaderBar(&shaderDebugPrinter);
   antweakbar.createProfilerBar(&app.profiler);
 
-  scene.load(glrt::renderer::SampleResourceManager::cornellBoxScene());
+  scene.load(glrt::renderer::SampleResourceManager::cornellBoxRoughnessScene());
 
   app.showWindow();
 
