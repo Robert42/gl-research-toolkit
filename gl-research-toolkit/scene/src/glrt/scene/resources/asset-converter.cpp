@@ -27,6 +27,15 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
   return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
 }
 
+inline CoordFrame assimp_global_transformation(const aiNode* node, const aiScene* scene)
+{
+  CoordFrame p;
+  if(node->mParent != nullptr && node->mParent != scene->mRootNode)
+    p = assimp_global_transformation(node->mParent, scene);
+
+  return p * CoordFrame(node->mTransformation);
+}
+
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed);
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings& settings);
 
@@ -275,7 +284,6 @@ struct SceneGraphImportAssets
   QVector<StaticMesh> meshData;
   QHash<QString, QSet<quint32>> meshInstances;
   QVector<Uuid<StaticMesh>> meshes;
-  bool indexed = true;
 
   QHash<QString, Uuid<LightSource>> lightUuids;
 
@@ -283,6 +291,7 @@ struct SceneGraphImportAssets
   QHash<QString, aiNode*> nodes;
 
   QHash<QUuid, QString> labels;
+  bool indexed = true;
 };
 
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
@@ -585,7 +594,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
       if(isUsingComponent)
       {
-        CoordFrame frame(assimp_node->mTransformation);
+        CoordFrame frame(assimp_global_transformation(assimp_node, scene));
         outputStream << "  node.rootComponent.localTransformation = "<< frame.as_angelscript_fast() <<";\n";
       }
     }
