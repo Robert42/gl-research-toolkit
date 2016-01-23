@@ -20,8 +20,11 @@ inline QFile* getLogFile()
 {
   static QFile file(getLogFilePath());
 
-  if(!file.open(QFile::WriteOnly))
-    Q_ASSERT("Failed to open the logfile for writing");
+  if(!file.isOpen())
+  {
+    if(!file.open(QFile::WriteOnly))
+      Q_ASSERT("Failed to open the logfile for writing");
+  }
 
   return &file;
 }
