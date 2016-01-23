@@ -47,6 +47,8 @@ private:
   bool handleWindowEvent(const SDL_WindowEvent& event);
   bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
 
+  void initAssimp();
+  void deinitAssimp();
   void initAngelScript();
   void deinitAngelScript();
 };

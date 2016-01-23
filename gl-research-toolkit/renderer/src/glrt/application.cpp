@@ -5,6 +5,8 @@
 
 #include <glhelper/gl.hpp>
 
+#include <assimp/DefaultLogger.hpp>
+
 #include <sdk/add_on/scriptstdstring/scriptstdstring.h>
 #include <sdk/add_on/scriptarray/scriptarray.h>
 #include <sdk/add_on/scriptdictionary/scriptdictionary.h>
@@ -19,6 +21,7 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
     isRunning(true)
 {
   initAngelScript();
+  initAssimp();
 
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
@@ -28,6 +31,7 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
 
 Application::~Application()
 {
+  deinitAssimp();
   deinitAngelScript();
 }
 
@@ -154,6 +158,43 @@ void Application::deinitAngelScript()
 {
   scriptEngine->ShutDownAndRelease();
   glrt::angelScriptEngine = this->scriptEngine = nullptr;
+}
+
+void Application::initAssimp()
+{
+  class QDebugLogger : public Assimp::Logger
+  {
+  public:
+    void OnDebug(const char* message) override
+    {
+      qDebug() << "Assimp: " << message;
+    }
+    void OnInfo(const char* message) override
+    {
+      qInfo() << "Assimp: " << message;
+    }
+    void OnWarn(const char* message) override
+    {
+      qWarning() << "Assimp: " << message;
+    }
+    void OnError(const char* message) override
+    {
+      qCritical() << "Assimp: " << message;
+    }
+    bool attachStream(Assimp::LogStream*,unsigned int) override
+    {
+      return false;
+    }
+    bool detatchStream(Assimp::LogStream*,unsigned int) override
+    {
+      return false;
+    }
+  };
+  Assimp::DefaultLogger::set(new QDebugLogger);
+}
+
+void Application::deinitAssimp()
+{
 }
 
 } // namespace glrt
