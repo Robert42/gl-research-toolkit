@@ -38,6 +38,12 @@ void MaterialBuffer::bind(int i)
   buffer->BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, i*blockOffset, dataSize);
 }
 
+void MaterialBuffer::clear()
+{
+  delete buffer;
+  buffer = nullptr;
+}
+
 
 template<typename T>
 void MaterialBuffer::initBlockOffset()
@@ -57,7 +63,7 @@ MaterialBuffer::Initializer::Initializer(MaterialBuffer& buffer, int expectedNum
 
 MaterialBuffer::Initializer::~Initializer()
 {
-  delete buffer.buffer;
+  buffer.clear();
   buffer.buffer = new gl::Buffer(data.length(), gl::Buffer::UsageFlag::IMMUTABLE, data.data());
 }
 

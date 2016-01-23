@@ -264,6 +264,7 @@ void Renderer::Pass::clearCache()
 {
   staticMeshInstance_Uniforms.clear();
   materialInstanceRanges.clear();
+  materialBuffer.clear();
   meshRanges.clear();
 }
 

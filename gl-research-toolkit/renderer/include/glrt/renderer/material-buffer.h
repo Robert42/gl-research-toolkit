@@ -30,6 +30,7 @@ public:
   MaterialBuffer&operator=(MaterialBuffer&&)=delete;
 
   void bind(int i);
+  void clear();
 
 private:
   gl::Buffer* buffer;
