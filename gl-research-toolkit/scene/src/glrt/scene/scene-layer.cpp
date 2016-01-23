@@ -36,6 +36,7 @@ SceneLayer::SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene)
     throw GLRT_EXCEPTION("Same uuid used twice");
 
   scene._layers[uuid] = this;
+  scene.resourceManager._sceneLayers.append(this);
 }
 
 SceneLayer::~SceneLayer()
@@ -43,6 +44,8 @@ SceneLayer::~SceneLayer()
   scene._layers.remove(uuid);
 
   // #TODO: delete all nodes
+
+  scene.resourceManager._sceneLayers.removeAll(this);
 }
 
 QList<Node*> SceneLayer::allNodes() const

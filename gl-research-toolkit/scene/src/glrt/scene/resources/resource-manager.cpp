@@ -34,14 +34,9 @@ QList<Uuid<Scene> > ResourceManager::allRegisteredScenes()
   return uuids;
 }
 
-QString ResourceManager::labelForResourceUuid(const QUuid& uuid, const QString& fallback) const
-{
-  return indexForResourceUuid(uuid)->labels.value(uuid, fallback);
-}
-
 QString ResourceManager::labelForResourceUuid(const QUuid& uuid) const
 {
-  return indexForResourceUuid(uuid)->labels.value(uuid, uuid.toString());
+  return labelForResourceUuid(uuid, uuid.toString());
 }
 
 LightSource ResourceManager::lightSourceForUuid(const Uuid<LightSource>& uuid) const
@@ -83,6 +78,23 @@ QList<const ResourceIndex*> ResourceManager::allIndices() const
   foreachIndex([&all](const Index* index){all.append(index);return false;});
 
   return all;
+}
+
+QString ResourceManager::labelForResourceUuid(const QUuid& uuid, const QString& fallback) const
+{
+  QString returnedLabel = fallback;
+
+  foreachIndex([&returnedLabel, &uuid](const Index* index){
+    auto i = index->labels.find(uuid);
+    if(i != index->labels.end())
+    {
+      returnedLabel = i.value();
+      return true;
+    }
+    return false;
+  });
+
+  return returnedLabel;
 }
 
 const ResourceIndex* ResourceManager::indexForResourceUuid(const QUuid& uuid, const Index* fallback) const

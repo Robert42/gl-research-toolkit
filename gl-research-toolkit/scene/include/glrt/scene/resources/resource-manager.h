@@ -8,6 +8,7 @@ namespace glrt {
 namespace scene {
 
 class Scene;
+class SceneLayer;
 
 namespace resources {
 
@@ -49,7 +50,7 @@ protected:
   virtual bool foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const = 0;
 
 private:
-  friend class SceneLayer;
+  friend class glrt::scene::SceneLayer;
   QList<SceneLayer*> _sceneLayers;
 };
 
