@@ -89,10 +89,12 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
 
   // #TODO uncomment
   //if(shouldConvert(sceneGraphFile, sourceFile))
+  /*
   {
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
     convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, uuid, settings);
   }
+  */
 }
 
 

@@ -80,8 +80,9 @@ private:
 };
 
 
-class Renderer::Pass final
+class Renderer::Pass final : public QObject
 {
+  Q_OBJECT
 public:
   const scene::resources::Material::Type type;
   Renderer& renderer;
@@ -98,6 +99,9 @@ public:
 
 public:
   void render();
+
+public slots:
+  void markDirty();
 
 private:
   typedef glm::mat4 MeshInstanceUniform;
