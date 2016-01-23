@@ -66,10 +66,12 @@ QString ResourceManager::sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, con
 
 void ResourceManager::foreachIndex(const std::function<bool(const Index* index)>& lambda) const
 {
-  foreachIndexImpl(lambda);
+  if(foreachIndexImpl(lambda))
+    return;
 
   for(const SceneLayer* sceneLayer : _sceneLayers)
-    lambda(&sceneLayer->index);
+    if(lambda(&sceneLayer->index))
+      return;
 
   lambda(&Index::fallback);
 }

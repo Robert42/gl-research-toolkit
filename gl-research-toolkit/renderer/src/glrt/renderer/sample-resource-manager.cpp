@@ -15,9 +15,9 @@ SampleResourceManager::~SampleResourceManager()
 {
 }
 
-void SampleResourceManager::foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const
+bool SampleResourceManager::foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const
 {
-  lambda(&index);
+  return lambda(&index);
 }
 
 

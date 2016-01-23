@@ -46,7 +46,7 @@ public:
   const Index* indexForResourceUuid(const QUuid& uuid, const Index* fallback=&Index::fallback) const;
 
 protected:
-  virtual void foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const = 0;
+  virtual bool foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const = 0;
 
 private:
   friend class SceneLayer;

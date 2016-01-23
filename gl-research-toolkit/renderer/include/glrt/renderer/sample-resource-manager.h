@@ -21,7 +21,7 @@ public:
   ~SampleResourceManager();
 
 protected:
-  void foreachIndexImpl(const std::function<bool(const Index*)>& lambda) const final override;
+  bool foreachIndexImpl(const std::function<bool(const Index*)>& lambda) const final override;
 };
 
 } // namespace renderer
