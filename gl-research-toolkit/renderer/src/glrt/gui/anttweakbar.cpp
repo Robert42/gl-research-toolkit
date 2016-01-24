@@ -167,6 +167,8 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 
 bool AntTweakBar::handleEvents(const SDL_Event& event)
 {
+  PROFILE_SCOPE("AntTweakBar (Events)")
+
   if(visible && TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION))
   {
     handeledEvent(event);
@@ -247,7 +249,7 @@ bool AntTweakBar::unhandeledEvent(const SDL_Event& event)
 
 void AntTweakBar::draw()
 {
-  PROFILE_SCOPE(AntTweakBar)
+  PROFILE_SCOPE("AntTweakBar (Draw)")
 
   if(visible)
     TwDraw();

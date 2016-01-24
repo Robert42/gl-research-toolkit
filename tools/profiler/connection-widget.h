@@ -27,12 +27,12 @@ signals:
 private:
   enum Column
   {
+    COLUMN_NAME,
     COLUMN_CPU_TIME,
     COLUMN_GPU_TIME,
-    COLUMN_FILE,
     COLUMN_FUNCTION,
-    COLUMN_NAME,
     COLUMN_LINE,
+    COLUMN_FILE,
     N_COLUMNS
   };
 
@@ -66,6 +66,9 @@ private:
   QAbstractItemModel* createModel();
   void sendModelStartChangeSignal();
   void sendModelChangedEndSignal();
+
+  void printReceivedData();
+  void print(const DataLine& dataLine);
 
 private slots:
   void dataReceived();

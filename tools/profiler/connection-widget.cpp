@@ -3,6 +3,8 @@
 
 #include <glrt/toolkit/network.h>
 
+const quint64 MAX_TIME = std::numeric_limits<quint64>::max();
+
 ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
   QWidget(parent),
   applicationName("Connected Game"),
@@ -12,6 +14,12 @@ ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
   ui->setupUi(this);
 
   ui->treeView->setModel(this->createModel());
+  ui->treeView->setColumnWidth(COLUMN_NAME, (ui->treeView->columnWidth(COLUMN_NAME)*6)/4);
+  ui->treeView->setColumnWidth(COLUMN_CPU_TIME, ui->treeView->columnWidth(COLUMN_CPU_TIME)/2);
+  ui->treeView->setColumnWidth(COLUMN_GPU_TIME, ui->treeView->columnWidth(COLUMN_GPU_TIME)/2);
+  ui->treeView->setColumnWidth(COLUMN_FUNCTION, (ui->treeView->columnWidth(COLUMN_FUNCTION)*5)/2);
+  ui->treeView->setColumnWidth(COLUMN_LINE, ui->treeView->columnWidth(COLUMN_LINE)/2);
+  ui->treeView->setColumnWidth(COLUMN_FILE, ui->treeView->columnWidth(COLUMN_FILE)*2);
 
   connect(tcpSocket, SIGNAL(aboutToClose()), this, SLOT(deleteLater()));
   connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
@@ -126,11 +134,13 @@ class ConnectionWidget::DataModel : public QAbstractItemModel
 public:
   QVector<DataLine>& currentData;
   const QHash<quintptr, QString>& strings;
+  ConnectionWidget* widget;
 
   DataModel(ConnectionWidget* w)
     : QAbstractItemModel(w),
       currentData(w->currentData),
-      strings(w->strings)
+      strings(w->strings),
+      widget(w)
   {
   }
 
@@ -173,11 +183,12 @@ public:
 
     while(childRow<=lastRow && childRow->depth>=expectedDepth)
     {
-      if(r == row)
-        return createIndex(row, column, childRow);
-
       if(childRow->depth == expectedDepth)
+      {
+        if(r == row)
+          return createIndex(row, column, childRow);
         r++;
+      }
       childRow++;
     }
 
@@ -192,30 +203,32 @@ public:
     DataLine* childRow = const_cast<DataLine*>(reinterpret_cast<const DataLine*>(child.internalPointer()));
 
     DataLine* firstRow = currentData.data();
-    DataLine* row = childRow;
 
-    while(row >= firstRow)
+    if(firstRow == childRow)
+      return QModelIndex();
+
+    DataLine* row = childRow-1;
+
+    while(row >= firstRow && row->depth >= childRow->depth)
     {
-      if(row->depth == childRow->depth-1)
-        break;
-
       row--;
     }
 
+    if(row < firstRow)
+      return QModelIndex();
+
     DataLine* parentRow = row;
     int rowIndex = 0;
+    row--;
 
-    while(row >= firstRow)
+    while(row >= firstRow && row->depth >= parentRow->depth)
     {
-      if(row->depth == parentRow->depth-1)
-        return createIndex(rowIndex, child.column(), parentRow);
-
       if(row->depth == parentRow->depth)
         rowIndex++;
       row--;
     }
 
-    return QModelIndex();
+    return createIndex(rowIndex, child.column(), parentRow);
   }
 
   int rowCount(const QModelIndex& parent) const override
@@ -227,11 +240,12 @@ public:
 
     DataLine* lastRow = &currentData.last();
     int expectedDepth = dataLine->depth;
-    int nRows = 1;
+    int nRows = 0;
 
     while(lastRow>=dataLine && dataLine->depth>=expectedDepth)
     {
-      lastRow++;
+      if(dataLine->depth == expectedDepth)
+        nRows++;
       dataLine++;
     }
 
@@ -255,9 +269,9 @@ public:
       switch(index.column())
       {
       case COLUMN_CPU_TIME:
-        return QVariant(data.cpuTime);
+        return data.cpuTime!=MAX_TIME ? QVariant(data.cpuTime) : QVariant(QString("-"));
       case COLUMN_GPU_TIME:
-        return QVariant(data.gpuTime);
+        return data.gpuTime!=MAX_TIME ? QVariant(data.gpuTime) : QVariant(QString("-"));
       case COLUMN_FILE:
         return QVariant(QFileInfo(strings.value(data.file, "???")).fileName());
       case COLUMN_FUNCTION:
@@ -281,6 +295,53 @@ public:
     }
 
     return QVariant();
+  }
+
+  QVariant headerData(int section, Qt::Orientation, int role) const override
+  {
+    if(role != Qt::DisplayRole)
+      return QVariant();
+    switch(section)
+    {
+    case COLUMN_CPU_TIME:
+      return QVariant(QString("CPU"));
+    case COLUMN_GPU_TIME:
+      return QVariant(QString("GPU"));
+    case COLUMN_FILE:
+      return QVariant(QString("File"));
+    case COLUMN_FUNCTION:
+      return QVariant(QString("Function"));
+    case COLUMN_NAME:
+      return QVariant(QString("Name"));
+    case COLUMN_LINE:
+      return QVariant(QString("Line"));
+    default:
+      return QVariant();
+    }
+  }
+
+  void print(const QModelIndex& index=QModelIndex())
+  {
+    if(index.isValid())
+    {
+      widget->print(*reinterpret_cast<const DataLine*>(index.internalPointer()));
+    }else
+    {
+      qDebug() << "//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\\\\";
+    }
+
+    int nRows = rowCount(index);
+
+    for(int i=0; i<nRows; ++i)
+    {
+      QModelIndex child = this->index(i, 0, index);
+      if(parent(child) != index)
+        qCritical() << "!!!!!!!!!!!!!Parent/Child mismatch!!!!!!!!!!!!";
+      print(child);
+    }
+
+    if(!index.isValid())
+      qDebug() << "\\\\++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//\n\n";
   }
 
   void sendModelStartChangeSignal()
@@ -307,4 +368,34 @@ void ConnectionWidget::sendModelStartChangeSignal()
 void ConnectionWidget::sendModelChangedEndSignal()
 {
   model->sendModelChangedEndSignal();
+  ui->treeView->expandAll();
+
+  //printReceivedData();
+  //model->print();
+}
+
+void ConnectionWidget::printReceivedData()
+{
+  qDebug() << "//----------------------------------------------------------------------------\\\\";
+  for(const DataLine& data : currentData)
+    print(data);
+  qDebug() << "\\\\----------------------------------------------------------------------------//\n\n";
+}
+
+void ConnectionWidget::print(const DataLine& data)
+{
+  QString line;
+
+  for(int i=0; i<data.depth; ++i)
+    line += "    ";
+
+  std::string str = QString("%0%1  %2  %3 `%4` `%5` %6")
+                    .arg(line)
+                    .arg(strings.value(data.name, "???"))
+                    .arg(data.cpuTime!=MAX_TIME ? QString("%0").arg(data.cpuTime) : QString("--"))
+                    .arg(data.gpuTime!=MAX_TIME ? QString("%1").arg(data.gpuTime) : QString("--"))
+                    .arg(strings.value(data.function, "???"))
+                    .arg(strings.value(data.file, "???"))
+                    .arg(data.line).toStdString();
+  qDebug() << str.c_str();
 }
