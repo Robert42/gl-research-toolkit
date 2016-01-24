@@ -46,7 +46,8 @@ Profiler* Profiler::activeProfiler = nullptr;
 
 
 Profiler::Profiler(const QString& applicationName)
-  : applicationName(applicationName)
+  : applicationName(applicationName),
+    currentDepth(0)
 {
   connect(&tcpSocket, &QTcpSocket::disconnected, this, &Profiler::deactivate);
   connect(&tcpSocket, &QTcpSocket::readyRead, this, &Profiler::readStringsToWrite);
@@ -64,16 +65,17 @@ float Profiler::update()
   float elapsedTime = timer.restart();
 
 #ifdef GLRT_PROFILER
-  recordedScopes.clear();
   if(this->isActive())
   {
-    recordedScopes.reserve(2048);
+    send_data_through_tcp(elapsedTime);
 
     if(printFramerate)
       qDebug() << 1.f / timer.elapsedTimeAsSeconds();
 
-    send_data_through_tcp(elapsedTime);
   }
+  recordedScopes.clear();
+  recordedScopes.reserve(2048);
+  currentDepth = 0;
 #endif
 
   return elapsedTime;

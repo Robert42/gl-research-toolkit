@@ -247,6 +247,8 @@ bool AntTweakBar::unhandeledEvent(const SDL_Event& event)
 
 void AntTweakBar::draw()
 {
+  PROFILE_SCOPE(AntTweakBar)
+
   if(visible)
     TwDraw();
 }
