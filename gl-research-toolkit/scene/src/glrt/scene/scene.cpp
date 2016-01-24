@@ -1,8 +1,10 @@
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-layer.h>
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
+#include <glrt/scene/resources/resource-manager.h>
+#include <glrt/scene/collect-scene-data.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
-#include <glrt/toolkit/json.h>
 
 #include <QFile>
 #include <QDirIterator>
@@ -11,14 +13,27 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include <angelscript-integration/call-script.h>
+
 namespace glrt {
 namespace scene {
+
+using AngelScriptIntegration::AngelScriptCheck;
+
+
+resources::ResourceManager* get_resourceManager(Scene* scene)
+{
+  return &scene->resourceManager;
+}
 
 
 // ======== Scene ==============================================================
 
-
-Scene::Scene()
+/*!
+\warning The resourceManager instance must live longer than this scene instance
+*/
+Scene::Scene(resources::ResourceManager* resourceManager)
+  : resourceManager(*resourceManager)
 {
 }
 
@@ -29,20 +44,17 @@ Scene::~Scene()
 
 void Scene::clear()
 {
-  clearScene();
+  this->uuid = Uuid<Scene>();
+
+  // the destructor of a scene layers removes the layer from the _layers hash.
+  // So the list of all layers have to be copied in order to be able to go with
+  // a foreach loop over it.
+  QList<SceneLayer*> layers = _layers.values();
+  _layers.clear();
+  for(SceneLayer* l : layers)
+    delete l;
 
   sceneCleared();
-}
-
-
-QString Scene::labelForUuid(const QUuid& uuid) const
-{
-  auto i = _labels.find(uuid);
-
-  if(i != _labels.end())
-    return i.value();
-
-  return uuid.toString();
 }
 
 
@@ -58,65 +70,73 @@ void Scene::update(float deltaTime)
 }
 
 
-const QVector<Entity*>& Scene::allEntities()
+QList<SceneLayer*> Scene::allLayers()
 {
-  return _entities;
+  return _layers.values();
 }
 
 
-QMap<QString, QString> Scene::findAllScenes()
+void Scene::load(const Uuid<Scene>& scene)
 {
-  SPLASHSCREEN_MESSAGE("search Scenes");
+  SPLASHSCREEN_MESSAGE("Loading Scene");
+  clear();
 
-  QMap<QString, QString> map;
+  this->uuid = scene;
 
-  QDirIterator dirIterator(QDir(GLRT_ASSET_DIR), QDirIterator::Subdirectories|QDirIterator::FollowSymlinks);
+  std::string filename = this->resourceManager.sceneFileForUuid(scene).toStdString();
 
-  while(dirIterator.hasNext())
-  {
-    QDir dir = dirIterator.next();
+  AngelScriptIntegration::ConfigCallScript config;
+  config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
 
-    if(dir.dirName() == ".")
-      continue;
+  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
-    for(const QFileInfo& fileInfo : dir.entryList({"*.scene"}, QDir::Dirs|QDir::Files|QDir::Readable, QDir::Name))
-    {
-      QString absoluteFilename = dir.absoluteFilePath(fileInfo.fileName());
-      QJsonObject json = readJsonFile(absoluteFilename).object();
+  angelScriptEngine->GarbageCollect();
 
-      if(!json.contains("name"))
-      {
-        qWarning() << "The scene " << absoluteFilename << " has no name";
-        continue;
-      }
+  // #TODO camera handling shouldn't be done by the scene
+  QVector<Camera> cameras = collectCameras(this);
+  if(!cameras.isEmpty())
+    this->debugCamera = cameras.first();
 
-      QJsonValue value = json["name"];
-      QString name = value.toString();
-
-      if(name.isEmpty())
-      {
-        qWarning() << "The scene " << absoluteFilename << " has an empty name";
-        continue;
-      }
-
-      if(map.contains(name))
-      {
-        qWarning() << "The scene-name " << name << " is used twice. Once for " << map[name] << " and once for " << absoluteFilename;
-        continue;
-      }
-
-      map[name] = absoluteFilename;
-    }
-  }
-
-  return map;
+  bool success = true; // #FIXME: really find out, whether this was a success
+  sceneLoadedExt(this, success);
+  sceneLoaded(success);
 }
 
-
-void Scene::loadFromFile(const QString& filename)
+void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)
 {
-  // #TODO
-  Q_UNUSED(filename);
+  SPLASHSCREEN_MESSAGE("Loading Scene-Layer");
+
+  std::string filename = this->resourceManager.sceneLayerFileForUuid(sceneLayerUuid).toStdString();
+
+  AngelScriptIntegration::ConfigCallScript config;
+  config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
+
+  SceneLayer* sceneLayer = new SceneLayer(sceneLayerUuid, *this);
+
+  AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(SceneLayer@ sceneLayer)", "scene-layer-file", config, sceneLayer);
+}
+
+void Scene::registerAngelScriptAPIDeclarations()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectType("Scene", 0, AngelScript::asOBJ_REF|AngelScript::asOBJ_NOCOUNT); AngelScriptCheck(r);
+
+  glrt::Uuid<void>::registerCustomizedUuidType("Scene", false);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void Scene::registerAngelScriptAPI()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "void loadSceneLayer(const Uuid<SceneLayer> &in uuid)", AngelScript::asMETHOD(Scene,loadSceneLayer), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "ResourceManager@ get_resourceManager()", AngelScript::asFUNCTION(get_resourceManager), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 

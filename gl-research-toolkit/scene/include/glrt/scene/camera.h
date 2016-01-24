@@ -3,12 +3,14 @@
 
 #include <glrt/dependencies.h>
 
+#include <glrt/scene/coord-frame.h>
+
 class aiCamera;
 
 namespace glrt {
 namespace scene {
 
-struct CameraParameter final // #TODO rename this class to Camera
+struct Camera final
 {
 public:
   glm::vec3 lookAt = glm::vec3(0, 0, -1);
@@ -23,10 +25,10 @@ public:
   float clipFar = 100.f;
   padding<float, 3> _padding;
 
-  static CameraParameter fromAssimp(const aiCamera& camera);
-  static CameraParameter defaultDebugCamera();
+  static Camera fromAssimp(const aiCamera& camera);
+  static Camera defaultDebugCamera();
 
-  friend CameraParameter operator*(const glm::mat4& t, CameraParameter camera);
+  friend Camera operator*(const CoordFrame& frame, Camera camera);
 
   glm::mat4 inverseViewMatrix() const;
   glm::mat4 viewMatrix() const;
@@ -36,7 +38,7 @@ public:
   glm::mat4 projectionMatrix(int width, int height) const;
 };
 
-static_assert(sizeof(CameraParameter)==64, "Please make sure the struct CameraParameter is std140 compatible");
+static_assert(sizeof(Camera)==64, "Please make sure the struct Camera is std140 compatible");
 
 } // namespace scene
 } // namespace glrt

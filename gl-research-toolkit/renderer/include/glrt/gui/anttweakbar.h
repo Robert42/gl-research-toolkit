@@ -3,8 +3,10 @@
 
 
 #include <glrt/gui/toolbar.h>
+#include <glrt/toolkit/uuid.h>
+#include <glrt/scene/resources/resource-manager.h>
 
-#include <glrt/scene/camera-parameter.h>
+#include <glrt/scene/camera.h>
 
 
 namespace glrt {
@@ -30,7 +32,7 @@ class ShaderDebugPrinter;
 namespace gui {
 
 
-using glrt::scene::CameraParameter;
+using glrt::scene::Camera;
 using glrt::scene::Scene;
 
 
@@ -41,7 +43,7 @@ public:
   typedef T_Map Map;
   typedef QSharedPointer<TweakBarEnum<T, Map>> Ptr;
 
-  static_assert(std::is_same<typename T_Map::key_type, QString>::value, "Wxpecting keytype QString");
+  static_assert(std::is_same<typename T_Map::key_type, QString>::value, "Expecting keytype QString");
 
   Map map;
   const std::string name;
@@ -64,6 +66,17 @@ public:
 
     if(tweakBar)
       TwRemoveVar(tweakBar, name.c_str());
+  }
+
+  template<typename T_uuid_inner_type>
+  void initWithUuids(const glrt::scene::resources::ResourceManager& resourceManager, const QList<Uuid<T_uuid_inner_type>>& values)
+  {
+    Map map;
+
+    for(const Uuid<T_uuid_inner_type>& value : values)
+      map[resourceManager.labelForResourceUuid(value)] = value;
+
+    init(map);
   }
 
   void init(const Map& map)
@@ -104,22 +117,43 @@ public:
 
     for(char* l : labels)
       delete[] l;
+
+    sendChangedSignal();
   }
 
+  std::function<void(const T&)> valueChangedByUser;
   std::function<void(const T&)> valueChanged;
+
+  void sendChangedSignal(bool byUser=false)
+  {
+    if(byUser)
+    {
+      if(valueChangedByUser && currentIndex>=0 && currentIndex<map.size())
+        valueChangedByUser(map.values()[currentIndex]);
+    }
+    if(valueChanged && currentIndex>=0 && currentIndex<map.size())
+      valueChanged(map.values()[currentIndex]);
+  }
+
+  void setIndex(int i)
+  {
+    if(i<0 || i==currentIndex)
+      return;
+
+    currentIndex = i;
+    sendChangedSignal();
+  }
 
   void setCurrentValue(const T& value)
   {
     int i = map.values().indexOf(value);
-    if(i>=0)
-      currentIndex = i;
+    setIndex(i);
   }
 
   void setCurrentKey(const QString& key)
   {
     int i = map.keys().indexOf(key);
-    if(i>=0)
-      currentIndex = i;
+    setIndex(i);
   }
 
 private:
@@ -132,8 +166,11 @@ private:
 
   static void setValue(const int* value, TweakBarEnum<T, Map>* wrapper)
   {
-    if(wrapper->map.size() > *value && *value >= 0 && wrapper->valueChanged)
-      wrapper->valueChanged(wrapper->map.values()[*value]);
+    if(wrapper->map.size() > *value && *value >= 0)
+    {
+      wrapper->currentIndex = *value;
+      wrapper->sendChangedSignal(true);
+    }
   }
 };
 
@@ -188,7 +225,7 @@ inline TwType TweakBarCBVar<bool>::type()
 
 class AntTweakBar final : public QObject
 {
-  Q_OBJECT // #FIXME
+  Q_OBJECT
 public:
   struct Settings final
   {
@@ -254,8 +291,8 @@ public:
 
 
 private:
-  typedef TweakBarEnum<QString, QMap<QString,QString>> SceneEnumeration;
-  typedef TweakBarEnum<CameraParameter, QHash<QString, CameraParameter>> CameraEnumeration;
+  typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
+  typedef TweakBarEnum<Camera, QMap<QString, Camera>> CameraEnumeration;
 
   gui::TweakBarCBVar<bool> toggleProfiler;
 

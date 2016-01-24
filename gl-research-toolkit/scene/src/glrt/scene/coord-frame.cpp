@@ -1,7 +1,11 @@
 #include <glrt/scene/coord-frame.h>
 
+#include <angelscript-integration/call-script.h>
+
 namespace glrt {
 namespace scene {
+
+using AngelScriptIntegration::AngelScriptCheck;
 
 CoordFrame::CoordFrame(glm::ctor ctor)
   : position(ctor),
@@ -21,6 +25,11 @@ CoordFrame::CoordFrame(const glm::mat4& transformation)
   _coordinateFromMatrix(&this->position, &this->orientation, &this->scaleFactor, transformation);
 }
 
+CoordFrame::CoordFrame(const aiMatrix4x4& transformation)
+  : CoordFrame(to_glm_mat4(transformation))
+{
+}
+
 CoordFrame& CoordFrame::operator *=(const CoordFrame& other)
 {
   _concatenate(&this->position, &this->orientation, &this->scaleFactor, this->position, this->orientation, this->scaleFactor, other.position, other.orientation, other.scaleFactor);
@@ -34,6 +43,10 @@ CoordFrame CoordFrame::operator *(const CoordFrame& other) const
   return f *= other;
 }
 
+glm::vec3 CoordFrame::operator *(const glm::vec3& point) const
+{
+  return this->transform_point(point);
+}
 
 glm::vec3 CoordFrame::transform_point(const glm::vec3& point) const
 {
@@ -48,37 +61,77 @@ glm::vec3 CoordFrame::transform_direction(const glm::vec3& point) const
 {
   glm::vec3 transformed_direction;
   _transform_direction(&transformed_direction,
-                       this->position, this->orientation, this->scaleFactor,
+                       this->orientation,
                        point);
   return transformed_direction;
 }
 
-
-void CoordFrame::_concatenate(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
-                         const glm::vec3& aPosition, const glm::quat& aOrientation, float aScaleFactor,
-                         const glm::vec3& bPosition, const glm::quat& bOrientation, float bScaleFactor)
+glm::mat4 CoordFrame::toMat4() const
 {
-  // #IMPLEMENT
+  glm::mat4 m;
+
+  _to_mat4(reinterpret_cast<float*>(&m),
+           this->position, this->orientation, this->scaleFactor);
+  return m;
 }
 
-void CoordFrame::_coordinateFromMatrix(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
-                                  const glm::mat4& transform)
+CoordFrame CoordFrame::inverse() const
 {
-  // #IMPLEMENT
+  CoordFrame i;
+  _inverse(&i.position, &i.orientation, &i.scaleFactor,
+           this->position, this->orientation, this->scaleFactor);
+  return i;
 }
 
-void CoordFrame::_transform_point(glm::vec3* outPoint,
-                             const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
-                             const glm::vec3& inPoint)
+QString CoordFrame::as_angelscript_fast() const
 {
-  // #IMPLEMENT
+  return QString("CoordFrame(vec3(%0, %1, %2), quat(%3, %4, %5, %6), %7)").arg(this->position.x).arg(this->position.y).arg(this->position.z).arg(this->orientation.w).arg(this->orientation.x).arg(this->orientation.y).arg(this->orientation.z).arg(this->scaleFactor);
 }
 
-void CoordFrame::_transform_direction(glm::vec3* outDirection,
-                                 const glm::vec3& position, const glm::quat& orientation, float scaleFactor,
-                                 const glm::vec3& inDirection)
+QDebug operator<<(QDebug debug, const CoordFrame& coordFrame)
 {
-  // #IMPLEMENT
+  return debug << "CoordFrame(position: " << coordFrame.position << ", orientation: " << coordFrame.orientation << ", scale: " << coordFrame.scaleFactor << ")";
+}
+
+inline void create_CoordFrame(CoordFrame* coordFrame, const glm::vec3& position, const glm::quat& orientation, float scaleFactor)
+{
+  coordFrame->position = position;
+  coordFrame->orientation = orientation;
+  coordFrame->scaleFactor = scaleFactor;
+}
+
+void CoordFrame::registerAngelScriptAPIDeclarations()
+{
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  int r;
+  r = angelScriptEngine->RegisterObjectType("CoordFrame",
+                                            sizeof(glm::quat),
+                                            AngelScript::asOBJ_VALUE |
+                                            AngelScript::asOBJ_POD |
+                                            AngelScript::asOBJ_APP_CLASS |
+                                            AngelScript::asOBJ_APP_CLASS_CONSTRUCTOR |
+                                            AngelScript::asOBJ_APP_CLASS_ASSIGNMENT |
+                                            AngelScript::asOBJ_APP_CLASS_COPY_CONSTRUCTOR |
+                                            AngelScript::asOBJ_APP_CLASS_ALLFLOATS);
+  AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void CoordFrame::registerAngelScriptAPI()
+{
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  int r;
+  r = angelScriptEngine->RegisterObjectBehaviour("CoordFrame",
+                                                 AngelScript::asBEHAVE_CONSTRUCT,
+                                                 "void f(const vec3 &in position, const quat &in orientation, float scaleFactor)",
+                                                 AngelScript::asFUNCTION(create_CoordFrame),
+                                                 AngelScript::asCALL_CDECL_OBJFIRST);
+  AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 } // namespace scene

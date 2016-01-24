@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
+project(OpenGL-Research-Toolkit)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   execute_process(
     COMMAND ./update-cmake.sh

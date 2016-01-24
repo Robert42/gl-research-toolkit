@@ -2,7 +2,8 @@
 #define GLRT_SCENE_SCENE_H
 
 #include <glrt/dependencies.h>
-#include <glrt/scene/entity.h>
+#include <glrt/scene/declarations.h>
+#include <glrt/scene/node.h>
 #include <glrt/scene/debug-camera.h>
 
 struct aiNode;
@@ -21,40 +22,47 @@ class StaticMeshComponent;
 
 class Scene final : public QObject
 {
-  Q_OBJECT // #FIXME
-
+  Q_OBJECT
 public:
-  QString name, file;
+  resources::ResourceManager& resourceManager;
+  Uuid<Scene> uuid;
+  QString file;
   DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
+  Scene(resources::ResourceManager* resourceManager);
   Scene(const Scene&) = delete;
   Scene(Scene&&) = delete;
   Scene& operator=(const Scene&) = delete;
   Scene& operator=(Scene&&) = delete;
 
-  Scene();
   ~Scene();
-
-  QString labelForUuid(const QUuid& uuid) const;
 
   bool handleEvents(const SDL_Event& event);
   void update(float deltaTime);
 
-  const QVector<Entity*>& allEntities();
+  QList<SceneLayer*> allLayers();
 
   void clear();
-  static QMap<QString, QString> findAllScenes();
-  void loadFromFile(const QString& filepath);
+  void load(const Uuid<Scene>& scene);
+
+  void loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid);
+
+  static void registerAngelScriptAPIDeclarations();
+  static void registerAngelScriptAPI();
 
 signals:
-  void clearScene();
   void sceneCleared();
   void sceneLoadedExt(scene::Scene* scene, bool success);
   void sceneLoaded(bool success);
 
+  void CameraComponentAdded(LightComponent* component);
+  void LightComponentAdded(LightComponent* component);
+  void StaticMeshComponentAdded(StaticMeshComponent* component);
+
 private:
-  QVector<Entity*> _entities; // #TODO use an optimized array
-  QHash<QUuid, QString> _labels;
+  friend class SceneLayer;
+
+  QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
 };
 
 } // namespace scene

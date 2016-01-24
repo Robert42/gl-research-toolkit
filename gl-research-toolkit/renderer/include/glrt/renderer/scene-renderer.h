@@ -2,11 +2,13 @@
 #define GLRT_RENDERER_RENDERER_H
 
 #include <glrt/scene/scene.h>
-#include <glrt/renderer/material.h>
+#include <glrt/scene/resources/material.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
-#include <glrt/renderer/static-mesh.h>
+#include <glrt/renderer/static-mesh-buffer-manager.h>
 #include <glrt/renderer/toolkit/shader-storage-format.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/material-buffer.h>
+#include <glrt/renderer/declarations.h>
 
 
 namespace glrt {
@@ -14,13 +16,14 @@ namespace renderer {
 
 class Renderer : public QObject
 {
-  Q_OBJECT // #FIXME
+  Q_OBJECT
 public:
-
   class DirectLights;
   class Pass;
 
   scene::Scene& scene;
+  StaticMeshBufferManager& staticMeshBufferManager;
+
   debugging::VisualizationRenderer visualizeCameras;
   debugging::VisualizationRenderer visualizeSphereAreaLights;
   debugging::VisualizationRenderer visualizeRectAreaLights;
@@ -32,7 +35,7 @@ public:
 
   DirectLights& directLights();
 
-  Renderer(scene::Scene* scene);
+  Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager);
   virtual ~Renderer();
 
   void render();
@@ -56,7 +59,6 @@ private:
 
   void updateSceneUniform();
 
-
   void debugCameraPositions();
 };
 
@@ -78,15 +80,16 @@ private:
 };
 
 
-class Renderer::Pass final
+class Renderer::Pass final : public QObject
 {
+  Q_OBJECT
 public:
-  const MaterialInstance::Type type;
+  const scene::resources::Material::Type type;
   Renderer& renderer;
   ReloadableShader shader;
 
-  Pass(Renderer* renderer, MaterialInstance::Type type, ReloadableShader&& shader);
-  Pass(Renderer* renderer, MaterialInstance::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock);
+  Pass(Renderer* renderer, scene::resources::Material::Type type, ReloadableShader&& shader);
+  Pass(Renderer* renderer, scene::resources::Material::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock);
   ~Pass();
 
   Pass(const Pass&) = delete;
@@ -97,26 +100,34 @@ public:
 public:
   void render();
 
+public slots:
+  void markDirty();
+
 private:
   typedef glm::mat4 MeshInstanceUniform;
 
   quint64 _cachedStaticStructureCacheIndex = 0;
 
-  struct MaterialInstanceRange
+  struct MaterialRange
   {
-    MaterialInstance* materialInstance;
     int begin, end;
   };
   struct MeshRange
   {
-    StaticMesh* mesh;
+    StaticMeshBuffer* mesh;
     int begin, end;
   };
 
-  std::vector<MaterialInstanceRange> materialInstanceRanges;
-  std::vector<MeshRange> meshRanges;
+  struct StaticMeshBufferVerification;
+
+  MaterialBuffer materialBuffer;
+
+  QVector<MaterialRange> materialRanges;
+  QVector<MeshRange> meshRanges;
   QSharedPointer<gl::Buffer> staticMeshInstance_Uniforms;
   GLint meshInstanceUniformOffset = 0;
+
+  bool isDirty;
 
   void renderStaticMeshes();
   void updateCache();

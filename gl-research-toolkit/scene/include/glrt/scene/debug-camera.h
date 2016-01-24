@@ -3,7 +3,7 @@
 
 #include <glrt/dependencies.h>
 
-#include <glrt/scene/camera-parameter.h>
+#include <glrt/scene/camera.h>
 
 namespace glrt {
 
@@ -26,9 +26,7 @@ public:
 
   void update(float deltaTime);
 
-  void operator=(const scene::CameraParameter& cameraParameter);
-
-  bool fromJson(const QJsonObject& json, const QMap<QString, scene::CameraParameter>& cameraParameter);
+  void operator=(const scene::Camera& cameraParameter);
 
 private:
   glm::mat4 camera_orientation_inverse;

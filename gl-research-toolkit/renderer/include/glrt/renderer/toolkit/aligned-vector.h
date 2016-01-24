@@ -8,7 +8,7 @@ namespace renderer {
 
 
 template<typename T>
-class aligned_vector
+class aligned_vector // #TODO: remove and use Array with an alignment trait instead?
 {
 public:
   enum class Alignment
@@ -16,17 +16,28 @@ public:
     UniformBufferOffsetAlignment
   };
 
-  aligned_vector(Alignment alignment)
+  static GLint retrieveAlignmentBaseValue(Alignment alignment)
   {
+    GLint a;
     switch(alignment)
     {
     case Alignment::UniformBufferOffsetAlignment:
-      glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &_alignment);
+      glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &a);
       break;
     default:
       Q_UNREACHABLE();
     }
-    _alignment = _alignment * ((_alignment-1+sizeof(T)) / _alignment);
+    return a;
+  }
+
+  static GLint retrieveAlignmentOffset(Alignment alignment)
+  {
+    return glm::ceilMultiple<GLint>(sizeof(T), retrieveAlignmentBaseValue(alignment));
+  }
+
+  aligned_vector(Alignment alignment)
+  {
+    _alignment = retrieveAlignmentOffset(alignment);
   }
 
   void writeTo(void* target, size_t nElements=std::numeric_limits<size_t>::max()) const

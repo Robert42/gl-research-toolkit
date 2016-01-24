@@ -1,14 +1,14 @@
 #include <glrt/scene/debug-camera.h>
 #include <glrt/toolkit/geometry.h>
-#include <glrt/toolkit/json.h>
 
 namespace glrt {
 
 glm::ivec2 DebugCamera::windowSize;
 
+// TODO: remove the debug camera, instead, define some sort of controller which is able to control any node/component
 DebugCamera::DebugCamera()
 {
-  *this = scene::CameraParameter::defaultDebugCamera();
+  *this = scene::Camera::defaultDebugCamera();
 
   movementMode = false;
 
@@ -99,31 +99,12 @@ void DebugCamera::update(float deltaTime)
 }
 
 
-void DebugCamera::operator=(const scene::CameraParameter& cameraParameter)
+void DebugCamera::operator=(const scene::Camera& cameraParameter)
 {
   this->projectionMatrix = cameraParameter.projectionMatrix(windowSize.x, windowSize.y);
   this->camera_orientation_inverse = cameraParameter.viewMatrix();
   this->camera_orientation_inverse[3] = glm::vec4(0,0,0,1);
   this->camera_position = cameraParameter.position;
-}
-
-
-bool DebugCamera::fromJson(const QJsonObject& json, const QMap<QString, scene::CameraParameter>& cameraParameter)
-{
-  this->locked = QJsonValue(json["locked"]).toBool(false);
-
-  if(json.contains("camera"))
-  {
-    QString name = QJsonValue(json["camera"]).toString("NOT-A-STRING");
-    if(!cameraParameter.contains(name))
-    {
-      qWarning() << "Unknown camera " << name;
-      return false;
-    }
-    this->loadedName = name;
-    *this = cameraParameter[name];
-  }
-  return true;
 }
 
 

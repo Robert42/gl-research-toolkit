@@ -38,18 +38,18 @@ DebugLineVisualisation::~DebugLineVisualisation()
 }
 
 
-DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scene::CameraParameter>& sceneCameras)
+DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scene::Camera>& sceneCameras)
 {
   struct CachedCamera final
   {
-    scene::CameraParameter cameraParameter;
+    scene::Camera cameraParameter;
     glm::mat4 inverseViewProjectionMatrix;
     glm::mat4 inverseViewMatrix;
 
     CachedCamera()
     {
     }
-    CachedCamera(const scene::CameraParameter& cameraParameter)
+    CachedCamera(const scene::Camera& cameraParameter)
       : cameraParameter(cameraParameter)
     {
       inverseViewProjectionMatrix = glm::inverse(this->cameraParameter.projectionMatrix() * this->cameraParameter.viewMatrix());
@@ -60,7 +60,7 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scen
 
   QVector<CachedCamera> cachedCameras;
   cachedCameras.reserve(sceneCameras.length());
-  for(const scene::CameraParameter& cameraParameter : sceneCameras)
+  for(const scene::Camera& cameraParameter : sceneCameras)
     cachedCameras.append(cameraParameter);
 
   DebugMesh::Painter painter;

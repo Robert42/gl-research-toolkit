@@ -4,13 +4,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/round.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>
-#include <angelscript-integration/angelscript-integration.h>
 
 #include <QDebug>
 #include <QString>
@@ -27,11 +27,13 @@
 #include <functional>
 #include <thread>
 #include <atomic>
+#include <cstring>
 
 #include <SDL2/SDL.h>
 
 
 // the unnecessary macros make my syntax highligh unpretty ;)
+// #TODO remove
 #ifdef __GNUC__
 #ifdef bool
 #undef bool
@@ -60,6 +62,8 @@ QDebug operator<<(QDebug d, const glm::ivec4& v);
 QDebug operator<<(QDebug d, const glm::mat2& v);
 QDebug operator<<(QDebug d, const glm::mat3& v);
 QDebug operator<<(QDebug d, const glm::mat4& v);
+
+QDebug operator<<(QDebug d, const glm::quat& q);
 
 QDebug operator<<(QDebug d, const std::string& s);
 
@@ -96,7 +100,7 @@ bool is_instance_of(const T_child* child)
 template<typename... T_arg>
 inline bool always_return_true(const T_arg&...){return true;}
 template<typename... T_arg>
-inline bool always_return_false(const T_arg&...){return true;}
+inline bool always_return_false(const T_arg&...){return false;}
 
 class SplashscreenMessage final
 {
@@ -110,6 +114,10 @@ public:
   SplashscreenMessage& operator=(SplashscreenMessage&& splashscreenMessage) = delete;
 
   static void show(const QString& message);
+
+  typedef std::function<void(const QString&)> MessageHandler;
+
+  static MessageHandler& getSplashscreenMessageHandler();
 
 private:
   static void push(const QString& message);
@@ -128,7 +136,7 @@ Q_UNUSED(__splashscreenMessage);
 #define CALL_SDL(x) __CALL_SDL(x,)
 #define CALL_SDL_CRITICAL(x) __CALL_SDL(x,abort();)
 
-#define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << x;
+#define PRINT_VALUE(x) qDebug() << "Value of `" << #x << "` = " << (x);
 
 } // namespace glrt
 

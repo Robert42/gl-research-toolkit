@@ -1,9 +1,10 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
-#include <glrt/scene/resources/resource-loader.h>
+#include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/scene.h>
-#include <glrt/renderer/forward-renderer.h>
 #include <glrt/gui/anttweakbar.h>
+#include <glrt/renderer/sample-resource-manager.h>
+#include <glrt/renderer/forward-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 
 #include <glhelper/gl.hpp>
@@ -13,11 +14,10 @@ int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
-  glrt::scene::resources::ResourceIndex resourceIndex;
-  resourceIndex.loadIndexedDirectory(GLRT_ASSET_DIR);
+  glrt::renderer::SampleResourceManager resourceManager;
+  glrt::scene::Scene scene(&resourceManager);
 
-  glrt::scene::Scene scene;
-  glrt::renderer::ForwardRenderer renderer(&scene);
+  glrt::renderer::ForwardRenderer renderer(&scene, &resourceManager);
 
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
   antweakbar.createDebugShaderBar(&shaderDebugPrinter);
   antweakbar.createProfilerBar(&app.profiler);
 
-  scene.loadFromFile(GLRT_ASSET_DIR"/common/scenes/cornell-box/cornell-box.scene");
+  scene.load(glrt::renderer::SampleResourceManager::cornellBoxRoughnessScene());
 
   app.showWindow();
 

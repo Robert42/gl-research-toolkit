@@ -1,5 +1,5 @@
 #include <glrt/splashscreen-style.h>
-#include <glrt/logger.h>
+#include <glrt/toolkit/logger.h>
 
 #include <QApplication>
 #include <QThread>
@@ -15,54 +15,6 @@ SplashscreenStyle::SplashscreenStyle()
 SplashscreenStyle::~SplashscreenStyle()
 {
 }
-
-typedef std::function<void(const QString&)> MessageHandler;
-
-inline MessageHandler& getSplashscreenMessageHandler()
-{
-  static MessageHandler messageHandler;
-  return messageHandler;
-}
-
-
-QStack<QString> SplashscreenMessage::messageStack;
-
-SplashscreenMessage::SplashscreenMessage(const QString& message)
-{
-  show(message);
-  push(message);
-}
-
-SplashscreenMessage::~SplashscreenMessage()
-{
-  show(pop());
-}
-
-void SplashscreenMessage::push(const QString& message)
-{
-  messageStack.push(message);
-}
-
-QString SplashscreenMessage::pop()
-{
-  if(messageStack.isEmpty())
-    return QString();
-
-  return messageStack.pop();
-}
-
-void SplashscreenMessage::show(const QString& message)
-{
-  MessageHandler& messageHandler = getSplashscreenMessageHandler();
-
-  if(messageHandler)
-    messageHandler(message);
-
-  Logger::SuppressDebug suppressLog;
-  qDebug() << "Show SplashScreen message: " << message;
-  Q_UNUSED(suppressLog);
-}
-
 
 /*!
 \brief Creates a new instance of QSplashScreen
@@ -87,12 +39,12 @@ QSplashScreen* SplashscreenStyle::createQSplashScreen(bool takeOwnershipOfStyle)
         takeOwnershipOfStyle(takeOwnershipOfStyle),
         style(style)
     {
-      getSplashscreenMessageHandler() = std::bind(&CustomSplashScreen::messageHandler, this, std::placeholders::_1);
+      SplashscreenMessage::getSplashscreenMessageHandler() = std::bind(&CustomSplashScreen::messageHandler, this, std::placeholders::_1);
     }
 
     ~CustomSplashScreen()
     {
-      getSplashscreenMessageHandler() = MessageHandler();
+      SplashscreenMessage::getSplashscreenMessageHandler() = SplashscreenMessage::MessageHandler();
       if(takeOwnershipOfStyle)
         delete style;
     }

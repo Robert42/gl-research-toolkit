@@ -3,10 +3,19 @@
 
 #include <glrt/toolkit/uuid.h>
 #include <glrt/scene/declarations.h>
+#include <glrt/scene/resources/light-source.h>
+#include <glrt/scene/resources/material.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
+namespace uuids {
+
+const Uuid<ResourceIndex> fallbackIndex("{8f26cd17-687c-4aab-946a-079740237011}");
+const Uuid<Material> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
+const Uuid<LightSource> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
+
+} // uuids
 
 
 struct StaticMeshImportSettings
@@ -20,7 +29,11 @@ struct StaticMeshImportSettings
 class ResourceIndex final
 {
 public:
-  ResourceIndex();
+  static const ResourceIndex fallback;
+
+  ResourceIndex(const Uuid<ResourceIndex>& uuid);
+
+  const Uuid<ResourceIndex> uuid;
 
   ResourceIndex(const ResourceIndex&) = delete;
   ResourceIndex(ResourceIndex&&) = delete;
@@ -32,27 +45,30 @@ public:
   void loadIndex(const std::string& filename);
   void loadIndexedDirectory(const std::string& filename);
 
-  State stateOf(const QUuid& uuid) const;
-  bool isRegistered(const QUuid& uuid) const;
-  bool isLoading(const QUuid& uuid) const;
-  bool isLoaded(const QUuid& uuid) const;
+  void registerStaticMesh(const Uuid<StaticMesh>& uuid, const std::string& mesh_file);
+  void registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light);
+  void registerMaterial(const Uuid<Material>& uuid, const Material& material);
+  void registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file);
+  void registerSceneFile(const Uuid<Scene>& uuid, const std::string& file);
 
-  void registerAsset(const Uuid<StaticMeshData>& uuid, const std::string& mesh_file);
+  bool isRegistered(const QUuid& uuid) const;
+
+  QSet<QUuid> allRegisteredResources;
+
+  QHash<Uuid<Scene>, QString> sceneFiles;
+  QHash<Uuid<StaticMesh>, QString> staticMeshAssetsFiles;
+  QHash<Uuid<LightSource>, LightSource> lightSources;
+  QHash<Uuid<Material>, Material> materials;
+  QHash<Uuid<SceneLayer>, QString> sceneLayerFiles;
+
+  QHash<QUuid, QString> labels;
 
 private:
-  friend class ResourceLoader;
-
-  QSet<QUuid> unloadedRessources;
-  QSet<QUuid> loadingRessources;
-  QSet<QUuid> loadedRessources;
-
-  QHash<Uuid<StaticMeshData>, QString> staticMeshAssetsFiles;
-
-  void _loadResource(ResourceLoader* loader, const QUuid& uuid, bool loadNow);
-  void waitForAssetToBeLoaded(const QUuid& uuid);
-
-  bool classInvariant();
+  void validateNotYetRegistered(const QUuid& uuid) const;
+  void registerFallbackIndex();
 };
+
+
 
 
 } // namespace resources

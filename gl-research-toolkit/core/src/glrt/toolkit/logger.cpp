@@ -1,4 +1,4 @@
-#include <glrt/logger.h>
+#include <glrt/toolkit/logger.h>
 
 #include <QCoreApplication>
 
@@ -20,8 +20,11 @@ inline QFile* getLogFile()
 {
   static QFile file(getLogFilePath());
 
-  if(!file.open(QFile::WriteOnly))
-    Q_ASSERT("Failed to open the logfile for writing");
+  if(!file.isOpen())
+  {
+    if(!file.open(QFile::WriteOnly))
+      Q_ASSERT("Failed to open the logfile for writing");
+  }
 
   return &file;
 }
@@ -101,6 +104,7 @@ void Logger::messageHandler(QtMsgType msgType,
       logger->logStream.writeEndElement();
       logger->logStream.writeEmptyElement("br");
       logger->logStream.writeEmptyElement("br");
+      getLogFile()->flush();
   }
 
   bool alreadyHandeled = false;

@@ -17,10 +17,11 @@ enum class State
 };
 
 class ResourceIndex;
-class ResourceLoader;
-class MaterialData;
-class StaticMeshData;
-
+class ResourceManager;
+class LightSource;
+class Material;
+class StaticMesh;
+class StaticMeshLoader;
 
 } // namespace resources
 } // namespace scene

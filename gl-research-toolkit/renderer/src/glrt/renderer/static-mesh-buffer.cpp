@@ -1,5 +1,5 @@
-#include <glrt/scene/resources/resource-loader.h>
-#include <glrt/renderer/static-mesh.h>
+#include <glrt/scene/resources/static-mesh-loader.h>
+#include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
@@ -8,7 +8,7 @@ namespace renderer {
 const GLuint vertexBufferBinding = 0;
 const GLuint indexBufferBinding = 1;
 
-StaticMesh::StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices)
+StaticMeshBuffer::StaticMeshBuffer(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices)
   : indexBuffer(std::move(indexBuffer)),
     vertexBuffer(std::move(vertexBuffer)),
     numberIndices(numberIndices),
@@ -16,7 +16,7 @@ StaticMesh::StaticMesh(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int nu
 {
 }
 
-StaticMesh::StaticMesh(StaticMesh&& mesh)
+StaticMeshBuffer::StaticMeshBuffer(StaticMeshBuffer&& mesh)
   : indexBuffer(std::move(mesh.indexBuffer)),
     vertexBuffer(std::move(mesh.vertexBuffer)),
     numberIndices(mesh.numberIndices),
@@ -29,14 +29,14 @@ StaticMesh::StaticMesh(StaticMesh&& mesh)
 }
 
 
-StaticMesh::~StaticMesh()
+StaticMeshBuffer::~StaticMeshBuffer()
 {
   delete indexBuffer;
   delete vertexBuffer;
 }
 
 
-StaticMesh& StaticMesh::operator=(StaticMesh&& mesh)
+StaticMeshBuffer& StaticMeshBuffer::operator=(StaticMeshBuffer&& mesh)
 {
   std::swap(mesh.indexBuffer, this->indexBuffer);
   std::swap(mesh.vertexBuffer, this->vertexBuffer);
@@ -46,19 +46,19 @@ StaticMesh& StaticMesh::operator=(StaticMesh&& mesh)
 }
 
 
-bool StaticMesh::isValidFileSuffix(const QFileInfo& file)
+bool StaticMeshBuffer::isValidFileSuffix(const QFileInfo& file)
 {
   return file.suffix().toLower() == "mesh";
 }
 
 
-StaticMesh StaticMesh::loadMeshFile(const QString& file)
+StaticMeshBuffer StaticMeshBuffer::loadMeshFile(const QString& file)
 {
-  return create(scene::resources::StaticMeshData::loadFromFile(file));
+  return create(scene::resources::StaticMesh::loadFromFile(file));
 }
 
 
-StaticMesh StaticMesh::create(const scene::resources::StaticMeshData& data)
+StaticMeshBuffer StaticMeshBuffer::create(const scene::resources::StaticMesh& data)
 {
   if(data.isIndexed())
     return createIndexed(data.indices.data(), data.indices.length(), data.vertices.data(), data.vertices.length());
@@ -67,7 +67,7 @@ StaticMesh StaticMesh::create(const scene::resources::StaticMeshData& data)
 }
 
 
-StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices, bool indexed)
+StaticMeshBuffer StaticMeshBuffer::createIndexed(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices, bool indexed)
 {
   if(!indexed)
     return _createAsArray(indices, numIndices, vertices, numVertices);
@@ -75,16 +75,16 @@ StaticMesh StaticMesh::createIndexed(const index_type* indices, int numIndices, 
   gl::Buffer* indexBuffer = new gl::Buffer(numIndices*sizeof(index_type), gl::Buffer::UsageFlag::IMMUTABLE, indices);
   gl::Buffer* vertexBuffer = new gl::Buffer(numVertices*sizeof(Vertex), gl::Buffer::UsageFlag::IMMUTABLE, vertices);
 
-  return StaticMesh(indexBuffer,
+  return StaticMeshBuffer(indexBuffer,
                     vertexBuffer,
                     numIndices,
                     numVertices);
 }
 
 
-StaticMesh StaticMesh::_createAsArray(const index_type* indices, int numIndices, const StaticMesh::Vertex* vertices, int numVertices)
+StaticMeshBuffer StaticMeshBuffer::_createAsArray(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices)
 {
-  std::vector<StaticMesh::Vertex> newVertices;
+  std::vector<StaticMeshBuffer::Vertex> newVertices;
 
   newVertices.reserve(numIndices);
 
@@ -101,14 +101,14 @@ StaticMesh StaticMesh::_createAsArray(const index_type* indices, int numIndices,
 }
 
 
-StaticMesh StaticMesh::createAsArray(const StaticMesh::Vertex* vertices, int numVertices)
+StaticMeshBuffer StaticMeshBuffer::createAsArray(const StaticMeshBuffer::Vertex* vertices, int numVertices)
 {
   gl::Buffer* indexBuffer = nullptr;
   int numIndices = 0;
 
   gl::Buffer* vertexBuffer = new gl::Buffer(numVertices*sizeof(Vertex), gl::Buffer::UsageFlag::IMMUTABLE, vertices);
 
-  return StaticMesh(indexBuffer,
+  return StaticMeshBuffer(indexBuffer,
                     vertexBuffer,
                     numIndices,
                     numVertices);
@@ -128,7 +128,7 @@ StaticMesh StaticMesh::createAsArray(const StaticMesh::Vertex* vertices, int num
 // 5. Draw
 // 6. Bind other Buffer to 0
 // 7. Draw
-gl::VertexArrayObject StaticMesh::generateVertexArrayObject()
+gl::VertexArrayObject StaticMeshBuffer::generateVertexArrayObject()
 {
   typedef gl::VertexArrayObject::Attribute Attribute;
 
@@ -143,14 +143,14 @@ gl::VertexArrayObject StaticMesh::generateVertexArrayObject()
                                           Attribute(Attribute::Type::FLOAT, 2, vertexBufferBinding)}));
 }
 
-void StaticMesh::bind(const gl::VertexArrayObject& vertexArrayObject)
+void StaticMeshBuffer::bind(const gl::VertexArrayObject& vertexArrayObject)
 {
   if(indexBuffer != nullptr)
     indexBuffer->BindIndexBuffer();
   vertexBuffer->BindVertexBuffer(vertexBufferBinding, 0, vertexArrayObject.GetVertexStride(vertexBufferBinding));
 }
 
-void StaticMesh::draw(GLenum mode) const
+void StaticMeshBuffer::draw(GLenum mode) const
 {
   Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type
   if(indexBuffer != nullptr)

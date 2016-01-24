@@ -1,69 +1,95 @@
 #include <glrt/scene/light-component.h>
-#include <glrt/toolkit/json.h>
-#include <QJsonObject>
+#include <glrt/scene/resources/resource-manager.h>
 
 namespace glrt {
 namespace scene {
 
 
-bool LightSource::initFromJson(QJsonObject& json)
-{
-  this->luminous_power = json.contains("luminous_power") ? json["luminous_power"].toDouble() : 25.0;
-  this->color = as_vec3_with_fallback(json["color"], glm::vec3(1), "SphereAreaLightComponent::Data::initFromJson");
-  this->origin = as_vec3_with_fallback(json["origin"], glm::vec3(0), "SphereAreaLightComponent::Data::initFromJson");
-  this->influence_radius = json.contains("influence_radius") ? float(json["influence_radius"].toDouble()) : INFINITY;
+using AngelScriptIntegration::AngelScriptCheck;
 
-  return true;
+
+LightComponent::LightComponent(Node &entity, const Uuid<LightComponent> &uuid, Interactivity interactivity)
+  : Node::Component(entity, uuid, interactivity==Interactivity::MOVABLE),
+    isStatic(interactivity==Interactivity::STATIC)
+{
+}
+
+
+LightComponent* LightComponent::createForLightSource(Node& node,
+                                                     const Uuid<LightComponent>& uuid,
+                                                     Interactivity interactivity,
+                                                     const resources::LightSource& lightSource)
+{
+  switch(lightSource.type)
+  {
+  case resources::LightSource::Type::RECT_AREA_LIGHT:
+    return new RectAreaLightComponent(node, uuid.cast<RectAreaLightComponent>(), lightSource.rect_area_light, interactivity);
+  case resources::LightSource::Type::SPHERE_AREA_LIGHT:
+    return new SphereAreaLightComponent(node, uuid.cast<SphereAreaLightComponent>(), lightSource.sphere_area_light, interactivity);
+  default:
+    Q_UNREACHABLE();
+  }
+}
+
+
+void LightComponent::registerAngelScriptAPIDeclarations()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  glrt::Uuid<void>::registerCustomizedUuidType("LightComponent", true);
+
+  r = angelScriptEngine->RegisterEnum("LightSourceInteractivity"); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("LightSourceInteractivity", "STATIC", int(Interactivity::STATIC)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("LightSourceInteractivity", "DYNAMIC", int(Interactivity::DYNAMIC)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("LightSourceInteractivity", "MOVABLE", int(Interactivity::MOVABLE)); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+inline LightComponent* createLightComponent(Node* node,
+                                            const Uuid<LightComponent>& uuid,
+                                            LightComponent::Interactivity interactivity,
+                                            const Uuid<resources::LightSource>& lightSource)
+{
+  return LightComponent::createForLightSource(*node,
+                                              uuid,
+                                              interactivity,
+                                              node->resourceManager().lightSourceForUuid(lightSource));
+}
+
+void LightComponent::registerAngelScriptAPI()
+{
+  int r;
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  r = angelScriptEngine->RegisterObjectMethod("Node", "LightComponent@ newLightComponent(const Uuid<LightComponent> &in uuid, LightSourceInteractivity interactivity, const Uuid<LightSource> &in lightSourceUuid)", AngelScript::asFUNCTION(createLightComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+
+  Node::Component::registerAsBaseOfClass<LightComponent>(angelScriptEngine, "LightComponent");
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 
 // =============================================================================
 
 
-SphereAreaLightComponent::SphereAreaLightComponent(Entity& entity, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, bool isStatic, bool isMovable)
-  : Entity::Component(entity, uuid, isMovable),
-    data(data),
-    isStatic(isStatic)
-{
-}
-
-
-bool SphereAreaLightComponent::Data::initFromJson(QJsonObject& json)
-{
-  if(!light.initFromJson(json))
-    return false;
-
-  this->radius = json.contains("radius") ? json["radius"].toDouble() : 1.0;
-
-  return true;
-}
-
-
-// =============================================================================
-
-
-RectAreaLightComponent::RectAreaLightComponent(Entity& entity, const Uuid<RectAreaLightComponent>& uuid, const Data& data, bool isMovable)
-  : Entity::Component(entity, uuid, isMovable),
+SphereAreaLightComponent::SphereAreaLightComponent(Node& node, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
+  : LightComponent(node, uuid, interactivity),
     data(data)
 {
 }
 
 
-bool RectAreaLightComponent::Data::initFromJson(QJsonObject& json)
+// =============================================================================
+
+
+RectAreaLightComponent::RectAreaLightComponent(Node& node, const Uuid<RectAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
+  : LightComponent(node, uuid, interactivity),
+    data(data)
 {
-  if(!light.initFromJson(json))
-    return false;
-
-  glm::vec3 normal = as_vec3_with_fallback(json["normal"], glm::vec3(0, 0, -1), "RectAreaLightComponent::Data::initFromJson");
-  glm::vec3 tangent = as_vec3_with_fallback(json["tangent"], glm::vec3(-1, 0, 0), "RectAreaLightComponent::Data::initFromJson");
-
-  this->tangent1 = tangent;
-  this->tangent2 = glm::cross(normal, tangent);
-  this->half_width = json.contains("width") ? json["width"].toDouble()*.5 : .5;
-  this->half_height = json.contains("height") ? json["height"].toDouble()*.5 : .5;
-
-  return true;
 }
+
 
 
 } // namespace scene

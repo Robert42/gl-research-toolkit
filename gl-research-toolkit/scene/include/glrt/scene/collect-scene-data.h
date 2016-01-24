@@ -14,14 +14,14 @@ QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::func
 
 
 template<typename T_component, typename T_data>
-QVector<T_data> collectData(Scene* scene, std::function<T_data(T_component*)>& get_data);
+QVector<T_data> collectData(Scene* scene, const std::function<T_data(T_component*)>& get_data);
 
 template<typename T_component, typename T_data>
-QHash<QString, T_data> collectNamedData(Scene* scene, std::function<T_data(T_component*)>& get_data);
+QHash<QString, T_data> collectNamedData(Scene* scene, const std::function<T_data(T_component*)>& get_data);
 
 
-QVector<CameraParameter> collectCameras(Scene* scene);
-QHash<QString, CameraParameter> collectNamedCameras(Scene* scene);
+QVector<Camera> collectCameras(Scene* scene);
+QHash<QString, Camera> collectNamedCameras(Scene* scene);
 
 QVector<SphereAreaLightComponent::Data> collectSphereAreaLights(Scene* scene);
 QHash<QString, scene::SphereAreaLightComponent::Data> collectNamedSphereAreaLights(Scene* scene);

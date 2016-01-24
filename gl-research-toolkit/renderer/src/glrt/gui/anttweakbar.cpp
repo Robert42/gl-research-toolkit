@@ -103,11 +103,11 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
 
   sceneSwitcher = SceneEnumeration::Ptr(new SceneEnumeration("CurrentSceneEnum", tweakBar, "Current Scene", ""));
-  sceneSwitcher->init(scene::Scene::findAllScenes());
-  sceneSwitcher->valueChanged = [&scene](const QString& file){scene.loadFromFile(file);};
+  sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, scene.resourceManager.allRegisteredScenes());
+  sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
   cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
-  cameraSwitcher->valueChanged = [&scene](const scene::CameraParameter& p){scene.debugCamera = p;};
+  cameraSwitcher->valueChanged = [&scene](const scene::Camera& p){scene.debugCamera = p;};
   TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
 
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
@@ -148,13 +148,19 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
 void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 {
   if(sceneSwitcher)
-    sceneSwitcher->setCurrentKey(scene->name);
+    sceneSwitcher->setCurrentValue(scene->uuid);
 
   if(cameraSwitcher)
   {
-    cameraSwitcher->init(scene::collectNamedCameras(scene));
+    QMap<QString, Camera> cameras;
+    QHash<QString, Camera> h = scene::collectNamedCameras(scene);
+    for(auto i=h.begin(); i!=h.end(); ++i)
+      cameras.insert(i.key(), i.value());
+    cameraSwitcher->init(cameras);
     if(!scene->debugCamera.loadedName.isEmpty())
       cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
+    else if(cameras.size() > 0)
+      cameraSwitcher->setCurrentKey(cameras.firstKey());
   }
 }
 
