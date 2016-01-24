@@ -43,7 +43,7 @@ quint64 Timer::elapsedTimeAsMicroseconds() const
 
 
 Profiler* Profiler::activeProfiler = nullptr;
-Profiler* Profiler::profilerToActivateNextFrame = nullptr;
+int Profiler::frameId = -1;
 
 
 Profiler::Profiler(const QString& applicationName)
@@ -66,9 +66,9 @@ float Profiler::update()
   float elapsedTime = timer.restart();
 
 #ifdef GLRT_PROFILER
-  activeProfiler = profilerToActivateNextFrame;
   if(this->isActive())
   {
+    frameId++;
     send_data_through_tcp(elapsedTime);
 
     if(printFramerate)
@@ -92,7 +92,7 @@ bool Profiler::isActive() const
 
 void Profiler::activate()
 {
-  profilerToActivateNextFrame = this;
+  activeProfiler = this;
   recordedScopes.clear();
   tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_PROFILER_DEFAULT_PORT);
   if(!tcpSocket.waitForConnected(1000))
@@ -102,9 +102,9 @@ void Profiler::activate()
 
 void Profiler::deactivate()
 {
-  if(activeProfiler == this || profilerToActivateNextFrame == this)
+  if(activeProfiler == this)
   {
-    profilerToActivateNextFrame = nullptr;
+    activeProfiler = nullptr;
     tcpSocket.abort();
   }
 }
@@ -174,6 +174,8 @@ Profiler::Scope::Scope(const char *file, int line, const char *function, const c
   if(!activeProfiler)
     return;
 
+  this->frameId = activeProfiler->frameId;
+
   int depth = activeProfiler->currentDepth++;
 
   index = activeProfiler->recordedScopes.size();
@@ -189,6 +191,14 @@ Profiler::Scope::~Scope()
   if(!activeProfiler)
     return;
 
+  // If the profile was activated within this scope, abort, because the tim measurement is wrong.
+  if(this->index==INVALID_INDEX)
+    return;
+
+  // The new frame begain within this scope => Don't use this scope
+  if(this->frameId != activeProfiler->frameId)
+    return;
+
    // It's theoretically possible, that a profiler was created during this scope
   bool validIndex = activeProfiler->recordedScopes.size() > index;
   Q_ASSERT(validIndex);
@@ -199,6 +209,7 @@ Profiler::Scope::~Scope()
   activeProfiler->currentDepth--;
   activeProfiler->recordedScopes[this->index].cpuTime = elapsedCpuTime;
   activeProfiler->recordedScopes[this->index].gpuTime = MAX_TIME; // #TODO:::: https://www.opengl.org/wiki/Query_Object#Query_scope
+  this->index = INVALID_INDEX;
 }
 
 } // namespace glrt

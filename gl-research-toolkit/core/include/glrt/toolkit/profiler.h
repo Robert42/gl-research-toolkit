@@ -52,8 +52,8 @@ private:
     void write(QDataStream& stream) const;
   };
 
+  static int frameId;
   static Profiler* activeProfiler;
-  static Profiler* profilerToActivateNextFrame;
 
   std::vector<RecordedScope> recordedScopes;
   int currentDepth;
@@ -74,6 +74,7 @@ class Profiler::Scope final
 public:
   Timer timer;
   size_t index;
+  int frameId = -1;
 
   Scope(const char* file, int line, const char* function, const char* name);
   ~Scope();
@@ -82,7 +83,7 @@ public:
 } // namespace glrt
 
 #ifdef GLRT_PROFILER
-#define PROFILE_SCOPE(name) Profiler::Scope __profiler_scope_##__LINE__(__FILE__, __LINE__, __PRETTY_FUNCTION__, name);Q_UNUSED(__profiler_scope_##__LINE__);
+#define PROFILE_SCOPE(name) glrt::Profiler::Scope __profiler_scope_##__LINE__(__FILE__, __LINE__, __PRETTY_FUNCTION__, name);Q_UNUSED(__profiler_scope_##__LINE__);
 #else
 #define PROFILE_SCOPE(name)
 #endif
