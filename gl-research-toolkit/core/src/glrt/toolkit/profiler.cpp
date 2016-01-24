@@ -43,6 +43,7 @@ quint64 Timer::elapsedTimeAsMicroseconds() const
 
 
 Profiler* Profiler::activeProfiler = nullptr;
+Profiler* Profiler::profilerToActivateNextFrame = nullptr;
 
 
 Profiler::Profiler(const QString& applicationName)
@@ -65,6 +66,7 @@ float Profiler::update()
   float elapsedTime = timer.restart();
 
 #ifdef GLRT_PROFILER
+  activeProfiler = profilerToActivateNextFrame;
   if(this->isActive())
   {
     send_data_through_tcp(elapsedTime);
@@ -90,7 +92,7 @@ bool Profiler::isActive() const
 
 void Profiler::activate()
 {
-  activeProfiler = this;
+  profilerToActivateNextFrame = this;
   recordedScopes.clear();
   tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_PROFILER_DEFAULT_PORT);
   if(!tcpSocket.waitForConnected(1000))
@@ -100,9 +102,9 @@ void Profiler::activate()
 
 void Profiler::deactivate()
 {
-  if(activeProfiler == this)
+  if(activeProfiler == this || profilerToActivateNextFrame == this)
   {
-    activeProfiler = nullptr;
+    profilerToActivateNextFrame = nullptr;
     tcpSocket.abort();
   }
 }

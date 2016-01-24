@@ -53,6 +53,7 @@ private:
   };
 
   static Profiler* activeProfiler;
+  static Profiler* profilerToActivateNextFrame;
 
   std::vector<RecordedScope> recordedScopes;
   int currentDepth;

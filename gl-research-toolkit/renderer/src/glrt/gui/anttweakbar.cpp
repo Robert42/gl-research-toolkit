@@ -167,6 +167,8 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 
 bool AntTweakBar::handleEvents(const SDL_Event& event)
 {
+  PROFILE_SCOPE("AntTweakBar (Events)")
+
   if(visible && TwEventSDL(&event, SDL_MAJOR_VERSION, SDL_MINOR_VERSION))
   {
     handeledEvent(event);
