@@ -21,32 +21,24 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
   reflection_ray.direction = dominant_reflection_direction;
   reflection_ray.origin = vec3(0);
   
-  Ray r = reflection_ray;
-  r.origin += surface.position;
-  
   
   if(!intersects_unclamped(rect, reflection_ray))
   {
-    // 1. project the rect along a ray to a plane perpendicular to the ray direction
+    // Rect edge points
     vec3 p[4];
     p[0] = rect.origin + -rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
     p[1] = rect.origin + -rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
     p[2] = rect.origin +  rect.tangent1*rect.half_width - rect.tangent2*rect.half_height;
     p[3] = rect.origin +  rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
     
-    // 1.a) the position of the plane is as close as possible to the rect to prevent errors 
-    const float distance_to_projection_plane = min(rect.half_width, rect.half_height);
-    float image_plane = min4(dot(reflection_ray.direction, p[0]),
-                             dot(reflection_ray.direction, p[1]),
-                             dot(reflection_ray.direction, p[2]),
-                             dot(reflection_ray.direction, p[3]));
-    // 1.b) the projection center is still on the ray, but roughly the radius of the light away from the light to reduce artefacts from projecting a too narrow rectangle
-    vec3 projection_center = reflection_ray.direction * (image_plane-distance_to_projection_plane);
-    reflection_ray.origin = projection_center;
-    
-    // 1.c) the intersection of the ray with the projection plane
-    vec3 image_center = get_point(reflection_ray, distance_to_projection_plane);
-    Plane projection_plane = plane_from_normal(reflection_ray.direction, image_center);
+    // 1. project the rect along a ray to a projection plane
+    // 1.a) Those a projection plane, where
+    vec3 planeNormal = normalize(rect.origin);
+    vec3 projection_center = vec3(0);
+    Plane projection_plane = plane_from_normal(planeNormal, dot(planeNormal, rect.origin));
+    vec3 image_center;
+    if(!intersection_point_unclamped(projection_plane, reflection_ray, image_center))
+      image_center = rect.origin;
     
     // 1.d) finally project the rect onto the plane
     for(int i=0; i<4; ++i)
