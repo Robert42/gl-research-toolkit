@@ -1,6 +1,6 @@
 include(files.cmake)
 
-find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Widgets 5.5 REQUIRED)
 
 add_library(glrt
   ${SOURCE_FILES}

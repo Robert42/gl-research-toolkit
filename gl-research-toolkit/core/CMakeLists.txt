@@ -11,8 +11,8 @@ message(FATAL_ERROR "GLRT_EXTERNAL_SHADER_DIR must be set")
 endif()
 
 find_package(SDL2 REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Network REQUIRED)
+find_package(Qt5Core 5.5 REQUIRED)
+find_package(Qt5Network 5.5 REQUIRED)
 
 add_library(glrt-core
   ${SOURCE_FILES}

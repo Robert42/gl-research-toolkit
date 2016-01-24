@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 project(Profiler)
 
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Network REQUIRED)
+find_package(Qt5Widgets 5.5 REQUIRED)
+find_package(Qt5Network 5.5 REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 

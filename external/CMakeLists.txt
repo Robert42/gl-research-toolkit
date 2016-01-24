@@ -4,9 +4,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/mod
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
 
-find_package(GLEW REQUIRED)
+find_package(GLEW 1.13 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(Qt5Core REQUIRED)
+find_package(Qt5Core 5.5 REQUIRED)
 
 
 ######## glhelpers #############################################################
