@@ -109,7 +109,6 @@ void ConnectionWidget::handleData(QBuffer* networkBuffer)
 void ConnectionWidget::updateGui()
 {
   ui->labelFPS->setText(QString("FPS: %0").arg(1.f/this->frameTime));
-  qDebug() << frameTime;
 }
 
 void ConnectionWidget::requestString(quintptr ptr)
