@@ -16,3 +16,7 @@
 [submodule "external/angelscript-integration"]
 	path = external/angelscript-integration
 	url = git@github.com:Robert42/angelscript-integration.git
+[submodule "external/assimp"]
+	path = external/assimp
+	url = git@github.com:assimp/assimp.git
+	branch = master

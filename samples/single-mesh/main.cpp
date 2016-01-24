@@ -1,6 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
-#include <glrt/scene/static-mesh.h>
+#include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/gui/anttweakbar.h>
 
 #include <glhelper/gl.hpp>
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
                         glrt::System::Settings::simpleWindow("Single Mesh" // window title
                                                              ),
                         glrt::Application::Settings::techDemo(true));
-  glrt::DebugCamera debugCamera(app.system.sdlWindow);
+  glrt::DebugCamera debugCamera;
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to load and display a simple single mesh" // help text of the sample
                                                                                 ));
@@ -72,10 +72,10 @@ int main(int argc, char** argv)
 
   // ======== Setup the Meshes ========
   // The main mesh we want to load
-  glrt::scene::StaticMesh mesh = glrt::scene::StaticMesh::loadMeshFromFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.dae");
+  glrt::renderer::StaticMeshBuffer mesh = glrt::renderer::StaticMeshBuffer::loadMeshFile(GLRT_ASSET_DIR"/common/meshes/suzanne/suzanne.mesh");
 
   // Get the Vertex Format of it
-  gl::VertexArrayObject vertexArrayObject = glrt::scene::StaticMesh::generateVertexArrayObject();
+  gl::VertexArrayObject vertexArrayObject = glrt::renderer::StaticMeshBuffer::generateVertexArrayObject();
 
   // ======== Setup the Shader ========
   // load and compile the shader
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
         QFileInfo droppedFile = QString::fromUtf8(event.drop.file);
         SDL_free(event.drop.file);
 
-        if(glrt::scene::StaticMesh::isValidFile(droppedFile, true))
+        if(glrt::renderer::StaticMeshBuffer::isValidFileSuffix(droppedFile))
         {
-          glrt::scene::StaticMesh newMesh = glrt::scene::StaticMesh::loadMeshFromFile(droppedFile.absoluteFilePath());
+          glrt::renderer::StaticMeshBuffer newMesh = glrt::renderer::StaticMeshBuffer::loadMeshFile(droppedFile.absoluteFilePath());
           std::swap(newMesh, mesh);
         }else
         {

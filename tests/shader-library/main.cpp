@@ -1,16 +1,13 @@
 #include <glrt/dependencies.h>
 #include <glrt/glsl/math.h>
 
+#include <testing-framework.h>
+
 using namespace glrt::glsl;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
 
-#define EXPECT_NEAR_EPSILON(value, expected, epsilon) if(distance(value, expected) > epsilon){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
-#define EXPECT_NEAR(value, expected) EXPECT_NEAR_EPSILON(value, expected, 0.0001f)
-#define EXPECT_EQ(value, expected) if(value!=expected){qCritical() << "Expected"<<expected<<"got"<<value<<"\nExpression for the tested value: " <<#value<<"\nExpression for the expected value: "<<#expected<<"\n";Q_UNREACHABLE();}
-#define EXPECT_TRUE(value) EXPECT_EQ(value, true);
-#define EXPECT_FALSE(value) EXPECT_EQ(value, false);
 
 void test_plane_distance()
 {
@@ -134,8 +131,7 @@ void test_projection_plane()
 
 int main(int argc, char** argv)
 {
-  Q_UNUSED(argc);
-  Q_UNUSED(argv);
+  TestingApplication testing_application(argc, argv);
 
   test_plane_distance();
   test_ray_distance();
@@ -143,5 +139,5 @@ int main(int argc, char** argv)
   test_raytracing_plane();
   test_projection_plane();
 
-  return 0;
+  return testing_application.result();
 }

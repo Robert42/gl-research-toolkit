@@ -16,6 +16,14 @@ add_subdirectory(glhelper)
 target_include_directories(glhelper PUBLIC ${GLM_INCLUDE_DIR})
 target_sources(glhelper PUBLIC ${GLHELPER_CONFIG_DIR}/glhelperconfig.hpp)
 
+######## Assimp #############################################################
+function(add_assimp)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+add_subdirectory(assimp EXCLUDE_FROM_ALL)
+endfunction()
+add_assimp()
+
 ######## AntTweakBar ###########################################################
 set(ATB_OPENGL_HEADER "GL/glew.h")
 add_subdirectory(AntTweakBar EXCLUDE_FROM_ALL)
