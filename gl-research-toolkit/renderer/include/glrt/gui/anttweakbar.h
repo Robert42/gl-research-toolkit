@@ -117,6 +117,8 @@ public:
 
     for(char* l : labels)
       delete[] l;
+
+    sendChangedSignal();
   }
 
   std::function<void(const T&)> valueChangedByUser;
@@ -151,8 +153,7 @@ public:
   void setCurrentKey(const QString& key)
   {
     int i = map.keys().indexOf(key);
-    if(i>=0)
-      currentIndex = i;
+    setIndex(i);
   }
 
 private:
