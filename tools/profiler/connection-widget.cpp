@@ -209,7 +209,7 @@ public:
 
     DataLine* row = childRow-1;
 
-    while(row < firstRow && row->depth >= childRow->depth)
+    while(row >= firstRow && row->depth >= childRow->depth)
     {
       row--;
     }
@@ -221,7 +221,7 @@ public:
     int rowIndex = 0;
     row--;
 
-    while(row >= firstRow && row->depth >= childRow->depth)
+    while(row >= firstRow && row->depth >= parentRow->depth)
     {
       if(row->depth == parentRow->depth)
         rowIndex++;
@@ -331,7 +331,6 @@ public:
     }
 
     int nRows = rowCount(index);
-    qDebug() << "nRows:"<<nRows;
 
     for(int i=0; i<nRows; ++i)
     {
@@ -371,10 +370,8 @@ void ConnectionWidget::sendModelChangedEndSignal()
   model->sendModelChangedEndSignal();
   ui->treeView->expandAll();
 
-  printReceivedData();
-
-  model->index(1, 0, QModelIndex());
-  model->print();
+  //printReceivedData();
+  //model->print();
 }
 
 void ConnectionWidget::printReceivedData()
