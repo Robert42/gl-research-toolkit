@@ -98,6 +98,11 @@ void ConnectionWidget::dataReceived()
     requestString(name);
   }
   tcpSocket->flush();
+
+  float frameTime;
+  stream >> frameTime;
+  ui->labelFPS->setText(QString("FPS: %0").arg(1.f/frameTime));
+  qDebug() << frameTime;
 }
 
 void ConnectionWidget::requestString(quintptr ptr)

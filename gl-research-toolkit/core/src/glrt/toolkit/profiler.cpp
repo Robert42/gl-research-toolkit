@@ -61,6 +61,8 @@ Profiler::~Profiler()
 
 float Profiler::update()
 {
+  float elapsedTime = timer.restart();
+
 #ifdef GLRT_PROFILER
   recordedScopes.clear();
   if(this->isActive())
@@ -70,11 +72,11 @@ float Profiler::update()
     if(printFramerate)
       qDebug() << 1.f / timer.elapsedTimeAsSeconds();
 
-    send_data_through_tcp();
+    send_data_through_tcp(elapsedTime);
   }
 #endif
 
-  return timer.restart();
+  return elapsedTime;
 }
 
 
@@ -103,14 +105,16 @@ void Profiler::deactivate()
   }
 }
 
-void Profiler::send_data_through_tcp()
+void Profiler::send_data_through_tcp(float frameTime)
 {
   if(tcpSocket.isOpen())
   {
     QBuffer networkBuffer;
     networkBuffer.open(QIODevice::WriteOnly);
     QDataStream stream(&networkBuffer);
+
     send_data(stream);
+    stream << frameTime;
 
     Network::writeAtomic(&tcpSocket, networkBuffer.buffer());
   }
@@ -196,6 +200,7 @@ Profiler::Scope::~Scope()
 
   activeProfiler->currentDepth--;
   activeProfiler->recordedScopes[this->index].cpuTime = elapsedCpuTime;
+  activeProfiler->recordedScopes[this->index].gpuTime = MAX_TIME; // #TODO:::: https://www.opengl.org/wiki/Query_Object#Query_scope
 }
 
 } // namespace glrt

@@ -60,7 +60,7 @@ private:
   QHash<quintptr, QString> strings_to_send;
   QTcpSocket tcpSocket;
 
-  void send_data_through_tcp();
+  void send_data_through_tcp(float frameTime);
   void send_data(QDataStream& stream);
 
 private slots:
