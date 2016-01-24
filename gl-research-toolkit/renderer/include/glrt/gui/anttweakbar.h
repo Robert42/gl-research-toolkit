@@ -223,7 +223,7 @@ public:
 
 private:
   typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
-  typedef TweakBarEnum<Camera, QHash<QString, Camera>> CameraEnumeration;
+  typedef TweakBarEnum<Camera, QMap<QString, Camera>> CameraEnumeration;
 
   SceneEnumeration::Ptr sceneSwitcher;
   CameraEnumeration::Ptr cameraSwitcher;

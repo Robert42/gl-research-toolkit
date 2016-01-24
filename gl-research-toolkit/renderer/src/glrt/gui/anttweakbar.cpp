@@ -143,7 +143,11 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 
   if(cameraSwitcher)
   {
-    cameraSwitcher->init(scene::collectNamedCameras(scene));
+    QMap<QString, Camera> cameras;
+    QHash<QString, Camera> h = scene::collectNamedCameras(scene);
+    for(auto i=h.begin(); i!=h.end(); ++i)
+      cameras.insert(i.key(), i.value());
+    cameraSwitcher->init(cameras);
     if(!scene->debugCamera.loadedName.isEmpty())
       cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
   }
