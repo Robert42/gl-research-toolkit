@@ -11,12 +11,12 @@ ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
 {
   ui->setupUi(this);
 
-  requestString(0);
-  tcpSocket->flush();
-
   connect(tcpSocket, SIGNAL(aboutToClose()), this, SLOT(deleteLater()));
   connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
   connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
+
+  requestString(0);
+  tcpSocket->flush();
 }
 
 ConnectionWidget::~ConnectionWidget()
@@ -29,50 +29,49 @@ ConnectionWidget::~ConnectionWidget()
 
 void ConnectionWidget::dataReceived()
 {
-  int n;
-  QBuffer networkBuffer;
-  networkBuffer.open(QIODevice::ReadOnly);
-
   bool hasData = false;
 #if 1 // Use the newsest frame
+  qint64 bytes = tcpSocket->bytesAvailable();
   do
   {
-    networkBuffer.seek(0);
-    networkBuffer.buffer().clear();
-    hasData = glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 10000);
-
-
-    QDataStream stream(&networkBuffer);
-    stream >> n;
-    for(int i=0; i<n; ++i)
+    QBuffer networkBuffer;
+    networkBuffer.open(QIODevice::ReadOnly);
+    if(glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 0, 0))
     {
-      quintptr ptr;
-      stream >> ptr >> strings[ptr];
-
-      if(ptr == 0 && applicationName!=strings[ptr])
-      {
-        applicationName = strings[ptr];
-        applicationNameChanged(applicationName);
-      }
+      bytes -= networkBuffer.size();
+      hasData = true;
+      handleData(&networkBuffer);
+    }else
+    {
+      break;
     }
+  }while(tcpSocket->bytesAvailable() > 0 && bytes > 0 && hasData);
 
-    if(tcpSocket->bytesAvailable() > 0 && hasData)
-      continue;
-  }while(false);
+  if(hasData)
+    updateGui();
 #else // Don't skip any data
-  hasData = glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 10000);
+  QBuffer networkBuffer;
+  networkBuffer.open(QIODevice::ReadOnly);
+  hasData = glrt::Network::readAtomic(&networkBuffer.buffer(), *tcpSocket, 0, 0);
+  if(hasData)
+  {
+    handleData(&networkBuffer);
+    updateGui();
+  }
 #endif
+}
 
-  if(!hasData)
-    return;
-
-  QDataStream stream(&networkBuffer);
+void ConnectionWidget::handleData(QBuffer* networkBuffer)
+{
+  int n;
+  QDataStream stream(networkBuffer);
 
   stream >> n;
   for(int i=0; i<n; ++i)
   {
     quintptr ptr;
-    stream >> ptr >> strings[ptr];
+    stream >> ptr;
+    stream >> strings[ptr];
 
     if(ptr == 0 && applicationName!=strings[ptr])
     {
@@ -99,9 +98,12 @@ void ConnectionWidget::dataReceived()
   }
   tcpSocket->flush();
 
-  float frameTime;
-  stream >> frameTime;
-  ui->labelFPS->setText(QString("FPS: %0").arg(1.f/frameTime));
+  stream >> this->frameTime;
+}
+
+void ConnectionWidget::updateGui()
+{
+  ui->labelFPS->setText(QString("FPS: %0").arg(1.f/this->frameTime));
   qDebug() << frameTime;
 }
 

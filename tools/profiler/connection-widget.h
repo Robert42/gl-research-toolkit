@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QHash>
 #include <QTcpSocket>
+#include <QBuffer>
 
 namespace Ui {
 class ConnectionWidget;
@@ -25,10 +26,14 @@ signals:
 private:
   Ui::ConnectionWidget *ui;
   QTcpSocket* const tcpSocket;
+  float frameTime;
 
   QHash<quintptr, QString> strings;
 
   void requestString(quintptr ptr);
+
+  void handleData(QBuffer* networkBuffer);
+  void updateGui();
 
 private slots:
   void dataReceived();

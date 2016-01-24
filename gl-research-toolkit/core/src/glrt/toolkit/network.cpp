@@ -9,10 +9,19 @@ bool readAtomic(QByteArray* byteArray,
                 int msecWait,
                 int msecWaitLoopIteration)
 {
+  bool waitForReadyRead = true;
+  if(msecWait <= 0 || msecWaitLoopIteration <= 0)
+  {
+    msecWait = 1;
+    msecWaitLoopIteration = 1;
+    waitForReadyRead = false;
+  }
+
   for(int t=0; t<msecWait; t+=msecWaitLoopIteration)
   {
-    if(!device.waitForReadyRead(msecWaitLoopIteration))
+    if(waitForReadyRead && !device.waitForReadyRead(msecWaitLoopIteration))
       continue;
+
 
     quintptr size;
     if(device.peek(reinterpret_cast<char*>(&size), sizeof(quintptr)) == sizeof(quintptr))
