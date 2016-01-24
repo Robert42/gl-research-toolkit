@@ -183,11 +183,12 @@ public:
 
     while(childRow<=lastRow && childRow->depth>=expectedDepth)
     {
-      if(r == row)
-        return createIndex(row, column, childRow);
-
       if(childRow->depth == expectedDepth)
+      {
+        if(r == row)
+          return createIndex(row, column, childRow);
         r++;
+      }
       childRow++;
     }
 
@@ -330,6 +331,7 @@ public:
     }
 
     int nRows = rowCount(index);
+    qDebug() << "nRows:"<<nRows;
 
     for(int i=0; i<nRows; ++i)
     {
@@ -370,6 +372,8 @@ void ConnectionWidget::sendModelChangedEndSignal()
   ui->treeView->expandAll();
 
   printReceivedData();
+
+  model->index(1, 0, QModelIndex());
   model->print();
 }
 
