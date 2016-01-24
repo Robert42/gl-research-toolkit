@@ -81,7 +81,7 @@ public:
 } // namespace glrt
 
 #ifdef GLRT_PROFILER
-#define PROFILE_SCOPE(name) Profiler::Scope __profiler_scope_##name(__FILE__, __LINE__, __PRETTY_FUNCTION__, #name);Q_UNUSED(__profiler_scope_##name);
+#define PROFILE_SCOPE(name) Profiler::Scope __profiler_scope_##__LINE__(__FILE__, __LINE__, __PRETTY_FUNCTION__, name);Q_UNUSED(__profiler_scope_##__LINE__);
 #else
 #define PROFILE_SCOPE(name)
 #endif
