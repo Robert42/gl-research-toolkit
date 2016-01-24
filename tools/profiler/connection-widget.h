@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QTcpSocket>
 #include <QBuffer>
+#include <QAbstractItemModel>
 
 namespace Ui {
 class ConnectionWidget;
@@ -24,7 +25,32 @@ signals:
   void applicationNameChanged(const QString& applicationName);
 
 private:
+  enum Column
+  {
+    COLUMN_CPU_TIME,
+    COLUMN_GPU_TIME,
+    COLUMN_FILE,
+    COLUMN_FUNCTION,
+    COLUMN_NAME,
+    COLUMN_LINE,
+    N_COLUMNS
+  };
+
+  struct DataLine
+  {
+    quint64 cpuTime;
+    quint64 gpuTime;
+    quintptr file;
+    quintptr function;
+    quintptr name;
+    int line;
+    int depth;
+  };
+
+  class DataModel;
+
   Ui::ConnectionWidget *ui;
+  QVector<DataLine> currentData;
   QTcpSocket* const tcpSocket;
   float frameTime;
 
@@ -34,6 +60,8 @@ private:
 
   void handleData(QBuffer* networkBuffer);
   void updateGui();
+
+  QAbstractItemModel* createModel();
 
 private slots:
   void dataReceived();
