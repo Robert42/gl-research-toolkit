@@ -68,6 +68,7 @@ private:
   void sendModelChangedEndSignal();
 
   void printReceivedData();
+  void print(const DataLine& dataLine);
 
 private slots:
   void dataReceived();
