@@ -67,6 +67,8 @@ private:
   void sendModelStartChangeSignal();
   void sendModelChangedEndSignal();
 
+  void printReceivedData();
+
 private slots:
   void dataReceived();
 };

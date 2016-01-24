@@ -339,4 +339,30 @@ void ConnectionWidget::sendModelChangedEndSignal()
 {
   model->sendModelChangedEndSignal();
   ui->treeView->expandAll();
+
+  printReceivedData();
 }
+
+void ConnectionWidget::printReceivedData()
+{
+  qDebug() << "//----------------------------------------------------------------------------\\\\";
+  for(const DataLine& data : currentData)
+  {
+    QString line;
+
+    for(int i=0; i<data.depth; ++i)
+      line += "    ";
+
+    std::string str = QString("%0%1  %2  %3 `%4` `%5` %6")
+                      .arg(line)
+                      .arg(strings.value(data.name, "???"))
+                      .arg(data.cpuTime!=MAX_TIME ? QString("%0").arg(data.cpuTime) : QString("--"))
+                      .arg(data.gpuTime!=MAX_TIME ? QString("%1").arg(data.gpuTime) : QString("--"))
+                      .arg(strings.value(data.function, "???"))
+                      .arg(strings.value(data.file, "???"))
+                      .arg(data.line).toStdString();
+    qDebug() << str.c_str();
+  }
+  qDebug() << "\\\\----------------------------------------------------------------------------//\n\n";
+}
+
