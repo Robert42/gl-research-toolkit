@@ -3,6 +3,8 @@
 
 #include <glrt/toolkit/network.h>
 
+const quint64 MAX_TIME = std::numeric_limits<quint64>::max();
+
 ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
   QWidget(parent),
   applicationName("Connected Game"),
@@ -255,9 +257,9 @@ public:
       switch(index.column())
       {
       case COLUMN_CPU_TIME:
-        return QVariant(data.cpuTime);
+        return data.cpuTime!=MAX_TIME ? QVariant(data.cpuTime) : QVariant(QString("-"));
       case COLUMN_GPU_TIME:
-        return QVariant(data.gpuTime);
+        return data.gpuTime!=MAX_TIME ? QVariant(data.gpuTime) : QVariant(QString("-"));
       case COLUMN_FILE:
         return QVariant(QFileInfo(strings.value(data.file, "???")).fileName());
       case COLUMN_FUNCTION:
@@ -281,6 +283,29 @@ public:
     }
 
     return QVariant();
+  }
+
+  QVariant headerData(int section, Qt::Orientation, int role) const override
+  {
+    if(role != Qt::DisplayRole)
+      return QVariant();
+    switch(section)
+    {
+    case COLUMN_CPU_TIME:
+      return QVariant(QString("Time (CPU)"));
+    case COLUMN_GPU_TIME:
+      return QVariant(QString("Time (GPU)"));
+    case COLUMN_FILE:
+      return QVariant(QString("File"));
+    case COLUMN_FUNCTION:
+      return QVariant(QString("Function"));
+    case COLUMN_NAME:
+      return QVariant(QString("Name"));
+    case COLUMN_LINE:
+      return QVariant(QString("Line"));
+    default:
+      return QVariant();
+    }
   }
 
   void sendModelStartChangeSignal()
