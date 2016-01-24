@@ -95,10 +95,10 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
 
   sceneSwitcher = SceneEnumeration::Ptr(new SceneEnumeration("CurrentSceneEnum", tweakBar, "Current Scene", ""));
   sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, scene.resourceManager.allRegisteredScenes());
-  sceneSwitcher->valueChanged = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
+  sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
   cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
-  cameraSwitcher->valueChanged = [&scene](const scene::Camera& p){scene.debugCamera = p;};
+  cameraSwitcher->valueChangedByUser = [&scene](const scene::Camera& p){scene.debugCamera = p;};
   TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
 
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
@@ -152,6 +152,7 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
       cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
     else if(cameras.size() > 0)
       cameraSwitcher->setCurrentKey(cameras.firstKey());
+    cameraSwitcher->sendChangedSignal();
   }
 }
 

@@ -119,13 +119,33 @@ public:
       delete[] l;
   }
 
+  std::function<void(const T&)> valueChangedByUser;
   std::function<void(const T&)> valueChanged;
+
+  void sendChangedSignal(bool byUser=false)
+  {
+    if(byUser)
+    {
+      if(valueChangedByUser && currentIndex>=0 && currentIndex<map.size())
+        valueChangedByUser(map.values()[currentIndex]);
+    }
+    if(valueChanged && currentIndex>=0 && currentIndex<map.size())
+      valueChanged(map.values()[currentIndex]);
+  }
+
+  void setIndex(int i)
+  {
+    if(i<0 || i==currentIndex)
+      return;
+
+    currentIndex = i;
+    sendChangedSignal();
+  }
 
   void setCurrentValue(const T& value)
   {
     int i = map.values().indexOf(value);
-    if(i>=0)
-      currentIndex = i;
+    setIndex(i);
   }
 
   void setCurrentKey(const QString& key)
@@ -148,8 +168,7 @@ private:
     if(wrapper->map.size() > *value && *value >= 0)
     {
       wrapper->currentIndex = *value;
-      if(wrapper->valueChanged)
-        wrapper->valueChanged(wrapper->map.values()[*value]);
+      wrapper->sendChangedSignal(true);
     }
   }
 };
