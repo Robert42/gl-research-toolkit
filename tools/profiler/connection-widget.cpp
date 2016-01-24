@@ -14,6 +14,12 @@ ConnectionWidget::ConnectionWidget(QTcpSocket* tcpSocket, QWidget *parent) :
   ui->setupUi(this);
 
   ui->treeView->setModel(this->createModel());
+  ui->treeView->setColumnWidth(COLUMN_NAME, (ui->treeView->columnWidth(COLUMN_NAME)*6)/4);
+  ui->treeView->setColumnWidth(COLUMN_CPU_TIME, ui->treeView->columnWidth(COLUMN_CPU_TIME)/2);
+  ui->treeView->setColumnWidth(COLUMN_GPU_TIME, ui->treeView->columnWidth(COLUMN_GPU_TIME)/2);
+  ui->treeView->setColumnWidth(COLUMN_FUNCTION, (ui->treeView->columnWidth(COLUMN_FUNCTION)*5)/2);
+  ui->treeView->setColumnWidth(COLUMN_LINE, ui->treeView->columnWidth(COLUMN_LINE)/2);
+  ui->treeView->setColumnWidth(COLUMN_FILE, ui->treeView->columnWidth(COLUMN_FILE)*2);
 
   connect(tcpSocket, SIGNAL(aboutToClose()), this, SLOT(deleteLater()));
   connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(deleteLater()));
@@ -292,9 +298,9 @@ public:
     switch(section)
     {
     case COLUMN_CPU_TIME:
-      return QVariant(QString("Time (CPU)"));
+      return QVariant(QString("CPU"));
     case COLUMN_GPU_TIME:
-      return QVariant(QString("Time (GPU)"));
+      return QVariant(QString("GPU"));
     case COLUMN_FILE:
       return QVariant(QString("File"));
     case COLUMN_FUNCTION:
