@@ -35,7 +35,7 @@ vec3 getDirectionToLight(out float specularEnergyFactor, out float light_distanc
     p[3] = rect.origin +  rect.tangent1*rect.half_width + rect.tangent2*rect.half_height;
     
     // 1.a) the position of the plane is as close as possible to the rect to prevent errors 
-    const float distance_projection_plane_to_rect = rect.half_width + rect.half_height;
+    const float distance_projection_plane_to_rect = 0;
     const float distance_ray_origin_to_projection_plane = rect.half_width + rect.half_height;
     float image_plane = min4(dot(reflection_ray.direction, p[0]),
                              dot(reflection_ray.direction, p[1]),
