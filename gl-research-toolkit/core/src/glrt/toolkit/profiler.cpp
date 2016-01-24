@@ -142,20 +142,14 @@ void Profiler::connectionError()
 
 void Profiler::readStringsToWrite()
 {
-  if(tcpSocket.bytesAvailable() < int(sizeof(quintptr)))
-    return;
-
-  QDataStream stream(&tcpSocket);
-
-  while(!stream.atEnd())
+  while(tcpSocket.bytesAvailable() >= int(sizeof(quintptr)))
   {
     quintptr ptr;
-    stream >> ptr;
+    tcpSocket.read(reinterpret_cast<char*>(&ptr), sizeof(quintptr));
     if(ptr == 0)
       strings_to_send[0] = applicationName;
     else
       strings_to_send[ptr] = reinterpret_cast<char*>(ptr);
-
   }
 }
 
