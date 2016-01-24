@@ -338,4 +338,5 @@ void ConnectionWidget::sendModelStartChangeSignal()
 void ConnectionWidget::sendModelChangedEndSignal()
 {
   model->sendModelChangedEndSignal();
+  ui->treeView->expandAll();
 }
