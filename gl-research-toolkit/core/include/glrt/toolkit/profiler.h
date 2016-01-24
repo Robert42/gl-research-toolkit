@@ -2,6 +2,7 @@
 #define GLRT_CORE_PROFILER_H
 
 #include <glrt/dependencies.h>
+#include <QTcpSocket>
 
 namespace glrt {
 
@@ -17,36 +18,54 @@ public:
   quint64 elapsedTimeAsMicroseconds() const;
 };
 
-class Profiler final
+class Profiler final : public QObject
 {
+  Q_OBJECT
 public:
   class Scope;
 
   Timer timer;
   float frameDuration;
   bool printFramerate = false;
+  QString applicationName;
 
-  Profiler();
+  Profiler(const QString& applicationName);
+  Profiler(const Profiler&) = delete;
   ~Profiler();
+
 
   float update();
   void activate();
   void deactivate();
+  bool isActive() const;
 private:
   struct RecordedScope
   {
-    quint64 time;
+    quint64 cpuTime;
+    quint64 gpuTime;
     const char* file;
     const char* function;
     const char* name;
     int line;
     int depth;
+
+    void write(QDataStream& stream) const;
   };
 
   static Profiler* activeProfiler;
 
   std::vector<RecordedScope> recordedScopes;
   int currentDepth;
+
+  QHash<quintptr, QString> strings_to_send;
+  QTcpSocket tcpSocket;
+
+  void send_data_through_tcp(float frameTime);
+  void send_data(QDataStream& stream);
+
+private slots:
+  void connectionError();
+  void readStringsToWrite();
 };
 
 class Profiler::Scope final

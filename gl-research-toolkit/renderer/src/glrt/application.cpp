@@ -18,6 +18,7 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
   : system(argc, argv, systemSettings),
     settings(applicationSettings),
     sdlWindow(system.sdlWindow),
+    profiler(systemSettings.windowTitle),
     isRunning(true)
 {
   initAngelScript();
@@ -55,6 +56,7 @@ bool Application::pollEvent(SDL_Event* e)
 
 float Application::update()
 {
+  qApp->processEvents();
   float frameDuration = profiler.update();
   return frameDuration;
 }

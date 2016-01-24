@@ -77,6 +77,15 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 
   TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &profiler->printFramerate, "");
 
+  toggleProfiler.getter = [profiler]()->bool{return profiler->isActive();};
+  toggleProfiler.setter = [profiler](bool a){
+    if(a)
+      profiler->activate();
+    else
+      profiler->deactivate();
+  };
+  toggleProfiler.TwAddVarCB(tweakBar, "Connect", "key=F10 help='Connect with the profiler gui (which must be already running)'");
+
   gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;

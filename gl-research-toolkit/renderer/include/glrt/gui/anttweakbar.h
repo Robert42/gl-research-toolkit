@@ -178,6 +178,51 @@ private:
 
 
 
+
+template<typename T>
+class TweakBarCBVar
+{
+public:
+  std::function<T()> getter;
+  std::function<void(T)> setter;
+
+  void TwAddVarCB(TwBar* bar, const char* name, const char* def)
+  {
+    ::TwAddVarCB(bar, name, type(), reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
+  }
+
+  void reapply()
+  {
+    if(getter && setter)
+      setter(getter());
+  }
+
+  static TwType type();
+
+private:
+
+  static void getValue(T* value, TweakBarCBVar<T>* wrapper)
+  {
+    if(wrapper->getter)
+      *value = wrapper->getter();
+  }
+
+  static void setValue(const T* value, TweakBarCBVar<T>* wrapper)
+  {
+    if(wrapper->setter)
+      wrapper->setter(*value);
+  }
+};
+
+template<>
+inline TwType TweakBarCBVar<bool>::type()
+{
+  return TW_TYPE_BOOLCPP;
+}
+
+
+
+
 class AntTweakBar final : public QObject
 {
   Q_OBJECT
@@ -249,6 +294,8 @@ private:
   typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
   typedef TweakBarEnum<Camera, QMap<QString, Camera>> CameraEnumeration;
 
+  gui::TweakBarCBVar<bool> toggleProfiler;
+
   SceneEnumeration::Ptr sceneSwitcher;
   CameraEnumeration::Ptr cameraSwitcher;
 
@@ -261,47 +308,6 @@ private slots:
   void handleSceneLoaded(Scene* scene);
 };
 
-
-template<typename T>
-class TweakBarCBVar
-{
-public:
-  std::function<T()> getter;
-  std::function<void(T)> setter;
-
-  void TwAddVarCB(TwBar* bar, const char* name, const char* def)
-  {
-    ::TwAddVarCB(bar, name, type(), reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
-  }
-
-  void reapply()
-  {
-    if(getter && setter)
-      setter(getter());
-  }
-
-  static TwType type();
-
-private:
-
-  static void getValue(T* value, TweakBarCBVar<T>* wrapper)
-  {
-    if(wrapper->getter)
-      *value = wrapper->getter();
-  }
-
-  static void setValue(const T* value, TweakBarCBVar<T>* wrapper)
-  {
-    if(wrapper->setter)
-      wrapper->setter(*value);
-  }
-};
-
-template<>
-inline TwType TweakBarCBVar<bool>::type()
-{
-  return TW_TYPE_BOOLCPP;
-}
 
 
 } // namespace gui

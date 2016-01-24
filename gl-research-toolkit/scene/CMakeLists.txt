@@ -1,6 +1,6 @@
 include(files.cmake)
 
-find_package(Qt5Core REQUIRED)
+find_package(Qt5Core 5.5 REQUIRED)
 
 add_library(glrt-scene
   ${SOURCE_FILES}
