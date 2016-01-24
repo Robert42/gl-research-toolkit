@@ -31,6 +31,8 @@ ConnectionWidget::~ConnectionWidget()
 
 void ConnectionWidget::dataReceived()
 {
+  sendModelStartChangeSignal();
+
   bool hasData = false;
 #if 1 // Use the newsest frame
   qint64 bytes = tcpSocket->bytesAvailable();
@@ -61,6 +63,8 @@ void ConnectionWidget::dataReceived()
     updateGui();
   }
 #endif
+
+  sendModelChangedEndSignal();
 }
 
 void ConnectionWidget::handleData(QBuffer* networkBuffer)
@@ -278,9 +282,29 @@ public:
 
     return QVariant();
   }
+
+  void sendModelStartChangeSignal()
+  {
+    beginResetModel();
+  }
+
+  void sendModelChangedEndSignal()
+  {
+    endResetModel();
+  }
 };
 
 QAbstractItemModel* ConnectionWidget::createModel()
 {
-  return new DataModel(this);
+  return model = new DataModel(this);
+}
+
+void ConnectionWidget::sendModelStartChangeSignal()
+{
+  model->sendModelStartChangeSignal();
+}
+
+void ConnectionWidget::sendModelChangedEndSignal()
+{
+  model->sendModelChangedEndSignal();
 }

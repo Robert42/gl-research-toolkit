@@ -61,7 +61,11 @@ private:
   void handleData(QBuffer* networkBuffer);
   void updateGui();
 
+
+  DataModel* model = nullptr;
   QAbstractItemModel* createModel();
+  void sendModelStartChangeSignal();
+  void sendModelChangedEndSignal();
 
 private slots:
   void dataReceived();
