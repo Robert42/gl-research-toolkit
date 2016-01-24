@@ -44,6 +44,8 @@ Scene::~Scene()
 
 void Scene::clear()
 {
+  this->uuid = Uuid<Scene>();
+
   // the destructor of a scene layers removes the layer from the _layers hash.
   // So the list of all layers have to be copied in order to be able to go with
   // a foreach loop over it.
@@ -78,6 +80,8 @@ void Scene::load(const Uuid<Scene>& scene)
 {
   SPLASHSCREEN_MESSAGE("Loading Scene");
   clear();
+
+  this->uuid = scene;
 
   std::string filename = this->resourceManager.sceneFileForUuid(scene).toStdString();
 

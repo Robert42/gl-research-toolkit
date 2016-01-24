@@ -145,8 +145,12 @@ private:
 
   static void setValue(const int* value, TweakBarEnum<T, Map>* wrapper)
   {
-    if(wrapper->map.size() > *value && *value >= 0 && wrapper->valueChanged)
-      wrapper->valueChanged(wrapper->map.values()[*value]);
+    if(wrapper->map.size() > *value && *value >= 0)
+    {
+      wrapper->currentIndex = *value;
+      if(wrapper->valueChanged)
+        wrapper->valueChanged(wrapper->map.values()[*value]);
+    }
   }
 };
 

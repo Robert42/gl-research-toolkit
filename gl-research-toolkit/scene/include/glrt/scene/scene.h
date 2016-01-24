@@ -25,7 +25,8 @@ class Scene final : public QObject
   Q_OBJECT
 public:
   resources::ResourceManager& resourceManager;
-  QString name, file;
+  Uuid<Scene> uuid;
+  QString file;
   DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
   Scene(resources::ResourceManager* resourceManager);

@@ -139,7 +139,7 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
 void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 {
   if(sceneSwitcher)
-    sceneSwitcher->setCurrentKey(scene->name);
+    sceneSwitcher->setCurrentValue(scene->uuid);
 
   if(cameraSwitcher)
   {
@@ -150,6 +150,8 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
     cameraSwitcher->init(cameras);
     if(!scene->debugCamera.loadedName.isEmpty())
       cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
+    else if(cameras.size() > 0)
+      cameraSwitcher->setCurrentKey(cameras.firstKey());
   }
 }
 
