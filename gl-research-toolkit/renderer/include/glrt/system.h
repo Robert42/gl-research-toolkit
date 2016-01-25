@@ -62,6 +62,7 @@ private:
   void initGLEW(const Settings& settings);
   void verifyGLFeatures();
   void verifyNVidiaFeatures();
+  void verifyAssimpVersion();
 };
 
 } // namespace glrt

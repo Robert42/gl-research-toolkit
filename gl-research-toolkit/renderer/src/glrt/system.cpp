@@ -4,6 +4,8 @@
 
 #include <glrt/glsl/layout-constants.h>
 
+#include <assimp/version.h>
+
 
 /*! \namespace glrt
 \ingroup glrt
@@ -35,6 +37,7 @@ System::System(int& argc, char** argv, const Settings& settings)
 
   verifyGLFeatures();
   verifyNVidiaFeatures();
+  verifyAssimpVersion();
 
   renderer::TempShaderFile::init();
 }
@@ -159,6 +162,17 @@ void System::verifyNVidiaFeatures()
   // https://www.opengl.org/registry/specs/NV/bindless_texture.txt
   if(!GLEW_ARB_bindless_texture)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_bindless_texture"));
+}
+
+void System::verifyAssimpVersion()
+{
+  const unsigned int expectedMajorVersion = 3;
+  const unsigned int expectedMinorVersion = 2;
+
+  const unsigned int expectedVersion = expectedMajorVersion*1000 + expectedMinorVersion;
+  const unsigned int aiVersion = aiGetVersionMajor()*1000 + aiGetVersionMinor();
+
+  Q_ASSERT(expectedVersion<=aiVersion);
 }
 
 
