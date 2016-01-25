@@ -36,20 +36,25 @@ float SampleApplication::update()
   return deltaTime;
 }
 
-void SampleApplication::drawScene()
+void SampleApplication::beginDrawing()
 {
   GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glEnable(GL_DEPTH_TEST);
 
   shaderDebugPrinter.begin();
-  renderer.render();
-  shaderDebugPrinter.end();
-  shaderDebugPrinter.draw();
 }
 
-void SampleApplication::drawOverlays()
+void SampleApplication::drawScene()
 {
+  renderer.render();
+}
+
+void SampleApplication::endDrawing()
+{
+  shaderDebugPrinter.end();
+  shaderDebugPrinter.draw();
+
   antweakbar.draw();
 }
 

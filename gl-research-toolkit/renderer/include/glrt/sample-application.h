@@ -45,8 +45,9 @@ public:
 
   float update();
 
+  void beginDrawing();
   void drawScene();
-  void drawOverlays();
+  void endDrawing();
 
 public:
   void initGui();

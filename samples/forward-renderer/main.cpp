@@ -26,11 +26,12 @@ int main(int argc, char** argv)
     const float deltaTime = app.update();
     Q_UNUSED(deltaTime);
 
+    app.beginDrawing();
     app.drawScene();
 
     // T O D O: add here your rendering code
 
-    app.drawOverlays();
+    app.endDrawing();
     app.swapWindow();
   }
 
