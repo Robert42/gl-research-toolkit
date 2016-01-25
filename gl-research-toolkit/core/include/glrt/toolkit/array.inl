@@ -400,7 +400,6 @@ Array<T, T_traits>::Array()
     _capacity(0),
     _length(0)
 {
-  traits::init_cache(&this->trait_cache);
 }
 
 template<typename T, class T_traits>
@@ -414,8 +413,6 @@ Array<T, T_traits>::~Array()
   _capacity = 0;
   _length = 0;
   _data = nullptr;
-
-  traits::delete_cache(&this->trait_cache);
 }
 
 template<typename T, class T_traits>
@@ -447,7 +444,6 @@ void Array<T, T_traits>::swap(Array& other)
   std::swap(this->_data, other._data);
   std::swap(this->_capacity, other._capacity);
   std::swap(this->_length, other._length);
-  traits::swap_cache(&this->trait_cache, &other.trait_cache);
 }
 
 
@@ -469,7 +465,6 @@ void Array<T, T_traits>::clear()
   _capacity = 0;
   _length = 0;
   _data = nullptr;
-  traits::clear_cache(&this->trait_cache);
 }
 
 template<typename T, class T_traits>
@@ -494,7 +489,6 @@ void Array<T, T_traits>::setCapacity(int capacity)
     if(this->_length > capacity)
     {
       this->_length = capacity;
-      traits::capacity_reduced(capacity, &this->trait_cache);
     }
 
     // move the elements to the new buffer.
@@ -585,12 +579,12 @@ bool Array<T, T_traits>::isEmpty() const
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::append_move(T&& value, const hint_type& hint)
+int Array<T, T_traits>::append_move(T&& value)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
   // the trait must assume, that there's enough space
-  int new_index = traits::append_move(this->data(), this->length(), std::move(value), &this->trait_cache, hint);
+  int new_index = traits::append_move(this->data(), this->length(), std::move(value));
 
   _length++;
 
@@ -601,11 +595,11 @@ int Array<T, T_traits>::append_move(T&& value, const hint_type& hint)
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::extend_move(T* values, int num_values, const hint_type& hint)
+int Array<T, T_traits>::extend_move(T* values, int num_values)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  int new_index = traits::extend_move(this->data(), this->length(), values, num_values, &this->trait_cache, hint);
+  int new_index = traits::extend_move(this->data(), this->length(), values, num_values);
 
   _length += num_values;
 
@@ -616,12 +610,12 @@ int Array<T, T_traits>::extend_move(T* values, int num_values, const hint_type& 
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::append_copy(const T& value, const hint_type& hint)
+int Array<T, T_traits>::append_copy(const T& value)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
   // the trait must assume, that there's enough space
-  int new_index = traits::append_copy(this->data(), this->length(), value, &this->trait_cache, hint);
+  int new_index = traits::append_copy(this->data(), this->length(), value);
 
   _length++;
 
@@ -633,11 +627,11 @@ int Array<T, T_traits>::append_copy(const T& value, const hint_type& hint)
 
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_type& hint)
+int Array<T, T_traits>::extend_copy(const T* values, int num_values)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
-  int new_index = traits::extend_copy(this->data(), this->length(), values, num_values, &this->trait_cache, hint);
+  int new_index = traits::extend_copy(this->data(), this->length(), values, num_values);
 
   _length += num_values;
 
@@ -648,21 +642,21 @@ int Array<T, T_traits>::extend_copy(const T* values, int num_values, const hint_
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::append(const T& value, const hint_type& hint)
+int Array<T, T_traits>::append(const T& value)
 {
-  return append_copy(value, hint);
+  return append_copy(value);
 }
 
 template<typename T, class T_traits>
-int Array<T, T_traits>::append(T&& value, const hint_type& hint)
+int Array<T, T_traits>::append(T&& value)
 {
-  return append_move(std::move(value), hint);
+  return append_move(std::move(value));
 }
 
 template<typename T, class T_traits>
-void Array<T, T_traits>::remove(int index, const hint_type& hint)
+void Array<T, T_traits>::remove(int index)
 {
-  traits::remove_single(this->data(), this->length(), index, &this->trait_cache, hint);
+  traits::remove_single(this->data(), this->length(), index);
 
   _length -= 1;
   Q_ASSERT(_length >= 0);
@@ -672,9 +666,9 @@ void Array<T, T_traits>::remove(int index, const hint_type& hint)
 }
 
 template<typename T, class T_traits>
-void Array<T, T_traits>::remove(int index, int num_to_remove, const hint_type& hint)
+void Array<T, T_traits>::remove(int index, int num_to_remove)
 {
-  traits::remove(this->data(), this->length(), index, num_to_remove, &this->trait_cache, hint);
+  traits::remove(this->data(), this->length(), index, num_to_remove);
 
   _length -= num_to_remove;
   Q_ASSERT(_length >= 0);
