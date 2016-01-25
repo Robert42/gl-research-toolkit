@@ -27,8 +27,6 @@ set(GLRT_PROFILER_DEFAULT_PORT 4315)
 
 add_definitions("-DGLRT_PROFILER_DEFAULT_PORT=${GLRT_PROFILER_DEFAULT_PORT}")
 
-set(GLM_INCLUDE_DIR ${GLRT_DIR}/external/glm)
-
 add_subdirectory(external)
 add_subdirectory(shader)
 add_subdirectory(gl-research-toolkit)
