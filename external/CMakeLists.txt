@@ -3,10 +3,17 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
+set(GLM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glm)
 
 find_package(OpenGL REQUIRED)
 find_package(Qt5Core 5.5 REQUIRED)
+find_package(ASSIMP 3.2 REQUIRED)
+find_package(SDL2 REQUIRED)
 
+
+######## glm ##################################################################ä
+add_library(glm INTERFACE)
+target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})
 
 ######## glhelpers #############################################################
 set(GLHELPER_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glhelperconfig/)
@@ -14,14 +21,6 @@ set(GLHELPER_ADDITIONAL_LIBRARIES Qt5::Core)
 add_subdirectory(glhelper)
 target_include_directories(glhelper PUBLIC ${GLM_INCLUDE_DIR})
 target_sources(glhelper PUBLIC ${GLHELPER_CONFIG_DIR}/glhelperconfig.hpp)
-
-######## Assimp ################################################################
-function(add_assimp)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-add_subdirectory(assimp EXCLUDE_FROM_ALL)
-endfunction()
-add_assimp()
 
 ######## AntTweakBar ###########################################################
 set(ATB_OPENGL_HEADER "GL/glew.h")

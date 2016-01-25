@@ -10,7 +10,6 @@ if(NOT GLRT_EXTERNAL_SHADER_DIR)
 message(FATAL_ERROR "GLRT_EXTERNAL_SHADER_DIR must be set")
 endif()
 
-find_package(SDL2 REQUIRED)
 find_package(Qt5Core 5.5 REQUIRED)
 find_package(Qt5Network 5.5 REQUIRED)
 
@@ -30,7 +29,6 @@ target_include_directories(
   glrt-core
   PUBLIC
   include
-  ${GLM_INCLUDE_DIR}
 )
 
 target_compile_definitions(
@@ -54,7 +52,8 @@ target_compile_options(glrt-core
 
 target_link_libraries(glrt-core
   PUBLIC
-  ${SDL2_LIBRARIES}
+  glm
+  sdl2
   assimp
   Qt5::Core
   Qt5::Network
