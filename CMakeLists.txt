@@ -9,6 +9,15 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   )
 endif()
 
+include(cmake/adapt-prefix-path.cmake)
+
+adapt_cmake_prefix_path(GLEW_DIR)
+find_package(GLEW 1.13 REQUIRED)
+reset_cmake_prefix_path()
+adapt_cmake_prefix_path(QT5_DIR)
+find_package(Qt5Core 5.5 REQUIRED)
+reset_cmake_prefix_path()
+
 set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(GLRT_ASSET_DIR ${GLRT_DIR}/external/assets)
 set(GLRT_EXTERNAL_SHADER_DIR ${GLRT_DIR}/external/shader)
