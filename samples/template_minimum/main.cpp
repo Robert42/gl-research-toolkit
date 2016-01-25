@@ -15,6 +15,7 @@ int main(int argc, char** argv)
     SDL_Event event;
     while(app.pollEvent(&event))
     {
+      // T O D O : Add your event handling code here
     }
 
     app.update();

@@ -7,7 +7,7 @@
 
 namespace glrt {
 
-class Application final
+class Application
 {
 public:
   struct Settings final
@@ -34,7 +34,11 @@ public:
   bool isRunning;
 
   Application(int& argc, char** argv, const System::Settings& systemSettings = System::Settings::simpleWindow(), const Application::Settings& applicationSettings=Settings::techDemo());
-  ~Application();
+  virtual ~Application();
+  Application(const Application&) = delete;
+  Application(Application&&) = delete;
+  Application&operator=(const Application&) = delete;
+  Application&operator=(Application&&) = delete;
 
   bool pollEvent(SDL_Event* event);
   float update();

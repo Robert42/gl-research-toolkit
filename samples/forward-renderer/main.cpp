@@ -1,35 +1,14 @@
-#include <glrt/application.h>
-#include <glrt/gui/toolbar.h>
-#include <glrt/scene/resources/resource-manager.h>
-#include <glrt/scene/scene.h>
-#include <glrt/gui/anttweakbar.h>
-#include <glrt/renderer/sample-resource-manager.h>
-#include <glrt/renderer/forward-renderer.h>
-#include <glrt/renderer/debugging/shader-debug-printer.h>
-
-#include <glhelper/gl.hpp>
+#include <glrt/sample-application.h>
 
 
 int main(int argc, char** argv)
 {
-  glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Forward-Renderer"));
-
-  glrt::renderer::SampleResourceManager resourceManager;
-  glrt::scene::Scene scene(&resourceManager);
-
-  glrt::renderer::ForwardRenderer renderer(&scene, &resourceManager);
-
-  glrt::gui::AntTweakBar antweakbar(&app,
-                                    glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
-                                                                                ));
-
-  glrt::renderer::debugging::ShaderDebugPrinter shaderDebugPrinter;
-
-  antweakbar.createDebugSceneBar(&renderer);
-  antweakbar.createDebugShaderBar(&shaderDebugPrinter);
-  antweakbar.createProfilerBar(&app.profiler);
-
-  scene.load(glrt::renderer::SampleResourceManager::cornellBoxRoughnessScene());
+  glrt::SampleApplication app(argc, argv,
+                              glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
+                                                                          ),
+                              glrt::SampleApplication::Settings::techDemo(),
+                              glrt::Application::Settings::techDemo(),
+                              glrt::System::Settings::simpleWindow("Forward-Renderer"));
 
   app.showWindow();
 
@@ -38,30 +17,21 @@ int main(int argc, char** argv)
     SDL_Event event;
     while(app.pollEvent(&event))
     {
-      if(scene.handleEvents(event))
+      if(app.handleEvents(event))
         continue;
-      if(antweakbar.handleEvents(event))
-        continue;
-      if(shaderDebugPrinter.handleEvents(event))
-        continue;
+
+      // T O D O : Add your event handling code here
     }
 
     const float deltaTime = app.update();
-    scene.update(deltaTime);
-    antweakbar.update(deltaTime);
+    Q_UNUSED(deltaTime);
 
-    GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    app.beginDrawing();
+    app.drawScene();
 
-    glEnable(GL_DEPTH_TEST);
+    // T O D O: add here your rendering code
 
-    shaderDebugPrinter.begin();
-    renderer.render();
-    shaderDebugPrinter.end();
-    shaderDebugPrinter.draw();
-
-
-    antweakbar.draw();
-
+    app.endDrawing();
     app.swapWindow();
   }
 

@@ -20,6 +20,7 @@ set(SOURCE_FILES
   include/glrt/renderer/toolkit/shader-compiler.h
   include/glrt/renderer/toolkit/shader-storage-format.h
   include/glrt/renderer/toolkit/temp-shader-file.h
+  include/glrt/sample-application.h
   include/glrt/splashscreen-style.h
   include/glrt/system.h
   src/glrt/application.cpp
@@ -31,6 +32,7 @@ set(SOURCE_FILES
   src/glrt/renderer/debugging/visualization-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp
   src/glrt/renderer/material-buffer.cpp
+  src/glrt/renderer/sample-application.cpp
   src/glrt/renderer/sample-resource-manager.cpp
   src/glrt/renderer/scene-renderer.cpp
   src/glrt/renderer/static-mesh-buffer.cpp
