@@ -8,14 +8,15 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 
-LightComponent::LightComponent(Node &entity, const Uuid<LightComponent> &uuid, Interactivity interactivity)
-  : Node::Component(entity, uuid, interactivity==Interactivity::MOVABLE),
+LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<LightComponent> &uuid, Interactivity interactivity)
+  : Node::Component(node, parent, uuid, interactivity==Interactivity::MOVABLE),
     isStatic(interactivity==Interactivity::STATIC)
 {
 }
 
 
 LightComponent* LightComponent::createForLightSource(Node& node,
+                                                     Node::Component* parent,
                                                      const Uuid<LightComponent>& uuid,
                                                      Interactivity interactivity,
                                                      const resources::LightSource& lightSource)
@@ -23,9 +24,9 @@ LightComponent* LightComponent::createForLightSource(Node& node,
   switch(lightSource.type)
   {
   case resources::LightSource::Type::RECT_AREA_LIGHT:
-    return new RectAreaLightComponent(node, uuid.cast<RectAreaLightComponent>(), lightSource.rect_area_light, interactivity);
+    return new RectAreaLightComponent(node, parent, uuid.cast<RectAreaLightComponent>(), lightSource.rect_area_light, interactivity);
   case resources::LightSource::Type::SPHERE_AREA_LIGHT:
-    return new SphereAreaLightComponent(node, uuid.cast<SphereAreaLightComponent>(), lightSource.sphere_area_light, interactivity);
+    return new SphereAreaLightComponent(node, parent, uuid.cast<SphereAreaLightComponent>(), lightSource.sphere_area_light, interactivity);
   default:
     Q_UNREACHABLE();
   }
@@ -47,23 +48,26 @@ void LightComponent::registerAngelScriptAPIDeclarations()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-inline LightComponent* createLightComponent(Node* node,
+inline LightComponent* createLightComponent(Node& node,
+                                            Node::Component* parent,
                                             const Uuid<LightComponent>& uuid,
                                             LightComponent::Interactivity interactivity,
                                             const Uuid<resources::LightSource>& lightSource)
 {
-  return LightComponent::createForLightSource(*node,
+  return LightComponent::createForLightSource(node,
+                                              parent,
                                               uuid,
                                               interactivity,
-                                              node->resourceManager().lightSourceForUuid(lightSource));
+                                              node.resourceManager().lightSourceForUuid(lightSource));
 }
 
 void LightComponent::registerAngelScriptAPI()
 {
-  int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  r = angelScriptEngine->RegisterObjectMethod("Node", "LightComponent@ newLightComponent(const Uuid<LightComponent> &in uuid, LightSourceInteractivity interactivity, const Uuid<LightSource> &in lightSourceUuid)", AngelScript::asFUNCTION(createLightComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  Node::Component::registerCreateMethod<decltype(createLightComponent), createLightComponent>(angelScriptEngine,
+                                                                                              "LightComponent",
+                                                                                              "const Uuid<LightComponent> &in uuid, LightSourceInteractivity interactivity, const Uuid<LightSource> &in lightSourceUuid");
 
   Node::Component::registerAsBaseOfClass<LightComponent>(angelScriptEngine, "LightComponent");
 
@@ -74,8 +78,8 @@ void LightComponent::registerAngelScriptAPI()
 // =============================================================================
 
 
-SphereAreaLightComponent::SphereAreaLightComponent(Node& node, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
-  : LightComponent(node, uuid, interactivity),
+SphereAreaLightComponent::SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
+  : LightComponent(node, parent, uuid, interactivity),
     data(data)
 {
 }
@@ -84,8 +88,8 @@ SphereAreaLightComponent::SphereAreaLightComponent(Node& node, const Uuid<Sphere
 // =============================================================================
 
 
-RectAreaLightComponent::RectAreaLightComponent(Node& node, const Uuid<RectAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
-  : LightComponent(node, uuid, interactivity),
+RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data, Interactivity interactivity)
+  : LightComponent(node, parent, uuid, interactivity),
     data(data)
 {
 }

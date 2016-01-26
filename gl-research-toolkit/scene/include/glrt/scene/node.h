@@ -1,5 +1,5 @@
-#ifndef GLRT_SCENE_ENTITY_H
-#define GLRT_SCENE_ENTITY_H
+#ifndef GLRT_SCENE_NODE_H
+#define GLRT_SCENE_NODE_H
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
@@ -48,10 +48,10 @@ class Node::ModularAttribute : public QObject
 {
   Q_OBJECT
 public:
-  Node& entity;
+  Node& node;
   const Uuid<ModularAttribute> uuid;
 
-  ModularAttribute(Node& entity, const Uuid<ModularAttribute>& uuid);
+  ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid);
   virtual ~ModularAttribute();
 };
 
@@ -61,17 +61,15 @@ class Node::Component : public QObject
   Q_OBJECT
 public:
   Node& node;
+  Component* const parent;
   const Uuid<Component> uuid;
 
   const bool isMovable : 1;
 
-  Component(Node& node, const Uuid<Component>& uuid, bool isMovable);
+  Component(Node& node, Component* parent, const Uuid<Component>& uuid, bool isMovable);
   virtual ~Component();
 
-  Component* parent() const;
-  void setParent(Component* component);
-
-  QVector<Component*> children() const;
+  const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
   CoordFrame localCoordFrame() const;
@@ -86,10 +84,21 @@ protected:
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 
+  template<typename T, T*>
+  static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments);
+
 private:
+  template<typename T>
+  struct _create_method_helper;
+
+  template<typename T_Component, typename... T_Args>
+  struct _create_method_helper<T_Component*(Node& node, Component* parent, T_Args...)>;
+
+  template<typename T, T*>
+  static void _registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const std::string& function_name, const char* arguments);
+
   CoordFrame _localCoordFrame;
 
-  Component* _parent = nullptr;
   QVector<Component*> _children;
 };
 
@@ -99,4 +108,4 @@ private:
 
 #include "node.inl"
 
-#endif // GLRT_SCENE_ENTITY_H
+#endif // GLRT_SCENE_NODE_H

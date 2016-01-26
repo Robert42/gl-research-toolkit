@@ -103,35 +103,58 @@ void Node::registerAngelScriptAPI()
 // ======== Node::ModularAttribute ===========================================
 
 
-Node::ModularAttribute::ModularAttribute(Node& entity, const Uuid<ModularAttribute>& uuid)
-  : entity(entity),
+Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
+  : node(node),
     uuid(uuid)
 {
-  entity._allModularAttributes.append(this);
+  node._allModularAttributes.append(this);
 }
 
 Node::ModularAttribute::~ModularAttribute()
 {
-  entity._allModularAttributes.removeOne(this);
+  node._allModularAttributes.removeOne(this);
 }
 
 
 // ======== Node::Component ==================================================
 
 
-Node::Component::Component(Node& node, const Uuid<Component>& uuid, bool isMovable)
+/*!
+Constructs a new Components and adds it to the given \a node.
+
+Optionally, you can pass a \a parent component. Note, that you are allowed to
+pass nullptr as \a parent.
+\br
+In this case, the component will be added as rootComponent, if there is'nt already
+one. If there's aredy a rootComponent, the rootComponent will be the parent of
+the new component.
+
+\note Once established, a parent/child component relationship can be
+only changed by deleting the child or parent component.
+
+This component will have the given \a uuid.
+*/
+Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid, bool isMovable)
   : node(node),
+    parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
     isMovable(isMovable)
 {
-  this->setParent(node.rootComponent());
+  if(this->parent !=nullptr)
+  {
+    Q_ASSERT(&this->node == &this->parent->node);
+    this->parent->_children.append(this);
+  }else
+  {
+    Q_ASSERT(node.rootComponent() == nullptr);
+    node._rootComponent = this;
+  }
 }
 
 Node::Component::~Component()
 {
-  if(parent())
-    parent()->_children.removeOne(this);
-  this->_parent = nullptr;
+  if(parent)
+    parent->_children.removeOne(this);
 
   QVector<Component*> children = this->children();
   for(Component* child : children)
@@ -140,60 +163,17 @@ Node::Component::~Component()
 }
 
 
-Node::Component* Node::Component::parent() const
+const QVector<glrt::scene::Node::Component*>& Node::Component::children() const
 {
-  if(this == nullptr)
-    return nullptr;
-  return this->_parent;
-}
-
-/*!
- * Set the \a component to be the parent of this component.
- *
- * \note This Method is able to accept nullptr as this value and also component to be nullptr.
- */
-void Node::Component::setParent(Component* component)
-{
-  if(this == nullptr)
-    return;
-
-  if(component == nullptr)
-  {
-    if(this->node.rootComponent() != nullptr)
-      throw GLRT_EXCEPTION("Only one root allowed at once");
-
-    if(this->parent() != nullptr)
-      this->parent()->_children.removeOne(this);
-
-    this->_parent = nullptr;
-    this->node._rootComponent = this;
-  }else
-  {
-    Q_ASSERT(&component->node == &this->node);
-
-    if(this->parent() != nullptr)
-      this->parent()->_children.removeOne(this);
-
-    this->_parent = component;
-    component->_children.append(this);
-  }
-}
-
-
-QVector<Node::Component*> Node::Component::children() const
-{
-  if(this == nullptr)
-    return QVector<Node::Component*>();
-
   return this->_children;
 }
 
 /*!
- * Appends the wwhole subtree of this component (including this component itself)
- * to the ggiven vector \a subTree.
- *
- * \note This Method is able to accept nullptr as this value.
- */
+Appends the wwhole subtree of this component (including this component itself)
+to the ggiven vector \a subTree.
+
+\note This Method is able to accept nullptr as this value.
+*/
 void Node::Component::collectSubtree(QVector<Component*>* subTree)
 {
   if(this == nullptr)
@@ -228,7 +208,7 @@ CoordFrame Node::Component::globalCoordFrame() const
   if(this == nullptr)
     return CoordFrame();
 
-  return parent()->globalCoordFrame() * localCoordFrame();
+  return parent->globalCoordFrame() * localCoordFrame();
 }
 
 
@@ -244,21 +224,24 @@ void Node::Component::registerAngelScriptAPIDeclarations()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-inline Node::Component* createEmptyComponent(Node* node,
+inline Node::Component* createEmptyComponent(Node& node,
+                                             Node::Component* parent,
                                              const Uuid<Node::Component>& uuid,
                                              bool isMovable)
 {
-  return new Node::Component(*node, uuid, isMovable);
+  return new Node::Component(node, parent, uuid, isMovable);
 }
 
 void Node::Component::registerAngelScriptAPI()
 {
-  int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   Node::Component::registerAsBaseOfClass<Component>(angelScriptEngine, "NodeComponent");
 
-  r = angelScriptEngine->RegisterObjectMethod("Node", "NodeComponent@ newEmptyComponent(const Uuid<NodeComponent> &in uuid, bool isMovable)", AngelScript::asFUNCTION(createEmptyComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
+                                                                                               "NodeComponent",
+                                                                                               "new_EmptyComponent",
+                                                                                               "const Uuid<NodeComponent> &in uuid, bool isMovable");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

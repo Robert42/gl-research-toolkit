@@ -10,12 +10,13 @@ namespace scene {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-StaticMeshComponent::StaticMeshComponent(Node& entity, // #TODO rename all entity/entities to node
+StaticMeshComponent::StaticMeshComponent(Node& node,
+                                         Node::Component* parent,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : Node::Component(entity, uuid, isMovable),
+  : Node::Component(node, parent, uuid, isMovable),
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {
@@ -35,21 +36,23 @@ void StaticMeshComponent::registerAngelScriptAPIDeclarations()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-inline StaticMeshComponent* createStaticMeshComponent(Node* node,
+inline StaticMeshComponent* createStaticMeshComponent(Node& node,
+                                                      Node::Component* parent,
                                                       const Uuid<StaticMeshComponent>& uuid,
                                                       bool isMovable,
                                                       const Uuid<resources::StaticMesh>& meshUuid,
                                                       const Uuid<resources::Material>& materialUuid)
 {
-  return new StaticMeshComponent(*node, uuid, isMovable, meshUuid, materialUuid);
+  return new StaticMeshComponent(node, parent, uuid, isMovable, meshUuid, materialUuid);
 }
 
 void StaticMeshComponent::registerAngelScriptAPI()
 {
-  int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  r = angelScriptEngine->RegisterObjectMethod("Node", "StaticMeshComponent@ newStaticMeshComponent(const Uuid<StaticMeshComponent> &in uuid, bool isMovable, const Uuid<StaticMesh> &in meshUuid, const Uuid<Material> &in materialUuid)", AngelScript::asFUNCTION(createStaticMeshComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  Node::Component::registerCreateMethod<decltype(createStaticMeshComponent), createStaticMeshComponent>(angelScriptEngine,
+                                                                                                        "StaticMeshComponent",
+                                                                                                        "const Uuid<StaticMeshComponent> &in uuid, bool isMovable, const Uuid<StaticMesh> &in meshUuid, const Uuid<Material> &in materialUuid");
 
   Node::Component::registerAsBaseOfClass<StaticMeshComponent>(angelScriptEngine, "StaticMeshComponent");
 

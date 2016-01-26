@@ -92,7 +92,6 @@ struct LightSource final
 
   LightSource(const RectAreaLight& rectAreaLight);
   LightSource(const SphereAreaLight& sphereAreaLight=SphereAreaLight());
-  LightComponent* createLightComponent(Node& node, const Uuid<LightComponent>& uuid, Interactivity interactivity);
 
   static void registerAngelScriptTypes();
 };

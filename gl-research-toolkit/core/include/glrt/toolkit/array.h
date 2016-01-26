@@ -27,40 +27,8 @@ struct ArrayCapacityTraits_Capacity_Blocks
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed);
 };
 
-namespace implementation {
-
-enum class dummy_array_hint_type{DefaultHint};
-enum class dummy_array_cache_type{DefaultCache};
-
-} // namespace implementation
-
-template<typename T>
-struct ArrayBucketTraits_NoBuckets
-{
-  typedef implementation::dummy_array_hint_type hint_type;
-  typedef implementation::dummy_array_cache_type cache_type;
-
-  struct bucket_append
-  {
-    T* data;
-    int length;
-  };
-
-  typedef bucket_append bucket_remove;
-
-  static hint_type default_append_hint(){return hint_type::DefaultHint;}
-  static hint_type default_remove_hint(){return hint_type::DefaultHint;}
-
-  static void init_cache(cache_type*){}
-  static void clear_cache(cache_type*){}
-  static void delete_cache(cache_type*){}
-  static void swap_cache(cache_type*, cache_type*){}
-
-  static void capacity_reduced(int, cache_type*){}
-};
-
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits, public ArrayBucketTraits_NoBuckets<T>
+struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 {
   static void copy_construct_POD(T* dest, const T* src, int count);
   static void copy_construct_single_POD(T* dest, const T* src);
@@ -110,9 +78,6 @@ struct ArrayTraits_Unordered_Primitive : public ArrayTraits_Unordered_Toolkit<T,
 {
   typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
 
-  typedef typename parent_type::cache_type cache_type;
-  typedef typename parent_type::hint_type hint_type;
-
   static void move_construct(T* dest, T* src, int count)
   {
     parent_type::copy_construct_POD(dest, src, count);
@@ -123,32 +88,32 @@ struct ArrayTraits_Unordered_Primitive : public ArrayTraits_Unordered_Toolkit<T,
     *dest = *src;
   }
 
-  static int append_move(T* data, int prev_length, T value, cache_type*, const hint_type&)
+  static int append_move(T* data, int prev_length, T value)
   {
     return append_copy(data, prev_length, value);
   }
 
-  static int extend_move(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
+  static int extend_move(T* data, int prev_length, const T* values, int num_values)
   {
     return extend_copy(data, prev_length, values, num_values);
   }
 
-  static int append_copy(T* data, int prev_length, T value, cache_type*, const hint_type&)
+  static int append_copy(T* data, int prev_length, T value)
   {
     return parent_type::append_Primitive(data, prev_length, value);
   }
 
-  static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values)
   {
     return parent_type::extend_POD(data, prev_length, values, num_values);
   }
 
-  static void remove_single(T* data, int prev_length, const int index, cache_type*, const hint_type&)
+  static void remove_single(T* data, int prev_length, const int index)
   {
     parent_type::remove_single_Primitive(data, prev_length, index);
   }
 
-  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type*, const hint_type&)
+  static void remove(T* data, int prev_length, const int first_index, int num_values)
   {
     parent_type::remove_POD(data, prev_length, first_index, num_values);
   }
@@ -177,32 +142,32 @@ struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_cap
     parent_type::copy_construct_single_POD(dest, src);
   }
 
-  static int append_move(T* data, int prev_length, T&& value, cache_type*, const hint_type&)
+  static int append_move(T* data, int prev_length, T&& value)
   {
     return append_copy(data, prev_length, value);
   }
 
-  static int extend_move(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
+  static int extend_move(T* data, int prev_length, const T* values, int num_values)
   {
     return extend_copy(data, prev_length, values, num_values);
   }
 
-  static int append_copy(T* data, int prev_length, const T& value, cache_type*, const hint_type&)
+  static int append_copy(T* data, int prev_length, const T& value)
   {
     return parent_type::append_POD(data, prev_length, value);
   }
 
-  static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values)
   {
     return parent_type::extend_POD(data, prev_length, values, num_values);
   }
 
-  static void remove_single(T* data, int prev_length, const int index, cache_type*, const hint_type&)
+  static void remove_single(T* data, int prev_length, const int index)
   {
     parent_type::remove_single_POD(data, prev_length, index);
   }
 
-  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type*, const hint_type&)
+  static void remove(T* data, int prev_length, const int first_index, int num_values)
   {
     parent_type::remove_POD(data, prev_length, first_index, num_values);
   }
@@ -219,9 +184,6 @@ struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_c
 {
   typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
 
-  typedef typename parent_type::cache_type cache_type;
-  typedef typename parent_type::hint_type hint_type;
-
   static void move_construct(T* dest, T* src, int count)
   {
     parent_type::move_construct_mC(dest, src, count);
@@ -232,25 +194,25 @@ struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_c
     parent_type::move_construct_single_mC(dest, src);
   }
 
-  static int append_move(T* data, int prev_length, T&& value, cache_type*, const hint_type&)
+  static int append_move(T* data, int prev_length, T&& value)
   {
     return parent_type::append_mC(data, prev_length, std::move(value));
   }
 
-  static int extend_move(T* data, int prev_length, T* values, int num_values, cache_type*, const hint_type&)
+  static int extend_move(T* data, int prev_length, T* values, int num_values)
   {
     return parent_type::extend_mC(data, prev_length, values, num_values);
   }
 
-  static int append_copy(T* data, int prev_length, const T& value, cache_type*, const hint_type&) = delete;
-  static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&) = delete;
+  static int append_copy(T* data, int prev_length, const T& value) = delete;
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values) = delete;
 
-  static void remove_single(T* data, int prev_length, const int index, cache_type*, const hint_type&)
+  static void remove_single(T* data, int prev_length, const int index)
   {
     parent_type::remove_single_mOD(data, prev_length, index);
   }
 
-  static void remove(T* data, int prev_length, const int first_index, int num_values, cache_type*, const hint_type&)
+  static void remove(T* data, int prev_length, const int first_index, int num_values)
   {
     parent_type::remove_mOD(data, prev_length, first_index, num_values);
   }
@@ -267,15 +229,12 @@ struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_c
 {
   typedef ArrayTraits_Unordered_mCmOD<T, T_capacity_traits> parent_type;
 
-  typedef typename parent_type::cache_type cache_type;
-  typedef typename parent_type::hint_type hint_type;
-
-  static int append_copy(T* data, int prev_length, const T& value, cache_type*, const hint_type&)
+  static int append_copy(T* data, int prev_length, const T& value)
   {
     return parent_type::append_cC(data, prev_length, value);
   }
 
-  static int extend_copy(T* data, int prev_length, const T* values, int num_values, cache_type*, const hint_type&)
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values)
   {
     return parent_type::extend_cC(data, prev_length, values, num_values);
   }
@@ -303,8 +262,6 @@ class Array final
 {
 public:
   typedef T_traits traits;
-  typedef typename traits::hint_type hint_type;
-  typedef typename traits::cache_type cache_type;
 
   Array();
   ~Array();
@@ -342,20 +299,20 @@ public:
   int length() const;
   bool isEmpty() const;
 
-  int append_move(T&& value, const hint_type& hint=traits::default_append_hint());
-  int extend_move(T* values, int num_values, const hint_type& hint=traits::default_append_hint());
+  int append_move(T&& value);
+  int extend_move(T* values, int num_values);
 
-  int append_copy(const T& value, const hint_type& hint=traits::default_append_hint());
-  int extend_copy(const T* values, int num_values, const hint_type& hint=traits::default_append_hint());
+  int append_copy(const T& value);
+  int extend_copy(const T* values, int num_values);
 
-  int append(const T& value, const hint_type& hint=traits::default_append_hint());
-  int append(T&& value, const hint_type& hint=traits::default_append_hint());
+  int append(const T& value);
+  int append(T&& value);
 
-  void remove(int index, const hint_type& hint=traits::default_remove_hint());
-  void remove(int index, int num_to_remove, const hint_type& hint=traits::default_remove_hint());
+  void remove(int index);
+  void remove(int index, int num_to_remove);
 
-  void removeFirst(const hint_type& hint=traits::default_remove_hint()){remove(0, hint);}
-  void removeLast(const hint_type& hint=traits::default_remove_hint()){remove(length()-1, hint);}
+  void removeFirst(){remove(0);}
+  void removeLast(){remove(length()-1);}
 
   bool operator==(const Array& other) const;
   bool operator!=(const Array& other) const;
@@ -366,7 +323,6 @@ private:
   T* _data;
   int _capacity;
   int _length;
-  cache_type trait_cache;
 
   static T* allocate_memory(int n);
   static void free_memory(T* data);

@@ -5,8 +5,8 @@ namespace scene {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-CameraComponent::CameraComponent(Node& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable)
-  : Component(entity, uuid, isMovable),
+CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable)
+  : Component(node, parent, uuid, isMovable),
     cameraParameter(cameraParameter)
 {
 }
@@ -27,7 +27,8 @@ void CameraComponent::registerAngelScriptAPIDeclarations()
 }
 
 
-inline CameraComponent* createCameraComponent(Node* node,
+inline CameraComponent* createCameraComponent(Node& node,
+                                              Node::Component* parent,
                                               const Uuid<CameraComponent>& uuid,
                                               bool isMovable,
                                               float aspect,
@@ -46,15 +47,16 @@ inline CameraComponent* createCameraComponent(Node* node,
   cameraParameter.lookAt = lookAt;
   cameraParameter.upVector = upVector;
   cameraParameter.position = position;
-  return new CameraComponent(*node, uuid, cameraParameter, isMovable);
+  return new CameraComponent(node, parent, uuid, cameraParameter, isMovable);
 }
 
 void CameraComponent::registerAngelScriptAPI()
 {
-  int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  r = angelScriptEngine->RegisterObjectMethod("Node", "CameraComponent@ newCameraComponent(const Uuid<CameraComponent> &in uuid, bool isMovable, float aspect, float clipFar, float clipNear, float horizontal_fov, const vec3 &in lookAt, const vec3 &in upVector, const vec3 &in position)", AngelScript::asFUNCTION(createCameraComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  Node::Component::registerCreateMethod<decltype(createCameraComponent), createCameraComponent>(angelScriptEngine,
+                                                                                                "CameraComponent",
+                                                                                                "const Uuid<CameraComponent> &in uuid, bool isMovable, float aspect, float clipFar, float clipNear, float horizontal_fov, const vec3 &in lookAt, const vec3 &in upVector, const vec3 &in position");
 
   Node::Component::registerAsBaseOfClass<CameraComponent>(angelScriptEngine, "CameraComponent");
 
