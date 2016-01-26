@@ -67,11 +67,15 @@ struct Node::Component::_create_method_helper<T_Component*(Node& node, Node::Com
   {
     static T_Component* createWithNode(Node* node, T_Args... args)
     {
+      if(node == nullptr)
+        throw GLRT_EXCEPTION("not expected nullptr as parent for creating a NodeComponent");
       return function(*node, nullptr, args...);
     }
 
     static T_Component* createWithParentComponent(Node::Component* parent, T_Args... args)
     {
+      if(parent == nullptr)
+        throw GLRT_EXCEPTION("not expected nullptr as node for creating a NodeComponent");
       return function(parent->node, parent, args...);
     }
   };
