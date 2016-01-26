@@ -224,21 +224,24 @@ void Node::Component::registerAngelScriptAPIDeclarations()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-inline Node::Component* createEmptyComponent(Node* node,
+inline Node::Component* createEmptyComponent(Node& node,
+                                             Node::Component* parent,
                                              const Uuid<Node::Component>& uuid,
                                              bool isMovable)
 {
-  return new Node::Component(*node, nullptr, uuid, isMovable);
+  return new Node::Component(node, parent, uuid, isMovable);
 }
 
 void Node::Component::registerAngelScriptAPI()
 {
-  int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   Node::Component::registerAsBaseOfClass<Component>(angelScriptEngine, "NodeComponent");
 
-  r = angelScriptEngine->RegisterObjectMethod("Node", "NodeComponent@ newEmptyComponent(const Uuid<NodeComponent> &in uuid, bool isMovable)", AngelScript::asFUNCTION(createEmptyComponent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
+                                                                                               "NodeComponent",
+                                                                                               "new_EmptyComponent",
+                                                                                               "const Uuid<NodeComponent> &in uuid, bool isMovable");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

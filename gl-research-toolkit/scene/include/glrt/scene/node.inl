@@ -81,17 +81,23 @@ struct Node::Component::_create_method_helper<T_Component*(Node& node, Node::Com
 template<typename T, T* function>
 void Node::Component::registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments)
 {
+  _registerCreateMethod<T, function>(engine, type, std::string("new_") + type, arguments);
+}
+
+template<typename T, T* function>
+void Node::Component::_registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const std::string& function_name, const char* arguments)
+{
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   typedef _create_method_helper<T> helper;
   typedef typename helper::template function_wrapper<T, function> wrapper;
 
   int r;
-  r = engine->RegisterGlobalFunction((std::string(type)+"@ new_"+type+"(Node@ node, "+arguments+")").c_str(),
+  r = engine->RegisterGlobalFunction((std::string(type)+"@ "+function_name+"(Node@ node, "+arguments+")").c_str(),
                                      AngelScript::asFUNCTION(wrapper::createWithNode),
                                      AngelScript::asCALL_CDECL);
   AngelScriptIntegration::AngelScriptCheck(r);
-  r = engine->RegisterGlobalFunction((std::string(type)+"@ new_"+type+"(NodeComponent@ parent, "+arguments+")").c_str(),
+  r = engine->RegisterGlobalFunction((std::string(type)+"@ "+function_name+"(NodeComponent@ parent, "+arguments+")").c_str(),
                                      AngelScript::asFUNCTION(wrapper::createWithParentComponent),
                                      AngelScript::asCALL_CDECL);
   AngelScriptIntegration::AngelScriptCheck(r);

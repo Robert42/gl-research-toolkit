@@ -17,7 +17,7 @@ public:
 
   LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, Interactivity interactivity);
 
-  static LightComponent* createForLightSource(Node& node, const Uuid<LightComponent>& uuid, Interactivity interactivity, const resources::LightSource& lightSource);
+  static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, Interactivity interactivity, const resources::LightSource& lightSource);
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();

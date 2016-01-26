@@ -94,6 +94,9 @@ private:
   template<typename T_Component, typename... T_Args>
   struct _create_method_helper<T_Component*(Node& node, Component* parent, T_Args...)>;
 
+  template<typename T, T*>
+  static void _registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const std::string& function_name, const char* arguments);
+
   CoordFrame _localCoordFrame;
 
   QVector<Component*> _children;
