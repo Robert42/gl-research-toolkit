@@ -54,19 +54,9 @@ void CameraComponent::registerAngelScriptAPI()
 {
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
-  Node::Component::registerCreateMethod<CameraComponent,
-                        const Uuid<CameraComponent>&,
-                        bool,
-                        float,
-                        float,
-                        float,
-                        float,
-                        const glm::vec3&,
-                        const glm::vec3&,
-                        const glm::vec3&>(angelScriptEngine,
-                        "CameraComponent",
-                        "const Uuid<CameraComponent> &in uuid, bool isMovable, float aspect, float clipFar, float clipNear, float horizontal_fov, const vec3 &in lookAt, const vec3 &in upVector, const vec3 &in position",
-                        createCameraComponent);
+  Node::Component::registerCreateMethod<decltype(createCameraComponent), createCameraComponent>(angelScriptEngine,
+                                                                                                "CameraComponent",
+                                                                                                "const Uuid<CameraComponent> &in uuid, bool isMovable, float aspect, float clipFar, float clipNear, float horizontal_fov, const vec3 &in lookAt, const vec3 &in upVector, const vec3 &in position");
 
   Node::Component::registerAsBaseOfClass<CameraComponent>(angelScriptEngine, "CameraComponent");
 

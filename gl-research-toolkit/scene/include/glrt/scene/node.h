@@ -84,12 +84,15 @@ protected:
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 
-  template<typename T_component, typename... T_Args>
-  static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments, T_component*(createFunction)(Node&, Node::Component* parent, T_Args... args) );
+  template<typename T, T*>
+  static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments);
 
 private:
-  template<typename T_component, typename... T_Args>
-  struct registerCreateMethod_helper;
+  template<typename T>
+  struct _create_method_helper;
+
+  template<typename T_Component, typename... T_Args>
+  struct _create_method_helper<T_Component*(Node& node, Component* parent, T_Args...)>;
 
   CoordFrame _localCoordFrame;
 
