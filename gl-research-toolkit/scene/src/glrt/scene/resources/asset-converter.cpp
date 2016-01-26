@@ -24,7 +24,6 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile)
 {
-  return true;
   return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
 }
 
