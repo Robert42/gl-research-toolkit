@@ -19,19 +19,6 @@ LightSource::LightSource(const SphereAreaLight& sphereAreaLight)
 {
 }
 
-LightComponent* LightSource::createLightComponent(Node& node, const Uuid<LightComponent>& uuid, LightComponent::Interactivity interactivity)
-{
-  switch(type)
-  {
-  case Type::SPHERE_AREA_LIGHT:
-    return new SphereAreaLightComponent(node, uuid.cast<SphereAreaLightComponent>(), sphere_area_light, interactivity);
-  case Type::RECT_AREA_LIGHT:
-    return new RectAreaLightComponent(node, uuid.cast<RectAreaLightComponent>(), rect_area_light, interactivity);
-  default:
-    Q_UNREACHABLE();
-  }
-}
-
 inline void as_init_rect_area_light(LightSource::RectAreaLight* rect_area_light)
 {
   *rect_area_light = LightSource::RectAreaLight();

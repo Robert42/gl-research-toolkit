@@ -12,7 +12,7 @@ public:
   const Uuid<resources::StaticMesh> staticMeshUuid;
   const Uuid<resources::Material> materialUuid;
 
-  StaticMeshComponent(Node& node, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMesh>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
+  StaticMeshComponent(Node& node, Node::Component* parent, const Uuid<StaticMeshComponent>& uuid, bool isMovable, const Uuid<resources::StaticMesh>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
   ~StaticMeshComponent();
 
   static void registerAngelScriptAPIDeclarations();

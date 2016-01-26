@@ -119,19 +119,39 @@ Node::ModularAttribute::~ModularAttribute()
 // ======== Node::Component ==================================================
 
 
-Node::Component::Component(Node& node, const Uuid<Component>& uuid, bool isMovable)
+/*!
+Constructs a new Components and adds it to the given \a node.
+
+Optionally, you can pass a \a parent component. Note, that you are allowed to
+pass nullptr as \a parent.
+\br
+In this case, the component will be added as rootComponent, if there is'nt already
+one. If there's aredy a rootComponent, the rootComponent will be the parent of
+the new component.
+
+\note Once established, a parent/child component relationship can be
+only changed by deleting the child or parent component.
+
+This component will have the given \a uuid.
+*/
+Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid, bool isMovable)
   : node(node),
+    parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
     isMovable(isMovable)
 {
-  this->setParent(node.rootComponent());
+  if(this->parent !=nullptr)
+  {
+    if(&this->node != &this->parent->node)
+      throw GLRT_EXCEPTION("node mismatch between parent component and child component");
+    this->parent->_children.append(this);
+  }
 }
 
 Node::Component::~Component()
 {
-  if(parent())
-    parent()->_children.removeOne(this);
-  this->_parent = nullptr;
+  if(parent)
+    parent->_children.removeOne(this);
 
   QVector<Component*> children = this->children();
   for(Component* child : children)
@@ -140,60 +160,17 @@ Node::Component::~Component()
 }
 
 
-Node::Component* Node::Component::parent() const
+const QVector<glrt::scene::Node::Component*>& Node::Component::children() const
 {
-  if(this == nullptr)
-    return nullptr;
-  return this->_parent;
-}
-
-/*!
- * Set the \a component to be the parent of this component.
- *
- * \note This Method is able to accept nullptr as this value and also component to be nullptr.
- */
-void Node::Component::setParent(Component* component)
-{
-  if(this == nullptr)
-    return;
-
-  if(component == nullptr)
-  {
-    if(this->node.rootComponent() != nullptr)
-      throw GLRT_EXCEPTION("Only one root allowed at once");
-
-    if(this->parent() != nullptr)
-      this->parent()->_children.removeOne(this);
-
-    this->_parent = nullptr;
-    this->node._rootComponent = this;
-  }else
-  {
-    Q_ASSERT(&component->node == &this->node);
-
-    if(this->parent() != nullptr)
-      this->parent()->_children.removeOne(this);
-
-    this->_parent = component;
-    component->_children.append(this);
-  }
-}
-
-
-QVector<Node::Component*> Node::Component::children() const
-{
-  if(this == nullptr)
-    return QVector<Node::Component*>();
-
   return this->_children;
 }
 
 /*!
- * Appends the wwhole subtree of this component (including this component itself)
- * to the ggiven vector \a subTree.
- *
- * \note This Method is able to accept nullptr as this value.
- */
+Appends the wwhole subtree of this component (including this component itself)
+to the ggiven vector \a subTree.
+
+\note This Method is able to accept nullptr as this value.
+*/
 void Node::Component::collectSubtree(QVector<Component*>* subTree)
 {
   if(this == nullptr)
@@ -228,7 +205,7 @@ CoordFrame Node::Component::globalCoordFrame() const
   if(this == nullptr)
     return CoordFrame();
 
-  return parent()->globalCoordFrame() * localCoordFrame();
+  return parent->globalCoordFrame() * localCoordFrame();
 }
 
 
@@ -248,7 +225,7 @@ inline Node::Component* createEmptyComponent(Node* node,
                                              const Uuid<Node::Component>& uuid,
                                              bool isMovable)
 {
-  return new Node::Component(*node, uuid, isMovable);
+  return new Node::Component(*node, nullptr, uuid, isMovable);
 }
 
 void Node::Component::registerAngelScriptAPI()

@@ -61,17 +61,15 @@ class Node::Component : public QObject
   Q_OBJECT
 public:
   Node& node;
+  Component* const parent;
   const Uuid<Component> uuid;
 
   const bool isMovable : 1;
 
-  Component(Node& node, const Uuid<Component>& uuid, bool isMovable);
+  Component(Node& node, Component* parent, const Uuid<Component>& uuid, bool isMovable);
   virtual ~Component();
 
-  Component* parent() const;
-  void setParent(Component* component);
-
-  QVector<Component*> children() const;
+  const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
   CoordFrame localCoordFrame() const;
@@ -89,7 +87,6 @@ protected:
 private:
   CoordFrame _localCoordFrame;
 
-  Component* _parent = nullptr;
   QVector<Component*> _children;
 };
 

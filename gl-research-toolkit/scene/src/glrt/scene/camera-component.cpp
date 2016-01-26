@@ -5,8 +5,8 @@ namespace scene {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-CameraComponent::CameraComponent(Node& entity, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable)
-  : Component(entity, uuid, isMovable),
+CameraComponent::CameraComponent(Node& entity, Node::Component* parent, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable)
+  : Component(entity, parent, uuid, isMovable),
     cameraParameter(cameraParameter)
 {
 }
@@ -46,7 +46,7 @@ inline CameraComponent* createCameraComponent(Node* node,
   cameraParameter.lookAt = lookAt;
   cameraParameter.upVector = upVector;
   cameraParameter.position = position;
-  return new CameraComponent(*node, uuid, cameraParameter, isMovable);
+  return new CameraComponent(*node, nullptr, uuid, cameraParameter, isMovable);
 }
 
 void CameraComponent::registerAngelScriptAPI()

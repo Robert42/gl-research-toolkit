@@ -11,11 +11,12 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 StaticMeshComponent::StaticMeshComponent(Node& entity, // #TODO rename all entity/entities to node
+                                         Node::Component* parent,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : Node::Component(entity, uuid, isMovable),
+  : Node::Component(entity, parent, uuid, isMovable),
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {
@@ -41,7 +42,7 @@ inline StaticMeshComponent* createStaticMeshComponent(Node* node,
                                                       const Uuid<resources::StaticMesh>& meshUuid,
                                                       const Uuid<resources::Material>& materialUuid)
 {
-  return new StaticMeshComponent(*node, uuid, isMovable, meshUuid, materialUuid);
+  return new StaticMeshComponent(*node, nullptr, uuid, isMovable, meshUuid, materialUuid);
 }
 
 void StaticMeshComponent::registerAngelScriptAPI()
