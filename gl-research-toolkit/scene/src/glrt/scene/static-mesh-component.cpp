@@ -10,13 +10,13 @@ namespace scene {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-StaticMeshComponent::StaticMeshComponent(Node& entity, // #TODO rename all entity/entities to node
+StaticMeshComponent::StaticMeshComponent(Node& node,
                                          Node::Component* parent,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          bool isMovable,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : Node::Component(entity, parent, uuid, isMovable),
+  : Node::Component(node, parent, uuid, isMovable),
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {

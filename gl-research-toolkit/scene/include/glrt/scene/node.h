@@ -1,5 +1,5 @@
-#ifndef GLRT_SCENE_ENTITY_H
-#define GLRT_SCENE_ENTITY_H
+#ifndef GLRT_SCENE_NODE_H
+#define GLRT_SCENE_NODE_H
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
@@ -48,10 +48,10 @@ class Node::ModularAttribute : public QObject
 {
   Q_OBJECT
 public:
-  Node& entity;
+  Node& node;
   const Uuid<ModularAttribute> uuid;
 
-  ModularAttribute(Node& entity, const Uuid<ModularAttribute>& uuid);
+  ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid);
   virtual ~ModularAttribute();
 };
 
@@ -96,4 +96,4 @@ private:
 
 #include "node.inl"
 
-#endif // GLRT_SCENE_ENTITY_H
+#endif // GLRT_SCENE_NODE_H

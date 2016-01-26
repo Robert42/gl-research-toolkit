@@ -8,8 +8,8 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 
-LightComponent::LightComponent(Node &entity, Node::Component* parent, const Uuid<LightComponent> &uuid, Interactivity interactivity)
-  : Node::Component(entity, parent, uuid, interactivity==Interactivity::MOVABLE),
+LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<LightComponent> &uuid, Interactivity interactivity)
+  : Node::Component(node, parent, uuid, interactivity==Interactivity::MOVABLE),
     isStatic(interactivity==Interactivity::STATIC)
 {
 }

@@ -103,16 +103,16 @@ void Node::registerAngelScriptAPI()
 // ======== Node::ModularAttribute ===========================================
 
 
-Node::ModularAttribute::ModularAttribute(Node& entity, const Uuid<ModularAttribute>& uuid)
-  : entity(entity),
+Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
+  : node(node),
     uuid(uuid)
 {
-  entity._allModularAttributes.append(this);
+  node._allModularAttributes.append(this);
 }
 
 Node::ModularAttribute::~ModularAttribute()
 {
-  entity._allModularAttributes.removeOne(this);
+  node._allModularAttributes.removeOne(this);
 }
 
 

@@ -1,5 +1,5 @@
-#ifndef GLRT_SCENE_ENTITY_INL
-#define GLRT_SCENE_ENTITY_INL
+#ifndef GLRT_SCENE_NODE_INL
+#define GLRT_SCENE_NODE_INL
 
 #include "node.h"
 
@@ -61,4 +61,4 @@ void Node::Component::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine
 } // namespace scene
 } // namespace glrt
 
-#endif // GLRT_SCENE_ENTITY_INL
+#endif // GLRT_SCENE_NODE_INL
