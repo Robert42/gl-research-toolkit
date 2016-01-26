@@ -3,6 +3,7 @@
 
 #include "node.h"
 
+
 namespace glrt {
 namespace scene {
 
@@ -55,6 +56,50 @@ void Node::Component::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine
 
     // #TODO add also conversion for the uuids
   }
+}
+
+template<typename T_component, typename... T_Args>
+struct Node::Component::registerCreateMethod_helper
+{
+  typedef T_component*(*function_type)(Node&, Node::Component* parent, T_Args... args);
+
+  function_type function;
+
+  T_component* createWithNode(Node* node, T_Args... args)
+  {
+    return function(*node, nullptr, args...);
+  }
+
+  T_component* createWithParentComponent(Node::Component* parent, T_Args... args)
+  {
+    return function(parent->node, parent, args...);
+  }
+};
+
+template<typename T_component, typename... T_Args>
+void Node::Component::registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments, T_component*(createFunction)(Node&, Node::Component* parent, T_Args... args) )
+{
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
+
+  typedef registerCreateMethod_helper<T_component,T_Args...> helper;
+  static helper h;
+
+  h.function = createFunction;
+
+
+  int r;
+  r = engine->RegisterGlobalFunction((std::string(type)+"@ new_"+type+"(Node@ node, "+arguments+")").c_str(),
+                                     AngelScript::asMETHOD(helper, createWithNode),
+                                     AngelScript::asCALL_THISCALL_ASGLOBAL,
+                                     &h);
+  AngelScriptIntegration::AngelScriptCheck(r);
+  r = engine->RegisterGlobalFunction((std::string(type)+"@ new_"+type+"(NodeComponent@ parent, "+arguments+")").c_str(),
+                                     AngelScript::asMETHOD(helper, createWithParentComponent),
+                                     AngelScript::asCALL_THISCALL_ASGLOBAL,
+                                     &h);
+  AngelScriptIntegration::AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 

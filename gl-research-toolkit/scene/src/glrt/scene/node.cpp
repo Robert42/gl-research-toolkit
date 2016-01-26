@@ -142,8 +142,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
 {
   if(this->parent !=nullptr)
   {
-    if(&this->node != &this->parent->node)
-      throw GLRT_EXCEPTION("node mismatch between parent component and child component");
+    Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
   }else
   {

@@ -24,6 +24,7 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile)
 {
+  return true;
   return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
 }
 
@@ -570,7 +571,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         outputStream << "  cameraComponentUuid = Uuid<CameraComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(cameraUuid).toString()), QString("CameraComponent[%0]").arg(0)).toString() << "\");\n";
         if(assets.labels.contains(cameraUuid))
           outputStream << "  sceneLayer.index.label[cameraComponentUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
-        outputStream << "  node.newCameraComponent(uuid: cameraComponentUuid, "
+        outputStream << "  new_CameraComponent(node: @node, uuid: cameraComponentUuid, "
                      << "isMovable: false, aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
       }
       if(isUsingLight)

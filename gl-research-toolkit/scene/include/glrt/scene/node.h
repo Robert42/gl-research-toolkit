@@ -84,7 +84,13 @@ protected:
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 
+  template<typename T_component, typename... T_Args>
+  static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments, T_component*(createFunction)(Node&, Node::Component* parent, T_Args... args) );
+
 private:
+  template<typename T_component, typename... T_Args>
+  struct registerCreateMethod_helper;
+
   CoordFrame _localCoordFrame;
 
   QVector<Component*> _children;
