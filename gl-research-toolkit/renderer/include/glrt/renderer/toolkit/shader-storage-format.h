@@ -186,7 +186,7 @@ public:
 
     for(NodeComponentType* component : components)
     {
-      if(component->isMovable)
+      if(component->movable())
       {
         // prevent adding the same component multiple times
         if(connections.contains(component))

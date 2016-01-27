@@ -60,12 +60,11 @@ public:
 class Node::Component : public QObject
 {
   Q_OBJECT
+  Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
 public:
   Node& node;
   Component* const parent;
   const Uuid<Component> uuid;
-
-  const bool isMovable : 1;
 
   Component(Node& node, Component* parent, const Uuid<Component>& uuid);
   virtual ~Component();
@@ -75,6 +74,9 @@ public:
 
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
+
+  bool movable() const;
+  void setMovable(bool movable);
 
   void set_localCoordFrame(const CoordFrame& coordFrame);
 
@@ -86,6 +88,7 @@ public:
 
 signals:
   void dependencyDepthChanged();
+  void movableChanged(Component* component);
 
 protected:
   struct DependencySet;
@@ -110,8 +113,11 @@ private:
 
   CoordFrame _localCoordFrame;
 
+  bool _movable : 1;
+
   QVector<Component*> _children;
   int _dependencyDepth;
+  int _coordinateIndex;
 };
 
 

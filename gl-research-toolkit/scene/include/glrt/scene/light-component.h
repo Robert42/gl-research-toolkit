@@ -11,15 +11,27 @@ namespace scene {
 
 class LightComponent : public Node::Component
 {
+  Q_OBJECT
+  Q_PROPERTY(bool dynamic READ dynamic WRITE setDynamic NOTIFY dynamicChanged)
 public:
-  const bool isStatic : 1;
-
   LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid);
 
   static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, const resources::LightSource& lightSource);
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
+
+  bool dynamic() const;
+  void setDynamic(bool dynamic);
+
+signals:
+  void dynamicChanged(LightComponent* component);
+
+private:
+  bool _dynamic : 1;
+
+private slots:
+  void handleChangedMovable();
 };
 
 

@@ -138,8 +138,9 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    isMovable(false),
-    _dependencyDepth(0)
+    _movable(false),
+    _dependencyDepth(0),
+    _coordinateIndex(-1)
 {
   if(this->parent !=nullptr)
   {
@@ -192,6 +193,21 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
 CoordFrame Node::Component::localCoordFrame() const
 {
   return _localCoordFrame;
+}
+
+
+bool Node::Component::movable() const
+{
+  return _movable;
+}
+
+void Node::Component::setMovable(bool movable)
+{
+  if(this->movable() != movable)
+  {
+    this->_movable = movable;
+    movableChanged(this);
+  }
 }
 
 
