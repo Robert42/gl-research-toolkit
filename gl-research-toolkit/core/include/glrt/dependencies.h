@@ -20,6 +20,7 @@
 #include <QSet>
 #include <QStack>
 #include <QUuid>
+#include <QQueue>
 
 #include <iostream>
 #include <memory>

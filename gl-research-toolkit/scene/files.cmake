@@ -3,6 +3,7 @@ set(SOURCE_FILES
   include/glrt/scene/camera.h
   include/glrt/scene/collect-scene-data.h
   include/glrt/scene/collect-scene-data.inl
+  include/glrt/scene/coord-constraints.h
   include/glrt/scene/coord-frame.h
   include/glrt/scene/coord-frame.inl
   include/glrt/scene/debug-camera.h
@@ -25,6 +26,7 @@ set(SOURCE_FILES
   src/glrt/scene/camera-component.cpp
   src/glrt/scene/camera.cpp
   src/glrt/scene/collect-scene-data.cpp
+  src/glrt/scene/coord-constraints.cpp
   src/glrt/scene/coord-frame.cpp
   src/glrt/scene/debug-camera.cpp
   src/glrt/scene/light-component.cpp

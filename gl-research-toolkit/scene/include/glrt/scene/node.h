@@ -2,6 +2,7 @@
 #define GLRT_SCENE_NODE_H
 
 #include <glrt/dependencies.h>
+#include <glrt/toolkit/array.h>
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/coord-frame.h>
 
@@ -77,15 +78,41 @@ public:
 
   void set_localCoordFrame(const CoordFrame& coordFrame);
 
+  bool dependsOn(const Component* other) const;
+  int updateDependencyDepth();
+
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
+signals:
+  void dependencyDepthChanged();
+
 protected:
+  struct DependencySet final
+  {
+    QSet<const Component*> componentsWithCycles;
+
+    DependencySet(const Component* component);
+
+    void addDependency(const Component* component);
+
+    bool dependsOn(const Component* other) const;
+    bool hasCycles() const;
+    int depth() const;
+
+  private:
+    QSet<const Component*> visitedDependencies;
+    QQueue<const Component*> queuedDependencies;
+    int _depth;
+  };
+
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
 
   template<typename T, T*>
   static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments);
+
+  virtual void collectDependencies(DependencySet* dependencySet) const;
 
 private:
   template<typename T>
@@ -100,6 +127,7 @@ private:
   CoordFrame _localCoordFrame;
 
   QVector<Component*> _children;
+  int _dependencyDepth;
 };
 
 
