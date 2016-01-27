@@ -88,23 +88,7 @@ signals:
   void dependencyDepthChanged();
 
 protected:
-  struct DependencySet final
-  {
-    QSet<const Component*> componentsWithCycles;
-
-    DependencySet(const Component* component);
-
-    void addDependency(const Component* component);
-
-    bool dependsOn(const Component* other) const;
-    bool hasCycles() const;
-    int depth() const;
-
-  private:
-    QSet<const Component*> visitedDependencies;
-    QQueue<const Component*> queuedDependencies;
-    int _depth;
-  };
+  struct DependencySet;
 
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
@@ -129,6 +113,26 @@ private:
   QVector<Component*> _children;
   int _dependencyDepth;
 };
+
+
+struct Node::Component::DependencySet final
+{
+  QSet<const Component*> componentsWithCycles;
+
+  DependencySet(const Component* component);
+
+  void addDependency(const Component* component);
+
+  bool dependsOn(const Component* other) const;
+  bool hasCycles() const;
+  int depth() const;
+
+private:
+  QSet<const Component*> visitedDependencies;
+  QQueue<const Component*> queuedDependencies;
+  int _depth;
+};
+
 
 
 } // namespace scene
