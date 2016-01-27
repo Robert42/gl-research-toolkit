@@ -141,10 +141,10 @@ bool orderByDrawCall(const scene::StaticMeshComponent* a, const scene::StaticMes
 }
 
 
-std::function<bool(scene::StaticMeshComponent* a)> allowOnly(scene::resources::Material::Type type, bool movable)
+std::function<bool(scene::StaticMeshComponent* a)> allowOnly(scene::resources::Material::Type type)
 {
-  return [type, movable](scene::StaticMeshComponent* a) -> bool {
-    return a->movable()==movable && a->material().type == type;
+  return [type](scene::StaticMeshComponent* a) -> bool {
+    return a->material().type == type;
   };
 }
 
@@ -274,7 +274,7 @@ inline void Renderer::Pass::updateCache()
   aligned_vector<MeshInstanceUniform> transformations(aligned_vector<MeshInstanceUniform>::Alignment::UniformBufferOffsetAlignment);
   meshInstanceUniformOffset = transformations.alignment();
 
-  QVector<scene::StaticMeshComponent*> allStaticMeshComponents = glrt::scene::collectAllComponentsWithType<glrt::scene::StaticMeshComponent>(&scene, allowOnly(this->type, false));
+  QVector<scene::StaticMeshComponent*> allStaticMeshComponents = glrt::scene::collectAllComponentsWithType<glrt::scene::StaticMeshComponent>(&scene, allowOnly(this->type));
 
   std::sort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
 

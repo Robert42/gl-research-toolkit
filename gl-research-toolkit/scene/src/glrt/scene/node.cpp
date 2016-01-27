@@ -198,7 +198,7 @@ CoordFrame Node::Component::localCoordFrame() const
 
 bool Node::Component::movable() const
 {
-  return _movable;
+  return _movable || _coordinateIndex==-1;
 }
 
 void Node::Component::setMovable(bool movable)
@@ -213,6 +213,12 @@ void Node::Component::setMovable(bool movable)
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
+  if(!movable())
+  {
+    qWarning() << "Trying to move not movable component";
+    return;
+  }
+
   this->_localCoordFrame = coordFrame;
 }
 
