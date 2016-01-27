@@ -13,10 +13,9 @@ using AngelScriptIntegration::AngelScriptCheck;
 StaticMeshComponent::StaticMeshComponent(Node& node,
                                          Node::Component* parent,
                                          const Uuid<StaticMeshComponent>& uuid,
-                                         bool isMovable,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : Node::Component(node, parent, uuid, isMovable),
+  : Node::Component(node, parent, uuid),
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {
@@ -39,11 +38,10 @@ void StaticMeshComponent::registerAngelScriptAPIDeclarations()
 inline StaticMeshComponent* createStaticMeshComponent(Node& node,
                                                       Node::Component* parent,
                                                       const Uuid<StaticMeshComponent>& uuid,
-                                                      bool isMovable,
                                                       const Uuid<resources::StaticMesh>& meshUuid,
                                                       const Uuid<resources::Material>& materialUuid)
 {
-  return new StaticMeshComponent(node, parent, uuid, isMovable, meshUuid, materialUuid);
+  return new StaticMeshComponent(node, parent, uuid, meshUuid, materialUuid);
 }
 
 void StaticMeshComponent::registerAngelScriptAPI()
@@ -52,7 +50,7 @@ void StaticMeshComponent::registerAngelScriptAPI()
 
   Node::Component::registerCreateMethod<decltype(createStaticMeshComponent), createStaticMeshComponent>(angelScriptEngine,
                                                                                                         "StaticMeshComponent",
-                                                                                                        "const Uuid<StaticMeshComponent> &in uuid, bool isMovable, const Uuid<StaticMesh> &in meshUuid, const Uuid<Material> &in materialUuid");
+                                                                                                        "const Uuid<StaticMeshComponent> &in uuid, const Uuid<StaticMesh> &in meshUuid, const Uuid<Material> &in materialUuid");
 
   Node::Component::registerAsBaseOfClass<StaticMeshComponent>(angelScriptEngine, "StaticMeshComponent");
 

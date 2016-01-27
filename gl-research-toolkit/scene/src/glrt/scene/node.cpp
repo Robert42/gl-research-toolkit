@@ -134,16 +134,20 @@ only changed by deleting the child or parent component.
 
 This component will have the given \a uuid.
 */
-Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid, bool isMovable)
+Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
   : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    isMovable(isMovable)
+    _movable(false),
+    _dependencyDepth(0),
+    _coordinateIndex(-1)
 {
   if(this->parent !=nullptr)
   {
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
+
+    connect(this->parent, &Node::Component::dependencyDepthChanged, this, &Node::Component::dependencyDepthChanged);
   }else
   {
     Q_ASSERT(node.rootComponent() == nullptr);
@@ -192,8 +196,29 @@ CoordFrame Node::Component::localCoordFrame() const
 }
 
 
+bool Node::Component::movable() const
+{
+  return _movable || _coordinateIndex==-1;
+}
+
+void Node::Component::setMovable(bool movable)
+{
+  if(this->movable() != movable)
+  {
+    this->_movable = movable;
+    movableChanged(this);
+  }
+}
+
+
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
+  if(!movable())
+  {
+    qWarning() << "Trying to move not movable component";
+    return;
+  }
+
   this->_localCoordFrame = coordFrame;
 }
 
@@ -211,6 +236,28 @@ CoordFrame Node::Component::globalCoordFrame() const
   return parent->globalCoordFrame() * localCoordFrame();
 }
 
+bool Node::Component::dependsOn(const Component* other) const
+{
+  DependencySet dependencies(this);
+
+  return dependencies.dependsOn(other);
+}
+
+int Node::Component::updateDependencyDepth()
+{
+  DependencySet dependencies(this);
+
+  _dependencyDepth = dependencies.depth();
+
+  return _dependencyDepth;
+}
+
+void Node::Component::collectDependencies(DependencySet* dependencySet) const
+{
+  if(parent != nullptr)
+    dependencySet->addDependency(parent);
+}
+
 
 void Node::Component::registerAngelScriptAPIDeclarations()
 {
@@ -226,10 +273,9 @@ void Node::Component::registerAngelScriptAPIDeclarations()
 
 inline Node::Component* createEmptyComponent(Node& node,
                                              Node::Component* parent,
-                                             const Uuid<Node::Component>& uuid,
-                                             bool isMovable)
+                                             const Uuid<Node::Component>& uuid)
 {
-  return new Node::Component(node, parent, uuid, isMovable);
+  return new Node::Component(node, parent, uuid);
 }
 
 void Node::Component::registerAngelScriptAPI()
@@ -241,9 +287,63 @@ void Node::Component::registerAngelScriptAPI()
   Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
                                                                                                "NodeComponent",
                                                                                                "new_EmptyComponent",
-                                                                                               "const Uuid<NodeComponent> &in uuid, bool isMovable");
+                                                                                               "const Uuid<NodeComponent> &in uuid");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+
+// ======== Node::Component::DependencySet =====================================
+
+Node::Component::DependencySet::DependencySet(const Component* component)
+{
+  _depth = -1;
+
+  queuedDependencies.enqueue(component);
+
+  while(!queuedDependencies.isEmpty())
+  {
+    QQueue<const Component*> currentDepth;
+
+    currentDepth.swap(queuedDependencies);
+
+    while(!currentDepth.isEmpty())
+    {
+      const Component* component = currentDepth.dequeue();
+      Q_ASSERT(!visitedDependencies.contains(component));
+      visitedDependencies.insert(component);
+
+      component->collectDependencies(this);
+    }
+
+    _depth++;
+  }
+}
+
+void Node::Component::DependencySet::addDependency(const Component* component)
+{
+  if(visitedDependencies.contains(component) || queuedDependencies.contains(component))
+  {
+    componentsWithCycles.insert(component);
+  }else
+  {
+    queuedDependencies.enqueue(component);
+  }
+}
+
+bool Node::Component::DependencySet::dependsOn(const Component* other) const
+{
+  return visitedDependencies.contains(other);
+}
+
+bool Node::Component::DependencySet::hasCycles() const
+{
+  return !componentsWithCycles.isEmpty();
+}
+
+int Node::Component::DependencySet::depth() const
+{
+  return _depth;
 }
 
 

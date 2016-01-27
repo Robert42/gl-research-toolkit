@@ -12,7 +12,7 @@ class CameraComponent final : public Node::Component
 public:
   Camera cameraParameter;
 
-  CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter, bool isMovable=false);
+  CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter);
   ~CameraComponent();
 
   static void registerAngelScriptAPIDeclarations();

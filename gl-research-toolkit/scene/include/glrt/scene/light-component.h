@@ -11,16 +11,27 @@ namespace scene {
 
 class LightComponent : public Node::Component
 {
+  Q_OBJECT
+  Q_PROPERTY(bool dynamic READ dynamic WRITE setDynamic NOTIFY dynamicChanged)
 public:
-  typedef resources::LightSource::Interactivity Interactivity;
-  const bool isStatic : 1;
+  LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid);
 
-  LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, Interactivity interactivity);
-
-  static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, Interactivity interactivity, const resources::LightSource& lightSource);
+  static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, const resources::LightSource& lightSource);
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
+
+  bool dynamic() const;
+  void setDynamic(bool dynamic);
+
+signals:
+  void dynamicChanged(LightComponent* component);
+
+private:
+  bool _dynamic : 1;
+
+private slots:
+  void handleChangedMovable();
 };
 
 
@@ -30,7 +41,7 @@ public:
   typedef resources::LightSource::SphereAreaLight Data;
   Data data;
 
-  SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, Interactivity interactivity);
+  SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data);
 };
 
 
@@ -40,7 +51,7 @@ public:
   typedef resources::LightSource::RectAreaLight Data;
   Data data;
 
-  RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data, resources::LightSource::Interactivity interactivity);
+  RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data);
 };
 
 
