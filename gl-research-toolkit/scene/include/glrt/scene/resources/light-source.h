@@ -11,13 +11,6 @@ namespace resources {
 
 struct LightSource final
 {
-  enum class Interactivity
-  {
-    STATIC,
-    DYNAMIC,
-    MOVABLE
-  };
-
   enum class Type
   {
     SPHERE_AREA_LIGHT,

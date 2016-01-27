@@ -67,7 +67,7 @@ public:
 
   const bool isMovable : 1;
 
-  Component(Node& node, Component* parent, const Uuid<Component>& uuid, bool isMovable);
+  Component(Node& node, Component* parent, const Uuid<Component>& uuid);
   virtual ~Component();
 
   const QVector<Component*>& children() const;

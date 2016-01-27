@@ -4,7 +4,7 @@ namespace glrt {
 namespace scene {
 
 CoordConstraint::CoordConstraint(Node& node, Component* parent, const Uuid<CoordConstraint>& uuid)
-  : Component(node, parent, uuid, true)
+  : Component(node, parent, uuid)
 {
 }
 

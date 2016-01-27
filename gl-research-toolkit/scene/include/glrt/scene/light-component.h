@@ -12,12 +12,11 @@ namespace scene {
 class LightComponent : public Node::Component
 {
 public:
-  typedef resources::LightSource::Interactivity Interactivity;
   const bool isStatic : 1;
 
-  LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, Interactivity interactivity);
+  LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid);
 
-  static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, Interactivity interactivity, const resources::LightSource& lightSource);
+  static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, const resources::LightSource& lightSource);
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
@@ -30,7 +29,7 @@ public:
   typedef resources::LightSource::SphereAreaLight Data;
   Data data;
 
-  SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data, Interactivity interactivity);
+  SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data);
 };
 
 
@@ -40,7 +39,7 @@ public:
   typedef resources::LightSource::RectAreaLight Data;
   Data data;
 
-  RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data, resources::LightSource::Interactivity interactivity);
+  RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data);
 };
 
 

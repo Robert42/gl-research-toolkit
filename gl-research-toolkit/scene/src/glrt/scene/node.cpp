@@ -134,11 +134,11 @@ only changed by deleting the child or parent component.
 
 This component will have the given \a uuid.
 */
-Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid, bool isMovable)
+Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
   : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    isMovable(isMovable),
+    isMovable(false),
     _dependencyDepth(0)
 {
   if(this->parent !=nullptr)
@@ -251,10 +251,9 @@ void Node::Component::registerAngelScriptAPIDeclarations()
 
 inline Node::Component* createEmptyComponent(Node& node,
                                              Node::Component* parent,
-                                             const Uuid<Node::Component>& uuid,
-                                             bool isMovable)
+                                             const Uuid<Node::Component>& uuid)
 {
-  return new Node::Component(node, parent, uuid, isMovable);
+  return new Node::Component(node, parent, uuid);
 }
 
 void Node::Component::registerAngelScriptAPI()
@@ -266,7 +265,7 @@ void Node::Component::registerAngelScriptAPI()
   Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
                                                                                                "NodeComponent",
                                                                                                "new_EmptyComponent",
-                                                                                               "const Uuid<NodeComponent> &in uuid, bool isMovable");
+                                                                                               "const Uuid<NodeComponent> &in uuid");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
