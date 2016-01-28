@@ -41,13 +41,6 @@ QVector<T*> Node::allComponentsWithType(const std::function<bool(T*)>& filter) c
 // ======== Node::TickingObject ================================================
 
 
-struct Node::TickingObject::TickTraits final
-{
-  quint32 tickAccessMask = 0;
-  bool canTick : 1;
-  bool mainThreadOnly : 1;
-};
-
 template<typename T>
 struct Node::TickingObject::DependencySet final
 {

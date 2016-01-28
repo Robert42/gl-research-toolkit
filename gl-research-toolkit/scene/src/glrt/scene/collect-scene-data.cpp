@@ -17,10 +17,10 @@ Array<Node::TickingObject*> collectAllTickingObjects(Scene* scene)
     for(Node* n : layer->allNodes())
     {
       for(Node::Component* component : n->allComponents())
-        if(component->tickTraits().canTick)
+        if(component->tickTraits() != Node::TickingObject::TickTraits::NoTick)
           tickingObjects.append(component);
       for(Node::ModularAttribute* attribute : n->allModularAttributes())
-        if(attribute->tickTraits().canTick)
+        if(attribute->tickTraits() != Node::TickingObject::TickTraits::NoTick)
           tickingObjects.append(attribute);
     }
   }

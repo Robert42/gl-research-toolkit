@@ -49,7 +49,12 @@ class Node::TickingObject : public QObject
 {
   Q_OBJECT
 public:
-  struct TickTraits;
+  enum class TickTraits
+  {
+    NoTick,
+    OnlyMainThread,
+    Multithreaded,
+  };
 
   virtual void tick(float timeDelta) const;
 

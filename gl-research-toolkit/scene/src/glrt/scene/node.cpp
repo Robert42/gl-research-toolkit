@@ -139,35 +139,39 @@ void Node::TickingObject::collectDependencies(TickDependencySet* dependencySet) 
 Defines, whether this object has an impplementation of the tick function which
 should be used or not.
 
-\warning no matter when called, this function should always return the same value!
+\warning this function should always return the same value, no matter when called!
 
 The order of tick is decided using the returned traits and the tick Dependencies.
 
-Each object is guaranteed, that all o fits dependency has been executed before
+Each object is guaranteed, that all of its dependency has been executed before
 the object.
 
-Also, it defines the resourced used by this tick function used as a hint, to
-allow multithreading without the need of using mutexes. While this can be powerful
-it is extremely dengerous.
-
+\list
+\li If this function returns TickTraits::NoTick no tick is executed at all.
+Thats the safest and most performant solution.
+\li If this function returns TickTraits::OnlyMainThread, the tick manager guarantees, that
+tick is called in the main thread and the tick manaer also doesn't execute any
+other tick function in a nother thread.
+\li If this function returns TickTraits::Multithreaded, the tick manager calls the
+tick function, in parallel together with other tick function from other tickable
+objects with the TickTraits::Multithreaded trait.
+\br
+\warning
+While this can be powerful it is extremely dengerous. You are responisble to make
+sure to prevent race condition.
 Even if your tick only reads data, you probably want to make sure no one other is
-changing the same data in parallel.
-
-If you aren't 100% sure that your ticks are race condition free
-I recommend to activate the \l{Node::TickingObject::TickTraits::mainThreadOnly}{mainThreadOnly}
-flag (which is active by default) which also guarantees, that no other tick
-functions will work at the same time in a parallel thread.
-
-Ways to prevent race confitions are tick dependencies or tickAccessMask.
+changing the same data in parallel. Don't say you haven't been warned.
+\br
+If you aren't 100% sure that your ticks are race condition free, I recomment to
+use the TickTraits::OnlyMainThread trait (which is returned by default).
+You can use tick dependencies to ensure, that theese two tick functions aren't called parallel,
+but you still have to make sure that no other thread will create any race condition, which isn't trivial.
+\endlist
 
 */
 Node::TickingObject::TickTraits Node::TickingObject::tickTraits() const
 {
-  TickTraits traits;
-  traits.canTick = false;
-  traits.mainThreadOnly = true;
-
-  return traits;
+  return TickTraits::OnlyMainThread;
 }
 
 void Node::TickingObject::collectTickDependencies(TickDependencySet* dependencySet) const
