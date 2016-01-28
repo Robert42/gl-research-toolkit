@@ -94,13 +94,62 @@ void Node::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("SceneLayer", "Node@ newNode(Uuid<Node> &in uuid)", AngelScript::asFUNCTION(create_node), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Node", "NodeComponent@ get_rootComponent()", AngelScript::asMETHOD(Node, rootComponent), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
-
   Component::registerAngelScriptAPI();
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-// ======== Node::ModularAttribute ===========================================
+// ======== Node::TickingObject ================================================
+
+Node::TickingObject::TickingObject()
+  : _tickDependencyDepth(0)
+{
+}
+
+void Node::TickingObject::tick(float timeDelta) const
+{
+  Q_UNUSED(timeDelta);
+}
+
+bool Node::TickingObject::tickDependsOn(const Component* other) const
+{
+  TickDependencySet dependencies(this);
+
+  return dependencies.dependsOn(other);
+}
+
+int Node::TickingObject::updateTickDependencyDepth()
+{
+  TickDependencySet dependencies(this);
+
+  int newDepth = dependencies.depth();
+
+  if(_tickDependencyDepth != newDepth)
+    tickDependencyDepthChanged(this);
+
+  return _tickDependencyDepth;
+}
+
+void Node::TickingObject::collectDependencies(TickDependencySet* dependencySet) const
+{
+  collectTickDependencies(dependencySet);
+}
+
+Node::TickingObject::TickTraits Node::TickingObject::tickTraits() const
+{
+  TickTraits traits;
+  traits.canTick = false;
+  traits.mainThreadOnly = true;
+
+  return traits;
+}
+
+void Node::TickingObject::collectTickDependencies(TickDependencySet* dependencySet) const
+{
+  Q_UNUSED(dependencySet);
+}
+
+// ======== Node::ModularAttribute =============================================
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
@@ -116,7 +165,7 @@ Node::ModularAttribute::~ModularAttribute()
 }
 
 
-// ======== Node::Component ==================================================
+// ======== Node::Component ====================================================
 
 
 /*!
@@ -139,7 +188,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
     _movable(false),
-    _dependencyDepth(0),
+    _coorddependencyDepth(0),
     _coordinateIndex(-1)
 {
   if(this->parent !=nullptr)
@@ -147,7 +196,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
 
-    connect(this->parent, &Node::Component::dependencyDepthChanged, this, &Node::Component::dependencyDepthChanged);
+    connect(this->parent, &Node::Component::coordDependencyDepthChanged, this, &Node::Component::coordDependencyDepthChanged);
   }else
   {
     Q_ASSERT(node.rootComponent() == nullptr);
@@ -223,6 +272,18 @@ CoordFrame Node::Component::globalCoordFrame() const
   return parent->globalCoordFrame() * localCoordFrame();
 }
 
+CoordFrame Node::Component::calcGlobalCoordFrame() const
+{
+  return CoordFrame(glm::vec3(NAN), glm::quat(NAN, NAN, NAN, NAN), NAN);
+}
+
+bool Node::Component::hasCustomGlobalCoordUpdater() const
+{
+  CoordFrame c = calcGlobalCoordFrame();
+
+  return c.scaleFactor!=NAN || c.position!=glm::vec3(NAN) || c.orientation!=glm::quat(NAN, NAN, NAN, NAN);
+}
+
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
   if(!movable())
@@ -235,20 +296,23 @@ void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 }
 
 
-bool Node::Component::dependsOn(const Component* other) const
+bool Node::Component::coordDependsOn(const Component* other) const
 {
-  DependencySet dependencies(this);
+  CoordDependencySet dependencies(this);
 
   return dependencies.dependsOn(other);
 }
 
-int Node::Component::updateDependencyDepth()
+int Node::Component::updateCoordDependencyDepth()
 {
-  DependencySet dependencies(this);
+  CoordDependencySet dependencies(this);
 
-  _dependencyDepth = dependencies.depth();
+  int newDepth = dependencies.depth();
 
-  return _dependencyDepth;
+  if(_coorddependencyDepth != newDepth)
+    coordDependencyDepthChanged(this);
+
+  return _coorddependencyDepth;
 }
 
 
@@ -285,66 +349,23 @@ void Node::Component::registerAngelScriptAPI()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
+void Node::Component::collectDependencies(TickDependencySet* dependencySet) const
+{
+  TickingObject::collectDependencies(dependencySet);
+}
 
-void Node::Component::collectDependencies(DependencySet* dependencySet) const
+void Node::Component::collectDependencies(CoordDependencySet* dependencySet) const
+{
+  collectCoordDependencies(dependencySet);
+}
+
+void Node::Component::collectCoordDependencies(CoordDependencySet* dependencySet) const
 {
   if(parent != nullptr)
     dependencySet->addDependency(parent);
 }
 
 
-// ======== Node::Component::DependencySet =====================================
-
-Node::Component::DependencySet::DependencySet(const Component* component)
-{
-  _depth = -1;
-
-  queuedDependencies.enqueue(component);
-
-  while(!queuedDependencies.isEmpty())
-  {
-    QQueue<const Component*> currentDepth;
-
-    currentDepth.swap(queuedDependencies);
-
-    while(!currentDepth.isEmpty())
-    {
-      const Component* component = currentDepth.dequeue();
-      Q_ASSERT(!visitedDependencies.contains(component));
-      visitedDependencies.insert(component);
-
-      component->collectDependencies(this);
-    }
-
-    _depth++;
-  }
-}
-
-void Node::Component::DependencySet::addDependency(const Component* component)
-{
-  if(visitedDependencies.contains(component) || queuedDependencies.contains(component))
-  {
-    componentsWithCycles.insert(component);
-  }else
-  {
-    queuedDependencies.enqueue(component);
-  }
-}
-
-bool Node::Component::DependencySet::dependsOn(const Component* other) const
-{
-  return visitedDependencies.contains(other);
-}
-
-bool Node::Component::DependencySet::hasCycles() const
-{
-  return !componentsWithCycles.isEmpty();
-}
-
-int Node::Component::DependencySet::depth() const
-{
-  return _depth;
-}
 
 
 } // namespace scene

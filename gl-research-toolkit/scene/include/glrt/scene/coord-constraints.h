@@ -20,7 +20,7 @@ signals:
   void targetChanged();
 
 protected:
-  void collectDependencies(DependencySet* dependencySet) const override;
+  void collectCoordDependencies(CoordDependencySet* dependencySet) const override;
 
 private:
   Component* _target;

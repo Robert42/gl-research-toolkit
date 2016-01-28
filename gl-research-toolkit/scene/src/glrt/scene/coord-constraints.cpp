@@ -18,27 +18,27 @@ void CoordConstraint::setTarget(Component* target)
   if(target != this->_target)
   {
       // Making sure to prevent cycles
-    if(target->dependsOn(this))
+    if(target->coordDependsOn(this))
       throw GLRT_EXCEPTION("CoordConstraints::setTarget: Dependency cycle detected");
 
     if(this->_target)
-      disconnect(this->_target, &Node::Component::dependencyDepthChanged, this, &Node::Component::dependencyDepthChanged);
+      disconnect(this->_target, &Node::Component::coordDependencyDepthChanged, this, &Node::Component::coordDependencyDepthChanged);
 
     _target = target;
 
     if(this->target())
-      connect(this->target(), &Node::Component::dependencyDepthChanged, this, &Node::Component::dependencyDepthChanged);
+      connect(this->target(), &Node::Component::coordDependencyDepthChanged, this, &Node::Component::coordDependencyDepthChanged);
 
     targetChanged();
   }
 }
 
-void CoordConstraint::collectDependencies(DependencySet* dependencySet) const
+void CoordConstraint::collectCoordDependencies(CoordDependencySet* dependencySet) const
 {
   if(_target != nullptr)
     dependencySet->addDependency(_target);
 
-  Node::Component::collectDependencies(dependencySet);
+  Node::Component::collectCoordDependencies(dependencySet);
 
 }
 

@@ -37,6 +37,105 @@ QVector<T*> Node::allComponentsWithType(const std::function<bool(T*)>& filter) c
 }
 
 
+
+// ======== Node::TickingObject ================================================
+
+
+struct Node::TickingObject::TickTraits final
+{
+  enum class LockingResource : quint32
+  {
+    None
+  };
+
+  LockingResource lockingResource = LockingResource::None;
+  bool canTick : 1;
+  bool mainThreadOnly : 1;
+};
+
+template<typename T>
+struct Node::TickingObject::DependencySet final
+{
+  QSet<const T*> objectsWithCycles;
+
+  DependencySet(const T* originalObject);
+  DependencySet(const DependencySet&) = delete;
+  DependencySet(DependencySet&&) = delete;
+  DependencySet&operator=(const DependencySet&) = delete;
+  DependencySet&operator=(DependencySet&&) = delete;
+
+  void addDependency(const T* object);
+
+  bool dependsOn(const T* other) const;
+  bool hasCycles() const;
+  int depth() const;
+
+private:
+  QSet<const T*> visitedDependencies;
+  QQueue<const T*> queuedDependencies;
+  int _depth;
+};
+
+template<typename T>
+Node::TickingObject::DependencySet<T>::DependencySet(const T* originalObject)
+{
+  _depth = -1;
+
+  queuedDependencies.enqueue(originalObject);
+
+  while(!queuedDependencies.isEmpty())
+  {
+    QQueue<const T*> currentDepth;
+
+    currentDepth.swap(queuedDependencies);
+
+    while(!currentDepth.isEmpty())
+    {
+      const T* object = currentDepth.dequeue();
+      Q_ASSERT(!visitedDependencies.contains(object));
+      visitedDependencies.insert(object);
+
+      object->collectDependencies(this);
+    }
+
+    _depth++;
+  }
+}
+
+template<typename T>
+void Node::TickingObject::DependencySet<T>::addDependency(const T* component)
+{
+  if(visitedDependencies.contains(component) || queuedDependencies.contains(component))
+  {
+    objectsWithCycles.insert(component);
+  }else
+  {
+    queuedDependencies.enqueue(component);
+  }
+}
+
+template<typename T>
+bool Node::TickingObject::DependencySet<T>::dependsOn(const T* other) const
+{
+  return visitedDependencies.contains(other);
+}
+
+template<typename T>
+bool Node::TickingObject::DependencySet<T>::hasCycles() const
+{
+  return !objectsWithCycles.isEmpty();
+}
+
+template<typename T>
+int Node::TickingObject::DependencySet<T>::depth() const
+{
+  return _depth;
+}
+
+
+// ======== Node::Component ====================================================
+
+
 template<typename T>
 void Node::Component::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className)
 {

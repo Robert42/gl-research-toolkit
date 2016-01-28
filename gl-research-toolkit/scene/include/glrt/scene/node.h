@@ -13,6 +13,7 @@ class SceneLayer;
 class Node final
 {
 public:
+  class TickingObject;
   class ModularAttribute;
   class Component;
 
@@ -44,8 +45,39 @@ private:
   Component* _rootComponent;
 };
 
+class Node::TickingObject : public QObject
+{
+  Q_OBJECT
+public:
+  virtual void tick(float timeDelta) const;
 
-class Node::ModularAttribute : public QObject
+  bool tickDependsOn(const Component* other) const;
+  int updateTickDependencyDepth();
+
+signals:
+  void tickDependencyDepthChanged(TickingObject* sender);
+
+protected:
+  struct TickTraits;
+
+  template<typename T>
+  struct DependencySet;
+
+  typedef DependencySet<TickingObject> TickDependencySet;
+
+  TickingObject();
+
+  void collectDependencies(TickDependencySet* dependencySet) const;
+
+  virtual TickTraits tickTraits() const;
+  virtual void collectTickDependencies(TickDependencySet* dependencySet) const;
+
+private:
+  int _tickDependencyDepth;
+};
+
+
+class Node::ModularAttribute : public TickingObject
 {
   Q_OBJECT
 public:
@@ -57,11 +89,12 @@ public:
 };
 
 
-class Node::Component : public QObject
+class Node::Component : public TickingObject
 {
   Q_OBJECT
   Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
 public:
+
   Node& node;
   Component* const parent;
   const Uuid<Component> uuid;
@@ -78,20 +111,24 @@ public:
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
 
+  virtual CoordFrame calcGlobalCoordFrame() const;
+  bool hasCustomGlobalCoordUpdater() const;
+
   void set_localCoordFrame(const CoordFrame& coordFrame);
 
-  bool dependsOn(const Component* other) const;
-  int updateDependencyDepth();
+  bool coordDependsOn(const Component* other) const;
+  int updateCoordDependencyDepth();
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
 signals:
-  void dependencyDepthChanged();
-  void movableChanged(Component* component);
+  void coordDependencyDepthChanged(Component* sender);
+  void movableChanged(Component* sender);
 
 protected:
-  struct DependencySet;
+  typedef DependencySet<Component> CoordDependencySet;
+  friend struct DependencySet<Component>;
 
   template<typename T>
   static void registerAsBaseOfClass(AngelScript::asIScriptEngine* engine, const char* className);
@@ -99,7 +136,10 @@ protected:
   template<typename T, T*>
   static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments);
 
-  virtual void collectDependencies(DependencySet* dependencySet) const;
+  void collectDependencies(TickDependencySet* dependencySet) const;
+  void collectDependencies(CoordDependencySet* dependencySet) const;
+
+  virtual void collectCoordDependencies(CoordDependencySet* dependencySet) const;
 
 private:
   template<typename T>
@@ -116,27 +156,8 @@ private:
   bool _movable : 1;
 
   QVector<Component*> _children;
-  int _dependencyDepth;
+  int _coorddependencyDepth;
   int _coordinateIndex;
-};
-
-
-struct Node::Component::DependencySet final
-{
-  QSet<const Component*> componentsWithCycles;
-
-  DependencySet(const Component* component);
-
-  void addDependency(const Component* component);
-
-  bool dependsOn(const Component* other) const;
-  bool hasCycles() const;
-  int depth() const;
-
-private:
-  QSet<const Component*> visitedDependencies;
-  QQueue<const Component*> queuedDependencies;
-  int _depth;
 };
 
 
