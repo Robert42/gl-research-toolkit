@@ -190,12 +190,6 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
 }
 
 
-CoordFrame Node::Component::localCoordFrame() const
-{
-  return _localCoordFrame;
-}
-
-
 bool Node::Component::movable() const
 {
   return _movable || _coordinateIndex==-1;
@@ -211,17 +205,10 @@ void Node::Component::setMovable(bool movable)
 }
 
 
-void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
+CoordFrame Node::Component::localCoordFrame() const
 {
-  if(!movable())
-  {
-    qWarning() << "Trying to move not movable component";
-    return;
-  }
-
-  this->_localCoordFrame = coordFrame;
+  return _localCoordFrame;
 }
-
 
 /*!
  * Returns the global transformation of the given component.
@@ -235,6 +222,18 @@ CoordFrame Node::Component::globalCoordFrame() const
 
   return parent->globalCoordFrame() * localCoordFrame();
 }
+
+void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
+{
+  if(!movable())
+  {
+    qWarning() << "Trying to move not movable component";
+    return;
+  }
+
+  this->_localCoordFrame = coordFrame;
+}
+
 
 bool Node::Component::dependsOn(const Component* other) const
 {
@@ -250,12 +249,6 @@ int Node::Component::updateDependencyDepth()
   _dependencyDepth = dependencies.depth();
 
   return _dependencyDepth;
-}
-
-void Node::Component::collectDependencies(DependencySet* dependencySet) const
-{
-  if(parent != nullptr)
-    dependencySet->addDependency(parent);
 }
 
 
@@ -290,6 +283,13 @@ void Node::Component::registerAngelScriptAPI()
                                                                                                "const Uuid<NodeComponent> &in uuid");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+
+void Node::Component::collectDependencies(DependencySet* dependencySet) const
+{
+  if(parent != nullptr)
+    dependencySet->addDependency(parent);
 }
 
 

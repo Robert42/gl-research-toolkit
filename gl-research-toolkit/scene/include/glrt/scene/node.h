@@ -72,11 +72,11 @@ public:
   const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
-  CoordFrame localCoordFrame() const;
-  CoordFrame globalCoordFrame() const;
-
   bool movable() const;
   void setMovable(bool movable);
+
+  CoordFrame localCoordFrame() const;
+  CoordFrame globalCoordFrame() const;
 
   void set_localCoordFrame(const CoordFrame& coordFrame);
 
