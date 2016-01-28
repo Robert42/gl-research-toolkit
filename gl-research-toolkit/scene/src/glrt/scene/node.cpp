@@ -135,6 +135,32 @@ void Node::TickingObject::collectDependencies(TickDependencySet* dependencySet) 
   collectTickDependencies(dependencySet);
 }
 
+/*!
+Defines, whether this object has an impplementation of the tick function which
+should be used or not.
+
+\warning no matter when called, this function should always return the same value!
+
+The order of tick is decided using the returned traits and the tick Dependencies.
+
+Each object is guaranteed, that all o fits dependency has been executed before
+the object.
+
+Also, it defines the resourced used by this tick function used as a hint, to
+allow multithreading without the need of using mutexes. While this can be powerful
+it is extremely dengerous.
+
+Even if your tick only reads data, you probably want to make sure no one other is
+changing the same data in parallel.
+
+If you aren't 100% sure that your ticks are race condition free
+I recommend to activate the \l{Node::TickingObject::TickTraits::mainThreadOnly}{mainThreadOnly}
+flag (which is active by default) which also guarantees, that no other tick
+functions will work at the same time in a parallel thread.
+
+Ways to prevent race confitions are tick dependencies or tickAccessMask.
+
+*/
 Node::TickingObject::TickTraits Node::TickingObject::tickTraits() const
 {
   TickTraits traits;
@@ -222,7 +248,7 @@ const QVector<glrt::scene::Node::Component*>& Node::Component::children() const
 }
 
 /*!
-Appends the wwhole subtree of this component (including this component itself)
+Appends the whole subtree of this component (including this component itself)
 to the ggiven vector \a subTree.
 
 \note This Method is able to accept nullptr as this value.
@@ -272,6 +298,15 @@ CoordFrame Node::Component::globalCoordFrame() const
   return parent->globalCoordFrame() * localCoordFrame();
 }
 
+/*!
+This function allows to use a customzed calculation for the global coord frame
+of a compent.
+
+The default implementation returns a coord frame containing only nans to signalize
+not to use this virtual function to improve performance.
+
+\warning Either always return a coord frame consisting only of NANs or never.
+*/
 CoordFrame Node::Component::calcGlobalCoordFrame() const
 {
   return CoordFrame(glm::vec3(NAN), glm::quat(NAN, NAN, NAN, NAN), NAN);
