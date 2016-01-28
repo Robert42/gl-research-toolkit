@@ -43,12 +43,7 @@ QVector<T*> Node::allComponentsWithType(const std::function<bool(T*)>& filter) c
 
 struct Node::TickingObject::TickTraits final
 {
-  enum class LockingResource : quint32
-  {
-    None
-  };
-
-  LockingResource lockingResource = LockingResource::None;
+  quint32 tickAccessMask = 0;
   bool canTick : 1;
   bool mainThreadOnly : 1;
 };

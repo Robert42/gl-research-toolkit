@@ -49,16 +49,18 @@ class Node::TickingObject : public QObject
 {
   Q_OBJECT
 public:
+  struct TickTraits;
+
   virtual void tick(float timeDelta) const;
 
   bool tickDependsOn(const Component* other) const;
   int updateTickDependencyDepth();
+  virtual TickTraits tickTraits() const;
 
 signals:
   void tickDependencyDepthChanged(TickingObject* sender);
 
 protected:
-  struct TickTraits;
 
   template<typename T>
   struct DependencySet;
@@ -69,7 +71,6 @@ protected:
 
   void collectDependencies(TickDependencySet* dependencySet) const;
 
-  virtual TickTraits tickTraits() const;
   virtual void collectTickDependencies(TickDependencySet* dependencySet) const;
 
 private:

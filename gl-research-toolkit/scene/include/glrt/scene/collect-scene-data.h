@@ -12,6 +12,8 @@ namespace scene {
 template<typename T_component>
 QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::function<bool(T_component*)>& filter=always_return_true<T_component*>);
 
+Array<Node::TickingObject*> collectAllTickingObjects(Scene* scene);
+
 
 template<typename T_component, typename T_data>
 QVector<T_data> collectData(Scene* scene, const std::function<T_data(T_component*)>& get_data);
