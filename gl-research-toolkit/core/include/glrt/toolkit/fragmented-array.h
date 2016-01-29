@@ -6,142 +6,156 @@
 namespace glrt {
 
 
-template<typename T_value, typename T_segment_type, class T_handler, typename T_segment_array_traits = typename DefaultTraits<T_segment_type>::type>
+template<typename T_value, typename T_handler>
+struct FragmentedArray_Segment_Values
+{
+  typedef T_handler handler_type;
+  typedef typename T_handler::extra_data_type extra_data_type;
+  typedef int segment_index;
+
+  struct SegmentRanges
+  {
+  };
+  typedef ArrayTraits_Unordered_POD<SegmentRanges> SegmentRanges_ArrayTraits;
+
+  static void init(SegmentRanges*){}
+
+  static void start_iterate(T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
+  {
+    *index = 0;
+
+    Q_UNUSED(data);
+    Q_UNUSED(data_index);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(ranges);
+    Q_UNUSED(extra_data);
+  }
+
+  static void iterate(T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
+  {
+    Q_UNUSED(ranges);
+    Q_UNUSED(extra_data);
+    Q_UNUSED(index);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+
+    T_handler::handle_value(data[data_index]);
+  }
+};
+
+
+template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait, typename T_segment_array_traits = typename DefaultTraits<T_segment_type>::type>
 struct FragmentedArray_Segment_Generic
 {
   typedef T_handler handler_type;
   typedef typename T_handler::extra_data_type extra_data_type;
+  static_assert(std::is_same<typename T_handler::extra_data_type, typename T_inner_sections_trait::extra_data_type>::value, "Both extra_data_type, of the handler and the inner sections trait must be the same");
+
+  struct segment_index
+  {
+    int index;
+    typename T_inner_sections_trait::segment_index inner_index;
+  };
 
   struct SegmentRanges
   {
     Array<T_segment_type, T_segment_array_traits> segment_value;
-    Array<int> length;
+    Array<int> segmentEnd;
+    Array<typename T_inner_sections_trait::SegmentRanges, typename T_inner_sections_trait::SegmentRanges_ArrayTraits> innerSegmentRanges;
+
+    int number_segments() const
+    {
+      int nSegments = segment_value.length();
+
+      Q_ASSERT(nSegments == segmentEnd.length());
+      Q_ASSERT(nSegments == innerSegmentRanges.length());
+
+      return nSegments;
+    }
+
+    int segment_start(int segment_index, int begin, int end) const
+    {
+      Q_ASSERT(segment_index >= 0);
+      Q_ASSERT(segment_index < number_segments());
+      Q_UNUSED(end);
+
+      return segment_index==0 ?  + begin : segmentEnd[segment_index-1];
+    }
+
+    int segment_end(int segment_index, int begin, int end) const
+    {
+      Q_ASSERT(segment_index >= 0);
+      Q_ASSERT(segment_index < number_segments());
+      Q_UNUSED(begin);
+      Q_UNUSED(end);
+
+      return segmentEnd[segment_index-1];
+    }
   };
 
-  static void init(SegmentRanges*){}
-
-  static void start_iterate(int, SegmentRanges, extra_data_type extra_data)
+  static void init(SegmentRanges*)
   {
-    TODO
   }
 
-  static void iterate(int current_index, int length, const SegmentRanges& ranges, extra_data_type extra_data)
+  static void start_iterate(T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
-    Q_ASSERT(ranges.segment_value.length() == ranges.length.length());
+    if(ranges.segmentEnd.isEmpty())
+      return;
 
-    TODO
-  }
-};
+    const int segment_start = ranges.segment_start(0, begin, end);
+    const int segment_end = ranges.segment_end(0, begin, end);
 
-template<typename T, class T_handler>
-struct FragmentedArray_Segment_SplitInTwo
-{
-  typedef T_handler handler_type;
-  typedef typename T_handler::extra_data_type extra_data_type;
-  typedef int SegmentRanges;
+    handler_type::handle_new_segment(data+segment_start, segment_end-segment_start, ranges.segment_value[0]);
 
-  static void init(SegmentRanges* firstSegmentLength)
-  {
-    *firstSegmentLength = 0;
+    index->index = 0;
+    T_inner_sections_trait::start_iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[0], extra_data, &index->inner_index);
   }
 
-  static void start_iterate(int, SegmentRanges ranges, extra_data_type extra_data)
+  static void iterate(T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
-    int current_segment = 0;
-    handler_type::handle_new_segment(extra_data, current_segment, 0, ranges);
-  }
+    const int num_segments = ranges.number_segments();
+    Q_ASSERT(index->index < num_segments);
 
-  static void iterate(int current_index, int length, SegmentRanges ranges, extra_data_type extra_data)
-  {
-    if(ranges==current_index)
+    int segment_start;
+    int segment_end = ranges.segment_end(index->index, begin, end);
+
+    if(segment_end < data_index)
     {
-      int current_segment = 1;
-      handler_type::handle_new_segment(extra_data, current_segment, ranges, length);
+      while(index->index<num_segments && (segment_end = ranges.segment_end(index->index, begin, end)) < data_index)
+        index->index++;
+
+      if(index->index >= num_segments)
+        return;
+
+      segment_start = ranges.segment_start(index->index, begin, end);
+
+      handler_type::handle_new_segment(data+segment_start, segment_end-segment_start, ranges.segment_value[index->index]);
+      T_inner_sections_trait::start_iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
+    }else
+    {
+      Q_ASSERT(index->index < num_segments);
+      segment_start = ranges.segment_start(index->index, begin, end);
+
+      T_inner_sections_trait::iterate(data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
     }
   }
 };
 
-template<typename T_value, int N, class T_handler>
+TODO test FragmentedArray_Segment_Generic first, after success, also implement the two classes below
+
+template<typename T_value, class T_handler, class T_inner_sections_trait>
+struct FragmentedArray_Segment_SplitInTwo
+{
+// #TODO
+};
+
+template<typename T_value, int N, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Split_in_N
 {
   static_assert(N>=1, "N must be at last 1");
 
-  typedef T_handler handler_type;
-  typedef typename T_handler::extra_data_type extra_data_type;
-  typedef int SegmentRanges[N];
-
-  static void init(SegmentRanges* ranges)
-  {
-    std::memset(ranges, 0, sizeof(int)*N);
-  }
-
-  static void start_iterate(int, const SegmentRanges& ranges, extra_data_type extra_data)
-  {
-    handler_type::handle_new_segment(extra_data, 0, ranges[0]);
-  }
-
-  static void iterate(int current_index, int length, const SegmentRanges& ranges, extra_data_type extra_data)
-  {
-    int current_segment = handler_type::current_segment(extra_data); // #TODO: is it possible to prevent this?
-
-    int next_segment = current_segment+1;
-    if(next_segment < N && ranges[next_segment]>=current_index)
-      handler_type::handle_new_segment(extra_data, next_segment, ranges[next_segment], next_segment+1<N ? ranges[next_segment+1] : length);
-  }
-};
-
-template<typename T_value, typename T1, typename T2>
-struct FragmentedArray_Link
-{
-  typedef typename T1::handler_type handler_type1;
-  typedef typename T2::handler_type handler_type2;
-  typedef typename handler_type1::extra_data_type extra_data_type1;
-  typedef typename handler_type2::extra_data_type extra_data_type2;
-
-  static_assert(std::is_same<extra_data_type1, extra_data_type2>::value, "Both subtypes must have the same extra_type");
-  typedef extra_data_type1 extra_data_type;
-
-  struct handler_type
-  {
-    static bool segmentLessThan(const T_value& value1, const T_value& value2)
-    {
-      if(handler_type1::segmentLessThan(value1, value2))
-        return true;
-      if(handler_type1::segmentLessThan(value2, value1))
-        return false;
-
-      if(handler_type2::segmentLessThan(value1, value2))
-        return true;
-      if(handler_type2::segmentLessThan(value2, value1))
-        return false;
-
-      return false;
-    }
-  };
-
-  struct SegmentRanges
-  {
-    typename T1::SegmentRanges ranges1;
-    typename T2::SegmentRanges ranges2;
-  };
-
-  static void init(SegmentRanges* ranges)
-  {
-    T1::init(&ranges->ranges1);
-    T2::init(&ranges->ranges2);
-  }
-
-  static void start_iterate(int length, const SegmentRanges& ranges, extra_data_type extra_data)
-  {
-    T1::iterate(length, ranges.ranges1, extra_data);
-    T2::iterate(length, ranges.ranges2, extra_data);
-  }
-
-  static void iterate(int current_index, int length, const SegmentRanges& ranges, extra_data_type extra_data)
-  {
-    T1::iterate(current_index, length, ranges.ranges1, extra_data);
-    T2::iterate(current_index, length, ranges.ranges2, extra_data);
-  }
+  // #TODO
 };
 
 
@@ -162,7 +176,7 @@ public:
   void append_move(T_data&& data);
   void remove(const T_data& data);
 
-  void updateSegments();
+  void updateSegments(extra_data_type extra_data);
   void iterate(extra_data_type extra_data);
 };
 
