@@ -79,10 +79,9 @@ struct BaseHandler
 
 struct DummyMeshCompnentHandler : public BaseHandler
 {
-  static void handle_value(const DummyMeshComponent* components, int index)
+  static void handle_value(const DummyMeshComponent* components, int index, QString* output)
   {
-    Q_UNUSED(components);
-    Q_UNUSED(index);
+    *output = QString("      %0").arg(components[index].instanceId);
   }
 
   static bool valueLessThan(const DummyMeshComponent& a, const DummyMeshComponent& b)
@@ -93,10 +92,9 @@ struct DummyMeshCompnentHandler : public BaseHandler
 
 struct DummyLightComponentHandler : public BaseHandler
 {
-  static void handle_value(const DummyLightComponent* components, int index)
+  static void handle_value(const DummyLightComponent* components, int index, QString* output)
   {
-    Q_UNUSED(components);
-    Q_UNUSED(index);
+    *output = QString("  %0").arg(components[index].instanceId);
   }
 
   static bool valueLessThan(const DummyLightComponent& a, const DummyLightComponent& b)

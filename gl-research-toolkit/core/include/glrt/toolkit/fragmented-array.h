@@ -44,12 +44,11 @@ struct FragmentedArray_Segment_Values
   static void iterate(const T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
     Q_UNUSED(ranges);
-    Q_UNUSED(extra_data);
     Q_UNUSED(index);
     Q_UNUSED(begin);
     Q_UNUSED(end);
 
-    T_handler::handle_value(data, data_index);
+    T_handler::handle_value(data, data_index, extra_data);
   }
 
 
