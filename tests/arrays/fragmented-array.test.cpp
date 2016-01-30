@@ -255,7 +255,42 @@ typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteract
 
 void test_FragmentedArray_Segment_Generic()
 {
-  // #TODO::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
+  QString output;
+
+  DummyLightComponent lightComponent1 = {Interactivity::DYNAMIC,
+                                         1};
+  DummyLightComponent lightComponent2 = {Interactivity::STATIC,
+                                         2};
+  DummyLightComponent lightComponent3 = {Interactivity::STATIC,
+                                         3};
+  DummyLightComponent lightComponent4 = {Interactivity::DYNAMIC,
+                                         4};
+  DummyLightComponent lightComponent5 = {Interactivity::STATIC,
+                                         5};
+
+  FragmentedArray_LightComponents_GenericOnly lightComponents;
+  lightComponents.append_copy(lightComponent5);
+  lightComponents.append_copy(lightComponent3);
+  lightComponents.append_copy(lightComponent4);
+  lightComponents.append_copy(lightComponent1);
+  lightComponents.append_copy(lightComponent2);
+
+  output = "\n";
+  lightComponents.updateSegments(&output);
+
+  output = "\n";
+  lightComponents.iterate(&output);
+  EXPECT_EQ(output,
+            "\n"
+            "Static(0, 3){\n"
+            "  2\n"
+            "  3\n"
+            "  4\n"
+            "} // Static(0, 3)\n"
+            "Dynamic(3, 5){\n"
+            "  1\n"
+            "  4\n"
+            "} // Dynamic(3, 5)\n");
 }
 
 
@@ -283,47 +318,12 @@ void test_FragmentedArray_Segment_Generic_recursive()
                                        Mesh::c,
                                        5};
 
-  DummyLightComponent lightComponent1 = {Interactivity::DYNAMIC,
-                                         1};
-  DummyLightComponent lightComponent2 = {Interactivity::STATIC,
-                                         2};
-  DummyLightComponent lightComponent3 = {Interactivity::STATIC,
-                                         3};
-  DummyLightComponent lightComponent4 = {Interactivity::DYNAMIC,
-                                         4};
-  DummyLightComponent lightComponent5 = {Interactivity::STATIC,
-                                         5};
-
   FragmentedArray_MeshComponents_GenericOnly meshComponents;
   meshComponents.append_copy(meshComponent5);
   meshComponents.append_copy(meshComponent3);
   meshComponents.append_copy(meshComponent1);
   meshComponents.append_copy(meshComponent4);
   meshComponents.append_copy(meshComponent2);
-
-  FragmentedArray_LightComponents_GenericOnly lightComponents;
-  lightComponents.append_copy(lightComponent5);
-  lightComponents.append_copy(lightComponent3);
-  lightComponents.append_copy(lightComponent4);
-  lightComponents.append_copy(lightComponent1);
-  lightComponents.append_copy(lightComponent2);
-
-  output = "\n";
-  lightComponents.updateSegments(&output);
-
-  output = "\n";
-  lightComponents.iterate(&output);
-  EXPECT_EQ(output,
-            "\n"
-            "Static(0, 3){\n"
-            "  2\n"
-            "  3\n"
-            "  4\n"
-            "} // Static(0, 3)\n"
-            "Dynamic(3, 5){\n"
-            "  1\n"
-            "  4\n"
-            "} // Dynamic(3, 5)\n");
 
   output = "\n";
   meshComponents.updateSegments(&output);
