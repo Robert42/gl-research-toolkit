@@ -408,7 +408,60 @@ void test_FragmentedArray_Segment_Generic_recursive()
 
 void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet()
 {
-  // #TODO::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
+  QString output;
+  int region_to_be_updated;
+
+  DummyLightComponent lightComponent1 = {Interactivity::DYNAMIC,
+                                         1};
+  DummyLightComponent lightComponent2 = {Interactivity::STATIC,
+                                         2};
+  DummyLightComponent lightComponent3 = {Interactivity::STATIC,
+                                         3};
+  DummyLightComponent lightComponent4 = {Interactivity::DYNAMIC,
+                                         4};
+  DummyLightComponent lightComponent5 = {Interactivity::STATIC,
+                                         5};
+
+  FragmentedArray_LightComponents_GenericOnly lightComponents;
+  lightComponents.append_copy(lightComponent5);
+  lightComponents.append_copy(lightComponent3);
+  lightComponents.append_copy(lightComponent4);
+  lightComponents.append_copy(lightComponent1);
+  lightComponents.append_copy(lightComponent2);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  lightComponents.append_copy(lightComponent1);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  lightComponents.append_copy(lightComponent1);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  lightComponents.append_copy(lightComponent4);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  lightComponents.append_copy(lightComponent3);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  lightComponents.append_copy(lightComponent2);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
 }
 
 void test_fragmented_array()
