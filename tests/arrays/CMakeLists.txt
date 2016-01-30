@@ -5,6 +5,7 @@ project(Test-Arrays)
 add_executable(test-arrays
   main.cpp
   trait-handling.cpp
+  fragmented-array.cpp
   statespy.cpp
   statespy.h
 )

@@ -1,7 +1,5 @@
 #include <testing-framework.h>
 
-#include <testing-framework.h>
-
 #include "statespy.h"
 
 using glrt::Array;
@@ -9,6 +7,7 @@ using glrt::Array;
 
 
 void test_traits();
+void test_fragmented_array();
 
 void test_array_constructors()
 {
@@ -717,6 +716,7 @@ int main(int argc, char** argv)
   test_destructor();
   test_remove();
   test_ensureCapacity();
+  test_fragmented_array();
 
   return testing_application.result();
 }
