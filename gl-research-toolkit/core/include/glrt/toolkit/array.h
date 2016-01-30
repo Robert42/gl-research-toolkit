@@ -249,6 +249,12 @@ struct DefaultTraits<int>
   typedef ArrayTraits_Unordered_Primitive<int> type;
 };
 
+template<>
+struct DefaultTraits<bool>
+{
+  typedef ArrayTraits_Unordered_Primitive<bool> type;
+};
+
 template<typename T>
 struct DefaultTraits<T*>
 {
