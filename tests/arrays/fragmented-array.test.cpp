@@ -75,6 +75,77 @@ struct DefaultTraits<Interactivity>
 struct BaseHandler
 {
   typedef QString* extra_data_type;
+
+  static QString format(Interactivity interactivity)
+  {
+    switch(interactivity)
+    {
+    case Interactivity::DYNAMIC:
+      return "Dynamic";
+    case Interactivity::STATIC:
+      return "Static";
+    default:
+      Q_UNREACHABLE();
+    }
+  }
+
+  static QString format(Mesh mesh)
+  {
+    switch(mesh)
+    {
+    case Mesh::a:
+      return "a";
+    case Mesh::b:
+      return "b";
+    case Mesh::c:
+      return "c";
+    case Mesh::d:
+      return "d";
+    case Mesh::e:
+      return "e";
+    case Mesh::f:
+      return "f";
+    default:
+      Q_UNREACHABLE();
+    }
+  }
+
+
+  static QString format(Material material)
+  {
+    switch(material)
+    {
+    case Material::A:
+      return "A";
+    case Material::B:
+      return "B";
+    case Material::C:
+      return "C";
+    case Material::D:
+      return "D";
+    case Material::E:
+      return "E";
+    case Material::F:
+      return "F";
+    default:
+      Q_UNREACHABLE();
+    }
+  }
+
+  static QString format(bool movable)
+  {
+    if(movable)
+      return "Movable";
+    else
+      return "Static";
+  }
+
+
+  template<typename T, int depth=0>
+  static QString format(T x, int begin, int end)
+  {
+    return QString("%0(%1, %2)").arg(format(x)).arg(begin).arg(end);
+  }
 };
 
 struct DummyMeshCompnentHandler : public BaseHandler
@@ -105,24 +176,6 @@ struct DummyLightComponentHandler : public BaseHandler
 
 struct InteractivitySegmentHandler : public BaseHandler
 {
-  static QString format(Interactivity interactivity)
-  {
-    switch(interactivity)
-    {
-    case Interactivity::DYNAMIC:
-      return "Dynamic";
-    case Interactivity::STATIC:
-      return "Static";
-    default:
-      Q_UNREACHABLE();
-    }
-  }
-
-  static QString format(Interactivity interactivity, int begin, int end)
-  {
-    return QString("%0(%1, %2)").arg(format(interactivity)).arg(begin).arg(end);
-  }
-
   static void handle_new_segment(const DummyLightComponent* components, int begin, int end, Interactivity interactivity, QString* output)
   {
     *output += format(interactivity, begin, end) + "{\n";
@@ -154,18 +207,14 @@ struct MeshSegmentHandler : public BaseHandler
 {
   static void handle_new_segment(const DummyMeshComponent* components, int begin, int end, Mesh mesh, QString* output)
   {
+    *output += "    Mesh " + format(mesh, begin, end) + "{\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(mesh);
     Q_UNUSED(output);
   }
   static void handle_end_segment(const DummyMeshComponent* components, int begin, int end, Mesh mesh, QString* output)
   {
+    *output += "    } // Mesh "+format(mesh, begin, end) + "\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(mesh);
     Q_UNUSED(output);
   }
 
@@ -186,19 +235,15 @@ struct MaterialSegmentHandler : public BaseHandler
 {
   static void handle_new_segment(const DummyMeshComponent* components, int begin, int end, Material material, QString* output)
   {
+    *output += "  Material " + format(material, begin, end) + "{\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(material);
     Q_UNUSED(output);
   }
 
   static void handle_end_segment(const DummyMeshComponent* components, int begin, int end, Material material, QString* output)
   {
+    *output += "  } // Material "+format(material, begin, end) + "\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(material);
     Q_UNUSED(output);
   }
 
@@ -219,19 +264,15 @@ struct MovableSegmentHandler : public BaseHandler
 {
   static void handle_new_segment(const DummyMeshComponent* components, int begin, int end, bool movable, QString* output)
   {
+    *output += format(movable, begin, end) + "{\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(movable);
     Q_UNUSED(output);
   }
 
   static void handle_end_segment(const DummyMeshComponent* components, int begin, int end, bool movable, QString* output)
   {
+    *output += "} // "+format(movable, begin, end) + "\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(movable);
     Q_UNUSED(output);
   }
 
@@ -346,31 +387,31 @@ void test_FragmentedArray_Segment_Generic_recursive()
   meshComponents.iterate(&output);
   EXPECT_EQ(output,
             "\n"
-            "Not Movable(0, 1){\n"
+            "Static(0, 1){\n"
             "  Material A(0, 1){\n"
             "    Mesh a(0, 1){\n"
             "      2\n"
             "    } // Mesh a(0, 1)\n"
             "  } // Material A(0, 1)\n"
-            "} // Not Movable(0, 4)\n"
+            "} // Static(0, 1)\n"
             "Movable(1, 5){\n"
             "  Material A(1, 3){\n"
             "    Mesh a(1, 3){\n"
             "      1\n"
             "      3\n"
-            "    } // Mesh a(0, 1)\n"
+            "    } // Mesh a(1, 3)\n"
             "  } // Material A(1, 3)\n"
             "  Material B(3, 4){\n"
             "    Mesh c(3, 4){\n"
             "      5\n"
-            "    } // Mesh a(0, 1)\n"
+            "    } // Mesh c(3, 4)\n"
             "  } // Material B(3, 4)\n"
-            "  Material C(4, 5){\n"
-            "    Mesh a(3, 4){\n"
+            "  Material D(4, 5){\n"
+            "    Mesh a(4, 5){\n"
             "      4\n"
-            "    } // Mesh a(0, 1)\n"
-            "  } // Material C(4, 5)\n"
-            "} // Movable(4, 5)\n");
+            "    } // Mesh a(4, 5)\n"
+            "  } // Material D(4, 5)\n"
+            "} // Movable(1, 5)\n");
 }
 
 void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet()
