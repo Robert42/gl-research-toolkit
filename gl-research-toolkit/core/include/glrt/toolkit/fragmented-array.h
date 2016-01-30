@@ -242,7 +242,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
     ranges->segment_value.append(prevSegment);
     int subSegmentStart = begin;
 
-    // #ISSUE-61 OMP  ??? calling T_inner_sections_trait::classify() might also useopen mp. measure whether it improves or damages performance
+    // #ISSUE-61 OMP  ??? calling T_inner_sections_trait::classify() might also useopen mp. measure whether it improves or damages performance. Maybe two functions classify and classify_parallel, the topmost trait gets called with _parallel it calls the inner traits without parallel (except FragmentedArray_Segment_SplitInTwo, this one calls both subtraits with _parallel)
     for(int i=begin+1; i<=end; ++i)
     {
       if(i!=end)

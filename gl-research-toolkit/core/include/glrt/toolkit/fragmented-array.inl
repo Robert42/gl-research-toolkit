@@ -92,6 +92,8 @@ int FragmentedArray<d, s, t>::updateSegments(extra_data_type extra_data)
 
   const int length = dataArray.length();
   d* data = dataArray.data();
+
+  // ISSUE-61 STL
   std::stable_sort(data+this->beginRegionToUpdate, data+length, s::segmentLessThan);
 
   Q_ASSERT(std::is_sorted(data, data+length, s::segmentLessThan));
