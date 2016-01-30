@@ -65,6 +65,16 @@ struct FragmentedArray_Segment_Values
   {
     return T_handler::valueLessThan(a, b);
   }
+
+  static int update_region_to_update(int beginRegionToUpdate, int begin, int end, const T_value& value, const SegmentRanges& ranges)
+  {
+    Q_UNUSED(beginRegionToUpdate);
+    Q_UNUSED(end);
+    Q_UNUSED(value);
+    Q_UNUSED(ranges);
+
+    return begin;
+  }
 };
 
 
@@ -143,7 +153,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
       Q_ASSERT(segment_index < number_segments());
       Q_UNUSED(end);
 
-      return segment_index==0 ?  + begin : segmentEnd[segment_index-1];
+      return segment_index==0 ?  begin : segmentEnd[segment_index-1];
     }
 
     int segment_end(int segment_index, int begin, int end) const
@@ -252,6 +262,28 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
       subSegmentStart = subSegmentEnd;
     }
   }
+
+  static int update_region_to_update(int beginRegionToUpdate, int begin, int end, const T_value& value, const SegmentRanges& ranges)
+  {
+    T_segment_type prevSegment = handler_type::classify(value);
+
+    const int num_segments = ranges.number_segments();
+    for(int i=0; i<num_segments; ++i)
+    {
+      int segment_begin = ranges.segment_start(i, begin, end);
+
+      if(segment_begin > beginRegionToUpdate)
+        return beginRegionToUpdate;
+
+      if(ranges.segment_value[i] == prevSegment)
+      {
+        int segment_end = ranges.segment_end(i, begin, end);
+        return T_inner_sections_trait::update_region_to_update(beginRegionToUpdate, segment_begin, segment_end, value, ranges.innerSegmentRanges[i]);
+      }
+    }
+
+    return beginRegionToUpdate;
+  }
 };
 
 // #TODO::::::::::::::::::::::::::: test FragmentedArray_Segment_Generic first, after success, also implement the two classes below
@@ -290,13 +322,13 @@ public:
   void append_move(T_data&& data);
   void remove(const T_data& data);
 
-  void updateSegments(extra_data_type extra_data);
+  int updateSegments(extra_data_type extra_data);
   void iterate(extra_data_type extra_data);
 
 private:
-#ifdef QT_DEBUG
-  bool _updated = true;
-#endif
+  int beginRegionToUpdate = 0;
+
+  void recalcRegionToUpdateAfterChanging(const T_data& data);
 };
 
 

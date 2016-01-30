@@ -41,18 +41,15 @@ FragmentedArray<d, s, t>& FragmentedArray<d, s, t>::operator=(FragmentedArray&& 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::append_copy(const d& data)
 {
-#ifdef QT_DEBUG
-  _updated = false;
-#endif
+  recalcRegionToUpdateAfterChanging(data);
+
   dataArray.append_copy(data);
 }
 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::append_move(d&& data)
 {
-#ifdef QT_DEBUG
-  _updated = false;
-#endif
+  recalcRegionToUpdateAfterChanging(data);
 
   dataArray.append_move(std::move(data));
 }
@@ -60,36 +57,34 @@ void FragmentedArray<d, s, t>::append_move(d&& data)
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::remove(const d& data)
 {
-#ifdef QT_DEBUG
-  _updated = false;
-#endif
+  recalcRegionToUpdateAfterChanging(data);
 
   dataArray.removeAt(dataArray.indexOf(data));
 }
 
 template<typename d, typename s, typename t>
-void FragmentedArray<d, s, t>::updateSegments(extra_data_type extra_data)
+int FragmentedArray<d, s, t>::updateSegments(extra_data_type extra_data)
 {
-  // #TODO::::::::::::::::::::::::::: Keep track of which sections need to be updated, to recognize, when not-movable buffers have to be updated
-
-  dataArray.stable_sort(s::segmentLessThan);
+  int beginRegionToUpdate = this->beginRegionToUpdate;
 
   const int length = dataArray.length();
+  d* data = dataArray.data();
+  std::stable_sort(data+this->beginRegionToUpdate, data+length, s::segmentLessThan);
+
+  Q_ASSERT(std::is_sorted(data, data+length, s::segmentLessThan));
+
   s::classify(dataArray.data(), 0, length, &segmentRanges, extra_data);
 
-#ifdef QT_DEBUG
-  _updated = true;
-#endif
+  this->beginRegionToUpdate = length;
+  return beginRegionToUpdate;
 }
 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::iterate(extra_data_type extra_data)
 {
-#ifdef QT_DEBUG
-  Q_ASSERT_X(_updated, "FragmentedArray<>::iterate", "bug detected: trying to iterate over a not updated FragmetnedArray");
-#endif
-
   const int length = dataArray.length();
+  Q_ASSERT_X(beginRegionToUpdate>=length, "FragmentedArray<>::iterate", "bug detected: trying to iterate over a not updated FragmetnedArray");
+
   typename s::segment_index index;
 
   s::start_iterate(dataArray.data(), 0, length, segmentRanges, extra_data, &index);
@@ -100,6 +95,13 @@ void FragmentedArray<d, s, t>::iterate(extra_data_type extra_data)
   }
 
   s::end_iterate(dataArray.data(), 0, length, segmentRanges, extra_data, &index);
+}
+
+template<typename d, typename s, typename t>
+void FragmentedArray<d, s, t>::recalcRegionToUpdateAfterChanging(const d& data)
+{
+  const int length = dataArray.length();
+  beginRegionToUpdate = glm::min<int>(beginRegionToUpdate, s::update_region_to_update(beginRegionToUpdate, 0, length, data, this->segmentRanges));
 }
 
 
