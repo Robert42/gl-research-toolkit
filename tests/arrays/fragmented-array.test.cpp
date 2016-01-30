@@ -72,29 +72,32 @@ struct DefaultTraits<Interactivity>
 
 } // namespace glrt
 
+struct BaseHandler
+{
+  typedef QString* extra_data_type;
+};
 
-
-struct DummyMeshCompnentHandler
+struct DummyMeshCompnentHandler : public BaseHandler
 {
 };
 
-struct DummyLightComponentHandler
+struct DummyLightComponentHandler : public BaseHandler
 {
 };
 
-struct InteractivitySectionHandler
+struct InteractivitySectionHandler : public BaseHandler
 {
 };
 
-struct MeshSectionHandler
+struct MeshSectionHandler : public BaseHandler
 {
 };
 
-struct MaterialSectionHandler
+struct MaterialSectionHandler : public BaseHandler
 {
 };
 
-struct MovableSectionHandler
+struct MovableSectionHandler : public BaseHandler
 {
 };
 
@@ -119,13 +122,57 @@ typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteract
 
 void test_FragmentedArray_Segment_Generic()
 {
-
+  // #TODO::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
 }
 
 
 void test_FragmentedArray_Segment_Generic_recursive()
 {
-  // #TODO::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
+  DummyMeshComponent meshComponent1 = {true, // movable
+                                       Material::A,
+                                       Mesh::a,
+                                       1};
+  DummyMeshComponent meshComponent2 = {false, // static
+                                       Material::A,
+                                       Mesh::a,
+                                       2};
+  DummyMeshComponent meshComponent3 = {true, // movable
+                                       Material::A,
+                                       Mesh::a,
+                                       3};
+  DummyMeshComponent meshComponent4 = {true, // movable
+                                       Material::D,
+                                       Mesh::a,
+                                       4};
+  DummyMeshComponent meshComponent5 = {true, // movable
+                                       Material::B,
+                                       Mesh::c,
+                                       5};
+
+  DummyLightComponent lightComponent1 = {Interactivity::DYNAMIC,
+                                         1};
+  DummyLightComponent lightComponent2 = {Interactivity::STATIC,
+                                         2};
+  DummyLightComponent lightComponent3 = {Interactivity::NO_MOVABLE_DYNAMIC,
+                                         3};
+  DummyLightComponent lightComponent4 = {Interactivity::STATIC,
+                                         4};
+  DummyLightComponent lightComponent5 = {Interactivity::NO_MOVABLE_DYNAMIC,
+                                         5};
+
+  FragmentedArray_MeshComponents_GenericOnly meshComponents;
+  meshComponents.append_copy(meshComponent1);
+  meshComponents.append_copy(meshComponent2);
+  meshComponents.append_copy(meshComponent3);
+  meshComponents.append_copy(meshComponent4);
+  meshComponents.append_copy(meshComponent5);
+
+  FragmentedArray_LightComponents_GenericOnly lightComponents;
+  lightComponents.append_copy(lightComponent1);
+  lightComponents.append_copy(lightComponent2);
+  lightComponents.append_copy(lightComponent3);
+  lightComponents.append_copy(lightComponent4);
+  lightComponents.append_copy(lightComponent5);
 }
 
 void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet()

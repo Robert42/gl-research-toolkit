@@ -1,3 +1,6 @@
+#ifndef GLRT_FRAGMENTEDARRAY_INL
+#define GLRT_FRAGMENTEDARRAY_INL
+
 #include <glrt/toolkit/fragmented-array.h>
 
 namespace glrt {
@@ -54,3 +57,5 @@ void FragmentedArray<d, s, t>::iterate(extra_data_type extra_data)
 
 
 } // namespace glrt
+
+#endif // GLRT_FRAGMENTEDARRAY_INL

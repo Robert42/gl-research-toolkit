@@ -64,6 +64,31 @@ struct FragmentedArray_Segment_Generic
     Array<int> segmentEnd;
     Array<typename T_inner_sections_trait::SegmentRanges, typename T_inner_sections_trait::SegmentRanges_ArrayTraits> innerSegmentRanges;
 
+    SegmentRanges(const SegmentRanges& other) = delete;
+    SegmentRanges&operator=(const SegmentRanges& other) = delete;
+
+    SegmentRanges()
+    {
+    };
+
+    SegmentRanges(SegmentRanges&& other)
+      : segment_value(std::move(other.segment_value)),
+        segmentEnd(std::move(other.segmentEnd)),
+        innerSegmentRanges(std::move(other.innerSegmentRanges))
+    {
+    }
+
+    SegmentRanges& operator=(SegmentRanges&& other)
+    {
+      segment_value.swap(other.segment_value);
+      segmentEnd.swap(other.segmentEnd);
+      innerSegmentRanges.swap(other.innerSegmentRanges);
+    }
+
+    ~SegmentRanges()
+    {
+    }
+
     int number_segments() const
     {
       int nSegments = segment_value.length();
@@ -93,6 +118,8 @@ struct FragmentedArray_Segment_Generic
       return segmentEnd[segment_index-1];
     }
   };
+
+  typedef ArrayTraits_Unordered_mCmOD<SegmentRanges> SegmentRanges_ArrayTraits;
 
   static void init(SegmentRanges*)
   {
@@ -171,6 +198,7 @@ public:
   Array<T_data, T_data_array_traits> dataArray;
 
   FragmentedArray();
+  // #TODO:::::::::::: move operator, move constructor
 
   void append_copy(const T_data& data);
   void append_move(T_data&& data);
@@ -182,5 +210,7 @@ public:
 
 
 } // namespace glrt
+
+#include "fragmented-array.inl"
 
 #endif // GLRT_FRAGMENTEDARRAY_H
