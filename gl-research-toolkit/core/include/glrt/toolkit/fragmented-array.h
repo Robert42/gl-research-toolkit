@@ -203,11 +203,12 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
       T_inner_sections_trait::end_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
       handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
 
-      while(index->index<num_segments && (segment_end = ranges.segment_end(index->index, begin, end)) < data_index)
+      while((segment_end = ranges.segment_end(index->index, begin, end)) <= data_index)
+      {
         index->index++;
-
-      if(index->index >= num_segments)
-        return;
+        if(index->index >= num_segments)
+          return;
+      }
 
       segment_start = ranges.segment_start(index->index, begin, end);
 
