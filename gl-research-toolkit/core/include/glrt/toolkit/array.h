@@ -322,6 +322,9 @@ public:
 
   QVector<T> toQVector() const;
 
+  template<typename T_lessThan>
+  void stable_sort(T_lessThan lessThan);
+
 private:
   T* _data;
   int _capacity;
