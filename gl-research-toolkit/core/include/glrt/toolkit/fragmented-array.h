@@ -283,7 +283,8 @@ public:
   Array<T_data, T_data_array_traits> dataArray;
 
   FragmentedArray();
-  // #TODO:::::::::::: move operator, move constructor
+  FragmentedArray(FragmentedArray&& other);
+  FragmentedArray& operator=(FragmentedArray&& other);
 
   void append_copy(const T_data& data);
   void append_move(T_data&& data);

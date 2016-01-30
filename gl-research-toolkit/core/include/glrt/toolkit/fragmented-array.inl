@@ -12,6 +12,32 @@ FragmentedArray<d, s, t>::FragmentedArray()
   s::init(&segmentRanges);
 }
 
+
+template<typename d, typename s, typename t>
+FragmentedArray<d, s, t>::FragmentedArray(FragmentedArray&& other)
+  : segmentRanges(std::move(other.segmentRanges)),
+    dataArray(std::move(other.dataArray))
+{
+#ifdef QT_DEBUG
+  this->_updated = other._updated;
+  other._updated = true;
+#endif
+}
+
+
+template<typename d, typename s, typename t>
+FragmentedArray<d, s, t>& FragmentedArray<d, s, t>::operator=(FragmentedArray&& other)
+{
+  this->segmentRanges.swap(other.segmentRanges);
+  this->dataArray.swap(other.dataArray);
+#ifdef QT_DEBUG
+  std::swap(this->_updated, other._updated);
+#endif
+
+  return *this;
+}
+
+
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::append_copy(const d& data)
 {
