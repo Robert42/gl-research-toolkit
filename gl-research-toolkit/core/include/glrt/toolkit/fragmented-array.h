@@ -180,11 +180,14 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
     if(ranges.segmentEnd.isEmpty())
       return;
 
-    const int segment_start = ranges.segment_start(0, begin, end);
-    const int segment_end = ranges.segment_end(0, begin, end);
+    const int num_segments = ranges.number_segments();
+    Q_ASSERT(index->index < num_segments);
 
-    T_inner_sections_trait::end_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[0], extra_data, &index->inner_index);
-    handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value[0], extra_data);
+    const int segment_start = ranges.segment_start(index->index, begin, end);
+    const int segment_end = ranges.segment_end(index->index, begin, end);
+
+    T_inner_sections_trait::end_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
+    handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
   }
 
   static void iterate(const T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
@@ -192,11 +195,14 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
     const int num_segments = ranges.number_segments();
     Q_ASSERT(index->index < num_segments);
 
-    int segment_start;
+    int segment_start = ranges.segment_start(index->index, begin, end);
     int segment_end = ranges.segment_end(index->index, begin, end);
 
     if(segment_end <= data_index)
     {
+      T_inner_sections_trait::end_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
+      handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
+
       while(index->index<num_segments && (segment_end = ranges.segment_end(index->index, begin, end)) < data_index)
         index->index++;
 
@@ -205,15 +211,10 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
 
       segment_start = ranges.segment_start(index->index, begin, end);
 
-      T_inner_sections_trait::end_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
-      handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
       handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
       T_inner_sections_trait::start_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
     }else
     {
-      Q_ASSERT(index->index < num_segments);
-      segment_start = ranges.segment_start(index->index, begin, end);
-
       T_inner_sections_trait::iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
     }
   }
