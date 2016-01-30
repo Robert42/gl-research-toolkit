@@ -718,7 +718,5 @@ int main(int argc, char** argv)
   test_remove();
   test_ensureCapacity();
 
-  // #TODO: Test all trait functions in action. Goal: each code line in the functions should be executed at least once.
-
   return testing_application.result();
 }
