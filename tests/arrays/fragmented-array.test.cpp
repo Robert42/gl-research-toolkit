@@ -311,6 +311,23 @@ void test_FragmentedArray_Segment_Generic_recursive()
   lightComponents.append_copy(lightComponent2);
 
   output = "\n";
+  lightComponents.updateSegments(&output);
+
+  output = "\n";
+  lightComponents.iterate(&output);
+  EXPECT_EQ(output,
+            "\n"
+            "Static(0, 3){\n"
+            "  2\n"
+            "  3\n"
+            "  4\n"
+            "} // Static(0, 3)\n"
+            "Dynamic(3, 5){\n"
+            "  1\n"
+            "  4\n"
+            "} // Dynamic(3, 5)\n");
+
+  output = "\n";
   meshComponents.updateSegments(&output);
 
   output = "\n";
@@ -342,23 +359,6 @@ void test_FragmentedArray_Segment_Generic_recursive()
             "    } // Mesh a(0, 1)\n"
             "  } // Material C(4, 5)\n"
             "} // Movable(4, 5)\n");
-
-  output = "\n";
-  lightComponents.updateSegments(&output);
-
-  output = "\n";
-  lightComponents.iterate(&output);
-  EXPECT_EQ(output,
-            "\n"
-            "Static(0, 3){\n"
-            "  2\n"
-            "  3\n"
-            "  4\n"
-            "} // Static(0, 3)\n"
-            "Dynamic(3, 5){\n"
-            "  1\n"
-            "  4\n"
-            "} // Dynamic(3, 5)\n");
 }
 
 void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet()
