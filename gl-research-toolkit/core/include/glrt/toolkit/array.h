@@ -129,9 +129,6 @@ struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_cap
 {
   typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
 
-  typedef typename parent_type::cache_type cache_type;
-  typedef typename parent_type::hint_type hint_type;
-
   static void move_construct(T* dest, T* src, int count)
   {
     parent_type::copy_construct_POD(dest, src, count);
