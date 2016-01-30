@@ -30,6 +30,8 @@ void FragmentedArray<d, s, t>::remove(const d& data)
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::updateSegments(extra_data_type extra_data)
 {
+  // #TODO::::::::::::::::::::::::::: Keep track of which sections need to be updated, to recognize, when not-movable buffers have to be updated
+
   dataArray.sort(handler_type::segmentLessThan);
 
   const int length = dataArray.length();
