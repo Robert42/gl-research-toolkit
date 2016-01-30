@@ -81,7 +81,7 @@ struct DummyMeshCompnentHandler : public BaseHandler
 {
   static void handle_value(const DummyMeshComponent* components, int index, QString* output)
   {
-    *output = QString("      %0").arg(components[index].instanceId);
+    *output += QString("      %0\n").arg(components[index].instanceId);
   }
 
   static bool valueLessThan(const DummyMeshComponent& a, const DummyMeshComponent& b)
@@ -94,7 +94,7 @@ struct DummyLightComponentHandler : public BaseHandler
 {
   static void handle_value(const DummyLightComponent* components, int index, QString* output)
   {
-    *output = QString("  %0").arg(components[index].instanceId);
+    *output += QString("  %0\n").arg(components[index].instanceId);
   }
 
   static bool valueLessThan(const DummyLightComponent& a, const DummyLightComponent& b)
@@ -285,7 +285,7 @@ void test_FragmentedArray_Segment_Generic()
             "Static(0, 3){\n"
             "  2\n"
             "  3\n"
-            "  4\n"
+            "  5\n"
             "} // Static(0, 3)\n"
             "Dynamic(3, 5){\n"
             "  1\n"
