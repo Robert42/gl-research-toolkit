@@ -195,11 +195,9 @@ struct InteractivitySegmentHandler : public BaseHandler
     return a.interactivity < b.interactivity;
   }
 
-  static Interactivity classify(const DummyLightComponent* data, int index, QString* output)
+  static Interactivity classify(const DummyLightComponent& data)
   {
-    Q_UNUSED(output);
-
-    return data[index].interactivity;
+    return data.interactivity;
   }
 };
 
@@ -223,11 +221,9 @@ struct MeshSegmentHandler : public BaseHandler
     return a.mesh < b.mesh;
   }
 
-  static Mesh classify(const DummyMeshComponent* data, int index, QString* output)
+  static Mesh classify(const DummyMeshComponent& data)
   {
-    Q_UNUSED(output);
-
-    return data[index].mesh;
+    return data.mesh;
   }
 };
 
@@ -252,11 +248,9 @@ struct MaterialSegmentHandler : public BaseHandler
     return a.material < b.material;
   }
 
-  static Material classify(const DummyMeshComponent* data, int index, QString* output)
+  static Material classify(const DummyMeshComponent& data)
   {
-    Q_UNUSED(output);
-
-    return data[index].material;
+    return data.material;
   }
 };
 
@@ -281,11 +275,9 @@ struct MovableSegmentHandler : public BaseHandler
     return int(a.movable) < int(b.movable);
   }
 
-  static bool classify(const DummyMeshComponent* data, int index, QString* output)
+  static bool classify(const DummyMeshComponent& data)
   {
-    Q_UNUSED(output);
-
-    return data[index].movable;
+    return data.movable;
   }
 };
 

@@ -228,7 +228,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
     if(begin == end)
       return;
 
-    T_segment_type prevSegment = handler_type::classify(data, begin, extra_data);
+    T_segment_type prevSegment = handler_type::classify(data[begin]);
     ranges->segment_value.append(prevSegment);
     int subSegmentStart = begin;
 
@@ -237,7 +237,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
     {
       if(i!=end)
       {
-        T_segment_type currentSegment = handler_type::classify(data, i, extra_data);
+        T_segment_type currentSegment = handler_type::classify(data[i]);
         if(currentSegment==prevSegment)
           continue;
         ranges->segment_value.append(currentSegment);
