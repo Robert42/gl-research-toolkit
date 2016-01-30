@@ -311,12 +311,14 @@ public:
   typedef typename T_sections_trait::handler_type handler_type;
   typedef typename handler_type::extra_data_type extra_data_type;
 
-  SegmentRanges segmentRanges;
-  Array<T_data, T_data_array_traits> dataArray;
-
   FragmentedArray();
   FragmentedArray(FragmentedArray&& other);
   FragmentedArray& operator=(FragmentedArray&& other);
+
+  bool needsUpdate() const;
+  T_data* data();
+  const T_data* data() const;
+  int length() const;
 
   void append_copy(const T_data& data);
   void append_move(T_data&& data);
@@ -326,6 +328,9 @@ public:
   void iterate(extra_data_type extra_data);
 
 private:
+  SegmentRanges segmentRanges;
+  Array<T_data, T_data_array_traits> dataArray;
+
   int beginRegionToUpdate = 0;
 
   void recalcRegionToUpdateAfterChanging(const T_data& data);

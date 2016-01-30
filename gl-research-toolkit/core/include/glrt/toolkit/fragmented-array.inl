@@ -37,6 +37,29 @@ FragmentedArray<d, s, t>& FragmentedArray<d, s, t>::operator=(FragmentedArray&& 
   return *this;
 }
 
+template<typename d, typename s, typename t>
+bool FragmentedArray<d, s, t>::needsUpdate() const
+{
+  return beginRegionToUpdate < this->length();
+}
+
+template<typename d, typename s, typename t>
+d* FragmentedArray<d, s, t>::data()
+{
+  return dataArray.data();
+}
+
+template<typename d, typename s, typename t>
+const d* FragmentedArray<d, s, t>::data() const
+{
+  return dataArray.data();
+}
+
+template<typename d, typename s, typename t>
+int FragmentedArray<d, s, t>::length() const
+{
+  return dataArray.length();
+}
 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::append_copy(const d& data)
@@ -83,7 +106,7 @@ template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::iterate(extra_data_type extra_data)
 {
   const int length = dataArray.length();
-  Q_ASSERT_X(beginRegionToUpdate>=length, "FragmentedArray<>::iterate", "bug detected: trying to iterate over a not updated FragmetnedArray");
+  Q_ASSERT_X(!needsUpdate(), "FragmentedArray<>::iterate", "bug detected: trying to iterate over a not updated FragmetnedArray");
 
   typename s::segment_index index;
 
