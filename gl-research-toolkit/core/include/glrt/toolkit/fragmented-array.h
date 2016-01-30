@@ -75,6 +75,12 @@ struct FragmentedArray_Segment_Values
 
     return begin;
   }
+
+  static glm::ivec2 section_boundaries(int begin, int end, const SegmentRanges& ranges)
+  {
+    Q_UNUSED(ranges);
+    return glm::ivec2(begin,end);
+  }
 };
 
 
@@ -285,6 +291,23 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
 
     return beginRegionToUpdate;
   }
+
+  template<typename... T_sub_segment_types>
+  static glm::ivec2 section_boundaries(int begin, int end, const SegmentRanges& ranges, T_segment_type segment, T_sub_segment_types... sub_segments)
+  {
+    const int num_segments = ranges.number_segments();
+    for(int i=0; i<num_segments; ++i)
+      if(ranges.segment_value[i] == segment)
+        T_inner_sections_trait::section_boundaries(ranges.segment_start(i, begin, end), ranges.segment_end(i, begin, end), ranges.innerSegmentRanges[i], sub_segments...);
+
+    return glm::ivec2(end,end);
+  }
+
+  static glm::ivec2 section_boundaries(int begin, int end, const SegmentRanges& ranges)
+  {
+    Q_UNUSED(ranges);
+    return glm::ivec2(begin,end);
+  }
 };
 
 // #TODO::::::::::::::::::::::::::: test FragmentedArray_Segment_Generic first, after success, also implement the two classes below
@@ -363,6 +386,9 @@ public:
 
   int updateSegments(extra_data_type extra_data);
   void iterate(extra_data_type extra_data);
+
+  template<typename... T_segment_types>
+  glm::ivec2 section_boundaries(T_segment_types... segments) const;
 
 private:
   SegmentRanges segmentRanges;

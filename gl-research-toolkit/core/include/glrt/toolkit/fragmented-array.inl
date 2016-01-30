@@ -123,6 +123,14 @@ void FragmentedArray<d, s, t>::iterate(extra_data_type extra_data)
 }
 
 template<typename d, typename s, typename t>
+template<typename... T_segment_types>
+glm::ivec2 FragmentedArray<d, s, t>::section_boundaries(T_segment_types... segments) const
+{
+  const int length = this->length();
+  return s::section_boundaries(0, length, segmentRanges, segments...);
+}
+
+template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::recalcRegionToUpdateAfterChanging(const d& data)
 {
   const int length = dataArray.length();
