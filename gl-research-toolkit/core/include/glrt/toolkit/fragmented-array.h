@@ -195,7 +195,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
     int segment_start;
     int segment_end = ranges.segment_end(index->index, begin, end);
 
-    if(segment_end < data_index)
+    if(segment_end <= data_index)
     {
       while(index->index<num_segments && (segment_end = ranges.segment_end(index->index, begin, end)) < data_index)
         index->index++;
