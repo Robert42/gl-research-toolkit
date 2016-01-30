@@ -15,18 +15,29 @@ FragmentedArray<d, s, t>::FragmentedArray()
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::append_copy(const d& data)
 {
+#ifdef QT_DEBUG
+  _updated = false;
+#endif
   dataArray.append_copy(data);
 }
 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::append_move(d&& data)
 {
+#ifdef QT_DEBUG
+  _updated = false;
+#endif
+
   dataArray.append_move(std::move(data));
 }
 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::remove(const d& data)
 {
+#ifdef QT_DEBUG
+  _updated = false;
+#endif
+
   dataArray.removeAt(dataArray.indexOf(data));
 }
 
@@ -39,11 +50,19 @@ void FragmentedArray<d, s, t>::updateSegments(extra_data_type extra_data)
 
   const int length = dataArray.length();
   s::classify(0, length, &segmentRanges, extra_data);
+
+#ifdef QT_DEBUG
+  _updated = true;
+#endif
 }
 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::iterate(extra_data_type extra_data)
 {
+#ifdef QT_DEBUG
+  Q_ASSERT_X(_updated, "FragmentedArray<>::iterate", "bug detected: trying to iterate over a not updated FragmetnedArray");
+#endif
+
   const int length = dataArray.length();
   typename s::segment_index index;
 

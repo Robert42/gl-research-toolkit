@@ -40,7 +40,7 @@ struct FragmentedArray_Segment_Values
     Q_UNUSED(begin);
     Q_UNUSED(end);
 
-    T_handler::handle_value(data[data_index]);
+    T_handler::handle_value(data, data_index);
   }
 };
 
@@ -69,7 +69,7 @@ struct FragmentedArray_Segment_Generic
 
     SegmentRanges()
     {
-    };
+    }
 
     SegmentRanges(SegmentRanges&& other)
       : segment_value(std::move(other.segment_value)),
@@ -133,7 +133,7 @@ struct FragmentedArray_Segment_Generic
     const int segment_start = ranges.segment_start(0, begin, end);
     const int segment_end = ranges.segment_end(0, begin, end);
 
-    handler_type::handle_new_segment(data+segment_start, segment_end-segment_start, ranges.segment_value[0]);
+    handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value[0], extra_data);
 
     index->index = 0;
     T_inner_sections_trait::start_iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[0], extra_data, &index->inner_index);
@@ -157,14 +157,14 @@ struct FragmentedArray_Segment_Generic
 
       segment_start = ranges.segment_start(index->index, begin, end);
 
-      handler_type::handle_new_segment(data+segment_start, segment_end-segment_start, ranges.segment_value[index->index]);
+      handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
       T_inner_sections_trait::start_iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
     }else
     {
       Q_ASSERT(index->index < num_segments);
       segment_start = ranges.segment_start(index->index, begin, end);
 
-      T_inner_sections_trait::iterate(data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
+      T_inner_sections_trait::iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
     }
   }
 };
@@ -206,6 +206,11 @@ public:
 
   void updateSegments(extra_data_type extra_data);
   void iterate(extra_data_type extra_data);
+
+private:
+#ifdef QT_DEBUG
+  bool _updated = true;
+#endif
 };
 
 

@@ -79,26 +79,44 @@ struct BaseHandler
 
 struct DummyMeshCompnentHandler : public BaseHandler
 {
+  static void handle_value(DummyMeshComponent* components, int index)
+  {
+  }
 };
 
 struct DummyLightComponentHandler : public BaseHandler
 {
+  static void handle_value(DummyLightComponent* components, int index)
+  {
+  }
 };
 
 struct InteractivitySectionHandler : public BaseHandler
 {
+  static void handle_new_segment(DummyLightComponent* components, int begin, int end, Interactivity interactivity, QString* output)
+  {
+  }
 };
 
 struct MeshSectionHandler : public BaseHandler
 {
+  static void handle_new_segment(DummyMeshComponent* components, int begin, int end, Mesh mesh, QString* output)
+  {
+  }
 };
 
 struct MaterialSectionHandler : public BaseHandler
 {
+  static void handle_new_segment(DummyMeshComponent* components, int begin, int end, Material material, QString* output)
+  {
+  }
 };
 
 struct MovableSectionHandler : public BaseHandler
 {
+  static void handle_new_segment(DummyMeshComponent* components, int begin, int end, bool movable, QString* output)
+  {
+  }
 };
 
 
