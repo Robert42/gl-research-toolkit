@@ -26,12 +26,22 @@ struct DummyMeshComponent
   Material material;
   Mesh mesh;
   int instanceId;
+
+  bool operator==(const DummyMeshComponent& other) const
+  {
+    return this->instanceId == other.instanceId;
+  }
 };
 
 struct DummyLightComponent
 {
   Interactivity interactivity;
   int instanceId;
+
+  bool operator==(const DummyLightComponent& other) const
+  {
+    return this->instanceId == other.instanceId;
+  }
 };
 
 
@@ -461,6 +471,115 @@ void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segme
 
   output = "\n";
   region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+
+  DummyMeshComponent meshComponent1 = {true, // movable
+                                       Material::A,
+                                       Mesh::a,
+                                       1};
+  DummyMeshComponent meshComponent2 = {false, // static
+                                       Material::A,
+                                       Mesh::a,
+                                       2};
+  DummyMeshComponent meshComponent3 = {true, // movable
+                                       Material::A,
+                                       Mesh::a,
+                                       3};
+  DummyMeshComponent meshComponent4 = {true, // movable
+                                       Material::D,
+                                       Mesh::a,
+                                       4};
+  DummyMeshComponent meshComponent5 = {true, // movable
+                                       Material::B,
+                                       Mesh::c,
+                                       5};
+
+  FragmentedArray_MeshComponents_GenericOnly meshComponents;
+  meshComponents.append_copy(meshComponent5);
+  meshComponents.append_copy(meshComponent3);
+  meshComponents.append_copy(meshComponent1);
+  meshComponents.append_copy(meshComponent4);
+  meshComponents.append_copy(meshComponent2);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  meshComponents.append_copy(meshComponent4);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 4);
+
+  meshComponents.append_copy(meshComponent4);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 4);
+
+  meshComponents.append_copy(meshComponent4);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 4);
+
+  meshComponents.append_copy(meshComponent5);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  meshComponents.append_copy(meshComponent5);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  meshComponents.remove(meshComponent5);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  meshComponents.append_copy(meshComponent3);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 1);
+
+  meshComponents.append_copy(meshComponent3);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 1);
+
+  meshComponents.remove(meshComponent3);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 1);
+
+  meshComponents.remove(meshComponent3);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 1);
+
+  meshComponents.remove(meshComponent3);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 1);
+
+  meshComponents.append_copy(meshComponent2);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 0);
 }
 

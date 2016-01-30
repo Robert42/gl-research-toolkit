@@ -82,7 +82,7 @@ void FragmentedArray<d, s, t>::remove(const d& data)
 {
   recalcRegionToUpdateAfterChanging(data);
 
-  dataArray.removeAt(dataArray.indexOf(data));
+  dataArray.removeAt(dataArray.indexOfFirst(data));
 }
 
 template<typename d, typename s, typename t>

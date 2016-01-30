@@ -317,6 +317,8 @@ public:
   void removeFirst(){removeAt(0);}
   void removeLast(){removeAt(length()-1);}
 
+  int indexOfFirst(const T& value, int fallback=-1) const;
+
   bool operator==(const Array& other) const;
   bool operator!=(const Array& other) const;
 

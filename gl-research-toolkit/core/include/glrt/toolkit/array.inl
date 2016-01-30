@@ -656,6 +656,9 @@ int Array<T, T_traits>::append(T&& value)
 template<typename T, class T_traits>
 void Array<T, T_traits>::removeAt(int index)
 {
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index<this->length());
+
   traits::remove_single(this->data(), this->length(), index);
 
   _length -= 1;
@@ -668,6 +671,9 @@ void Array<T, T_traits>::removeAt(int index)
 template<typename T, class T_traits>
 void Array<T, T_traits>::removeAt(int index, int num_to_remove)
 {
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index+num_to_remove<=this->length());
+
   traits::remove(this->data(), this->length(), index, num_to_remove);
 
   _length -= num_to_remove;
@@ -675,6 +681,17 @@ void Array<T, T_traits>::removeAt(int index, int num_to_remove)
 
   int new_capacity = traits::adapt_capacity_after_removing_elements(this->capacity(), this->length(), num_to_remove);
   setCapacity(new_capacity);
+}
+
+template<typename T, class T_traits>
+int Array<T, T_traits>::indexOfFirst(const T& value, int fallback) const
+{
+  const T* data = this->data();
+  const int length = this->length();
+  for(int i=0; i<length; ++i)
+    if(data[i] == value)
+      return i;
+  return fallback;
 }
 
 template<typename T, class T_traits>
