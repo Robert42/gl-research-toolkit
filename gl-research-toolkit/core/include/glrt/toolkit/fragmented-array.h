@@ -214,10 +214,9 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
 
       handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
       T_inner_sections_trait::start_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
-    }else
-    {
-      T_inner_sections_trait::iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
     }
+
+    T_inner_sections_trait::iterate(data, data_index, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
   }
 
   static void classify(const T_value* data, int begin, int end, SegmentRanges* ranges, extra_data_type extra_data)
