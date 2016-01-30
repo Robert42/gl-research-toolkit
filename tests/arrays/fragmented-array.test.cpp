@@ -79,43 +79,160 @@ struct BaseHandler
 
 struct DummyMeshCompnentHandler : public BaseHandler
 {
-  static void handle_value(DummyMeshComponent* components, int index)
+  static void handle_value(const DummyMeshComponent* components, int index)
   {
+    Q_UNUSED(components);
+    Q_UNUSED(index);
+  }
+
+  static bool valueLessThan(const DummyMeshComponent& a, const DummyMeshComponent& b)
+  {
+    return a.instanceId < b.instanceId;
   }
 };
 
 struct DummyLightComponentHandler : public BaseHandler
 {
-  static void handle_value(DummyLightComponent* components, int index)
+  static void handle_value(const DummyLightComponent* components, int index)
   {
+    Q_UNUSED(components);
+    Q_UNUSED(index);
+  }
+
+  static bool valueLessThan(const DummyLightComponent& a, const DummyLightComponent& b)
+  {
+    return a.instanceId < b.instanceId;
   }
 };
 
-struct InteractivitySectionHandler : public BaseHandler
+struct InteractivitySegmentHandler : public BaseHandler
 {
-  static void handle_new_segment(DummyLightComponent* components, int begin, int end, Interactivity interactivity, QString* output)
+  static void handle_new_segment(const DummyLightComponent* components, int begin, int end, Interactivity interactivity, QString* output)
   {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(interactivity);
+    Q_UNUSED(output);
+  }
+
+  static void handle_end_segment(const DummyLightComponent* components, int begin, int end, Interactivity interactivity, QString* output)
+  {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(interactivity);
+    Q_UNUSED(output);
+  }
+
+  static bool segmentLessThan(const DummyLightComponent& a, const DummyLightComponent& b)
+  {
+    return a.interactivity < b.interactivity;
+  }
+
+  static Interactivity classify(const DummyLightComponent* data, int index, QString* output)
+  {
+    Q_UNUSED(output);
+
+    return data[index].interactivity;
   }
 };
 
-struct MeshSectionHandler : public BaseHandler
+struct MeshSegmentHandler : public BaseHandler
 {
-  static void handle_new_segment(DummyMeshComponent* components, int begin, int end, Mesh mesh, QString* output)
+  static void handle_new_segment(const DummyMeshComponent* components, int begin, int end, Mesh mesh, QString* output)
   {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(mesh);
+    Q_UNUSED(output);
+  }
+  static void handle_end_segment(const DummyMeshComponent* components, int begin, int end, Mesh mesh, QString* output)
+  {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(mesh);
+    Q_UNUSED(output);
+  }
+
+  static bool segmentLessThan(const DummyMeshComponent& a, const DummyMeshComponent& b)
+  {
+    return a.mesh < b.mesh;
+  }
+
+  static Mesh classify(const DummyMeshComponent* data, int index, QString* output)
+  {
+    Q_UNUSED(output);
+
+    return data[index].mesh;
   }
 };
 
-struct MaterialSectionHandler : public BaseHandler
+struct MaterialSegmentHandler : public BaseHandler
 {
-  static void handle_new_segment(DummyMeshComponent* components, int begin, int end, Material material, QString* output)
+  static void handle_new_segment(const DummyMeshComponent* components, int begin, int end, Material material, QString* output)
   {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(material);
+    Q_UNUSED(output);
+  }
+
+  static void handle_end_segment(const DummyMeshComponent* components, int begin, int end, Material material, QString* output)
+  {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(material);
+    Q_UNUSED(output);
+  }
+
+  static bool segmentLessThan(const DummyMeshComponent& a, const DummyMeshComponent& b)
+  {
+    return a.material < b.material;
+  }
+
+  static Material classify(const DummyMeshComponent* data, int index, QString* output)
+  {
+    Q_UNUSED(output);
+
+    return data[index].material;
   }
 };
 
-struct MovableSectionHandler : public BaseHandler
+struct MovableSegmentHandler : public BaseHandler
 {
-  static void handle_new_segment(DummyMeshComponent* components, int begin, int end, bool movable, QString* output)
+  static void handle_new_segment(const DummyMeshComponent* components, int begin, int end, bool movable, QString* output)
   {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(movable);
+    Q_UNUSED(output);
+  }
+
+  static void handle_end_segment(const DummyMeshComponent* components, int begin, int end, bool movable, QString* output)
+  {
+    Q_UNUSED(components);
+    Q_UNUSED(begin);
+    Q_UNUSED(end);
+    Q_UNUSED(movable);
+    Q_UNUSED(output);
+  }
+
+  static bool segmentLessThan(const DummyMeshComponent& a, const DummyMeshComponent& b)
+  {
+    return int(a.movable) < int(b.movable);
+  }
+
+  static bool classify(const DummyMeshComponent* data, int index, QString* output)
+  {
+    Q_UNUSED(output);
+
+    return data[index].movable;
   }
 };
 
@@ -127,11 +244,11 @@ typedef FragmentedArray_Segment_Values<DummyLightComponent, DummyLightComponentH
 namespace GenericSectionTraits {
 
 
-typedef FragmentedArray_Segment_Generic<DummyMeshComponent, Mesh, MeshSectionHandler, DummyMeshComponent_Trait> MeshHandler;
-typedef FragmentedArray_Segment_Generic<DummyMeshComponent, Material, MaterialSectionHandler, MeshHandler> MaterialHandler;
-typedef FragmentedArray_Segment_Generic<DummyMeshComponent, bool, MovableSectionHandler, MaterialHandler> MovableHandler;
+typedef FragmentedArray_Segment_Generic<DummyMeshComponent, Mesh, MeshSegmentHandler, DummyMeshComponent_Trait> MeshHandler;
+typedef FragmentedArray_Segment_Generic<DummyMeshComponent, Material, MaterialSegmentHandler, MeshHandler> MaterialHandler;
+typedef FragmentedArray_Segment_Generic<DummyMeshComponent, bool, MovableSegmentHandler, MaterialHandler> MovableHandler;
 
-typedef FragmentedArray_Segment_Generic<DummyLightComponent, Interactivity, InteractivitySectionHandler, DummyLightComponentHandler_Trait> LightInteractivityHandler;
+typedef FragmentedArray_Segment_Generic<DummyLightComponent, Interactivity, InteractivitySegmentHandler, DummyLightComponentHandler_Trait> LightInteractivityHandler;
 
 } // namespace GenericSectionTraits
 
@@ -146,6 +263,7 @@ void test_FragmentedArray_Segment_Generic()
 
 void test_FragmentedArray_Segment_Generic_recursive()
 {
+  QString output;
   DummyMeshComponent meshComponent1 = {true, // movable
                                        Material::A,
                                        Mesh::a,
@@ -191,6 +309,18 @@ void test_FragmentedArray_Segment_Generic_recursive()
   lightComponents.append_copy(lightComponent3);
   lightComponents.append_copy(lightComponent4);
   lightComponents.append_copy(lightComponent5);
+
+  output.clear();
+  meshComponents.updateSegments(&output);
+
+  output.clear();
+  meshComponents.iterate(&output);
+
+  output.clear();
+  lightComponents.updateSegments(&output);
+
+  output.clear();
+  lightComponents.iterate(&output);
 }
 
 void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet()
