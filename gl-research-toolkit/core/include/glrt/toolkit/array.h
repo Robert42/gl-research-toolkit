@@ -311,11 +311,11 @@ public:
   int append(const T& value);
   int append(T&& value);
 
-  void remove(int index);
-  void remove(int index, int num_to_remove);
+  void removeAt(int index);
+  void removeAt(int index, int num_to_remove);
 
-  void removeFirst(){remove(0);}
-  void removeLast(){remove(length()-1);}
+  void removeFirst(){removeAt(0);}
+  void removeLast(){removeAt(length()-1);}
 
   bool operator==(const Array& other) const;
   bool operator!=(const Array& other) const;

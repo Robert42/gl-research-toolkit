@@ -654,7 +654,7 @@ int Array<T, T_traits>::append(T&& value)
 }
 
 template<typename T, class T_traits>
-void Array<T, T_traits>::remove(int index)
+void Array<T, T_traits>::removeAt(int index)
 {
   traits::remove_single(this->data(), this->length(), index);
 
@@ -666,7 +666,7 @@ void Array<T, T_traits>::remove(int index)
 }
 
 template<typename T, class T_traits>
-void Array<T, T_traits>::remove(int index, int num_to_remove)
+void Array<T, T_traits>::removeAt(int index, int num_to_remove)
 {
   traits::remove(this->data(), this->length(), index, num_to_remove);
 
