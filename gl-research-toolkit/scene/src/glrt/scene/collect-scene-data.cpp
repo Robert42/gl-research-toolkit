@@ -3,6 +3,30 @@
 namespace glrt {
 namespace scene {
 
+Array<Node::TickingObject*> collectAllTickingObjects(Scene* scene)
+{
+  Array<Node::TickingObject*> tickingObjects;
+  int totalNumberTickingObjects = 0;
+  for(const SceneLayer* layer : scene->allLayers())
+    totalNumberTickingObjects += layer->allNodes().length();
+
+  tickingObjects.reserve(totalNumberTickingObjects);
+
+  for(const SceneLayer* layer : scene->allLayers())
+  {
+    for(Node* n : layer->allNodes())
+    {
+      for(Node::Component* component : n->allComponents())
+        if(component->tickTraits() != Node::TickingObject::TickTraits::NoTick)
+          tickingObjects.append(component);
+      for(Node::ModularAttribute* attribute : n->allModularAttributes())
+        if(attribute->tickTraits() != Node::TickingObject::TickTraits::NoTick)
+          tickingObjects.append(attribute);
+    }
+  }
+
+  return std::move(tickingObjects);
+}
 
 QVector<Camera> collectCameras(Scene* scene)
 {

@@ -24,6 +24,25 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile)
 {
+  // No conversion possible if the source file doesn't exist
+  if(!sourceFile.exists())
+  {
+    // If the target file also doesn't exist, print a warning
+    if(!targetFile.exists())
+      qWarning() << "Couldn't locate the asset file " << targetFile.path() << " (and neither the source file "<<sourceFile.path()<<" to automatically convert it)";
+
+    return false;
+  }
+
+#ifdef QT_DEBUG
+  // If the cpp files responsible for converting the source files is newer than the target file, we probably need a reconversion, as the conversion code changed
+  QSet<QString> converterSourceFile = {QString(__FILE__)};
+  for(QFileInfo cppFile : converterSourceFile)
+    if(cppFile.exists() && cppFile.lastModified() > targetFile.lastModified())
+      return true;
+#endif
+
+  // automatically convert, if the target doesn't exist or the source file is newer
   return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
 }
 

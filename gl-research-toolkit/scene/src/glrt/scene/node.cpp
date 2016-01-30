@@ -94,13 +94,92 @@ void Node::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("SceneLayer", "Node@ newNode(Uuid<Node> &in uuid)", AngelScript::asFUNCTION(create_node), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Node", "NodeComponent@ get_rootComponent()", AngelScript::asMETHOD(Node, rootComponent), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
-
   Component::registerAngelScriptAPI();
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-// ======== Node::ModularAttribute ===========================================
+// ======== Node::TickingObject ================================================
+
+Node::TickingObject::TickingObject()
+  : _tickDependencyDepth(0)
+{
+}
+
+void Node::TickingObject::tick(float timeDelta) const
+{
+  Q_UNUSED(timeDelta);
+}
+
+bool Node::TickingObject::tickDependsOn(const Component* other) const
+{
+  TickDependencySet dependencies(this);
+
+  return dependencies.dependsOn(other);
+}
+
+int Node::TickingObject::updateTickDependencyDepth()
+{
+  TickDependencySet dependencies(this);
+
+  int newDepth = dependencies.depth();
+
+  if(_tickDependencyDepth != newDepth)
+    tickDependencyDepthChanged(this);
+
+  return _tickDependencyDepth;
+}
+
+void Node::TickingObject::collectDependencies(TickDependencySet* dependencySet) const
+{
+  collectTickDependencies(dependencySet);
+}
+
+/*!
+Defines, whether this object has an impplementation of the tick function which
+should be used or not.
+
+\warning this function should always return the same value, no matter when called!
+
+The order of tick is decided using the returned traits and the tick Dependencies.
+
+Each object is guaranteed, that all of its dependency has been executed before
+the object.
+
+\list
+\li If this function returns TickTraits::NoTick no tick is executed at all.
+Thats the safest and most performant solution.
+\li If this function returns TickTraits::OnlyMainThread, the tick manager guarantees, that
+tick is called in the main thread and the tick manaer also doesn't execute any
+other tick function in a nother thread.
+\li If this function returns TickTraits::Multithreaded, the tick manager calls the
+tick function, in parallel together with other tick function from other tickable
+objects with the TickTraits::Multithreaded trait.
+\br
+\warning
+While this can be powerful it is extremely dengerous. You are responisble to make
+sure to prevent race condition.
+Even if your tick only reads data, you probably want to make sure no one other is
+changing the same data in parallel. Don't say you haven't been warned.
+\br
+If you aren't 100% sure that your ticks are race condition free, I recomment to
+use the TickTraits::OnlyMainThread trait (which is returned by default).
+You can use tick dependencies to ensure, that theese two tick functions aren't called parallel,
+but you still have to make sure that no other thread will create any race condition, which isn't trivial.
+\endlist
+
+*/
+Node::TickingObject::TickTraits Node::TickingObject::tickTraits() const
+{
+  return TickTraits::OnlyMainThread;
+}
+
+void Node::TickingObject::collectTickDependencies(TickDependencySet* dependencySet) const
+{
+  Q_UNUSED(dependencySet);
+}
+
+// ======== Node::ModularAttribute =============================================
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
@@ -116,7 +195,7 @@ Node::ModularAttribute::~ModularAttribute()
 }
 
 
-// ======== Node::Component ==================================================
+// ======== Node::Component ====================================================
 
 
 /*!
@@ -139,7 +218,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
     _movable(false),
-    _dependencyDepth(0),
+    _coorddependencyDepth(0),
     _coordinateIndex(-1)
 {
   if(this->parent !=nullptr)
@@ -147,7 +226,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
 
-    connect(this->parent, &Node::Component::dependencyDepthChanged, this, &Node::Component::dependencyDepthChanged);
+    connect(this->parent, &Node::Component::coordDependencyDepthChanged, this, &Node::Component::coordDependencyDepthChanged);
   }else
   {
     Q_ASSERT(node.rootComponent() == nullptr);
@@ -173,7 +252,7 @@ const QVector<glrt::scene::Node::Component*>& Node::Component::children() const
 }
 
 /*!
-Appends the wwhole subtree of this component (including this component itself)
+Appends the whole subtree of this component (including this component itself)
 to the ggiven vector \a subTree.
 
 \note This Method is able to accept nullptr as this value.
@@ -187,12 +266,6 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
 
   for(Component* child : children())
     child->collectSubtree(subTree);
-}
-
-
-CoordFrame Node::Component::localCoordFrame() const
-{
-  return _localCoordFrame;
 }
 
 
@@ -211,17 +284,10 @@ void Node::Component::setMovable(bool movable)
 }
 
 
-void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
+CoordFrame Node::Component::localCoordFrame() const
 {
-  if(!movable())
-  {
-    qWarning() << "Trying to move not movable component";
-    return;
-  }
-
-  this->_localCoordFrame = coordFrame;
+  return _localCoordFrame;
 }
-
 
 /*!
  * Returns the global transformation of the given component.
@@ -236,26 +302,56 @@ CoordFrame Node::Component::globalCoordFrame() const
   return parent->globalCoordFrame() * localCoordFrame();
 }
 
-bool Node::Component::dependsOn(const Component* other) const
+/*!
+This function allows to use a customzed calculation for the global coord frame
+of a compent.
+
+The default implementation returns a coord frame containing only nans to signalize
+not to use this virtual function to improve performance.
+
+\warning Either always return a coord frame consisting only of NANs or never.
+*/
+CoordFrame Node::Component::calcGlobalCoordFrame() const
 {
-  DependencySet dependencies(this);
+  return CoordFrame(glm::vec3(NAN), glm::quat(NAN, NAN, NAN, NAN), NAN);
+}
+
+bool Node::Component::hasCustomGlobalCoordUpdater() const
+{
+  CoordFrame c = calcGlobalCoordFrame();
+
+  return c.scaleFactor!=NAN || c.position!=glm::vec3(NAN) || c.orientation!=glm::quat(NAN, NAN, NAN, NAN);
+}
+
+void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
+{
+  if(!movable())
+  {
+    qWarning() << "Trying to move not movable component";
+    return;
+  }
+
+  this->_localCoordFrame = coordFrame;
+}
+
+
+bool Node::Component::coordDependsOn(const Component* other) const
+{
+  CoordDependencySet dependencies(this);
 
   return dependencies.dependsOn(other);
 }
 
-int Node::Component::updateDependencyDepth()
+int Node::Component::updateCoordDependencyDepth()
 {
-  DependencySet dependencies(this);
+  CoordDependencySet dependencies(this);
 
-  _dependencyDepth = dependencies.depth();
+  int newDepth = dependencies.depth();
 
-  return _dependencyDepth;
-}
+  if(_coorddependencyDepth != newDepth)
+    coordDependencyDepthChanged(this);
 
-void Node::Component::collectDependencies(DependencySet* dependencySet) const
-{
-  if(parent != nullptr)
-    dependencySet->addDependency(parent);
+  return _coorddependencyDepth;
 }
 
 
@@ -292,59 +388,23 @@ void Node::Component::registerAngelScriptAPI()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-
-// ======== Node::Component::DependencySet =====================================
-
-Node::Component::DependencySet::DependencySet(const Component* component)
+void Node::Component::collectDependencies(TickDependencySet* dependencySet) const
 {
-  _depth = -1;
-
-  queuedDependencies.enqueue(component);
-
-  while(!queuedDependencies.isEmpty())
-  {
-    QQueue<const Component*> currentDepth;
-
-    currentDepth.swap(queuedDependencies);
-
-    while(!currentDepth.isEmpty())
-    {
-      const Component* component = currentDepth.dequeue();
-      Q_ASSERT(!visitedDependencies.contains(component));
-      visitedDependencies.insert(component);
-
-      component->collectDependencies(this);
-    }
-
-    _depth++;
-  }
+  TickingObject::collectDependencies(dependencySet);
 }
 
-void Node::Component::DependencySet::addDependency(const Component* component)
+void Node::Component::collectDependencies(CoordDependencySet* dependencySet) const
 {
-  if(visitedDependencies.contains(component) || queuedDependencies.contains(component))
-  {
-    componentsWithCycles.insert(component);
-  }else
-  {
-    queuedDependencies.enqueue(component);
-  }
+  collectCoordDependencies(dependencySet);
 }
 
-bool Node::Component::DependencySet::dependsOn(const Component* other) const
+void Node::Component::collectCoordDependencies(CoordDependencySet* dependencySet) const
 {
-  return visitedDependencies.contains(other);
+  if(parent != nullptr)
+    dependencySet->addDependency(parent);
 }
 
-bool Node::Component::DependencySet::hasCycles() const
-{
-  return !componentsWithCycles.isEmpty();
-}
 
-int Node::Component::DependencySet::depth() const
-{
-  return _depth;
-}
 
 
 } // namespace scene

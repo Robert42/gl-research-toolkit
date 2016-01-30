@@ -710,6 +710,13 @@ QVector<T> Array<T, T_traits>::toQVector() const
   return v;
 }
 
+template<typename T, class T_traits>
+template<typename T_lessThan>
+void Array<T, T_traits>::stable_sort(T_lessThan lessThan)
+{
+  // #ISSUE-61 STL
+  std::stable_sort(this->data(), this->data()+this->length(), lessThan);
+}
 
 template<typename T, class T_traits>
 T* Array<T, T_traits>::allocate_memory(int n)
