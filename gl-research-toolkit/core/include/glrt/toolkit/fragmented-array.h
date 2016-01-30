@@ -154,7 +154,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
       Q_UNUSED(begin);
       Q_UNUSED(end);
 
-      return segmentEnd[segment_index-1];
+      return segmentEnd[segment_index];
     }
   };
 
