@@ -258,6 +258,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
 
       ranges->segmentEnd.append(subSegmentEnd);
       ranges->innerSegmentRanges.append_move(std::move(typename T_inner_sections_trait::SegmentRanges()));
+      T_inner_sections_trait::init(&ranges->innerSegmentRanges.last());
       T_inner_sections_trait::classify(data, subSegmentStart, subSegmentEnd, &ranges->innerSegmentRanges.last(), extra_data);
       subSegmentStart = subSegmentEnd;
     }
