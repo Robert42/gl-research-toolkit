@@ -290,8 +290,38 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
 // #TODO::::::::::::::::::::::::::: test FragmentedArray_Segment_Generic first, after success, also implement the two classes below
 
 template<typename T_value, class T_handler, class T_inner_sections_trait>
-struct FragmentedArray_Segment_SplitInTwo
+struct FragmentedArray_Segment_Split_in_VariableNumber
 {
+  // #TODO::::::::::::::::: This is quasi the same as FragmentedArray_Segment_Generic, but with no generic segment type which allows faster lookups
+  struct SegmentRanges
+  {
+    Array<int> segmentEnd;
+    Array<typename T_inner_sections_trait::SegmentRanges, ArrayTraits_Unordered_mCmOD<typename T_inner_sections_trait::SegmentRanges>> innerSegmentRanges;
+
+    SegmentRanges(const SegmentRanges& other) = delete;
+    SegmentRanges&operator=(const SegmentRanges& other) = delete;
+
+    SegmentRanges()
+    {
+    }
+
+    SegmentRanges(SegmentRanges&& other)
+      : segmentEnd(std::move(other.segmentEnd)),
+        innerSegmentRanges(std::move(other.innerSegmentRanges))
+    {
+    }
+
+    SegmentRanges& operator=(SegmentRanges&& other)
+    {
+      segmentEnd.swap(other.segmentEnd);
+      innerSegmentRanges.swap(other.innerSegmentRanges);
+    }
+
+    ~SegmentRanges()
+    {
+    }
+  };
+
 // #TODO
 };
 
@@ -303,6 +333,12 @@ struct FragmentedArray_Segment_Split_in_N
   // #TODO
 };
 
+
+template<typename T_value, class T_handler, class T_inner_sections_trait>
+struct FragmentedArray_Segment_SplitInTwo
+{
+// #TODO
+};
 
 template<typename T_data, typename T_sections_trait, typename T_data_array_traits = typename DefaultTraits<T_data>::type>
 class FragmentedArray
