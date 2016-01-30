@@ -307,10 +307,11 @@ typedef FragmentedArray_Segment_Generic<DummyLightComponent, Interactivity, Inte
 
 } // namespace GenericSectionTraits
 
-typedef FragmentedArray<DummyMeshComponent, GenericSectionTraits::MovableHandler> FragmentedArray_MeshComponents_GenericOnly;
-typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_GenericOnly;
+template<typename FragmentedArray_MeshComponents, typename FragmentedArray_LightComponents>
+struct FragmentedArrayTest
+{
 
-void test_FragmentedArray_Segment_Generic()
+static void test_FragmentedArray_Segment()
 {
   QString output;
 
@@ -325,7 +326,7 @@ void test_FragmentedArray_Segment_Generic()
   DummyLightComponent lightComponent5 = {Interactivity::STATIC,
                                          5};
 
-  FragmentedArray_LightComponents_GenericOnly lightComponents;
+  FragmentedArray_LightComponents lightComponents;
   lightComponents.append_copy(lightComponent5);
   lightComponents.append_copy(lightComponent3);
   lightComponents.append_copy(lightComponent4);
@@ -351,7 +352,7 @@ void test_FragmentedArray_Segment_Generic()
 }
 
 
-void test_FragmentedArray_Segment_Generic_recursive()
+static void test_FragmentedArray_Segment_recursive()
 {
   QString output;
   DummyMeshComponent meshComponent1 = {true, // movable
@@ -375,7 +376,7 @@ void test_FragmentedArray_Segment_Generic_recursive()
                                        Mesh::c,
                                        5};
 
-  FragmentedArray_MeshComponents_GenericOnly meshComponents;
+  FragmentedArray_MeshComponents meshComponents;
   meshComponents.append_copy(meshComponent5);
   meshComponents.append_copy(meshComponent3);
   meshComponents.append_copy(meshComponent1);
@@ -416,7 +417,7 @@ void test_FragmentedArray_Segment_Generic_recursive()
             "} // Movable(1, 5)\n");
 }
 
-void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet()
+static void test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet()
 {
   QString output;
   int region_to_be_updated;
@@ -432,7 +433,7 @@ void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segme
   DummyLightComponent lightComponent5 = {Interactivity::STATIC,
                                          5};
 
-  FragmentedArray_LightComponents_GenericOnly lightComponents;
+  FragmentedArray_LightComponents lightComponents;
   lightComponents.append_copy(lightComponent5);
   lightComponents.append_copy(lightComponent3);
   lightComponents.append_copy(lightComponent4);
@@ -495,7 +496,7 @@ void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segme
                                        Mesh::c,
                                        5};
 
-  FragmentedArray_MeshComponents_GenericOnly meshComponents;
+  FragmentedArray_MeshComponents meshComponents;
   meshComponents.append_copy(meshComponent5);
   meshComponents.append_copy(meshComponent3);
   meshComponents.append_copy(meshComponent1);
@@ -585,9 +586,18 @@ void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segme
   EXPECT_EQ(region_to_be_updated, 0);
 }
 
+static void test_fragmented_array()
+{
+  test_FragmentedArray_Segment();
+  test_FragmentedArray_Segment_recursive();
+  test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet();
+}
+
+};
+
 void test_fragmented_array()
 {
-  test_FragmentedArray_Segment_Generic();
-  test_FragmentedArray_Segment_Generic_recursive();
-  test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet();
+  typedef FragmentedArray<DummyMeshComponent, GenericSectionTraits::MovableHandler> FragmentedArray_MeshComponents_GenericOnly;
+  typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_GenericOnly;
+  FragmentedArrayTest<FragmentedArray_MeshComponents_GenericOnly, FragmentedArray_LightComponents_GenericOnly>::test_fragmented_array();
 }
