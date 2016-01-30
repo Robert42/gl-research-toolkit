@@ -578,6 +578,8 @@ void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segme
   region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 0);
 
+  meshComponents.remove(meshComponent2);
+
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 0);
