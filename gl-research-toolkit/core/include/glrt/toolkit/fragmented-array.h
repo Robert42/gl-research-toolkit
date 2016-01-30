@@ -242,6 +242,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
         if(currentSegment==prevSegment)
           continue;
         ranges->segment_value.append(currentSegment);
+        prevSegment = currentSegment;
       }
 
       int subSegmentEnd = i;
