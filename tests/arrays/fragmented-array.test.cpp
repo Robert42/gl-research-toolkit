@@ -105,21 +105,35 @@ struct DummyLightComponentHandler : public BaseHandler
 
 struct InteractivitySegmentHandler : public BaseHandler
 {
+  static QString format(Interactivity interactivity)
+  {
+    switch(interactivity)
+    {
+    case Interactivity::DYNAMIC:
+      return "Dynamic";
+    case Interactivity::STATIC:
+      return "Static";
+    default:
+      Q_UNREACHABLE();
+    }
+  }
+
+  static QString format(Interactivity interactivity, int begin, int end)
+  {
+    return QString("%0(%1, %2)").arg(format(interactivity)).arg(begin).arg(end);
+  }
+
   static void handle_new_segment(const DummyLightComponent* components, int begin, int end, Interactivity interactivity, QString* output)
   {
+    *output += format(interactivity, begin, end) + "{\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(interactivity);
     Q_UNUSED(output);
   }
 
   static void handle_end_segment(const DummyLightComponent* components, int begin, int end, Interactivity interactivity, QString* output)
   {
+    *output += "} // "+format(interactivity, begin, end) + "\n";
     Q_UNUSED(components);
-    Q_UNUSED(begin);
-    Q_UNUSED(end);
-    Q_UNUSED(interactivity);
     Q_UNUSED(output);
   }
 
