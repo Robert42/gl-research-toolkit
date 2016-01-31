@@ -312,7 +312,7 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
 
 // #TODO::::::::::::::::::::::::::: test FragmentedArray_Segment_Generic first, after success, also implement the two classes below
 
-template<typename T_value, class T_handler, class T_inner_sections_trait>
+template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Split_in_VariableNumber
 {
   // #TODO::::::::::::::::: This is quasi the same as FragmentedArray_Segment_Generic, but with no generic segment type which allows faster lookups
@@ -348,7 +348,7 @@ struct FragmentedArray_Segment_Split_in_VariableNumber
 // #TODO
 };
 
-template<typename T_value, int N, class T_handler, class T_inner_sections_trait>
+template<typename T_value, typename T_segment_type, int N, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Split_in_N
 {
   static_assert(N>=1, "N must be at last 1");
@@ -357,7 +357,7 @@ struct FragmentedArray_Segment_Split_in_N
 };
 
 
-template<typename T_value, class T_handler, class T_inner_sections_trait>
+template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_SplitInTwo
 {
 // #TODO
