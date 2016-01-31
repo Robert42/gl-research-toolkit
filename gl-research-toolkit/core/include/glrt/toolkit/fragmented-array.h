@@ -86,6 +86,133 @@ struct FragmentedArray_Segment_Values
 
 namespace implementation {
 
+template<typename T_segment_type, typename T_segment_array_traits = typename DefaultTraits<T_segment_type>::type>
+struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic
+{
+  template<class Base>
+  struct SegmentRangesMixin : public Base
+  {
+    Array<T_segment_type, T_segment_array_traits> segment_value;
+
+    SegmentRangesMixin()
+    {
+    }
+
+    SegmentRangesMixin(const SegmentRangesMixin& other) = delete;
+    SegmentRangesMixin&operator=(const SegmentRangesMixin& other) = delete;
+
+    SegmentRangesMixin(SegmentRangesMixin&& other)
+      : Base(std::move(other)),
+        segment_value(std::move(other.segment_value))
+    {
+    }
+
+    SegmentRangesMixin& operator=(SegmentRangesMixin&& other)
+    {
+      Base::operator=(std::move(other));
+      segment_value.swap(other.segment_value);
+      return *this;
+    }
+
+    int number_segments() const
+    {
+      Q_ASSERT(Base::number_segments() == segment_value.length());
+
+      return Base::number_segments();
+    }
+
+    T_segment_type segment_value_for_index(int index) const
+    {
+      Q_ASSERT(index >= 0);
+      Q_ASSERT(index < number_segments());
+      return segment_value[index];
+    }
+
+    int segment_as_index(T_segment_type segment, int fallback=-1) const
+    {
+      const int num_segments = number_segments();
+      for(int i=0; i<num_segments; ++i)
+      {
+        if(segment_value_for_index(i) == segment)
+          return i;
+      }
+
+      return fallback;
+    }
+
+    void clear()
+    {
+      Base::clear();
+      segment_value.clear();
+    }
+
+    void appendSegment(T_segment_type segment)
+    {
+      segment_value.append(segment);
+    }
+  };
+};
+
+template<typename T_segment_type, typename T_handler>
+struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased
+{
+  template<class Base>
+  struct SegmentRangesMixin : public Base
+  {
+    SegmentRangesMixin()
+    {
+    }
+
+    SegmentRangesMixin(const SegmentRangesMixin& other) = delete;
+    SegmentRangesMixin&operator=(const SegmentRangesMixin& other) = delete;
+
+    SegmentRangesMixin(SegmentRangesMixin&& other)
+      : Base(std::move(other))
+    {
+    }
+
+    SegmentRangesMixin& operator=(SegmentRangesMixin&& other)
+    {
+      Base::operator=(std::move(other));
+      return *this;
+    }
+
+    int number_segments() const
+    {
+      return Base::number_segments();
+    }
+
+
+    T_segment_type segment_value_for_index(int index)
+    {
+      Q_ASSERT(index >= 0);
+      Q_ASSERT(index < number_segments());
+      return T_handler::segment_from_index(index);
+    }
+
+    int segment_as_index(T_segment_type segment, int fallback=-1) const
+    {
+      return T_handler::segment_as_index(segment, fallback);
+    }
+
+    void appendSegment(T_segment_type segment)
+    {
+      int i = segment_as_index(segment);
+
+      int prevSegmentEnd = 0;
+      if(number_segments() != 0)
+        prevSegmentEnd = Base::segmentEnd.last();
+
+      while(i>=number_segments()+1)
+      {
+        Base::segmentEnd.append(prevSegmentEnd);
+        Base::innerSegmentRanges.append_move(std::move(typename Base::T_inner_sections_trait::SegmentRanges()));
+        Base::T_inner_sections_trait::init(&Base::innerSegmentRanges.last());
+      }
+    }
+
+  };
+};
 
 template<typename T_value, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Base
@@ -105,12 +232,13 @@ struct FragmentedArray_Segment_Base
 } // namespace implementation
 
 
-template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait, typename T_segment_array_traits = typename DefaultTraits<T_segment_type>::type>
+template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_Segment_Base<T_value, T_handler, T_inner_sections_trait>
 {
   typedef T_handler handler_type;
   typedef typename T_handler::extra_data_type extra_data_type;
   static_assert(std::is_same<typename T_handler::extra_data_type, typename T_inner_sections_trait::extra_data_type>::value, "Both extra_data_type, of the handler and the inner sections trait must be the same");
+  typedef implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic<T_segment_type> T_segment_index_traits;
 
   struct segment_index
   {
@@ -118,34 +246,31 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     typename T_inner_sections_trait::segment_index inner_index;
   };
 
-  struct SegmentRanges
+  struct SegmentRangesBase
   {
-    Array<T_segment_type, T_segment_array_traits> segment_value;
     Array<int> segmentEnd;
     Array<typename T_inner_sections_trait::SegmentRanges, ArrayTraits_Unordered_mCmOD<typename T_inner_sections_trait::SegmentRanges>> innerSegmentRanges;
 
-    SegmentRanges(const SegmentRanges& other) = delete;
-    SegmentRanges&operator=(const SegmentRanges& other) = delete;
+    SegmentRangesBase(const SegmentRangesBase& other) = delete;
+    SegmentRangesBase&operator=(const SegmentRangesBase& other) = delete;
 
-    SegmentRanges()
+    SegmentRangesBase()
     {
     }
 
-    SegmentRanges(SegmentRanges&& other)
-      : segment_value(std::move(other.segment_value)),
-        segmentEnd(std::move(other.segmentEnd)),
+    SegmentRangesBase(SegmentRangesBase&& other)
+      : segmentEnd(std::move(other.segmentEnd)),
         innerSegmentRanges(std::move(other.innerSegmentRanges))
     {
     }
 
-    SegmentRanges& operator=(SegmentRanges&& other)
+    SegmentRangesBase& operator=(SegmentRangesBase&& other)
     {
-      segment_value.swap(other.segment_value);
       segmentEnd.swap(other.segmentEnd);
       innerSegmentRanges.swap(other.innerSegmentRanges);
     }
 
-    ~SegmentRanges()
+    ~SegmentRangesBase()
     {
     }
 
@@ -154,7 +279,6 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
       int nSegments = segmentEnd.length();
 
       Q_ASSERT(nSegments == segmentEnd.length());
-      Q_ASSERT(nSegments == segment_value.length());
       Q_ASSERT(nSegments == innerSegmentRanges.length());
 
       return nSegments;
@@ -178,7 +302,15 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
       return segmentEnd[segment_index];
     }
+
+    void clear()
+    {
+      innerSegmentRanges.clear();
+      segmentEnd.clear();
+    }
   };
+
+  typedef typename T_segment_index_traits::template SegmentRangesMixin<SegmentRangesBase> SegmentRanges;
 
   static void init(SegmentRanges*)
   {
@@ -192,7 +324,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     const int segment_start = ranges.segment_start(0, begin, end);
     const int segment_end = ranges.segment_end(0, begin, end);
 
-    handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value[0], extra_data);
+    handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value_for_index(0), extra_data);
 
     index->index = 0;
     T_inner_sections_trait::start_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[0], extra_data, &index->inner_index);
@@ -210,7 +342,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     const int segment_end = ranges.segment_end(index->index, begin, end);
 
     T_inner_sections_trait::end_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
-    handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
+    handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value_for_index(index->index), extra_data);
   }
 
   static void iterate(const T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
@@ -224,7 +356,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     if(segment_end <= data_index)
     {
       T_inner_sections_trait::end_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
-      handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
+      handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value_for_index(index->index), extra_data);
 
       while((segment_end = ranges.segment_end(index->index, begin, end)) <= data_index)
       {
@@ -235,7 +367,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
       segment_start = ranges.segment_start(index->index, begin, end);
 
-      handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value[index->index], extra_data);
+      handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value_for_index(index->index), extra_data);
       T_inner_sections_trait::start_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
     }
 
@@ -244,15 +376,13 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
   static void classify(const T_value* data, int begin, int end, SegmentRanges* ranges, extra_data_type extra_data)
   {
-    ranges->innerSegmentRanges.clear();
-    ranges->segmentEnd.clear();
-    ranges->segment_value.clear();
+    ranges->clear();
 
     if(begin == end)
       return;
 
     T_segment_type prevSegment = handler_type::classify(data[begin]);
-    ranges->segment_value.append(prevSegment);
+    ranges->appendSegment(prevSegment);
     int subSegmentStart = begin;
 
     // #ISSUE-61 OMP  ??? calling T_inner_sections_trait::classify() might also useopen mp. measure whether it improves or damages performance. Maybe two functions classify and classify_parallel, the topmost trait gets called with _parallel it calls the inner traits without parallel (except FragmentedArray_Segment_SplitInTwo, this one calls both subtraits with _parallel)
@@ -263,7 +393,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
         T_segment_type currentSegment = handler_type::classify(data[i]);
         if(currentSegment==prevSegment)
           continue;
-        ranges->segment_value.append(currentSegment);
+        ranges->appendSegment(currentSegment);
         prevSegment = currentSegment;
       }
 
@@ -279,35 +409,25 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
   static int update_region_to_update(int beginRegionToUpdate, int begin, int end, const T_value& value, const SegmentRanges& ranges)
   {
-    T_segment_type prevSegment = handler_type::classify(value);
+    int i = ranges.segment_as_index( handler_type::classify(value));
 
-    const int num_segments = ranges.number_segments();
-    for(int i=0; i<num_segments; ++i)
-    {
-      int segment_begin = ranges.segment_start(i, begin, end);
+    if(i == -1)
+      return beginRegionToUpdate;
 
-      if(segment_begin > beginRegionToUpdate)
-        return beginRegionToUpdate;
-
-      if(ranges.segment_value[i] == prevSegment)
-      {
-        int segment_end = ranges.segment_end(i, begin, end);
-        return T_inner_sections_trait::update_region_to_update(beginRegionToUpdate, segment_begin, segment_end, value, ranges.innerSegmentRanges[i]);
-      }
-    }
-
-    return beginRegionToUpdate;
+    int segment_begin = ranges.segment_start(i, begin, end);
+    int segment_end = ranges.segment_end(i, begin, end);
+    return T_inner_sections_trait::update_region_to_update(beginRegionToUpdate, segment_begin, segment_end, value, ranges.innerSegmentRanges[i]);
   }
 
   template<typename... T_sub_segment_types>
   static glm::ivec2 section_boundaries(int begin, int end, const SegmentRanges& ranges, T_segment_type segment, T_sub_segment_types... sub_segments)
   {
-    const int num_segments = ranges.number_segments();
-    for(int i=0; i<num_segments; ++i)
-      if(ranges.segment_value[i] == segment)
-        T_inner_sections_trait::section_boundaries(ranges.segment_start(i, begin, end), ranges.segment_end(i, begin, end), ranges.innerSegmentRanges[i], sub_segments...);
+    int i = ranges.index_for_segment_value(segment);
 
-    return glm::ivec2(end,end);
+    if(i == -1)
+      return glm::ivec2(end,end);
+
+    return T_inner_sections_trait::section_boundaries(ranges.segment_start(i, begin, end), ranges.segment_end(i, begin, end), ranges.innerSegmentRanges[i], sub_segments...);
   }
 
   static glm::ivec2 section_boundaries(int begin, int end, const SegmentRanges& ranges)
