@@ -84,6 +84,9 @@ struct FragmentedArray_Segment_Values
 };
 
 
+namespace implementation {
+
+
 template<typename T_value, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Base
 {
@@ -99,8 +102,11 @@ struct FragmentedArray_Segment_Base
 };
 
 
+} // namespace implementation
+
+
 template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait, typename T_segment_array_traits = typename DefaultTraits<T_segment_type>::type>
-struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_value, T_handler, T_inner_sections_trait>
+struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_Segment_Base<T_value, T_handler, T_inner_sections_trait>
 {
   typedef T_handler handler_type;
   typedef typename T_handler::extra_data_type extra_data_type;
@@ -145,9 +151,10 @@ struct FragmentedArray_Segment_Generic : public FragmentedArray_Segment_Base<T_v
 
     int number_segments() const
     {
-      int nSegments = segment_value.length();
+      int nSegments = segmentEnd.length();
 
       Q_ASSERT(nSegments == segmentEnd.length());
+      Q_ASSERT(nSegments == segment_value.length());
       Q_ASSERT(nSegments == innerSegmentRanges.length());
 
       return nSegments;
