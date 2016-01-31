@@ -214,6 +214,11 @@ struct InteractivitySegmentHandler : public BaseHandler
   {
     return static_cast<int>(interactivity);
   }
+
+  static Interactivity segment_from_index(int interactivity)
+  {
+    return static_cast<Interactivity>(glm::clamp<int>(interactivity, 0, segment_as_index(Interactivity::DYNAMIC)));
+  }
 };
 
 struct MeshSegmentHandler : public BaseHandler
@@ -244,6 +249,11 @@ struct MeshSegmentHandler : public BaseHandler
   static int segment_as_index(Mesh mesh)
   {
     return static_cast<int>(mesh);
+  }
+
+  static Mesh segment_from_index(int mesh)
+  {
+    return static_cast<Mesh>(glm::clamp<int>(mesh, 0, segment_as_index(Mesh::f)));
   }
 };
 
@@ -277,6 +287,11 @@ struct MaterialSegmentHandler : public BaseHandler
   {
     return static_cast<int>(material);
   }
+
+  static Material segment_from_index(int material)
+  {
+    return static_cast<Material>(glm::clamp<int>(material, 0, segment_as_index(Material::F)));
+  }
 };
 
 struct MovableSegmentHandler : public BaseHandler
@@ -308,6 +323,11 @@ struct MovableSegmentHandler : public BaseHandler
   static int segment_as_index(bool movable)
   {
     return static_cast<int>(movable);
+  }
+
+  static int segment_from_index(int movable)
+  {
+    return movable != 0;
   }
 };
 
