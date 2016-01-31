@@ -232,13 +232,12 @@ struct FragmentedArray_Segment_Base
 } // namespace implementation
 
 
-template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
+template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait, class T_segment_index_traits=implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic<T_segment_type>>
 struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_Segment_Base<T_value, T_handler, T_inner_sections_trait>
 {
   typedef T_handler handler_type;
   typedef typename T_handler::extra_data_type extra_data_type;
   static_assert(std::is_same<typename T_handler::extra_data_type, typename T_inner_sections_trait::extra_data_type>::value, "Both extra_data_type, of the handler and the inner sections trait must be the same");
-  typedef implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic<T_segment_type> T_segment_index_traits;
 
   struct segment_index
   {
@@ -439,40 +438,11 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
 // #TODO::::::::::::::::::::::::::: test FragmentedArray_Segment_Generic first, after success, also implement the two classes below
 
+
+
 template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
-struct FragmentedArray_Segment_Split_in_VariableNumber
+struct FragmentedArray_Segment_Split_in_VariableNumber : public FragmentedArray_Segment_Generic<T_value, T_segment_type, T_handler, T_inner_sections_trait, implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased<T_segment_type, T_handler>>
 {
-  // #TODO::::::::::::::::: This is quasi the same as FragmentedArray_Segment_Generic, but with no generic segment type which allows faster lookups
-  struct SegmentRanges
-  {
-    Array<int> segmentEnd;
-    Array<typename T_inner_sections_trait::SegmentRanges, ArrayTraits_Unordered_mCmOD<typename T_inner_sections_trait::SegmentRanges>> innerSegmentRanges;
-
-    SegmentRanges(const SegmentRanges& other) = delete;
-    SegmentRanges&operator=(const SegmentRanges& other) = delete;
-
-    SegmentRanges()
-    {
-    }
-
-    SegmentRanges(SegmentRanges&& other)
-      : segmentEnd(std::move(other.segmentEnd)),
-        innerSegmentRanges(std::move(other.innerSegmentRanges))
-    {
-    }
-
-    SegmentRanges& operator=(SegmentRanges&& other)
-    {
-      segmentEnd.swap(other.segmentEnd);
-      innerSegmentRanges.swap(other.innerSegmentRanges);
-    }
-
-    ~SegmentRanges()
-    {
-    }
-  };
-
-// #TODO
 };
 
 template<typename T_value, typename T_segment_type, int N, class T_handler, class T_inner_sections_trait>
