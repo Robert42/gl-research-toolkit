@@ -153,7 +153,7 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic
   };
 };
 
-template<typename T_segment_type, typename T_handler>
+template<class T_segment_type, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased
 {
   template<class Base>
@@ -183,7 +183,7 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased
     }
 
 
-    T_segment_type segment_value_for_index(int index)
+    T_segment_type segment_value_for_index(int index) const
     {
       Q_ASSERT(index >= 0);
       Q_ASSERT(index < number_segments());
@@ -206,8 +206,8 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased
       while(i>=number_segments()+1)
       {
         Base::segmentEnd.append(prevSegmentEnd);
-        Base::innerSegmentRanges.append_move(std::move(typename Base::T_inner_sections_trait::SegmentRanges()));
-        Base::T_inner_sections_trait::init(&Base::innerSegmentRanges.last());
+        Base::innerSegmentRanges.append_move(std::move(typename T_inner_sections_trait::SegmentRanges()));
+        T_inner_sections_trait::init(&Base::innerSegmentRanges.last());
       }
     }
 
@@ -441,7 +441,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
 
 template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
-struct FragmentedArray_Segment_Split_in_VariableNumber : public FragmentedArray_Segment_Generic<T_value, T_segment_type, T_handler, T_inner_sections_trait, implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased<T_segment_type, T_handler>>
+struct FragmentedArray_Segment_Split_in_VariableNumber : public FragmentedArray_Segment_Generic<T_value, T_segment_type, T_handler, T_inner_sections_trait, implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased<T_segment_type, T_handler, T_inner_sections_trait>>
 {
 };
 

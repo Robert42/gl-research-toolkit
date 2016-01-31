@@ -210,9 +210,16 @@ struct InteractivitySegmentHandler : public BaseHandler
     return data.interactivity;
   }
 
-  static int segment_as_index(Interactivity interactivity)
+  static int segment_as_index(Interactivity interactivity, int fallback=-1)
   {
-    return static_cast<int>(interactivity);
+    switch(interactivity)
+    {
+    case Interactivity::DYNAMIC:
+    case Interactivity::STATIC:
+      return static_cast<int>(interactivity);
+    default:
+      return fallback;
+    }
   }
 
   static Interactivity segment_from_index(int interactivity)
@@ -246,9 +253,12 @@ struct MeshSegmentHandler : public BaseHandler
     return data.mesh;
   }
 
-  static int segment_as_index(Mesh mesh)
+  static int segment_as_index(Mesh mesh, int fallback=-1)
   {
-    return static_cast<int>(mesh);
+    int i= static_cast<int>(mesh);
+    if(i<0 || i>=6)
+      return fallback;
+    return i;
   }
 
   static Mesh segment_from_index(int mesh)
@@ -283,9 +293,12 @@ struct MaterialSegmentHandler : public BaseHandler
     return data.material;
   }
 
-  static int segment_as_index(Material material)
+  static int segment_as_index(Material material, int fallback = -1)
   {
-    return static_cast<int>(material);
+    int i = static_cast<int>(material);
+    if(i<0 || i>=6)
+      return fallback;
+    return i;
   }
 
   static Material segment_from_index(int material)
@@ -320,7 +333,7 @@ struct MovableSegmentHandler : public BaseHandler
     return data.movable;
   }
 
-  static int segment_as_index(bool movable)
+  static int segment_as_index(bool movable, int)
   {
     return static_cast<int>(movable);
   }
@@ -342,6 +355,18 @@ namespace GenericSectionTraits {
 typedef FragmentedArray_Segment_Generic<DummyMeshComponent, Mesh, MeshSegmentHandler, DummyMeshComponent_Trait> MeshHandler;
 typedef FragmentedArray_Segment_Generic<DummyMeshComponent, Material, MaterialSegmentHandler, MeshHandler> MaterialHandler;
 typedef FragmentedArray_Segment_Generic<DummyMeshComponent, bool, MovableSegmentHandler, MaterialHandler> MovableHandler;
+
+typedef FragmentedArray_Segment_Generic<DummyLightComponent, Interactivity, InteractivitySegmentHandler, DummyLightComponentHandler_Trait> LightInteractivityHandler;
+
+} // namespace GenericSectionTraits
+
+
+namespace VariableNumberSectionTraits {
+
+
+typedef FragmentedArray_Segment_Split_in_VariableNumber<DummyMeshComponent, Mesh, MeshSegmentHandler, DummyMeshComponent_Trait> MeshHandler;
+typedef FragmentedArray_Segment_Split_in_VariableNumber<DummyMeshComponent, Material, MaterialSegmentHandler, MeshHandler> MaterialHandler;
+typedef FragmentedArray_Segment_Split_in_VariableNumber<DummyMeshComponent, bool, MovableSegmentHandler, MaterialHandler> MovableHandler;
 
 typedef FragmentedArray_Segment_Generic<DummyLightComponent, Interactivity, InteractivitySegmentHandler, DummyLightComponentHandler_Trait> LightInteractivityHandler;
 
@@ -640,4 +665,8 @@ void test_fragmented_array()
   typedef FragmentedArray<DummyMeshComponent, GenericSectionTraits::MovableHandler> FragmentedArray_MeshComponents_GenericOnly;
   typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_GenericOnly;
   FragmentedArrayTest<FragmentedArray_MeshComponents_GenericOnly, FragmentedArray_LightComponents_GenericOnly>::test_fragmented_array();
+
+  typedef FragmentedArray<DummyMeshComponent, VariableNumberSectionTraits::MovableHandler> FragmentedArray_MeshComponents_VariableNumberOnly;
+  typedef FragmentedArray<DummyLightComponent, VariableNumberSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_VariableNumberOnly;
+  FragmentedArrayTest<FragmentedArray_MeshComponents_VariableNumberOnly, FragmentedArray_LightComponents_VariableNumberOnly>::test_fragmented_array();
 }
