@@ -209,6 +209,11 @@ struct InteractivitySegmentHandler : public BaseHandler
   {
     return data.interactivity;
   }
+
+  static int segment_as_index(Interactivity interactivity)
+  {
+    return static_cast<int>(interactivity);
+  }
 };
 
 struct MeshSegmentHandler : public BaseHandler
@@ -234,6 +239,11 @@ struct MeshSegmentHandler : public BaseHandler
   static Mesh classify(const DummyMeshComponent& data)
   {
     return data.mesh;
+  }
+
+  static int segment_as_index(Mesh mesh)
+  {
+    return static_cast<int>(mesh);
   }
 };
 
@@ -262,6 +272,11 @@ struct MaterialSegmentHandler : public BaseHandler
   {
     return data.material;
   }
+
+  static int segment_as_index(Material material)
+  {
+    return static_cast<int>(material);
+  }
 };
 
 struct MovableSegmentHandler : public BaseHandler
@@ -288,6 +303,11 @@ struct MovableSegmentHandler : public BaseHandler
   static bool classify(const DummyMeshComponent& data)
   {
     return data.movable;
+  }
+
+  static int segment_as_index(bool movable)
+  {
+    return static_cast<int>(movable);
   }
 };
 
