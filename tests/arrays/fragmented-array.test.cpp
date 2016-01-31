@@ -376,6 +376,65 @@ template<typename FragmentedArray_MeshComponents, typename FragmentedArray_Light
 struct FragmentedArrayTest
 {
 
+static void test_FragmentedArray_AddingLateSegments()
+{
+  QString output;
+
+  DummyMeshComponent meshComponent1 = {false, // movable
+                                       Material::C,
+                                       Mesh::a,
+                                       1};
+  DummyMeshComponent meshComponent2 = {false, // static
+                                       Material::C,
+                                       Mesh::f,
+                                       2};
+  DummyMeshComponent meshComponent3 = {false, // movable
+                                       Material::F,
+                                       Mesh::a,
+                                       3};
+  DummyMeshComponent meshComponent4 = {false, // movable
+                                       Material::F,
+                                       Mesh::a,
+                                       4};
+  DummyMeshComponent meshComponent5 = {false, // movable
+                                       Material::F,
+                                       Mesh::f,
+                                       5};
+
+  FragmentedArray_MeshComponents meshComponents;
+  meshComponents.append_copy(meshComponent5);
+  meshComponents.append_copy(meshComponent3);
+  meshComponents.append_copy(meshComponent1);
+  meshComponents.append_copy(meshComponent4);
+  meshComponents.append_copy(meshComponent2);
+
+  output = "\n";
+  meshComponents.updateSegments(&output);
+
+  EXPECT_EQ(meshComponents.section_boundaries(true), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false), glm::ivec2(0,5));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::A), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::B), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C), glm::ivec2(0,2));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::D), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::E), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F), glm::ivec2(2,5));
+
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::a), glm::ivec2(0,1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::b), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::c), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::d), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::e), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::f), glm::ivec2(1,2));
+
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::a), glm::ivec2(2,4));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::b), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::c), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::d), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::e), glm::ivec2(-1));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::f), glm::ivec2(4,5));
+}
+
 static void test_FragmentedArray_Segment()
 {
   QString output;
@@ -653,6 +712,7 @@ static void test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet
 
 static void test_fragmented_array()
 {
+  test_FragmentedArray_AddingLateSegments();
   test_FragmentedArray_Segment();
   test_FragmentedArray_Segment_recursive();
   test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet();

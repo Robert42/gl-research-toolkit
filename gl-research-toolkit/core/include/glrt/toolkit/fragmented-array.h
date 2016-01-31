@@ -421,10 +421,10 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
   template<typename... T_sub_segment_types>
   static glm::ivec2 section_boundaries(int begin, int end, const SegmentRanges& ranges, T_segment_type segment, T_sub_segment_types... sub_segments)
   {
-    int i = ranges.index_for_segment_value(segment);
+    int i = ranges.segment_as_index(segment);
 
     if(i == -1)
-      return glm::ivec2(end,end);
+      return glm::ivec2(-1);
 
     return T_inner_sections_trait::section_boundaries(ranges.segment_start(i, begin, end), ranges.segment_end(i, begin, end), ranges.innerSegmentRanges[i], sub_segments...);
   }
