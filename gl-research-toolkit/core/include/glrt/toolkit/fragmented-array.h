@@ -128,7 +128,7 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic
       return segment_value[index];
     }
 
-    int segment_as_index(T_segment_type segment, int fallback=-1) const
+    int segment_as_index(T_segment_type segment) const
     {
       const int num_segments = number_segments();
       for(int i=0; i<num_segments; ++i)
@@ -137,7 +137,7 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic
           return i;
       }
 
-      return fallback;
+      return -1;
     }
 
     void clear()
@@ -190,9 +190,11 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased
       return T_handler::segment_from_index(index);
     }
 
-    int segment_as_index(T_segment_type segment, int fallback=-1) const
+    int segment_as_index(T_segment_type segment) const
     {
-      return T_handler::segment_as_index(segment, fallback);
+      int i = T_handler::segment_as_index(segment);
+
+      return (i<0||i>=number_segments()) ? -1 : i;
     }
 
     void appendSegment(T_segment_type segment)

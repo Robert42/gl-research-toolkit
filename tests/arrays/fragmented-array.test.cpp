@@ -210,16 +210,9 @@ struct InteractivitySegmentHandler : public BaseHandler
     return data.interactivity;
   }
 
-  static int segment_as_index(Interactivity interactivity, int fallback=-1)
+  static int segment_as_index(Interactivity interactivity)
   {
-    switch(interactivity)
-    {
-    case Interactivity::DYNAMIC:
-    case Interactivity::STATIC:
-      return static_cast<int>(interactivity);
-    default:
-      return fallback;
-    }
+    return static_cast<int>(interactivity);
   }
 
   static Interactivity segment_from_index(int interactivity)
@@ -253,12 +246,9 @@ struct MeshSegmentHandler : public BaseHandler
     return data.mesh;
   }
 
-  static int segment_as_index(Mesh mesh, int fallback=-1)
+  static int segment_as_index(Mesh mesh)
   {
-    int i= static_cast<int>(mesh);
-    if(i<0 || i>=6)
-      return fallback;
-    return i;
+    return static_cast<int>(mesh);
   }
 
   static Mesh segment_from_index(int mesh)
@@ -293,12 +283,9 @@ struct MaterialSegmentHandler : public BaseHandler
     return data.material;
   }
 
-  static int segment_as_index(Material material, int fallback = -1)
+  static int segment_as_index(Material material)
   {
-    int i = static_cast<int>(material);
-    if(i<0 || i>=6)
-      return fallback;
-    return i;
+    return static_cast<int>(material);
   }
 
   static Material segment_from_index(int material)
@@ -333,7 +320,7 @@ struct MovableSegmentHandler : public BaseHandler
     return data.movable;
   }
 
-  static int segment_as_index(bool movable, int)
+  static int segment_as_index(bool movable)
   {
     return static_cast<int>(movable);
   }
