@@ -400,7 +400,6 @@ static void test_FragmentedArray_AddingLateSegments()
 
   output = "\n";
   meshComponents.iterate(&output);
-  qDebug() << output;
   EXPECT_EQ(output,
             "\nStatic(0, 5){\n"
             "  Material C(0, 2){\n"

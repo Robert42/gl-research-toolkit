@@ -110,6 +110,9 @@ void FragmentedArray<d, s, t>::iterate(extra_data_type extra_data)
   const int length = dataArray.length();
   Q_ASSERT_X(!needsUpdate(), "FragmentedArray<>::iterate", "bug detected: trying to iterate over a not updated FragmetnedArray");
 
+  if(length == 0)
+    return;
+
   typename s::segment_index index;
 
   s::start_iterate(dataArray.data(), 0, length, segmentRanges, extra_data, &index);

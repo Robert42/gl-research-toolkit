@@ -216,12 +216,8 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased
       if(goingToAppendEndAnyway)
         i--;
 
-      while(i>number_segments())
-      {
+      while(i > Base::segmentEnd.length())
         Base::segmentEnd.append(end);
-        Base::innerSegmentRanges.append_move(std::move(typename T_inner_sections_trait::SegmentRanges()));
-        T_inner_sections_trait::init(&Base::innerSegmentRanges.last());
-      }
     }
 
   };
@@ -320,6 +316,32 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
       innerSegmentRanges.clear();
       segmentEnd.clear();
     }
+
+    void classify_subsegments(const T_value* data, extra_data_type extra_data)
+    {
+      const int n = segmentEnd.length();
+      int subsegment_begin = 0;
+      for(int i=0; i<n; ++i)
+      {
+        int subsegment_end = segmentEnd[i];
+
+        innerSegmentRanges.append_move(std::move(typename T_inner_sections_trait::SegmentRanges()));
+        T_inner_sections_trait::init(&innerSegmentRanges.last());
+        T_inner_sections_trait::classify(data, subsegment_begin, subsegment_end, &innerSegmentRanges.last(), extra_data);
+
+        subsegment_begin = subsegment_end;
+      }
+    }
+
+    int firstNotEmptySubsegment(int begin, int end) const
+    {
+      Q_UNUSED(end);
+      const int n = segmentEnd.length();
+      for(int i=0; i<n; ++i)
+        if(segmentEnd[i] != begin)
+          return i;
+      return -1;
+    }
   };
 
   typedef typename T_segment_index_traits::template SegmentRangesMixin<SegmentRangesBase> SegmentRanges;
@@ -333,13 +355,16 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     if(ranges.segmentEnd.isEmpty())
       return;
 
-    const int segment_start = ranges.segment_start(0, begin, end);
-    const int segment_end = ranges.segment_end(0, begin, end);
+    index->index = ranges.firstNotEmptySubsegment(begin, end);
 
-    handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value_for_index(0), extra_data);
+    // If start_iterate gets called, we already know, that this segment is not empty. So there must be at least one not empty subsegment
+    Q_ASSERT(index->index>=0 && index->index<ranges.number_segments());
 
-    index->index = 0;
-    T_inner_sections_trait::start_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[0], extra_data, &index->inner_index);
+    const int segment_start = ranges.segment_start(index->index, begin, end);
+    const int segment_end = ranges.segment_end(index->index, begin, end);
+
+    handler_type::handle_new_segment(data, segment_start, segment_end, ranges.segment_value_for_index(index->index), extra_data);
+    T_inner_sections_trait::start_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
   }
 
   static void end_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
@@ -396,7 +421,6 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     T_segment_type prevSegment = handler_type::classify(data[begin]);
     ranges->appendSegment(prevSegment);
     ranges->fillUpToSegment(prevSegment, begin, false);
-    int subSegmentStart = begin;
 
     // #ISSUE-61 OMP  ??? calling T_inner_sections_trait::classify() might also useopen mp. measure whether it improves or damages performance. Maybe two functions classify and classify_parallel, the topmost trait gets called with _parallel it calls the inner traits without parallel (except FragmentedArray_Segment_SplitInTwo, this one calls both subtraits with _parallel)
     for(int i=begin+1; i<=end; ++i)
@@ -414,11 +438,9 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
       int subSegmentEnd = i;
 
       ranges->segmentEnd.append(subSegmentEnd);
-      ranges->innerSegmentRanges.append_move(std::move(typename T_inner_sections_trait::SegmentRanges()));
-      T_inner_sections_trait::init(&ranges->innerSegmentRanges.last());
-      T_inner_sections_trait::classify(data, subSegmentStart, subSegmentEnd, &ranges->innerSegmentRanges.last(), extra_data);
-      subSegmentStart = subSegmentEnd;
     }
+
+    ranges->classify_subsegments(data, extra_data);
   }
 
   static int update_region_to_update(int beginRegionToUpdate, int begin, int end, const T_value& value, const SegmentRanges& ranges)
