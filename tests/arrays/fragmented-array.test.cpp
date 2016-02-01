@@ -398,27 +398,53 @@ static void test_FragmentedArray_AddingLateSegments()
   output = "\n";
   meshComponents.updateSegments(&output);
 
-  EXPECT_EQ(meshComponents.section_boundaries(true), glm::ivec2(-1));
+  output = "\n";
+  meshComponents.iterate(&output);
+  qDebug() << output;
+  EXPECT_EQ(output,
+            "\nStatic(0, 5){\n"
+            "  Material C(0, 2){\n"
+            "    Mesh a(0, 1){\n"
+            "      1\n"
+            "    } // Mesh a(0, 1)\n"
+            "    Mesh f(1, 2){\n"
+            "      2\n"
+            "    } // Mesh f(1, 2)\n"
+            "  } // Material C(0, 2)\n"
+            "  Material F(2, 5){\n"
+            "    Mesh a(2, 4){\n"
+            "      3\n"
+            "      4\n"
+            "    } // Mesh a(2, 4)\n"
+            "    Mesh f(4, 5){\n"
+            "      5\n"
+            "    } // Mesh f(4, 5)\n"
+            "  } // Material F(2, 5)\n"
+            "} // Static(0, 5)\n");
+
+#define EXPECT_EMPTY(b) {glm::ivec2 v = b;EXPECT_EQ(v.x, v.y)};
+
+  EXPECT_EMPTY(meshComponents.section_boundaries(true));
   EXPECT_EQ(meshComponents.section_boundaries(false), glm::ivec2(0,5));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::A), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::B), glm::ivec2(-1));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::A));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::B));
   EXPECT_EQ(meshComponents.section_boundaries(false, Material::C), glm::ivec2(0,2));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::D), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::E), glm::ivec2(-1));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::D));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::E));
   EXPECT_EQ(meshComponents.section_boundaries(false, Material::F), glm::ivec2(2,5));
 
   EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::a), glm::ivec2(0,1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::b), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::c), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::d), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::e), glm::ivec2(-1));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::b));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::c));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::d));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::e));
   EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::f), glm::ivec2(1,2));
 
   EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::a), glm::ivec2(2,4));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::b), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::c), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::d), glm::ivec2(-1));
-  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::e), glm::ivec2(-1));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::b));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::c));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::d));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::e));
   EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::f), glm::ivec2(4,5));
 }
 

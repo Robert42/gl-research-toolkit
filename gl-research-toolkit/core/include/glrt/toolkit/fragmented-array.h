@@ -150,6 +150,13 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_Generic
     {
       segment_value.append(segment);
     }
+
+    void fillUpToSegment(T_segment_type segment, int end, bool goingToAppendEndAnyway)
+    {
+      Q_UNUSED(segment);
+      Q_UNUSED(end);
+      Q_UNUSED(goingToAppendEndAnyway);
+    }
   };
 };
 
@@ -199,15 +206,19 @@ struct FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased
 
     void appendSegment(T_segment_type segment)
     {
-      int i = segment_as_index(segment);
+      Q_UNUSED(segment);
+    }
 
-      int prevSegmentEnd = 0;
-      if(number_segments() != 0)
-        prevSegmentEnd = Base::segmentEnd.last();
+    void fillUpToSegment(T_segment_type segment, int end, bool goingToAppendEndAnyway)
+    {
+      int i = T_handler::segment_as_index(segment);
 
-      while(i>=number_segments()+1)
+      if(goingToAppendEndAnyway)
+        i--;
+
+      while(i>number_segments())
       {
-        Base::segmentEnd.append(prevSegmentEnd);
+        Base::segmentEnd.append(end);
         Base::innerSegmentRanges.append_move(std::move(typename T_inner_sections_trait::SegmentRanges()));
         T_inner_sections_trait::init(&Base::innerSegmentRanges.last());
       }
@@ -243,7 +254,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
   struct segment_index
   {
-    int index;
+    int index = 0;
     typename T_inner_sections_trait::segment_index inner_index;
   };
 
@@ -384,6 +395,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
     T_segment_type prevSegment = handler_type::classify(data[begin]);
     ranges->appendSegment(prevSegment);
+    ranges->fillUpToSegment(prevSegment, begin, false);
     int subSegmentStart = begin;
 
     // #ISSUE-61 OMP  ??? calling T_inner_sections_trait::classify() might also useopen mp. measure whether it improves or damages performance. Maybe two functions classify and classify_parallel, the topmost trait gets called with _parallel it calls the inner traits without parallel (except FragmentedArray_Segment_SplitInTwo, this one calls both subtraits with _parallel)
@@ -396,6 +408,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
           continue;
         ranges->appendSegment(currentSegment);
         prevSegment = currentSegment;
+        ranges->fillUpToSegment(currentSegment, i, true);
       }
 
       int subSegmentEnd = i;
