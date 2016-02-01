@@ -9,7 +9,6 @@ namespace glrt {
 template<typename d, typename s, typename t>
 FragmentedArray<d, s, t>::FragmentedArray()
 {
-  s::init(&segmentRanges);
 }
 
 
