@@ -342,6 +342,12 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
           return i;
       return -1;
     }
+
+    bool isEmpty(int begin, int end) const
+    {
+      Q_UNUSED(end);
+      return segmentEnd.isEmpty() || begin==segmentEnd.last();
+    }
   };
 
   typedef typename T_segment_index_traits::template SegmentRangesMixin<SegmentRangesBase> SegmentRanges;
@@ -352,8 +358,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
   static void start_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
-    if(ranges.segmentEnd.isEmpty())
-      return;
+    Q_ASSERT(!ranges.isEmpty(begin, end));
 
     index->index = ranges.firstNotEmptySubsegment(begin, end);
 
@@ -369,8 +374,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
   static void end_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
-    if(ranges.segmentEnd.isEmpty())
-      return;
+    Q_ASSERT(!ranges.isEmpty(begin, end));
 
     const int num_segments = ranges.number_segments();
     Q_ASSERT(index->index < num_segments);
@@ -384,6 +388,8 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
   static void iterate(const T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
+    Q_ASSERT(!ranges.isEmpty(begin, end));
+
     const int num_segments = ranges.number_segments();
     Q_ASSERT(index->index < num_segments);
 
