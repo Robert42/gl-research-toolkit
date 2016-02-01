@@ -473,29 +473,12 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
   }
 };
 
-// #TODO::::::::::::::::::::::::::: test FragmentedArray_Segment_Generic first, after success, also implement the two classes below
-
-
-
 template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Split_in_VariableNumber : public FragmentedArray_Segment_Generic<T_value, T_segment_type, T_handler, T_inner_sections_trait, implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased<T_segment_type, T_handler, T_inner_sections_trait>>
 {
 };
 
-template<typename T_value, typename T_segment_type, int N, class T_handler, class T_inner_sections_trait>
-struct FragmentedArray_Segment_Split_in_N
-{
-  static_assert(N>=1, "N must be at last 1");
 
-  // #TODO
-};
-
-
-template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
-struct FragmentedArray_Segment_SplitInTwo
-{
-// #TODO
-};
 
 template<typename T_data, typename T_sections_trait, typename T_data_array_traits = typename DefaultTraits<T_data>::type>
 class FragmentedArray
