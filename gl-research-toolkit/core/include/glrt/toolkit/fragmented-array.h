@@ -18,8 +18,6 @@ struct FragmentedArray_Segment_Values
   };
   typedef ArrayTraits_Unordered_POD<SegmentRanges> SegmentRanges_ArrayTraits;
 
-  static void init(SegmentRanges*){}
-
   static void start_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
     *index = 0;
@@ -326,7 +324,6 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
         int subsegment_end = segmentEnd[i];
 
         innerSegmentRanges.append_move(std::move(typename T_inner_sections_trait::SegmentRanges()));
-        T_inner_sections_trait::init(&innerSegmentRanges.last());
         T_inner_sections_trait::classify(data, subsegment_begin, subsegment_end, &innerSegmentRanges.last(), extra_data);
 
         subsegment_begin = subsegment_end;
@@ -352,9 +349,6 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
 
   typedef typename T_segment_index_traits::template SegmentRangesMixin<SegmentRangesBase> SegmentRanges;
 
-  static void init(SegmentRanges*)
-  {
-  }
 
   static void start_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
