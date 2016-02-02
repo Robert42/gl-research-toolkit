@@ -41,8 +41,7 @@ SceneLayer::SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene)
 
 SceneLayer::~SceneLayer()
 {
-  QHash<Uuid<Node>, Node*> nodes;
-  nodes.swap(this->_nodes);
+  QHash<Uuid<Node>, Node*> nodes(std::move(this->_nodes));
   for(Node* node : nodes)
     delete node;
 
