@@ -3,6 +3,8 @@ set(SOURCE_FILES
   include/glrt/toolkit/array.h
   include/glrt/toolkit/array.inl
   include/glrt/toolkit/assimp-glm-converter.h
+  include/glrt/toolkit/dependency-set.h
+  include/glrt/toolkit/dependency-set.inl
   include/glrt/toolkit/escape-string.h
   include/glrt/toolkit/fragmented-array.h
   include/glrt/toolkit/fragmented-array.inl

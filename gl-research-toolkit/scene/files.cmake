@@ -23,6 +23,8 @@ set(SOURCE_FILES
   include/glrt/scene/scene.h
   include/glrt/scene/scene-layer.h
   include/glrt/scene/static-mesh-component.h
+  include/glrt/scene/ticking-object.h
+  include/glrt/scene/tick-manager.h
   src/glrt/scene/camera-component.cpp
   src/glrt/scene/camera.cpp
   src/glrt/scene/collect-scene-data.cpp
@@ -41,4 +43,6 @@ set(SOURCE_FILES
   src/glrt/scene/scene.cpp
   src/glrt/scene/scene-layer.cpp
   src/glrt/scene/static-mesh-component.cpp
+  src/glrt/scene/ticking-object.cpp
+  src/glrt/scene/tick-manager.cpp
 )

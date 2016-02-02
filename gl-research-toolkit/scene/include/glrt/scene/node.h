@@ -5,6 +5,7 @@
 #include <glrt/toolkit/array.h>
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/coord-frame.h>
+#include <glrt/scene/ticking-object.h>
 
 namespace glrt {
 namespace scene {
@@ -13,7 +14,6 @@ class SceneLayer;
 class Node final
 {
 public:
-  class TickingObject;
   class ModularAttribute;
   class Component;
 
@@ -43,43 +43,6 @@ public:
 private:
   QVector<ModularAttribute*> _allModularAttributes;
   Component* _rootComponent;
-};
-
-class Node::TickingObject : public QObject
-{
-  Q_OBJECT
-public:
-  enum class TickTraits
-  {
-    NoTick,
-    OnlyMainThread,
-    Multithreaded,
-  };
-
-  virtual void tick(float timeDelta) const;
-
-  bool tickDependsOn(const Component* other) const;
-  int updateTickDependencyDepth();
-  virtual TickTraits tickTraits() const;
-
-signals:
-  void tickDependencyDepthChanged(TickingObject* sender);
-
-protected:
-
-  template<typename T>
-  struct DependencySet;
-
-  typedef DependencySet<TickingObject> TickDependencySet;
-
-  TickingObject();
-
-  void collectDependencies(TickDependencySet* dependencySet) const;
-
-  virtual void collectTickDependencies(TickDependencySet* dependencySet) const;
-
-private:
-  int _tickDependencyDepth;
 };
 
 

@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/node.h>
+#include <glrt/scene/tick-manager.h>
 #include <glrt/scene/debug-camera.h>
 
 struct aiNode;
@@ -27,6 +28,7 @@ public:
   resources::ResourceManager& resourceManager;
   Uuid<Scene> uuid;
   QString file;
+  TickManager tickManager;
   DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
   Scene(resources::ResourceManager* resourceManager);
