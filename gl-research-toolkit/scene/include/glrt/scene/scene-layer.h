@@ -34,14 +34,8 @@ private:
   friend class Node;
   friend class Scene;
   QHash<Uuid<Node>, Node*> _nodes;
-  Array<Node*> _newNodes;
 
   SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene);
-
-  void _addNode(Node* node);
-  void _removeNode(Node* node);
-
-  void update();
 };
 
 } // namespace scene

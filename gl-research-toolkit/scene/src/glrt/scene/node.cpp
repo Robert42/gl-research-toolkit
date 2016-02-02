@@ -28,7 +28,8 @@ Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
   if(sceneLayer._nodes.contains(uuid))
     throw GLRT_EXCEPTION("Same uuid used twice");
 
-  sceneLayer._addNode(this);
+  sceneLayer._nodes.insert(uuid, this);
+  sceneLayer.nodeAdded(this);
 }
 
 Node::~Node()
@@ -43,7 +44,8 @@ Node::~Node()
   delete rootComponent;
   Q_ASSERT(this->rootComponent() == nullptr);
 
-  sceneLayer._removeNode(this);
+  sceneLayer._nodes.remove(uuid);
+  sceneLayer.nodeRemoved(this);
 }
 
 CoordFrame Node::globalCoordFrame() const

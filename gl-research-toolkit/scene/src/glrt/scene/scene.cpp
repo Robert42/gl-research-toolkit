@@ -8,6 +8,7 @@
 
 #include <QFile>
 #include <QDirIterator>
+#include <QCoreApplication>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -66,9 +67,6 @@ bool Scene::handleEvents(const SDL_Event& event)
 
 void Scene::update(float deltaTime)
 {
-  for(SceneLayer* l : _layers)
-    l->update();
-
   debugCamera.update(deltaTime);
 }
 
@@ -95,8 +93,7 @@ void Scene::load(const Uuid<Scene>& scene)
 
   angelScriptEngine->GarbageCollect();
 
-  for(SceneLayer* l : _layers)
-    l->update();
+  qApp->processEvents();
 
   // #TODO camera handling shouldn't be done by the scene
   QVector<Camera> cameras = collectCameras(this);
@@ -106,6 +103,8 @@ void Scene::load(const Uuid<Scene>& scene)
   bool success = true; // #FIXME: really find out, whether this was a success
   sceneLoadedExt(this, success);
   sceneLoaded(success);
+
+  qApp->processEvents();
 }
 
 void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)
