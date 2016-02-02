@@ -1,13 +1,15 @@
 #include <glrt/scene/ticking-object.h>
+#include <glrt/scene/tick-manager.h>
 
 namespace glrt {
 namespace scene {
 
 
-TickingObject::TickingObject(QObject* parent)
+TickingObject::TickingObject(TickManager& tickManager, QObject* parent)
   : QObject(parent),
     _tickDependencyDepth(0)
 {
+  tickManager.addTickingObject(this);
 }
 
 TickingObject::~TickingObject()

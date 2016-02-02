@@ -21,6 +21,7 @@
 #include <QStack>
 #include <QUuid>
 #include <QQueue>
+#include <QPointer>
 
 #include <iostream>
 #include <memory>
@@ -31,6 +32,13 @@
 #include <cstring>
 
 #include <SDL2/SDL.h>
+
+
+template<typename T>
+inline int qHash(const QPointer<T>& ptr, int seed = 0)
+{
+  return qHash(ptr.data(), seed);
+}
 
 
 // the unnecessary macros make my syntax highligh unpretty ;)

@@ -33,7 +33,7 @@ protected:
   typedef DependencySet<TickingObject> TickDependencySet;
   friend struct DependencySet<TickingObject>;
 
-  TickingObject(QObject* parent = nullptr);
+  TickingObject(TickManager& tickManager, QObject* parent = nullptr);
   ~TickingObject();
 
   void collectDependencies(TickDependencySet* dependencySet) const;

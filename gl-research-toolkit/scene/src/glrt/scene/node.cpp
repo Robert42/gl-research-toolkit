@@ -107,7 +107,7 @@ void Node::registerAngelScriptAPI()
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
-  : TickingObject(&node),
+  : TickingObject(node.sceneLayer.scene.tickManager, &node),
     node(node),
     uuid(uuid)
 {
@@ -139,7 +139,7 @@ only changed by deleting the child or parent component.
 This component will have the given \a uuid.
 */
 Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
-  : TickingObject(&node),
+  : TickingObject(node.sceneLayer.scene.tickManager, &node),
     node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),

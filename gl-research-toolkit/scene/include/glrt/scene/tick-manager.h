@@ -13,7 +13,17 @@ class TickManager : public QObject
 public:
   TickManager(QObject* parent=nullptr);
 
+  void tick(float deltaTime);
 
+private:
+  friend class TickingObject;
+  QSet<QPointer<TickingObject>> notYetAddedTickingPointers;
+
+  void addTickingObject(TickingObject* tickingObject);
+  void updateObjects();
+
+private slots:
+  void removeObject(QObject* object);
 };
 
 } // namespace scene
