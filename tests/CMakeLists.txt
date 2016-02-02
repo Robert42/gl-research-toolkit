@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 include(files.cmake)
 
+set(CMAKE_AUTOMOC ON)
+
 project(Tests)
 
 add_executable(tests

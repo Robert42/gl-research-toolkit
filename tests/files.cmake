@@ -6,6 +6,8 @@ set(SOURCE_FILES
   arrays/trait-handling.cpp
   coord-frame/coord-frame.cpp
   main.cpp
+  qt-tests/auto-disconnect-with-deletion.cpp
+  qt-tests/auto-disconnect-with-deletion.h
   shader-includes/shader-includes.cpp
   shader-library/shader-library.cpp
   testing-framework/testing-application.cpp

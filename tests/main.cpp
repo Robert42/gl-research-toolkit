@@ -1,5 +1,6 @@
 #include <testing-framework.h>
 
+void main_qt_tests();
 void main_coord_frame();
 void main_array_tests();
 void test_shader_includes();
@@ -9,6 +10,7 @@ int main(int argc, char** argv)
 {
   TestingApplication testing_application(argc, argv);
 
+  main_qt_tests();
   main_coord_frame();
   main_array_tests();
   test_shader_includes();
