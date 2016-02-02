@@ -4,8 +4,8 @@ namespace glrt {
 namespace scene {
 
 
-TickingObject::TickingObject(TickManager& tickManager)
-  : tickManager(tickManager),
+TickingObject::TickingObject(QObject* parent)
+  : QObject(parent),
     _tickDependencyDepth(0)
 {
 }

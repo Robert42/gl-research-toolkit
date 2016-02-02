@@ -11,8 +11,9 @@ namespace glrt {
 namespace scene {
 
 class SceneLayer;
-class Node final
+class Node final : public QObject
 {
+  Q_OBJECT
 public:
   class ModularAttribute;
   class Component;

@@ -20,20 +20,19 @@ inline Node* create_node(SceneLayer* scenelayer, const Uuid<Node>& uuid)
 
 
 Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
-  : sceneLayer(sceneLayer),
+  : QObject(&sceneLayer),
+    sceneLayer(sceneLayer),
     uuid(uuid),
     _rootComponent(nullptr)
 {
   if(sceneLayer._nodes.contains(uuid))
     throw GLRT_EXCEPTION("Same uuid used twice");
 
-  sceneLayer._nodes[uuid] = this;
+  sceneLayer._addNode(this);
 }
 
 Node::~Node()
 {
-  sceneLayer._nodes.remove(uuid);
-
   QVector<ModularAttribute*> allModularAttributes = this->allModularAttributes();
   for(ModularAttribute* a : allModularAttributes)
     delete a;
@@ -42,7 +41,9 @@ Node::~Node()
 
   Component* rootComponent = this->rootComponent();
   delete rootComponent;
-  Q_ASSERT(rootComponent == nullptr);
+  Q_ASSERT(this->rootComponent() == nullptr);
+
+  sceneLayer._removeNode(this);
 }
 
 CoordFrame Node::globalCoordFrame() const
@@ -104,7 +105,7 @@ void Node::registerAngelScriptAPI()
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
-  : TickingObject(node.sceneLayer.scene.tickManager),
+  : TickingObject(&node),
     node(node),
     uuid(uuid)
 {
@@ -136,7 +137,7 @@ only changed by deleting the child or parent component.
 This component will have the given \a uuid.
 */
 Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
-  : TickingObject(node.sceneLayer.scene.tickManager),
+  : TickingObject(&node),
     node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
@@ -161,11 +162,13 @@ Node::Component::~Component()
 {
   if(parent)
     parent->_children.removeOne(this);
+  else
+    node._rootComponent = nullptr;
 
   QVector<Component*> children = this->children();
   for(Component* child : children)
     delete child;
-  Q_ASSERT(children.isEmpty());
+  Q_ASSERT(this->children().isEmpty());
 }
 
 

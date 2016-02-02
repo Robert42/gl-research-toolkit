@@ -41,10 +41,20 @@ SceneLayer::SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene)
 
 SceneLayer::~SceneLayer()
 {
+  QHash<Uuid<Node>, Node*> nodes;
+  nodes.swap(this->_nodes);
+  this->_newNodes.clear();
+  for(Node* node : nodes)
+    delete node;
+
+  Array<Node*> newNodes;
+  newNodes.swap(this->_newNodes);
+  const int length = newNodes.length();
+  Node** const data = newNodes.data();
+  for(int i=0; i<length; ++i)
+    delete data[i];
+
   scene._layers.remove(uuid);
-
-  // #TODO: delete all nodes
-
   scene.resourceManager._sceneLayers.removeAll(this);
 }
 
@@ -87,6 +97,55 @@ void SceneLayer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("SceneLayer", "ResourceIndex@ get_index()", AngelScript::asFUNCTION(get_index), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void SceneLayer::update()
+{
+  Array<Node*> newNodes;
+  newNodes.swap(this->_newNodes);
+  const int length = newNodes.length();
+  Node** const data = newNodes.data();
+  for(int i=0; i<length; ++i)
+  {
+    Node* node = data[i];
+
+    Q_ASSERT(!this->_nodes.contains(node->uuid));
+
+    this->_nodes.insert(node->uuid, node);
+
+    nodeAdded(node);
+  }
+}
+
+void SceneLayer::_addNode(Node* node)
+{
+  _newNodes.append(node);
+}
+
+void SceneLayer::_removeNode(Node* node)
+{
+  {
+    auto i = _nodes.find(node->uuid);
+
+    if(i == _nodes.end())
+      return;
+
+    Q_ASSERT(i.value() == node);
+
+    _nodes.erase(i);
+  }
+
+  {
+    int i = _newNodes.indexOfFirst(node);
+    if(i>0)
+      _newNodes.removeAt(i);
+  }
+
+  Q_ASSERT(_newNodes.indexOfFirst(node) == -1);
+
+  node->deleteLater();
+
+  nodeRemoved(node);
 }
 
 

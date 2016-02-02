@@ -66,6 +66,9 @@ bool Scene::handleEvents(const SDL_Event& event)
 
 void Scene::update(float deltaTime)
 {
+  for(SceneLayer* l : _layers)
+    l->update();
+
   debugCamera.update(deltaTime);
 }
 
@@ -91,6 +94,9 @@ void Scene::load(const Uuid<Scene>& scene)
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
   angelScriptEngine->GarbageCollect();
+
+  for(SceneLayer* l : _layers)
+    l->update();
 
   // #TODO camera handling shouldn't be done by the scene
   QVector<Camera> cameras = collectCameras(this);
