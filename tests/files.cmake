@@ -1,0 +1,14 @@
+set(SOURCE_FILES
+  arrays/arrays-tests.cpp
+  arrays/fragmented-array.test.cpp
+  arrays/statespy.cpp
+  arrays/statespy.h
+  arrays/trait-handling.cpp
+  coord-frame/coord-frame.cpp
+  main.cpp
+  shader-includes/shader-includes.cpp
+  shader-library/shader-library.cpp
+  testing-framework/testing-application.cpp
+  testing-framework/testing-application.h
+  testing-framework/testing-framework.h
+)

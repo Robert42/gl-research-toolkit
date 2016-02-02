@@ -701,10 +701,8 @@ void test_ensureCapacity()
   EXPECT_EQ(array.capacity(), 0);
 }
 
-int main(int argc, char** argv)
+void main_array_tests()
 {
-  TestingApplication testing_application(argc, argv);
-
   test_traits();
   test_array_constructors();
   test_array_operators();
@@ -717,6 +715,4 @@ int main(int argc, char** argv)
   test_remove();
   test_ensureCapacity();
   test_fragmented_array();
-
-  return testing_application.result();
 }

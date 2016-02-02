@@ -129,15 +129,11 @@ void test_projection_plane()
 }
 
 
-int main(int argc, char** argv)
+void main_shader_library()
 {
-  TestingApplication testing_application(argc, argv);
-
   test_plane_distance();
   test_ray_distance();
   test_ray_nearest_point();
   test_raytracing_plane();
   test_projection_plane();
-
-  return testing_application.result();
 }

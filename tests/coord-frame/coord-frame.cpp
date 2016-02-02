@@ -80,10 +80,8 @@ void test_invert()
 }
 
 
-int main(int argc, char** argv)
+void main_coord_frame()
 {
-  TestingApplication testing_application(argc, argv);
-
   for(int i=0; i<6; ++i)
     all_dimensions[i][i/2] = (i%2==0 ? 1 : -1);
 
@@ -92,6 +90,4 @@ int main(int argc, char** argv)
   test_to_matrix();
   test_from_matrix();
   test_invert();
-
-  return testing_application.result();
 }
