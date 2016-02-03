@@ -89,7 +89,7 @@ but you still have to make sure that no other thread will create any race condit
 */
 TickingObject::TickTraits TickingObject::tickTraits() const
 {
-  return TickTraits::OnlyMainThread;
+  return TickTraits::NoTick;
 }
 
 void TickingObject::collectTickDependencies(TickDependencySet* dependencySet) const

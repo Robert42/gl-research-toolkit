@@ -38,15 +38,15 @@ void TickManager::updateObjects()
 
     TickingObject* tickingObject = ptr.data();
 
-    tickingObject->updateTickDependencyDepth();
-
-    connect(tickingObject, &TickingObject::tickDependencyDepthChanged, this, &TickManager::updateObject);
-    connect(tickingObject, &QObject::destroyed, this, &TickManager::removeObject);
-
     TickingObject::TickTraits traits = tickingObject->tickTraits();
 
     if(traits == TickingObject::TickTraits::NoTick)
       continue;
+
+    tickingObject->updateTickDependencyDepth();
+
+    connect(tickingObject, &TickingObject::tickDependencyDepthChanged, this, &TickManager::updateObject);
+    connect(tickingObject, &QObject::destroyed, this, &TickManager::removeObject);
 
     fragmented_array.append_copy(tickingObject);
   }
