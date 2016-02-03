@@ -29,7 +29,7 @@ struct FragmentedArray_Segment_Values
     Q_UNUSED(extra_data);
   }
 
-  static void end_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
+  static void end_iterate(T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
     Q_UNUSED(data);
     Q_UNUSED(begin);
@@ -39,7 +39,7 @@ struct FragmentedArray_Segment_Values
     Q_UNUSED(index);
   }
 
-  static void iterate(const T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
+  static void iterate(T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
     Q_UNUSED(ranges);
     Q_UNUSED(index);
@@ -77,6 +77,13 @@ struct FragmentedArray_Segment_Values
   static glm::ivec2 section_boundaries(int begin, int end, const SegmentRanges& ranges)
   {
     Q_UNUSED(ranges);
+    return glm::ivec2(begin,end);
+  }
+
+  static glm::ivec2 section_boundaries_for_value(int begin, int end, const SegmentRanges& ranges, const T_value& value)
+  {
+    Q_UNUSED(ranges);
+    Q_UNUSED(value);
     return glm::ivec2(begin,end);
   }
 };
@@ -479,7 +486,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     if(i == -1)
       return glm::ivec2(-1);
 
-    return T_inner_sections_trait::section_boundaries(ranges.segment_start(i, begin, end), ranges.segment_end(i, begin, end), ranges.innerSegmentRanges[i], value);
+    return T_inner_sections_trait::section_boundaries_for_value(ranges.segment_start(i, begin, end), ranges.segment_end(i, begin, end), ranges.innerSegmentRanges[i], value);
   }
 };
 

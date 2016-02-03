@@ -15,7 +15,8 @@ DependencySet<T>::DependencySet(const T* originalObject)
 
   while(!queuedDependencies.isEmpty())
   {
-    QQueue<const T*> currentDepth(std::move(queuedDependencies));
+    QQueue<const T*> currentDepth;
+    currentDepth.swap(queuedDependencies);
 
     while(!currentDepth.isEmpty())
     {

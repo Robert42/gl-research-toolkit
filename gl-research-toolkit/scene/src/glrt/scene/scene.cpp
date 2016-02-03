@@ -67,6 +67,7 @@ bool Scene::handleEvents(const SDL_Event& event)
 
 void Scene::update(float deltaTime)
 {
+  tickManager.tick(deltaTime);
   debugCamera.update(deltaTime);
 }
 

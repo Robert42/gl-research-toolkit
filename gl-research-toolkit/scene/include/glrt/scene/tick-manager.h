@@ -25,11 +25,11 @@ private:
 
   struct TickCaller : public HandlerBase
   {
-    static void handle_value(const TickingObject**, int, TickManager*)
+    static void handle_value(TickingObject**, int, TickManager*)
     {
     }
 
-    static bool valueLessThan(const TickingObject* a, const TickingObject* b)
+    static bool valueLessThan(TickingObject* a, TickingObject* b)
     {
       return a < b;
     }
@@ -118,12 +118,12 @@ private:
       }
     }
 
-    static void handle_end_segment(TickingObject** objects, int begin, int end, int depth, TickManager* tickManager)
+    static void handle_end_segment(TickingObject** objects, int begin, int end, TickingObject::TickTraits tickTraits, TickManager* tickManager)
     {
       Q_UNUSED(objects);
       Q_UNUSED(begin);
       Q_UNUSED(end);
-      Q_UNUSED(depth);
+      Q_UNUSED(tickTraits);
       Q_UNUSED(tickManager);
     }
   };
