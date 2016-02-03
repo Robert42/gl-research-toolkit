@@ -350,7 +350,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
   typedef typename T_segment_index_traits::template SegmentRangesMixin<SegmentRangesBase> SegmentRanges;
 
 
-  static void start_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
+  static void start_iterate(T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
     Q_ASSERT(!ranges.isEmpty(begin, end));
 
@@ -366,7 +366,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     T_inner_sections_trait::start_iterate(data, segment_start, segment_end, ranges.innerSegmentRanges[index->index], extra_data, &index->inner_index);
   }
 
-  static void end_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
+  static void end_iterate(T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
     Q_ASSERT(!ranges.isEmpty(begin, end));
 
@@ -380,7 +380,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     handler_type::handle_end_segment(data, segment_start, segment_end, ranges.segment_value_for_index(index->index), extra_data);
   }
 
-  static void iterate(const T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
+  static void iterate(T_value* data, int data_index, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
     Q_ASSERT(!ranges.isEmpty(begin, end));
 
@@ -471,11 +471,33 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
     Q_UNUSED(ranges);
     return glm::ivec2(begin,end);
   }
+
+  static glm::ivec2 section_boundaries_for_value(int begin, int end, const SegmentRanges& ranges, const T_value& value)
+  {
+    int i = ranges.segment_as_index(handler_type::classify(value));
+
+    if(i == -1)
+      return glm::ivec2(-1);
+
+    return T_inner_sections_trait::section_boundaries(ranges.segment_start(i, begin, end), ranges.segment_end(i, begin, end), ranges.innerSegmentRanges[i], value);
+  }
 };
 
 template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
 struct FragmentedArray_Segment_Split_in_VariableNumber : public FragmentedArray_Segment_Generic<T_value, T_segment_type, T_handler, T_inner_sections_trait, implementation::FragmentedArray_SegmentIndexTraits_VariableSegmentNumber_IndexBased<T_segment_type, T_handler, T_inner_sections_trait>>
 {
+};
+
+template<int N, typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
+struct FragmentedArray_Segment_Split_in_FixedNumberOfSegments : public FragmentedArray_Segment_Split_in_VariableNumber<T_value, T_segment_type, T_handler, T_inner_sections_trait>
+{
+  // Dummy implementation for a possible future faster implementation of constant number of segments
+};
+
+template<typename T_value, typename T_segment_type, class T_handler, class T_inner_sections_trait>
+struct FragmentedArray_Segment_Split_in_TwoSegments : public FragmentedArray_Segment_Split_in_VariableNumber<T_value, T_segment_type, T_handler, T_inner_sections_trait>
+{
+  // Dummy implementation for a possible future faster implementation of two segments
 };
 
 
@@ -500,6 +522,10 @@ public:
   void append_copy(const T_data& data);
   void append_move(T_data&& data);
   void remove(const T_data& data);
+  void remove(int);
+
+  int indexOfFirst(const T_data& data) const;
+  void orderChangedForValue(const T_data& data);
 
   int updateSegments(extra_data_type extra_data);
   void iterate(extra_data_type extra_data);

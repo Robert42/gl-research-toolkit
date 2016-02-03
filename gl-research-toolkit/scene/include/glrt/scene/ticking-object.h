@@ -3,6 +3,7 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/toolkit/dependency-set.h>
+#include <glrt/toolkit/array.h>
 
 namespace glrt {
 namespace scene {
@@ -15,14 +16,18 @@ class TickingObject : public QObject
 public:
   enum class TickTraits
   {
-    NoTick,
+    // The order explained: This order is used by the Tick manager to decide in
+    // which order objects are called. So NoTick must be the last one to prevent
+    // gaps. between segments.
     OnlyMainThread,
     Multithreaded,
+    NoTick,
   };
 
   virtual void tick(float timeDelta) const;
 
   bool tickDependsOn(const TickingObject* other) const;
+  int tickDependencyDepth() const;
   int updateTickDependencyDepth();
   virtual TickTraits tickTraits() const;
 
@@ -46,6 +51,14 @@ private:
 
 
 } // namespace scene
+
+
+template<>
+struct DefaultTraits<scene::TickingObject::TickTraits>
+{
+  typedef ArrayTraits_Unordered_Primitive<scene::TickingObject::TickTraits> type;
+};
+
 } // namespace glrt
 
 #endif // GLRT_SCENE_TICKINGOBJECT_H

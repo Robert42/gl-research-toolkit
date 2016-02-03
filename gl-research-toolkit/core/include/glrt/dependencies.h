@@ -22,6 +22,8 @@
 #include <QUuid>
 #include <QQueue>
 #include <QPointer>
+#include <QMutexLocker>
+#include <QMutex>
 
 #include <iostream>
 #include <memory>

@@ -79,9 +79,41 @@ void FragmentedArray<d, s, t>::append_move(d&& data)
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::remove(const d& data)
 {
-  recalcRegionToUpdateAfterChanging(data);
+  remove(indexOfFirst(data));
+}
 
-  dataArray.removeAt(dataArray.indexOfFirst(data));
+template<typename d, typename s, typename t>
+void FragmentedArray<d, s, t>::remove(int index)
+{
+  Q_ASSERT(index>=0 && index<this->length());
+
+  beginRegionToUpdate = glm::min<int>(index, beginRegionToUpdate);
+
+  dataArray.removeAt(index);
+}
+
+template<typename d, typename s, typename t>
+int FragmentedArray<d, s, t>::indexOfFirst(const d& value) const
+{
+  const int length = this->length();
+  glm::ivec2 bounds = s::section_boundaries_for_value(0, length, segmentRanges, value);
+
+  if(bounds[0] < beginRegionToUpdate)
+  {
+    const d* data = this->data();
+    for(int i=bounds[0]; i<bounds[1]; ++i)
+      if(data[i] == value)
+        return i;
+  }
+
+  return dataArray.indexOfFirst(value);
+}
+
+template<typename d, typename s, typename t>
+void FragmentedArray<d, s, t>::orderChangedForValue(const d& value)
+{
+  beginRegionToUpdate = glm::min<int>(beginRegionToUpdate, indexOfFirst(value));
+  recalcRegionToUpdateAfterChanging(value);
 }
 
 template<typename d, typename s, typename t>
@@ -97,6 +129,7 @@ int FragmentedArray<d, s, t>::updateSegments(extra_data_type extra_data)
 
   Q_ASSERT(std::is_sorted(data, data+length, s::segmentLessThan));
 
+  // #TODO: is it possible to reclassify only the changed part?
   s::classify(dataArray.data(), 0, length, &segmentRanges, extra_data);
 
   this->beginRegionToUpdate = length;

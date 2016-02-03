@@ -16,6 +16,9 @@ TickingObject::~TickingObject()
 {
 }
 
+/*
+\warning Never update the Qt eventloop within a tick.  If you do so, assertions might get thrown
+*/
 void TickingObject::tick(float timeDelta) const
 {
   Q_UNUSED(timeDelta);
@@ -37,6 +40,11 @@ int TickingObject::updateTickDependencyDepth()
   if(_tickDependencyDepth != newDepth)
     tickDependencyDepthChanged(this);
 
+  return _tickDependencyDepth;
+}
+
+int TickingObject::tickDependencyDepth() const
+{
   return _tickDependencyDepth;
 }
 
