@@ -8,6 +8,8 @@ set(SOURCE_FILES
   include/glrt/scene/coord-frame.inl
   include/glrt/scene/debug-camera.h
   include/glrt/scene/declarations.h
+  include/glrt/scene/implementation/tick-manager-tickorder-array.h
+  include/glrt/scene/implementation/tick-manager-tickorder-array.inl
   include/glrt/scene/light-component.h
   include/glrt/scene/node.h
   include/glrt/scene/node.inl
