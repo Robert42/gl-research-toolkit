@@ -1,4 +1,4 @@
-#include "static-mesh-buffer-manager.h"
+#include <glrt/renderer/static-mesh-buffer-manager.h>
 
 namespace glrt {
 namespace renderer {
