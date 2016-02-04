@@ -63,6 +63,7 @@ class Node::Component : public TickingObject
 {
   Q_OBJECT
   Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
+  Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
 
   Node& node;
@@ -76,7 +77,7 @@ public:
   void collectSubtree(QVector<Component*>* subTree);
 
   bool movable() const;
-  void setMovable(bool movable);
+  bool visible() const;
 
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
@@ -92,9 +93,18 @@ public:
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
+public slots:
+  void setMovable(bool movable);
+  void setVisible(bool visible);
+  void show(bool show);
+  void hide(bool hide);
+
 signals:
   void coordDependencyDepthChanged(Component* sender);
-  void movableChanged(Component* sender);
+  void componentMovabilityChanged(Component* sender);
+  void componentVisibilityChanged(Component* sender);
+  void visibleChanged(bool);
+  void movableChanged(bool);
 
 protected:
   typedef DependencySet<Component> CoordDependencySet;
@@ -124,6 +134,7 @@ private:
   CoordFrame _localCoordFrame;
 
   bool _movable : 1;
+  bool _visible : 1;
 
   QVector<Component*> _children;
   int _coorddependencyDepth;

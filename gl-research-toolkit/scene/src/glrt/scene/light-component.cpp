@@ -12,7 +12,7 @@ LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<L
   : Node::Component(node, parent, uuid),
     _dynamic(false)
 {
-  connect(this, &LightComponent::movableChanged, this, &LightComponent::handleChangedMovable);
+  connect(this, &LightComponent::componentMovabilityChanged, this, &LightComponent::handleChangedMovable);
 }
 
 
