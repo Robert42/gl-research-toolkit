@@ -156,21 +156,25 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   }else
   {
     Q_ASSERT(node.rootComponent() == nullptr);
-    node._rootComponent = this;
+    this->node._rootComponent = this;
   }
+
+  this->node.sceneLayer.componentAdded(this);
 }
 
 Node::Component::~Component()
 {
-  if(parent)
-    parent->_children.removeOne(this);
-  else
-    node._rootComponent = nullptr;
+  node.sceneLayer.componentRemoved(this);
 
   QVector<Component*> children = this->children();
   for(Component* child : children)
     delete child;
   Q_ASSERT(this->children().isEmpty());
+
+  if(parent)
+    parent->_children.removeOne(this);
+  else
+    node._rootComponent = nullptr;
 }
 
 

@@ -1,5 +1,6 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-layer.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/scene/resources/resource-manager.h>
 
@@ -19,10 +20,12 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {
+  this->node.sceneLayer.staticMeshComponentAdded(this);
 }
 
 StaticMeshComponent::~StaticMeshComponent()
 {
+  this->node.sceneLayer.staticMeshComponentRemoved(this);
 }
 
 

@@ -30,6 +30,12 @@ signals:
   void nodeAdded(Node* node);
   void nodeRemoved(Node* node);
 
+  void componentAdded(Node::Component* node);
+  void componentRemoved(Node::Component* node);
+
+  void staticMeshComponentAdded(StaticMeshComponent* node);
+  void staticMeshComponentRemoved(StaticMeshComponent* node);
+
 private:
   friend class Node;
   friend class Scene;
