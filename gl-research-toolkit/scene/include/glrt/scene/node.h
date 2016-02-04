@@ -135,10 +135,13 @@ private:
 
   bool _movable : 1;
   bool _visible : 1;
+  bool _parentVisible : 1;
 
   QVector<Component*> _children;
   int _coorddependencyDepth;
   int _coordinateIndex;
+
+  void updateVisibility(bool prevVisibility);
 };
 
 

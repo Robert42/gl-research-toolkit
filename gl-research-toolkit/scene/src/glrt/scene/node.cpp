@@ -145,6 +145,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     uuid(uuid),
     _movable(false),
     _visible(true),
+    _parentVisible(true),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
 {
@@ -219,20 +220,34 @@ void Node::Component::setMovable(bool movable)
 
 bool Node::Component::visible() const
 {
-  return _visible;
+  return _visible && _parentVisible;
 }
 
 void Node::Component::setVisible(bool visible)
 {
+  bool prevVisibility = this->visible();
   this->_visible = visible;
-  if(this->visible() != visible)
+  updateVisibility(prevVisibility);
+}
+
+void Node::Component::updateVisibility(bool prevVisibility)
+{
+  bool currentVisibility = this->visible();
+  if(currentVisibility != prevVisibility)
   {
-    visibleChanged(this->visible());
+    visibleChanged(currentVisibility);
     componentVisibilityChanged(this);
-    if(this->visible())
+    if(currentVisibility)
       node.sceneLayer.componentShown(this);
     else
       node.sceneLayer.componentHidden(this);
+
+    for(Component* child : _children)
+    {
+      bool prevVisibility = child->visible();
+      child->_parentVisible = currentVisibility;
+      child->updateVisibility(prevVisibility);
+    }
   }
 }
 
