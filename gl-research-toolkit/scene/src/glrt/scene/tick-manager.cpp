@@ -16,7 +16,7 @@ void TickManager::tick(float deltaTime)
   this->deltaTime = deltaTime;
   updateObjects();
 
-  objectArray.fragmented_array.iterate(this);
+  objectArray.iterate(this);
 }
 
 void TickManager::addTickingObject(TickingObject* tickingObject)
@@ -26,7 +26,7 @@ void TickManager::addTickingObject(TickingObject* tickingObject)
 
 void TickManager::updateObjects()
 {
-  auto& fragmented_array = objectArray.fragmented_array;
+  auto& fragmented_array = objectArray;
 
   for(TickingObject* deletedObject : deletedObjects)
     fragmented_array.remove(deletedObject);
@@ -71,7 +71,7 @@ void TickManager::removeObject(QObject* object)
 void TickManager::updateObject(TickingObject* object)
 {
   QMutexLocker l(&mutex);
-  auto& fragmented_array = objectArray.fragmented_array;
+  auto& fragmented_array = objectArray;
   fragmented_array.orderChangedForValue(object);
 }
 

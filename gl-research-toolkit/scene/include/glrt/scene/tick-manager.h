@@ -21,7 +21,7 @@ private:
   friend class TickingObject;
   friend struct implementation::TickManager_TickObjectArray;
 
-  implementation::TickManager_TickObjectArray objectArray;
+  implementation::TickManager_TickObjectArray::type objectArray;
   QSet<QPointer<TickingObject>> notYetAddedTickingPointers;
   QSet<TickingObject*> deletedObjects;
   QMutex mutex;

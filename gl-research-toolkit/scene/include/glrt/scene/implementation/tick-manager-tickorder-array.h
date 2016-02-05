@@ -46,9 +46,7 @@ struct TickManager_TickObjectArray
   typedef FragmentedArray_Segment_Split_in_TwoSegments<TickingObject*, TickingObject::TickTraits, MultithreadingHandler, CallTickTrait> MultithreadingTraits;
   typedef FragmentedArray_Segment_Split_in_VariableNumber<TickingObject*, int, DependencyDepthHandler, MultithreadingTraits> DependencyDepthTraits;
 
-  typedef FragmentedArray<TickingObject*, DependencyDepthTraits> FragmentedArray_TickOrder;
-
-  FragmentedArray_TickOrder fragmented_array;
+  typedef FragmentedArray<TickingObject*, DependencyDepthTraits> type;
 };
 
 } // namespace implementation
