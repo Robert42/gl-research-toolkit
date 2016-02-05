@@ -21,10 +21,10 @@ private:
   friend class TickingObject;
   friend struct implementation::TickManager_TickObjectArray;
 
-  implementation::TickManager_TickObjectArray::type objectArray;
+  implementation::TickManager_TickObjectArray::type fragmented_array;
   QSet<QPointer<TickingObject>> notYetAddedTickingPointers;
   QSet<TickingObject*> deletedObjects;
-  QMutex mutex;
+  QReadWriteLock mutexFragmentedArray;
   float deltaTime;
 
   void addTickingObject(TickingObject* tickingObject);

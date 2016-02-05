@@ -84,8 +84,11 @@ void TickManager_TickObjectArray::MultithreadingHandler::handle_new_segment(Tick
   case TickingObject::TickTraits::Multithreaded:
     // #ISSUE-61 OMP
     for(int i=begin; i<end; ++i)
-      if(!tickManager->deletedObjects.contains(objects[i]))
-        objects[i]->tick(tickManager->deltaTime);
+    {
+      if(tickManager->deletedObjects.contains(objects[i]))
+        continue;
+      objects[i]->tick(tickManager->deltaTime);
+    }
     break;
   case TickingObject::TickTraits::OnlyMainThread:
     for(int i=begin; i<end; ++i)

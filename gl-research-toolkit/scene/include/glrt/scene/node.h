@@ -82,7 +82,7 @@ public:
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
 
-  CoordFrame calcGlobalCoordFrame() const;
+  CoordFrame updateGlobalCoordFrame();
   virtual CoordFrame calcGlobalCoordFrameImpl() const;
   bool hasCustomGlobalCoordUpdater() const;
 

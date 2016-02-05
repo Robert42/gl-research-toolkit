@@ -60,6 +60,8 @@ struct GlobalCoordArrayOrder
   typedef FragmentedArray_Segment_Split_in_TwoSegments<Node::Component*, bool, HasCustomUpdaterHandler, CallUpdateTrait> HasCustomUpdaterTraits;
   typedef FragmentedArray_Segment_Split_in_VariableNumber<Node::Component*, int, DependencyDepthHandler, HasCustomUpdaterTraits> DependencyDepthTraits;
   typedef FragmentedArray_Segment_Split_in_TwoSegments<Node::Component*, bool, MovableHandler, DependencyDepthTraits> IsMovableTraits;
+
+  typedef FragmentedArray<Node::Component*, IsMovableTraits> type;
 };
 
 } // namespace implementation

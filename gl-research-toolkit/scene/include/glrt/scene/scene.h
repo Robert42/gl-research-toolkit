@@ -5,6 +5,7 @@
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/node.h>
 #include <glrt/scene/tick-manager.h>
+#include <glrt/scene/global-coord-updater.h>
 #include <glrt/scene/debug-camera.h>
 
 struct aiNode;
@@ -29,6 +30,7 @@ public:
   Uuid<Scene> uuid;
   QString file;
   TickManager tickManager;
+  GlobalCoordUpdater globalCoordUpdater;
   DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
   Scene(resources::ResourceManager* resourceManager);

@@ -162,6 +162,8 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   }
 
   this->node.sceneLayer.componentAdded(this);
+
+  node.sceneLayer.scene.globalCoordUpdater.addComponent(this);
 }
 
 Node::Component::~Component()
@@ -272,7 +274,7 @@ Returns the cached global transformation of the given component.
 
 \note The cache ist updated after calling the tick functions of any components.
 If your tick function depends on the final global position of a component, use
-the slow function calcGlobalCoordFrame or think, whether
+the slow function calcGlobalCoordFrame to update it first or think, whether
 */
 CoordFrame Node::Component::globalCoordFrame() const
 {
@@ -284,16 +286,19 @@ Calculates the global transformation of the given component.
 
 \note This Method is able to accept nullptr as this value.
 */
-CoordFrame Node::Component::calcGlobalCoordFrame() const
+CoordFrame Node::Component::updateGlobalCoordFrame()
 {
   if(this == nullptr)
     return CoordFrame();
 
   if(hasCustomGlobalCoordUpdater())
-    return calcGlobalCoordFrameImpl();
+    _globalCoordFrame = calcGlobalCoordFrameImpl();
   else
-    return parent->calcGlobalCoordFrame() * localCoordFrame();
+    _globalCoordFrame = parent->globalCoordFrame() * localCoordFrame();
+
+  return _globalCoordFrame;
 }
+
 
 /*!
 This function allows to use a customzed calculation for the global coord frame
@@ -306,6 +311,11 @@ not to use this virtual function to improve performance.
 
 \warning This functions will be called multithreaded, so don't depend on anything
 different than this component itself or it's CoordDependencies.
+\br
+Don't change any state of any object, just calculate the new GlobalCoordinate and
+return it.
+\br
+Don't change anything, expecially don't change the movability or delete any objects.
 */
 CoordFrame Node::Component::calcGlobalCoordFrameImpl() const
 {

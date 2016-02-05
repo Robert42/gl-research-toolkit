@@ -9,11 +9,32 @@
 namespace glrt {
 namespace scene {
 
-class GlobalCoordUpdater
+
+class GlobalCoordUpdater : public QObject
 {
+  Q_OBJECT
 public:
   GlobalCoordUpdater();
+
+  void updateCoordinages();
+
+private:
+  friend class Node::Component;
+  friend struct implementation::GlobalCoordArrayOrder;
+
+  implementation::GlobalCoordArrayOrder::type fragmented_array;
+  QSet<QPointer<TickingObject>> notYetAddedComponents;
+  QMutex mutex;
+
+  void addComponent(Node::Component* component);
+
+  void updateArray();
+
+private slots:
+  void removeObject(QObject*);
+  void movabilityChanged(Node::Component* component);
 };
+
 
 } // namespace scene
 } // namespace glrt

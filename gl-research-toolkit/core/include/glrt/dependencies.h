@@ -24,6 +24,9 @@
 #include <QPointer>
 #include <QMutexLocker>
 #include <QMutex>
+#include <QReadWriteLock>
+#include <QReadLocker>
+#include <QWriteLocker>
 
 #include <iostream>
 #include <memory>

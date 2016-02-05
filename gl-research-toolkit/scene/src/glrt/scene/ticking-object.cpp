@@ -80,6 +80,8 @@ sure to prevent race condition.
 Even if your tick only reads data, you probably want to make sure no one other is
 changing the same data in parallel. Don't say you haven't been warned.
 \br
+Avoid deleting any object directly, instead, call deleteLater()
+\br
 If you aren't 100% sure that your ticks are race condition free, I recomment to
 use the TickTraits::OnlyMainThread trait (which is returned by default).
 You can use tick dependencies to ensure, that theese two tick functions aren't called parallel,
