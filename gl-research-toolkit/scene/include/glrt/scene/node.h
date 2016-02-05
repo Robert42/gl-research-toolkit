@@ -82,7 +82,8 @@ public:
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
 
-  virtual CoordFrame calcGlobalCoordFrame() const;
+  CoordFrame calcGlobalCoordFrame() const;
+  virtual CoordFrame calcGlobalCoordFrameImpl() const;
   bool hasCustomGlobalCoordUpdater() const;
 
   void set_localCoordFrame(const CoordFrame& coordFrame);
@@ -132,6 +133,7 @@ private:
   static void _registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const std::string& function_name, const char* arguments);
 
   CoordFrame _localCoordFrame;
+  CoordFrame _globalCoordFrame;
 
   bool _movable : 1;
   bool _visible : 1;

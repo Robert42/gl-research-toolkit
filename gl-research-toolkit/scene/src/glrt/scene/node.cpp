@@ -268,16 +268,31 @@ CoordFrame Node::Component::localCoordFrame() const
 }
 
 /*!
- * Returns the global transformation of the given component.
- *
- * \note This Method is able to accept nullptr as this value.
- */
+Returns the cached global transformation of the given component.
+
+\note The cache ist updated after calling the tick functions of any components.
+If your tick function depends on the final global position of a component, use
+the slow function calcGlobalCoordFrame or think, whether
+*/
 CoordFrame Node::Component::globalCoordFrame() const
+{
+  return _globalCoordFrame;
+}
+
+/*!
+Calculates the global transformation of the given component.
+
+\note This Method is able to accept nullptr as this value.
+*/
+CoordFrame Node::Component::calcGlobalCoordFrame() const
 {
   if(this == nullptr)
     return CoordFrame();
 
-  return parent->globalCoordFrame() * localCoordFrame();
+  if(hasCustomGlobalCoordUpdater())
+    return calcGlobalCoordFrameImpl();
+  else
+    return parent->calcGlobalCoordFrame() * localCoordFrame();
 }
 
 /*!
@@ -288,15 +303,18 @@ The default implementation returns a coord frame containing only nans to signali
 not to use this virtual function to improve performance.
 
 \warning Either always return a coord frame consisting only of NANs or never.
+
+\warning This functions will be called multithreaded, so don't depend on anything
+different than this component itself or it's CoordDependencies.
 */
-CoordFrame Node::Component::calcGlobalCoordFrame() const
+CoordFrame Node::Component::calcGlobalCoordFrameImpl() const
 {
   return CoordFrame(glm::vec3(NAN), glm::quat(NAN, NAN, NAN, NAN), NAN);
 }
 
 bool Node::Component::hasCustomGlobalCoordUpdater() const
 {
-  CoordFrame c = calcGlobalCoordFrame();
+  CoordFrame c = calcGlobalCoordFrameImpl();
 
   return c.scaleFactor!=NAN || c.position!=glm::vec3(NAN) || c.orientation!=glm::quat(NAN, NAN, NAN, NAN);
 }
