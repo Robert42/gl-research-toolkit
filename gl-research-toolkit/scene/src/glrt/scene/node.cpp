@@ -143,14 +143,14 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
+    _globalCoordFrame(glm::uninitialize),
     _movable(false),
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(true),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
-{
-  if(this->parent !=nullptr)
+{  if(this->parent !=nullptr)
   {
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
@@ -302,8 +302,10 @@ CoordFrame Node::Component::updateGlobalCoordFrame()
 
   if(hasCustomGlobalCoordUpdater())
     _globalCoordFrame = calcGlobalCoordFrameImpl();
-  else
+  else if(parent != nullptr)
     _globalCoordFrame = parent->globalCoordFrame() * localCoordFrame();
+  else
+    _globalCoordFrame = localCoordFrame();
 
   return _globalCoordFrame;
 }
@@ -335,7 +337,7 @@ bool Node::Component::hasCustomGlobalCoordUpdater() const
 {
   CoordFrame c = calcGlobalCoordFrameImpl();
 
-  return c.scaleFactor!=NAN || c.position!=glm::vec3(NAN) || c.orientation!=glm::quat(NAN, NAN, NAN, NAN);
+  return !std::isnan(c.scaleFactor);
 }
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
@@ -364,7 +366,10 @@ int Node::Component::updateCoordDependencyDepth()
   int newDepth = dependencies.depth();
 
   if(_coorddependencyDepth != newDepth)
+  {
+    _coorddependencyDepth = newDepth;
     coordDependencyDepthChanged(this);
+  }
 
   return _coorddependencyDepth;
 }

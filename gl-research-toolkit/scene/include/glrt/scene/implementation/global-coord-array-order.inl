@@ -72,6 +72,10 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
 {
   Q_UNUSED(coordManager);
 
+  // necessary check for if(objects[begin]->parent != nullptr)
+  if(begin==end)
+    return;
+
   if(hasCustomUpdater)
   {
     // #ISSUE-61 OMP
@@ -81,7 +85,7 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
 
       component->_globalCoordFrame = component->calcGlobalCoordFrameImpl();
     }
-  }else
+  }else if(objects[begin]->parent != nullptr)
   {
     // #ISSUE-61 OMP
     for(int i=begin; i!=end; ++i)
@@ -89,6 +93,15 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
       Node::Component* component = objects[i];
 
       component->_globalCoordFrame = component->parent->_globalCoordFrame * component->_localCoordFrame;
+    }
+  }else
+  {
+    // #ISSUE-61 OMP
+    for(int i=begin; i!=end; ++i)
+    {
+      Node::Component* component = objects[i];
+
+      component->_globalCoordFrame = component->_localCoordFrame;
     }
   }
 }
