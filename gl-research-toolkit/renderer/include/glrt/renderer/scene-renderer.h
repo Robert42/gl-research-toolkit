@@ -44,20 +44,20 @@ protected:
   virtual void renderImplementation() = 0;
 
 private:
-  struct SceneUniformBlock
+  struct CameraUniformBlock
   {
     glm::mat4 view_projection_matrix;
     glm::vec3 camera_position;
     padding<float> _padding;
   };
 
-  gl::Buffer sceneUniformBuffer;
+  gl::Buffer cameraUniformBuffer;
 
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
   DirectLights* _directLights = nullptr;
 
-  void updateSceneUniform();
+  void updateCameraUniform();
 
   void debugCameraPositions();
 };

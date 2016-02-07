@@ -18,7 +18,7 @@ Renderer::Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBuffe
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
-    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    cameraUniformBuffer(sizeof(CameraUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     staticMeshVertexArrayObject(std::move(StaticMeshBuffer::generateVertexArrayObject())),
     _directLights(new DirectLights(this))
 {
@@ -31,9 +31,9 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-  updateSceneUniform();
+  updateCameraUniform();
 
-  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+  cameraUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
 
   renderImplementation();
 
@@ -42,12 +42,12 @@ void Renderer::render()
   visualizeRectAreaLights.render();
 }
 
-void Renderer::updateSceneUniform()
+void Renderer::updateCameraUniform()
 {
-  SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
-  sceneUniformData.camera_position = scene.debugCamera.camera_position;
-  sceneUniformBuffer.Unmap();
+  CameraUniformBlock& cameraUniformData =  *reinterpret_cast<CameraUniformBlock*>(cameraUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  cameraUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
+  cameraUniformData.camera_position = scene.debugCamera.camera_position;
+  cameraUniformBuffer.Unmap();
 }
 
 Renderer::DirectLights& Renderer::directLights()
