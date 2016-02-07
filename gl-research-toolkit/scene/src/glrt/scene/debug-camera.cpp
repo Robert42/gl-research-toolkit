@@ -8,7 +8,7 @@ glm::ivec2 DebugCamera::windowSize;
 // TODO: remove the debug camera, instead, define some sort of controller which is able to control any node/component
 DebugCamera::DebugCamera()
 {
-  *this = scene::Camera::defaultDebugCamera();
+  *this = scene::CameraParameter::defaultDebugCamera();
 
   movementMode = false;
 
@@ -99,7 +99,7 @@ void DebugCamera::update(float deltaTime)
 }
 
 
-void DebugCamera::operator=(const scene::Camera& cameraParameter)
+void DebugCamera::operator=(const scene::CameraParameter& cameraParameter)
 {
   this->projectionMatrix = cameraParameter.projectionMatrix(windowSize.x, windowSize.y);
   this->camera_orientation_inverse = cameraParameter.viewMatrix();

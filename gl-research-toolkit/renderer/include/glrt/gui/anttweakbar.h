@@ -6,7 +6,7 @@
 #include <glrt/toolkit/uuid.h>
 #include <glrt/scene/resources/resource-manager.h>
 
-#include <glrt/scene/camera.h>
+#include <glrt/scene/camera-parameter.h>
 
 
 namespace glrt {
@@ -32,7 +32,7 @@ class ShaderDebugPrinter;
 namespace gui {
 
 
-using glrt::scene::Camera;
+using glrt::scene::CameraParameter;
 using glrt::scene::Scene;
 
 
@@ -292,7 +292,7 @@ public:
 
 private:
   typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
-  typedef TweakBarEnum<Camera, QMap<QString, Camera>> CameraEnumeration;
+  typedef TweakBarEnum<CameraParameter, QMap<QString, CameraParameter>> CameraEnumeration;
 
   gui::TweakBarCBVar<bool> toggleProfiler;
 

@@ -3,7 +3,7 @@
 
 #include <glrt/dependencies.h>
 
-#include <glrt/scene/camera.h>
+#include <glrt/scene/camera-parameter.h>
 
 namespace glrt {
 
@@ -26,7 +26,7 @@ public:
 
   void update(float deltaTime);
 
-  void operator=(const scene::Camera& cameraParameter);
+  void operator=(const scene::CameraParameter& cameraParameter);
 
 private:
   glm::mat4 camera_orientation_inverse;

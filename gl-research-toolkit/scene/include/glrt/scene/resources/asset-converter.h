@@ -22,7 +22,7 @@ struct SceneGraphImportSettings final
   QHash<QString, Uuid<Material>> materialUuids;
   QHash<QString, Uuid<LightSource>> lightUuids;
   QHash<QString, Uuid<Node>> nodeUuids;
-  QHash<QString, Uuid<Camera>> cameraUuids;
+  QHash<QString, Uuid<CameraParameter>> cameraUuids;
 
   bool shouldImportMesh(const QString& name) const;
   bool shouldImportCamera(const QString& name) const;

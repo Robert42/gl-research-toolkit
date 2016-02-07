@@ -5,7 +5,7 @@ namespace scene {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter)
+CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter)
   : Component(node, parent, uuid),
     cameraParameter(cameraParameter)
 {
@@ -38,7 +38,7 @@ inline CameraComponent* createCameraComponent(Node& node,
                                               const glm::vec3& upVector,
                                               const glm::vec3& position)
 {
-  Camera cameraParameter;
+  CameraParameter cameraParameter;
   cameraParameter.aspect = aspect;
   cameraParameter.clipFar = clipFar;
   cameraParameter.clipNear = clipNear;

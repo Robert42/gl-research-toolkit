@@ -1,6 +1,6 @@
 set(SOURCE_FILES
   include/glrt/scene/camera-component.h
-  include/glrt/scene/camera.h
+  include/glrt/scene/camera-parameter.h
   include/glrt/scene/collect-scene-data.h
   include/glrt/scene/collect-scene-data.inl
   include/glrt/scene/coord-constraints.h
@@ -31,7 +31,7 @@ set(SOURCE_FILES
   include/glrt/scene/ticking-object.h
   include/glrt/scene/tick-manager.h
   src/glrt/scene/camera-component.cpp
-  src/glrt/scene/camera.cpp
+  src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/collect-scene-data.cpp
   src/glrt/scene/coord-constraints.cpp
   src/glrt/scene/coord-frame.cpp

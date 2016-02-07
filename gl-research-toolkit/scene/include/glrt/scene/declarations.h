@@ -12,7 +12,7 @@ struct GlobalCoordArrayOrder;
 
 class Node;
 class LightComponent;
-class Camera;
+class CameraParameter;
 class Scene;
 class SceneLayer;
 class StaticMeshComponent;

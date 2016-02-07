@@ -10,7 +10,7 @@ class aiCamera;
 namespace glrt {
 namespace scene {
 
-struct Camera final
+struct CameraParameter final
 {
 public:
   glm::vec3 lookAt = glm::vec3(0, 0, -1);
@@ -25,10 +25,10 @@ public:
   float clipFar = 100.f;
   padding<float, 3> _padding;
 
-  static Camera fromAssimp(const aiCamera& camera);
-  static Camera defaultDebugCamera();
+  static CameraParameter fromAssimp(const aiCamera& camera);
+  static CameraParameter defaultDebugCamera();
 
-  friend Camera operator*(const CoordFrame& frame, Camera camera);
+  friend CameraParameter operator*(const CoordFrame& frame, CameraParameter camera);
 
   glm::mat4 inverseViewMatrix() const;
   glm::mat4 viewMatrix() const;
@@ -38,7 +38,7 @@ public:
   glm::mat4 projectionMatrix(int width, int height) const;
 };
 
-static_assert(sizeof(Camera)==64, "Please make sure the struct Camera is std140 compatible");
+static_assert(sizeof(CameraParameter)==64, "Please make sure the struct Camera is std140 compatible");
 
 } // namespace scene
 } // namespace glrt

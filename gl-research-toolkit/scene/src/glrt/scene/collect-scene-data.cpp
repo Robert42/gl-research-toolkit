@@ -4,14 +4,14 @@ namespace glrt {
 namespace scene {
 
 
-QVector<Camera> collectCameras(Scene* scene)
+QVector<CameraParameter> collectCameras(Scene* scene)
 {
-  return collectData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->updateGlobalCoordFrame() * c->cameraParameter;});
+  return collectData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->updateGlobalCoordFrame() * c->cameraParameter;});
 }
 
-QHash<QString, Camera> collectNamedCameras(Scene* scene)
+QHash<QString, CameraParameter> collectNamedCameras(Scene* scene)
 {
-  return collectNamedData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->updateGlobalCoordFrame() * c->cameraParameter;});
+  return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->updateGlobalCoordFrame() * c->cameraParameter;});
 }
 
 // #TODO: use the new Array type?

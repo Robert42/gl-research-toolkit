@@ -98,7 +98,7 @@ void Scene::load(const Uuid<Scene>& scene)
   qApp->processEvents();
 
   // #TODO camera handling shouldn't be done by the scene
-  QVector<Camera> cameras = collectCameras(this);
+  QVector<CameraParameter> cameras = collectCameras(this);
   if(!cameras.isEmpty())
     this->debugCamera = cameras.first();
 

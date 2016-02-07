@@ -1,7 +1,7 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/static-mesh.h>
 #include <glrt/scene/resources/resource-index.h>
-#include <glrt/scene/camera.h>
+#include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/coord-frame.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 #include <glrt/toolkit/escape-string.h>
@@ -297,8 +297,8 @@ struct SceneGraphImportAssets
 {
   QVector<Uuid<Material>> materials;
 
-  QHash<QString, Uuid<Camera>> cameraUuids;
-  QHash<QString, Camera> cameras;
+  QHash<QString, Uuid<CameraParameter>> cameraUuids;
+  QHash<QString, CameraParameter> cameras;
 
   QVector<StaticMesh> meshData;
   QHash<QString, QSet<quint32>> meshInstances;
@@ -376,9 +376,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(!settings.shouldImportCamera(n))
       continue;
 
-    assets.cameras[n] = Camera::fromAssimp(*scene->mCameras[i]);
+    assets.cameras[n] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
-    Uuid<Camera> cameraUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("camera[%0]").arg(i)), n));
+    Uuid<CameraParameter> cameraUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("camera[%0]").arg(i)), n));
 
     if(settings.cameraUuids.contains(n))
       cameraUuid = settings.cameraUuids[n];
@@ -583,8 +583,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       }
       if(isUsingCamera)
       {
-        const Camera& camera = assets.cameras[n];
-        Uuid<Camera> cameraUuid = assets.cameraUuids[n];
+        const CameraParameter& camera = assets.cameras[n];
+        Uuid<CameraParameter> cameraUuid = assets.cameraUuids[n];
         outputStream << "  // Camera \"" << n << "\"\n";
         outputStream << "  cameraComponentUuid = Uuid<CameraComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(cameraUuid).toString()), QString("CameraComponent[%0]").arg(0)).toString() << "\");\n";
         if(assets.labels.contains(cameraUuid))
@@ -749,7 +749,7 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   int materialUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Material>");
   int lightUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<LightSource>");
   int nodeUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Node>");
-  int cameraUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Camera>");
+  int cameraUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<CameraParameter>");
 
   as_meshesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_camerasToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
@@ -759,7 +759,7 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   as_materialUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Material>>(), materialUuidTypeId, angelScriptEngine);
   as_lightUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<LightSource>>(), lightUuidTypeId, angelScriptEngine);
   as_nodeUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Node>>(), nodeUuidTypeId, angelScriptEngine);
-  as_cameraUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Camera>>(), cameraUuidTypeId, angelScriptEngine);
+  as_cameraUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<CameraParameter>>(), cameraUuidTypeId, angelScriptEngine);
 }
 
 SceneGraphImportSettings::AngelScriptInterface::~AngelScriptInterface()
@@ -815,7 +815,7 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   int materialUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Material>");
   int lightUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<LightSource>");
   int nodeUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Node>");
-  int cameraUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Camera>");
+  int cameraUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<CameraParameter>");
 
   meshesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToImport);
   camerasToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_camerasToImport);
@@ -825,7 +825,7 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Material>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
   lightUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<LightSource>>(interface->as_lightUuids, {uuidTypeId, lightUuidTypeId});
   nodeUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Node>>(interface->as_nodeUuids, {uuidTypeId, nodeUuidTypeId});
-  cameraUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Camera>>(interface->as_cameraUuids, {uuidTypeId, cameraUuidTypeId});
+  cameraUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<CameraParameter>>(interface->as_cameraUuids, {uuidTypeId, cameraUuidTypeId});
 
   interface->releaseReference();
 }
