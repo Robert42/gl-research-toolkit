@@ -6,12 +6,12 @@ namespace scene {
 
 QVector<Camera> collectCameras(Scene* scene)
 {
-  return collectData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->globalCoordFrame() * c->cameraParameter;});
+  return collectData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->updateGlobalCoordFrame() * c->cameraParameter;});
 }
 
 QHash<QString, Camera> collectNamedCameras(Scene* scene)
 {
-  return collectNamedData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->globalCoordFrame() * c->cameraParameter;});
+  return collectNamedData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->updateGlobalCoordFrame() * c->cameraParameter;});
 }
 
 // #TODO: use the new Array type?

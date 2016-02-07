@@ -39,6 +39,7 @@ int GlobalCoordArrayOrder::DependencyDepthHandler::segment_from_index(int i)
 
 void GlobalCoordArrayOrder::DependencyDepthHandler::handle_new_segment(Node::Component**, int, int, int, extra_data_type)
 {
+  // #TODO add assertions, that all components are up-to-date
 }
 
 void GlobalCoordArrayOrder::DependencyDepthHandler::handle_end_segment(Node::Component**, int, int, int, extra_data_type)
