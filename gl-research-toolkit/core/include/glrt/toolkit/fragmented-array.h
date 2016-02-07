@@ -528,11 +528,15 @@ public:
 
   void append_copy(const T_data& data);
   void append_move(T_data&& data);
-  void remove(const T_data& data);
   void remove(int);
 
-  int indexOfFirst(const T_data& data) const;
-  void orderChangedForValue(const T_data& data);
+  template<typename T_set>
+  void removeMultiple(const T_set& s);
+
+  int indexOf(const T_data& data) const;
+  int indexOf_Safe(const T_data& data) const;
+  void orderChangedForValue(const T_data& value);
+  void orderChangedAtIndex(int index);
 
   int updateSegments(extra_data_type extra_data);
   void iterate(extra_data_type extra_data);

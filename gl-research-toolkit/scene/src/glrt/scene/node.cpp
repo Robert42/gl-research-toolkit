@@ -146,6 +146,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     _movable(false),
     _visible(true),
     _parentVisible(true),
+    _hiddenBecauseDeletedNextFrame(true),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
 {
@@ -222,7 +223,7 @@ void Node::Component::setMovable(bool movable)
 
 bool Node::Component::visible() const
 {
-  return _visible && _parentVisible;
+  return _visible && _parentVisible && !_hiddenBecauseDeletedNextFrame;
 }
 
 void Node::Component::setVisible(bool visible)
@@ -261,6 +262,14 @@ void Node::Component::show(bool show)
 void Node::Component::hide(bool hide)
 {
   setVisible(!hide);
+}
+
+void Node::Component::hideNowAndDeleteLater()
+{
+  bool prevVisibility = this->visible();
+  _hiddenBecauseDeletedNextFrame = true;
+  updateVisibility(prevVisibility);
+  this->deleteLater();
 }
 
 
@@ -357,6 +366,11 @@ int Node::Component::updateCoordDependencyDepth()
   if(_coorddependencyDepth != newDepth)
     coordDependencyDepthChanged(this);
 
+  return _coorddependencyDepth;
+}
+
+int Node::Component::coordDependencyDepth() const
+{
   return _coorddependencyDepth;
 }
 

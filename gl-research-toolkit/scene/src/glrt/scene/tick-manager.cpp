@@ -26,8 +26,7 @@ void TickManager::addTickingObject(TickingObject* tickingObject)
 
 void TickManager::updateObjects()
 {
-  for(TickingObject* deletedObject : deletedObjects)
-    fragmented_array.remove(deletedObject);
+  fragmented_array.removeMultiple(deletedObjects);
   deletedObjects.clear();
 
   QSet<QPointer<TickingObject>> notYetAddedTickingPointers(std::move(this->notYetAddedTickingPointers));
@@ -57,6 +56,7 @@ void TickManager::updateObjects()
 
 void TickManager::removeObject(QObject* object)
 {
+  // TODO: add check, that this isn't called during TickManager::tick
   deletedObjects.insert(static_cast<TickingObject*>(object));
 }
 

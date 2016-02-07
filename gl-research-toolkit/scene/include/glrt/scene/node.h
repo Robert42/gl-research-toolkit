@@ -90,6 +90,7 @@ public:
 
   bool coordDependsOn(const Component* other) const;
   int updateCoordDependencyDepth();
+  int coordDependencyDepth() const;
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
@@ -99,6 +100,8 @@ public slots:
   void setVisible(bool visible);
   void show(bool show);
   void hide(bool hide);
+
+  void hideNowAndDeleteLater();
 
 signals:
   void coordDependencyDepthChanged(Component* sender);
@@ -132,12 +135,14 @@ private:
   template<typename T, T*>
   static void _registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const std::string& function_name, const char* arguments);
 
+  friend struct implementation::GlobalCoordArrayOrder;
   CoordFrame _localCoordFrame;
   CoordFrame _globalCoordFrame;
 
   bool _movable : 1;
   bool _visible : 1;
   bool _parentVisible : 1;
+  bool _hiddenBecauseDeletedNextFrame : 1;
 
   QVector<Component*> _children;
   int _coorddependencyDepth;

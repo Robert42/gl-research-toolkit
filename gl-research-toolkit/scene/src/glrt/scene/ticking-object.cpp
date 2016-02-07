@@ -17,7 +17,12 @@ TickingObject::~TickingObject()
 }
 
 /*
-\warning Never update the Qt eventloop within a tick.  If you do so, assertions might get thrown
+\warning Never update the Qt eventloop within a tick.  If you do so, assertions might get thrown.
+
+\warning
+Avoid deleting any object directly, instead, call deleteLater() to delete it for
+the next frame. Better call \l{Node::Component}{Node::Components} hideNowAndDeleteLater() to prevent it from getting drawn this frame and delete it next frame.
+and delete later.
 */
 void TickingObject::tick(float timeDelta) const
 {
@@ -79,8 +84,6 @@ While this can be powerful it is extremely dengerous. You are responisble to mak
 sure to prevent race condition.
 Even if your tick only reads data, you probably want to make sure no one other is
 changing the same data in parallel. Don't say you haven't been warned.
-\br
-Avoid deleting any object directly, instead, call deleteLater()
 \br
 If you aren't 100% sure that your ticks are race condition free, I recomment to
 use the TickTraits::OnlyMainThread trait (which is returned by default).

@@ -6,6 +6,9 @@
 
 namespace glrt {
 namespace scene {
+namespace implementation {
+struct GlobalCoordArrayOrder;
+} // namespace implementation
 
 class Node;
 class LightComponent;

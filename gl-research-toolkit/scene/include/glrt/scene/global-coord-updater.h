@@ -23,8 +23,8 @@ private:
   friend struct implementation::GlobalCoordArrayOrder;
 
   implementation::GlobalCoordArrayOrder::type fragmented_array;
-  QSet<QPointer<TickingObject>> notYetAddedComponents;
   QMutex mutex;
+  Array<QPointer<Node::Component>> staticComponentsToUpdate;
 
   void addComponent(Node::Component* component);
 
@@ -33,6 +33,7 @@ private:
 private slots:
   void removeObject(QObject*);
   void movabilityChanged(Node::Component* component);
+  void dependencyDepthChanged(Node::Component* component);
 };
 
 

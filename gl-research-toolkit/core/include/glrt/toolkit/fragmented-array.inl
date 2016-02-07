@@ -77,12 +77,6 @@ void FragmentedArray<d, s, t>::append_move(d&& data)
 }
 
 template<typename d, typename s, typename t>
-void FragmentedArray<d, s, t>::remove(const d& data)
-{
-  remove(indexOfFirst(data));
-}
-
-template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::remove(int index)
 {
   Q_ASSERT(index>=0 && index<this->length());
@@ -93,7 +87,48 @@ void FragmentedArray<d, s, t>::remove(int index)
 }
 
 template<typename d, typename s, typename t>
-int FragmentedArray<d, s, t>::indexOfFirst(const d& value) const
+template<typename T_set>
+void FragmentedArray<d, s, t>::removeMultiple(const T_set& set)
+{
+  const int length = dataArray.length();
+  d* const data = dataArray.data();
+
+  int i=0;
+  while(i<length)
+  {
+    if(set.contains(data[i]))
+    {
+      beginRegionToUpdate = glm::min<int>(i, beginRegionToUpdate);
+      dataArray.removeAt(i);
+      break;
+    }else
+    {
+      ++i;
+    }
+  }
+
+  while(i<length)
+  {
+    if(set.contains(data[i]))
+      dataArray.removeAt(i);
+    else
+      ++i;
+  }
+}
+
+/*!
+\warning This implementation uses  the section_boundaries_for_value method of the given trait.
+If the trait is using values of a object being destroyed right now, this might
+become an issue. In this case, prefer indexOf_Safe, which is only using the
+\l{Array::indexOfFirst}{indexOfFirst} method of the inner array.
+\br
+This might for example become an issue because of removing an object from the
+fragmented_array after getting QObject::deleteLater signal. In this case the child
+classes' destructors are already called and classify methids depending on values
+of the child class are not usable anymore.
+*/
+template<typename d, typename s, typename t>
+int FragmentedArray<d, s, t>::indexOf(const d& value) const
 {
   const int length = this->length();
   glm::ivec2 bounds = s::section_boundaries_for_value(0, length, segmentRanges, value);
@@ -106,14 +141,26 @@ int FragmentedArray<d, s, t>::indexOfFirst(const d& value) const
         return i;
   }
 
+  return indexOf_Safe(value);
+}
+
+template<typename d, typename s, typename t>
+int FragmentedArray<d, s, t>::indexOf_Safe(const d& value) const
+{
   return dataArray.indexOfFirst(value);
 }
 
 template<typename d, typename s, typename t>
 void FragmentedArray<d, s, t>::orderChangedForValue(const d& value)
 {
-  beginRegionToUpdate = glm::min<int>(beginRegionToUpdate, indexOfFirst(value));
+  orderChangedAtIndex(indexOf(value));
   recalcRegionToUpdateAfterChanging(value);
+}
+
+template<typename d, typename s, typename t>
+void FragmentedArray<d, s, t>::orderChangedAtIndex(int index)
+{
+  beginRegionToUpdate = glm::min<int>(beginRegionToUpdate, index);
 }
 
 template<typename d, typename s, typename t>
@@ -124,7 +171,7 @@ int FragmentedArray<d, s, t>::updateSegments(extra_data_type extra_data)
   const int length = dataArray.length();
   d* data = dataArray.data();
 
-  // ISSUE-61 STL
+  // #ISSUE-61 STL
   std::stable_sort(data+this->beginRegionToUpdate, data+length, s::segmentLessThan);
 
   Q_ASSERT(std::is_sorted(data, data+length, s::segmentLessThan));

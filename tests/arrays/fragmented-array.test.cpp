@@ -673,7 +673,7 @@ static void test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet
   region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 3);
 
-  meshComponents.remove(meshComponent5);
+  meshComponents.remove(meshComponents.indexOf(meshComponent5));
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
@@ -691,19 +691,19 @@ static void test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet
   region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 1);
 
-  meshComponents.remove(meshComponent3);
+  meshComponents.remove(meshComponents.indexOf(meshComponent3));
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 1);
 
-  meshComponents.remove(meshComponent3);
+  meshComponents.remove(meshComponents.indexOf(meshComponent3));
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 1);
 
-  meshComponents.remove(meshComponent3);
+  meshComponents.remove(meshComponents.indexOf(meshComponent3));
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
@@ -715,7 +715,7 @@ static void test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet
   region_to_be_updated = meshComponents.updateSegments(&output);
   EXPECT_EQ(region_to_be_updated, 0);
 
-  meshComponents.remove(meshComponent2);
+  meshComponents.remove(meshComponents.indexOf(meshComponent2));
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
