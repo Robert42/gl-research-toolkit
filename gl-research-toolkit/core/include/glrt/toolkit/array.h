@@ -237,6 +237,58 @@ struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_c
   }
 };
 
+// Class with copy constructor, assignment operator and destructor
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
+struct ArrayTraits_Unordered_cCaOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+{
+  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+
+  static void move_construct(T* dest, T* src, int count)
+  {
+    parent_type::copy_construct_cC(dest, src, count);
+  }
+
+  static void move_construct_single(T* dest, T* src)
+  {
+    parent_type::copy_construct_single_cC(dest, src);
+  }
+
+  static int append_move(T* data, int prev_length, T&& value)
+  {
+    return parent_type::append_cC(data, prev_length, std::move(value));
+  }
+
+  static int extend_move(T* data, int prev_length, T* values, int num_values)
+  {
+    return parent_type::extend_cC(data, prev_length, values, num_values);
+  }
+
+  static int append_copy(T* data, int prev_length, const T& value)
+  {
+    return parent_type::append_cC(data, prev_length, value);
+  }
+
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values)
+  {
+    return parent_type::extend_cC(data, prev_length, values, num_values);
+  }
+
+  static void remove_single(T* data, int prev_length, const int index)
+  {
+    parent_type::remove_single_aOD(data, prev_length, index);
+  }
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values)
+  {
+    parent_type::remove_aOD(data, prev_length, first_index, num_values);
+  }
+
+  static void destruct(T* data, int length)
+  {
+    parent_type::destruct_D(data, length);
+  }
+};
+
 template<typename T>
 struct DefaultTraits;
 
@@ -256,6 +308,12 @@ template<typename T>
 struct DefaultTraits<T*>
 {
   typedef ArrayTraits_Unordered_Primitive<T*> type;
+};
+
+template<typename T>
+struct DefaultTraits<QPointer<T>>
+{
+  typedef ArrayTraits_Unordered_cCaOD<QPointer<T>> type;
 };
 
 
