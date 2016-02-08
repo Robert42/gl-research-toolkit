@@ -107,8 +107,9 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
   cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
-  cameraSwitcher->valueChanged = [&scene](const scene::CameraParameter& p){scene.debugCamera = p;};
-  TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
+  // #FIXME:
+  //cameraSwitcher->valueChanged = [&scene](const scene::CameraParameter& p){scene.debugCamera = p;};
+  //TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
 
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
@@ -152,6 +153,8 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 
   if(cameraSwitcher)
   {
+    /*
+    #FIXME:
     QMap<QString, CameraParameter> cameras;
     QHash<QString, CameraParameter> h = scene::collectNamedCameras(scene);
     for(auto i=h.begin(); i!=h.end(); ++i)
@@ -161,6 +164,7 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
       cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
     else if(cameras.size() > 0)
       cameraSwitcher->setCurrentKey(cameras.firstKey());
+    */
   }
 }
 

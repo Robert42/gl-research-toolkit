@@ -2,8 +2,10 @@
 
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/camera-component.h>
 #include <glrt/scene/collect-scene-data.h>
 
+#include <glrt/system.h>
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
@@ -22,6 +24,8 @@ Renderer::Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBuffe
     staticMeshVertexArrayObject(std::move(StaticMeshBuffer::generateVertexArrayObject())),
     _directLights(new DirectLights(this))
 {
+  fillCameraUniform(scene::CameraParameter::defaultDebugCamera());
+  updateCameraUniform();
 }
 
 Renderer::~Renderer()
@@ -44,9 +48,38 @@ void Renderer::render()
 
 void Renderer::updateCameraUniform()
 {
+  if(!this->cameraComponent)
+  {
+    QVector<scene::CameraComponent*> cameraComponents = scene::collectAllComponentsWithType<scene::CameraComponent>(&scene);
+
+    for(scene::CameraComponent* cameraComponent : cameraComponents)
+    {
+      if(cameraComponent->uuid == scene::uuids::debugCameraComponent)
+      {
+        this->cameraComponent = cameraComponent;
+        break;
+      }
+    }
+    if(!cameraComponent && !cameraComponents.isEmpty())
+      this->cameraComponent = cameraComponents.first();
+  }
+
+  if(this->cameraComponent)
+    updateCameraComponent(this->cameraComponent);
+}
+
+void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
+{
+  Q_ASSERT(cameraComponent != nullptr);
+  cameraComponent->cameraParameter.aspect = System::windowAspectRatio();
+  fillCameraUniform(cameraComponent->globalCameraParameter());
+}
+
+void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
+{
   CameraUniformBlock& cameraUniformData =  *reinterpret_cast<CameraUniformBlock*>(cameraUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  cameraUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
-  cameraUniformData.camera_position = scene.debugCamera.camera_position;
+  cameraUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  cameraUniformData.camera_position = cameraParameter.position;
   cameraUniformBuffer.Unmap();
 }
 

@@ -1,4 +1,6 @@
 #include <glrt/scene/camera-component.h>
+#include <glrt/scene/scene-layer.h>
+#include <glrt/scene/scene.h>
 
 namespace glrt {
 namespace scene {
@@ -9,11 +11,18 @@ CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid
   : Component(node, parent, uuid),
     cameraParameter(cameraParameter)
 {
+  node.sceneLayer.scene.CameraComponentAdded(this);
 }
 
 
 CameraComponent::~CameraComponent()
 {
+}
+
+
+CameraParameter CameraComponent::globalCameraParameter() const
+{
+  return this->globalCoordFrame() * this->cameraParameter;
 }
 
 

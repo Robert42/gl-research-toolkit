@@ -15,6 +15,8 @@ public:
   CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter);
   ~CameraComponent();
 
+  CameraParameter globalCameraParameter() const;
+
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 };

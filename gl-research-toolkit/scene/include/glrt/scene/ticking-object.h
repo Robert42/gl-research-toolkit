@@ -24,7 +24,7 @@ public:
     NoTick,
   };
 
-  virtual void tick(float timeDelta) const;
+  virtual void tick(float timeDelta);
 
   bool tickDependsOn(const TickingObject* other) const;
   int tickDependencyDepth() const;

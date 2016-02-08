@@ -4,6 +4,7 @@
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/collect-scene-data.h>
+#include <glrt/scene/fps-debug-controller.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <QFile>
@@ -36,7 +37,6 @@ resources::ResourceManager* get_resourceManager(Scene* scene)
 Scene::Scene(resources::ResourceManager* resourceManager)
   : resourceManager(*resourceManager)
 {
-  inputManager.addHandler(&debugCamera);
 }
 
 Scene::~Scene()
@@ -70,7 +70,6 @@ void Scene::update(float deltaTime)
 {
   tickManager.tick(deltaTime);
   globalCoordUpdater.updateCoordinages();
-  debugCamera.update(deltaTime);
 
   inputManager.update();
 }
@@ -100,11 +99,6 @@ void Scene::load(const Uuid<Scene>& scene)
 
   qApp->processEvents();
 
-  // #TODO camera handling shouldn't be done by the scene
-  QVector<CameraParameter> cameras = collectCameras(this);
-  if(!cameras.isEmpty())
-    this->debugCamera = cameras.first();
-
   bool success = true; // #FIXME: really find out, whether this was a success
   sceneLoadedExt(this, success);
   sceneLoaded(success);
@@ -126,6 +120,17 @@ void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(SceneLayer@ sceneLayer)", "scene-layer-file", config, sceneLayer);
 }
 
+void Scene::addSceneLayer_debugCamera()
+{
+  SceneLayer* sceneLayer = new SceneLayer(uuids::debugCameraLayer, *this);
+
+  Node* node = new Node(*sceneLayer, Uuid<Node>(QUuid::createUuidV5(uuids::debugCameraComponent, QString("glrt::scene::Node"))));
+  CameraComponent* debugCameraComponent = new CameraComponent(*node, nullptr, uuids::debugCameraComponent, CameraParameter::defaultDebugCamera());
+
+  FpsDebugController* fpsController = new FpsDebugController(*debugCameraComponent, Uuid<FpsDebugController>(QUuid::createUuidV5(uuids::debugCameraComponent, QString("glrt::scene::FpsDebugController"))));
+  Q_UNUSED(fpsController);
+}
+
 void Scene::registerAngelScriptAPIDeclarations()
 {
   int r;
@@ -144,6 +149,7 @@ void Scene::registerAngelScriptAPI()
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void loadSceneLayer(const Uuid<SceneLayer> &in uuid)", AngelScript::asMETHOD(Scene,loadSceneLayer), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "void addSceneLayer_debugCamera()", AngelScript::asMETHOD(Scene,addSceneLayer_debugCamera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "ResourceManager@ get_resourceManager()", AngelScript::asFUNCTION(get_resourceManager), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);

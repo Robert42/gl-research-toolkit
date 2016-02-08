@@ -1,16 +1,13 @@
-#include <glrt/scene/debug-camera.h>
+#include <glrt/scene/fps-debug-controller.h>
+#include <glrt/scene/scene-layer.h>
+#include <glrt/scene/scene.h>
 #include <glrt/toolkit/geometry.h>
 
 namespace glrt {
 namespace scene {
 
-glm::ivec2 DebugCamera::windowSize;
-
-// TODO: remove the debug camera, instead, define some sort of controller which is able to control any node/component
-DebugCamera::DebugCamera()
+FpsDebugInputHandler::FpsDebugInputHandler()
 {
-  *this = scene::CameraParameter::defaultDebugCamera();
-
   movementMode = false;
 
   movement_speed = 5.f;
@@ -18,7 +15,7 @@ DebugCamera::DebugCamera()
   locked = false;
 }
 
-bool DebugCamera::handleEvent(const SDL_Event& event)
+bool FpsDebugInputHandler::handleEvent(const SDL_Event& event)
 {
   if(locked)
   {
@@ -55,26 +52,14 @@ bool DebugCamera::handleEvent(const SDL_Event& event)
     default:
       return false;
     }
-  case SDL_WINDOWEVENT:
-    switch(event.window.event)
-    {
-    case SDL_WINDOWEVENT_RESIZED:
-      this->windowSize.x = event.window.data1;
-      this->windowSize.y = event.window.data2;
-      break;
-    default:
-      break;
-    }
     return false;
   default:
     return false;
   }
 }
 
-void DebugCamera::update(float deltaTime)
+void FpsDebugInputHandler::update(float deltaTime)
 {
-  const glm::mat4 I = glm::mat4(1);
-
   if(movementMode)
   {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
@@ -92,20 +77,39 @@ void DebugCamera::update(float deltaTime)
 
     key_input = transform_direction(glm::inverse(camera_orientation_inverse), -key_input);
 
-    camera_position -=  key_input * deltaTime * movement_speed;
+    frame.position -=  key_input * deltaTime * movement_speed;
   }
-
-  const glm::mat4 viewMatrix = camera_orientation_inverse * glm::translate(I, -camera_position);
-  this->viewProjectionMatrix = projectionMatrix * viewMatrix;
 }
 
+// =============================================================================
 
-void DebugCamera::operator=(const scene::CameraParameter& cameraParameter)
+FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<FpsDebugController>& uuid)
+  : Node::ModularAttribute(component.node, uuid),
+    component(component)
 {
-  this->projectionMatrix = cameraParameter.projectionMatrix(windowSize.x, windowSize.y);
-  this->camera_orientation_inverse = cameraParameter.viewMatrix();
-  this->camera_orientation_inverse[3] = glm::vec4(0,0,0,1);
-  this->camera_position = cameraParameter.position;
+  connect(&component, &Node::Component::destroyed, this, &FpsDebugController::deleteLater);
+
+  node.sceneLayer.scene.inputManager.addHandler(&inputHandler);
+}
+
+void FpsDebugController::tick(float timeDelta)
+{
+  CoordFrame frame = component.localCoordFrame();
+
+  frame.position.z += 0.1f * timeDelta;
+
+  component.set_localCoordFrame(frame);
+  inputHandler.update(timeDelta);
+}
+
+TickingObject::TickTraits FpsDebugController::tickTraits() const
+{
+  return TickTraits::OnlyMainThread;
+}
+
+void FpsDebugController::collectTickDependencies(TickDependencySet* dependencySet) const
+{
+  dependencySet->addDependency(&component);
 }
 
 

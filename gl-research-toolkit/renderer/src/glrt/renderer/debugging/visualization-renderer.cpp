@@ -10,7 +10,7 @@ namespace debugging {
 VisualizationRenderer VisualizationRenderer::debugSceneCameras(scene::Scene* scene)
 {
   return VisualizationRenderer(scene, [scene](){
-    QHash<QString, scene::CameraParameter> cameras = scene::collectNamedCameras(scene);
+    QHash<QString, scene::CameraParameter> cameras = scene::collectNamedCameraParameters(scene);
     if(cameras.isEmpty())
       return DebugLineVisualisation::Ptr();
     else

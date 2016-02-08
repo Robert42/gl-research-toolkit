@@ -24,7 +24,7 @@ Avoid deleting any object directly, instead, call deleteLater() to delete it for
 the next frame. Better call \l{Node::Component}{Node::Components} hideNowAndDeleteLater() to prevent it from getting drawn this frame and delete it next frame.
 and delete later.
 */
-void TickingObject::tick(float timeDelta) const
+void TickingObject::tick(float timeDelta)
 {
   Q_UNUSED(timeDelta);
 }

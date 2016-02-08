@@ -7,7 +7,7 @@
 #include <glrt/scene/tick-manager.h>
 #include <glrt/scene/global-coord-updater.h>
 #include <glrt/scene/input-handler.h>
-#include <glrt/scene/debug-camera.h>
+#include <glrt/scene/fps-debug-controller.h>
 
 struct aiNode;
 struct aiScene;
@@ -33,7 +33,6 @@ public:
   TickManager tickManager;
   GlobalCoordUpdater globalCoordUpdater;
   InputHandler::Manager inputManager;
-  DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
 
   Scene(resources::ResourceManager* resourceManager);
   Scene(const Scene&) = delete;
@@ -52,6 +51,7 @@ public:
   void load(const Uuid<Scene>& scene);
 
   void loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid);
+  void addSceneLayer_debugCamera();
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
@@ -61,7 +61,7 @@ signals:
   void sceneLoadedExt(scene::Scene* scene, bool success);
   void sceneLoaded(bool success);
 
-  void CameraComponentAdded(LightComponent* component);
+  void CameraComponentAdded(CameraComponent* component);
   void LightComponentAdded(LightComponent* component);
   void StaticMeshComponentAdded(StaticMeshComponent* component);
 

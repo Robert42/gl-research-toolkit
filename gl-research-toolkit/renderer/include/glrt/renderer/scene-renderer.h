@@ -2,6 +2,7 @@
 #define GLRT_RENDERER_RENDERER_H
 
 #include <glrt/scene/scene.h>
+#include <glrt/scene/camera-component.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer-manager.h>
@@ -23,6 +24,8 @@ public:
 
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
+
+  QPointer<scene::CameraComponent> cameraComponent;
 
   debugging::VisualizationRenderer visualizeCameras;
   debugging::VisualizationRenderer visualizeSphereAreaLights;
@@ -58,8 +61,12 @@ private:
   DirectLights* _directLights = nullptr;
 
   void updateCameraUniform();
+  void fillCameraUniform(const scene::CameraParameter& cameraParameter);
 
   void debugCameraPositions();
+
+private slots:
+  void updateCameraComponent(scene::CameraComponent* cameraComponent);
 };
 
 

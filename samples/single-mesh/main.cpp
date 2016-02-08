@@ -47,7 +47,7 @@ int main(int argc, char** argv)
                         glrt::System::Settings::simpleWindow("Single Mesh" // window title
                                                              ),
                         glrt::Application::Settings::techDemo(true));
-  glrt::scene::DebugCamera debugCamera;
+  glrt::scene::FpsDebugInputHandler debugCamera;
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to load and display a simple single mesh" // help text of the sample
                                                                                 ));
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 
   // initialize the uniform block with meaningful values
   u.model_matrix = glm::translate(glm::mat4(1), glm::vec3(0, 0, 0));
-  u.view_projection = debugCamera.viewProjectionMatrix;
+  // #FIXME: u.view_projection = debugCamera.viewProjectionMatrix;
   u.material_color = glm::vec4(1, 0.5, 0, 1);
   u.light_direction = glm::normalize(glm::vec3(-0.67, 0.14, -0.73));
   u.debuggingMode = DebuggingMode::None;
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
     // -------- update the uniform data --------
     current_orientation = current_orientation * glm::angleAxis(glm::radians(rotationSpeed) * deltaTime, glm::vec3(0, 0, 1));
     u.model_matrix = glm::mat4_cast(current_orientation);
-    u.view_projection = debugCamera.viewProjectionMatrix;
+    // #FIXME: u.view_projection = debugCamera.viewProjectionMatrix;
     // Note: the color gets modified the Tweakbar, search for &u.material_color
 
     // send the updated uniform to the Graphic device

@@ -1,5 +1,7 @@
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/resource-manager.h>
+#include <glrt/scene/scene-layer.h>
+#include <glrt/scene/scene.h>
 
 namespace glrt {
 namespace scene {
@@ -12,6 +14,7 @@ LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<L
   : Node::Component(node, parent, uuid),
     _dynamic(false)
 {
+  node.sceneLayer.scene.LightComponentAdded(this);
   connect(this, &LightComponent::componentMovabilityChanged, this, &LightComponent::handleChangedMovable);
 }
 
