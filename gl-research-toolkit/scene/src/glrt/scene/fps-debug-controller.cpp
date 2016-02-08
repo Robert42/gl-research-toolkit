@@ -23,10 +23,13 @@ bool FpsDebugInputHandler::handleEvent(const SDL_Event& event)
     return false;
   }
 
-  const glm::mat4 I = glm::mat4(1);
   const glm::vec3 x(1, 0, 0);
   const glm::vec3 y(0, 1, 0);
   const glm::vec3 z(0, 0, 1);
+
+  Q_UNUSED(x);
+  Q_UNUSED(y);
+  Q_UNUSED(z);
 
   switch(event.type)
   {
@@ -88,9 +91,6 @@ FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<Fp
   connect(&component, &Node::Component::destroyed, this, &FpsDebugController::deleteLater);
 
   node.sceneLayer.scene.inputManager.addHandler(&inputHandler);
-
-  // #FIXME: remove:
-  component.set_localCoordFrame(CoordFrame(glm::vec3(0, 0, 1.9f)));
 
   inputHandler.frame = component.localCoordFrame();
 }
