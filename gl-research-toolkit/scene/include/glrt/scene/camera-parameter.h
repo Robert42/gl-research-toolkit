@@ -26,7 +26,6 @@ public:
   padding<float, 3> _padding;
 
   static CameraParameter fromAssimp(const aiCamera& camera);
-  static CameraParameter defaultDebugCamera();
 
   friend CameraParameter operator*(const CoordFrame& frame, CameraParameter camera);
 

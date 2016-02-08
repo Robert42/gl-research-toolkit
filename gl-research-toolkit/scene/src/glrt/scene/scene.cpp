@@ -125,7 +125,7 @@ void Scene::addSceneLayer_debugCamera()
   SceneLayer* sceneLayer = new SceneLayer(uuids::debugCameraLayer, *this);
 
   Node* node = new Node(*sceneLayer, Uuid<Node>(QUuid::createUuidV5(uuids::debugCameraComponent, QString("glrt::scene::Node"))));
-  CameraComponent* debugCameraComponent = new CameraComponent(*node, nullptr, uuids::debugCameraComponent, CameraParameter::defaultDebugCamera());
+  CameraComponent* debugCameraComponent = new CameraComponent(*node, nullptr, uuids::debugCameraComponent, CameraParameter());
 
   FpsDebugController* fpsController = new FpsDebugController(*debugCameraComponent, Uuid<FpsDebugController>(QUuid::createUuidV5(uuids::debugCameraComponent, QString("glrt::scene::FpsDebugController"))));
   Q_UNUSED(fpsController);

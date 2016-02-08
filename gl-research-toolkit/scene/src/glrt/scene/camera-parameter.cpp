@@ -23,17 +23,6 @@ CameraParameter CameraParameter::fromAssimp(const aiCamera& assimpCamera)
   return camera;
 }
 
-CameraParameter CameraParameter::defaultDebugCamera()
-{
-  CameraParameter camera;
-
-  camera.lookAt = glm::vec3(0, 0, -1);
-  camera.upVector = glm::vec3(0, 1, 0);
-  camera.position = glm::vec3(0, 0, 0);
-
-  return camera;
-}
-
 glm::mat4 CameraParameter::inverseViewMatrix() const
 {
   return glm::mat4(glm::vec4(glm::cross(this->lookAt, this->upVector), 0),

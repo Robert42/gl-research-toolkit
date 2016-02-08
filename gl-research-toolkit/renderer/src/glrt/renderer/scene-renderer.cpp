@@ -24,7 +24,7 @@ Renderer::Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBuffe
     staticMeshVertexArrayObject(std::move(StaticMeshBuffer::generateVertexArrayObject())),
     _directLights(new DirectLights(this))
 {
-  fillCameraUniform(scene::CameraParameter::defaultDebugCamera());
+  fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
 }
 
