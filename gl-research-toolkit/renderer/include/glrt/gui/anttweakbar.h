@@ -292,7 +292,7 @@ public:
 
 private:
   typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
-  typedef TweakBarEnum<CameraParameter, QMap<QString, CameraParameter>> CameraEnumeration;
+  typedef TweakBarEnum<QPointer<scene::CameraComponent>, QMap<QString, QPointer<scene::CameraComponent>>> CameraEnumeration;
 
   gui::TweakBarCBVar<bool> toggleProfiler;
 
@@ -303,6 +303,8 @@ private:
 
   void handeledEvent(const SDL_Event& event);
   bool unhandeledEvent(const SDL_Event& event);
+
+  static void switchDebugCameraTo(Scene* scene, const QPointer<scene::CameraComponent>& otherCamera);
 
 private slots:
   void handleSceneLoaded(Scene* scene);

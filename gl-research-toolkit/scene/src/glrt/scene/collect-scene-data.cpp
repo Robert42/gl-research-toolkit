@@ -3,6 +3,16 @@
 namespace glrt {
 namespace scene {
 
+CameraComponent* findDebugCameraComponent(Scene* scene)
+{
+  for(CameraComponent* cameraComponent : collectAllComponentsWithType<CameraComponent>(scene))
+  {
+    if(cameraComponent->uuid == uuids::debugCameraComponent)
+      return cameraComponent;
+  }
+
+  return nullptr;
+}
 
 QVector<CameraParameter> collectCameraParameters(Scene* scene)
 {

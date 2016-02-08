@@ -13,12 +13,12 @@ namespace scene {
 class FpsDebugInputHandler final : public InputHandler
 {
 public:
+  static bool locked;
   CoordFrame frame;
 
   float movement_speed;
   float rotation_speed;
   QString loadedName;
-  bool locked;
 
   FpsDebugInputHandler();
 

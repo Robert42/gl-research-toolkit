@@ -6,13 +6,14 @@
 namespace glrt {
 namespace scene {
 
+bool FpsDebugInputHandler::locked = false;
+
 FpsDebugInputHandler::FpsDebugInputHandler()
 {
   movementMode = false;
 
   movement_speed = 5.f;
   rotation_speed = glm::radians(1.f);
-  locked = false;
 }
 
 bool FpsDebugInputHandler::handleEvent(const SDL_Event& event)
@@ -61,7 +62,7 @@ bool FpsDebugInputHandler::handleEvent(const SDL_Event& event)
 
 void FpsDebugInputHandler::update(float deltaTime)
 {
-  if(movementMode)
+  if(movementMode && !locked)
   {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
 
@@ -84,6 +85,7 @@ void FpsDebugInputHandler::update(float deltaTime)
 
 // =============================================================================
 
+
 FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<FpsDebugController>& uuid)
   : Node::ModularAttribute(component.node, uuid),
     component(component)
@@ -97,6 +99,7 @@ FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<Fp
 
 void FpsDebugController::tick(float timeDelta)
 {
+  inputHandler.frame = component.localCoordFrame();
   inputHandler.update(timeDelta);
 
   component.set_localCoordFrame(inputHandler.frame);

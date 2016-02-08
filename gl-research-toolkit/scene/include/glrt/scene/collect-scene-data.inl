@@ -28,6 +28,21 @@ QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::func
   return components;
 }
 
+template<typename T_component>
+QHash<QString, T_component*> collectAllComponentsWithTypeNamed(Scene* scene, const std::function<bool(T_component*)>& filter)
+{
+  static_assert(std::is_base_of<Node::Component, T_component>::value, "T_component must inherit from Node::Component");
+
+  QHash<QString, T_component*> components;
+
+  for(const SceneLayer* layer : scene->allLayers())
+    for(Node* n : layer->allNodes())
+      for(T_component* component : n->allComponentsWithType<T_component>(filter))
+        components.insert(scene->resourceManager.labelForResourceUuid(component->uuid), component);
+
+  return components;
+}
+
 template<typename T_component, typename T_data>
 QVector<T_data> collectData(Scene* scene, const std::function<T_data(T_component*)>& get_data)
 {
