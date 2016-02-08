@@ -27,7 +27,6 @@ public:
   void update(float deltaTime);
 
 private:
-  glm::mat4 camera_orientation_inverse;
   bool movementMode;
 };
 

@@ -35,9 +35,7 @@ bool FpsDebugInputHandler::handleEvent(const SDL_Event& event)
     {
       const glm::vec2 angle = rotation_speed * glm::vec2(event.motion.xrel, event.motion.yrel);
 
-      camera_orientation_inverse = glm::rotate(I, angle.y, x) *
-                                   camera_orientation_inverse *
-                                   glm::rotate(I, angle.x, z);
+      frame.orientation = glm::angleAxis(-angle.x, z) * frame.orientation * glm::angleAxis(-angle.y, x);
       return true;
     }
     return false;
