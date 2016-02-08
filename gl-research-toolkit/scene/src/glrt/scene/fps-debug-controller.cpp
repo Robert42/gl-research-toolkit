@@ -75,9 +75,9 @@ void FpsDebugInputHandler::update(float deltaTime)
                         state[e]-state[q],
                         state[s]-state[w]);
 
-    key_input = transform_direction(glm::inverse(camera_orientation_inverse), -key_input);
+    key_input = frame.transform_direction(key_input);
 
-    frame.position -=  key_input * deltaTime * movement_speed;
+    frame.position +=  key_input * deltaTime * movement_speed;
   }
 }
 
@@ -90,16 +90,18 @@ FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<Fp
   connect(&component, &Node::Component::destroyed, this, &FpsDebugController::deleteLater);
 
   node.sceneLayer.scene.inputManager.addHandler(&inputHandler);
+
+  // #FIXME: remove:
+  component.set_localCoordFrame(CoordFrame(glm::vec3(0, 0, 1.9f)));
+
+  inputHandler.frame = component.localCoordFrame();
 }
 
 void FpsDebugController::tick(float timeDelta)
 {
-  CoordFrame frame = component.localCoordFrame();
-
-  frame.position.z += 0.1f * timeDelta;
-
-  component.set_localCoordFrame(frame);
   inputHandler.update(timeDelta);
+
+  component.set_localCoordFrame(inputHandler.frame);
 }
 
 TickingObject::TickTraits FpsDebugController::tickTraits() const

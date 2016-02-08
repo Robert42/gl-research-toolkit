@@ -27,9 +27,9 @@ CameraParameter CameraParameter::defaultDebugCamera()
 {
   CameraParameter camera;
 
-  camera.lookAt = glm::vec3(0, 1, 0);
-  camera.upVector = glm::vec3(0, 0, 1);
-  camera.position = glm::vec3(0, -5, 0);
+  camera.lookAt = glm::vec3(0, 0, -1);
+  camera.upVector = glm::vec3(0, 1, 0);
+  camera.position = glm::vec3(0, 0, 0);
 
   return camera;
 }
