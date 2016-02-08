@@ -36,6 +36,7 @@ resources::ResourceManager* get_resourceManager(Scene* scene)
 Scene::Scene(resources::ResourceManager* resourceManager)
   : resourceManager(*resourceManager)
 {
+  inputManager.addHandler(&debugCamera);
 }
 
 Scene::~Scene()
@@ -61,7 +62,7 @@ void Scene::clear()
 
 bool Scene::handleEvents(const SDL_Event& event)
 {
-  return debugCamera.handleEvents(event);
+  return inputManager.handleEvent(event);
 }
 
 
@@ -70,6 +71,8 @@ void Scene::update(float deltaTime)
   tickManager.tick(deltaTime);
   globalCoordUpdater.updateCoordinages();
   debugCamera.update(deltaTime);
+
+  inputManager.update();
 }
 
 

@@ -86,7 +86,7 @@ void System::initSDL(const Settings& settings)
                                SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
   CALL_SDL_CRITICAL(sdlWindow != nullptr);
 
-  DebugCamera::windowSize = settings.windowSize;
+  scene::DebugCamera::windowSize = settings.windowSize; // #TODO remove
 
   sdlGlContext = SDL_GL_CreateContext(sdlWindow);
   CALL_SDL_CRITICAL(sdlGlContext != nullptr);

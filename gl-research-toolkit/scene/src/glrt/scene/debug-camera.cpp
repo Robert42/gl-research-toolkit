@@ -2,6 +2,7 @@
 #include <glrt/toolkit/geometry.h>
 
 namespace glrt {
+namespace scene {
 
 glm::ivec2 DebugCamera::windowSize;
 
@@ -17,7 +18,7 @@ DebugCamera::DebugCamera()
   locked = false;
 }
 
-bool DebugCamera::handleEvents(const SDL_Event& event)
+bool DebugCamera::handleEvent(const SDL_Event& event)
 {
   if(locked)
   {
@@ -108,5 +109,6 @@ void DebugCamera::operator=(const scene::CameraParameter& cameraParameter)
 }
 
 
+} // namespace scene
 } // namespace glrt
 

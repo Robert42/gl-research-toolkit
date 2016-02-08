@@ -47,7 +47,7 @@ int main(int argc, char** argv)
                         glrt::System::Settings::simpleWindow("Single Mesh" // window title
                                                              ),
                         glrt::Application::Settings::techDemo(true));
-  glrt::DebugCamera debugCamera;
+  glrt::scene::DebugCamera debugCamera;
   glrt::gui::AntTweakBar antweakbar(&app,
                                     glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to load and display a simple single mesh" // help text of the sample
                                                                                 ));
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
     SDL_Event event;
     while(app.pollEvent(&event))
     {
-      if(debugCamera.handleEvents(event))
+      if(debugCamera.handleEvent(event))
         continue;
       if(antweakbar.handleEvents(event))
         continue;

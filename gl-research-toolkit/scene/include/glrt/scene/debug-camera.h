@@ -4,10 +4,12 @@
 #include <glrt/dependencies.h>
 
 #include <glrt/scene/camera-parameter.h>
+#include <glrt/scene/input-handler.h>
 
 namespace glrt {
+namespace scene {
 
-class DebugCamera
+class DebugCamera final : public InputHandler
 {
 public:
   static glm::ivec2 windowSize;
@@ -22,7 +24,7 @@ public:
 
   DebugCamera();
 
-  bool handleEvents(const SDL_Event& event);
+  bool handleEvent(const SDL_Event& event) override;
 
   void update(float deltaTime);
 
@@ -33,6 +35,7 @@ private:
   bool movementMode;
 };
 
+} // namespace scene
 } // namespace glrt
 
 #endif // GLRT_DEBUGCAMERA_H

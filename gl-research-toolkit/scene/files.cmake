@@ -13,6 +13,7 @@ set(SOURCE_FILES
   include/glrt/scene/implementation/global-coord-array-order.inl
   include/glrt/scene/implementation/tick-manager-tickorder-array.h
   include/glrt/scene/implementation/tick-manager-tickorder-array.inl
+  include/glrt/scene/input-handler.h
   include/glrt/scene/light-component.h
   include/glrt/scene/node.h
   include/glrt/scene/node.inl
@@ -37,6 +38,7 @@ set(SOURCE_FILES
   src/glrt/scene/coord-frame.cpp
   src/glrt/scene/debug-camera.cpp
   src/glrt/scene/global-coord-updater.cpp
+  src/glrt/scene/input-handler.cpp
   src/glrt/scene/light-component.cpp
   src/glrt/scene/node.cpp
   src/glrt/scene/resources/asset-converter.cpp
