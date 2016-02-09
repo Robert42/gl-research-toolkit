@@ -698,7 +698,7 @@ StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3&
     throw GLRT_EXCEPTION(QString("Couldn't find any faces%0").arg(context));
 
   if(numVertices > std::numeric_limits<index_type>::max())
-    throw GLRT_EXCEPTION(QString("Too many vertices%0").arg(context));
+    throw GLRT_EXCEPTION(QString("Too many vertices%0. Got %1, the maximum ist %2").arg(context).arg(numVertices).arg(std::numeric_limits<index_type>::max()));
 
   QVector<Vertex> vertices;
   QVector<index_type> indices;
