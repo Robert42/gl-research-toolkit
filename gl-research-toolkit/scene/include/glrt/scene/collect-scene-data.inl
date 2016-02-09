@@ -63,6 +63,17 @@ Array<T_att*> collectAllModularAttributesWithType(Scene* scene, const std::funct
   return attributes;
 }
 
+template<typename T_component>
+T_component* findComponent(Scene* scene, const Uuid<T_component>& uuid)
+{
+  for(const SceneLayer* layer : scene->allLayers())
+    for(Node* n : layer->allNodes())
+      for(T_component* component : n->allComponentsWithType<T_component>())
+        if(component->uuid == uuid)
+          return component;
+  return nullptr;
+}
+
 template<typename T_component, typename T_data>
 QVector<T_data> collectData(Scene* scene, const std::function<T_data(T_component*)>& get_data)
 {

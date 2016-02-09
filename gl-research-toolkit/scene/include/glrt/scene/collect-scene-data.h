@@ -17,6 +17,9 @@ QHash<QString, T_component*> collectAllComponentsWithTypeNamed(Scene* scene, con
 template<typename T_att>
 Array<T_att*> collectAllModularAttributesWithType(Scene* scene, const std::function<bool(T_att*)>& filter=always_return_true<T_att*>);
 
+template<typename T_component>
+T_component* findComponent(Scene* scene, const Uuid<T_component>& uuid);
+
 CameraComponent* findDebugCameraComponent(Scene* scene);
 FpsDebugController* findFpsDebugController(Scene* scene);
 
