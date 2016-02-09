@@ -562,9 +562,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   outputStream << "  Uuid<CameraComponent> cameraComponentUuid;\n";
   outputStream << "  Uuid<Material> materialUuid;\n";
   if(fallbackLightIsUsed)
-    outputStream << "  Uuid<LightSource> fallbackLight = \""<<QUuid(uuids::fallbackLight).toString()<<"\";\n";
+    outputStream << "  Uuid<LightSource> fallbackLight = Uuid<LightSource>(\""<<QUuid(uuids::fallbackLight).toString()<<"\");\n";
   if(fallbackMaterialIsUsed)
-    outputStream << "  Uuid<Material> fallbackMaterial = \""<<QUuid(uuids::fallbackMaterial).toString()<<"\";\n";
+    outputStream << "  Uuid<Material> fallbackMaterial = Uuid<Material>(\""<<QUuid(uuids::fallbackMaterial).toString()<<"\");\n";
 
   if(!allMeshesToImport.isEmpty())
   {
