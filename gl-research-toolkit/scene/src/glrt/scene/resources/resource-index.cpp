@@ -26,7 +26,8 @@ void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
   convertSceneGraph(QString::fromStdString(sceneGraphFilename),
                     QString::fromStdString(sourceFilename),
                     resourceIndex->uuid,
-                    settings);
+                    settings,
+                    QString::fromStdString(groupToImport));
 }
 
 inline void set_label(ResourceIndex* index, const Uuid<void>& uuid, const std::string& l)

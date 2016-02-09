@@ -59,10 +59,10 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings& settings);
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
-QString python_exportSceneAsObjMesh(const QString& objFile);
-QString python_exportSceneAsColladaSceneGraph(const QString& objFile);
+QString python_exportSceneAsObjMesh(const QString& objFile, const QString& groupToImport);
+QString python_exportSceneAsColladaSceneGraph(const QString& objFile, const QString& groupToImport);
 
-void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& blenderFile, bool indexed)
+void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& blenderFile, const QString& groupToImport, bool indexed)
 {
   QTemporaryDir temporaryDir;
 
@@ -71,12 +71,12 @@ void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& 
 
   QString tempFilePath = QDir(temporaryDir.path()).absoluteFilePath("exported.obj");
 
-  runBlenderWithPythonScript(python_exportSceneAsObjMesh(tempFilePath), blenderFile);
+  runBlenderWithPythonScript(python_exportSceneAsObjMesh(tempFilePath, groupToImport), blenderFile);
 
   convertStaticMesh_assimpToMesh(meshFile, tempFilePath, indexed);
 }
 
-void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
+void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const QFileInfo& blenderFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings, const QString& groupToImport)
 {
   QTemporaryDir temporaryDir;
 
@@ -85,7 +85,7 @@ void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const Q
 
   QString tempFilePath = QDir(temporaryDir.path()).absoluteFilePath("exported-scene.dae");
 
-  runBlenderWithPythonScript(python_exportSceneAsColladaSceneGraph(tempFilePath), blenderFile);
+  runBlenderWithPythonScript(python_exportSceneAsColladaSceneGraph(tempFilePath, groupToImport), blenderFile);
 
   convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath, resourceIndexUuid, settings);
 }
@@ -102,13 +102,13 @@ void convertStaticMesh(const std::string& meshFilename, const std::string& sourc
   if(shouldConvert(meshFile, sourceFile))
   {
     if(sourceFile.suffix().toLower() == "blend")
-      convertStaticMesh_BlenderToObj(meshFile, sourceFile, indexed);
+      convertStaticMesh_BlenderToObj(meshFile, sourceFile, QString::fromStdString(groupToImport), indexed);
     else
       convertStaticMesh_assimpToMesh(meshFile, sourceFile, indexed);
   }
 }
 
-void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceFilename, const Uuid<ResourceIndex>& uuid, const SceneGraphImportSettings &settings)
+void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceFilename, const Uuid<ResourceIndex>& uuid, const SceneGraphImportSettings &settings, const QString& groupToImport)
 {
   QFileInfo sceneGraphFile(sceneGraphFilename);
   QFileInfo sourceFile(sourceFilename);
@@ -118,7 +118,7 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   if(shouldConvert(sceneGraphFile, sourceFile))
   {
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
-    convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, uuid, settings);
+    convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, uuid, settings, groupToImport);
   }
 }
 
@@ -137,48 +137,82 @@ QString to_python_string(QString str)
   return str.replace("\\", R"("'\\'")").replace("\"", "\\\"").prepend("r\"").append("\"");
 }
 
-QString python_exportSceneAsObjMesh(const QString& objFile)
+QString python_select_group_only(const QString& groupToImport)
 {
-  return QString("import bpy\n"
-                 "bpy.ops.export_scene.obj("
-                 "filepath=%0"
-                 ", "
-                 "check_existing=False"
-                 ", "
-                 "use_mesh_modifiers=True"
-                 ", "
-                 "global_scale=1.0"
-                 ", "
-                 "use_normals=True"
-                 ", "
-                 "use_uvs=True"
-                 ", "
-                 "use_materials=True"
-                 ", "
-                 "use_triangles=True"
-                 ", "
-                 "axis_forward='Y'"
-                 ", "
-                 "axis_up='Z'"
-                 ")").arg(to_python_string(objFile));
+  QString pythonScript;
+
+  if(!groupToImport.isEmpty())
+  {
+    pythonScript += "bpy.ops.object.select_all(action='DESELECT')";
+    pythonScript += QString("bpy.ops.object.select_same_group(group='%0')").arg(groupToImport);
+  }
+
+  return pythonScript;
 }
 
-QString python_exportSceneAsColladaSceneGraph(const QString& colladaFile)
+QString python_exportSceneAsObjMesh(const QString& objFile, const QString& groupToImport)
 {
-  return QString("import bpy\n"
-                 "bpy.ops.wm.collada_export("
-                 "filepath=%0"
-                 ", "
-                 "apply_modifiers=True"
-                 ", "
-                 "triangulate=True"
-                 ", "
-                 "use_object_instantiation=True"
-                 ", "
-                 "sort_by_name=True"
-                 ", "
-                 "export_transformation_type_selection='matrix'"
-                 ")").arg(to_python_string(colladaFile));
+  QString pythonScript = "import bpy\n";
+
+  pythonScript += python_select_group_only(groupToImport);
+
+
+  pythonScript += QString("bpy.ops.export_scene.obj("
+                          "filepath=%0"
+                          ", "
+                          "check_existing=False"
+                          ", "
+                          "use_mesh_modifiers=True"
+                          ", "
+                          "global_scale=1.0"
+                          ", "
+                          "use_normals=True"
+                          ", "
+                          "use_uvs=True"
+                          ", "
+                          "use_materials=True"
+                          ", "
+                          "use_triangles=True"
+                          ", "
+                          "axis_forward='Y'"
+                          ", "
+                          "axis_up='Z'").arg(to_python_string(objFile));
+
+  if(!groupToImport.isEmpty())
+    pythonScript += ",use_selection='True'";
+
+  pythonScript += ")";
+
+  return pythonScript;
+}
+
+QString python_exportSceneAsColladaSceneGraph(const QString& colladaFile, const QString& groupToImport)
+{
+  QString pythonScript = "import bpy\n";
+
+  pythonScript += python_select_group_only(groupToImport);
+
+  pythonScript += QString("import bpy\n"
+                          "bpy.ops.wm.collada_export("
+                          "filepath=%0"
+                          ", "
+                          "apply_modifiers=True"
+                          ", "
+                          "triangulate=True"
+                          ", "
+                          "use_object_instantiation=True"
+                          ", "
+                          "sort_by_name=True"
+                          ", "
+                          "export_transformation_type_selection='matrix'"
+                          ).arg(to_python_string(colladaFile));
+
+  if(!groupToImport.isEmpty())
+    pythonScript += ",selected='True'";
+
+  pythonScript += ")";
+
+  return pythonScript;
 }
 
 
