@@ -68,6 +68,8 @@ bool InputHandler::Manager::handleEvent(const SDL_Event& event)
 
   for(const QPointer<InputHandler>& handler : listOfHandlers)
   {
+    if(handler.isNull())
+      continue;
     if(handler->handleEvent(event))
       return true;
   }
