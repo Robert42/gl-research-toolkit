@@ -143,8 +143,8 @@ QString python_select_group_only(const QString& groupToImport)
 
   if(!groupToImport.isEmpty())
   {
-    pythonScript += "bpy.ops.object.select_all(action='DESELECT')";
-    pythonScript += QString("bpy.ops.object.select_same_group(group='%0')").arg(groupToImport);
+    pythonScript += "bpy.ops.object.select_all(action='DESELECT')\n";
+    pythonScript += QString("bpy.ops.object.select_same_group(group='%0')\n").arg(groupToImport);
   }
 
   return pythonScript;
@@ -179,7 +179,7 @@ QString python_exportSceneAsObjMesh(const QString& objFile, const QString& group
                           "axis_up='Z'").arg(to_python_string(objFile));
 
   if(!groupToImport.isEmpty())
-    pythonScript += ",use_selection='True'";
+    pythonScript += ", use_selection=True";
 
   pythonScript += ")";
 
@@ -208,7 +208,7 @@ QString python_exportSceneAsColladaSceneGraph(const QString& colladaFile, const 
                           ).arg(to_python_string(colladaFile));
 
   if(!groupToImport.isEmpty())
-    pythonScript += ",selected='True'";
+    pythonScript += ", selected=True";
 
   pythonScript += ")";
 
