@@ -56,6 +56,8 @@ void Scene::clear()
   for(SceneLayer* l : layers)
     delete l;
 
+  _cameras.clear();
+
   sceneCleared();
 }
 
@@ -131,6 +133,16 @@ void Scene::addSceneLayer_debugCamera()
   Q_UNUSED(fpsController);
 }
 
+void Scene::set_camera(CameraSlot slot, const Uuid<CameraComponent>& uuid)
+{
+  _cameras[slot] = uuid;
+}
+
+Uuid<CameraComponent> Scene::camera(CameraSlot slot) const
+{
+  return _cameras[slot];
+}
+
 void Scene::registerAngelScriptAPIDeclarations()
 {
   int r;
@@ -148,6 +160,11 @@ void Scene::registerAngelScriptAPI()
   int r;
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
+  r = angelScriptEngine->RegisterEnum("CameraSlot"); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("CameraSlot", "MAIN_CAMERA", static_cast<int>(CameraSlot::MAIN_CAMERA)); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "void set_camera(CameraSlot slot, const Uuid<CameraComponent> &in uuid)", AngelScript::asMETHOD(Scene,set_camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "Uuid<CameraComponent> get_camera(CameraSlot slot)", AngelScript::asMETHOD(Scene,camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void loadSceneLayer(const Uuid<SceneLayer> &in uuid)", AngelScript::asMETHOD(Scene,loadSceneLayer), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void addSceneLayer_debugCamera()", AngelScript::asMETHOD(Scene,addSceneLayer_debugCamera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "ResourceManager@ get_resourceManager()", AngelScript::asFUNCTION(get_resourceManager), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);

@@ -177,6 +177,11 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
     cameraSwitcher->init(cameras);
     if(!cameras.isEmpty())
       cameraSwitcher->setCurrentKey(cameras.keys().first());
+
+    QPointer<scene::CameraComponent> cameraComponent = glrt::scene::findComponent(scene, scene->camera(glrt::scene::CameraSlot::MAIN_CAMERA));
+    if(!cameraComponent.isNull())
+      cameraSwitcher->setCurrentValue(cameraComponent);
+
   }
 }
 

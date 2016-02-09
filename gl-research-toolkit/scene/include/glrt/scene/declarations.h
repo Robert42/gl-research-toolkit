@@ -10,6 +10,11 @@ namespace implementation {
 struct GlobalCoordArrayOrder;
 } // namespace implementation
 
+enum class CameraSlot
+{
+  MAIN_CAMERA
+};
+
 class CameraParameter;
 
 class Scene;
@@ -27,5 +32,6 @@ const Uuid<CameraComponent> debugCameraComponent("{635544d5-207e-4c93-8d01-65f47
 
 } // namespace scene
 } // namespace glrt
+
 
 #endif // GLRT_SCENE_DECLARATIONS_H

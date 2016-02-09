@@ -854,7 +854,7 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   int materialUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Material>");
   int lightUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<LightSource>");
   int nodeUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<Node>");
-  int cameraUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<CameraParameter>");
+  int cameraUuidTypeId = angelScriptEngine->GetTypeIdByDecl("Uuid<CameraComponent>");
 
   meshesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToImport);
   camerasToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_camerasToImport);

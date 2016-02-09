@@ -53,6 +53,9 @@ public:
   void loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid);
   void addSceneLayer_debugCamera();
 
+  void set_camera(CameraSlot slot, const Uuid<CameraComponent>& uuid);
+  Uuid<CameraComponent> camera(CameraSlot slot) const;
+
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
@@ -69,6 +72,8 @@ private:
   friend class SceneLayer;
 
   QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
+
+  QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
 };
 
 } // namespace scene
