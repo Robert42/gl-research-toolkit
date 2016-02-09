@@ -294,7 +294,6 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
   const aiScene* scene = importer.ReadFile(sourceFilepath.toStdString(),
                                            (indexed ? aiProcess_JoinIdenticalVertices : 0) | // Use Index Buffer
                                            aiProcess_PreTransformVertices | // As we are loading everything into one mesh
-                                           aiProcess_ValidateDataStructure |
                                            aiProcess_RemoveRedundantMaterials |
                                            aiProcess_OptimizeMeshes |
                                            aiProcess_ImproveCacheLocality |
