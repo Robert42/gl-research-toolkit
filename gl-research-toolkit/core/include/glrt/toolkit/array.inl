@@ -468,6 +468,42 @@ void Array<T, T_traits>::clear()
 }
 
 template<typename T, class T_traits>
+T* Array<T, T_traits>::begin()
+{
+  return this->_data;
+}
+
+template<typename T, class T_traits>
+T* Array<T, T_traits>::end()
+{
+  return this->_data + this->_length;
+}
+
+template<typename T, class T_traits>
+const T* Array<T, T_traits>::begin() const
+{
+  return this->constBegin();
+}
+
+template<typename T, class T_traits>
+const T* Array<T, T_traits>::end() const
+{
+  return this->constEnd();
+}
+
+template<typename T, class T_traits>
+const T* Array<T, T_traits>::constBegin() const
+{
+  return this->_data;
+}
+
+template<typename T, class T_traits>
+const T* Array<T, T_traits>::constEnd() const
+{
+  return this->_data + this->_length;
+}
+
+template<typename T, class T_traits>
 void Array<T, T_traits>::setCapacity(int capacity)
 {
   Q_ASSERT(capacity >= 0);

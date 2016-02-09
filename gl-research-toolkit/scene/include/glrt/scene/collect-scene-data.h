@@ -14,7 +14,11 @@ QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::func
 template<typename T_component>
 QHash<QString, T_component*> collectAllComponentsWithTypeNamed(Scene* scene, const std::function<bool(T_component*)>& filter=always_return_true<T_component*>);
 
+template<typename T_att>
+Array<T_att*> collectAllModularAttributesWithType(Scene* scene, const std::function<bool(T_att*)>& filter=always_return_true<T_att*>);
+
 CameraComponent* findDebugCameraComponent(Scene* scene);
+FpsDebugController* findFpsDebugController(Scene* scene);
 
 
 template<typename T_component, typename T_data>

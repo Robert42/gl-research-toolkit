@@ -148,11 +148,15 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
 void AntTweakBar::switchDebugCameraTo(Scene* scene, const QPointer<scene::CameraComponent>& otherCamera)
 {
   QPointer<scene::CameraComponent> debugCamera = scene::findDebugCameraComponent(scene);
+  scene::FpsDebugController* fpsController = scene::findFpsDebugController(scene);
 
   if(!debugCamera.isNull() && !otherCamera.isNull())
   {
     debugCamera->set_localCoordFrame(otherCamera->localCoordFrame());
     debugCamera->cameraParameter = otherCamera->cameraParameter;
+
+    if(fpsController)
+      fpsController->inputHandler.frame = otherCamera->localCoordFrame();
   }
 }
 

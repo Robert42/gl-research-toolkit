@@ -344,6 +344,13 @@ public:
   void reserve(int minCapacity);
   void clear();
 
+  T* begin();
+  T* end();
+  const T* begin() const;
+  const T* end() const;
+  const T* constBegin() const;
+  const T* constEnd() const;
+
   T* data();
   const T* data() const;
 

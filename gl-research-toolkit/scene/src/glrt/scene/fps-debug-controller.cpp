@@ -99,7 +99,6 @@ FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<Fp
 
 void FpsDebugController::tick(float timeDelta)
 {
-  inputHandler.frame = component.localCoordFrame();
   inputHandler.update(timeDelta);
 
   component.set_localCoordFrame(inputHandler.frame);

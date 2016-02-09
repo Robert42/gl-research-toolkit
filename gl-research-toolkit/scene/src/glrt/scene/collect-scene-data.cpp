@@ -1,4 +1,5 @@
 #include <glrt/scene/collect-scene-data.h>
+#include <glrt/scene/fps-debug-controller.h>
 
 namespace glrt {
 namespace scene {
@@ -9,6 +10,17 @@ CameraComponent* findDebugCameraComponent(Scene* scene)
   {
     if(cameraComponent->uuid == uuids::debugCameraComponent)
       return cameraComponent;
+  }
+
+  return nullptr;
+}
+
+FpsDebugController* findFpsDebugController(Scene* scene)
+{
+  for(FpsDebugController* fps : collectAllModularAttributesWithType<FpsDebugController>(scene))
+  {
+    if(fps != nullptr)
+      return fps;
   }
 
   return nullptr;
