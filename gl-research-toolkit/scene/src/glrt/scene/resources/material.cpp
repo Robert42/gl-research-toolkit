@@ -9,7 +9,8 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 Material::Material(const PlainColor& plainColor)
   : plainColor(plainColor),
-    type(Type::PLAIN_COLOR)
+    type(Type::PLAIN_COLOR),
+    materialUser(UuidIndex::null_index<0>())
 {
 }
 

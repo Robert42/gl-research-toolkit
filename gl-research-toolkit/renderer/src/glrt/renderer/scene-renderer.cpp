@@ -160,6 +160,11 @@ bool orderByDrawCall(const scene::StaticMeshComponent* a, const scene::StaticMes
   if(a->movable() && !b->movable())
     return false;
 
+  if(a->material().materialUser < b->material().materialUser)
+    return true;
+  if(a->material().materialUser > b->material().materialUser)
+    return false;
+
   if(a->materialUuid < b->materialUuid)
     return true;
   if(a->materialUuid > b->materialUuid)

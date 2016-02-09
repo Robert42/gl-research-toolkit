@@ -21,9 +21,11 @@ set(SOURCE_FILES
   include/glrt/scene/resources/declarations.h
   include/glrt/scene/resources/light-source.h
   include/glrt/scene/resources/material.h
+  include/glrt/scene/resources/material.inl
   include/glrt/scene/resources/resource-index.h
   include/glrt/scene/resources/resource-index.inl
   include/glrt/scene/resources/resource-manager.h
+  include/glrt/scene/resources/resource-manager.inl
   include/glrt/scene/resources/static-mesh.h
   include/glrt/scene/resources/static-mesh-loader.h
   include/glrt/scene/scene.h

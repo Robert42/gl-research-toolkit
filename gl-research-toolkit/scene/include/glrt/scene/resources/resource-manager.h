@@ -46,17 +46,25 @@ public:
   QList<const Index*> allIndices() const;
   const Index* indexForResourceUuid(const QUuid& uuid, const Index* fallback=&Index::fallback) const;
 
+  template<typename T>
+  void addMaterialUser(const Uuid<Material>& material, const Uuid<T>& materialuser);
+
 protected:
   virtual bool foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const = 0;
 
 private:
   friend class glrt::scene::SceneLayer;
   QList<SceneLayer*> _sceneLayers;
+
+  void foreachWritableIndex(const std::function<bool(Index* index)>& lambda);
+  ResourceIndex* writableIndexForResourceUuid(const QUuid& uuid, Index* fallback);
 };
 
 
 } // namespace resources
 } // namespace scene
 } // namespace glrt
+
+#include "resource-manager.inl"
 
 #endif // GLRT_SCENE_RESOURCES_RESOURCEMANAGER_H
