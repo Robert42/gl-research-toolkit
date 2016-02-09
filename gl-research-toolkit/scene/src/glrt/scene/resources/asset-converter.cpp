@@ -143,6 +143,7 @@ QString python_select_group_only(const QString& groupToImport)
 
   if(!groupToImport.isEmpty())
   {
+    // #FIXME: show all Layers?
     pythonScript += "bpy.ops.object.select_all(action='DESELECT')\n";
     pythonScript += QString("bpy.ops.object.select_same_group(group='%0')\n").arg(groupToImport);
   }
