@@ -20,6 +20,7 @@ using AngelScriptIntegration::AngelScriptCheck;
 void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
                                const std::string& sourceFilename,
                                SceneGraphImportSettings::AngelScriptInterface* settings,
+                               const std::string& groupToImport,
                                const ResourceIndex* resourceIndex)
 {
   convertSceneGraph(QString::fromStdString(sceneGraphFilename),
@@ -86,8 +87,8 @@ void ResourceIndex::registerAngelScriptAPI()
 
   SceneGraphImportSettings::registerType();
 
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile)", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings)", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void set_label(const BaseUuid &in uuid, const string &in label)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "string get_label(const BaseUuid &in uuid)", AngelScript::asFUNCTION(get_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);

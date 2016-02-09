@@ -90,7 +90,7 @@ void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const Q
   convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath, resourceIndexUuid, settings);
 }
 
-void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename, ResourceIndex*)
+void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename, const std::string& groupToImport, ResourceIndex*)
 {
   bool indexed = true;// #TODO allow the script to choose, whether the mesh is indexed or not
 

@@ -37,7 +37,9 @@ private:
 };
 
 void convertStaticMesh(const std::string& meshFile,
-                       const std::string& sourceFile, ResourceIndex*);
+                       const std::string& sourceFile,
+                       const std::string& groupToImport,
+                       ResourceIndex*);
 void convertSceneGraph(const QString& sceneGraphFilename,
                        const QString& sourceFilename,
                        const Uuid<ResourceIndex>& uuid,
