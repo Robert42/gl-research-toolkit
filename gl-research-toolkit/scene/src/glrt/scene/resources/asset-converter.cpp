@@ -143,8 +143,13 @@ QString python_select_group_only(const QString& groupToImport)
 
   if(!groupToImport.isEmpty())
   {
-    // #FIXME: show all Layers?
+    pythonScript += "# Only objects in visible layers are exported so make sure that all layers containing objects of the group are visible.\n"
+                    "# To be on the safe side, just show all layers ;)\n";
+    pythonScript += "for i in range(0, 20):\n";
+    pythonScript += "    bpy.context.scene.layers[i] = True";
+    pythonScript += "# all selected objects are exported. So make sure no objects outside of the group are selected\n";
     pythonScript += "bpy.ops.object.select_all(action='DESELECT')\n";
+    pythonScript += "# only selected objects are exported. So make sure all objects of the group are selected\n";
     pythonScript += QString("bpy.ops.object.select_same_group(group='%0')\n").arg(groupToImport);
   }
 
