@@ -30,9 +30,9 @@ public:
   static void registerAngelScriptAPI();
 
   template<typename T>
-  QVector<T*> allModularAttributeWithType(const std::function<bool(T*)>& filter=always_return_true) const;
+  QVector<T*> allModularAttributeWithType(const std::function<bool(T*)>& filter=always_return_true<T*>) const;
   template<typename T>
-  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true) const;
+  QVector<T*> allComponentsWithType(const std::function<bool(T*)>& filter=always_return_true<T*>) const;
 
   const QVector<ModularAttribute*>& allModularAttributes();
 
