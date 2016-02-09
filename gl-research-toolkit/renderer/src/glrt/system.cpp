@@ -93,6 +93,10 @@ void System::initSDL(const Settings& settings)
   sdlGlContext = SDL_GL_CreateContext(sdlWindow);
   CALL_SDL_CRITICAL(sdlGlContext != nullptr);
 
+#ifdef QT_DEBUG
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
+
   if(settings.VSync)
   {
     if(SDL_GL_SetSwapInterval(-1) < 0)
