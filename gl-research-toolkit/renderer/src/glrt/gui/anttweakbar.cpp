@@ -163,13 +163,20 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 
   if(cameraSwitcher)
   {
+    QString firstKey;
     QMap<QString, QPointer<scene::CameraComponent>> cameras;
     QHash<QString, scene::CameraComponent*> h = glrt::scene::collectAllComponentsWithTypeNamed<scene::CameraComponent>(scene);
     for(auto i=h.begin(); i!=h.end(); ++i)
+    {
       if(i.value()->uuid != scene::uuids::debugCameraComponent)
+      {
         cameras.insert(i.key(), i.value());
+        firstKey = i.key();
+      }
+    }
     cameraSwitcher->init(cameras);
-    cameraSwitcher->setCurrentKey(cameras.firstKey());
+    if(!firstKey.isEmpty())
+      cameraSwitcher->setCurrentKey(firstKey);
   }
 }
 
