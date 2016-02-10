@@ -317,13 +317,20 @@ struct DefaultTraits<QPointer<T>>
   typedef ArrayTraits_Unordered_cCaOD<QPointer<T>> type;
 };
 
+template<typename T>
+struct DefaultAllocator
+{
+  static T* allocate_memory(int n);
+  static void free_memory(T* data);
+};
 
 
-template<typename T, class T_traits = typename DefaultTraits<T>::type>
+template<typename T, class T_traits = typename DefaultTraits<T>::type, class T_allocator = DefaultAllocator<T>>
 class Array final
 {
 public:
   typedef T_traits traits;
+  typedef T_allocator allocator;
 
   Array();
   ~Array();
@@ -397,20 +404,17 @@ private:
   T* _data;
   int _capacity;
   int _length;
-
-  static T* allocate_memory(int n);
-  static void free_memory(T* data);
 };
 
-template<typename T, typename T_traits>
-QDebug operator<<(QDebug d, const Array<T, T_traits>& array);
+template<typename T, class T_traits, class T_allocator>
+QDebug operator<<(QDebug d, const Array<T, T_traits, T_allocator>& array);
 
 
 } // namespace glrt
 
 namespace std {
-template<typename T, class T_traits>
-void swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b);
+template<typename T, class T_traits, class T_allocator>
+void swap(glrt::Array<T, T_traits,T_allocator>& a, glrt::Array<T, T_traits,T_allocator>& b);
 } // namespace std
 
 #include "array.inl"
