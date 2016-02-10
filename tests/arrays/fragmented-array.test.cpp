@@ -695,19 +695,19 @@ static void test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
-  EXPECT_EQ(region_to_be_updated, 1);
+  EXPECT_EQ(region_to_be_updated, 2);
 
   meshComponents.remove(meshComponents.indexOf(meshComponent3));
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
-  EXPECT_EQ(region_to_be_updated, 1);
+  EXPECT_EQ(region_to_be_updated, 2);
 
   meshComponents.remove(meshComponents.indexOf(meshComponent3));
 
   output = "\n";
   region_to_be_updated = meshComponents.updateSegments(&output);
-  EXPECT_EQ(region_to_be_updated, 1);
+  EXPECT_EQ(region_to_be_updated, 2);
 
   meshComponents.append_copy(meshComponent2);
 
