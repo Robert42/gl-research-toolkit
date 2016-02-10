@@ -396,6 +396,42 @@ void DefaultAllocator<T>::free_memory(T* data)
   free(data);
 }
 
+template<typename T, class T_prepended_type, int offset>
+T* AllocatorWithPrependedData<T,T_prepended_type,offset>::allocate_memory(int n)
+{
+  Q_ASSERT(n!=0);
+
+  void* buffer = malloc(n*sizeof(T) + offset);
+
+  if(buffer == nullptr)
+    throw GLRT_EXCEPTION("Out of memory");
+
+  return reinterpret_cast<T*>(buffer+offset);
+}
+
+template<typename T, class T_prepended_type, int offset>
+void AllocatorWithPrependedData<T,T_prepended_type,offset>::free_memory(T* data)
+{
+  Q_ASSERT(data!=nullptr);
+  free(data-offset);
+}
+
+template<typename T, class T_prepended_type, int offset>
+T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(T* data)
+{
+  void* buffer = reinterpret_cast<void*>(data);
+
+  return *reinterpret_cast<T_prepended_type*>(buffer-offset);
+}
+
+template<typename T, class T_prepended_type, int offset>
+const T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(const T* data)
+{
+  void* buffer = reinterpret_cast<void*>(data);
+
+  return *reinterpret_cast<T_prepended_type*>(buffer-offset);
+}
+
 // =============================================================================
 
 /*! \class glrt::Array

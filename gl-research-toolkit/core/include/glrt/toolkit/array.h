@@ -324,6 +324,19 @@ struct DefaultAllocator
   static void free_memory(T* data);
 };
 
+template<typename T, class T_prepended_type, int offset=sizeof(T_prepended_type)>
+struct AllocatorWithPrependedData
+{
+  static_assert(offset>=sizeof(T_prepended_type), "offset must be at least as large as the prepended_type");
+  typedef T_prepended_type prependet_type;
+
+  static T* allocate_memory(int n);
+  static void free_memory(T* data);
+
+  static prependet_type& prepended_data(T* data);
+  static const prependet_type& prepended_data(const T* data);
+};
+
 
 template<typename T, class T_traits = typename DefaultTraits<T>::type, class T_allocator = DefaultAllocator<T>>
 class Array final
