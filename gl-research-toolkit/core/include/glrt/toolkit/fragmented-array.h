@@ -509,7 +509,7 @@ struct FragmentedArray_Segment_Split_in_TwoSegments : public FragmentedArray_Seg
 
 
 
-template<typename T_data, typename T_sections_trait, typename T_data_array_traits = typename DefaultTraits<T_data>::type>
+template<typename T_data, typename T_sections_trait, typename T_data_array_traits = typename DefaultTraits<T_data>::type, typename T_data_array_allocator = DefaultAllocator<T_data>>
 class FragmentedArray
 {
 public:
@@ -546,7 +546,7 @@ public:
 
 private:
   SegmentRanges segmentRanges;
-  Array<T_data, T_data_array_traits> dataArray;
+  Array<T_data, T_data_array_traits, T_data_array_allocator> dataArray;
 
   int beginRegionToUpdate = 0;
 
