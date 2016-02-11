@@ -176,8 +176,14 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   node.sceneLayer.scene.globalCoordUpdater.addComponent(this);
 }
 
+/*!
+\note While calling the destructor, hideInDestructor is called, you
+are guaranteed that the component is beeing hidden.
+*/
 Node::Component::~Component()
 {
+  hideInDestructor();
+
   node.sceneLayer.componentRemoved(this);
 
   QVector<Component*> children = this->children();
@@ -286,10 +292,15 @@ void Node::Component::hide(bool hide)
 
 void Node::Component::hideNowAndDeleteLater()
 {
+  hideInDestructor();
+  this->deleteLater();
+}
+
+void Node::Component::hideInDestructor()
+{
   bool prevVisibility = this->visible();
   _hiddenBecauseDeletedNextFrame = true;
   updateVisibility(prevVisibility);
-  this->deleteLater();
 }
 
 

@@ -9,11 +9,15 @@ set(SOURCE_FILES
   include/glrt/renderer/declarations.h
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
+  include/glrt/renderer/implementation/fragmented-light-component-array.h
+  include/glrt/renderer/implementation/fragmented-light-component-array.inl
   include/glrt/renderer/material-buffer.h
   include/glrt/renderer/sample-resource-manager.h
   include/glrt/renderer/scene-renderer.h
   include/glrt/renderer/static-mesh-buffer.h
   include/glrt/renderer/static-mesh-buffer-manager.h
+  include/glrt/renderer/synced-fragmented-component-array.h
+  include/glrt/renderer/synced-fragmented-component-array.inl
   include/glrt/renderer/toolkit/aligned-vector.h
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h

@@ -76,6 +76,9 @@ private:
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
 };
 
+template<class T>
+struct ComponentAddedSignal;
+
 } // namespace scene
 } // namespace glrt
 

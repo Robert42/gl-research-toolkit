@@ -100,8 +100,8 @@ public:
 public slots:
   void setMovable(bool movable);
   void setVisible(bool visible);
-  void show(bool show);
-  void hide(bool hide);
+  void show(bool show=true);
+  void hide(bool hide=true);
 
   void hideNowAndDeleteLater();
 
@@ -128,6 +128,8 @@ protected:
   virtual void collectCoordDependencies(CoordDependencySet* dependencySet) const;
 
   void setMayBecomeMovable(bool mayBecomeMovable);
+
+  void hideInDestructor();
 
 private:
   template<typename T>
