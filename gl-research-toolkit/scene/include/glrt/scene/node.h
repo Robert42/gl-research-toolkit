@@ -63,6 +63,7 @@ class Node::Component : public TickingObject
 {
   Q_OBJECT
   Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
+  Q_PROPERTY(bool mayBecomeMovable READ mayBecomeMovable WRITE setMayBecomeMovable)
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
 
@@ -77,6 +78,7 @@ public:
   void collectSubtree(QVector<Component*>* subTree);
 
   bool movable() const;
+  bool mayBecomeMovable() const;
   bool visible() const;
 
   CoordFrame localCoordFrame() const;
@@ -125,6 +127,8 @@ protected:
 
   virtual void collectCoordDependencies(CoordDependencySet* dependencySet) const;
 
+  void setMayBecomeMovable(bool mayBecomeMovable);
+
 private:
   template<typename T>
   struct _create_method_helper;
@@ -140,6 +144,7 @@ private:
   CoordFrame _globalCoordFrame;
 
   bool _movable : 1;
+  bool _mayBecomeMovable : 1;
   bool _visible : 1;
   bool _parentVisible : 1;
   bool _hiddenBecauseDeletedNextFrame : 1;

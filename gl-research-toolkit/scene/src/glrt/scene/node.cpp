@@ -122,6 +122,14 @@ Node::ModularAttribute::~ModularAttribute()
 
 // ======== Node::Component ====================================================
 
+/*!
+\property Node::Component::mayBecomeMovable
+
+This property is just a hint. For example the renderer might decide to order not
+movable components, which may be come movable later on between movable and not
+movable componetns in an array. this way, after becoming movable, a smaller part
+of components have to be resorted.
+*/
 
 /*!
 Constructs a new Components and adds it to the given \a node.
@@ -145,6 +153,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     uuid(uuid),
     _globalCoordFrame(glm::uninitialize),
     _movable(false),
+    _mayBecomeMovable(false),
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(true),
@@ -211,6 +220,11 @@ bool Node::Component::movable() const
   return _movable || _coordinateIndex==-1;
 }
 
+bool Node::Component::mayBecomeMovable() const
+{
+  return _mayBecomeMovable;
+}
+
 void Node::Component::setMovable(bool movable)
 {
   if(this->movable() != movable)
@@ -219,6 +233,12 @@ void Node::Component::setMovable(bool movable)
     movableChanged(movable);
     componentMovabilityChanged(this);
   }
+}
+
+void Node::Component::setMayBecomeMovable(bool mayBecomeMovable)
+{
+  if(this->mayBecomeMovable() != mayBecomeMovable)
+    this->_mayBecomeMovable = mayBecomeMovable;
 }
 
 bool Node::Component::visible() const
