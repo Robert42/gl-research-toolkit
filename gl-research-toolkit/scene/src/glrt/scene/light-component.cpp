@@ -11,11 +11,9 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 
 LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<LightComponent> &uuid)
-  : Node::Component(node, parent, uuid),
-    _dynamic(false)
+  : Node::Component(node, parent, uuid)
 {
   node.sceneLayer.scene.LightComponentAdded(this);
-  connect(this, &LightComponent::componentMovabilityChanged, this, &LightComponent::handleChangedMovable);
 }
 
 
@@ -67,30 +65,6 @@ void LightComponent::registerAngelScriptAPI()
   Node::Component::registerAsBaseOfClass<LightComponent>(angelScriptEngine, "LightComponent");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
-}
-
-bool LightComponent::dynamic() const
-{
-  return _dynamic;
-}
-
-void LightComponent::setDynamic(bool dynamic)
-{
-  if(this->dynamic() != dynamic)
-  {
-    this->_dynamic = dynamic;
-
-    if(!dynamic)
-      this->setMovable(false);
-
-    dynamicChanged(this);
-  }
-}
-
-void LightComponent::handleChangedMovable()
-{
-  if(this->movable())
-    this->setDynamic(true);
 }
 
 // =============================================================================
