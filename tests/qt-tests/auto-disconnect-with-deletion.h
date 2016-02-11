@@ -19,5 +19,20 @@ signals:
   void mySignal();
 };
 
+template<typename T>
+class TemplateFoo : public QObject
+{
+public:
+  static int slotWasCalled;
+
+  void mySlot()
+  {
+    slotWasCalled++;
+  }
+};
+
+template<typename T>
+int TemplateFoo<T>::slotWasCalled = 0;
+
 
 } // namespace QObject_disconnectTest

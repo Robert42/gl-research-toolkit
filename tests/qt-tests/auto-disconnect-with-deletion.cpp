@@ -71,6 +71,61 @@ void test_queued_connection_everything_deleting_sender_in_between()
 }
 
 
+void test_auto_disconnected_subclass_of_qobject()
+{
+  Foo* foo;
+  TemplateFoo<int>* templateObject;
+  QMetaObject::Connection connection;
+
+  TemplateFoo<int>::slotWasCalled = 0;
+  foo= new Foo();
+  templateObject = new TemplateFoo<int>();
+
+  connection = QObject::connect(foo, &Foo::mySignal, templateObject, &TemplateFoo<int>::mySlot);
+  EXPECT_TRUE(bool(connection));
+
+  EXPECT_EQ(TemplateFoo<int>::slotWasCalled, 0);
+
+  foo->mySignal();
+
+  EXPECT_EQ(TemplateFoo<int>::slotWasCalled, 1);
+
+  EXPECT_TRUE(bool(connection));
+  delete templateObject;
+  EXPECT_FALSE(bool(connection));
+
+  EXPECT_EQ(TemplateFoo<int>::slotWasCalled, 1);
+
+  delete foo;
+
+  EXPECT_EQ(TemplateFoo<int>::slotWasCalled, 1);
+
+
+
+  // deleting the other way round;
+  TemplateFoo<int>::slotWasCalled = 0;
+  foo= new Foo();
+  templateObject = new TemplateFoo<int>();
+
+  connection = QObject::connect(foo, &Foo::mySignal, templateObject, &TemplateFoo<int>::mySlot);
+  EXPECT_TRUE(bool(connection));
+
+  EXPECT_EQ(TemplateFoo<int>::slotWasCalled, 0);
+
+  foo->mySignal();
+
+  EXPECT_EQ(TemplateFoo<int>::slotWasCalled, 1);
+
+  EXPECT_TRUE(bool(connection));
+  delete foo;
+  EXPECT_FALSE(bool(connection));
+
+  EXPECT_EQ(TemplateFoo<int>::slotWasCalled, 1);
+
+  delete templateObject;
+
+}
+
 }
 
 void main_qt_tests()
@@ -81,4 +136,5 @@ void main_qt_tests()
 
   test_direct_connection_everything_ok();
   test_queued_connection_everything_ok();
+  test_auto_disconnected_subclass_of_qobject();
 }
