@@ -31,7 +31,8 @@ void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::addComponen
   connect(component, &glrt::scene::Node::Component::componentVisibilityChanged,
           this, &SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleVisibilityComponents);
 
-  handleVisibilityComponents(component);
+  if(component->visible())
+    fragmented_array.append_copy(component);
 }
 
 template<typename T_component, typename T_FragmentedArray>
