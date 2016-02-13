@@ -34,7 +34,11 @@ public:
   void bindShaderStorageBuffer(int bindingIndex);
 
 private:
-  typedef SyncedFragmentedComponentArray<T_LightComponent, typename implementation::FragmentedLightComponentArray<T_LightComponent>::type> LightComponentArray;
+  typedef SimpleShaderStorageBuffer<T_LightComponent,T_array_header, block_to_update> this_type;
+  typedef typename implementation::FragmentedLightComponentArray<T_LightComponent>::type FragmentedArray;
+  typedef SyncedFragmentedComponentArray<T_LightComponent, FragmentedArray> LightComponentArray;
+
+  struct Updater;
 
   LightComponentArray lightComponents;
   gl::Buffer buffer;
