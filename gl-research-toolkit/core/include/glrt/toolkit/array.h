@@ -335,6 +335,13 @@ struct AllocatorWithPrependedData
 
   static prependet_type& prepended_data(T* data);
   static const prependet_type& prepended_data(const T* data);
+
+private:
+  template<typename T_whole_buffer, typename T_data_buffer>
+  static T_whole_buffer* whole_buffer(T_data_buffer* data_buffer);
+
+  template<typename T_data_buffer, typename T_whole_buffer>
+  static T_data_buffer* data_buffer(T_whole_buffer* whole_buffer);
 };
 
 
