@@ -66,6 +66,8 @@ signals:
 
   void CameraComponentAdded(CameraComponent* component);
   void LightComponentAdded(LightComponent* component);
+  void SphereAreaLightComponentAdded(SphereAreaLightComponent* component);
+  void RectAreaLightComponentAdded(RectAreaLightComponent* component);
   void StaticMeshComponentAdded(StaticMeshComponent* component);
 
 private:
@@ -76,10 +78,19 @@ private:
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
 };
 
+
+namespace implementation
+{
+
 template<class T>
 struct ComponentAddedSignal;
 
+
+} // namespace implementation
+
 } // namespace scene
 } // namespace glrt
+
+#include "scene.inl"
 
 #endif // GLRT_SCENE_SCENE_H

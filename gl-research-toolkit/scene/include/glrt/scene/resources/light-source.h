@@ -3,6 +3,7 @@
 
 #include <glrt/scene/coord-frame.h>
 #include <glrt/scene/declarations.h>
+#include <glrt/toolkit/array.h>
 
 namespace glrt {
 namespace scene {
@@ -92,6 +93,20 @@ struct LightSource final
 
 } // namespace resources
 } // namespace scene
+
+
+template<>
+struct DefaultTraits<scene::resources::LightSource::SphereAreaLight>
+{
+  typedef ArrayTraits_Unordered_POD<scene::resources::LightSource::SphereAreaLight> type;
+};
+
+template<>
+struct DefaultTraits<scene::resources::LightSource::RectAreaLight>
+{
+  typedef ArrayTraits_Unordered_POD<scene::resources::LightSource::RectAreaLight> type;
+};
+
 } // namespace glrt
 
 #endif // GLRT_SCENE_RESOURCES_LIGHTSOURCE_H

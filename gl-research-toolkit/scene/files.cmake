@@ -29,6 +29,7 @@ set(SOURCE_FILES
   include/glrt/scene/resources/static-mesh.h
   include/glrt/scene/resources/static-mesh-loader.h
   include/glrt/scene/scene.h
+  include/glrt/scene/scene.inl
   include/glrt/scene/scene-layer.h
   include/glrt/scene/static-mesh-component.h
   include/glrt/scene/ticking-object.h

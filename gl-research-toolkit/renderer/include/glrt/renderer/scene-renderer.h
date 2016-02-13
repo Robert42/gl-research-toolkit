@@ -3,13 +3,14 @@
 
 #include <glrt/scene/scene.h>
 #include <glrt/scene/camera-component.h>
+#include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer-manager.h>
-#include <glrt/renderer/toolkit/shader-storage-format.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 #include <glrt/renderer/material-buffer.h>
 #include <glrt/renderer/declarations.h>
+#include <glrt/renderer/simple-shader-storage-buffer.h>
 
 
 namespace glrt {
@@ -82,8 +83,8 @@ public:
   void bindShaderStoreageBuffers();
 
 private:
-  ShaderStorageFormat<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
-  ShaderStorageFormat<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
+  SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
+  SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
 };
 
 

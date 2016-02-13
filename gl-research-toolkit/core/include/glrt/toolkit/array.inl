@@ -401,7 +401,7 @@ T* AllocatorWithPrependedData<T,T_prepended_type,offset>::allocate_memory(int n)
 {
   Q_ASSERT(n!=0);
 
-  void* buffer = malloc(n*sizeof(T) + offset);
+  quint8* buffer = reinterpret_cast<quint8*>(malloc(n*sizeof(T) + offset));
 
   if(buffer == nullptr)
     throw GLRT_EXCEPTION("Out of memory");
@@ -419,7 +419,7 @@ void AllocatorWithPrependedData<T,T_prepended_type,offset>::free_memory(T* data)
 template<typename T, class T_prepended_type, int offset>
 T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(T* data)
 {
-  void* buffer = reinterpret_cast<void*>(data);
+  quint8* buffer = reinterpret_cast<quint8*>(data);
 
   return *reinterpret_cast<T_prepended_type*>(buffer-offset);
 }
@@ -427,7 +427,7 @@ T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepend
 template<typename T, class T_prepended_type, int offset>
 const T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(const T* data)
 {
-  void* buffer = reinterpret_cast<void*>(data);
+  quint8* buffer = reinterpret_cast<quint8*>(data);
 
   return *reinterpret_cast<T_prepended_type*>(buffer-offset);
 }
