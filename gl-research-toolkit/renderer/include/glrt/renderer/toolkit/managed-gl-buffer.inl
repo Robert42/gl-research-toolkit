@@ -8,7 +8,6 @@ namespace renderer {
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::ManagedGLBuffer()
-  : buffer(0, gl::Buffer::MAP_WRITE)
 {
 }
 
@@ -36,7 +35,10 @@ void ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::setNumElemen
   if(newCapacity != buffer.GetSize())
   {
     this->first_dirty_byte = 0;
-    this->buffer = std::move(gl::Buffer(newCapacity, gl::Buffer::MAP_WRITE));
+    if(newCapacity > 0)
+      this->buffer = std::move(gl::Buffer(newCapacity, gl::Buffer::MAP_WRITE));
+    else
+      this->buffer = std::move(gl::Buffer());
   }
 }
 
