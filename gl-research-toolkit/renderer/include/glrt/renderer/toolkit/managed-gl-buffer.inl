@@ -55,9 +55,14 @@ with the element which was marked dirty with the markElementDirty() command
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 T_element* ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Map()
 {
+  const GLsizeiptr total_number_bytes = T_header_traits::header_size() + header.n_elements()*sizeof(T_element);
+
   Q_ASSERT(first_dirty_byte==0 || (first_dirty_byte-T_header_traits::header_size()) % sizeof(T_element) == 0);
 
-  GLsizeiptr nDirtyBytes = T_header_traits::header_size() + header.n_elements()*sizeof(T_element) - first_dirty_byte;
+  GLsizeiptr nDirtyBytes = total_number_bytes - first_dirty_byte;
+
+  if(nDirtyBytes>0)
+    return nullptr;
 
   byte* whole_buffer = reinterpret_cast<byte*>(this->buffer.Map(first_dirty_byte, nDirtyBytes, gl::Buffer::MapType::WRITE, first_dirty_byte==0 ? gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER : gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
 
@@ -65,7 +70,11 @@ T_element* ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Map()
 
   Q_ASSERT(reinterpret_cast<size_t>(whole_buffer) >= first_dirty_byte);
 
-  return reinterpret_cast<T_element*>(whole_buffer+T_header_traits::header_size()-first_dirty_byte);
+  T_element* data = reinterpret_cast<T_element*>(whole_buffer+T_header_traits::header_size()-first_dirty_byte);
+
+  first_dirty_byte = total_number_bytes;
+
+  return data;
 }
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>

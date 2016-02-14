@@ -23,8 +23,8 @@ void SimpleShaderStorageBuffer<T_LightComponent,T_BufferCapacityTraits,T_array_h
   buffer.markElementDirty(indexOfFirstUpdated);
   buffer.setNumElements(length);
 
-  LightData* dest = buffer.Map();
   T_LightComponent** src = fragmented_array.data();
+  LightData* dest = buffer.Map();
 
   // ISSUE-61 OMP
   for(int i=indexOfFirstUpdated; i<length; ++i)
