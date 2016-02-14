@@ -153,6 +153,11 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawArrows(const QVector<Arr
 
 void DebugLineVisualisation::draw()
 {
+  bool use_depth_test = glIsEnabled(GL_DEPTH_TEST);
+
+  if(use_depth_test)
+    glDisable(GL_DEPTH_TEST);
+
   shaderObject.Activate();
 
   vertexArrayObject.Bind();
@@ -165,6 +170,9 @@ void DebugLineVisualisation::draw()
   }
 
   vertexArrayObject.ResetBinding();
+
+  if(use_depth_test)
+    glEnable(GL_DEPTH_TEST);
 }
 
 
