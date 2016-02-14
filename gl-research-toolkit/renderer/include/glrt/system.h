@@ -65,6 +65,7 @@ private:
   void initSplashscreen(const Settings& settings);
   void initSDL(const Settings& settings);
   void initGLEW(const Settings& settings);
+  void initNVCommandlist(const Settings& settings);
   void verifyGLFeatures();
   void verifyNVidiaFeatures();
   void verifyAssimpVersion();

@@ -39,3 +39,6 @@ add_subdirectory(shader EXCLUDE_FROM_ALL)
 
 ######## Angelscript ###########################################################
 add_subdirectory(angelscript-integration)
+
+######## Nvidia ################################################################
+add_subdirectory(nvcommandlist)

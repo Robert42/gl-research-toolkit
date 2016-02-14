@@ -17,5 +17,6 @@ target_link_libraries(glrt
   PUBLIC
   # glhelper # TODO use again
   glrt-scene
+  nvcommandlist
   Qt5::Widgets
 )
