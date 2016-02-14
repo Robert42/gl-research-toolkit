@@ -27,7 +27,15 @@ bool FragmentedLightComponentArray<T_LightComponent>::DynamicHintHandler::segmen
 template<class T_LightComponent>
 int FragmentedLightComponentArray<T_LightComponent>::DynamicHintHandler::classify(const T_LightComponent* component)
 {
-  return (static_cast<int>(component->movable())<<1) | static_cast<int>(component->mayBecomeMovable());
+  // There are three possibilities: 0b00 for not movable and not becoming movable
+  // There are three possibilities: 0b01 for not movable and may becoming movable
+  // There are three possibilities: 0b11 for not movable
+
+  int movable = static_cast<int>(component->movable());
+  int mayBecomeMovable = static_cast<int>(component->movable());
+  Q_ASSERT(movable<=1);
+  Q_ASSERT(mayBecomeMovable<=1);
+  return (movable<<1) | (mayBecomeMovable | movable);
 }
 
 template<class T_LightComponent>

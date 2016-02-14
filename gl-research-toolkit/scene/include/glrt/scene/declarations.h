@@ -22,6 +22,8 @@ class SceneLayer;
 class Node;
 
 class LightComponent;
+class SphereAreaLightComponent;
+class RectAreaLightComponent;
 class CameraComponent;
 class StaticMeshComponent;
 

@@ -74,6 +74,12 @@ SphereAreaLightComponent::SphereAreaLightComponent(Node& node, Node::Component* 
   : LightComponent(node, parent, uuid),
     data(data)
 {
+  node.sceneLayer.scene.SphereAreaLightComponentAdded(this);
+}
+
+SphereAreaLightComponent::Data SphereAreaLightComponent::globalData() const
+{
+  return globalCoordFrame() * data;
 }
 
 
@@ -84,6 +90,12 @@ RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* pare
   : LightComponent(node, parent, uuid),
     data(data)
 {
+  node.sceneLayer.scene.RectAreaLightComponentAdded(this);
+}
+
+RectAreaLightComponent::Data RectAreaLightComponent::globalData() const
+{
+  return globalCoordFrame() * data;
 }
 
 

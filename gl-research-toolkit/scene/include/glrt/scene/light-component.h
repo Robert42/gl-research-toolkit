@@ -29,6 +29,8 @@ public:
   Data data;
 
   SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data);
+
+  Data globalData() const;
 };
 
 
@@ -39,6 +41,8 @@ public:
   Data data;
 
   RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data);
+
+  Data globalData() const;
 };
 
 

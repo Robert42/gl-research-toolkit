@@ -25,6 +25,7 @@ struct ArrayCapacityTraits_Capacity_Blocks
 
   static int new_capacity(int prev_capacity, int current_length, int elements_to_add);
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed);
+  static int recalc_capacity(int prev_capacity, int current_length);
 };
 
 // #TODO: rename from ArrayTraits_Unordered* to ArrayTraits*
@@ -335,6 +336,13 @@ struct AllocatorWithPrependedData
 
   static prependet_type& prepended_data(T* data);
   static const prependet_type& prepended_data(const T* data);
+
+private:
+  template<typename T_whole_buffer, typename T_data_buffer>
+  static T_whole_buffer* whole_buffer(T_data_buffer* data_buffer);
+
+  template<typename T_data_buffer, typename T_whole_buffer>
+  static T_data_buffer* data_buffer(T_whole_buffer* whole_buffer);
 };
 
 

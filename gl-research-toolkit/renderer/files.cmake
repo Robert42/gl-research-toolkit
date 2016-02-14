@@ -14,14 +14,17 @@ set(SOURCE_FILES
   include/glrt/renderer/material-buffer.h
   include/glrt/renderer/sample-resource-manager.h
   include/glrt/renderer/scene-renderer.h
+  include/glrt/renderer/simple-shader-storage-buffer.h
+  include/glrt/renderer/simple-shader-storage-buffer.inl
   include/glrt/renderer/static-mesh-buffer.h
   include/glrt/renderer/static-mesh-buffer-manager.h
   include/glrt/renderer/synced-fragmented-component-array.h
   include/glrt/renderer/synced-fragmented-component-array.inl
   include/glrt/renderer/toolkit/aligned-vector.h
+  include/glrt/renderer/toolkit/managed-gl-buffer.h
+  include/glrt/renderer/toolkit/managed-gl-buffer.inl
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h
-  include/glrt/renderer/toolkit/shader-storage-format.h
   include/glrt/renderer/toolkit/temp-shader-file.h
   include/glrt/sample-application.h
   include/glrt/splashscreen-style.h

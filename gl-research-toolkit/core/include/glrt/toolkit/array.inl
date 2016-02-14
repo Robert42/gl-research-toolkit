@@ -30,6 +30,16 @@ inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_rem
   return glm::min(prev_capacity, glm::ceilMultiple(current_length, block_size_remove));
 }
 
+template<int block_size_append, int block_size_remove>
+inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_remove>::recalc_capacity(int prev_capacity, int current_length)
+{
+  if(prev_capacity < current_length)
+    return new_capacity(prev_capacity, current_length, current_length-prev_capacity);
+  else if(prev_capacity > current_length)
+    return adapt_capacity_after_removing_elements(prev_capacity, current_length, prev_capacity-current_length);
+  else
+    return prev_capacity;
+}
 
 
 /*! \class glrt::ArrayTraits_Unordered_Toolkit
@@ -396,40 +406,56 @@ void DefaultAllocator<T>::free_memory(T* data)
   free(data);
 }
 
+// -----------------------------------------------------------------------------
+
 template<typename T, class T_prepended_type, int offset>
 T* AllocatorWithPrependedData<T,T_prepended_type,offset>::allocate_memory(int n)
 {
   Q_ASSERT(n!=0);
 
-  void* buffer = malloc(n*sizeof(T) + offset);
+  quint8* whole_buffer = reinterpret_cast<quint8*>(malloc(n*sizeof(T) + offset));
 
-  if(buffer == nullptr)
+  if(whole_buffer == nullptr)
     throw GLRT_EXCEPTION("Out of memory");
 
-  return reinterpret_cast<T*>(buffer+offset);
+  return data_buffer<T>(whole_buffer);
 }
 
 template<typename T, class T_prepended_type, int offset>
 void AllocatorWithPrependedData<T,T_prepended_type,offset>::free_memory(T* data)
 {
   Q_ASSERT(data!=nullptr);
-  free(data-offset);
+  free(whole_buffer<quint8>(data));
 }
 
 template<typename T, class T_prepended_type, int offset>
 T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(T* data)
 {
-  void* buffer = reinterpret_cast<void*>(data);
-
-  return *reinterpret_cast<T_prepended_type*>(buffer-offset);
+  return *whole_buffer<T_prepended_type>(data);
 }
 
 template<typename T, class T_prepended_type, int offset>
 const T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(const T* data)
 {
-  void* buffer = reinterpret_cast<void*>(data);
+  return *whole_buffer<const T_prepended_type>(data);
+}
 
-  return *reinterpret_cast<T_prepended_type*>(buffer-offset);
+template<typename T, class T_prepended_type, int offset>
+template<typename T_whole_buffer, typename T_data_buffer>
+T_whole_buffer* AllocatorWithPrependedData<T,T_prepended_type,offset>::whole_buffer(T_data_buffer* data_buffer)
+{
+  quint8* whole_buffer = ((quint8*)data_buffer) - offset;
+
+  return ((T_whole_buffer*)whole_buffer);
+}
+
+template<typename T, class T_prepended_type, int offset>
+template<typename T_data_buffer, typename T_whole_buffer>
+T_data_buffer* AllocatorWithPrependedData<T,T_prepended_type,offset>::data_buffer(T_whole_buffer* whole_buffer)
+{
+  quint8* data_buffer = ((quint8*)whole_buffer) + offset;
+
+  return ((T_data_buffer*)data_buffer);
 }
 
 // =============================================================================

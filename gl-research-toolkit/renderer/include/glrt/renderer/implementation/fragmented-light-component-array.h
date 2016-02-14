@@ -40,6 +40,8 @@ struct FragmentedLightComponentArray
   typedef FragmentedArray_Segment_Split_in_FixedNumberOfSegments<3, T_LightComponent*, int, DynamicHintHandler, CallUpdateTrait> DynamicHintTraits;
 
   typedef FragmentedArray<T_LightComponent*, DynamicHintTraits> type;
+
+  static int firstSegmentWithMovable(){return 3;}
 };
 
 } // namespace implementation

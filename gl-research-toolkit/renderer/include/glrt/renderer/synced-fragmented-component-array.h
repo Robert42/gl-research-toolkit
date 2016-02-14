@@ -20,7 +20,7 @@ public:
 
 private:
   void handleDeletedComponents(QObject* object);
-  void handleVisibilityComponents(T_component* component);
+  void handleVisibilityComponents(glrt::scene::Node::Component* component);
 };
 
 } // namespace renderer

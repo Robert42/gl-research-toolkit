@@ -12,16 +12,18 @@ SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::SyncedFragmented
   : scene(scene),
     dirty(true)
 {
-  connect(&scene, glrt::scene::ComponentAddedSignal<T_component>::signal(scene),
+  connect(&scene, glrt::scene::implementation::ComponentAddedSignal<T_component>::signal(&scene),
           this, &SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::addComponent);
 
-  for(T_component* c : glrt::scene::collectAllComponentsWithType<T_component>(scene))
+  for(T_component* c : glrt::scene::collectAllComponentsWithType<T_component>(&scene))
     addComponent(c);
 }
 
 template<typename T_component, typename T_FragmentedArray>
 void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::addComponent(T_component* component)
 {
+  Q_ASSERT(is_instance_of<T_component>(component));
+
 #ifdef QT_DEBUG // only connect for a check
   connect(component, &QObject::destroyed,
           this, &SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleDeletedComponents);
@@ -29,7 +31,8 @@ void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::addComponen
   connect(component, &glrt::scene::Node::Component::componentVisibilityChanged,
           this, &SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleVisibilityComponents);
 
-  handleVisibilityComponents(component);
+  if(component->visible())
+    fragmented_array.append_copy(component);
 }
 
 template<typename T_component, typename T_FragmentedArray>
@@ -40,14 +43,17 @@ void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleDelet
 }
 
 template<typename T_component, typename T_FragmentedArray>
-void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleVisibilityComponents(T_component* component)
+void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleVisibilityComponents(glrt::scene::Node::Component* node_component)
 {
   dirty = true;
 
+  T_component* component = reinterpret_cast<T_component*>(node_component);
+
   if(component->visible())
   {
+    Q_ASSERT(is_instance_of<T_component>(node_component));
     Q_ASSERT(fragmented_array.indexOf(component) == -1);
-    fragmented_array.append(component);
+    fragmented_array.append_copy(component);
   }else
   {
     Q_ASSERT(fragmented_array.indexOf(component) != -1);
