@@ -1,8 +1,8 @@
 #ifndef GLRT_SCENE_CAMERACOMPONENT_H
 #define GLRT_SCENE_CAMERACOMPONENT_H
 
-#include "node.h"
-#include "camera.h"
+#include <glrt/scene/node.h>
+#include <glrt/scene/camera-parameter.h>
 
 namespace glrt {
 namespace scene {
@@ -10,10 +10,12 @@ namespace scene {
 class CameraComponent final : public Node::Component
 {
 public:
-  Camera cameraParameter;
+  CameraParameter cameraParameter;
 
-  CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter);
+  CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter);
   ~CameraComponent();
+
+  CameraParameter globalCameraParameter() const;
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();

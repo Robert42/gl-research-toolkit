@@ -38,18 +38,18 @@ DebugLineVisualisation::~DebugLineVisualisation()
 }
 
 
-DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scene::Camera>& sceneCameras)
+DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scene::CameraParameter>& sceneCameras)
 {
   struct CachedCamera final
   {
-    scene::Camera cameraParameter;
+    scene::CameraParameter cameraParameter;
     glm::mat4 inverseViewProjectionMatrix;
     glm::mat4 inverseViewMatrix;
 
     CachedCamera()
     {
     }
-    CachedCamera(const scene::Camera& cameraParameter)
+    CachedCamera(const scene::CameraParameter& cameraParameter)
       : cameraParameter(cameraParameter)
     {
       inverseViewProjectionMatrix = glm::inverse(this->cameraParameter.projectionMatrix() * this->cameraParameter.viewMatrix());
@@ -60,7 +60,7 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawCameras(const QList<scen
 
   QVector<CachedCamera> cachedCameras;
   cachedCameras.reserve(sceneCameras.length());
-  for(const scene::Camera& cameraParameter : sceneCameras)
+  for(const scene::CameraParameter& cameraParameter : sceneCameras)
     cachedCameras.append(cameraParameter);
 
   DebugMesh::Painter painter;
@@ -153,6 +153,11 @@ DebugLineVisualisation::Ptr DebugLineVisualisation::drawArrows(const QVector<Arr
 
 void DebugLineVisualisation::draw()
 {
+  bool use_depth_test = glIsEnabled(GL_DEPTH_TEST);
+
+  if(use_depth_test)
+    glDisable(GL_DEPTH_TEST);
+
   shaderObject.Activate();
 
   vertexArrayObject.Bind();
@@ -165,6 +170,9 @@ void DebugLineVisualisation::draw()
   }
 
   vertexArrayObject.ResetBinding();
+
+  if(use_depth_test)
+    glEnable(GL_DEPTH_TEST);
 }
 
 

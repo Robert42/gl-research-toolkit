@@ -2,7 +2,7 @@
 #define GLRT_APPLICATION_H
 
 #include <glrt/toolkit/profiler.h>
-#include <glrt/scene/debug-camera.h>
+#include <glrt/scene/fps-debug-controller.h>
 #include <glrt/system.h>
 
 namespace glrt {

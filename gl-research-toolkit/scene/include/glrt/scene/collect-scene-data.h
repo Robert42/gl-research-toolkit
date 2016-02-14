@@ -11,8 +11,17 @@ namespace scene {
 
 template<typename T_component>
 QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::function<bool(T_component*)>& filter=always_return_true<T_component*>);
+template<typename T_component>
+QHash<QString, T_component*> collectAllComponentsWithTypeNamed(Scene* scene, const std::function<bool(T_component*)>& filter=always_return_true<T_component*>);
 
-Array<Node::TickingObject*> collectAllTickingObjects(Scene* scene);
+template<typename T_att>
+Array<T_att*> collectAllModularAttributesWithType(Scene* scene, const std::function<bool(T_att*)>& filter=always_return_true<T_att*>);
+
+template<typename T_component>
+T_component* findComponent(Scene* scene, const Uuid<T_component>& uuid);
+
+CameraComponent* findDebugCameraComponent(Scene* scene);
+FpsDebugController* findFpsDebugController(Scene* scene);
 
 
 template<typename T_component, typename T_data>
@@ -22,8 +31,8 @@ template<typename T_component, typename T_data>
 QHash<QString, T_data> collectNamedData(Scene* scene, const std::function<T_data(T_component*)>& get_data);
 
 
-QVector<Camera> collectCameras(Scene* scene);
-QHash<QString, Camera> collectNamedCameras(Scene* scene);
+QVector<CameraParameter> collectCameraParameters(Scene* scene);
+QHash<QString, CameraParameter> collectNamedCameraParameters(Scene* scene);
 
 QVector<SphereAreaLightComponent::Data> collectSphereAreaLights(Scene* scene);
 QHash<QString, scene::SphereAreaLightComponent::Data> collectNamedSphereAreaLights(Scene* scene);

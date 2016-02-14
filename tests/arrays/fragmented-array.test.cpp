@@ -26,12 +26,22 @@ struct DummyMeshComponent
   Material material;
   Mesh mesh;
   int instanceId;
+
+  bool operator==(const DummyMeshComponent& other) const
+  {
+    return this->instanceId == other.instanceId;
+  }
 };
 
 struct DummyLightComponent
 {
   Interactivity interactivity;
   int instanceId;
+
+  bool operator==(const DummyLightComponent& other) const
+  {
+    return this->instanceId == other.instanceId;
+  }
 };
 
 
@@ -195,11 +205,19 @@ struct InteractivitySegmentHandler : public BaseHandler
     return a.interactivity < b.interactivity;
   }
 
-  static Interactivity classify(const DummyLightComponent* data, int index, QString* output)
+  static Interactivity classify(const DummyLightComponent& data)
   {
-    Q_UNUSED(output);
+    return data.interactivity;
+  }
 
-    return data[index].interactivity;
+  static int segment_as_index(Interactivity interactivity)
+  {
+    return static_cast<int>(interactivity);
+  }
+
+  static Interactivity segment_from_index(int interactivity)
+  {
+    return static_cast<Interactivity>(glm::clamp<int>(interactivity, 0, segment_as_index(Interactivity::DYNAMIC)));
   }
 };
 
@@ -223,11 +241,19 @@ struct MeshSegmentHandler : public BaseHandler
     return a.mesh < b.mesh;
   }
 
-  static Mesh classify(const DummyMeshComponent* data, int index, QString* output)
+  static Mesh classify(const DummyMeshComponent& data)
   {
-    Q_UNUSED(output);
+    return data.mesh;
+  }
 
-    return data[index].mesh;
+  static int segment_as_index(Mesh mesh)
+  {
+    return static_cast<int>(mesh);
+  }
+
+  static Mesh segment_from_index(int mesh)
+  {
+    return static_cast<Mesh>(glm::clamp<int>(mesh, 0, segment_as_index(Mesh::f)));
   }
 };
 
@@ -252,11 +278,19 @@ struct MaterialSegmentHandler : public BaseHandler
     return a.material < b.material;
   }
 
-  static Material classify(const DummyMeshComponent* data, int index, QString* output)
+  static Material classify(const DummyMeshComponent& data)
   {
-    Q_UNUSED(output);
+    return data.material;
+  }
 
-    return data[index].material;
+  static int segment_as_index(Material material)
+  {
+    return static_cast<int>(material);
+  }
+
+  static Material segment_from_index(int material)
+  {
+    return static_cast<Material>(glm::clamp<int>(material, 0, segment_as_index(Material::F)));
   }
 };
 
@@ -281,11 +315,19 @@ struct MovableSegmentHandler : public BaseHandler
     return int(a.movable) < int(b.movable);
   }
 
-  static bool classify(const DummyMeshComponent* data, int index, QString* output)
+  static bool classify(const DummyMeshComponent& data)
   {
-    Q_UNUSED(output);
+    return data.movable;
+  }
 
-    return data[index].movable;
+  static int segment_as_index(bool movable)
+  {
+    return static_cast<int>(movable);
+  }
+
+  static int segment_from_index(int movable)
+  {
+    return movable != 0;
   }
 };
 
@@ -305,10 +347,107 @@ typedef FragmentedArray_Segment_Generic<DummyLightComponent, Interactivity, Inte
 
 } // namespace GenericSectionTraits
 
-typedef FragmentedArray<DummyMeshComponent, GenericSectionTraits::MovableHandler> FragmentedArray_MeshComponents_GenericOnly;
-typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_GenericOnly;
 
-void test_FragmentedArray_Segment_Generic()
+namespace VariableNumberSectionTraits {
+
+
+typedef FragmentedArray_Segment_Split_in_VariableNumber<DummyMeshComponent, Mesh, MeshSegmentHandler, DummyMeshComponent_Trait> MeshHandler;
+typedef FragmentedArray_Segment_Split_in_VariableNumber<DummyMeshComponent, Material, MaterialSegmentHandler, MeshHandler> MaterialHandler;
+typedef FragmentedArray_Segment_Split_in_VariableNumber<DummyMeshComponent, bool, MovableSegmentHandler, MaterialHandler> MovableHandler;
+
+typedef FragmentedArray_Segment_Generic<DummyLightComponent, Interactivity, InteractivitySegmentHandler, DummyLightComponentHandler_Trait> LightInteractivityHandler;
+
+} // namespace GenericSectionTraits
+
+template<typename FragmentedArray_MeshComponents, typename FragmentedArray_LightComponents>
+struct FragmentedArrayTest
+{
+
+static void test_FragmentedArray_AddingLateSegments()
+{
+  QString output;
+
+  DummyMeshComponent meshComponent1 = {false, // movable
+                                       Material::C,
+                                       Mesh::a,
+                                       1};
+  DummyMeshComponent meshComponent2 = {false, // static
+                                       Material::C,
+                                       Mesh::f,
+                                       2};
+  DummyMeshComponent meshComponent3 = {false, // movable
+                                       Material::F,
+                                       Mesh::a,
+                                       3};
+  DummyMeshComponent meshComponent4 = {false, // movable
+                                       Material::F,
+                                       Mesh::a,
+                                       4};
+  DummyMeshComponent meshComponent5 = {false, // movable
+                                       Material::F,
+                                       Mesh::f,
+                                       5};
+
+  FragmentedArray_MeshComponents meshComponents;
+  meshComponents.append_copy(meshComponent5);
+  meshComponents.append_copy(meshComponent3);
+  meshComponents.append_copy(meshComponent1);
+  meshComponents.append_copy(meshComponent4);
+  meshComponents.append_copy(meshComponent2);
+
+  output = "\n";
+  meshComponents.updateSegments(&output);
+
+  output = "\n";
+  meshComponents.iterate(&output);
+  EXPECT_EQ(output,
+            "\nStatic(0, 5){\n"
+            "  Material C(0, 2){\n"
+            "    Mesh a(0, 1){\n"
+            "      1\n"
+            "    } // Mesh a(0, 1)\n"
+            "    Mesh f(1, 2){\n"
+            "      2\n"
+            "    } // Mesh f(1, 2)\n"
+            "  } // Material C(0, 2)\n"
+            "  Material F(2, 5){\n"
+            "    Mesh a(2, 4){\n"
+            "      3\n"
+            "      4\n"
+            "    } // Mesh a(2, 4)\n"
+            "    Mesh f(4, 5){\n"
+            "      5\n"
+            "    } // Mesh f(4, 5)\n"
+            "  } // Material F(2, 5)\n"
+            "} // Static(0, 5)\n");
+
+#define EXPECT_EMPTY(b) {glm::ivec2 v = b;EXPECT_EQ(v.x, v.y)};
+
+  EXPECT_EMPTY(meshComponents.section_boundaries(true));
+  EXPECT_EQ(meshComponents.section_boundaries(false), glm::ivec2(0,5));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::A));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::B));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C), glm::ivec2(0,2));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::D));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::E));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F), glm::ivec2(2,5));
+
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::a), glm::ivec2(0,1));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::b));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::c));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::d));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::C, Mesh::e));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::C, Mesh::f), glm::ivec2(1,2));
+
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::a), glm::ivec2(2,4));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::b));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::c));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::d));
+  EXPECT_EMPTY(meshComponents.section_boundaries(false, Material::F, Mesh::e));
+  EXPECT_EQ(meshComponents.section_boundaries(false, Material::F, Mesh::f), glm::ivec2(4,5));
+}
+
+static void test_FragmentedArray_Segment()
 {
   QString output;
 
@@ -323,7 +462,7 @@ void test_FragmentedArray_Segment_Generic()
   DummyLightComponent lightComponent5 = {Interactivity::STATIC,
                                          5};
 
-  FragmentedArray_LightComponents_GenericOnly lightComponents;
+  FragmentedArray_LightComponents lightComponents;
   lightComponents.append_copy(lightComponent5);
   lightComponents.append_copy(lightComponent3);
   lightComponents.append_copy(lightComponent4);
@@ -349,7 +488,7 @@ void test_FragmentedArray_Segment_Generic()
 }
 
 
-void test_FragmentedArray_Segment_Generic_recursive()
+static void test_FragmentedArray_Segment_recursive()
 {
   QString output;
   DummyMeshComponent meshComponent1 = {true, // movable
@@ -373,7 +512,7 @@ void test_FragmentedArray_Segment_Generic_recursive()
                                        Mesh::c,
                                        5};
 
-  FragmentedArray_MeshComponents_GenericOnly meshComponents;
+  FragmentedArray_MeshComponents meshComponents;
   meshComponents.append_copy(meshComponent5);
   meshComponents.append_copy(meshComponent3);
   meshComponents.append_copy(meshComponent1);
@@ -414,14 +553,192 @@ void test_FragmentedArray_Segment_Generic_recursive()
             "} // Movable(1, 5)\n");
 }
 
-void test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet()
+static void test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet()
 {
-  // #TODO::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
+  QString output;
+  int region_to_be_updated;
+
+  DummyLightComponent lightComponent1 = {Interactivity::DYNAMIC,
+                                         1};
+  DummyLightComponent lightComponent2 = {Interactivity::STATIC,
+                                         2};
+  DummyLightComponent lightComponent3 = {Interactivity::STATIC,
+                                         3};
+  DummyLightComponent lightComponent4 = {Interactivity::DYNAMIC,
+                                         4};
+  DummyLightComponent lightComponent5 = {Interactivity::STATIC,
+                                         5};
+
+  FragmentedArray_LightComponents lightComponents;
+  lightComponents.append_copy(lightComponent5);
+  lightComponents.append_copy(lightComponent3);
+  lightComponents.append_copy(lightComponent4);
+  lightComponents.append_copy(lightComponent1);
+  lightComponents.append_copy(lightComponent2);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  lightComponents.append_copy(lightComponent1);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  lightComponents.append_copy(lightComponent1);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  lightComponents.append_copy(lightComponent4);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  lightComponents.append_copy(lightComponent3);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  lightComponents.append_copy(lightComponent2);
+
+  output = "\n";
+  region_to_be_updated = lightComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+
+  DummyMeshComponent meshComponent1 = {true, // movable
+                                       Material::A,
+                                       Mesh::a,
+                                       1};
+  DummyMeshComponent meshComponent2 = {false, // static
+                                       Material::A,
+                                       Mesh::a,
+                                       2};
+  DummyMeshComponent meshComponent3 = {true, // movable
+                                       Material::A,
+                                       Mesh::a,
+                                       3};
+  DummyMeshComponent meshComponent4 = {true, // movable
+                                       Material::D,
+                                       Mesh::a,
+                                       4};
+  DummyMeshComponent meshComponent5 = {true, // movable
+                                       Material::B,
+                                       Mesh::c,
+                                       5};
+
+  FragmentedArray_MeshComponents meshComponents;
+  meshComponents.append_copy(meshComponent5);
+  meshComponents.append_copy(meshComponent3);
+  meshComponents.append_copy(meshComponent1);
+  meshComponents.append_copy(meshComponent4);
+  meshComponents.append_copy(meshComponent2);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  meshComponents.append_copy(meshComponent4);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 4);
+
+  meshComponents.append_copy(meshComponent4);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 4);
+
+  meshComponents.append_copy(meshComponent4);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 4);
+
+  meshComponents.append_copy(meshComponent5);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  meshComponents.append_copy(meshComponent5);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  meshComponents.remove(meshComponents.indexOf(meshComponent5));
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 3);
+
+  meshComponents.append_copy(meshComponent3);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 1);
+
+  meshComponents.append_copy(meshComponent3);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 1);
+
+  meshComponents.remove(meshComponents.indexOf(meshComponent3));
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 2);
+
+  meshComponents.remove(meshComponents.indexOf(meshComponent3));
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 2);
+
+  meshComponents.remove(meshComponents.indexOf(meshComponent3));
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 2);
+
+  meshComponents.append_copy(meshComponent2);
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
+
+  meshComponents.remove(meshComponents.indexOf(meshComponent2));
+
+  output = "\n";
+  region_to_be_updated = meshComponents.updateSegments(&output);
+  EXPECT_EQ(region_to_be_updated, 0);
 }
+
+static void test_fragmented_array()
+{
+  test_FragmentedArray_AddingLateSegments();
+  test_FragmentedArray_Segment();
+  test_FragmentedArray_Segment_recursive();
+  test_FragmentedArray_Segment_recursive_updating_only_the_last_segmet();
+}
+
+};
 
 void test_fragmented_array()
 {
-  test_FragmentedArray_Segment_Generic();
-  test_FragmentedArray_Segment_Generic_recursive();
-  test_FragmentedArray_Segment_Generic_recursive_updating_only_the_last_segmet();
+  typedef FragmentedArray<DummyMeshComponent, GenericSectionTraits::MovableHandler> FragmentedArray_MeshComponents_GenericOnly;
+  typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_GenericOnly;
+  FragmentedArrayTest<FragmentedArray_MeshComponents_GenericOnly, FragmentedArray_LightComponents_GenericOnly>::test_fragmented_array();
+
+  typedef FragmentedArray<DummyMeshComponent, VariableNumberSectionTraits::MovableHandler> FragmentedArray_MeshComponents_VariableNumberOnly;
+  typedef FragmentedArray<DummyLightComponent, VariableNumberSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_VariableNumberOnly;
+  FragmentedArrayTest<FragmentedArray_MeshComponents_VariableNumberOnly, FragmentedArray_LightComponents_VariableNumberOnly>::test_fragmented_array();
 }

@@ -20,20 +20,20 @@ inline Node* create_node(SceneLayer* scenelayer, const Uuid<Node>& uuid)
 
 
 Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
-  : sceneLayer(sceneLayer),
+  : QObject(&sceneLayer),
+    _sceneLayer(sceneLayer),
     uuid(uuid),
     _rootComponent(nullptr)
 {
   if(sceneLayer._nodes.contains(uuid))
     throw GLRT_EXCEPTION("Same uuid used twice");
 
-  sceneLayer._nodes[uuid] = this;
+  sceneLayer._nodes.insert(uuid, this);
+  scene().nodeAdded(this);
 }
 
 Node::~Node()
 {
-  sceneLayer._nodes.remove(uuid);
-
   QVector<ModularAttribute*> allModularAttributes = this->allModularAttributes();
   for(ModularAttribute* a : allModularAttributes)
     delete a;
@@ -42,7 +42,40 @@ Node::~Node()
 
   Component* rootComponent = this->rootComponent();
   delete rootComponent;
-  Q_ASSERT(rootComponent == nullptr);
+  Q_ASSERT(this->rootComponent() == nullptr);
+
+  sceneLayer()._nodes.remove(uuid);
+  scene().nodeRemoved(this);
+}
+
+Scene& Node::scene()
+{
+  return _sceneLayer.scene();
+}
+
+const Scene& Node::scene()const
+{
+  return _sceneLayer.scene();
+}
+
+SceneLayer& Node::sceneLayer()
+{
+  return _sceneLayer;
+}
+
+const SceneLayer& Node::sceneLayer()const
+{
+  return _sceneLayer;
+}
+
+resources::ResourceManager& Node::resourceManager()
+{
+  return _sceneLayer.scene().resourceManager;
+}
+
+const resources::ResourceManager& Node::resourceManager() const
+{
+  return _sceneLayer.scene().resourceManager;
 }
 
 CoordFrame Node::globalCoordFrame() const
@@ -65,11 +98,6 @@ QVector<Node::Component*> Node::allComponents() const
 Node::Component* Node::rootComponent() const
 {
   return _rootComponent;
-}
-
-resources::ResourceManager& Node::resourceManager()
-{
-  return sceneLayer.scene.resourceManager;
 }
 
 void Node::registerAngelScriptAPIDeclarations()
@@ -99,91 +127,13 @@ void Node::registerAngelScriptAPI()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-// ======== Node::TickingObject ================================================
-
-Node::TickingObject::TickingObject()
-  : _tickDependencyDepth(0)
-{
-}
-
-void Node::TickingObject::tick(float timeDelta) const
-{
-  Q_UNUSED(timeDelta);
-}
-
-bool Node::TickingObject::tickDependsOn(const Component* other) const
-{
-  TickDependencySet dependencies(this);
-
-  return dependencies.dependsOn(other);
-}
-
-int Node::TickingObject::updateTickDependencyDepth()
-{
-  TickDependencySet dependencies(this);
-
-  int newDepth = dependencies.depth();
-
-  if(_tickDependencyDepth != newDepth)
-    tickDependencyDepthChanged(this);
-
-  return _tickDependencyDepth;
-}
-
-void Node::TickingObject::collectDependencies(TickDependencySet* dependencySet) const
-{
-  collectTickDependencies(dependencySet);
-}
-
-/*!
-Defines, whether this object has an impplementation of the tick function which
-should be used or not.
-
-\warning this function should always return the same value, no matter when called!
-
-The order of tick is decided using the returned traits and the tick Dependencies.
-
-Each object is guaranteed, that all of its dependency has been executed before
-the object.
-
-\list
-\li If this function returns TickTraits::NoTick no tick is executed at all.
-Thats the safest and most performant solution.
-\li If this function returns TickTraits::OnlyMainThread, the tick manager guarantees, that
-tick is called in the main thread and the tick manaer also doesn't execute any
-other tick function in a nother thread.
-\li If this function returns TickTraits::Multithreaded, the tick manager calls the
-tick function, in parallel together with other tick function from other tickable
-objects with the TickTraits::Multithreaded trait.
-\br
-\warning
-While this can be powerful it is extremely dengerous. You are responisble to make
-sure to prevent race condition.
-Even if your tick only reads data, you probably want to make sure no one other is
-changing the same data in parallel. Don't say you haven't been warned.
-\br
-If you aren't 100% sure that your ticks are race condition free, I recomment to
-use the TickTraits::OnlyMainThread trait (which is returned by default).
-You can use tick dependencies to ensure, that theese two tick functions aren't called parallel,
-but you still have to make sure that no other thread will create any race condition, which isn't trivial.
-\endlist
-
-*/
-Node::TickingObject::TickTraits Node::TickingObject::tickTraits() const
-{
-  return TickTraits::OnlyMainThread;
-}
-
-void Node::TickingObject::collectTickDependencies(TickDependencySet* dependencySet) const
-{
-  Q_UNUSED(dependencySet);
-}
 
 // ======== Node::ModularAttribute =============================================
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
-  : node(node),
+  : TickingObject(node.scene().tickManager, &node),
+    node(node),
     uuid(uuid)
 {
   node._allModularAttributes.append(this);
@@ -195,8 +145,47 @@ Node::ModularAttribute::~ModularAttribute()
 }
 
 
+Scene& Node::ModularAttribute::scene()
+{
+  return node.scene();
+}
+
+const Scene& Node::ModularAttribute::scene()const
+{
+  return node.scene();
+}
+
+SceneLayer& Node::ModularAttribute::sceneLayer()
+{
+  return node.sceneLayer();
+}
+
+const SceneLayer& Node::ModularAttribute::sceneLayer()const
+{
+  return node.sceneLayer();
+}
+
+resources::ResourceManager& Node::ModularAttribute::resourceManager()
+{
+  return node.resourceManager();
+}
+
+const resources::ResourceManager& Node::ModularAttribute::resourceManager() const
+{
+  return node.resourceManager();
+}
+
+
 // ======== Node::Component ====================================================
 
+/*!
+\property Node::Component::mayBecomeMovable
+
+This property is just a hint. For example the renderer might decide to order not
+movable components, which may be come movable later on between movable and not
+movable componetns in an array. this way, after becoming movable, a smaller part
+of components have to be resorted.
+*/
 
 /*!
 Constructs a new Components and adds it to the given \a node.
@@ -214,14 +203,19 @@ only changed by deleting the child or parent component.
 This component will have the given \a uuid.
 */
 Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
-  : node(node),
+  : TickingObject(node.scene().tickManager, &node),
+    node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
+    _globalCoordFrame(glm::uninitialize),
     _movable(false),
+    _mayBecomeMovable(false),
+    _visible(true),
+    _parentVisible(true),
+    _hiddenBecauseDeletedNextFrame(false),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
-{
-  if(this->parent !=nullptr)
+{  if(this->parent !=nullptr)
   {
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
@@ -230,19 +224,63 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   }else
   {
     Q_ASSERT(node.rootComponent() == nullptr);
-    node._rootComponent = this;
+    this->node._rootComponent = this;
   }
+
+  scene().componentAdded(this);
+
+  scene().globalCoordUpdater.addComponent(this);
 }
 
+/*!
+\note While calling the destructor, hideInDestructor is called, you
+are guaranteed that the component is beeing hidden.
+*/
 Node::Component::~Component()
 {
-  if(parent)
-    parent->_children.removeOne(this);
+  hideInDestructor();
+
+  scene().componentRemoved(this);
 
   QVector<Component*> children = this->children();
   for(Component* child : children)
     delete child;
-  Q_ASSERT(children.isEmpty());
+  Q_ASSERT(this->children().isEmpty());
+
+  if(parent)
+    parent->_children.removeOne(this);
+  else
+    node._rootComponent = nullptr;
+}
+
+Scene& Node::Component::scene()
+{
+  return node.scene();
+}
+
+const Scene& Node::Component::scene()const
+{
+  return node.scene();
+}
+
+SceneLayer& Node::Component::sceneLayer()
+{
+  return node.sceneLayer();
+}
+
+const SceneLayer& Node::Component::sceneLayer()const
+{
+  return node.sceneLayer();
+}
+
+resources::ResourceManager& Node::Component::resourceManager()
+{
+  return node.resourceManager();
+}
+
+const resources::ResourceManager& Node::Component::resourceManager() const
+{
+  return node.resourceManager();
 }
 
 
@@ -274,13 +312,81 @@ bool Node::Component::movable() const
   return _movable || _coordinateIndex==-1;
 }
 
+bool Node::Component::mayBecomeMovable() const
+{
+  return _mayBecomeMovable;
+}
+
 void Node::Component::setMovable(bool movable)
 {
   if(this->movable() != movable)
   {
     this->_movable = movable;
-    movableChanged(this);
+    movableChanged(movable);
+    componentMovabilityChanged(this);
   }
+}
+
+void Node::Component::setMayBecomeMovable(bool mayBecomeMovable)
+{
+  if(this->mayBecomeMovable() != mayBecomeMovable)
+    this->_mayBecomeMovable = mayBecomeMovable;
+}
+
+bool Node::Component::visible() const
+{
+  return _visible && _parentVisible && !_hiddenBecauseDeletedNextFrame;
+}
+
+void Node::Component::setVisible(bool visible)
+{
+  bool prevVisibility = this->visible();
+  this->_visible = visible;
+  updateVisibility(prevVisibility);
+}
+
+void Node::Component::updateVisibility(bool prevVisibility)
+{
+  bool currentVisibility = this->visible();
+  if(currentVisibility != prevVisibility)
+  {
+    visibleChanged(currentVisibility);
+    componentVisibilityChanged(this);
+    if(currentVisibility)
+      scene().componentShown(this);
+    else
+      scene().componentHidden(this);
+
+    for(Component* child : _children)
+    {
+      bool prevVisibility = child->visible();
+      child->_parentVisible = currentVisibility;
+      child->updateVisibility(prevVisibility);
+    }
+  }
+}
+
+void Node::Component::show(bool show)
+{
+  setVisible(show);
+}
+
+void Node::Component::hide(bool hide)
+{
+  setVisible(!hide);
+}
+
+void Node::Component::hideNowAndDeleteLater()
+{
+  hideInDestructor();
+  this->deleteLater();
+}
+
+void Node::Component::hideInDestructor()
+{
+  bool prevVisibility = this->visible();
+  _hiddenBecauseDeletedNextFrame = true;
+  updateVisibility(prevVisibility);
 }
 
 
@@ -290,17 +396,37 @@ CoordFrame Node::Component::localCoordFrame() const
 }
 
 /*!
- * Returns the global transformation of the given component.
- *
- * \note This Method is able to accept nullptr as this value.
- */
+Returns the cached global transformation of the given component.
+
+\note The cache ist updated after calling the tick functions of any components.
+If your tick function depends on the final global position of a component, use
+the slow function calcGlobalCoordFrame to update it first or think, whether
+*/
 CoordFrame Node::Component::globalCoordFrame() const
+{
+  return _globalCoordFrame;
+}
+
+/*!
+Calculates the global transformation of the given component.
+
+\note This Method is able to accept nullptr as this value.
+*/
+CoordFrame Node::Component::updateGlobalCoordFrame()
 {
   if(this == nullptr)
     return CoordFrame();
 
-  return parent->globalCoordFrame() * localCoordFrame();
+  if(hasCustomGlobalCoordUpdater())
+    _globalCoordFrame = calcGlobalCoordFrameImpl();
+  else if(parent != nullptr)
+    _globalCoordFrame = parent->globalCoordFrame() * localCoordFrame();
+  else
+    _globalCoordFrame = localCoordFrame();
+
+  return _globalCoordFrame;
 }
+
 
 /*!
 This function allows to use a customzed calculation for the global coord frame
@@ -310,17 +436,25 @@ The default implementation returns a coord frame containing only nans to signali
 not to use this virtual function to improve performance.
 
 \warning Either always return a coord frame consisting only of NANs or never.
+
+\warning This functions will be called multithreaded, so don't depend on anything
+different than this component itself or it's CoordDependencies.
+\br
+Don't change any state of any object, just calculate the new GlobalCoordinate and
+return it.
+\br
+Don't change anything, expecially don't change the movability or delete any objects.
 */
-CoordFrame Node::Component::calcGlobalCoordFrame() const
+CoordFrame Node::Component::calcGlobalCoordFrameImpl() const
 {
   return CoordFrame(glm::vec3(NAN), glm::quat(NAN, NAN, NAN, NAN), NAN);
 }
 
 bool Node::Component::hasCustomGlobalCoordUpdater() const
 {
-  CoordFrame c = calcGlobalCoordFrame();
+  CoordFrame c = calcGlobalCoordFrameImpl();
 
-  return c.scaleFactor!=NAN || c.position!=glm::vec3(NAN) || c.orientation!=glm::quat(NAN, NAN, NAN, NAN);
+  return !std::isnan(c.scaleFactor);
 }
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
@@ -349,8 +483,16 @@ int Node::Component::updateCoordDependencyDepth()
   int newDepth = dependencies.depth();
 
   if(_coorddependencyDepth != newDepth)
+  {
+    _coorddependencyDepth = newDepth;
     coordDependencyDepthChanged(this);
+  }
 
+  return _coorddependencyDepth;
+}
+
+int Node::Component::coordDependencyDepth() const
+{
   return _coorddependencyDepth;
 }
 

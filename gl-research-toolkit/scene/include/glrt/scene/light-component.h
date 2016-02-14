@@ -12,26 +12,14 @@ namespace scene {
 class LightComponent : public Node::Component
 {
   Q_OBJECT
-  Q_PROPERTY(bool dynamic READ dynamic WRITE setDynamic NOTIFY dynamicChanged)
 public:
   LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid);
+  ~LightComponent();
 
   static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, const resources::LightSource& lightSource);
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
-
-  bool dynamic() const;
-  void setDynamic(bool dynamic);
-
-signals:
-  void dynamicChanged(LightComponent* component);
-
-private:
-  bool _dynamic : 1;
-
-private slots:
-  void handleChangedMovable();
 };
 
 
@@ -42,6 +30,9 @@ public:
   Data data;
 
   SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data);
+  ~SphereAreaLightComponent();
+
+  Data globalData() const;
 };
 
 
@@ -52,6 +43,9 @@ public:
   Data data;
 
   RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data);
+  ~RectAreaLightComponent();
+
+  Data globalData() const;
 };
 
 

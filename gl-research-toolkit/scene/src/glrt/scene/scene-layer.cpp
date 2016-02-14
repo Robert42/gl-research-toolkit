@@ -13,7 +13,7 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 inline Scene* get_scene(SceneLayer* sceneLayer)
 {
-  return &sceneLayer->scene;
+  return &sceneLayer->scene();
 }
 
 inline resources::ResourceIndex* get_index(SceneLayer* sceneLayer)
@@ -29,8 +29,8 @@ inline resources::ResourceIndex* get_index(SceneLayer* sceneLayer)
 SceneLayer::SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene)
   : QObject(&scene),
     uuid(uuid),
-    scene(scene),
-    index(Uuid<resources::ResourceIndex>(QUuid::createUuidV5(QUuid(uuid), QString("index for scene-layer"))))
+    index(Uuid<resources::ResourceIndex>(QUuid::createUuidV5(QUuid(uuid), QString("index for scene-layer")))),
+    _scene(scene)
 {
   if(scene._layers.contains(uuid))
     throw GLRT_EXCEPTION("Same uuid used twice");
@@ -41,11 +41,22 @@ SceneLayer::SceneLayer(const Uuid<SceneLayer>& uuid, Scene& scene)
 
 SceneLayer::~SceneLayer()
 {
-  scene._layers.remove(uuid);
+  QHash<Uuid<Node>, Node*> nodes(std::move(this->_nodes));
+  for(Node* node : nodes)
+    delete node;
 
-  // #TODO: delete all nodes
+  scene()._layers.remove(uuid);
+  scene().resourceManager._sceneLayers.removeAll(this);
+}
 
-  scene.resourceManager._sceneLayers.removeAll(this);
+Scene& SceneLayer::scene()
+{
+  return _scene;
+}
+
+const Scene& SceneLayer::scene() const
+{
+  return _scene;
 }
 
 QList<Node*> SceneLayer::allNodes() const
@@ -88,6 +99,7 @@ void SceneLayer::registerAngelScriptAPI()
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
+
 
 
 } // namespace scene

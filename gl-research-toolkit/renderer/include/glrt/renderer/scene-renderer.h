@@ -2,13 +2,15 @@
 #define GLRT_RENDERER_RENDERER_H
 
 #include <glrt/scene/scene.h>
+#include <glrt/scene/camera-component.h>
+#include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer-manager.h>
-#include <glrt/renderer/toolkit/shader-storage-format.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 #include <glrt/renderer/material-buffer.h>
 #include <glrt/renderer/declarations.h>
+#include <glrt/renderer/simple-shader-storage-buffer.h>
 
 
 namespace glrt {
@@ -23,6 +25,8 @@ public:
 
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
+
+  QPointer<scene::CameraComponent> cameraComponent;
 
   debugging::VisualizationRenderer visualizeCameras;
   debugging::VisualizationRenderer visualizeSphereAreaLights;
@@ -44,22 +48,26 @@ protected:
   virtual void renderImplementation() = 0;
 
 private:
-  struct SceneUniformBlock
+  struct CameraUniformBlock
   {
     glm::mat4 view_projection_matrix;
     glm::vec3 camera_position;
     padding<float> _padding;
   };
 
-  gl::Buffer sceneUniformBuffer;
+  gl::Buffer cameraUniformBuffer;
 
   gl::VertexArrayObject staticMeshVertexArrayObject;
 
   DirectLights* _directLights = nullptr;
 
-  void updateSceneUniform();
+  void updateCameraUniform();
+  void fillCameraUniform(const scene::CameraParameter& cameraParameter);
 
   void debugCameraPositions();
+
+private slots:
+  void updateCameraComponent(scene::CameraComponent* cameraComponent);
 };
 
 
@@ -75,8 +83,8 @@ public:
   void bindShaderStoreageBuffers();
 
 private:
-  ShaderStorageFormat<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
-  ShaderStorageFormat<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
+  SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
+  SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
 };
 
 

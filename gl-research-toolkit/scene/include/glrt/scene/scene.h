@@ -4,7 +4,10 @@
 #include <glrt/dependencies.h>
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/node.h>
-#include <glrt/scene/debug-camera.h>
+#include <glrt/scene/tick-manager.h>
+#include <glrt/scene/global-coord-updater.h>
+#include <glrt/scene/input-handler.h>
+#include <glrt/scene/fps-debug-controller.h>
 
 struct aiNode;
 struct aiScene;
@@ -27,7 +30,9 @@ public:
   resources::ResourceManager& resourceManager;
   Uuid<Scene> uuid;
   QString file;
-  DebugCamera debugCamera; // #TODO this shouldn't be within the scene?
+  TickManager tickManager;
+  GlobalCoordUpdater globalCoordUpdater;
+  InputHandler::Manager inputManager;
 
   Scene(resources::ResourceManager* resourceManager);
   Scene(const Scene&) = delete;
@@ -46,6 +51,10 @@ public:
   void load(const Uuid<Scene>& scene);
 
   void loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid);
+  void addSceneLayer_debugCamera();
+
+  void set_camera(CameraSlot slot, const Uuid<CameraComponent>& uuid);
+  Uuid<CameraComponent> camera(CameraSlot slot) const;
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
@@ -55,17 +64,42 @@ signals:
   void sceneLoadedExt(scene::Scene* scene, bool success);
   void sceneLoaded(bool success);
 
-  void CameraComponentAdded(LightComponent* component);
+  void nodeAdded(Node* node);
+  void nodeRemoved(Node* node);
+
+  void componentAdded(Node::Component* node);
+  void componentRemoved(Node::Component* node);
+
+  void componentShown(Node::Component* node);
+  void componentHidden(Node::Component* node);
+
+  void CameraComponentAdded(CameraComponent* component);
   void LightComponentAdded(LightComponent* component);
+  void SphereAreaLightComponentAdded(SphereAreaLightComponent* component);
+  void RectAreaLightComponentAdded(RectAreaLightComponent* component);
   void StaticMeshComponentAdded(StaticMeshComponent* component);
 
 private:
   friend class SceneLayer;
 
   QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
+
+  QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
 };
+
+
+namespace implementation
+{
+
+template<class T>
+struct ComponentAddedSignal;
+
+
+} // namespace implementation
 
 } // namespace scene
 } // namespace glrt
+
+#include "scene.inl"
 
 #endif // GLRT_SCENE_SCENE_H

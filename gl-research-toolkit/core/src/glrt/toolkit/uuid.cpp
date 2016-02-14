@@ -38,6 +38,35 @@ QUuid UuidIndex::toQUuid() const
   return uuidForIndex(index);
 }
 
+bool UuidIndex::operator==(UuidIndex other) const
+{
+  return other.index == this->index;
+}
+
+bool UuidIndex::operator!=(UuidIndex other) const
+{
+  return other.index != this->index;
+}
+
+bool UuidIndex::operator<(UuidIndex other) const
+{
+  return other.index < this->index;
+}
+
+bool UuidIndex::operator<=(UuidIndex other) const
+{
+  return other.index <= this->index;
+}
+
+bool UuidIndex::operator>(UuidIndex other) const
+{
+  return other.index > this->index;
+}
+
+bool UuidIndex::operator>=(UuidIndex other) const
+{
+  return other.index >= this->index;
+}
 
 QUuid UuidIndex::uuidForIndex(index_type i)
 {
@@ -66,6 +95,11 @@ UuidIndex::index_type UuidIndex::indexForUuid(const QUuid& uuid)
   allIndicesForUuid().insert(std::make_pair(uuid, index));
 
   return index;
+}
+
+UuidIndex::UuidIndex(index_type index)
+  : index(index)
+{
 }
 
 // ======== Uuid & AngelScript =================================================

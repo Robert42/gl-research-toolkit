@@ -21,7 +21,7 @@ void main()
   vec3 ws_position = vertex_position.x*tangent*rectAreaLight.half_width +
                      vertex_position.y*bitangent*rectAreaLight.half_height +
                      vertex_position.z*normal*mix(rectAreaLight.half_width, rectAreaLight.half_height, 0.5) +
-                     rectAreaLight.origin;
+                     rectAreaLight.light.origin;
 
   pass_attributes_to_fragment_shader(ws_position, vertex_color);
 }

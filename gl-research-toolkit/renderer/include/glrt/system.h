@@ -52,10 +52,15 @@ public:
 
   void showWindow();
 
+  static glm::ivec2 windowSize(){return _windowSize;}
+  static float windowAspectRatio(){return float(_windowSize.x)/float(_windowSize.y);}
+
 private:
   QApplication application;
   QSplashScreen* splashscreen = nullptr;
   Logger logger;
+
+  static glm::ivec2 _windowSize;
 
   void initSplashscreen(const Settings& settings);
   void initSDL(const Settings& settings);

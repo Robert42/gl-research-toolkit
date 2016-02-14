@@ -2,6 +2,7 @@
 #define GLRT_SCENE_RESOURCES_MATERIAL_H
 
 #include <glrt/dependencies.h>
+#include <glrt/toolkit/uuid.h>
 
 namespace glrt {
 namespace scene {
@@ -33,6 +34,10 @@ public:
     PlainColor plainColor;
   };
   Type type;
+  UuidIndex materialUser;
+
+  template<typename T>
+  void addMaterialUser(const Uuid<T>& uuid);
 
   Material(const PlainColor& plainColor = PlainColor());
 
@@ -41,8 +46,11 @@ public:
   static void registerAngelScriptTypes();
 };
 
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt
+
+#include "material.inl"
 
 #endif // GLRT_SCENE_RESOURCES_MATERIAL_H

@@ -1,41 +1,39 @@
 #include <glrt/scene/collect-scene-data.h>
+#include <glrt/scene/fps-debug-controller.h>
 
 namespace glrt {
 namespace scene {
 
-Array<Node::TickingObject*> collectAllTickingObjects(Scene* scene)
+CameraComponent* findDebugCameraComponent(Scene* scene)
 {
-  Array<Node::TickingObject*> tickingObjects;
-  int totalNumberTickingObjects = 0;
-  for(const SceneLayer* layer : scene->allLayers())
-    totalNumberTickingObjects += layer->allNodes().length();
-
-  tickingObjects.reserve(totalNumberTickingObjects);
-
-  for(const SceneLayer* layer : scene->allLayers())
+  for(CameraComponent* cameraComponent : collectAllComponentsWithType<CameraComponent>(scene))
   {
-    for(Node* n : layer->allNodes())
-    {
-      for(Node::Component* component : n->allComponents())
-        if(component->tickTraits() != Node::TickingObject::TickTraits::NoTick)
-          tickingObjects.append(component);
-      for(Node::ModularAttribute* attribute : n->allModularAttributes())
-        if(attribute->tickTraits() != Node::TickingObject::TickTraits::NoTick)
-          tickingObjects.append(attribute);
-    }
+    if(cameraComponent->uuid == uuids::debugCameraComponent)
+      return cameraComponent;
   }
 
-  return std::move(tickingObjects);
+  return nullptr;
 }
 
-QVector<Camera> collectCameras(Scene* scene)
+FpsDebugController* findFpsDebugController(Scene* scene)
 {
-  return collectData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->globalCoordFrame() * c->cameraParameter;});
+  for(FpsDebugController* fps : collectAllModularAttributesWithType<FpsDebugController>(scene))
+  {
+    if(fps != nullptr)
+      return fps;
+  }
+
+  return nullptr;
 }
 
-QHash<QString, Camera> collectNamedCameras(Scene* scene)
+QVector<CameraParameter> collectCameraParameters(Scene* scene)
 {
-  return collectNamedData<CameraComponent,Camera>(scene, [](CameraComponent* c) -> Camera{return c->globalCoordFrame() * c->cameraParameter;});
+  return collectData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{c->updateGlobalCoordFrame();return c->globalCameraParameter();});
+}
+
+QHash<QString, CameraParameter> collectNamedCameraParameters(Scene* scene)
+{
+  return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{c->updateGlobalCoordFrame();return c->globalCameraParameter();});
 }
 
 // #TODO: use the new Array type?

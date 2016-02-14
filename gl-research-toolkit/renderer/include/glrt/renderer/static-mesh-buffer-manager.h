@@ -12,6 +12,7 @@ class StaticMeshBufferManager final : public StaticMeshLoader
 {
 public:
   StaticMeshBufferManager();
+  ~StaticMeshBufferManager();
 
   StaticMeshBuffer* meshForUuid(const Uuid<StaticMesh>& uuid);
 

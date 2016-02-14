@@ -6,7 +6,7 @@
 #include <glrt/toolkit/uuid.h>
 #include <glrt/scene/resources/resource-manager.h>
 
-#include <glrt/scene/camera.h>
+#include <glrt/scene/camera-parameter.h>
 
 
 namespace glrt {
@@ -32,7 +32,7 @@ class ShaderDebugPrinter;
 namespace gui {
 
 
-using glrt::scene::Camera;
+using glrt::scene::CameraParameter;
 using glrt::scene::Scene;
 
 
@@ -292,7 +292,7 @@ public:
 
 private:
   typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
-  typedef TweakBarEnum<Camera, QMap<QString, Camera>> CameraEnumeration;
+  typedef TweakBarEnum<QPointer<scene::CameraComponent>, QMap<QString, QPointer<scene::CameraComponent>>> CameraEnumeration;
 
   gui::TweakBarCBVar<bool> toggleProfiler;
 
@@ -303,6 +303,8 @@ private:
 
   void handeledEvent(const SDL_Event& event);
   bool unhandeledEvent(const SDL_Event& event);
+
+  static void switchDebugCameraTo(Scene* scene, const QPointer<scene::CameraComponent>& otherCamera);
 
 private slots:
   void handleSceneLoaded(Scene* scene);

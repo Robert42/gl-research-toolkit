@@ -1,13 +1,19 @@
 set(SOURCE_FILES
   include/glrt/scene/camera-component.h
-  include/glrt/scene/camera.h
+  include/glrt/scene/camera-parameter.h
   include/glrt/scene/collect-scene-data.h
   include/glrt/scene/collect-scene-data.inl
   include/glrt/scene/coord-constraints.h
   include/glrt/scene/coord-frame.h
   include/glrt/scene/coord-frame.inl
-  include/glrt/scene/debug-camera.h
   include/glrt/scene/declarations.h
+  include/glrt/scene/fps-debug-controller.h
+  include/glrt/scene/global-coord-updater.h
+  include/glrt/scene/implementation/global-coord-array-order.h
+  include/glrt/scene/implementation/global-coord-array-order.inl
+  include/glrt/scene/implementation/tick-manager-tickorder-array.h
+  include/glrt/scene/implementation/tick-manager-tickorder-array.inl
+  include/glrt/scene/input-handler.h
   include/glrt/scene/light-component.h
   include/glrt/scene/node.h
   include/glrt/scene/node.inl
@@ -15,20 +21,27 @@ set(SOURCE_FILES
   include/glrt/scene/resources/declarations.h
   include/glrt/scene/resources/light-source.h
   include/glrt/scene/resources/material.h
+  include/glrt/scene/resources/material.inl
   include/glrt/scene/resources/resource-index.h
   include/glrt/scene/resources/resource-index.inl
   include/glrt/scene/resources/resource-manager.h
+  include/glrt/scene/resources/resource-manager.inl
   include/glrt/scene/resources/static-mesh.h
   include/glrt/scene/resources/static-mesh-loader.h
   include/glrt/scene/scene.h
+  include/glrt/scene/scene.inl
   include/glrt/scene/scene-layer.h
   include/glrt/scene/static-mesh-component.h
+  include/glrt/scene/ticking-object.h
+  include/glrt/scene/tick-manager.h
   src/glrt/scene/camera-component.cpp
-  src/glrt/scene/camera.cpp
+  src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/collect-scene-data.cpp
   src/glrt/scene/coord-constraints.cpp
   src/glrt/scene/coord-frame.cpp
-  src/glrt/scene/debug-camera.cpp
+  src/glrt/scene/fps-debug-controller.cpp
+  src/glrt/scene/global-coord-updater.cpp
+  src/glrt/scene/input-handler.cpp
   src/glrt/scene/light-component.cpp
   src/glrt/scene/node.cpp
   src/glrt/scene/resources/asset-converter.cpp
@@ -41,4 +54,6 @@ set(SOURCE_FILES
   src/glrt/scene/scene.cpp
   src/glrt/scene/scene-layer.cpp
   src/glrt/scene/static-mesh-component.cpp
+  src/glrt/scene/ticking-object.cpp
+  src/glrt/scene/tick-manager.cpp
 )

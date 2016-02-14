@@ -30,6 +30,16 @@ inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_rem
   return glm::min(prev_capacity, glm::ceilMultiple(current_length, block_size_remove));
 }
 
+template<int block_size_append, int block_size_remove>
+inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_remove>::recalc_capacity(int prev_capacity, int current_length)
+{
+  if(prev_capacity < current_length)
+    return new_capacity(prev_capacity, current_length, current_length-prev_capacity);
+  else if(prev_capacity > current_length)
+    return adapt_capacity_after_removing_elements(prev_capacity, current_length, prev_capacity-current_length);
+  else
+    return prev_capacity;
+}
 
 
 /*! \class glrt::ArrayTraits_Unordered_Toolkit
@@ -375,6 +385,81 @@ inline void ArrayTraits_Unordered_Toolkit<T, T_c>::destruct_D(T* data, int lengt
 
 // =============================================================================
 
+
+template<typename T>
+T* DefaultAllocator<T>::allocate_memory(int n)
+{
+  Q_ASSERT(n!=0);
+
+  void* buffer = malloc(n*sizeof(T));
+
+  if(buffer == nullptr)
+    throw GLRT_EXCEPTION("Out of memory");
+
+  return reinterpret_cast<T*>(buffer);
+}
+
+template<typename T>
+void DefaultAllocator<T>::free_memory(T* data)
+{
+  Q_ASSERT(data!=nullptr);
+  free(data);
+}
+
+// -----------------------------------------------------------------------------
+
+template<typename T, class T_prepended_type, int offset>
+T* AllocatorWithPrependedData<T,T_prepended_type,offset>::allocate_memory(int n)
+{
+  Q_ASSERT(n!=0);
+
+  quint8* whole_buffer = reinterpret_cast<quint8*>(malloc(n*sizeof(T) + offset));
+
+  if(whole_buffer == nullptr)
+    throw GLRT_EXCEPTION("Out of memory");
+
+  return data_buffer<T>(whole_buffer);
+}
+
+template<typename T, class T_prepended_type, int offset>
+void AllocatorWithPrependedData<T,T_prepended_type,offset>::free_memory(T* data)
+{
+  Q_ASSERT(data!=nullptr);
+  free(whole_buffer<quint8>(data));
+}
+
+template<typename T, class T_prepended_type, int offset>
+T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(T* data)
+{
+  return *whole_buffer<T_prepended_type>(data);
+}
+
+template<typename T, class T_prepended_type, int offset>
+const T_prepended_type& AllocatorWithPrependedData<T,T_prepended_type,offset>::prepended_data(const T* data)
+{
+  return *whole_buffer<const T_prepended_type>(data);
+}
+
+template<typename T, class T_prepended_type, int offset>
+template<typename T_whole_buffer, typename T_data_buffer>
+T_whole_buffer* AllocatorWithPrependedData<T,T_prepended_type,offset>::whole_buffer(T_data_buffer* data_buffer)
+{
+  quint8* whole_buffer = ((quint8*)data_buffer) - offset;
+
+  return ((T_whole_buffer*)whole_buffer);
+}
+
+template<typename T, class T_prepended_type, int offset>
+template<typename T_data_buffer, typename T_whole_buffer>
+T_data_buffer* AllocatorWithPrependedData<T,T_prepended_type,offset>::data_buffer(T_whole_buffer* whole_buffer)
+{
+  quint8* data_buffer = ((quint8*)whole_buffer) + offset;
+
+  return ((T_data_buffer*)data_buffer);
+}
+
+// =============================================================================
+
 /*! \class glrt::Array
 
 An array optimized for performant storage of values.
@@ -394,29 +479,29 @@ by only moving the raw bytes of the buffer.
 */
 
 
-template<typename T, class T_traits>
-Array<T, T_traits>::Array()
+template<typename T, class T_traits, class T_allocator>
+Array<T, T_traits, T_allocator>::Array()
   : _data(nullptr),
     _capacity(0),
     _length(0)
 {
 }
 
-template<typename T, class T_traits>
-Array<T, T_traits>::~Array()
+template<typename T, class T_traits, class T_allocator>
+Array<T, T_traits,T_allocator>::~Array()
 {
   if(_data != nullptr)
   {
     traits::destruct(_data, _length);
-    free_memory(_data);
+    allocator::free_memory(_data);
   }
   _capacity = 0;
   _length = 0;
   _data = nullptr;
 }
 
-template<typename T, class T_traits>
-Array<T, T_traits>::Array(const std::initializer_list<T>& init_with_values)
+template<typename T, class T_traits, class T_allocator>
+Array<T, T_traits,T_allocator>::Array(const std::initializer_list<T>& init_with_values)
   : Array()
 {
   ensureCapacity(init_with_values.size());
@@ -424,22 +509,22 @@ Array<T, T_traits>::Array(const std::initializer_list<T>& init_with_values)
     append_copy(value);
 }
 
-template<typename T, class T_traits>
-Array<T, T_traits>::Array(Array&& other)
+template<typename T, class T_traits, class T_allocator>
+Array<T, T_traits,T_allocator>::Array(Array&& other)
   : Array()
 {
   this->swap(other);
 }
 
-template<typename T, class T_traits>
-Array<T, T_traits>& Array<T, T_traits>::operator=(Array<T, T_traits>&& other)
+template<typename T, class T_traits, class T_allocator>
+Array<T, T_traits,T_allocator>& Array<T, T_traits,T_allocator>::operator=(Array<T, T_traits,T_allocator>&& other)
 {
   this->swap(other);
   return *this;
 }
 
-template<typename T, class T_traits>
-void Array<T, T_traits>::swap(Array& other)
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::swap(Array& other)
 {
   std::swap(this->_data, other._data);
   std::swap(this->_capacity, other._capacity);
@@ -447,28 +532,64 @@ void Array<T, T_traits>::swap(Array& other)
 }
 
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::capacity() const
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::capacity() const
 {
   return _capacity;
 }
 
 
-template<typename T, class T_traits>
-void Array<T, T_traits>::clear()
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::clear()
 {
   if(_data != nullptr)
   {
     traits::destruct(_data, _length);
-    free_memory(_data);
+    allocator::free_memory(_data);
   }
   _capacity = 0;
   _length = 0;
   _data = nullptr;
 }
 
-template<typename T, class T_traits>
-void Array<T, T_traits>::setCapacity(int capacity)
+template<typename T, class T_traits, class T_allocator>
+T* Array<T, T_traits,T_allocator>::begin()
+{
+  return this->_data;
+}
+
+template<typename T, class T_traits, class T_allocator>
+T* Array<T, T_traits,T_allocator>::end()
+{
+  return this->_data + this->_length;
+}
+
+template<typename T, class T_traits, class T_allocator>
+const T* Array<T, T_traits,T_allocator>::begin() const
+{
+  return this->constBegin();
+}
+
+template<typename T, class T_traits, class T_allocator>
+const T* Array<T, T_traits,T_allocator>::end() const
+{
+  return this->constEnd();
+}
+
+template<typename T, class T_traits, class T_allocator>
+const T* Array<T, T_traits,T_allocator>::constBegin() const
+{
+  return this->_data;
+}
+
+template<typename T, class T_traits, class T_allocator>
+const T* Array<T, T_traits,T_allocator>::constEnd() const
+{
+  return this->_data + this->_length;
+}
+
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::setCapacity(int capacity)
 {
   Q_ASSERT(capacity >= 0);
 
@@ -483,7 +604,7 @@ void Array<T, T_traits>::setCapacity(int capacity)
     T* old_data = this->_data;
     int old_length = this->_length;
 
-    this->_data = allocate_memory(capacity);
+    this->_data = allocator::allocate_memory(capacity);
     this->_capacity = capacity;
 
     if(this->_length > capacity)
@@ -497,13 +618,13 @@ void Array<T, T_traits>::setCapacity(int capacity)
     if(old_data != nullptr)
     {
       traits::destruct(old_data, old_length);
-      free_memory(old_data);
+      allocator::free_memory(old_data);
     }
   }
 }
 
-template<typename T, class T_traits>
-void Array<T, T_traits>::ensureCapacity(int minCapacity)
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::ensureCapacity(int minCapacity)
 {
   Q_ASSERT(capacity() >= 0);
 
@@ -515,8 +636,8 @@ void Array<T, T_traits>::ensureCapacity(int minCapacity)
   setCapacity(newCapacity);
 }
 
-template<typename T, class T_traits>
-void Array<T, T_traits>::reserve(int minCapacity)
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::reserve(int minCapacity)
 {
   Q_ASSERT(capacity() >= 0);
 
@@ -524,29 +645,29 @@ void Array<T, T_traits>::reserve(int minCapacity)
 }
 
 
-template<typename T, class T_traits>
-T* Array<T, T_traits>::data()
+template<typename T, class T_traits, class T_allocator>
+T* Array<T, T_traits,T_allocator>::data()
 {
   return _data;
 }
 
-template<typename T, class T_traits>
-const T* Array<T, T_traits>::data() const
+template<typename T, class T_traits, class T_allocator>
+const T* Array<T, T_traits,T_allocator>::data() const
 {
   return _data;
 }
 
 
-template<typename T, class T_traits>
-T& Array<T, T_traits>::at(int i)
+template<typename T, class T_traits, class T_allocator>
+T& Array<T, T_traits,T_allocator>::at(int i)
 {
   Q_ASSERT(i>=0);
   Q_ASSERT(i<_length);
   return *(_data+i);
 }
 
-template<typename T, class T_traits>
-const T& Array<T, T_traits>::at(int i) const
+template<typename T, class T_traits, class T_allocator>
+const T& Array<T, T_traits,T_allocator>::at(int i) const
 {
   Q_ASSERT(i>=0);
   Q_ASSERT(i<_length);
@@ -554,32 +675,32 @@ const T& Array<T, T_traits>::at(int i) const
 }
 
 
-template<typename T, class T_traits>
-T& Array<T, T_traits>::operator[](int i)
+template<typename T, class T_traits, class T_allocator>
+T& Array<T, T_traits,T_allocator>::operator[](int i)
 {
   return at(i);
 }
 
-template<typename T, class T_traits>
-const T& Array<T, T_traits>::operator[](int i) const
+template<typename T, class T_traits, class T_allocator>
+const T& Array<T, T_traits,T_allocator>::operator[](int i) const
 {
   return at(i);
 }
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::length() const
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::length() const
 {
   return _length;
 }
 
-template<typename T, class T_traits>
-bool Array<T, T_traits>::isEmpty() const
+template<typename T, class T_traits, class T_allocator>
+bool Array<T, T_traits,T_allocator>::isEmpty() const
 {
   return _length==0;
 }
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::append_move(T&& value)
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::append_move(T&& value)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
@@ -594,8 +715,8 @@ int Array<T, T_traits>::append_move(T&& value)
   return new_index;
 }
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::extend_move(T* values, int num_values)
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::extend_move(T* values, int num_values)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
@@ -609,8 +730,8 @@ int Array<T, T_traits>::extend_move(T* values, int num_values)
   return new_index;
 }
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::append_copy(const T& value)
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::append_copy(const T& value)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), 1));
 
@@ -626,8 +747,8 @@ int Array<T, T_traits>::append_copy(const T& value)
 }
 
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::extend_copy(const T* values, int num_values)
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::extend_copy(const T* values, int num_values)
 {
   ensureCapacity(traits::new_capacity(this->capacity(), this->length(), num_values));
 
@@ -641,21 +762,24 @@ int Array<T, T_traits>::extend_copy(const T* values, int num_values)
   return new_index;
 }
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::append(const T& value)
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::append(const T& value)
 {
   return append_copy(value);
 }
 
-template<typename T, class T_traits>
-int Array<T, T_traits>::append(T&& value)
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::append(T&& value)
 {
   return append_move(std::move(value));
 }
 
-template<typename T, class T_traits>
-void Array<T, T_traits>::remove(int index)
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::removeAt(int index)
 {
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index<this->length());
+
   traits::remove_single(this->data(), this->length(), index);
 
   _length -= 1;
@@ -665,9 +789,12 @@ void Array<T, T_traits>::remove(int index)
   setCapacity(new_capacity);
 }
 
-template<typename T, class T_traits>
-void Array<T, T_traits>::remove(int index, int num_to_remove)
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::removeAt(int index, int num_to_remove)
 {
+  Q_ASSERT(index>=0);
+  Q_ASSERT(index+num_to_remove<=this->length());
+
   traits::remove(this->data(), this->length(), index, num_to_remove);
 
   _length -= num_to_remove;
@@ -677,8 +804,19 @@ void Array<T, T_traits>::remove(int index, int num_to_remove)
   setCapacity(new_capacity);
 }
 
-template<typename T, class T_traits>
-bool Array<T, T_traits>::operator==(const Array& other) const
+template<typename T, class T_traits, class T_allocator>
+int Array<T, T_traits,T_allocator>::indexOfFirst(const T& value, int fallback) const
+{
+  const T* data = this->data();
+  const int length = this->length();
+  for(int i=0; i<length; ++i)
+    if(data[i] == value)
+      return i;
+  return fallback;
+}
+
+template<typename T, class T_traits, class T_allocator>
+bool Array<T, T_traits,T_allocator>::operator==(const Array& other) const
 {
   if(this->length() != other.length())
     return false;
@@ -694,14 +832,14 @@ bool Array<T, T_traits>::operator==(const Array& other) const
   return true;
 }
 
-template<typename T, class T_traits>
-bool Array<T, T_traits>::operator!=(const Array& other) const
+template<typename T, class T_traits, class T_allocator>
+bool Array<T, T_traits,T_allocator>::operator!=(const Array& other) const
 {
   return !this->operator ==(other);
 }
 
-template<typename T, class T_traits>
-QVector<T> Array<T, T_traits>::toQVector() const
+template<typename T, class T_traits, class T_allocator>
+QVector<T> Array<T, T_traits,T_allocator>::toQVector() const
 {
   QVector<T> v;
   v.resize(this->length());
@@ -710,37 +848,17 @@ QVector<T> Array<T, T_traits>::toQVector() const
   return v;
 }
 
-template<typename T, class T_traits>
+template<typename T, class T_traits, class T_allocator>
 template<typename T_lessThan>
-void Array<T, T_traits>::stable_sort(T_lessThan lessThan)
+void Array<T, T_traits,T_allocator>::stable_sort(T_lessThan lessThan)
 {
   // #ISSUE-61 STL
   std::stable_sort(this->data(), this->data()+this->length(), lessThan);
 }
 
-template<typename T, class T_traits>
-T* Array<T, T_traits>::allocate_memory(int n)
-{
-  Q_ASSERT(n!=0);
 
-  void* buffer = malloc(n*sizeof(T));
-
-  if(buffer == nullptr)
-    throw GLRT_EXCEPTION("Out of memory");
-
-  return reinterpret_cast<T*>(buffer);
-}
-
-template<typename T, class T_traits>
-void Array<T, T_traits>::free_memory(T* data)
-{
-  Q_ASSERT(data!=nullptr);
-  free(data);
-}
-
-
-template<typename T, typename T_traits>
-QDebug operator<<(QDebug d, const Array<T, T_traits>& array)
+template<typename T, typename T_traits, class T_allocator>
+QDebug operator<<(QDebug d, const Array<T, T_traits,T_allocator>& array)
 {
   return d << array.toQVector();
 }
@@ -749,8 +867,8 @@ QDebug operator<<(QDebug d, const Array<T, T_traits>& array)
 } // namespace glrt
 
 
-template<typename T, class T_traits>
-void std::swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b)
+template<typename T, class T_traits, class T_allocator>
+void std::swap(glrt::Array<T, T_traits,T_allocator>& a, glrt::Array<T, T_traits,T_allocator>& b)
 {
   a.swap(b);
 }

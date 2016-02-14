@@ -1,19 +1,29 @@
 #include <glrt/scene/camera-component.h>
+#include <glrt/scene/scene-layer.h>
+#include <glrt/scene/scene.h>
 
 namespace glrt {
 namespace scene {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const Camera& cameraParameter)
+CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter)
   : Component(node, parent, uuid),
     cameraParameter(cameraParameter)
 {
+  scene().CameraComponentAdded(this);
 }
 
 
 CameraComponent::~CameraComponent()
 {
+  hideInDestructor();
+}
+
+
+CameraParameter CameraComponent::globalCameraParameter() const
+{
+  return this->globalCoordFrame() * this->cameraParameter;
 }
 
 
@@ -38,7 +48,7 @@ inline CameraComponent* createCameraComponent(Node& node,
                                               const glm::vec3& upVector,
                                               const glm::vec3& position)
 {
-  Camera cameraParameter;
+  CameraParameter cameraParameter;
   cameraParameter.aspect = aspect;
   cameraParameter.clipFar = clipFar;
   cameraParameter.clipNear = clipNear;

@@ -23,3 +23,7 @@ cd - > /dev/null
 cd ./shader
 ./update-cmake.sh
 cd - > /dev/null
+
+cd ./tests
+./update-cmake.sh
+cd - > /dev/null

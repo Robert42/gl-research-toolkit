@@ -6,6 +6,16 @@
 namespace glrt {
 
 
+template<size_t offset>
+UuidIndex UuidIndex::null_index()
+{
+  return UuidIndex(std::numeric_limits<size_t>::max()-offset);
+}
+
+
+// -----------------------------------------------------------------------------
+
+
 template<class T>
 Uuid<T>::Uuid(const QUuid& uuid)
   : _index(uuid)

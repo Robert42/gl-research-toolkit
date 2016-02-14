@@ -47,6 +47,10 @@ inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 // ======== GLSL ===============================================================
 #else
 
+#ifndef inline
+#define inline
+#endif
+
 #ifndef out
 #define out(t) out t
 #endif

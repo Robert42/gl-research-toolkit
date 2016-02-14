@@ -25,8 +25,10 @@ struct ArrayCapacityTraits_Capacity_Blocks
 
   static int new_capacity(int prev_capacity, int current_length, int elements_to_add);
   static int adapt_capacity_after_removing_elements(int prev_capacity, int current_length, int elements_removed);
+  static int recalc_capacity(int prev_capacity, int current_length);
 };
 
+// #TODO: rename from ArrayTraits_Unordered* to ArrayTraits*
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
 struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 {
@@ -237,6 +239,58 @@ struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_c
   }
 };
 
+// Class with copy constructor, assignment operator and destructor
+template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
+struct ArrayTraits_Unordered_cCaOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+{
+  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+
+  static void move_construct(T* dest, T* src, int count)
+  {
+    parent_type::copy_construct_cC(dest, src, count);
+  }
+
+  static void move_construct_single(T* dest, T* src)
+  {
+    parent_type::copy_construct_single_cC(dest, src);
+  }
+
+  static int append_move(T* data, int prev_length, T&& value)
+  {
+    return parent_type::append_cC(data, prev_length, std::move(value));
+  }
+
+  static int extend_move(T* data, int prev_length, T* values, int num_values)
+  {
+    return parent_type::extend_cC(data, prev_length, values, num_values);
+  }
+
+  static int append_copy(T* data, int prev_length, const T& value)
+  {
+    return parent_type::append_cC(data, prev_length, value);
+  }
+
+  static int extend_copy(T* data, int prev_length, const T* values, int num_values)
+  {
+    return parent_type::extend_cC(data, prev_length, values, num_values);
+  }
+
+  static void remove_single(T* data, int prev_length, const int index)
+  {
+    parent_type::remove_single_aOD(data, prev_length, index);
+  }
+
+  static void remove(T* data, int prev_length, const int first_index, int num_values)
+  {
+    parent_type::remove_aOD(data, prev_length, first_index, num_values);
+  }
+
+  static void destruct(T* data, int length)
+  {
+    parent_type::destruct_D(data, length);
+  }
+};
+
 template<typename T>
 struct DefaultTraits;
 
@@ -258,13 +312,46 @@ struct DefaultTraits<T*>
   typedef ArrayTraits_Unordered_Primitive<T*> type;
 };
 
+template<typename T>
+struct DefaultTraits<QPointer<T>>
+{
+  typedef ArrayTraits_Unordered_cCaOD<QPointer<T>> type;
+};
+
+template<typename T>
+struct DefaultAllocator
+{
+  static T* allocate_memory(int n);
+  static void free_memory(T* data);
+};
+
+template<typename T, class T_prepended_type, int offset=sizeof(T_prepended_type)>
+struct AllocatorWithPrependedData
+{
+  static_assert(offset>=sizeof(T_prepended_type), "offset must be at least as large as the prepended_type");
+  typedef T_prepended_type prependet_type;
+
+  static T* allocate_memory(int n);
+  static void free_memory(T* data);
+
+  static prependet_type& prepended_data(T* data);
+  static const prependet_type& prepended_data(const T* data);
+
+private:
+  template<typename T_whole_buffer, typename T_data_buffer>
+  static T_whole_buffer* whole_buffer(T_data_buffer* data_buffer);
+
+  template<typename T_data_buffer, typename T_whole_buffer>
+  static T_data_buffer* data_buffer(T_whole_buffer* whole_buffer);
+};
 
 
-template<typename T, class T_traits = typename DefaultTraits<T>::type>
+template<typename T, class T_traits = typename DefaultTraits<T>::type, class T_allocator = DefaultAllocator<T>>
 class Array final
 {
 public:
   typedef T_traits traits;
+  typedef T_allocator allocator;
 
   Array();
   ~Array();
@@ -284,6 +371,13 @@ public:
   void ensureCapacity(int minCapacity);
   void reserve(int minCapacity);
   void clear();
+
+  T* begin();
+  T* end();
+  const T* begin() const;
+  const T* end() const;
+  const T* constBegin() const;
+  const T* constEnd() const;
 
   T* data();
   const T* data() const;
@@ -311,11 +405,13 @@ public:
   int append(const T& value);
   int append(T&& value);
 
-  void remove(int index);
-  void remove(int index, int num_to_remove);
+  void removeAt(int index);
+  void removeAt(int index, int num_to_remove);
 
-  void removeFirst(){remove(0);}
-  void removeLast(){remove(length()-1);}
+  void removeFirst(){removeAt(0);}
+  void removeLast(){removeAt(length()-1);}
+
+  int indexOfFirst(const T& value, int fallback=-1) const;
 
   bool operator==(const Array& other) const;
   bool operator!=(const Array& other) const;
@@ -329,20 +425,17 @@ private:
   T* _data;
   int _capacity;
   int _length;
-
-  static T* allocate_memory(int n);
-  static void free_memory(T* data);
 };
 
-template<typename T, typename T_traits>
-QDebug operator<<(QDebug d, const Array<T, T_traits>& array);
+template<typename T, class T_traits, class T_allocator>
+QDebug operator<<(QDebug d, const Array<T, T_traits, T_allocator>& array);
 
 
 } // namespace glrt
 
 namespace std {
-template<typename T, class T_traits>
-void swap(glrt::Array<T, T_traits>& a, glrt::Array<T, T_traits>& b);
+template<typename T, class T_traits, class T_allocator>
+void swap(glrt::Array<T, T_traits,T_allocator>& a, glrt::Array<T, T_traits,T_allocator>& b);
 } // namespace std
 
 #include "array.inl"

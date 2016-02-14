@@ -3,6 +3,7 @@
 
 #include <glrt/scene/coord-frame.h>
 #include <glrt/scene/declarations.h>
+#include <glrt/toolkit/array.h>
 
 namespace glrt {
 namespace scene {

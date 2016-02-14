@@ -1,9 +1,14 @@
-option(GLRT_TESTS "Enable to compile tests." ON)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
-if(GLRT_TESTS)
-add_subdirectory(testing-framework)
-add_subdirectory(arrays)
-add_subdirectory(coord-frame)
-add_subdirectory(shader-includes)
-add_subdirectory(shader-library)
-endif()
+include(files.cmake)
+
+set(CMAKE_AUTOMOC ON)
+
+project(Tests)
+
+add_executable(tests
+  ${SOURCE_FILES}
+)
+target_link_libraries(tests glrt)
+target_compile_definitions(tests PRIVATE SHADER_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/shader-includes/shader\")
+target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/testing-framework)

@@ -1,5 +1,7 @@
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/resource-manager.h>
+#include <glrt/scene/scene-layer.h>
+#include <glrt/scene/scene.h>
 
 namespace glrt {
 namespace scene {
@@ -9,10 +11,14 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 
 LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<LightComponent> &uuid)
-  : Node::Component(node, parent, uuid),
-    _dynamic(false)
+  : Node::Component(node, parent, uuid)
 {
-  connect(this, &LightComponent::movableChanged, this, &LightComponent::handleChangedMovable);
+  scene().LightComponentAdded(this);
+}
+
+LightComponent::~LightComponent()
+{
+  hideInDestructor();
 }
 
 
@@ -66,30 +72,6 @@ void LightComponent::registerAngelScriptAPI()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-bool LightComponent::dynamic() const
-{
-  return _dynamic;
-}
-
-void LightComponent::setDynamic(bool dynamic)
-{
-  if(this->dynamic() != dynamic)
-  {
-    this->_dynamic = dynamic;
-
-    if(!dynamic)
-      this->setMovable(false);
-
-    dynamicChanged(this);
-  }
-}
-
-void LightComponent::handleChangedMovable()
-{
-  if(this->movable())
-    this->setDynamic(true);
-}
-
 // =============================================================================
 
 
@@ -97,6 +79,17 @@ SphereAreaLightComponent::SphereAreaLightComponent(Node& node, Node::Component* 
   : LightComponent(node, parent, uuid),
     data(data)
 {
+  scene().SphereAreaLightComponentAdded(this);
+}
+
+SphereAreaLightComponent::~SphereAreaLightComponent()
+{
+  hideInDestructor();
+}
+
+SphereAreaLightComponent::Data SphereAreaLightComponent::globalData() const
+{
+  return globalCoordFrame() * data;
 }
 
 
@@ -107,6 +100,17 @@ RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* pare
   : LightComponent(node, parent, uuid),
     data(data)
 {
+  scene().RectAreaLightComponentAdded(this);
+}
+
+RectAreaLightComponent::~RectAreaLightComponent()
+{
+  hideInDestructor();
+}
+
+RectAreaLightComponent::Data RectAreaLightComponent::globalData() const
+{
+  return globalCoordFrame() * data;
 }
 
 

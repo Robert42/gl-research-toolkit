@@ -107,8 +107,8 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
   cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
-  cameraSwitcher->valueChanged = [&scene](const scene::Camera& p){scene.debugCamera = p;};
-  TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene.debugCamera.locked, "group=Camera");
+  cameraSwitcher->valueChanged = [&scene](const QPointer<scene::CameraComponent>& otherCamera){switchDebugCameraTo(&scene, otherCamera);};
+  TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene::FpsDebugInputHandler::locked, "group=Camera");
 
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
@@ -145,6 +145,21 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
   return tweakBar;
 }
 
+void AntTweakBar::switchDebugCameraTo(Scene* scene, const QPointer<scene::CameraComponent>& otherCamera)
+{
+  QPointer<scene::CameraComponent> debugCamera = scene::findDebugCameraComponent(scene);
+  scene::FpsDebugController* fpsController = scene::findFpsDebugController(scene);
+
+  if(!debugCamera.isNull() && !otherCamera.isNull())
+  {
+    debugCamera->set_localCoordFrame(otherCamera->localCoordFrame());
+    debugCamera->cameraParameter = otherCamera->cameraParameter;
+
+    if(fpsController)
+      fpsController->inputHandler.frame = otherCamera->localCoordFrame();
+  }
+}
+
 void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 {
   if(sceneSwitcher)
@@ -152,15 +167,21 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
 
   if(cameraSwitcher)
   {
-    QMap<QString, Camera> cameras;
-    QHash<QString, Camera> h = scene::collectNamedCameras(scene);
+    QMap<QString, QPointer<scene::CameraComponent>> cameras;
+    QHash<QString, scene::CameraComponent*> h = glrt::scene::collectAllComponentsWithTypeNamed<scene::CameraComponent>(scene);
     for(auto i=h.begin(); i!=h.end(); ++i)
-      cameras.insert(i.key(), i.value());
+    {
+      if(i.value()->uuid != scene::uuids::debugCameraComponent)
+        cameras.insert(i.key(), i.value());
+    }
     cameraSwitcher->init(cameras);
-    if(!scene->debugCamera.loadedName.isEmpty())
-      cameraSwitcher->setCurrentKey(scene->debugCamera.loadedName);
-    else if(cameras.size() > 0)
-      cameraSwitcher->setCurrentKey(cameras.firstKey());
+    if(!cameras.isEmpty())
+      cameraSwitcher->setCurrentKey(cameras.keys().first());
+
+    QPointer<scene::CameraComponent> cameraComponent = glrt::scene::findComponent(scene, scene->camera(glrt::scene::CameraSlot::MAIN_CAMERA));
+    if(!cameraComponent.isNull())
+      cameraSwitcher->setCurrentValue(cameraComponent);
+
   }
 }
 

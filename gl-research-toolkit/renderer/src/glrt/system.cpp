@@ -1,6 +1,6 @@
 #include <glrt/system.h>
 #include <glrt/renderer/toolkit/temp-shader-file.h>
-#include <glrt/scene/debug-camera.h>
+#include <glrt/scene/fps-debug-controller.h>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -23,6 +23,8 @@
 
 
 namespace glrt {
+
+glm::ivec2 System::_windowSize;
 
 System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
@@ -86,10 +88,14 @@ void System::initSDL(const Settings& settings)
                                SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
   CALL_SDL_CRITICAL(sdlWindow != nullptr);
 
-  DebugCamera::windowSize = settings.windowSize;
+  _windowSize =  settings.windowSize;
 
   sdlGlContext = SDL_GL_CreateContext(sdlWindow);
   CALL_SDL_CRITICAL(sdlGlContext != nullptr);
+
+#ifdef QT_DEBUG
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
 
   if(settings.VSync)
   {

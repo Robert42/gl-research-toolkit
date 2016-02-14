@@ -534,7 +534,7 @@ void test_remove()
     StateSpy::clearLog();
     EXPECT_FALSE(array.isEmpty());
     EXPECT_EQ(array.capacity(), 2);
-    array.remove(0);
+    array.removeAt(0);
     EXPECT_TRUE(array.isEmpty());
     EXPECT_EQ(array.capacity(), 0);
     EXPECT_EQ(StateSpy::log(),
@@ -558,14 +558,14 @@ void test_remove()
     StateSpy::clearLog();
     EXPECT_EQ(array.length(), 2);
     EXPECT_EQ(array.capacity(), 2);
-    array.remove(0);
+    array.removeAt(0);
     EXPECT_EQ(array.length(), 1);
     EXPECT_EQ(array.capacity(), 2);
     EXPECT_EQ(StateSpy::log(),
               "2: move operator from 3\n"
               "3: destructed\n");
     StateSpy::clearLog();
-    array.remove(0);
+    array.removeAt(0);
     EXPECT_EQ(array.length(), 0);
     EXPECT_EQ(array.capacity(), 0);
     EXPECT_EQ(StateSpy::log(),
@@ -594,7 +594,7 @@ void test_remove()
     StateSpy::clearLog();
     EXPECT_EQ(array.length(), 3);
     EXPECT_EQ(array.capacity(), 4);
-    array.remove(1);
+    array.removeAt(1);
     EXPECT_EQ(array.length(), 2);
     EXPECT_EQ(array.capacity(), 2);
     EXPECT_EQ(StateSpy::log(),
@@ -605,13 +605,13 @@ void test_remove()
               "3: destructed\n"
               "4: destructed\n");
     StateSpy::clearLog();
-    array.remove(1);
+    array.removeAt(1);
     EXPECT_EQ(array.length(), 1);
     EXPECT_EQ(array.capacity(), 2);
     EXPECT_EQ(StateSpy::log(),
               "7: destructed\n");
     StateSpy::clearLog();
-    array.remove(0);
+    array.removeAt(0);
     EXPECT_EQ(array.length(), 0);
     EXPECT_EQ(array.capacity(), 0);
     EXPECT_EQ(array.data(), nullptr);
@@ -640,7 +640,7 @@ void test_remove()
     StateSpy::clearLog();
     EXPECT_EQ(array.length(), 3);
     EXPECT_EQ(array.capacity(), 4);
-    array.remove(0, 2);
+    array.removeAt(0, 2);
     EXPECT_EQ(array.length(), 1);
     EXPECT_EQ(array.capacity(), 2);
     EXPECT_EQ(StateSpy::log(),
@@ -650,7 +650,7 @@ void test_remove()
               "6: move constructor from 3\n"
               "3: destructed\n");
     StateSpy::clearLog();
-    array.remove(0, 1);
+    array.removeAt(0, 1);
     EXPECT_EQ(array.length(), 0);
     EXPECT_EQ(array.capacity(), 0);
     EXPECT_EQ(array.data(), nullptr);
@@ -701,10 +701,8 @@ void test_ensureCapacity()
   EXPECT_EQ(array.capacity(), 0);
 }
 
-int main(int argc, char** argv)
+void main_array_tests()
 {
-  TestingApplication testing_application(argc, argv);
-
   test_traits();
   test_array_constructors();
   test_array_operators();
@@ -717,6 +715,4 @@ int main(int argc, char** argv)
   test_remove();
   test_ensureCapacity();
   test_fragmented_array();
-
-  return testing_application.result();
 }

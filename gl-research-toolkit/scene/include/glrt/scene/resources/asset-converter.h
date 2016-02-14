@@ -22,7 +22,7 @@ struct SceneGraphImportSettings final
   QHash<QString, Uuid<Material>> materialUuids;
   QHash<QString, Uuid<LightSource>> lightUuids;
   QHash<QString, Uuid<Node>> nodeUuids;
-  QHash<QString, Uuid<Camera>> cameraUuids;
+  QHash<QString, Uuid<CameraParameter>> cameraUuids;
 
   bool shouldImportMesh(const QString& name) const;
   bool shouldImportCamera(const QString& name) const;
@@ -37,11 +37,13 @@ private:
 };
 
 void convertStaticMesh(const std::string& meshFile,
-                       const std::string& sourceFile, ResourceIndex*);
+                       const std::string& sourceFile,
+                       const std::string& groupToImport,
+                       ResourceIndex*);
 void convertSceneGraph(const QString& sceneGraphFilename,
                        const QString& sourceFilename,
                        const Uuid<ResourceIndex>& uuid,
-                       const SceneGraphImportSettings& settings);
+                       const SceneGraphImportSettings& settings, const QString& groupToImport);
 
 } // namespace resources
 } // namespace scene

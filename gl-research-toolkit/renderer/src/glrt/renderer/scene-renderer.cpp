@@ -2,8 +2,10 @@
 
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/camera-component.h>
 #include <glrt/scene/collect-scene-data.h>
 
+#include <glrt/system.h>
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
@@ -18,10 +20,12 @@ Renderer::Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBuffe
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
-    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    cameraUniformBuffer(sizeof(CameraUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     staticMeshVertexArrayObject(std::move(StaticMeshBuffer::generateVertexArrayObject())),
     _directLights(new DirectLights(this))
 {
+  fillCameraUniform(scene::CameraParameter());
+  updateCameraUniform();
 }
 
 Renderer::~Renderer()
@@ -31,9 +35,9 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-  updateSceneUniform();
+  updateCameraUniform();
 
-  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+  cameraUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
 
   renderImplementation();
 
@@ -42,12 +46,41 @@ void Renderer::render()
   visualizeRectAreaLights.render();
 }
 
-void Renderer::updateSceneUniform()
+void Renderer::updateCameraUniform()
 {
-  SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneUniformData.view_projection_matrix = scene.debugCamera.viewProjectionMatrix;
-  sceneUniformData.camera_position = scene.debugCamera.camera_position;
-  sceneUniformBuffer.Unmap();
+  if(!this->cameraComponent)
+  {
+    QVector<scene::CameraComponent*> cameraComponents = scene::collectAllComponentsWithType<scene::CameraComponent>(&scene);
+
+    for(scene::CameraComponent* cameraComponent : cameraComponents)
+    {
+      if(cameraComponent->uuid == scene::uuids::debugCameraComponent)
+      {
+        this->cameraComponent = cameraComponent;
+        break;
+      }
+    }
+    if(!cameraComponent && !cameraComponents.isEmpty())
+      this->cameraComponent = cameraComponents.first();
+  }
+
+  if(this->cameraComponent)
+    updateCameraComponent(this->cameraComponent);
+}
+
+void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
+{
+  Q_ASSERT(cameraComponent != nullptr);
+  cameraComponent->cameraParameter.aspect = System::windowAspectRatio();
+  fillCameraUniform(cameraComponent->globalCameraParameter());
+}
+
+void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
+{
+  CameraUniformBlock& cameraUniformData =  *reinterpret_cast<CameraUniformBlock*>(cameraUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  cameraUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  cameraUniformData.camera_position = cameraParameter.position;
+  cameraUniformBuffer.Unmap();
 }
 
 Renderer::DirectLights& Renderer::directLights()
@@ -125,6 +158,11 @@ bool orderByDrawCall(const scene::StaticMeshComponent* a, const scene::StaticMes
   if(!a->movable() && b->movable())
     return true;
   if(a->movable() && !b->movable())
+    return false;
+
+  if(a->material().materialUser < b->material().materialUser)
+    return true;
+  if(a->material().materialUser > b->material().materialUser)
     return false;
 
   if(a->materialUuid < b->materialUuid)

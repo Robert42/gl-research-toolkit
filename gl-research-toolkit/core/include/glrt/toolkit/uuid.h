@@ -44,6 +44,16 @@ public:
 
   QUuid toQUuid() const;
 
+  bool operator==(UuidIndex other) const;
+  bool operator!=(UuidIndex other) const;
+  bool operator<(UuidIndex other) const;
+  bool operator<=(UuidIndex other) const;
+  bool operator>(UuidIndex other) const;
+  bool operator>=(UuidIndex other) const;
+
+  template<size_t offset=0>
+  static UuidIndex null_index();
+
 private:
   static std::mutex& mutex();
   static std::unordered_map<QUuid, index_type>& allIndicesForUuid();
@@ -51,6 +61,8 @@ private:
 
   static QUuid uuidForIndex(index_type i);
   static index_type indexForUuid(const QUuid& uuid);
+
+  explicit UuidIndex(index_type index);
 };
 
 template<class _identifier>
