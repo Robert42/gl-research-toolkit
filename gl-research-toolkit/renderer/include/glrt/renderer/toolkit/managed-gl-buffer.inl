@@ -48,6 +48,12 @@ int ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::byte_for_inde
   return T_header_traits::header_size() + sizeof(T_element) * index;
 }
 
+template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
+bool ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::needsUpdate() const
+{
+  return this->totalNumberBytes() != first_dirty_byte;
+}
+
 /*!
 \warning This method is dangerous. The returned buffer is only valid beginning
 with the element which was marked dirty with the markElementDirty() command
@@ -55,14 +61,13 @@ with the element which was marked dirty with the markElementDirty() command
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 T_element* ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Map()
 {
-  const GLsizeiptr total_number_bytes = T_header_traits::header_size() + header.n_elements()*sizeof(T_element);
+  const GLsizeiptr total_number_bytes = this->totalNumberBytes();
 
   Q_ASSERT(first_dirty_byte==0 || (first_dirty_byte-T_header_traits::header_size()) % sizeof(T_element) == 0);
 
   GLsizeiptr nDirtyBytes = total_number_bytes - first_dirty_byte;
 
-  if(nDirtyBytes>0)
-    return nullptr;
+  Q_ASSERT(nDirtyBytes>0); // Note: please check with needsUpdate, whether Map()Unmap() is necessary
 
   byte* whole_buffer = reinterpret_cast<byte*>(this->buffer.Map(first_dirty_byte, nDirtyBytes, gl::Buffer::MapType::WRITE, first_dirty_byte==0 ? gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER : gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
 
@@ -75,6 +80,14 @@ T_element* ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Map()
   first_dirty_byte = total_number_bytes;
 
   return data;
+}
+
+template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
+GLsizeiptr ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::totalNumberBytes() const
+{
+  GLsizeiptr totalNumberBytes = T_header_traits::header_size() + header.n_elements()*sizeof(T_element);
+  Q_ASSERT(first_dirty_byte <= totalNumberBytes);
+  return totalNumberBytes;
 }
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>

@@ -118,6 +118,8 @@ public:
   void setHeader(const header_type& header);
   void setNumElements(int numElements);
 
+  bool needsUpdate() const;
+
   T_element* Map();
   void Unmap();
 
@@ -126,6 +128,8 @@ private:
 
   int first_dirty_byte = 0;
   T_header_traits header;
+
+  GLsizeiptr totalNumberBytes() const;
 
   static int byte_for_index(int index);
 };
