@@ -17,6 +17,7 @@ CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid
 
 CameraComponent::~CameraComponent()
 {
+  hideInDestructor();
 }
 
 

@@ -29,7 +29,7 @@ Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
     throw GLRT_EXCEPTION("Same uuid used twice");
 
   sceneLayer._nodes.insert(uuid, this);
-  sceneLayer.nodeAdded(this);
+  sceneLayer.scene.nodeAdded(this);
 }
 
 Node::~Node()
@@ -45,7 +45,7 @@ Node::~Node()
   Q_ASSERT(this->rootComponent() == nullptr);
 
   sceneLayer._nodes.remove(uuid);
-  sceneLayer.nodeRemoved(this);
+  sceneLayer.scene.nodeRemoved(this);
 }
 
 CoordFrame Node::globalCoordFrame() const
@@ -171,7 +171,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     this->node._rootComponent = this;
   }
 
-  this->node.sceneLayer.componentAdded(this);
+  this->node.sceneLayer.scene.componentAdded(this);
 
   node.sceneLayer.scene.globalCoordUpdater.addComponent(this);
 }
@@ -184,7 +184,7 @@ Node::Component::~Component()
 {
   hideInDestructor();
 
-  node.sceneLayer.componentRemoved(this);
+  node.sceneLayer.scene.componentRemoved(this);
 
   QVector<Component*> children = this->children();
   for(Component* child : children)
@@ -267,9 +267,9 @@ void Node::Component::updateVisibility(bool prevVisibility)
     visibleChanged(currentVisibility);
     componentVisibilityChanged(this);
     if(currentVisibility)
-      node.sceneLayer.componentShown(this);
+      node.sceneLayer.scene.componentShown(this);
     else
-      node.sceneLayer.componentHidden(this);
+      node.sceneLayer.scene.componentHidden(this);
 
     for(Component* child : _children)
     {

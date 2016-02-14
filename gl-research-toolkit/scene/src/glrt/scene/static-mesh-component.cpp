@@ -20,13 +20,13 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {
-  this->node.sceneLayer.staticMeshComponentAdded(this);
+  this->node.sceneLayer.scene.StaticMeshComponentAdded(this);
   this->node.resourceManager().addMaterialUser(materialUuid, staticMesh);
 }
 
 StaticMeshComponent::~StaticMeshComponent()
 {
-  this->node.sceneLayer.staticMeshComponentRemoved(this);
+  hideInDestructor();
 }
 
 

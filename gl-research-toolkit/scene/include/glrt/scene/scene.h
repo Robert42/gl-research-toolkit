@@ -64,6 +64,15 @@ signals:
   void sceneLoadedExt(scene::Scene* scene, bool success);
   void sceneLoaded(bool success);
 
+  void nodeAdded(Node* node);
+  void nodeRemoved(Node* node);
+
+  void componentAdded(Node::Component* node);
+  void componentRemoved(Node::Component* node);
+
+  void componentShown(Node::Component* node);
+  void componentHidden(Node::Component* node);
+
   void CameraComponentAdded(CameraComponent* component);
   void LightComponentAdded(LightComponent* component);
   void SphereAreaLightComponentAdded(SphereAreaLightComponent* component);

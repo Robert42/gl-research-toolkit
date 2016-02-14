@@ -14,6 +14,7 @@ class LightComponent : public Node::Component
   Q_OBJECT
 public:
   LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid);
+  ~LightComponent();
 
   static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, const resources::LightSource& lightSource);
 
@@ -29,6 +30,7 @@ public:
   Data data;
 
   SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data);
+  ~SphereAreaLightComponent();
 
   Data globalData() const;
 };
@@ -41,6 +43,7 @@ public:
   Data data;
 
   RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data);
+  ~RectAreaLightComponent();
 
   Data globalData() const;
 };

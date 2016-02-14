@@ -16,6 +16,11 @@ LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<L
   node.sceneLayer.scene.LightComponentAdded(this);
 }
 
+LightComponent::~LightComponent()
+{
+  hideInDestructor();
+}
+
 
 LightComponent* LightComponent::createForLightSource(Node& node,
                                                      Node::Component* parent,
@@ -77,6 +82,11 @@ SphereAreaLightComponent::SphereAreaLightComponent(Node& node, Node::Component* 
   node.sceneLayer.scene.SphereAreaLightComponentAdded(this);
 }
 
+SphereAreaLightComponent::~SphereAreaLightComponent()
+{
+  hideInDestructor();
+}
+
 SphereAreaLightComponent::Data SphereAreaLightComponent::globalData() const
 {
   return globalCoordFrame() * data;
@@ -91,6 +101,11 @@ RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* pare
     data(data)
 {
   node.sceneLayer.scene.RectAreaLightComponentAdded(this);
+}
+
+RectAreaLightComponent::~RectAreaLightComponent()
+{
+  hideInDestructor();
 }
 
 RectAreaLightComponent::Data RectAreaLightComponent::globalData() const
