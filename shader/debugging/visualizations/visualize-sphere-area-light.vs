@@ -14,7 +14,7 @@ uniform LightBlock
 
 void main()
 {
-  vec3 ws_position = vertex_position * sphereAreaLight.radius + sphereAreaLight.origin;
+  vec3 ws_position = vertex_position * sphereAreaLight.radius + sphereAreaLight.light.origin;
 
   pass_attributes_to_fragment_shader(ws_position, vertex_color);
 }
