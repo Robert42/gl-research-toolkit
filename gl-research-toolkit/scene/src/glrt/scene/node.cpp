@@ -156,7 +156,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     _mayBecomeMovable(false),
     _visible(true),
     _parentVisible(true),
-    _hiddenBecauseDeletedNextFrame(true),
+    _hiddenBecauseDeletedNextFrame(false),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
 {  if(this->parent !=nullptr)
