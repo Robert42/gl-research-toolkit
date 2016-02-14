@@ -35,3 +35,4 @@ SOFTWARE.
 # External Code-Snippets
 
 - Shader Code snippets from the Siggraph 2014 course [Moving Frostbite to PBR](http://www.frostbite.com/2014/11/moving-frostbite-to-pbr/).
+- [Header](https://github.com/nvpro-samples/gl_cadscene_rendertechniques/blob/b47350a949e94dce368f14e968faa1672ef6ac42/nvcommandlist.h) and [source](https://github.com/nvpro-samples/gl_cadscene_rendertechniques/blob/b47350a949e94dce368f14e968faa1672ef6ac42/nvcommandlist.cpp) files used the NV_command_list extension for OpenGl. Both source files are published under a BSD-like license.
