@@ -11,7 +11,7 @@ CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid
   : Component(node, parent, uuid),
     cameraParameter(cameraParameter)
 {
-  node.sceneLayer.scene.CameraComponentAdded(this);
+  scene().CameraComponentAdded(this);
 }
 
 

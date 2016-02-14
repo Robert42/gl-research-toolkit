@@ -18,11 +18,17 @@ public:
   class ModularAttribute;
   class Component;
 
-  SceneLayer& sceneLayer;
   const Uuid<Node> uuid;
 
   Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid);
   ~Node();
+
+  Scene& scene();
+  const Scene& scene()const;
+  SceneLayer& sceneLayer();
+  const SceneLayer& sceneLayer()const;
+  resources::ResourceManager& resourceManager();
+  const resources::ResourceManager& resourceManager() const;
 
   CoordFrame globalCoordFrame() const;
 
@@ -39,9 +45,9 @@ public:
   QVector<Component*> allComponents() const;
   Component* rootComponent() const;
 
-  resources::ResourceManager& resourceManager();
 
 private:
+  SceneLayer& _sceneLayer;
   QVector<ModularAttribute*> _allModularAttributes;
   Component* _rootComponent;
 };
@@ -56,6 +62,13 @@ public:
 
   ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid);
   virtual ~ModularAttribute();
+
+  Scene& scene();
+  const Scene& scene()const;
+  SceneLayer& sceneLayer();
+  const SceneLayer& sceneLayer()const;
+  resources::ResourceManager& resourceManager();
+  const resources::ResourceManager& resourceManager() const;
 };
 
 
@@ -73,6 +86,13 @@ public:
 
   Component(Node& node, Component* parent, const Uuid<Component>& uuid);
   virtual ~Component();
+
+  Scene& scene();
+  const Scene& scene()const;
+  SceneLayer& sceneLayer();
+  const SceneLayer& sceneLayer()const;
+  resources::ResourceManager& resourceManager();
+  const resources::ResourceManager& resourceManager() const;
 
   const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);

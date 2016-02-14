@@ -13,7 +13,7 @@ using AngelScriptIntegration::AngelScriptCheck;
 LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<LightComponent> &uuid)
   : Node::Component(node, parent, uuid)
 {
-  node.sceneLayer.scene.LightComponentAdded(this);
+  scene().LightComponentAdded(this);
 }
 
 LightComponent::~LightComponent()
@@ -79,7 +79,7 @@ SphereAreaLightComponent::SphereAreaLightComponent(Node& node, Node::Component* 
   : LightComponent(node, parent, uuid),
     data(data)
 {
-  node.sceneLayer.scene.SphereAreaLightComponentAdded(this);
+  scene().SphereAreaLightComponentAdded(this);
 }
 
 SphereAreaLightComponent::~SphereAreaLightComponent()
@@ -100,7 +100,7 @@ RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* pare
   : LightComponent(node, parent, uuid),
     data(data)
 {
-  node.sceneLayer.scene.RectAreaLightComponentAdded(this);
+  scene().RectAreaLightComponentAdded(this);
 }
 
 RectAreaLightComponent::~RectAreaLightComponent()

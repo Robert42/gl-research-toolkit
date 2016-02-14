@@ -21,7 +21,7 @@ inline Node* create_node(SceneLayer* scenelayer, const Uuid<Node>& uuid)
 
 Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
   : QObject(&sceneLayer),
-    sceneLayer(sceneLayer),
+    _sceneLayer(sceneLayer),
     uuid(uuid),
     _rootComponent(nullptr)
 {
@@ -29,7 +29,7 @@ Node::Node(SceneLayer& sceneLayer, const Uuid<Node>& uuid)
     throw GLRT_EXCEPTION("Same uuid used twice");
 
   sceneLayer._nodes.insert(uuid, this);
-  sceneLayer.scene.nodeAdded(this);
+  scene().nodeAdded(this);
 }
 
 Node::~Node()
@@ -44,8 +44,38 @@ Node::~Node()
   delete rootComponent;
   Q_ASSERT(this->rootComponent() == nullptr);
 
-  sceneLayer._nodes.remove(uuid);
-  sceneLayer.scene.nodeRemoved(this);
+  sceneLayer()._nodes.remove(uuid);
+  scene().nodeRemoved(this);
+}
+
+Scene& Node::scene()
+{
+  return _sceneLayer.scene();
+}
+
+const Scene& Node::scene()const
+{
+  return _sceneLayer.scene();
+}
+
+SceneLayer& Node::sceneLayer()
+{
+  return _sceneLayer;
+}
+
+const SceneLayer& Node::sceneLayer()const
+{
+  return _sceneLayer;
+}
+
+resources::ResourceManager& Node::resourceManager()
+{
+  return _sceneLayer.scene().resourceManager;
+}
+
+const resources::ResourceManager& Node::resourceManager() const
+{
+  return _sceneLayer.scene().resourceManager;
 }
 
 CoordFrame Node::globalCoordFrame() const
@@ -68,11 +98,6 @@ QVector<Node::Component*> Node::allComponents() const
 Node::Component* Node::rootComponent() const
 {
   return _rootComponent;
-}
-
-resources::ResourceManager& Node::resourceManager()
-{
-  return sceneLayer.scene.resourceManager;
 }
 
 void Node::registerAngelScriptAPIDeclarations()
@@ -107,7 +132,7 @@ void Node::registerAngelScriptAPI()
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
-  : TickingObject(node.sceneLayer.scene.tickManager, &node),
+  : TickingObject(node.scene().tickManager, &node),
     node(node),
     uuid(uuid)
 {
@@ -117,6 +142,37 @@ Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute
 Node::ModularAttribute::~ModularAttribute()
 {
   node._allModularAttributes.removeOne(this);
+}
+
+
+Scene& Node::ModularAttribute::scene()
+{
+  return node.scene();
+}
+
+const Scene& Node::ModularAttribute::scene()const
+{
+  return node.scene();
+}
+
+SceneLayer& Node::ModularAttribute::sceneLayer()
+{
+  return node.sceneLayer();
+}
+
+const SceneLayer& Node::ModularAttribute::sceneLayer()const
+{
+  return node.sceneLayer();
+}
+
+resources::ResourceManager& Node::ModularAttribute::resourceManager()
+{
+  return node.resourceManager();
+}
+
+const resources::ResourceManager& Node::ModularAttribute::resourceManager() const
+{
+  return node.resourceManager();
 }
 
 
@@ -147,7 +203,7 @@ only changed by deleting the child or parent component.
 This component will have the given \a uuid.
 */
 Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
-  : TickingObject(node.sceneLayer.scene.tickManager, &node),
+  : TickingObject(node.scene().tickManager, &node),
     node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
@@ -171,9 +227,9 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     this->node._rootComponent = this;
   }
 
-  this->node.sceneLayer.scene.componentAdded(this);
+  scene().componentAdded(this);
 
-  node.sceneLayer.scene.globalCoordUpdater.addComponent(this);
+  scene().globalCoordUpdater.addComponent(this);
 }
 
 /*!
@@ -184,7 +240,7 @@ Node::Component::~Component()
 {
   hideInDestructor();
 
-  node.sceneLayer.scene.componentRemoved(this);
+  scene().componentRemoved(this);
 
   QVector<Component*> children = this->children();
   for(Component* child : children)
@@ -195,6 +251,36 @@ Node::Component::~Component()
     parent->_children.removeOne(this);
   else
     node._rootComponent = nullptr;
+}
+
+Scene& Node::Component::scene()
+{
+  return node.scene();
+}
+
+const Scene& Node::Component::scene()const
+{
+  return node.scene();
+}
+
+SceneLayer& Node::Component::sceneLayer()
+{
+  return node.sceneLayer();
+}
+
+const SceneLayer& Node::Component::sceneLayer()const
+{
+  return node.sceneLayer();
+}
+
+resources::ResourceManager& Node::Component::resourceManager()
+{
+  return node.resourceManager();
+}
+
+const resources::ResourceManager& Node::Component::resourceManager() const
+{
+  return node.resourceManager();
 }
 
 
@@ -267,9 +353,9 @@ void Node::Component::updateVisibility(bool prevVisibility)
     visibleChanged(currentVisibility);
     componentVisibilityChanged(this);
     if(currentVisibility)
-      node.sceneLayer.scene.componentShown(this);
+      scene().componentShown(this);
     else
-      node.sceneLayer.scene.componentHidden(this);
+      scene().componentHidden(this);
 
     for(Component* child : _children)
     {

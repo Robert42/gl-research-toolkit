@@ -92,7 +92,7 @@ FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<Fp
 {
   connect(&component, &Node::Component::destroyed, this, &FpsDebugController::deleteLater);
 
-  node.sceneLayer.scene.inputManager.addHandler(&inputHandler);
+  scene().inputManager.addHandler(&inputHandler);
 
   inputHandler.frame = component.localCoordFrame();
 }
