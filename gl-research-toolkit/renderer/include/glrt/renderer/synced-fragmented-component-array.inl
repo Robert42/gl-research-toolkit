@@ -47,12 +47,11 @@ void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleVisib
 {
   dirty = true;
 
-  Q_ASSERT(is_instance_of<T_component>(node_component));
-
   T_component* component = reinterpret_cast<T_component*>(node_component);
 
   if(component->visible())
   {
+    Q_ASSERT(is_instance_of<T_component>(node_component));
     Q_ASSERT(fragmented_array.indexOf(component) == -1);
     fragmented_array.append_copy(component);
   }else
