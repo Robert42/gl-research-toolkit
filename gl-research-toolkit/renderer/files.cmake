@@ -21,6 +21,8 @@ set(SOURCE_FILES
   include/glrt/renderer/synced-fragmented-component-array.h
   include/glrt/renderer/synced-fragmented-component-array.inl
   include/glrt/renderer/toolkit/aligned-vector.h
+  include/glrt/renderer/toolkit/managed-gl-buffer.h
+  include/glrt/renderer/toolkit/managed-gl-buffer.inl
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h
   include/glrt/renderer/toolkit/temp-shader-file.h
