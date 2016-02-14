@@ -29,7 +29,7 @@ void SimpleShaderStorageBuffer<T_LightComponent,T_BufferCapacityTraits,T_array_h
     LightData* dest = buffer.Map();
 
     // ISSUE-61 OMP
-    for(int i=indexOfFirstUpdated; i<length; ++i)
+    for(int i=buffer.firstElementToCopy(); i<length; ++i)
       dest[i] = src[i]->data;
 
     buffer.Unmap();

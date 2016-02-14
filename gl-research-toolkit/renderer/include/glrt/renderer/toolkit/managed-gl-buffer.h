@@ -118,6 +118,7 @@ public:
   void setHeader(const header_type& header);
   void setNumElements(int numElements);
 
+  int firstElementToCopy() const;
   bool needsUpdate() const;
 
   T_element* Map();

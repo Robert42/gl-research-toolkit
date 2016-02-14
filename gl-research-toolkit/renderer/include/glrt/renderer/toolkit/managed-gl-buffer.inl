@@ -52,6 +52,12 @@ int ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::byte_for_inde
 }
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
+int ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::firstElementToCopy() const
+{
+  return glm::max<int>(first_dirty_byte-T_header_traits::header_size(), 0) / sizeof(T_element);
+}
+
+template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 bool ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::needsUpdate() const
 {
   Q_ASSERT(first_dirty_byte <= this->totalNumberBytes());
@@ -80,11 +86,7 @@ T_element* ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Map()
 
   Q_ASSERT(reinterpret_cast<size_t>(whole_buffer) >= first_dirty_byte);
 
-  T_element* data = reinterpret_cast<T_element*>(whole_buffer+T_header_traits::header_size()-first_dirty_byte);
-
-  first_dirty_byte = total_number_bytes;
-
-  return data;
+  return reinterpret_cast<T_element*>(whole_buffer+T_header_traits::header_size()-first_dirty_byte);
 }
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
@@ -97,6 +99,8 @@ template<typename T_element, typename T_CapacityTraits, typename T_header_traits
 void ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Unmap()
 {
   this->buffer.Unmap();
+
+  first_dirty_byte = this->totalNumberBytes();
 }
 
 } // namespace renderer
