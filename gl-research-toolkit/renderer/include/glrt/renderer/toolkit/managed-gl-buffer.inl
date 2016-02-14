@@ -39,6 +39,9 @@ void ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::setNumElemen
       this->buffer = std::move(gl::Buffer(newCapacity, gl::Buffer::MAP_WRITE));
     else
       this->buffer = std::move(gl::Buffer());
+  }else
+  {
+    this->first_dirty_byte = glm::min<decltype(first_dirty_byte)>(this->first_dirty_byte, this->totalNumberBytes());
   }
 }
 
@@ -51,6 +54,7 @@ int ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::byte_for_inde
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 bool ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::needsUpdate() const
 {
+  Q_ASSERT(first_dirty_byte <= this->totalNumberBytes());
   return this->totalNumberBytes() != first_dirty_byte;
 }
 
@@ -63,6 +67,7 @@ T_element* ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Map()
 {
   const GLsizeiptr total_number_bytes = this->totalNumberBytes();
 
+  Q_ASSERT(first_dirty_byte <= total_number_bytes);
   Q_ASSERT(first_dirty_byte==0 || (first_dirty_byte-T_header_traits::header_size()) % sizeof(T_element) == 0);
 
   GLsizeiptr nDirtyBytes = total_number_bytes - first_dirty_byte;
@@ -85,9 +90,7 @@ T_element* ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::Map()
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 GLsizeiptr ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::totalNumberBytes() const
 {
-  GLsizeiptr totalNumberBytes = T_header_traits::header_size() + header.n_elements()*sizeof(T_element);
-  Q_ASSERT(first_dirty_byte <= totalNumberBytes);
-  return totalNumberBytes;
+  return T_header_traits::header_size() + header.n_elements()*sizeof(T_element);
 }
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
