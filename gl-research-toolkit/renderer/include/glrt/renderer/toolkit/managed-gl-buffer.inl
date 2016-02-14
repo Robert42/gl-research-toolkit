@@ -29,6 +29,15 @@ template<typename T_element, typename T_CapacityTraits, typename T_header_traits
 void ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::setNumElements(int numElements)
 {
   header.set_n_elements(&first_dirty_byte, &buffer, numElements);
+
+  int newCapacity = T_CapacityTraits::recalc_capacity(buffer.GetSize(),
+                                                      T_header_traits::header_size() + numElements*sizeof(T_element));
+
+  if(newCapacity != buffer.GetSize())
+  {
+    this->first_dirty_byte = 0;
+    this->buffer = std::move(gl::Buffer(newCapacity, gl::Buffer::MAP_WRITE));
+  }
 }
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>

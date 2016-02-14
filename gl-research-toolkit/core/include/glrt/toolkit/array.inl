@@ -30,6 +30,16 @@ inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_rem
   return glm::min(prev_capacity, glm::ceilMultiple(current_length, block_size_remove));
 }
 
+template<int block_size_append, int block_size_remove>
+inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_remove>::recalc_capacity(int prev_capacity, int current_length)
+{
+  if(prev_capacity < current_length)
+    return new_capacity(prev_capacity, current_length, current_length-prev_capacity);
+  else if(prev_capacity > current_length)
+    return adapt_capacity_after_removing_elements(prev_capacity, current_length, prev_capacity-current_length);
+  else
+    return prev_capacity;
+}
 
 
 /*! \class glrt::ArrayTraits_Unordered_Toolkit
