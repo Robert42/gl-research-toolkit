@@ -188,8 +188,12 @@ void System::verifyNVidiaFeatures()
   if(!GLEW_NV_fragment_shader_interlock)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fragment_shader_interlock"));
 
+  // http://developer.download.nvidia.com/opengl/specs/GL_NV_shader_buffer_load.txt
+  if(!GLEW_NV_shader_buffer_load)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_shader_buffer_load"));
+
   // https://www.opengl.org/registry/specs/NV/bindless_texture.txt
-  if(!GLEW_ARB_bindless_texture)
+  if(!GLEW_NV_bindless_texture)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_bindless_texture"));
 
   // http://developer.download.nvidia.com/opengl/specs/GL_NV_command_list.txt
