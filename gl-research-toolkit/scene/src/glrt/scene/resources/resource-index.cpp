@@ -79,7 +79,8 @@ void ResourceIndex::registerAngelScriptAPI()
   LightComponent::registerAngelScriptAPI();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in dirname)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void addIncludeDirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,addScriptIncludeDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerStaticMesh(const Uuid<StaticMesh> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerStaticMesh), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerLightSource(const Uuid<LightSource> &in uuid, const LightSource &in light)", AngelScript::asMETHOD(ResourceIndex,registerLightSource), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
@@ -103,13 +104,24 @@ void ResourceIndex::loadIndex(const std::string& filename)
 
   AngelScriptIntegration::ConfigCallScript config;
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
+  config.includeDirectories = this->scriptIncludeDirectories;
 
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(ResourceIndex@ index)", "resource-index", config, this);
+
+  this->scriptIncludeDirectories = config.includeDirectories;
 }
 
 void ResourceIndex::loadIndexedDirectory(const std::string& dir)
 {
   loadIndex(dir+"/asset-index");
+}
+
+void ResourceIndex::addScriptIncludeDirectory(const std::string& d)
+{
+  QDir dir = QDir::current();
+  dir.cd(QString::fromStdString(d));
+
+  scriptIncludeDirectories << dir.absolutePath();
 }
 
 /*! \note This is one of the few methods which can be called with \c{this==nullptr}

@@ -45,6 +45,8 @@ public:
   void loadIndex(const std::string& filename);
   void loadIndexedDirectory(const std::string& filename);
 
+  void addScriptIncludeDirectory(const std::string& filename);
+
   void registerStaticMesh(const Uuid<StaticMesh>& uuid, const std::string& mesh_file);
   void registerLightSource(const Uuid<LightSource>& uuid, const LightSource& light);
   void registerMaterial(const Uuid<Material>& uuid, const Material& material);
@@ -64,6 +66,8 @@ public:
   QHash<QUuid, QString> labels;
 
 private:
+  QVector<QDir> scriptIncludeDirectories;
+
   void validateNotYetRegistered(const QUuid& uuid) const;
   void registerFallbackIndex();
 };

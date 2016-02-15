@@ -6,6 +6,8 @@
 
 #include <assimp/version.h>
 
+#include <nvcommandlist.h>
+
 
 /*! \namespace glrt
 \ingroup glrt
@@ -22,6 +24,12 @@
 */
 
 
+#ifdef Q_OS_LINUX
+#include <GL/glx.h>
+#endif
+
+
+
 namespace glrt {
 
 glm::ivec2 System::_windowSize;
@@ -36,6 +44,7 @@ System::System(int& argc, char** argv, const Settings& settings)
 
   initSDL(settings);
   initGLEW(settings);
+  initNVCommandlist(settings);
 
   verifyGLFeatures();
   verifyNVidiaFeatures();
@@ -127,6 +136,20 @@ inline GLint print_gl_integer(GLenum variable, const char* variableName)
   return value;
 }
 
+NVCPROC myglGetProcAddress(const char* name)
+{
+#ifdef Q_OS_LINUX
+  return reinterpret_cast<NVCPROC>(glXGetProcAddress(reinterpret_cast<const GLubyte*>(name)));
+#endif
+}
+
+void System::initNVCommandlist(const Settings& settings)
+{
+  Q_UNUSED(settings);
+
+  init_NV_command_list(myglGetProcAddress);
+}
+
 #define PRINT_GL_INTEGER(x) print_gl_integer(x, #x)
 
 void System::verifyGLFeatures()
@@ -165,9 +188,18 @@ void System::verifyNVidiaFeatures()
   if(!GLEW_NV_fragment_shader_interlock)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fragment_shader_interlock"));
 
+  // http://developer.download.nvidia.com/opengl/specs/GL_NV_shader_buffer_load.txt
+  if(!GLEW_NV_shader_buffer_load)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_shader_buffer_load"));
+
   // https://www.opengl.org/registry/specs/NV/bindless_texture.txt
-  if(!GLEW_ARB_bindless_texture)
+  if(!GLEW_NV_bindless_texture)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_bindless_texture"));
+
+  // http://developer.download.nvidia.com/opengl/specs/GL_NV_command_list.txt
+  // http://on-demand.gputechconf.com/gtc/2015/presentation/S5135-Christoph-Kubisch-Pierre-Boudier.pdf
+  if(glDrawCommandsNV == nullptr)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_command_list"));
 }
 
 void System::verifyAssimpVersion()

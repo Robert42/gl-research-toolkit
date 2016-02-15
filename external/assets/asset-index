@@ -1,4 +1,6 @@
 void main(ResourceIndex@ index)
 {
+  index.addIncludeDirectory(".");
+
   index.loadSubdirectory("common");
 }
