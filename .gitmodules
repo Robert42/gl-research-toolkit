@@ -16,3 +16,6 @@
 [submodule "external/angelscript-integration"]
 	path = external/angelscript-integration
 	url = git@github.com:Robert42/angelscript-integration.git
+[submodule "external/googletest"]
+	path = external/googletest
+	url = https://github.com/google/googletest.git
