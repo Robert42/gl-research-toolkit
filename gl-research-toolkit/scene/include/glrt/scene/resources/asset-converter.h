@@ -38,7 +38,7 @@ private:
 
 struct MeshImportSettings final
 {
-  bool indexed = false;
+  bool indexed = true;
 
   static void registerType();
 };
@@ -51,14 +51,18 @@ struct TextureImportSettings final
   static void registerType();
 };
 
-void convertStaticMesh(const std::string& meshFile,
-                       const std::string& sourceFile,
-                       const std::string& groupToImport,
-                       ResourceIndex*);
+void convertStaticMesh(const QString& meshFile,
+                       const QString& sourceFile,
+                       const QString& groupToImport,
+                       const MeshImportSettings& meshImportSettings);
+void convertTexture(const QString& textureFilename,
+                    const QString& sourceFilename,
+                    const TextureImportSettings& textureImportSettings);
 void convertSceneGraph(const QString& sceneGraphFilename,
                        const QString& sourceFilename,
                        const Uuid<ResourceIndex>& uuid,
-                       const SceneGraphImportSettings& settings, const QString& groupToImport);
+                       const SceneGraphImportSettings& settings,
+                       const QString& groupToImport);
 
 } // namespace resources
 } // namespace scene

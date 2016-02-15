@@ -90,19 +90,19 @@ void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const Q
   convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath, resourceIndexUuid, settings);
 }
 
-void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename, const std::string& groupToImport, ResourceIndex*)
+void convertStaticMesh(const QString& meshFilename, const QString& sourceFilename, const QString& groupToImport, const MeshImportSettings& meshImportSettings)
 {
-  bool indexed = true;// #TODO allow the script to choose, whether the mesh is indexed or not
+  bool indexed = meshImportSettings.indexed;
 
-  QFileInfo meshFile(QString::fromStdString(meshFilename));
-  QFileInfo sourceFile(QString::fromStdString(sourceFilename));
+  QFileInfo meshFile(meshFilename);
+  QFileInfo sourceFile(sourceFilename);
 
   SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
 
   if(shouldConvert(meshFile, sourceFile))
   {
     if(sourceFile.suffix().toLower() == "blend")
-      convertStaticMesh_BlenderToObj(meshFile, sourceFile, QString::fromStdString(groupToImport), indexed);
+      convertStaticMesh_BlenderToObj(meshFile, sourceFile, groupToImport, indexed);
     else
       convertStaticMesh_assimpToMesh(meshFile, sourceFile, indexed);
   }
@@ -122,6 +122,21 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   }
 }
 
+void convertTexture(const QString& textureFilename, const QString& sourceFilename, const TextureImportSettings& textureImportSettings)
+{
+  QFileInfo textureFile(textureFilename);
+  QFileInfo sourceFile(sourceFilename);
+
+  SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
+
+  if(shouldConvert(textureFilename, sourceFile))
+  {
+    qDebug() << "convertTexture("<<textureFile.fileName()<<", "<<sourceFile.fileName()<<")";
+
+    // #ISSUE-27: This still must be implemented
+    Q_UNUSED(textureImportSettings);
+  }
+}
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile)
 {

@@ -30,6 +30,30 @@ void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
                     QString::fromStdString(groupToImport));
 }
 
+void convertStaticMesh_wrapper(const std::string& meshFile,
+                               const std::string& sourceFile,
+                               const std::string& groupToImport,
+                               const MeshImportSettings* meshImportSettings,
+                               const ResourceIndex* resourceIndex)
+{
+  convertStaticMesh(QString::fromStdString(meshFile),
+                    QString::fromStdString(sourceFile),
+                    QString::fromStdString(groupToImport),
+                    *meshImportSettings);
+  Q_UNUSED(resourceIndex);
+}
+
+void convertTexture_wrapper(const std::string& textureFilename,
+                            const std::string& sourceFilename,
+                            const TextureImportSettings* settings,
+                            const ResourceIndex* resourceIndex)
+{
+  convertTexture(QString::fromStdString(textureFilename),
+                 QString::fromStdString(sourceFilename),
+                 *settings);
+  Q_UNUSED(resourceIndex);
+}
+
 inline void set_label(ResourceIndex* index, const Uuid<void>& uuid, const std::string& l)
 {
   index->labels[uuid] = QString::fromStdString(l);
@@ -91,7 +115,8 @@ void ResourceIndex::registerAngelScriptAPI()
   MeshImportSettings::registerType();
   TextureImportSettings::registerType();
 
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\", const MeshImportSettings &in meshImportSettings = MeshImportSettings())", AngelScript::asFUNCTION(convertStaticMesh_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertTexture(const string &in textureFile, const string &in sourceFile, const MeshImportSettings &in textureImportSettings = TextureImportSettings())", AngelScript::asFUNCTION(convertTexture_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void set_label(const BaseUuid &in uuid, const string &in label)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
