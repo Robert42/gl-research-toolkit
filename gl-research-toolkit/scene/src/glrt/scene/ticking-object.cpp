@@ -56,6 +56,11 @@ int TickingObject::tickDependencyDepth() const
 void TickingObject::collectDependencies(TickDependencySet* dependencySet) const
 {
   collectTickDependencies(dependencySet);
+
+#ifdef QT_DEBUG
+  if(!dependencySet->objectsWithCycles().isEmpty())
+    qWarning() << "Warning: dependency cycles detected!";
+#endif // QT_DEBUG
 }
 
 /*!

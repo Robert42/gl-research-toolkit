@@ -46,8 +46,6 @@ void GlobalCoordUpdater::updateArray()
     if(component->movable())
       continue;
 
-    // #TODO: make sure the component doesn't depend on movable objects
-
     component->updateGlobalCoordFrame();
   }
   staticComponentsToUpdate.clear();
