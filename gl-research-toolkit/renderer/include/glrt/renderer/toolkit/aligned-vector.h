@@ -8,7 +8,7 @@ namespace renderer {
 
 
 template<typename T>
-class aligned_vector // #TODO: remove and use Array with an alignment trait instead?
+class aligned_vector // #ISSUE-63: remove and use Array with an alignment trait instead?
 {
 public:
   enum class Alignment

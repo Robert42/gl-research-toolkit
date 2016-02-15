@@ -17,11 +17,11 @@ MaterialBuffer::MaterialBuffer(Type type)
     initBlockOffset<Material::PlainColor>();
     break;
   case Type::TEXTURED_MASKED:
-    // #TODO
+    // #ISSUE-63
   case Type::TEXTURED_OPAQUE:
-    // #TODO
+    // #ISSUE-63
   case Type::TEXTURED_TRANSPARENT:
-    // #TODO
+    // #ISSUE-63
   default:
     Q_UNREACHABLE();
   }

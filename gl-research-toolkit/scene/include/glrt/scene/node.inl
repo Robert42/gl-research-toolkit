@@ -58,7 +58,7 @@ void Node::Component::registerAsBaseOfClass(AngelScript::asIScriptEngine* engine
     r = engine->RegisterObjectMethod("NodeComponent", (std::string(className)+"@ opConv()").c_str(), AngelScript::asFUNCTION((AngelScriptIntegration::wrap_static_cast<T, Component>)), AngelScript::asCALL_CDECL_OBJFIRST);
     AngelScriptIntegration::AngelScriptCheck(r);
 
-    // #TODO add also conversion for the uuids
+    // #ISSUE-65 [conversion] Also register converstion from Uuid<T> to it's base Uuid<T_base> (for example Uuid<LightComponent> should be implicit convertible to Uuid<NodeComponent>)
   }
 }
 

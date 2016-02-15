@@ -12,7 +12,7 @@ SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::SyncedFragmented
   : scene(scene),
     dirty(true)
 {
-  // #TODO: listen to the event, when the scene gets cleared, so clearing gets faster?
+  // #ISSUE-64: listen to the event, when the scene gets cleared, so clearing gets faster?
   connect(&scene, glrt::scene::implementation::ComponentAddedSignal<T_component>::signal(&scene),
           this, &SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::addComponent);
 

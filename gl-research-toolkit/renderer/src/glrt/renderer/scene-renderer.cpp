@@ -132,7 +132,7 @@ Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, 
     materialBuffer(MaterialBuffer::Type::PLAIN_COLOR),
     isDirty(true)
 {
-  // #TODO not pretty, we are just interested in changes of static mesh components
+  // #ISSUE-63 not pretty, we are just interested in changes of static mesh components
   connect(&renderer->scene, SIGNAL(sceneCleared()), this, SLOT(markDirty()));
   connect(&renderer->scene, SIGNAL(sceneLoaded(bool)), this, SLOT(markDirty()));
 }
