@@ -69,7 +69,6 @@ void LightSource::registerAngelScriptTypes()
 
   int r;
 
-  // #TODO test all properties
   r = angelScriptEngine->RegisterObjectType("AreaLightCommon", sizeof(LightSource::AreaLightCommon), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   registerCommonAreaLightProperties<LightSource::AreaLightCommon>("AreaLightCommon");
 
@@ -81,13 +80,11 @@ void LightSource::registerAngelScriptTypes()
   r = angelScriptEngine->RegisterObjectProperty("RectAreaLightSource", "float half_height", asOFFSET(LightSource::RectAreaLight, half_height)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("RectAreaLightSource", "void set_size(const vec2 &in size)", AngelScript::asFUNCTION(as_rect_area_light_set_size), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("RectAreaLightSource", "vec2 get_size()", AngelScript::asFUNCTION(as_rect_area_light_get_size), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty("RectAreaLightSource", "AreaLightCommon common", asOFFSET(LightSource::RectAreaLight, areaLightCommon));
   registerCommonAreaLightProperties<LightSource::RectAreaLight>("RectAreaLightSource");
 
   r = angelScriptEngine->RegisterObjectType("SphereAreaLightSource", sizeof(LightSource::SphereAreaLight), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("SphereAreaLightSource", AngelScript::asBEHAVE_CONSTRUCT, "void ctor()", AngelScript::asFUNCTION(as_init_sphere_area_light), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty("SphereAreaLightSource", "float radius", asOFFSET(LightSource::SphereAreaLight, radius)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty("SphereAreaLightSource", "AreaLightCommon common", asOFFSET(LightSource::SphereAreaLight, areaLightCommon));
   registerCommonAreaLightProperties<LightSource::SphereAreaLight>("SphereAreaLightSource");
 
   r = angelScriptEngine->RegisterObjectType("LightSource", sizeof(LightSource), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_DAK); AngelScriptCheck(r);
