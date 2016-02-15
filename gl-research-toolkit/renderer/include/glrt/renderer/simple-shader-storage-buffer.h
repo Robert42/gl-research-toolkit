@@ -10,7 +10,7 @@
 namespace glrt {
 namespace renderer {
 
-// #TODO: is there a way to get the best value for block_to_update from opengl? (Its the size which is send together as a block to opengl) or find out experimentally which block_to_update value is the fastest
+// #ISSUE-64: try out different values for <512, 4096> to find the fastest one
 template<class T_LightComponent, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>, class T_array_header=implementation::SimpleShaderStorageBuffer_DefaultHeader, int block_to_update=64>
 class SimpleShaderStorageBuffer
 {

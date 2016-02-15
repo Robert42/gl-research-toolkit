@@ -46,21 +46,6 @@ inline int qHash(const QPointer<T>& ptr, int seed = 0)
 }
 
 
-// the unnecessary macros make my syntax highligh unpretty ;)
-// #TODO remove
-#ifdef __GNUC__
-#ifdef bool
-#undef bool
-#endif
-#ifdef true
-#undef true
-#endif
-#ifdef false
-#undef false
-#endif
-#endif
-
-
 QDebug operator<<(QDebug d, const glm::bvec2& v);
 QDebug operator<<(QDebug d, const glm::bvec3& v);
 QDebug operator<<(QDebug d, const glm::bvec4& v);
