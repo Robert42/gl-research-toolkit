@@ -36,6 +36,21 @@ private:
   static bool shouldImport(const QString& name, const QSet<QString>& patternsToImport);
 };
 
+struct MeshImportSettings final
+{
+  bool indexed = false;
+
+  static void registerType();
+};
+
+struct TextureImportSettings final
+{
+  int maxResolution = 2048;
+  bool scaleDownToMultipleOfTwo = false;
+
+  static void registerType();
+};
+
 void convertStaticMesh(const std::string& meshFile,
                        const std::string& sourceFile,
                        const std::string& groupToImport,

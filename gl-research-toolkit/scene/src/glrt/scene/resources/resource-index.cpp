@@ -88,6 +88,8 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
+  MeshImportSettings::registerType();
+  TextureImportSettings::registerType();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertStaticMesh), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);

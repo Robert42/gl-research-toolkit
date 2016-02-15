@@ -889,6 +889,29 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ cameraUuids", asOFFSET(AngelScriptInterface,as_cameraUuids)); AngelScriptCheck(r);
 }
 
+
+void MeshImportSettings::registerType()
+{
+  int r;
+  const char* name = "MeshImportSettings";
+
+  r = angelScriptEngine->RegisterObjectType(name, sizeof(MeshImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("MeshImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<MeshImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool indexed", asOFFSET(MeshImportSettings,indexed)); AngelScriptCheck(r);
+}
+
+void TextureImportSettings::registerType()
+{
+  int r;
+  const char* name = "TextureImportSettings";
+
+  r = angelScriptEngine->RegisterObjectType(name, sizeof(MeshImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<TextureImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToMultipleOfTwo", asOFFSET(TextureImportSettings,scaleDownToMultipleOfTwo)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "int maxResolution", asOFFSET(TextureImportSettings,maxResolution)); AngelScriptCheck(r);
+}
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt
