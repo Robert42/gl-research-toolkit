@@ -42,7 +42,7 @@ private:
   static QString& globalState();
 };
 
-typedef glrt::Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
-typedef glrt::Array<StateSpy, glrt::ArrayTraits_Unordered_cCmCmOD<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 2>>> StateSpyArray_CapacityBock_2_2;
+typedef glrt::Array<StateSpy, glrt::ArrayTraits_cCmCmOD<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 4>>> StateSpyArray;
+typedef glrt::Array<StateSpy, glrt::ArrayTraits_cCmCmOD<StateSpy, glrt::ArrayCapacityTraits_Capacity_Blocks<2, 2>>> StateSpyArray_CapacityBock_2_2;
 
 #endif // STATESPY_H

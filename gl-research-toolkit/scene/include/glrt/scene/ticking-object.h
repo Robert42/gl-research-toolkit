@@ -56,7 +56,7 @@ private:
 template<>
 struct DefaultTraits<scene::TickingObject::TickTraits>
 {
-  typedef ArrayTraits_Unordered_Primitive<scene::TickingObject::TickTraits> type;
+  typedef ArrayTraits_Primitive<scene::TickingObject::TickTraits> type;
 };
 
 } // namespace glrt

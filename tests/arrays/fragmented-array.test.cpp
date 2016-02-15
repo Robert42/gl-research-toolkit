@@ -53,31 +53,31 @@ namespace glrt {
 template<>
 struct DefaultTraits<DummyMeshComponent>
 {
-  typedef ArrayTraits_Unordered_POD<DummyMeshComponent>type;
+  typedef ArrayTraits_POD<DummyMeshComponent>type;
 };
 
 template<>
 struct DefaultTraits<DummyLightComponent>
 {
-  typedef ArrayTraits_Unordered_POD<DummyLightComponent>type;
+  typedef ArrayTraits_POD<DummyLightComponent>type;
 };
 
 template<>
 struct DefaultTraits<Material>
 {
-  typedef ArrayTraits_Unordered_Primitive<Material>type;
+  typedef ArrayTraits_Primitive<Material>type;
 };
 
 template<>
 struct DefaultTraits<Mesh>
 {
-  typedef ArrayTraits_Unordered_Primitive<Mesh>type;
+  typedef ArrayTraits_Primitive<Mesh>type;
 };
 
 template<>
 struct DefaultTraits<Interactivity>
 {
-  typedef ArrayTraits_Unordered_Primitive<Interactivity>type;
+  typedef ArrayTraits_Primitive<Interactivity>type;
 };
 
 } // namespace glrt

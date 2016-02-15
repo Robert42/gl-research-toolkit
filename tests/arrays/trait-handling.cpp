@@ -34,7 +34,7 @@ void test_capacity_traits()
 void test_capacity_trait_rangecheck()
 {
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   EXPECT_TRUE(traits::ranges_overlap( 0, 5, 0, 5));
 
@@ -63,7 +63,7 @@ void test_swap_instances_mO()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -84,7 +84,7 @@ void test_swap_single_instance_mO()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -99,7 +99,7 @@ void test_call_instance_destructors_D()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -116,7 +116,7 @@ void test_call_instance_destructors_D()
 void test_values_used_to_fill_gaps()
 {
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
   int first, count;
 
   traits::values_used_to_fill_gaps(&first, &count, 4, 0, 4);
@@ -164,7 +164,7 @@ void test_copy_construct_single_cC()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -179,7 +179,7 @@ void test_remove_single_mOD()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -200,7 +200,7 @@ void test_remove_mOD()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -236,7 +236,7 @@ void test_remove_single_aOD()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -257,7 +257,7 @@ void test_remove_aOD()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -293,7 +293,7 @@ void test_remove_single_cCD()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -314,7 +314,7 @@ void test_remove_cCD()
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
