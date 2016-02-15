@@ -50,7 +50,7 @@ void Renderer::updateCameraUniform()
 {
   if(!this->cameraComponent)
   {
-    QVector<scene::CameraComponent*> cameraComponents = scene::collectAllComponentsWithType<scene::CameraComponent>(&scene);
+    Array<scene::CameraComponent*> cameraComponents = scene::collectAllComponentsWithType<scene::CameraComponent>(&scene);
 
     for(scene::CameraComponent* cameraComponent : cameraComponents)
     {
@@ -275,7 +275,7 @@ struct Renderer::Pass::StaticMeshBufferVerification
     instances.push_back(Instance{materials.size()-1, meshes.size()-1});
   }
 
-  void verify(const QVector<scene::StaticMeshComponent*>& comparison,
+  void verify(const Array<scene::StaticMeshComponent*>& comparison,
               const QVector<MaterialRange>& materialRanges,
               const QVector<MeshRange>& meshRanges) const
   {
@@ -312,7 +312,7 @@ inline void Renderer::Pass::updateCache()
   aligned_vector<MeshInstanceUniform> transformations(aligned_vector<MeshInstanceUniform>::Alignment::UniformBufferOffsetAlignment);
   meshInstanceUniformOffset = transformations.alignment();
 
-  QVector<scene::StaticMeshComponent*> allStaticMeshComponents = glrt::scene::collectAllComponentsWithType<glrt::scene::StaticMeshComponent>(&scene, allowOnly(this->type));
+  Array<scene::StaticMeshComponent*> allStaticMeshComponents = glrt::scene::collectAllComponentsWithType<glrt::scene::StaticMeshComponent>(&scene, allowOnly(this->type));
 
   std::sort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
 
@@ -330,7 +330,7 @@ inline void Renderer::Pass::updateCache()
     Uuid<Material> lastMaterial;
     MaterialBuffer::Initializer materials(materialBuffer, allStaticMeshComponents.length());
 
-    for(int i=0; i<allStaticMeshComponents.size(); ++i)
+    for(int i=0; i<allStaticMeshComponents.length(); ++i)
     {
       scene::StaticMeshComponent* staticMeshComponent = allStaticMeshComponents[i];
 

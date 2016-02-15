@@ -9,11 +9,11 @@ namespace glrt {
 namespace scene {
 
 template<typename T_component>
-QVector<T_component*> collectAllComponentsWithType(Scene* scene, const std::function<bool(T_component*)>& filter)
+Array<T_component*> collectAllComponentsWithType(Scene* scene, const std::function<bool(T_component*)>& filter)
 {
   static_assert(std::is_base_of<Node::Component, T_component>::value, "T_component must inherit from Node::Component");
 
-  QVector<T_component*> components;
+  Array<T_component*> components;
   int totalNumberEntites = 0;
   for(const SceneLayer* layer : scene->allLayers())
     totalNumberEntites += layer->allNodes().length();
@@ -77,7 +77,7 @@ T_component* findComponent(Scene* scene, const Uuid<T_component>& uuid)
 template<typename T_component, typename T_data>
 QVector<T_data> collectData(Scene* scene, const std::function<T_data(T_component*)>& get_data)
 {
-  QVector<T_component*> components = collectAllComponentsWithType<T_component>(scene);
+  Array<T_component*> components = collectAllComponentsWithType<T_component>(scene);
   QVector<T_data> data;
 
   data.reserve(components.length());
@@ -92,7 +92,7 @@ QVector<T_data> collectData(Scene* scene, const std::function<T_data(T_component
 template<typename T_component, typename T_data>
 QHash<QString, T_data> collectNamedData(Scene* scene, const std::function<T_data(T_component*)>& get_data)
 {
-  QVector<T_component*> components = collectAllComponentsWithType<T_component>(scene);
+  Array<T_component*> components = collectAllComponentsWithType<T_component>(scene);
   QHash<QString, T_data> data;
 
   data.reserve(components.length());
