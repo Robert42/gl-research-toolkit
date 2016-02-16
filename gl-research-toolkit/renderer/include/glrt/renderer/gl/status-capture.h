@@ -13,10 +13,15 @@ class StatusCapture
   Q_DISABLE_COPY(StatusCapture)
 
 public:
+  enum class Mode
+  {
+    TRIANGLES = GL_TRIANGLES,
+  };
+
   StatusCapture();
   ~StatusCapture();
 
-  static StatusCapture&& capture();
+  static StatusCapture&& capture(Mode mode);
 
   StatusCapture(StatusCapture&& other);
   StatusCapture& operator=(StatusCapture&& other);
