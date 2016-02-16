@@ -32,6 +32,8 @@ set(SOURCE_FILES
   src/glrt/application.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
+  src/glrt/renderer/command-list.cpp
+  src/glrt/renderer/command-list.h
   src/glrt/renderer/debugging/debug-line-visualisation.cpp
   src/glrt/renderer/debugging/debug-mesh.cpp
   src/glrt/renderer/debugging/shader-debug-printer.cpp
