@@ -22,6 +22,8 @@ public:
 
   void call();
 
+  GLuint glhandle() const{return _commandListHandler;}
+
 private:
   GLuint _commandListHandler;
 };

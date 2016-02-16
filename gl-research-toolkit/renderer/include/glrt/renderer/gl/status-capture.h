@@ -26,6 +26,8 @@ public:
   StatusCapture(StatusCapture&& other);
   StatusCapture& operator=(StatusCapture&& other);
 
+  GLuint glhandle() const{return _stateCapture;}
+
 private:
   GLuint _stateCapture;
 };
