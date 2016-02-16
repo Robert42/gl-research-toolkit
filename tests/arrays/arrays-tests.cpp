@@ -1,4 +1,4 @@
-#include <testing-framework.h>
+#include <gtest/gtest.h>
 
 #include "statespy.h"
 
@@ -6,10 +6,7 @@ using glrt::Array;
 
 
 
-void test_traits();
-void test_fragmented_array();
-
-void test_array_constructors()
+TEST(array, array_constructors)
 {
   // Test standart constructor
   Array<int> array1;
@@ -35,7 +32,7 @@ void test_array_constructors()
   EXPECT_EQ(array3, Array<int>({100, 101, 102, 103, 104, 105, 106, 107, 108, 109}));
 }
 
-void test_array_operators()
+TEST(array, array_operators)
 {
   // test == && !=
   Array<int> array1 = {0, 1, 2};
@@ -44,29 +41,29 @@ void test_array_operators()
   Array<int> array4 = {0, 1, 2, 3};
   Array<int> array5;
   EXPECT_EQ(array1, array1);
-  EXPECT_NEQ(array1, array2);
-  EXPECT_NEQ(array1, array3);
-  EXPECT_NEQ(array1, array4);
-  EXPECT_NEQ(array1, array5);
-  EXPECT_NEQ(array2, array1);
+  EXPECT_NE(array1, array2);
+  EXPECT_NE(array1, array3);
+  EXPECT_NE(array1, array4);
+  EXPECT_NE(array1, array5);
+  EXPECT_NE(array2, array1);
   EXPECT_EQ (array2, array2);
-  EXPECT_NEQ(array2, array3);
-  EXPECT_NEQ(array2, array4);
-  EXPECT_NEQ(array2, array5);
-  EXPECT_NEQ(array3, array1);
-  EXPECT_NEQ(array3, array2);
+  EXPECT_NE(array2, array3);
+  EXPECT_NE(array2, array4);
+  EXPECT_NE(array2, array5);
+  EXPECT_NE(array3, array1);
+  EXPECT_NE(array3, array2);
   EXPECT_EQ (array3, array3);
   EXPECT_EQ (array3, array4);
-  EXPECT_NEQ(array3, array5);
-  EXPECT_NEQ(array4, array1);
-  EXPECT_NEQ(array4, array2);
+  EXPECT_NE(array3, array5);
+  EXPECT_NE(array4, array1);
+  EXPECT_NE(array4, array2);
   EXPECT_EQ (array4, array3);
   EXPECT_EQ (array4, array4);
-  EXPECT_NEQ(array4, array5);
-  EXPECT_NEQ(array5, array1);
-  EXPECT_NEQ(array5, array2);
-  EXPECT_NEQ(array5, array3);
-  EXPECT_NEQ(array5, array4);
+  EXPECT_NE(array4, array5);
+  EXPECT_NE(array5, array1);
+  EXPECT_NE(array5, array2);
+  EXPECT_NE(array5, array3);
+  EXPECT_NE(array5, array4);
   EXPECT_EQ (array5, array5);
 
   // test move operator (is implemented using swap, so ne need to test swap seprately)
@@ -89,7 +86,7 @@ void test_array_operators()
   EXPECT_EQ(array1[2], 2);
 }
 
-void test_swap()
+TEST(array, swap)
 {
   StateSpy::clearIndex();
   StateSpy::clearLog();
@@ -111,7 +108,7 @@ void test_swap()
   EXPECT_TRUE(StateSpy::log().isEmpty());
 }
 
-void test_append_move()
+TEST(array, append_move)
 {
   StateSpy::clearLog();
 
@@ -197,7 +194,7 @@ void test_append_move()
 
 }
 
-void test_append_copy()
+TEST(array, append_copy)
 {
   StateSpy::clearLog();
 
@@ -301,7 +298,7 @@ void test_append_copy()
 
 }
 
-void test_extend_copy()
+TEST(array, extend_copy)
 {
   StateSpy::clearLog();
 
@@ -388,7 +385,7 @@ void test_extend_copy()
   StateSpy::clearLog();
 }
 
-void test_extend_move()
+TEST(array, extend_move)
 {
   StateSpy::clearLog();
 
@@ -475,7 +472,7 @@ void test_extend_move()
   StateSpy::clearLog();
 }
 
-void test_destructor()
+TEST(array, destructor)
 {
   StateSpy::clearLog();
   {
@@ -519,7 +516,7 @@ void test_destructor()
   StateSpy::clearLog();
 }
 
-void test_remove()
+TEST(array, remove)
 {
   StateSpy::clearLog();
 
@@ -663,7 +660,7 @@ void test_remove()
   StateSpy::clearLog();
 }
 
-void test_ensureCapacity()
+TEST(array, ensureCapacity)
 {
   StateSpyArray array;
   EXPECT_EQ(array.capacity(), 0);
@@ -699,20 +696,4 @@ void test_ensureCapacity()
   array.setCapacity(0);
 
   EXPECT_EQ(array.capacity(), 0);
-}
-
-void main_array_tests()
-{
-  test_traits();
-  test_array_constructors();
-  test_array_operators();
-  test_swap();
-  test_append_move();
-  test_append_copy();
-  test_extend_move();
-  test_extend_copy();
-  test_destructor();
-  test_remove();
-  test_ensureCapacity();
-  test_fragmented_array();
 }

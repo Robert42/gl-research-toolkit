@@ -10,8 +10,6 @@ namespace glrt {
 template<typename T>
 struct DependencySet final
 {
-  QSet<const T*> objectsWithCycles;
-
   DependencySet(const T* originalObject);
   DependencySet(const DependencySet&) = delete;
   DependencySet(DependencySet&&) = delete;
@@ -24,9 +22,16 @@ struct DependencySet final
   bool hasCycles() const;
   int depth() const;
 
+  const QSet<const T*>& objectsWithCycles() const;
+  const QSet<const T*>& visitedDependencies() const;
+  const QQueue<const T*>& queuedDependencies() const;
+  const T* originalObject() const;
+
 private:
-  QSet<const T*> visitedDependencies;
-  QQueue<const T*> queuedDependencies;
+  QSet<const T*> _objectsWithCycles;
+  QSet<const T*> _visitedDependencies;
+  QQueue<const T*> _queuedDependencies;
+  const T* const _originalObject;
   int _depth;
 };
 

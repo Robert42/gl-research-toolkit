@@ -23,7 +23,7 @@ struct LightSource final
     glm::vec3 color = glm::vec3(1);
     float luminous_power = 25.f;
     glm::vec3 origin = glm::vec3(0);
-    float influence_radius = INFINITY; // #TODO test, whether the influence radius is already working
+    float influence_radius = INFINITY;
 
     AreaLightCommon(){}
 

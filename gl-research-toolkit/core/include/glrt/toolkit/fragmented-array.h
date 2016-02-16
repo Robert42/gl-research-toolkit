@@ -16,7 +16,7 @@ struct FragmentedArray_Segment_Values
   struct SegmentRanges
   {
   };
-  typedef ArrayTraits_Unordered_POD<SegmentRanges> SegmentRanges_ArrayTraits;
+  typedef ArrayTraits_POD<SegmentRanges> SegmentRanges_ArrayTraits;
 
   static void start_iterate(const T_value* data, int begin, int end, const SegmentRanges& ranges, extra_data_type extra_data, segment_index* index)
   {
@@ -262,7 +262,7 @@ struct FragmentedArray_Segment_Generic : public implementation::FragmentedArray_
   struct SegmentRangesBase
   {
     Array<int> segmentEnd;
-    Array<typename T_inner_sections_trait::SegmentRanges, ArrayTraits_Unordered_mCmOD<typename T_inner_sections_trait::SegmentRanges>> innerSegmentRanges;
+    Array<typename T_inner_sections_trait::SegmentRanges, ArrayTraits_mCmOD<typename T_inner_sections_trait::SegmentRanges>> innerSegmentRanges;
 
     SegmentRangesBase(const SegmentRangesBase& other) = delete;
     SegmentRangesBase&operator=(const SegmentRangesBase& other) = delete;

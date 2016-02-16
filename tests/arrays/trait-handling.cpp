@@ -1,13 +1,12 @@
 #include <glrt/toolkit/array.h>
-
-#include <testing-framework.h>
+#include <gtest/gtest.h>
 
 #include "statespy.h"
 
 using glrt::Array;
 
 
-void test_capacity_traits()
+TEST(array_traits, capacity_traits)
 {
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
 
@@ -31,10 +30,10 @@ void test_capacity_traits()
   EXPECT_EQ(capacity_blocks::adapt_capacity_after_removing_elements(100, 64, 1), 64);
 }
 
-void test_capacity_trait_rangecheck()
+TEST(array_traits, capacity_trait_rangecheck)
 {
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   EXPECT_TRUE(traits::ranges_overlap( 0, 5, 0, 5));
 
@@ -59,11 +58,11 @@ void test_capacity_trait_rangecheck()
   EXPECT_FALSE(traits::ranges_overlap(0, 5, 60, 70));
 }
 
-void test_swap_instances_mO()
+TEST(array_traits, swap_instances_mO)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -80,11 +79,11 @@ void test_swap_instances_mO()
   StateSpy::clearLog();
 }
 
-void test_swap_single_instance_mO()
+TEST(array_traits, swap_single_instance_mO)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -95,11 +94,11 @@ void test_swap_single_instance_mO()
   StateSpy::clearLog();
 }
 
-void test_call_instance_destructors_D()
+TEST(array_traits, call_instance_destructors_D)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -113,10 +112,10 @@ void test_call_instance_destructors_D()
   StateSpy::clearLog();
 }
 
-void test_values_used_to_fill_gaps()
+TEST(array_traits, values_used_to_fill_gaps)
 {
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
   int first, count;
 
   traits::values_used_to_fill_gaps(&first, &count, 4, 0, 4);
@@ -160,11 +159,11 @@ void test_values_used_to_fill_gaps()
   EXPECT_EQ(count, 1);
 }
 
-void test_copy_construct_single_cC()
+TEST(array_traits, copy_construct_single_cC)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -175,11 +174,11 @@ void test_copy_construct_single_cC()
   StateSpy::clearLog();
 }
 
-void test_remove_single_mOD()
+TEST(array_traits, remove_single_mOD)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -196,11 +195,11 @@ void test_remove_single_mOD()
   StateSpy::clearLog();
 }
 
-void test_remove_mOD()
+TEST(array_traits, remove_mOD)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -232,11 +231,11 @@ void test_remove_mOD()
   StateSpy::clearLog();
 }
 
-void test_remove_single_aOD()
+TEST(array_traits, remove_single_aOD)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -253,11 +252,11 @@ void test_remove_single_aOD()
   StateSpy::clearLog();
 }
 
-void test_remove_aOD()
+TEST(array_traits, remove_aOD)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -289,11 +288,11 @@ void test_remove_aOD()
   StateSpy::clearLog();
 }
 
-void test_remove_single_cCD()
+TEST(array_traits, remove_single_cCD)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -310,11 +309,11 @@ void test_remove_single_cCD()
   StateSpy::clearLog();
 }
 
-void test_remove_cCD()
+TEST(array_traits, remove_cCD)
 {
   StateSpy::clearIndex();
   typedef glrt::ArrayCapacityTraits_Capacity_Blocks<16, 64> capacity_blocks;
-  typedef glrt::ArrayTraits_Unordered_Toolkit<StateSpy, capacity_blocks> traits;
+  typedef glrt::ArrayTraits_Toolkit<StateSpy, capacity_blocks> traits;
 
   StateSpy instances[4];
   StateSpy::clearLog();
@@ -358,22 +357,4 @@ void test_remove_cCD()
             "4: copy constructor from 3\n"
             "3: destructed\n");
   StateSpy::clearLog();
-}
-
-
-void test_traits()
-{
-  test_capacity_traits();
-  test_capacity_trait_rangecheck();
-  test_swap_instances_mO();
-  test_swap_single_instance_mO();
-  test_call_instance_destructors_D();
-  test_values_used_to_fill_gaps();
-  test_copy_construct_single_cC();
-  test_remove_single_mOD();
-  test_remove_mOD();
-  test_remove_single_aOD();
-  test_remove_aOD();
-  test_remove_single_cCD();
-  test_remove_cCD();
 }

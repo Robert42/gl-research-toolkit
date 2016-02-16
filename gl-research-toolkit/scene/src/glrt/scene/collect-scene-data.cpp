@@ -36,7 +36,7 @@ QHash<QString, CameraParameter> collectNamedCameraParameters(Scene* scene)
   return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{c->updateGlobalCoordFrame();return c->globalCameraParameter();});
 }
 
-// #TODO: use the new Array type?
+
 QVector<SphereAreaLightComponent::Data> collectSphereAreaLights(Scene* scene)
 {
   return collectData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});

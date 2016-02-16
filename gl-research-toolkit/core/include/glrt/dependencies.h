@@ -8,6 +8,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/io.hpp>
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>
@@ -44,21 +45,6 @@ inline int qHash(const QPointer<T>& ptr, int seed = 0)
 {
   return qHash(ptr.data(), seed);
 }
-
-
-// the unnecessary macros make my syntax highligh unpretty ;)
-// #TODO remove
-#ifdef __GNUC__
-#ifdef bool
-#undef bool
-#endif
-#ifdef true
-#undef true
-#endif
-#ifdef false
-#undef false
-#endif
-#endif
 
 
 QDebug operator<<(QDebug d, const glm::bvec2& v);

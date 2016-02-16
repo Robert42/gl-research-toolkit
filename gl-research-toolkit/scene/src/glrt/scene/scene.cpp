@@ -95,13 +95,14 @@ void Scene::load(const Uuid<Scene>& scene)
   AngelScriptIntegration::ConfigCallScript config;
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
 
+  AngelScriptIntegration::errorCount = 0;
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
   angelScriptEngine->GarbageCollect();
 
   qApp->processEvents();
 
-  bool success = true; // #FIXME: really find out, whether this was a success
+  bool success = AngelScriptIntegration::errorCount==0;
   sceneLoadedExt(this, success);
   sceneLoaded(success);
 

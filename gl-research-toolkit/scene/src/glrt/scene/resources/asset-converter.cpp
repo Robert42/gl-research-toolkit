@@ -90,19 +90,19 @@ void convertSceneGraph_BlenderToCollada(const QFileInfo& sceneGraphFile, const Q
   convertSceneGraph_assimpToSceneGraph(sceneGraphFile, tempFilePath, resourceIndexUuid, settings);
 }
 
-void convertStaticMesh(const std::string& meshFilename, const std::string& sourceFilename, const std::string& groupToImport, ResourceIndex*)
+void convertStaticMesh(const QString& meshFilename, const QString& sourceFilename, const QString& groupToImport, const MeshImportSettings& meshImportSettings)
 {
-  bool indexed = true;// #TODO allow the script to choose, whether the mesh is indexed or not
+  bool indexed = meshImportSettings.indexed;
 
-  QFileInfo meshFile(QString::fromStdString(meshFilename));
-  QFileInfo sourceFile(QString::fromStdString(sourceFilename));
+  QFileInfo meshFile(meshFilename);
+  QFileInfo sourceFile(sourceFilename);
 
   SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
 
   if(shouldConvert(meshFile, sourceFile))
   {
     if(sourceFile.suffix().toLower() == "blend")
-      convertStaticMesh_BlenderToObj(meshFile, sourceFile, QString::fromStdString(groupToImport), indexed);
+      convertStaticMesh_BlenderToObj(meshFile, sourceFile, groupToImport, indexed);
     else
       convertStaticMesh_assimpToMesh(meshFile, sourceFile, indexed);
   }
@@ -122,6 +122,21 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   }
 }
 
+void convertTexture(const QString& textureFilename, const QString& sourceFilename, const TextureImportSettings& textureImportSettings)
+{
+  QFileInfo textureFile(textureFilename);
+  QFileInfo sourceFile(sourceFilename);
+
+  SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
+
+  if(shouldConvert(textureFilename, sourceFile))
+  {
+    qDebug() << "convertTexture("<<textureFile.fileName()<<", "<<sourceFile.fileName()<<")";
+
+    // #ISSUE-27: This still must be implemented
+    Q_UNUSED(textureImportSettings);
+  }
+}
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile)
 {
@@ -888,6 +903,29 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ nodeUuids", asOFFSET(AngelScriptInterface,as_nodeUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ cameraUuids", asOFFSET(AngelScriptInterface,as_cameraUuids)); AngelScriptCheck(r);
 }
+
+
+void MeshImportSettings::registerType()
+{
+  int r;
+  const char* name = "MeshImportSettings";
+
+  r = angelScriptEngine->RegisterObjectType(name, sizeof(MeshImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("MeshImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<MeshImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool indexed", asOFFSET(MeshImportSettings,indexed)); AngelScriptCheck(r);
+}
+
+void TextureImportSettings::registerType()
+{
+  int r;
+  const char* name = "TextureImportSettings";
+
+  r = angelScriptEngine->RegisterObjectType(name, sizeof(MeshImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<TextureImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToMultipleOfTwo", asOFFSET(TextureImportSettings,scaleDownToMultipleOfTwo)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "int maxResolution", asOFFSET(TextureImportSettings,maxResolution)); AngelScriptCheck(r);
+}
+
 
 } // namespace resources
 } // namespace scene

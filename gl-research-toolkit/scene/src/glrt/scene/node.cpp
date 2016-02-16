@@ -37,7 +37,7 @@ Node::~Node()
   QVector<ModularAttribute*> allModularAttributes = this->allModularAttributes();
   for(ModularAttribute* a : allModularAttributes)
     delete a;
-  // #TODO instead of deleting it manually, use the QObject system?
+
   Q_ASSERT(this->allModularAttributes().isEmpty());
 
   Component* rootComponent = this->rootComponent();
@@ -538,6 +538,18 @@ void Node::Component::collectDependencies(TickDependencySet* dependencySet) cons
 void Node::Component::collectDependencies(CoordDependencySet* dependencySet) const
 {
   collectCoordDependencies(dependencySet);
+
+#ifdef QT_DEBUG
+  if(dependencySet->originalObject() == this)
+  {
+    for(const Component* dependency : dependencySet->queuedDependencies() + dependencySet->queuedDependencies())
+      if(!this->movable() && dependency->movable())
+        qWarning() << "Warning: not movable object " << this->uuid << " depending on a movable component " << dependency->uuid << ".";
+  }
+
+  if(!dependencySet->objectsWithCycles().isEmpty())
+    qWarning() << "Warning: dependency cycles detected (the component " << this->uuid<<" has detected a dependency cycle)";
+#endif
 }
 
 void Node::Component::collectCoordDependencies(CoordDependencySet* dependencySet) const

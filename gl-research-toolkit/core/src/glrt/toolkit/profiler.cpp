@@ -208,7 +208,7 @@ Profiler::Scope::~Scope()
 
   activeProfiler->currentDepth--;
   activeProfiler->recordedScopes[this->index].cpuTime = elapsedCpuTime;
-  activeProfiler->recordedScopes[this->index].gpuTime = MAX_TIME; // #TODO:::: https://www.opengl.org/wiki/Query_Object#Query_scope
+  activeProfiler->recordedScopes[this->index].gpuTime = MAX_TIME; // #ISSUE-58 use the real value instead of MAX:TIME
   this->index = INVALID_INDEX;
 }
 

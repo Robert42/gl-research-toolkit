@@ -28,9 +28,8 @@ struct ArrayCapacityTraits_Capacity_Blocks
   static int recalc_capacity(int prev_capacity, int current_length);
 };
 
-// #TODO: rename from ArrayTraits_Unordered* to ArrayTraits*
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
+struct ArrayTraits_Toolkit : public T_capacity_traits
 {
   static void copy_construct_POD(T* dest, const T* src, int count);
   static void copy_construct_single_POD(T* dest, const T* src);
@@ -76,9 +75,9 @@ struct ArrayTraits_Unordered_Toolkit : public T_capacity_traits
 
 // Primitives, like int or float
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_Primitive : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+struct ArrayTraits_Primitive : public ArrayTraits_Toolkit<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_Toolkit<T, T_capacity_traits> parent_type;
 
   static void move_construct(T* dest, T* src, int count)
   {
@@ -127,9 +126,9 @@ struct ArrayTraits_Unordered_Primitive : public ArrayTraits_Unordered_Toolkit<T,
 
 // Plain old data, POD struct like vec3
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+struct ArrayTraits_POD : public ArrayTraits_Toolkit<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_Toolkit<T, T_capacity_traits> parent_type;
 
   static void move_construct(T* dest, T* src, int count)
   {
@@ -179,9 +178,9 @@ struct ArrayTraits_Unordered_POD : public ArrayTraits_Unordered_Toolkit<T, T_cap
 // Class with move constructor, move operator and destructor
 // (Thought for OpenGL Wrapper)
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+struct ArrayTraits_mCmOD : public ArrayTraits_Toolkit<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_Toolkit<T, T_capacity_traits> parent_type;
 
   static void move_construct(T* dest, T* src, int count)
   {
@@ -224,9 +223,9 @@ struct ArrayTraits_Unordered_mCmOD : public ArrayTraits_Unordered_Toolkit<T, T_c
 
 // Class with copy constructor, move constructor, move operator and destructor
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_capacity_traits>
+struct ArrayTraits_cCmCmOD : public ArrayTraits_mCmOD<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_mCmOD<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_mCmOD<T, T_capacity_traits> parent_type;
 
   static int append_copy(T* data, int prev_length, const T& value)
   {
@@ -241,9 +240,9 @@ struct ArrayTraits_Unordered_cCmCmOD : public ArrayTraits_Unordered_mCmOD<T, T_c
 
 // Class with copy constructor, assignment operator and destructor
 template<typename T, class T_capacity_traits=ArrayCapacityTraits_Capacity_Blocks<>>
-struct ArrayTraits_Unordered_cCaOD : public ArrayTraits_Unordered_Toolkit<T, T_capacity_traits>
+struct ArrayTraits_cCaOD : public ArrayTraits_Toolkit<T, T_capacity_traits>
 {
-  typedef ArrayTraits_Unordered_Toolkit<T, T_capacity_traits> parent_type;
+  typedef ArrayTraits_Toolkit<T, T_capacity_traits> parent_type;
 
   static void move_construct(T* dest, T* src, int count)
   {
@@ -297,25 +296,25 @@ struct DefaultTraits;
 template<>
 struct DefaultTraits<int>
 {
-  typedef ArrayTraits_Unordered_Primitive<int> type;
+  typedef ArrayTraits_Primitive<int> type;
 };
 
 template<>
 struct DefaultTraits<bool>
 {
-  typedef ArrayTraits_Unordered_Primitive<bool> type;
+  typedef ArrayTraits_Primitive<bool> type;
 };
 
 template<typename T>
 struct DefaultTraits<T*>
 {
-  typedef ArrayTraits_Unordered_Primitive<T*> type;
+  typedef ArrayTraits_Primitive<T*> type;
 };
 
 template<typename T>
 struct DefaultTraits<QPointer<T>>
 {
-  typedef ArrayTraits_Unordered_cCaOD<QPointer<T>> type;
+  typedef ArrayTraits_cCaOD<QPointer<T>> type;
 };
 
 template<typename T>

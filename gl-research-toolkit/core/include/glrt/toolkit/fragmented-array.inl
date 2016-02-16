@@ -176,7 +176,7 @@ int FragmentedArray<d, s, t, a>::updateSegments(extra_data_type extra_data)
 
   Q_ASSERT(std::is_sorted(data, data+length, s::segmentLessThan));
 
-  // #TODO: is it possible to reclassify only the changed part?
+  // #ISSUE-64: is it possible to reclassify only the changed part?
   s::classify(dataArray.data(), 0, length, &segmentRanges, extra_data);
 
   this->beginRegionToUpdate = length;

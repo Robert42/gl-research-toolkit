@@ -16,7 +16,7 @@ namespace std {
 
     result_type operator()(const QUuid& uuid) const
     {
-      // #TODO this is slow
+      // #ISSUE-64 this is slow
       return hash<std::string>{}(uuid.toString().toStdString());
     }
   };
@@ -81,7 +81,7 @@ public:
   template<typename T>
   Uuid<T> cast() const;
 
-  operator QUuid() const; // #TODO: avoid using QUuid to prevent mixing both when using angelscript. Instead, write a common BaseClass GenericUuid, to binary compatibility is always guaranteed
+  operator QUuid() const; // #ISSUE-65: avoid using QUuid to prevent mixing both when using angelscript. Instead, write a common BaseClass GenericUuid, to binary compatibility is always guaranteed
 
   QUuid toQUuid() const;
   QString toString() const;
