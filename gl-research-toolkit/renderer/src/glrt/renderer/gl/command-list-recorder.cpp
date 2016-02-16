@@ -16,8 +16,10 @@ CommandListRecorder::CommandListRecorder(CommandListRecorder&& other)
     offsets(std::move(other.offsets)),
     sizes(std::move(other.sizes)),
     states(std::move(other.states)),
-    fbos(std::move(other.fbos))
+    fbos(std::move(other.fbos)),
+    tokenBeginStart(other.tokenBeginStart)
 {
+  other.tokenBeginStart = -1;
 }
 
 CommandListRecorder& CommandListRecorder::operator=(CommandListRecorder&& other)
@@ -27,6 +29,7 @@ CommandListRecorder& CommandListRecorder::operator=(CommandListRecorder&& other)
   this->sizes.swap(other.sizes);
   this->states.swap(other.states);
   this->fbos.swap(other.fbos);
+  std::swap(this->tokenBeginStart, other.tokenBeginStart);
   return *this;
 }
 
@@ -34,13 +37,19 @@ CommandListRecorder& CommandListRecorder::operator=(CommandListRecorder&& other)
 void CommandListRecorder::beginTokenList()
 {
   Q_ASSERT(!isInsideBeginEnd());
-  // #TODO
+
+  tokenBeginStart = commandTokens.length();
 }
 
 glm::ivec2 CommandListRecorder::endTokenList()
 {
   Q_ASSERT(isInsideBeginEnd());
-  // #TODO
+
+  glm::ivec2 range = glm::ivec2(tokenBeginStart, commandTokens.length());
+
+  tokenBeginStart = -1;
+
+  return range;
 }
 
 void CommandListRecorder::append_drawcall(const glm::ivec2& tokens, const gl::StatusCapture* statusCapture, const gl::FramebufferObject* fbo)
@@ -85,6 +94,11 @@ glrt::Array<const void*> CommandListRecorder::createIndirectsArray() const
     indirects.append(commandTokens.data() + offsets[i]);
 
   return std::move(indirects);
+}
+
+bool CommandListRecorder::isInsideBeginEnd() const
+{
+  return tokenBeginStart >= 0;
 }
 
 

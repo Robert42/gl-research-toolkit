@@ -46,6 +46,7 @@ private:
   glrt::Array<GLsizei> sizes;
   glrt::Array<const gl::StatusCapture*> states;
   glrt::Array<const gl::FramebufferObject*> fbos;
+  GLsizei tokenBeginStart = -1;
 
   glrt::Array<const void*> createIndirectsArray() const;
   bool isInsideBeginEnd() const;
