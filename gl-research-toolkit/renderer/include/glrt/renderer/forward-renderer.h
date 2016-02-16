@@ -14,6 +14,7 @@ class ForwardRenderer final : public Renderer
 public:
   ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager);
 
+  glm::ivec2 videoResolution;
   gl::Texture2D colorFramebufferTexture;
   gl::Texture2D depthFramebufferTexture;
   gl::FramebufferObject framebuffer;
