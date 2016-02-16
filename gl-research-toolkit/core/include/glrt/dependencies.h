@@ -8,6 +8,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/io.hpp>
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>

@@ -1,7 +1,7 @@
 #include <glrt/scene/coord-frame.h>
 #include <glrt/glsl/math.h>
-
-#include <testing-framework.h>
+#include <gtest/gtest.h>
+#include <test-vectors.h>
 
 using namespace glrt::glsl;
 
@@ -18,76 +18,73 @@ float distance(const glrt::scene::CoordFrame& a, const glrt::scene::CoordFrame& 
 }
 }
 
-
-glm::vec3 all_dimensions[6];
-
-glrt::scene::CoordFrame a(glm::vec3(1, 2, 3),
-                          glm::angleAxis(glm::radians(-90.f), glm::vec3(0, 0, 1)),
-                          0.5f);
-glrt::scene::CoordFrame b(glm::vec3(7, 8, 9),
-                          glm::angleAxis(glm::radians(90.f), glm::vec3(1, 0, 0)),
-                          3.f);
-
-glm::mat4 ma = glm::mat4(0, -0.5f, 0, 0,
-                         0.5f,  0, 0, 0,
-                         0,  0, 0.5f, 0,
-                         1,  2, 3, 1);
-
-void test_transformations()
+class coord_frame : public ::testing::Test
 {
-  EXPECT_NEAR(a* glm::vec3(0), glm::vec3(1, 2, 3));
-  EXPECT_NEAR(b* glm::vec3(0), glm::vec3(7, 8, 9));
+protected:
+  glm::vec3 all_dimensions[6];
 
-  EXPECT_NEAR(a* glm::vec3(0, 0, 1), glm::vec3(1, 2, 3.5));
-  EXPECT_NEAR(b* glm::vec3(0, 0, 1), glm::vec3(7, 5, 9));
+  const glrt::scene::CoordFrame a = glrt::scene::CoordFrame(glm::vec3(1, 2, 3),
+                                                            glm::angleAxis(glm::radians(-90.f), glm::vec3(0, 0, 1)),
+                                                            0.5f);
+  const glrt::scene::CoordFrame b = glrt::scene::CoordFrame(glm::vec3(7, 8, 9),
+                                                            glm::angleAxis(glm::radians(90.f), glm::vec3(1, 0, 0)),
+                                                            3.f);
+
+  const glm::mat4 ma = glm::mat4(0, -0.5f, 0, 0,
+                                 0.5f,  0, 0, 0,
+                                 0,  0, 0.5f, 0,
+                                 1,  2, 3, 1);
+
+  void SetUp() override
+  {
+    for(int i=0; i<6; ++i)
+      all_dimensions[i][i/2] = (i%2==0 ? 1 : -1);
+  }
+};
+
+
+TEST_F(coord_frame, transformations)
+{
+  EXPECT_VEC_EQ(a* glm::vec3(0), glm::vec3(1, 2, 3));
+  EXPECT_VEC_EQ(b* glm::vec3(0), glm::vec3(7, 8, 9));
+
+  EXPECT_VEC_EQ(a* glm::vec3(0, 0, 1), glm::vec3(1, 2, 3.5));
+  EXPECT_VEC_EQ(b* glm::vec3(0, 0, 1), glm::vec3(7, 5, 9));
 }
 
-void test_concatenation()
+TEST_F(coord_frame, concatenation)
 {
-  EXPECT_NEAR((a*b).scaleFactor, 1.5f);
-  EXPECT_NEAR((a*b).position, a*glm::vec3(7, 8, 9));
-  EXPECT_NEAR((a*b).orientation.x, (a.orientation*b.orientation).x);
-  EXPECT_NEAR((a*b).orientation.y, (a.orientation*b.orientation).y);
-  EXPECT_NEAR((a*b).orientation.z, (a.orientation*b.orientation).z);
-  EXPECT_NEAR((a*b).orientation.w, (a.orientation*b.orientation).w);
+  EXPECT_FLOAT_EQ((a*b).scaleFactor, 1.5f);
+  EXPECT_VEC_EQ((a*b).position, a*glm::vec3(7, 8, 9));
+  EXPECT_FLOAT_EQ((a*b).orientation.x, (a.orientation*b.orientation).x);
+  EXPECT_FLOAT_EQ((a*b).orientation.y, (a.orientation*b.orientation).y);
+  EXPECT_FLOAT_EQ((a*b).orientation.z, (a.orientation*b.orientation).z);
+  EXPECT_FLOAT_EQ((a*b).orientation.w, (a.orientation*b.orientation).w);
 
-  EXPECT_NEAR((a*b) * glm::vec3(0), glm::vec3(1, 2, 3) + glm::vec3(8, -7, 9)*.5f);
-  EXPECT_NEAR((a*b) * glm::vec3(0, 0, 1), glm::vec3(1, 2, 3) + glm::vec3(5, -7, 9)*.5f);
+  EXPECT_VEC_EQ((a*b) * glm::vec3(0), glm::vec3(1, 2, 3) + glm::vec3(8, -7, 9)*.5f);
+  EXPECT_VEC_EQ((a*b) * glm::vec3(0, 0, 1), glm::vec3(1, 2, 3) + glm::vec3(5, -7, 9)*.5f);
 
   for(int i=0; i<6; ++i)
-    EXPECT_NEAR((a*b)*all_dimensions[i], a*(b*all_dimensions[i]));
+    EXPECT_VEC_NEAR((a*b)*all_dimensions[i], a*(b*all_dimensions[i]), 1.e-6);
 }
 
-void test_to_matrix()
+TEST_F(coord_frame, to_matrix)
 {
-  EXPECT_NEAR(ma[0], a.toMat4()[0]);
-  EXPECT_NEAR(ma[1], a.toMat4()[1]);
-  EXPECT_NEAR(ma[2], a.toMat4()[2]);
-  EXPECT_NEAR(ma[3], a.toMat4()[3]);
+  EXPECT_VEC_NEAR(ma[0], a.toMat4()[0], 1.e-7);
+  EXPECT_VEC_NEAR(ma[1], a.toMat4()[1], 1.e-7);
+  EXPECT_VEC_NEAR(ma[2], a.toMat4()[2], 1.e-7);
+  EXPECT_VEC_NEAR(ma[3], a.toMat4()[3], 1.e-7);
 }
 
-void test_from_matrix()
+TEST_F(coord_frame, from_matrix)
 {
-  EXPECT_NEAR(glrt::scene::CoordFrame(ma), a);
+  EXPECT_VEC_EQ(glrt::scene::CoordFrame(ma), a);
 }
 
-void test_invert()
+TEST_F(coord_frame, invert)
 {
-  EXPECT_NEAR(a*a.inverse(), glrt::scene::CoordFrame());
-  EXPECT_NEAR(a.inverse()*a, glrt::scene::CoordFrame());
-  EXPECT_NEAR(b*b.inverse(), glrt::scene::CoordFrame());
-  EXPECT_NEAR(b.inverse()*b, glrt::scene::CoordFrame());
-}
-
-
-void main_coord_frame()
-{
-  for(int i=0; i<6; ++i)
-    all_dimensions[i][i/2] = (i%2==0 ? 1 : -1);
-
-  test_transformations();
-  test_concatenation();
-  test_to_matrix();
-  test_from_matrix();
-  test_invert();
+  EXPECT_VEC_NEAR(a*a.inverse(), glrt::scene::CoordFrame(), 1.e-7);
+  EXPECT_VEC_NEAR(a.inverse()*a, glrt::scene::CoordFrame(), 1.e-7);
+  EXPECT_VEC_NEAR(b*b.inverse(), glrt::scene::CoordFrame(), 1.e-7);
+  EXPECT_VEC_NEAR(b.inverse()*b, glrt::scene::CoordFrame(), 1.e-7);
 }

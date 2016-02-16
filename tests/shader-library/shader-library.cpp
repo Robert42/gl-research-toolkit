@@ -1,7 +1,7 @@
 #include <glrt/dependencies.h>
 #include <glrt/glsl/math.h>
-
-#include <testing-framework.h>
+#include <gtest/gtest.h>
+#include <test-vectors.h>
 
 using namespace glrt::glsl;
 using glm::vec2;
@@ -9,19 +9,19 @@ using glm::vec3;
 using glm::vec4;
 
 
-void test_plane_distance()
+TEST(shader_library, plane_distance)
 {
   Plane plane;
 
   plane.normal = vec3(1, 0, 0);
   plane.d = 2;
 
-  Q_ASSERT(signed_distance_to(plane, glm::vec3(3, 10, 10000)) == 1);
-  Q_ASSERT(signed_distance_to(plane, glm::vec3(1, 10, 10000)) == -1);
-  Q_ASSERT(distance_to(plane, glm::vec3(1, 10, 10000)) == 1);
+  EXPECT_EQ(signed_distance_to(plane, glm::vec3(3, 10, 10000)), 1);
+  EXPECT_EQ(signed_distance_to(plane, glm::vec3(1, 10, 10000)), -1);
+  EXPECT_EQ(distance_to(plane, glm::vec3(1, 10, 10000)), 1);
 }
 
-void test_ray_distance()
+TEST(shader_library, ray_distance)
 {
   Ray ray1;
 
@@ -53,7 +53,7 @@ void test_ray_distance()
   EXPECT_EQ(sq_distance_to_unclamped(ray1, vec3(0, 0, 0)), 0);
 }
 
-void test_ray_nearest_point()
+TEST(shader_library, ray_nearest_point)
 {
   Plane plane;
   plane.d = 4;
@@ -62,7 +62,7 @@ void test_ray_nearest_point()
   EXPECT_EQ(nearest_point(plane, vec3(42, 23, -5)), vec3(42, 23, 4));
 }
 
-void test_raytracing_plane()
+TEST(shader_library, raytracing_plane)
 {
   Plane plane1;
   plane1.d = 4;
@@ -99,7 +99,7 @@ void test_raytracing_plane()
   EXPECT_EQ(intersection_distance(plane2, ray4), 3);
 }
 
-void test_projection_plane()
+TEST(shader_library, projection_plane)
 {
   Plane projection_plane;
   vec3 p[2];
@@ -114,7 +114,7 @@ void test_projection_plane()
   for(int i=0; i<2; ++i)
   {
     p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
-    EXPECT_NEAR(p[i], vec3(42, 23, 1));
+    ASSERT_VEC_EQ(p[i], vec3(42, 23, 1));
   }
 
 
@@ -124,16 +124,6 @@ void test_projection_plane()
   p[1] = vec3(-0.150000, 0.087474, 0.762831);
   for(int i=0; i<2; ++i)
     p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
-  EXPECT_NEAR(p[0], vec3(-0.819333, 1.733090, 3.113433));
-  EXPECT_NEAR_EPSILON(p[1], vec3(-12.459891, 7.266071, 63.365238), 0.001f);
-}
-
-
-void main_shader_library()
-{
-  test_plane_distance();
-  test_ray_distance();
-  test_ray_nearest_point();
-  test_raytracing_plane();
-  test_projection_plane();
+  EXPECT_VEC_NEAR(p[0], vec3(-0.819333, 1.733090, 3.113433), 1.e-5);
+  EXPECT_VEC_NEAR(p[1], vec3(-12.459891, 7.266071, 63.365238), 0.001f);
 }

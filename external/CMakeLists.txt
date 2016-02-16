@@ -12,6 +12,9 @@ find_package(ASSIMP 3.2 REQUIRED)
 find_package(SDL2 REQUIRED)
 
 
+######## googletest ############################################################
+add_subdirectory(googletest EXCLUDE_FROM_ALL)
+
 ######## glew ##################################################################
 add_library(glew INTERFACE)
 target_include_directories(glew INTERFACE ${GLEW_INCLUDE_DIRS})

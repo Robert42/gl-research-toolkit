@@ -93,6 +93,11 @@ QDebug operator<<(QDebug debug, const CoordFrame& coordFrame)
   return debug << "CoordFrame(position: " << coordFrame.position << ", orientation: " << coordFrame.orientation << ", scale: " << coordFrame.scaleFactor << ")";
 }
 
+std::ostream& operator<<(std::ostream& stream, const CoordFrame& coordFrame)
+{
+  return stream << "CoordFrame(position: " << coordFrame.position << ", orientation: " << coordFrame.orientation << ", scale: " << coordFrame.scaleFactor << ")";
+}
+
 inline void create_CoordFrame(CoordFrame* coordFrame, const glm::vec3& position, const glm::quat& orientation, float scaleFactor)
 {
   coordFrame->position = position;

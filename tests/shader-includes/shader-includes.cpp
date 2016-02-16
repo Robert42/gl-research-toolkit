@@ -1,5 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
+#include <gtest/gtest.h>
 
 #include <glhelper/screenalignedtriangle.hpp>
 #include <glhelper/shaderobject.hpp>
@@ -8,7 +9,7 @@
 
 const QDir shaderDir(SHADER_DIR);
 
-void test_shader_includes()
+TEST(shader_includes, shader_includes)
 {
   int argc = 0;
   char** argv = nullptr;

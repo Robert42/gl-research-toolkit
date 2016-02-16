@@ -55,6 +55,7 @@ struct CoordFrame final
 };
 
 QDebug operator<<(QDebug debug, const CoordFrame& coordFrame);
+std::ostream& operator<<(std::ostream& stream, const CoordFrame& coordFrame);
 
 } // namespace scene
 } // namespace glrt

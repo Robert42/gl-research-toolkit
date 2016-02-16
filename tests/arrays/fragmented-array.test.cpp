@@ -1,6 +1,5 @@
 #include <glrt/toolkit/fragmented-array.h>
-
-#include <testing-framework.h>
+#include <gtest/gtest.h>
 
 using namespace glrt;
 
@@ -421,7 +420,7 @@ static void test_FragmentedArray_AddingLateSegments()
             "  } // Material F(2, 5)\n"
             "} // Static(0, 5)\n");
 
-#define EXPECT_EMPTY(b) {glm::ivec2 v = b;EXPECT_EQ(v.x, v.y)};
+#define EXPECT_EMPTY(b) {glm::ivec2 v = b;EXPECT_EQ(v.x, v.y);}
 
   EXPECT_EMPTY(meshComponents.section_boundaries(true));
   EXPECT_EQ(meshComponents.section_boundaries(false), glm::ivec2(0,5));
@@ -732,7 +731,7 @@ static void test_fragmented_array()
 
 };
 
-void test_fragmented_array()
+TEST(fragmented_array, fragmented_array)
 {
   typedef FragmentedArray<DummyMeshComponent, GenericSectionTraits::MovableHandler> FragmentedArray_MeshComponents_GenericOnly;
   typedef FragmentedArray<DummyLightComponent, GenericSectionTraits::LightInteractivityHandler> FragmentedArray_LightComponents_GenericOnly;
