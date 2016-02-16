@@ -9,6 +9,8 @@ set(SOURCE_FILES
   include/glrt/renderer/declarations.h
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
+  include/glrt/renderer/gl/command-list.h
+  include/glrt/renderer/gl/status-capture.h
   include/glrt/renderer/implementation/fragmented-light-component-array.h
   include/glrt/renderer/implementation/fragmented-light-component-array.inl
   include/glrt/renderer/material-buffer.h
@@ -32,13 +34,13 @@ set(SOURCE_FILES
   src/glrt/application.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
-  src/glrt/renderer/command-list.cpp
-  src/glrt/renderer/command-list.h
   src/glrt/renderer/debugging/debug-line-visualisation.cpp
   src/glrt/renderer/debugging/debug-mesh.cpp
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp
+  src/glrt/renderer/gl/command-list.cpp
+  src/glrt/renderer/gl/status-capture.cpp
   src/glrt/renderer/material-buffer.cpp
   src/glrt/renderer/sample-application.cpp
   src/glrt/renderer/sample-resource-manager.cpp

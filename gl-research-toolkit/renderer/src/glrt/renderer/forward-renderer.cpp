@@ -31,6 +31,8 @@ void ForwardRenderer::renderImplementation()
 
   framebuffer.BindBackBuffer();
 
+
+
   framebuffer.BindRead();
   GL_CALL(glBlitFramebuffer, 0, 0, videoResolution.x, videoResolution.y, 0, 0, videoResolution.x, videoResolution.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST);
   framebuffer.UnbindRead();

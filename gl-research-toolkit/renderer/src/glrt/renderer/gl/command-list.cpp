@@ -1,7 +1,8 @@
-#include "command-list.h"
+#include <glrt/renderer/gl/command-list.h>
 
 namespace glrt {
 namespace renderer {
+namespace gl {
 
 CommandList::CommandList()
   : _commandListHandler(0)
@@ -11,6 +12,15 @@ CommandList::CommandList()
 CommandList::~CommandList()
 {
   glDeleteCommandListsNV(1, &_commandListHandler);
+}
+
+CommandList&& CommandList::create()
+{
+  CommandList commandList;
+
+  glCreateCommandListsNV(1, &commandList._commandListHandler);
+
+  return std::move(commandList);
 }
 
 CommandList::CommandList(CommandList&& other)
@@ -30,5 +40,6 @@ void CommandList::call()
   glCallCommandListNV(_commandListHandler);
 }
 
+} // namespace gl
 } // namespace renderer
 } // namespace glrt
