@@ -34,7 +34,7 @@ TEST_F(qt_tests, direct_connection_everything_ok)
 
   foo.mySignal();
 
-  EXPECT_EQ(bar.slotWasCalled, true);
+  EXPECT_TRUE(bar.slotWasCalled);
 }
 
 TEST_F(qt_tests, queued_connection_everything_ok)
@@ -46,11 +46,11 @@ TEST_F(qt_tests, queued_connection_everything_ok)
 
   foo.mySignal();
 
-  EXPECT_EQ(bar.slotWasCalled, false);
+  EXPECT_FALSE(bar.slotWasCalled);
 
   qApp->processEvents();
 
-  EXPECT_EQ(bar.slotWasCalled, true);
+  EXPECT_TRUE(bar.slotWasCalled);
 }
 
 TEST_F(qt_tests, queued_connection_everything_deleting_receiver_in_between)
@@ -63,13 +63,13 @@ TEST_F(qt_tests, queued_connection_everything_deleting_receiver_in_between)
 
   foo.mySignal();
 
-  EXPECT_EQ(bar->slotWasCalled, false);
+  EXPECT_FALSE(bar->slotWasCalled);
 
   delete bar;
 
   qApp->processEvents();
 
-  EXPECT_EQ(bar->slotWasCalled, false);
+  EXPECT_FALSE(bar->slotWasCalled);
 }
 
 TEST_F(qt_tests, queued_connection_everything_deleting_sender_in_between)
@@ -81,13 +81,13 @@ TEST_F(qt_tests, queued_connection_everything_deleting_sender_in_between)
 
   foo->mySignal();
 
-  EXPECT_EQ(bar->slotWasCalled, false);
+  EXPECT_FALSE(bar->slotWasCalled);
 
   delete foo;
 
   qApp->processEvents();
 
-  EXPECT_EQ(bar->slotWasCalled, false);
+  EXPECT_TRUE(bar->slotWasCalled);
 }
 
 
