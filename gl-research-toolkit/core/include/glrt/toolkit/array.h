@@ -294,10 +294,53 @@ template<typename T>
 struct DefaultTraits;
 
 template<>
-struct DefaultTraits<int>
+struct DefaultTraits<qint8>
 {
-  typedef ArrayTraits_Primitive<int> type;
+  typedef ArrayTraits_Primitive<qint32> type;
 };
+
+template<>
+struct DefaultTraits<quint8>
+{
+  typedef ArrayTraits_Primitive<quint8> type;
+};
+
+template<>
+struct DefaultTraits<qint16>
+{
+  typedef ArrayTraits_Primitive<qint16> type;
+};
+
+template<>
+struct DefaultTraits<quint16>
+{
+  typedef ArrayTraits_Primitive<quint16> type;
+};
+
+template<>
+struct DefaultTraits<qint32>
+{
+  typedef ArrayTraits_Primitive<qint32> type;
+};
+
+template<>
+struct DefaultTraits<quint32>
+{
+  typedef ArrayTraits_Primitive<quint32> type;
+};
+
+template<>
+struct DefaultTraits<qint64>
+{
+  typedef ArrayTraits_Primitive<qint64> type;
+};
+
+template<>
+struct DefaultTraits<quint64>
+{
+  typedef ArrayTraits_Primitive<quint64> type;
+};
+
 
 template<>
 struct DefaultTraits<bool>

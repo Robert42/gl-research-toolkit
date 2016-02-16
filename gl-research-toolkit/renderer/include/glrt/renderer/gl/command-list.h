@@ -1,35 +1,42 @@
-#ifndef GLRT_RENDERER_GL_COMMANDLIST_H
-#define GLRT_RENDERER_GL_COMMANDLIST_H
+#ifndef GL_COMMANDLIST_H
+#define GL_COMMANDLIST_H
 
-#include <glrt/dependencies.h>
+#include <glrt/toolkit/array.h>
+
+#include <glhelper/framebufferobject.hpp>
+#include <glhelper/buffer.hpp>
+
 #include <nvcommandlist.h>
 
-namespace glrt {
-namespace renderer {
 namespace gl {
 
-class CommandList
+class StatusCapture;
+class CommandList final
 {
   Q_DISABLE_COPY(CommandList)
 public:
   CommandList();
   ~CommandList();
 
-  static CommandList&& create();
+  static CommandList&& create(GLuint num_segments);
 
   CommandList(CommandList&& other);
   CommandList& operator=(CommandList&& other);
 
+  void setSegment(GLuint segment,
+                  const glrt::Array<const void*>& indirects,
+                  const glrt::Array<GLsizei>& sizes,
+                  const glrt::Array<const StatusCapture*>& states,
+                  const glrt::Array<const FramebufferObject*>& fbos);
   void call();
 
   GLuint glhandle() const{return _commandListHandler;}
 
 private:
-  GLuint _commandListHandler;
+  GLuint _commandListHandler = 0;
+  GLuint num_segments = 0;
 };
 
 } // namespace gl
-} // namespace renderer
-} // namespace glrt
 
-#endif // GLRT_RENDERER_GL_COMMANDLIST_H
+#endif // GL_COMMANDLIST_H

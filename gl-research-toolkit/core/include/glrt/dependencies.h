@@ -39,6 +39,7 @@
 
 #include <SDL2/SDL.h>
 
+typedef quint8 byte;
 
 template<typename T>
 inline int qHash(const QPointer<T>& ptr, int seed = 0)

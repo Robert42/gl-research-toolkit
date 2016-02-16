@@ -16,8 +16,6 @@ struct SimpleShaderStorageBuffer_DefaultHeader
 
 struct ManagedGLBuffer_NoHeader
 {
-  typedef quint8 byte;
-
   static int header_size(){return 0;}
 
   int n_elements() const
@@ -51,8 +49,6 @@ template<typename T_header=SimpleShaderStorageBuffer_DefaultHeader, int minDista
 struct ManagedGLBuffer_Header_With_Num_Elements
 {
   static_assert(sizeof(T_header) < minDistanceForDifferentSynchronizations, "minDistanceForDifferentSynchronizationsmust be larger than the header type");
-
-  typedef quint8 byte;
 
   T_header header;
 
@@ -125,8 +121,6 @@ public:
   void Unmap();
 
 private:
-  typedef quint8 byte;
-
   int first_dirty_byte = 0;
   T_header_traits header;
 

@@ -1,14 +1,12 @@
-#ifndef GLRT_RENDERER_GL_STATUSCAPTURE_H
-#define GLRT_RENDERER_GL_STATUSCAPTURE_H
+#ifndef GL_STATUSCAPTURE_H
+#define GL_STATUSCAPTURE_H
 
 #include <glrt/dependencies.h>
 #include <nvcommandlist.h>
 
-namespace glrt {
-namespace renderer {
 namespace gl {
 
-class StatusCapture
+class StatusCapture final
 {
   Q_DISABLE_COPY(StatusCapture)
 
@@ -33,7 +31,5 @@ private:
 };
 
 } // namespace gl
-} // namespace renderer
-} // namespace glrt
 
-#endif // GLRT_RENDERER_GL_STATUSCAPTURE_H
+#endif // GL_STATUSCAPTURE_H

@@ -10,6 +10,7 @@ set(SOURCE_FILES
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
   include/glrt/renderer/gl/command-list.h
+  include/glrt/renderer/gl/command-list-recorder.h
   include/glrt/renderer/gl/status-capture.h
   include/glrt/renderer/implementation/fragmented-light-component-array.h
   include/glrt/renderer/implementation/fragmented-light-component-array.inl
@@ -40,6 +41,7 @@ set(SOURCE_FILES
   src/glrt/renderer/debugging/visualization-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp
   src/glrt/renderer/gl/command-list.cpp
+  src/glrt/renderer/gl/command-list-recorder.cpp
   src/glrt/renderer/gl/status-capture.cpp
   src/glrt/renderer/material-buffer.cpp
   src/glrt/renderer/sample-application.cpp

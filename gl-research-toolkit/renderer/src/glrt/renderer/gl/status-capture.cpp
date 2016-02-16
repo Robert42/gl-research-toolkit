@@ -1,7 +1,5 @@
 #include <glrt/renderer/gl/status-capture.h>
 
-namespace glrt {
-namespace renderer {
 namespace gl {
 
 StatusCapture::StatusCapture()
@@ -36,5 +34,3 @@ StatusCapture& StatusCapture::operator=(StatusCapture&& other)
 }
 
 } // namespace gl
-} // namespace renderer
-} // namespace glrt
