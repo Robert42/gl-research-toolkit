@@ -18,10 +18,14 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
 
 void ForwardRenderer::renderImplementation()
 {
+  framebuffer.Bind(true);
+
   plainColorMeshes.render();
   texturedMeshes.render();
   maskedMeshes.render();
   transparentMeshes.render();
+
+  framebuffer.BindBackBuffer();
 }
 
 
