@@ -33,6 +33,8 @@ public:
   CommandListRecorder& operator=(CommandListRecorder&& other);
 
   void beginTokenList();
+  void append_token_TerminateSequence();
+  void append_token_NOP();
   // #TODO : append_token_ ...()
   glm::ivec2 endTokenList();
 
@@ -50,6 +52,9 @@ private:
 
   glrt::Array<const void*> createIndirectsArray() const;
   bool isInsideBeginEnd() const;
+
+  template<typename T>
+  void append_token(const T& token);
 };
 
 } // namespace gl

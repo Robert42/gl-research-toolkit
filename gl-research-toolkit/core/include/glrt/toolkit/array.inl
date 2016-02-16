@@ -856,6 +856,23 @@ void Array<T, T_traits,T_allocator>::stable_sort(T_lessThan lessThan)
   std::stable_sort(this->data(), this->data()+this->length(), lessThan);
 }
 
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::append_by_memcpy(const void* src, size_t num)
+{
+  static_assert(std::is_same<byte, T>::value, "append_by_memcpy only allowed for an array of the type byte");
+
+  reserve(length() + num);
+  this->_length += num;
+  std::memcpy(this->_data, src, num);
+}
+
+template<typename T, class T_traits, class T_allocator>
+template<typename T_value>
+void Array<T, T_traits,T_allocator>::append_by_memcpy(const T_value& value)
+{
+  append_by_memcpy(&value, sizeof(value));
+}
+
 
 template<typename T, typename T_traits, class T_allocator>
 QDebug operator<<(QDebug d, const Array<T, T_traits,T_allocator>& array)

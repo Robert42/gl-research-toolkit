@@ -41,6 +41,28 @@ void CommandListRecorder::beginTokenList()
   tokenBeginStart = commandTokens.length();
 }
 
+template<typename T>
+void CommandListRecorder::append_token(const T& token)
+{
+  Q_ASSERT(isInsideBeginEnd());
+
+  commandTokens.append_by_memcpy(token);
+}
+
+void CommandListRecorder::append_token_TerminateSequence()
+{
+  TerminateSequenceCommandNV token;
+  token.header = GL_TERMINATE_SEQUENCE_COMMAND_NV;
+  append_token(token);
+}
+
+void CommandListRecorder::append_token_NOP()
+{
+  NOPCommandNV token;
+  token.header = GL_NOP_COMMAND_NV;
+  append_token(token);
+}
+
 glm::ivec2 CommandListRecorder::endTokenList()
 {
   Q_ASSERT(isInsideBeginEnd());
