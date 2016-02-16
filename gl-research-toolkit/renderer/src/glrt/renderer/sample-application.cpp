@@ -9,7 +9,7 @@ SampleApplication::SampleApplication(int& argc, char** argv,
                                      const System::Settings& systemSettings)
   : Application(argc, argv, systemSettings, applicationSettings),
     scene(&resourceManager),
-    renderer(&scene, &resourceManager),
+    renderer(systemSettings.windowSize, &scene, &resourceManager),
     antweakbar(this, guiSettings)
 {
   initGui();

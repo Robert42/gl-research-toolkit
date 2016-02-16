@@ -3,6 +3,8 @@
 
 #include "scene-renderer.h"
 #include <glrt/renderer/sample-resource-manager.h>
+#include <glhelper/framebufferobject.hpp>
+#include <glhelper/texture2d.hpp>
 
 namespace glrt {
 namespace renderer {
@@ -10,7 +12,11 @@ namespace renderer {
 class ForwardRenderer final : public Renderer
 {
 public:
-  ForwardRenderer(scene::Scene* scene, SampleResourceManager* resourceManager);
+  ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager);
+
+  gl::Texture2D colorFramebufferTexture;
+  gl::Texture2D depthFramebufferTexture;
+  gl::FramebufferObject framebuffer;
 
   Pass plainColorMeshes;
   Pass texturedMeshes;

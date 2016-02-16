@@ -1,6 +1,7 @@
 #ifndef GLRT_RENDERER_RENDERER_H
 #define GLRT_RENDERER_RENDERER_H
 
+
 #include <glrt/scene/scene.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/light-component.h>
