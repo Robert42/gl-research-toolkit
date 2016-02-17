@@ -35,7 +35,7 @@ public:
   void beginTokenList();
   void append_token_TerminateSequence();
   void append_token_NOP();
-  // #TODO : append_token_ ...()
+  void append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress);
   glm::ivec2 endTokenList();
 
   void append_drawcall(const glm::ivec2& tokens, const gl::StatusCapture* statusCapture, const gl::FramebufferObject* fbo);

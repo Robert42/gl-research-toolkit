@@ -51,6 +51,16 @@ void CommandListRecorder::append_token(T* token, GLenum tokenId)
   commandTokens.append_by_memcpy(token, sizeof(T));
 }
 
+inline GLuint addressHi(GLuint64 fullAddress)
+{
+  return fullAddress>>32;
+}
+
+inline GLuint addressLo(GLuint64 fullAddress)
+{
+  return fullAddress & 0xffffffff;
+}
+
 void CommandListRecorder::append_token_TerminateSequence()
 {
   TerminateSequenceCommandNV token;
@@ -61,6 +71,15 @@ void CommandListRecorder::append_token_NOP()
 {
   NOPCommandNV token;
   append_token(&token, GL_NOP_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress)
+{
+  AttributeAddressCommandNV token;
+  token.index = index;
+  token.addressLo = addressLo(gpuAddress);
+  token.addressHi = addressHi(gpuAddress);
+  append_token(&token, GL_ATTRIBUTE_ADDRESS_COMMAND_NV);
 }
 
 glm::ivec2 CommandListRecorder::endTokenList()
@@ -86,6 +105,8 @@ void CommandListRecorder::append_drawcall(const glm::ivec2& tokens, const gl::St
 
 CommandList CommandListRecorder::compile(glrt::Array<CommandListRecorder>&& segments)
 {
+  SPLASHSCREEN_MESSAGE("Compiling command_list");
+
   GLuint num_segments = static_cast<GLuint>(segments.length());
 
   CommandList commandList = CommandList::create(num_segments);

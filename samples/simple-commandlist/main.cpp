@@ -56,7 +56,9 @@ int main(int argc, char** argv)
 
   framebuffer.Bind(true);
   orangeShader.Activate();
+  vertexArray.Bind();
   statusCapture = gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES);
+  vertexArray.ResetBinding();
   framebuffer.BindBackBuffer();
   gl::ShaderObject::Deactivate();
 
@@ -64,6 +66,8 @@ int main(int argc, char** argv)
   gl::CommandListRecorder segment;
 
   segment.beginTokenList();
+  segment.append_token_AttributeAddress(bindingIndex, buffer.gpuBufferAddress());
+  segment.append_token_NOP();
   segment.append_token_TerminateSequence();
   tokenRange = segment.endTokenList();
 
@@ -90,7 +94,7 @@ int main(int argc, char** argv)
 
     commandList.call();
 
-    vertexArray.Bind();
+    vertexArray.Bind(); // #TODO: delete line if possible
     buffer.BindVertexBuffer(bindingIndex, 0, vertexArray.GetVertexStride(bindingIndex));
 
     orangeShader.Activate();
