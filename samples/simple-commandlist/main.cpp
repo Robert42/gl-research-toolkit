@@ -90,12 +90,6 @@ int main(int argc, char** argv)
     framebuffer.BindRead();
     framebuffer.BindBackBuffer();
 
-    // workaround, see https://www.opengl.org/discussion_boards/showthread.php/185515-NV_command_list/page2
-    glUseProgram(0);
-     glBegin(GL_POINTS);
-     glVertex3f(0, 0, 0);
-     glEnd();
-
     GL_CALL(glBlitFramebuffer, 0, 0, videoResolution.x, videoResolution.y, 0, 0, videoResolution.x, videoResolution.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST);
     framebuffer.UnbindRead();
 
