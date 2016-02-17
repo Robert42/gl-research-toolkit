@@ -862,8 +862,8 @@ void Array<T, T_traits,T_allocator>::append_by_memcpy(const void* src, size_t nu
   static_assert(std::is_same<byte, T>::value, "append_by_memcpy only allowed for an array of the type byte");
 
   reserve(length() + num);
+  std::memcpy(this->_data + this->_length, src, num);
   this->_length += num;
-  std::memcpy(this->_data, src, num);
 }
 
 template<typename T, class T_traits, class T_allocator>
