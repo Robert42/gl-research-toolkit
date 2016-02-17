@@ -12,7 +12,7 @@ CommandList::~CommandList()
   GL_CALL(glDeleteCommandListsNV, 1, &_commandListHandler);
 }
 
-CommandList&& CommandList::create(GLuint num_segments)
+CommandList CommandList::create(GLuint num_segments)
 {
   CommandList commandList;
 

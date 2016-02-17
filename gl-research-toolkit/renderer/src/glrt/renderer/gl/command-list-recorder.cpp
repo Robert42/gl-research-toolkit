@@ -119,7 +119,10 @@ glrt::Array<const void*> CommandListRecorder::createIndirectsArray() const
   indirects.reserve(offsets.length());
 
   for(int i=0; i<offsets.length(); ++i)
+  {
+    Q_ASSERT(commandTokens.length() >= offsets[i]+sizes[i]);
     indirects.append(commandTokens.data() + offsets[i]);
+  }
 
   return std::move(indirects);
 }

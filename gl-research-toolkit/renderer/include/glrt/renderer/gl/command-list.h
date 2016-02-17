@@ -18,7 +18,7 @@ public:
   CommandList();
   ~CommandList();
 
-  static CommandList&& create(GLuint num_segments);
+  static CommandList create(GLuint num_segments);
 
   CommandList(CommandList&& other);
   CommandList& operator=(CommandList&& other);

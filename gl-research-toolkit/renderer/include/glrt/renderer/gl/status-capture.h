@@ -19,7 +19,7 @@ public:
   StatusCapture();
   ~StatusCapture();
 
-  static StatusCapture&& capture(Mode mode);
+  static StatusCapture capture(Mode mode);
 
   StatusCapture(StatusCapture&& other);
   StatusCapture& operator=(StatusCapture&& other);

@@ -13,7 +13,7 @@ StatusCapture::~StatusCapture()
   GL_CALL(glDeleteStatesNV, 1, &_stateCapture);
 }
 
-StatusCapture&& StatusCapture::capture(Mode mode)
+StatusCapture StatusCapture::capture(Mode mode)
 {
   StatusCapture capture;
 
