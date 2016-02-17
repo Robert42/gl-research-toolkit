@@ -127,7 +127,7 @@ private:
 };
 
 #define SPLASHSCREEN_MESSAGE(message) \
-SplashscreenMessage __splashscreenMessage(message); \
+::glrt::SplashscreenMessage __splashscreenMessage(message); \
 Q_UNUSED(__splashscreenMessage);
 
 
