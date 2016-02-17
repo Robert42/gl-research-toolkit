@@ -19,6 +19,9 @@ int main(int argc, char** argv)
   gl::Texture2D depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH24_STENCIL8);
   gl::FramebufferObject framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true);
 
+  gl::Texture2D colorFramebufferTexture2(4,4, gl::TextureFormat::R8I);
+  gl::FramebufferObject workaround(gl::FramebufferObject::Attachment(&colorFramebufferTexture2), gl::FramebufferObject::Attachment(nullptr));
+
   float min_coord = -1;
   float max_coord = 1;
   const std::vector<float> positions = {min_coord, min_coord,
@@ -52,7 +55,7 @@ int main(int argc, char** argv)
 
   gl::StatusCapture statusCapture;
 
-  framebuffer.Bind(true);
+  framebuffer.Bind(false);
   orangeShader.Activate();
   GL_CALL(glVertexAttribFormatNV, bindingIndex, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
   GL_CALL(glEnableVertexAttribArray, bindingIndex);
@@ -66,6 +69,7 @@ int main(int argc, char** argv)
   gl::CommandListRecorder segment;
 
   segment.beginTokenList();
+  segment.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   segment.append_token_AttributeAddress(bindingIndex, buffer.gpuBufferAddress());
   segment.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
   tokenRange = segment.endTokenList();
@@ -85,13 +89,16 @@ int main(int argc, char** argv)
 
     app.update();
 
-    framebuffer.Bind(true);
+    framebuffer.Bind(false);
     glClearDepth(1.f);
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    commandList.call();
-    framebuffer.BindRead();
     framebuffer.BindBackBuffer();
 
+    workaround.Bind(false);
+    commandList.call();
+    workaround.BindBackBuffer();
+
+    framebuffer.BindRead();
     GL_CALL(glBlitFramebuffer, 0, 0, videoResolution.x, videoResolution.y, 0, 0, videoResolution.x, videoResolution.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST);
     framebuffer.UnbindRead();
 
