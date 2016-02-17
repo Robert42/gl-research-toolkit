@@ -48,17 +48,17 @@ int main(int argc, char** argv)
                                    "main.cpp (orange fragment)");
   orangeShader.CreateProgram();
 
-  GL_CALL(glEnableClientState, GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV);
-  GL_CALL(glEnableVertexAttribArray, bindingIndex);
-
   gl::StatusCapture statusCapture;
 
   framebuffer.Bind(true);
   orangeShader.Activate();
   GL_CALL(glVertexAttribFormatNV, bindingIndex, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
+  GL_CALL(glEnableVertexAttribArray, bindingIndex);
   statusCapture = gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES);
   framebuffer.BindBackBuffer();
   gl::ShaderObject::Deactivate();
+  GL_CALL(glDisableVertexAttribArray, bindingIndex);
+
 
   glm::ivec2 tokenRange;
   gl::CommandListRecorder segment;
