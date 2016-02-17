@@ -11,7 +11,7 @@ class StatusCapture final
   Q_DISABLE_COPY(StatusCapture)
 
 public:
-  enum class Mode
+  enum class Mode : GLenum
   {
     TRIANGLES = GL_TRIANGLES,
   };

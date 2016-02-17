@@ -40,7 +40,8 @@ public:
 
   void append_drawcall(const glm::ivec2& tokens, const gl::StatusCapture* statusCapture, const gl::FramebufferObject* fbo);
 
-  static CommandList&& compile(glrt::Array<CommandListRecorder>&& segments);
+  static CommandList compile(glrt::Array<CommandListRecorder>&& segments);
+  static CommandList compile(CommandListRecorder&& segment);
 
 private:
   glrt::Array<byte> commandTokens;

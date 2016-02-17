@@ -18,6 +18,10 @@ CommandList&& CommandList::create(GLuint num_segments)
 
   GLuint& list = commandList._commandListHandler;
 
+  if (!CheckGLFunctionExistsAndReport("glCreateCommandListsNV", reinterpret_cast<const void*>(glCreateCommandListsNV)))
+    qWarning() << "WARNING";
+  glCreateCommandListsNV(1, &list);
+  CheckGLError("glCreateCommandListsNV");
   GL_CALL(glCreateCommandListsNV, 1, &list);
 
   GL_CALL(glCommandListSegmentsNV, list, num_segments);
@@ -65,8 +69,8 @@ void CommandList::setSegment(GLuint segment,
 
   for(GLuint i=0; i<count; ++i)
   {
-    states_array.append(states[i]->glhandle());
-    fbos_array.append(fbos[i]->GetInternHandle());
+    states_array.append(states[int(i)]->glhandle());
+    fbos_array.append(fbos[int(i)]->GetInternHandle());
   }
 
   GL_CALL(glListDrawCommandsStatesClientNV, _commandListHandler, segment, const_cast<const void**>(indirects.data()), sizes.data(), states_array.data(), fbos_array.data(), count);
@@ -74,7 +78,7 @@ void CommandList::setSegment(GLuint segment,
 
 void CommandList::call()
 {
-  glCallCommandListNV(_commandListHandler);
+  GL_CALL(glCallCommandListNV, _commandListHandler);
 }
 
 } // namespace gl

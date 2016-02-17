@@ -84,9 +84,8 @@ void CommandListRecorder::append_drawcall(const glm::ivec2& tokens, const gl::St
   fbos.append(fbo);
 }
 
-CommandList&& CommandListRecorder::compile(glrt::Array<CommandListRecorder>&& segments)
+CommandList CommandListRecorder::compile(glrt::Array<CommandListRecorder>&& segments)
 {
-
   GLuint num_segments = static_cast<GLuint>(segments.length());
 
   CommandList commandList = CommandList::create(num_segments);
@@ -99,9 +98,16 @@ CommandList&& CommandListRecorder::compile(glrt::Array<CommandListRecorder>&& se
     commandList.setSegment(GLuint(i), segment.createIndirectsArray(), segment.sizes, segment.states, segment.fbos);
   }
 
-  glCompileCommandListNV(commandList.glhandle());
+  GL_CALL(glCompileCommandListNV, commandList.glhandle());
 
   return std::move(commandList);
+}
+
+CommandList CommandListRecorder::compile(CommandListRecorder&& segment)
+{
+  glrt::Array<CommandListRecorder> segments;
+  segments.append(std::move(segment));
+  return compile(std::move(segments));
 }
 
 glrt::Array<const void*> CommandListRecorder::createIndirectsArray() const
@@ -112,7 +118,7 @@ glrt::Array<const void*> CommandListRecorder::createIndirectsArray() const
 
   indirects.reserve(offsets.length());
 
-  for(int i=0; i<indirects.length(); ++i)
+  for(int i=0; i<offsets.length(); ++i)
     indirects.append(commandTokens.data() + offsets[i]);
 
   return std::move(indirects);
