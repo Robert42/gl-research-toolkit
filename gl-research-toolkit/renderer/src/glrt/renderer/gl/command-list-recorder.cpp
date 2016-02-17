@@ -42,25 +42,25 @@ void CommandListRecorder::beginTokenList()
 }
 
 template<typename T>
-void CommandListRecorder::append_token(const T& token)
+void CommandListRecorder::append_token(T* token, GLenum tokenId)
 {
   Q_ASSERT(isInsideBeginEnd());
 
-  commandTokens.append_by_memcpy(token);
+  token->header = glGetCommandHeaderNV(tokenId, sizeof(T));
+
+  commandTokens.append_by_memcpy(token, sizeof(T));
 }
 
 void CommandListRecorder::append_token_TerminateSequence()
 {
   TerminateSequenceCommandNV token;
-  token.header = GL_TERMINATE_SEQUENCE_COMMAND_NV;
-  append_token(token);
+  append_token(&token, GL_TERMINATE_SEQUENCE_COMMAND_NV);
 }
 
 void CommandListRecorder::append_token_NOP()
 {
   NOPCommandNV token;
-  token.header = GL_NOP_COMMAND_NV;
-  append_token(token);
+  append_token(&token, GL_NOP_COMMAND_NV);
 }
 
 glm::ivec2 CommandListRecorder::endTokenList()

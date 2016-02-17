@@ -55,7 +55,7 @@ private:
   bool isInsideBeginEnd() const;
 
   template<typename T>
-  void append_token(const T& token);
+  void append_token(T* token, GLenum tokenId);
 };
 
 } // namespace gl
