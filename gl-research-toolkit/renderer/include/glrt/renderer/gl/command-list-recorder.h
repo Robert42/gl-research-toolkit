@@ -31,6 +31,11 @@ public:
     CW = 0,
     CCW = 1,
   };
+  enum class Strip : GLenum
+  {
+    STRIP,
+    NO_STRIP
+  };
 
   CommandListRecorder();
   ~CommandListRecorder();
@@ -41,7 +46,7 @@ public:
   void beginTokenList();
   void append_token_TerminateSequence();
   void append_token_NOP();
-  void append_token_DrawArrays(GLuint count, GLuint first);
+  void append_token_DrawArrays(GLuint count, GLuint first, Strip strip = Strip::NO_STRIP);
   void append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress);
   void append_token_FrontFace(FrontFace frontFace);
   glm::ivec2 endTokenList();

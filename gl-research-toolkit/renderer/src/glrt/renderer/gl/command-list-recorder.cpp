@@ -73,12 +73,12 @@ void CommandListRecorder::append_token_NOP()
   append_token(&token, GL_NOP_COMMAND_NV);
 }
 
-void CommandListRecorder::append_token_DrawArrays(GLuint count, GLuint first)
+void CommandListRecorder::append_token_DrawArrays(GLuint count, GLuint first, Strip strip)
 {
   DrawArraysCommandNV token;
   token.count = count;
   token.first = first;
-  append_token(&token, GL_DRAW_ARRAYS_COMMAND_NV);
+  append_token(&token, strip==Strip::NO_STRIP ? GL_DRAW_ARRAYS_COMMAND_NV : GL_DRAW_ARRAYS_STRIP_COMMAND_NV);
 }
 
 void CommandListRecorder::append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress)
