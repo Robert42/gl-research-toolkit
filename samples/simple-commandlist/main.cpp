@@ -19,10 +19,12 @@ int main(int argc, char** argv)
   gl::Texture2D depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH24_STENCIL8);
   gl::FramebufferObject framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true);
 
-  const std::vector<float> positions = {0, 0,
-                                        0, 1,
-                                        1, 0,
-                                        1, 1};
+  float min_coord = -1;
+  float max_coord = 1;
+  const std::vector<float> positions = {min_coord, min_coord,
+                                        min_coord, max_coord,
+                                        max_coord, min_coord,
+                                        max_coord, max_coord};
 
 
   gl::Buffer buffer(8*sizeof(float), gl::Buffer::UsageFlag::IMMUTABLE, positions.data());
