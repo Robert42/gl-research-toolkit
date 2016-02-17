@@ -66,6 +66,10 @@ int main(int argc, char** argv)
   orangeShader.CreateProgram();
 
 #ifdef WITH_COMMANDLISTS
+  glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV);
+  glEnableVertexAttribArray(bindingIndex);
+  GL_CALL(glVertexAttribFormat, bindingIndex, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
+
   gl::CommandList commandList;
 
   gl::StatusCapture statusCapture;
@@ -119,7 +123,8 @@ int main(int argc, char** argv)
 #endif // WITH_BINDINGS
 
 #ifdef BINDLESS
-//  glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV);
+  glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV);
+  glEnableVertexAttribArray(bindingIndex);
   GL_CALL(glVertexAttribFormat, bindingIndex, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
   app.showWindow();
   while(app.isRunning)
@@ -134,7 +139,7 @@ int main(int argc, char** argv)
     framebuffer.Bind(true);
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    GL_CALL(glBufferAddressRangeNV, GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, bindingIndex, buffer.gpuBufferAddress(), positions.size()*sizeof(float));
+    GL_CALL(glBufferAddressRangeNV, GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, bindingIndex, buffer.gpuBufferAddress(), buffer.GetSize());
 
     orangeShader.Activate();
     GL_CALL(glDrawArrays, GL_LINE_LOOP, 0, 4);
