@@ -73,12 +73,53 @@ void CommandListRecorder::append_token_NOP()
   append_token(&token, GL_NOP_COMMAND_NV);
 }
 
+void CommandListRecorder::append_token_DrawElements(GLuint count, GLuint firstIndex, GLuint baseVertex, Strip strip)
+{
+  DrawElementsCommandNV token;
+  token.count = count;
+  token.firstIndex = firstIndex;
+  token.baseVertex = baseVertex;
+  append_token(&token, strip==Strip::NO_STRIP ? GL_DRAW_ELEMENTS_COMMAND_NV : GL_DRAW_ELEMENTS_STRIP_COMMAND_NV);
+}
+
 void CommandListRecorder::append_token_DrawArrays(GLuint count, GLuint first, Strip strip)
 {
   DrawArraysCommandNV token;
   token.count = count;
   token.first = first;
   append_token(&token, strip==Strip::NO_STRIP ? GL_DRAW_ARRAYS_COMMAND_NV : GL_DRAW_ARRAYS_STRIP_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_DrawElementsInstanced(GLuint mode, GLuint count, GLuint instanceCount, GLuint firstIndex, GLuint baseVertex, GLuint baseInstance)
+{
+  DrawElementsInstancedCommandNV token;
+  token.mode = mode;
+  token.count = count;
+  token.instanceCount = instanceCount;
+  token.firstIndex = firstIndex;
+  token.baseVertex = baseVertex;
+  token.baseInstance = baseInstance;
+  append_token(&token, GL_DRAW_ELEMENTS_INSTANCED_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_DrawArraysInstanced(GLuint mode, GLuint count, GLuint instanceCount, GLuint first, GLuint baseInstance)
+{
+  DrawArraysInstancedCommandNV token;
+  token.mode = mode;
+  token.count = count;
+  token.instanceCount = instanceCount;
+  token.first = first;
+  token.baseInstance = baseInstance;
+  append_token(&token, GL_DRAW_ELEMENTS_INSTANCED_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_ElementAddress(GLuint64 gpuAddress, GLuint typeSizeInByte)
+{
+  ElementAddressCommandNV token;
+  token.addressLo = addressLo(gpuAddress);
+  token.addressHi = addressHi(gpuAddress);
+  token.typeSizeInByte = typeSizeInByte;
+  append_token(&token, GL_ELEMENT_ADDRESS_COMMAND_NV);
 }
 
 void CommandListRecorder::append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress)
@@ -88,6 +129,76 @@ void CommandListRecorder::append_token_AttributeAddress(GLuint index, GLuint64 g
   token.addressLo = addressLo(gpuAddress);
   token.addressHi = addressHi(gpuAddress);
   append_token(&token, GL_ATTRIBUTE_ADDRESS_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_UniformAddress(GLushort index, gl::ShaderObject::ShaderType shaderType, GLuint64 gpuAddress)
+{
+  UniformAddressCommandNV token;
+  token.index = index;
+  token.stage = glGetStageIndexNV(gl::ShaderObject::getGLShaderType(shaderType));
+  token.addressLo = addressLo(gpuAddress);
+  token.addressHi = addressHi(gpuAddress);
+  append_token(&token, GL_UNIFORM_ADDRESS_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_BlendColor(const glm::vec4& color)
+{
+  BlendColorCommandNV token;
+  token.red = color.r;
+  token.green = color.g;
+  token.blue = color.b;
+  token.alpha = color.a;
+  append_token(&token, GL_BLEND_COLOR_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_StencilRef(GLuint front, GLuint back)
+{
+  StencilRefCommandNV token;
+  token.frontStencilRef = front;
+  token.backStencilRef = back;
+  append_token(&token, GL_STENCIL_REF_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_LineWidth(float lineWidth)
+{
+  LineWidthCommandNV token;
+  token.lineWidth = lineWidth;
+  append_token(&token, GL_LINE_WIDTH_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_PolygonOffset(float scale, float bias)
+{
+  PolygonOffsetCommandNV token;
+  token.scale = scale;
+  token.bias = bias;
+  append_token(&token, GL_POLYGON_OFFSET_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_AlphaRef(float alphaRef)
+{
+  AlphaRefCommandNV token;
+  token.alphaRef = alphaRef;
+  append_token(&token, GL_ALPHA_REF_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_Viewport(const glm::uvec2& pos, const glm::uvec2& size)
+{
+  ViewportCommandNV token;
+  token.x = pos.x;
+  token.y = pos.y;
+  token.width = size.x;
+  token.height = size.y;
+  append_token(&token, GL_VIEWPORT_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_Scissor(const glm::uvec2& pos, const glm::uvec2& size)
+{
+  ScissorCommandNV token;
+  token.x = pos.x;
+  token.y = pos.y;
+  token.width = size.x;
+  token.height = size.y;
+  append_token(&token, GL_SCISSOR_COMMAND_NV);
 }
 
 void CommandListRecorder::append_token_FrontFace(FrontFace frontFace)
