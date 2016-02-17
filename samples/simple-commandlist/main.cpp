@@ -4,12 +4,19 @@
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
 #include <glhelper/shaderobject.hpp>
+#include <glhelper/texture2d.hpp>
+#include <glhelper/framebufferobject.hpp>
 
 
 
 int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::simpleWindow("Simple-Commandlist-Quad"));
+
+  const glm::ivec2 videoResolution = glrt::System::windowSize();
+  gl::Texture2D colorFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8);
+  gl::Texture2D depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH24_STENCIL8);
+  gl::FramebufferObject framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true);
 
   const std::vector<float> positions = {0, 1,
                                         0, 0,
@@ -54,13 +61,21 @@ int main(int argc, char** argv)
 
     app.update();
 
-    GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+    framebuffer.Bind(true);
+
+    GL_CALL(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     vertexArray.Bind();
     buffer.BindVertexBuffer(bindingIndex, 0, vertexArray.GetVertexStride(bindingIndex));
 
     orangeShader.Activate();
     GL_CALL(glDrawArrays, GL_QUADS, 0, 4);
+
+    framebuffer.BindBackBuffer();
+
+    framebuffer.BindRead();
+    GL_CALL(glBlitFramebuffer, 0, 0, videoResolution.x, videoResolution.y, 0, 0, videoResolution.x, videoResolution.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+    framebuffer.UnbindRead();
 
     app.swapWindow();
   }
