@@ -26,6 +26,12 @@ class CommandListRecorder final
 public:
   Q_DISABLE_COPY(CommandListRecorder)
 
+  enum class FrontFace
+  {
+    CW = 0,
+    CCW = 1,
+  };
+
   CommandListRecorder();
   ~CommandListRecorder();
 
@@ -35,7 +41,9 @@ public:
   void beginTokenList();
   void append_token_TerminateSequence();
   void append_token_NOP();
+  void append_token_DrawArrays(GLuint count, GLuint first);
   void append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress);
+  void append_token_FrontFace(FrontFace frontFace);
   glm::ivec2 endTokenList();
 
   void append_drawcall(const glm::ivec2& tokens, const gl::StatusCapture* statusCapture, const gl::FramebufferObject* fbo);

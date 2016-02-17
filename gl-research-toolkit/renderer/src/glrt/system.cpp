@@ -188,6 +188,11 @@ void System::verifyNVidiaFeatures()
   if(!GLEW_NV_fragment_shader_interlock)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fragment_shader_interlock"));
 
+  // https://www.opengl.org/registry/specs/NV/vertex_buffer_unified_memory.txt
+  // Used for glBufferAddressRangeNV
+  if(!GLEW_NV_vertex_buffer_unified_memory)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension GL_NV_vertex_buffer_unified_memory"));
+
   // http://developer.download.nvidia.com/opengl/specs/GL_NV_shader_buffer_load.txt
   if(!GLEW_NV_shader_buffer_load)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_shader_buffer_load"));

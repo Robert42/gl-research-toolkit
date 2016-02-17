@@ -73,6 +73,14 @@ void CommandListRecorder::append_token_NOP()
   append_token(&token, GL_NOP_COMMAND_NV);
 }
 
+void CommandListRecorder::append_token_DrawArrays(GLuint count, GLuint first)
+{
+  DrawArraysCommandNV token;
+  token.count = count;
+  token.first = first;
+  append_token(&token, GL_DRAW_ARRAYS_COMMAND_NV);
+}
+
 void CommandListRecorder::append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress)
 {
   AttributeAddressCommandNV token;
@@ -80,6 +88,13 @@ void CommandListRecorder::append_token_AttributeAddress(GLuint index, GLuint64 g
   token.addressLo = addressLo(gpuAddress);
   token.addressHi = addressHi(gpuAddress);
   append_token(&token, GL_ATTRIBUTE_ADDRESS_COMMAND_NV);
+}
+
+void CommandListRecorder::append_token_FrontFace(FrontFace frontFace)
+{
+  FrontFaceCommandNV token;
+  token.frontFace = frontFace == FrontFace::CW ? 0 : 1;
+  append_token(&token, GL_FRONTFACE_COMMAND_NV);
 }
 
 glm::ivec2 CommandListRecorder::endTokenList()

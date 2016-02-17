@@ -13,6 +13,7 @@ class StatusCapture final
 public:
   enum class Mode : GLenum
   {
+    LINES = GL_LINES,
     TRIANGLES = GL_TRIANGLES,
   };
 
