@@ -7,6 +7,8 @@
 #include <glhelper/texture2d.hpp>
 #include <glhelper/framebufferobject.hpp>
 
+#include <glrt/renderer/gl/command-list.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
 
 
 int main(int argc, char** argv)
@@ -48,6 +50,26 @@ int main(int argc, char** argv)
                                    "main.cpp (orange fragment)");
   orangeShader.CreateProgram();
 
+  gl::CommandList commandList;
+
+  gl::StatusCapture statusCapture;
+
+  framebuffer.Bind(true);
+  orangeShader.Activate();
+  statusCapture = gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES);
+  framebuffer.BindBackBuffer();
+
+  glm::ivec2 tokenRange;
+  gl::CommandListRecorder segment;
+
+  segment.beginTokenList();
+  segment.append_token_TerminateSequence();
+  tokenRange = segment.endTokenList();
+
+  segment.append_drawcall(tokenRange, &statusCapture, &framebuffer);
+
+  commandList = gl::CommandListRecorder::compile(std::move(segment));
+
 
   app.showWindow();
 
@@ -64,6 +86,8 @@ int main(int argc, char** argv)
     framebuffer.Bind(true);
 
     GL_CALL(glClear, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    commandList.call();
 
     vertexArray.Bind();
     buffer.BindVertexBuffer(bindingIndex, 0, vertexArray.GetVertexStride(bindingIndex));
