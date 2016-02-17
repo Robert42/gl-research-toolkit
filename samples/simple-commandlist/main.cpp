@@ -58,6 +58,7 @@ int main(int argc, char** argv)
   orangeShader.Activate();
   statusCapture = gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES);
   framebuffer.BindBackBuffer();
+  gl::ShaderObject::Deactivate();
 
   glm::ivec2 tokenRange;
   gl::CommandListRecorder segment;
