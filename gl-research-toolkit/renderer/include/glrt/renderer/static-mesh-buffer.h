@@ -34,6 +34,8 @@ public:
   static StaticMeshBuffer createAsArray(const StaticMeshBuffer::Vertex* vertices, int numVertices);
 
   static gl::VertexArrayObject generateVertexArrayObject();
+  static void enableVertexArrays();
+  static void disableVertexArrays();
 
   void bind(const gl::VertexArrayObject& vertexArrayObject);
 

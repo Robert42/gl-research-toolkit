@@ -50,6 +50,13 @@ const void* Material::data() const
   return &plainColor;
 }
 
+
+int qHash(Material::Type materialType)
+{
+  return ::qHash(static_cast<int>(materialType));
+}
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt

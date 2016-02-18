@@ -4,6 +4,8 @@
 #include <glrt/renderer/implementation/fragmented-light-component-array.h>
 #include <glrt/renderer/synced-fragmented-component-array.h>
 #include <glrt/renderer/toolkit/managed-gl-buffer.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
+#include <glhelper/shaderobject.hpp>
 
 #include <glhelper/buffer.hpp>
 
@@ -17,12 +19,12 @@ class SimpleShaderStorageBuffer
 public:
   typedef typename T_LightComponent::Data LightData;
 
-
   SimpleShaderStorageBuffer(scene::Scene& scene);
 
   void update();
 
-  void bindShaderStorageBuffer(int bindingIndex);
+  bool needRerecording() const;
+  void recordBinding(gl::CommandListRecorder& recorder, GLushort bindingIndex, gl::ShaderObject::ShaderType shaderType);
 
 private:
   typedef SimpleShaderStorageBuffer<T_LightComponent, T_BufferCapacityTraits,T_array_header, block_to_update> this_type;

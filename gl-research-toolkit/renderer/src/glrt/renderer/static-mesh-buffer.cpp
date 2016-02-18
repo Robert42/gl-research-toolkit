@@ -143,6 +143,34 @@ gl::VertexArrayObject StaticMeshBuffer::generateVertexArrayObject()
                                           Attribute(Attribute::Type::FLOAT, 2, vertexBufferBinding)}));
 }
 
+
+void StaticMeshBuffer::enableVertexArrays()
+{
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_POSITION == 0);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_NORMAL == 1);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_TANGENT == 2);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_UV == 3);
+
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_UV, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_NORMAL);
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_TANGENT);
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_UV);
+}
+
+void StaticMeshBuffer::disableVertexArrays()
+{
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_NORMAL);
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_TANGENT);
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_UV);
+}
+
+
 void StaticMeshBuffer::bind(const gl::VertexArrayObject& vertexArrayObject)
 {
   if(indexBuffer != nullptr)

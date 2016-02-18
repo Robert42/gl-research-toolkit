@@ -23,8 +23,16 @@ ReloadableShader::ReloadableShader(ReloadableShader&& other)
     shaderDir(other.shaderDir)
 {
   allReloadableShader().insert(this);
+  other.shaderDir = QDir();
 }
 
+ReloadableShader& ReloadableShader::operator=(ReloadableShader&& other)
+{
+  preprocessorBlock = std::move(other.preprocessorBlock);
+  shaderObject = std::move(other.shaderObject);
+  shaderDir = std::move(other.shaderDir);
+  return *this;
+}
 
 ReloadableShader::~ReloadableShader()
 {

@@ -46,6 +46,7 @@ public:
   static void registerAngelScriptTypes();
 };
 
+int qHash(Material::Type materialType);
 
 } // namespace resources
 } // namespace scene

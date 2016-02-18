@@ -22,14 +22,14 @@ public:
 
   ReloadableShader(const ReloadableShader&) = delete;
   ReloadableShader& operator=(const ReloadableShader&) = delete;
-  ReloadableShader& operator=(ReloadableShader&&) = delete;
+  ReloadableShader& operator=(ReloadableShader&&);
 
   bool reload();
 
   static void reloadAll();
 
 private:
-  const QDir shaderDir;
+  QDir shaderDir;
 
   static QSet<ReloadableShader*>& allReloadableShader();
 

@@ -101,12 +101,13 @@ private:
 } // namespace implementation
 
 template<typename T_element, typename T_CapacityTraits = ArrayCapacityTraits_Capacity_Blocks<>, typename T_header_traits=implementation::ManagedGLBuffer_NoHeader>
-class ManagedGLBuffer
+class ManagedGLBuffer final
 {
 public:
   typedef T_header_traits header_type;
 
   gl::Buffer buffer;
+  bool gpuAddressChanged : 1;
 
   ManagedGLBuffer();
 

@@ -37,9 +37,16 @@ void SimpleShaderStorageBuffer<T_LightComponent,T_BufferCapacityTraits,T_array_h
 }
 
 template<class T_LightComponent, typename T_BufferCapacityTraits, class T_array_header, int block_to_update>
-void SimpleShaderStorageBuffer<T_LightComponent,T_BufferCapacityTraits,T_array_header, block_to_update>::bindShaderStorageBuffer(int bindingIndex)
+bool SimpleShaderStorageBuffer<T_LightComponent,T_BufferCapacityTraits,T_array_header, block_to_update>::needRerecording() const
 {
-  buffer.buffer.BindShaderStorageBuffer(bindingIndex);
+  return buffer.gpuAddressChanged;
+}
+
+template<class T_LightComponent, typename T_BufferCapacityTraits, class T_array_header, int block_to_update>
+void SimpleShaderStorageBuffer<T_LightComponent,T_BufferCapacityTraits,T_array_header, block_to_update>::recordBinding(gl::CommandListRecorder& recorder, GLushort bindingIndex, gl::ShaderObject::ShaderType shaderType)
+{
+  recorder.append_token_UniformAddress(bindingIndex, shaderType, buffer.buffer.gpuBufferAddress());
+  buffer.gpuAddressChanged = false;
 }
 
 
