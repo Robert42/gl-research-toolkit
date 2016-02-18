@@ -48,13 +48,12 @@ private:
 
 struct MaterialBuffer::Initializer
 {
-  Array<byte> data;
-
   void begin(int expectedNumberMaterials, Type type);
   int append(const Material& material);
   MaterialBuffer&& end();
 
 private:
+  Array<byte> data;
   Type type = Type::PLAIN_COLOR;
   BlockSize blockSize;
 };
