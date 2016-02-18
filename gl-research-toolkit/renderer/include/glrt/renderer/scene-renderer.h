@@ -66,6 +66,7 @@ private:
     padding<float> _padding;
   };
 
+  QMap<Material::Type, MaterialBuffer> materialUniformBuffers;
   QMap<QPair<Pass, Material::Type>, MaterialShader*> materialShaderMetadata;
   Array<MaterialShader> materialShaders;
 
