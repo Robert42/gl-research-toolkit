@@ -111,6 +111,8 @@ void Renderer::recordCommandlist()
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformBuffer.gpuBufferAddress());
   _directLights->recordBinding(recorder);
   recorder.endTokenList();
+
+  commandList = gl::CommandListRecorder::compile(std::move(recorder));
 }
 
 void Renderer::updateCameraUniform()
