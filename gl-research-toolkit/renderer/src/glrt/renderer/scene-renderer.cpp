@@ -59,20 +59,32 @@ void Renderer::render()
 void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
 {
   if(pass == Pass::DEPTH_PREPASS)
-  {
-    if(materialTypes.contains(Material::Type::PLAIN_COLOR) || materialTypes.contains(Material::Type::TEXTURED_OPAQUE))
-      preprocessorBlock.insert("OPAQUE_PREPASS");
-    if(materialTypes.contains(Material::Type::TEXTURED_MASKED)||materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
-      preprocessorBlock.insert("TRANSPARENT_PREPASS");
-  }else if(pass == Pass::FORWARD_PASS)
-  {
-    Q_ASSERT(materialTypes.size() == 1);
+    preprocessorBlock.insert("#define DEPTH_PREPASS");
+  else if(pass == Pass::FORWARD_PASS)
+    preprocessorBlock.insert("#define FORWARD_PASS");
+  else
+    Q_UNREACHABLE();
 
-    if(materialTypes.contains(Material::Type::PLAIN_COLOR))
-      preprocessorBlock.insert("PLAIN_COLOR");
-    if(materialTypes.contains(Material::Type::TEXTURED_OPAQUE)||materialTypes.contains(Material::Type::TEXTURED_MASKED)||materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
-      preprocessorBlock.insert("TEXTURED");
+  if(materialTypes.contains(Material::Type::PLAIN_COLOR) || materialTypes.contains(Material::Type::TEXTURED_OPAQUE))
+    preprocessorBlock.insert("#define OPAQUE");
+  else
+  {
+    preprocessorBlock.insert("#define OUTPUT_USES_ALPHA");
+
+    if(materialTypes.contains(Material::Type::TEXTURED_MASKED))
+      preprocessorBlock.insert("#define MASKED");
+    else if(materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
+      preprocessorBlock.insert("#define TRANSPARENT");
+    else
+      Q_UNREACHABLE();
   }
+
+  if(materialTypes.contains(Material::Type::PLAIN_COLOR))
+    preprocessorBlock.insert("#define PLAIN_COLOR");
+  else if(materialTypes.contains(Material::Type::TEXTURED_OPAQUE)||materialTypes.contains(Material::Type::TEXTURED_MASKED)||materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
+    preprocessorBlock.insert("#define TEXTURED");
+  else
+    Q_UNREACHABLE();
 
   materialShaders.append_move(std::move(MaterialShader(preprocessorBlock)));
 
