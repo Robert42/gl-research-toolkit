@@ -14,7 +14,13 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
   
   incoming_luminance *= exposure;
   
+#ifdef DEPTH_PREPASS
+  color = vec4(vec3(0), alpha);
+#endif
+
+#ifdef FORWARD_PASS
   color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
+#endif 
   
   
 }
