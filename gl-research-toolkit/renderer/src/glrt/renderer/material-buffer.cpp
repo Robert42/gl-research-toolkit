@@ -57,13 +57,17 @@ void MaterialBuffer::Initializer::begin(int expectedNumberMaterials, Type type)
   data.reserve(expectedNumberMaterials*blockSize.blockOffset);
 }
 
-void MaterialBuffer::Initializer::append(const Material& material)
+int MaterialBuffer::Initializer::append(const Material& material)
 {
   if(data.capacity() < data.length() + blockSize.blockOffset)
     data.reserve(data.capacity() + blockSize.blockOffset*64);
 
+  int indexOfCurrentUniformBlock = data.length();
+  data.reserve(data.length() + blockSize.blockOffset);
   data.append_by_memcpy(material.data(), blockSize.dataSize);
   data.resize(data.length() + blockSize.blockOffset);
+
+  return indexOfCurrentUniformBlock;
 }
 
 MaterialBuffer&& MaterialBuffer::Initializer::end()

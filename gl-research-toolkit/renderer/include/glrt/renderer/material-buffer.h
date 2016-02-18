@@ -51,7 +51,7 @@ struct MaterialBuffer::Initializer
   Array<byte> data;
 
   void begin(int expectedNumberMaterials, Type type);
-  void append(const Material& material);
+  int append(const Material& material);
   MaterialBuffer&& end();
 
 private:
