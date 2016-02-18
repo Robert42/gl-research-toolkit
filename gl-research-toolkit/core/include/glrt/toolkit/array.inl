@@ -873,6 +873,19 @@ void Array<T, T_traits,T_allocator>::append_by_memcpy(const T_value& value)
   append_by_memcpy(&value, sizeof(value));
 }
 
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::resize(int newSize)
+{
+  static_assert(std::is_same<byte, T>::value, "append_by_memcpy only allowed for an array of the type byte");
+
+  Q_ASSERT(newSize>=0);
+
+  if(newSize <= 0)
+    clear();
+  else
+    _length = 0;
+}
+
 
 template<typename T, typename T_traits, class T_allocator>
 QDebug operator<<(QDebug d, const Array<T, T_traits,T_allocator>& array)

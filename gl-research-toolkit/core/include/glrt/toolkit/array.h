@@ -450,6 +450,7 @@ public:
   void append_by_memcpy(const void* src, size_t num);
   template<typename T_value>
   void append_by_memcpy(const T_value& value);
+  void resize(int newSize);
 
   void removeAt(int index);
   void removeAt(int index, int num_to_remove);
