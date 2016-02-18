@@ -7,6 +7,7 @@
 
 #include <glrt/scene/resources/material.h>
 #include <glrt/renderer/declarations.h>
+#include <glrt/toolkit/array.h>
 
 namespace glrt {
 namespace renderer {
@@ -20,7 +21,6 @@ public:
 
   const Type type;
 
-
   MaterialBuffer(Type type);
   ~MaterialBuffer();
 
@@ -29,29 +29,34 @@ public:
   MaterialBuffer&operator=(const MaterialBuffer&)=delete;
   MaterialBuffer&operator=(MaterialBuffer&&)=delete;
 
-  void bind(int i);
   void clear();
 
 private:
-  gl::Buffer* buffer;
-  int blockOffset;
-  int dataSize;
+  struct BlockSize
+  {
+    int blockOffset;
+    int dataSize;
 
+    template<typename T>
+    static BlockSize forType();
+    static BlockSize forType(Type type);
+  };
 
-  template<typename T>
-  void initBlockOffset();
+  gl::Buffer buffer;
+  BlockSize blockSize;
 };
 
 struct MaterialBuffer::Initializer
 {
-  MaterialBuffer& buffer;
-  int materialsAdded;
-  QVector<quint8> data;
+  Array<byte> data;
 
-  Initializer(MaterialBuffer& buffer, int expectedNumberMaterials);
-  ~Initializer();
-
+  void begin(int expectedNumberMaterials, Type type);
   void append(const Material& material);
+  MaterialBuffer&& end();
+
+private:
+  Type type = Type::PLAIN_COLOR;
+  BlockSize blockSize;
 };
 
 

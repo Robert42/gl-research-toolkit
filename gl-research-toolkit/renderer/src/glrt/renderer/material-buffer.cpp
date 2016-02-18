@@ -8,74 +8,70 @@ namespace renderer {
 using glrt::scene::resources::Material;
 
 MaterialBuffer::MaterialBuffer(Type type)
-  : type(type),
-    buffer(nullptr)
+  : type(type)
+{
+  blockSize = BlockSize::forType(type);
+}
+
+MaterialBuffer::~MaterialBuffer()
+{
+}
+
+template<typename T>
+MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType()
+{
+  BlockSize blockSize;
+  blockSize.dataSize = sizeof(T);
+  blockSize.blockOffset = aligned_vector<T>::retrieveAlignmentOffset(aligned_vector<T>::Alignment::UniformBufferOffsetAlignment);
+  return blockSize;
+}
+
+MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType(Type type)
 {
   switch(type)
   {
   case Type::PLAIN_COLOR:
-    initBlockOffset<Material::PlainColor>();
-    break;
+    return forType<Material::PlainColor>();
   case Type::TEXTURED_MASKED:
     // #ISSUE-63
+    Q_UNREACHABLE();
   case Type::TEXTURED_OPAQUE:
     // #ISSUE-63
+    Q_UNREACHABLE();
   case Type::TEXTURED_TRANSPARENT:
     // #ISSUE-63
+    Q_UNREACHABLE();
   default:
     Q_UNREACHABLE();
   }
 }
 
-MaterialBuffer::~MaterialBuffer()
+
+
+
+void MaterialBuffer::Initializer::begin(int expectedNumberMaterials, Type type)
 {
-  delete buffer;
-}
+  blockSize = BlockSize::forType(type);
 
-void MaterialBuffer::bind(int i)
-{
-  Q_ASSERT(buffer != nullptr);
-  buffer->BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, i*blockOffset, dataSize);
-}
-
-void MaterialBuffer::clear()
-{
-  delete buffer;
-  buffer = nullptr;
-}
-
-
-template<typename T>
-void MaterialBuffer::initBlockOffset()
-{
-  dataSize = sizeof(T);
-  blockOffset = aligned_vector<T>::retrieveAlignmentOffset(aligned_vector<T>::Alignment::UniformBufferOffsetAlignment);
-}
-
-
-
-MaterialBuffer::Initializer::Initializer(MaterialBuffer& buffer, int expectedNumberMaterials)
-  : buffer(buffer),
-    materialsAdded(0)
-{
-  data.reserve(expectedNumberMaterials*buffer.blockOffset);
-}
-
-MaterialBuffer::Initializer::~Initializer()
-{
-  buffer.clear();
-  buffer.buffer = new gl::Buffer(data.length(), gl::Buffer::UsageFlag::IMMUTABLE, data.data());
+  data.clear();
+  data.reserve(expectedNumberMaterials*blockSize.blockOffset);
 }
 
 void MaterialBuffer::Initializer::append(const Material& material)
 {
-  if(data.capacity() < data.length() + buffer.blockOffset)
-    data.reserve(data.capacity() + buffer.blockOffset*64);
+  if(data.capacity() < data.length() + blockSize.blockOffset)
+    data.reserve(data.capacity() + blockSize.blockOffset*64);
 
-  void* targetLocation = data.data() + data.length();
-  data.resize(data.length() + buffer.blockOffset);
+  data.append_by_memcpy(material.data(), blockSize.dataSize);
+  data.resize(data.length() + blockSize.blockOffset);
+}
 
-  std::memcpy(targetLocation, material.data(), buffer.dataSize);
+MaterialBuffer&& MaterialBuffer::Initializer::end()
+{
+  MaterialBuffer buffer(type);
+  buffer.buffer = std::move(gl::Buffer(data.length(), gl::Buffer::UsageFlag::IMMUTABLE, data.data()));
+
+  return std::move(buffer);
 }
 
 } // namespace renderer
