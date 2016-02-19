@@ -18,6 +18,8 @@ using glrt::scene::resources::StaticMesh;
 using glrt::scene::resources::StaticMeshLoader;
 using glrt::scene::resources::Material;
 
+class Renderer;
+
 } // namespace renderer
 } // namespace glrt
 

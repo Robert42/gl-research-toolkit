@@ -21,7 +21,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     videoResolution(videoResolution),
-    _directLights(new DirectLights(this)),
+    _lightBuffer(this),
     workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
     workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
     cameraUniformBuffer(sizeof(CameraUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr)
@@ -32,7 +32,6 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
 
 Renderer::~Renderer()
 {
-  delete _directLights;
 }
 
 void Renderer::render()
@@ -41,7 +40,7 @@ void Renderer::render()
     recordCommandlist();
 
   updateCameraUniform();
-  _directLights->update();
+  _lightBuffer.update();
 
   clearFramebuffer();
 
@@ -100,7 +99,7 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
 
 bool Renderer::needRerecording() const
 {
-  return _directLights->needRerecording();
+  return _lightBuffer.needRerecording();
 }
 
 void Renderer::recordCommandlist()
@@ -109,7 +108,7 @@ void Renderer::recordCommandlist()
 
   recorder.beginTokenList();
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformBuffer.gpuBufferAddress());
-  _directLights->recordBinding(recorder);
+  _lightBuffer.recordBinding(recorder);
   recorder.endTokenList();
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
@@ -151,58 +150,6 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   cameraUniformData.camera_position = cameraParameter.position;
   cameraUniformBuffer.Unmap();
 }
-
-Renderer::DirectLights& Renderer::directLights()
-{
-  return *this->_directLights;
-}
-
-
-// ======== DirectLights =======================================================
-
-
-Renderer::DirectLights::DirectLights(Renderer* renderer)
-  : renderer(*renderer),
-    sphereAreaShaderStorageBuffer(this->renderer.scene),
-    rectAreaShaderStorageBuffer(this->renderer.scene)
-{
-}
-
-Renderer::DirectLights::~DirectLights()
-{
-}
-
-void Renderer::DirectLights::update()
-{
-  sphereAreaShaderStorageBuffer.update();
-  rectAreaShaderStorageBuffer.update();
-}
-
-
-bool Renderer::DirectLights::needRerecording() const
-{
-  return sphereAreaShaderStorageBuffer.needRerecording() || rectAreaShaderStorageBuffer.needRerecording();
-}
-
-
-void Renderer::DirectLights::recordBinding(gl::CommandListRecorder& recorder,
-                                           GLushort sphereAreaLightBindingIndex,
-                                           GLushort rectAreaLightBindingIndex)
-{
-  update();
-
-  sphereAreaShaderStorageBuffer.recordBinding(recorder, sphereAreaLightBindingIndex, gl::ShaderObject::ShaderType::FRAGMENT);
-  rectAreaShaderStorageBuffer.recordBinding(recorder, rectAreaLightBindingIndex, gl::ShaderObject::ShaderType::FRAGMENT);
-}
-
-
-void Renderer::DirectLights::recordBinding(gl::CommandListRecorder& recorder)
-{
-  recordBinding(recorder,
-                SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA,
-                SHADERSTORAGE_BINDING_LIGHTS_RECTAREA);
-}
-
 
 
 } // namespace renderer

@@ -12,7 +12,7 @@
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 #include <glrt/renderer/material-buffer.h>
 #include <glrt/renderer/declarations.h>
-#include <glrt/renderer/simple-shader-storage-buffer.h>
+#include <glrt/renderer/light-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
 #include <glrt/renderer/material-shader.h>
 
@@ -27,8 +27,6 @@ class Renderer : public QObject
 {
   Q_OBJECT
 public:
-  class DirectLights;
-
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
 
@@ -44,8 +42,6 @@ public:
   Renderer(Renderer&&) = delete;
   Renderer& operator=(const Renderer&) = delete;
   Renderer& operator=(Renderer&&) = delete;
-
-  DirectLights& directLights();
 
   Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager);
   virtual ~Renderer();
@@ -66,11 +62,10 @@ private:
     padding<float> _padding;
   };
 
+  LightBuffer _lightBuffer;
   QMap<Material::Type, MaterialBuffer> materialUniformBuffers;
   QMap<QPair<Pass, Material::Type>, MaterialShader*> materialShaderMetadata;
   Array<MaterialShader> materialShaders;
-
-  DirectLights* _directLights = nullptr;
 
   gl::Texture2D workaroundFramebufferTexture;
   gl::FramebufferObject workaroundFramebuffer;
@@ -85,26 +80,6 @@ private:
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
-};
-
-
-class Renderer::DirectLights final
-{
-public:
-  Renderer& renderer;
-
-  DirectLights(Renderer* renderer);
-  ~DirectLights();
-
-  bool needRerecording() const;
-  void update();
-
-  void recordBinding(gl::CommandListRecorder& recorder, GLushort sphereAreaLightBindingIndex, GLushort rectAreaLightBindingIndex);
-  void recordBinding(gl::CommandListRecorder& recorder);
-
-private:
-  SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
-  SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
 };
 
 
