@@ -6,15 +6,15 @@
 namespace glrt {
 namespace renderer {
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header, int block_to_update>
-SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header, block_to_update>::SimpleShaderStorageBuffer(scene::Scene& scene)
+template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header>
+SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header>::SimpleShaderStorageBuffer(scene::Scene& scene)
   : lightComponents(scene)
 {
 }
 
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header, int block_to_update>
-void SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header, block_to_update>::update()
+template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header>
+void SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header>::update()
 {
   FragmentedArray& fragmented_array = lightComponents.fragmented_array;
   const int indexOfFirstUpdated = fragmented_array.updateSegments(nullptr);
@@ -36,14 +36,14 @@ void SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTra
   }
 }
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header, int block_to_update>
-bool SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header, block_to_update>::needRerecording() const
+template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header>
+bool SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header>::needRerecording() const
 {
   return buffer.gpuAddressChanged;
 }
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header, int block_to_update>
-void SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header, block_to_update>::recordBinding(gl::CommandListRecorder& recorder, GLushort bindingIndex, gl::ShaderObject::ShaderType shaderType)
+template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits, class T_array_header>
+void SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits,T_array_header>::recordBinding(gl::CommandListRecorder& recorder, GLushort bindingIndex, gl::ShaderObject::ShaderType shaderType)
 {
   recorder.append_token_UniformAddress(bindingIndex, shaderType, buffer.buffer.gpuBufferAddress());
   buffer.gpuAddressChanged = false;

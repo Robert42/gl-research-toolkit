@@ -13,7 +13,7 @@ namespace glrt {
 namespace renderer {
 
 // #ISSUE-64: try out different values for <512, 4096> to find the fastest one
-template<class T_Component, typename T_FragmentedArray=typename implementation::FragmentedLightComponentArray<T_Component>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>, class T_array_header=implementation::SimpleShaderStorageBuffer_DefaultHeader, int block_to_update=64>
+template<class T_Component, typename T_FragmentedArray=typename implementation::FragmentedLightComponentArray<T_Component>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>, class T_array_header=implementation::SimpleShaderStorageBuffer_DefaultHeader>
 class SimpleShaderStorageBuffer
 {
 public:
@@ -27,7 +27,7 @@ public:
   void recordBinding(gl::CommandListRecorder& recorder, GLushort bindingIndex, gl::ShaderObject::ShaderType shaderType);
 
 private:
-  typedef SimpleShaderStorageBuffer<T_Component, T_FragmentedArray, T_BufferCapacityTraits,T_array_header, block_to_update> this_type;
+  typedef SimpleShaderStorageBuffer<T_Component, T_FragmentedArray, T_BufferCapacityTraits,T_array_header> this_type;
   typedef T_FragmentedArray FragmentedArray;
   typedef SyncedFragmentedComponentArray<T_Component, FragmentedArray> LightComponentArray;
 
