@@ -44,7 +44,7 @@ LightSource ResourceManager::lightSourceForUuid(const Uuid<LightSource>& uuid) c
   return indexForResourceUuid(uuid)->lightSources.value(uuid, Index::fallback.lightSources[uuids::fallbackLight]);
 }
 
-Material ResourceManager::materialSourceForUuid(const Uuid<Material>& uuid) const
+Material ResourceManager::materialForUuid(const Uuid<Material>& uuid) const
 {
   return indexForResourceUuid(uuid)->materials.value(uuid, Index::fallback.materials[uuids::fallbackMaterial]);
 }

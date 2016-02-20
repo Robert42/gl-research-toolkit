@@ -63,7 +63,7 @@ void StaticMeshComponent::registerAngelScriptAPI()
 
 resources::Material StaticMeshComponent::material() const
 {
-  return this->node.resourceManager().materialSourceForUuid(this->materialUuid);
+  return this->node.resourceManager().materialForUuid(this->materialUuid);
 }
 
 

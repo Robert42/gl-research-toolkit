@@ -21,7 +21,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     videoResolution(videoResolution),
-    _lightBuffer(this),
+    lightUniformBuffer(this),
     workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
     workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
     cameraUniformBuffer(sizeof(CameraUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr)
@@ -40,7 +40,7 @@ void Renderer::render()
     recordCommandlist();
 
   updateCameraUniform();
-  _lightBuffer.update();
+  lightUniformBuffer.update();
 
   clearFramebuffer();
 
@@ -99,7 +99,7 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
 
 bool Renderer::needRerecording() const
 {
-  return _lightBuffer.needRerecording();
+  return lightUniformBuffer.needRerecording();
 }
 
 void Renderer::recordCommandlist()
@@ -108,7 +108,7 @@ void Renderer::recordCommandlist()
 
   recorder.beginTokenList();
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformBuffer.gpuBufferAddress());
-  _lightBuffer.recordBinding(recorder);
+  lightUniformBuffer.recordBinding(recorder);
   recorder.endTokenList();
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));

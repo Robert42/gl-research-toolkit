@@ -1,5 +1,6 @@
 #include <glrt/scene/resources/material.h>
 #include <glrt/toolkit/uuid.h>
+#include <glrt/toolkit/concatenated-less-than.h>
 
 namespace glrt {
 namespace scene {
@@ -48,6 +49,11 @@ void Material::registerAngelScriptTypes()
 const void* Material::data() const
 {
   return &plainColor;
+}
+
+bool Material::operator<(const Material& other) const
+{
+  return concatenated_lessThan(this->type, other.type, this->materialUser, this->materialUser);
 }
 
 

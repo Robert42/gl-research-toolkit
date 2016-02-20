@@ -37,7 +37,7 @@ public:
   QString labelForResourceUuid(const QUuid& uuid) const;
 
   LightSource lightSourceForUuid(const Uuid<LightSource>& uuid) const;
-  Material materialSourceForUuid(const Uuid<Material>& uuid) const;
+  Material materialForUuid(const Uuid<Material>& uuid) const;
 
   QString sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback=QString()) const;
   QString sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, const QString& fallback=QString()) const;

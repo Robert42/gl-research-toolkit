@@ -7,6 +7,8 @@
 
 #include <glrt/scene/resources/material.h>
 #include <glrt/renderer/declarations.h>
+#include <glrt/renderer/static-mesh-buffer-manager.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
 #include <glrt/toolkit/array.h>
 
 namespace glrt {
@@ -15,21 +17,19 @@ namespace renderer {
 class MaterialBuffer final
 {
 public:
-  typedef scene::resources::Material::Type Type;
+  typedef scene::resources::Material Material;
+  typedef Material::Type Type;
 
   struct Initializer;
 
-  const Type type;
-
-  MaterialBuffer(Type type);
+  MaterialBuffer();
   ~MaterialBuffer();
 
-  MaterialBuffer(const MaterialBuffer&)=delete;
-  MaterialBuffer(MaterialBuffer&&)=delete;
-  MaterialBuffer&operator=(const MaterialBuffer&)=delete;
-  MaterialBuffer&operator=(MaterialBuffer&&)=delete;
+  MaterialBuffer(MaterialBuffer&&);
+  MaterialBuffer&operator=(MaterialBuffer&&);
 
-  void clear();
+  MaterialBuffer(const MaterialBuffer&)=delete;
+  MaterialBuffer&operator=(const MaterialBuffer&)=delete;
 
 private:
   struct BlockSize
@@ -40,22 +40,28 @@ private:
     template<typename T>
     static BlockSize forType();
     static BlockSize forType(Type type);
+    static int expectedBlockOffset();
   };
 
   gl::Buffer buffer;
-  BlockSize blockSize;
 };
 
 struct MaterialBuffer::Initializer
 {
-  void begin(int expectedNumberMaterials, Type type);
-  int append(const Material& material);
-  MaterialBuffer&& end();
+  gl::CommandListRecorder& recorder;
+  const glrt::scene::resources::ResourceManager& resourceManager;
+
+  Initializer(gl::CommandListRecorder& recorder, const glrt::scene::resources::ResourceManager& resourceManager);
+
+  void begin(int expectedNumberMaterials);
+  int append(const Uuid<Material>& materialUuid);
+  MaterialBuffer end();
+
+  QMap<Uuid<Material>, GLuint64> gpuAddresses; // #TODO use this or remove this :)
 
 private:
   Array<byte> data;
-  Type type = Type::PLAIN_COLOR;
-  BlockSize blockSize;
+  gl::Buffer buffer;
 };
 
 

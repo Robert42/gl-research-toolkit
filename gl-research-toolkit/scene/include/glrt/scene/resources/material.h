@@ -4,6 +4,8 @@
 #include <glrt/dependencies.h>
 #include <glrt/toolkit/uuid.h>
 
+#include <glhelper/gl.hpp>
+
 namespace glrt {
 namespace scene {
 namespace resources {
@@ -29,6 +31,21 @@ public:
     PlainColor(){}
   };
 
+  struct Textured
+  {
+    glm::vec4 tint;
+    glm::vec2 smoothness_range;
+    glm::vec2 occlusion_range;
+    glm::vec2 reflectance_range;
+    float emission_factor;
+    padding<float, 1> _padding;
+    GLuint64 diffuse_map;
+    GLuint64 normal_map;
+    GLuint64 height_map;
+    GLuint64 srmo_map; // smoothness, reflectance, metalic_map, occlusion
+    GLuint64 emission_map;
+  };
+
   union
   {
     PlainColor plainColor;
@@ -44,6 +61,8 @@ public:
   const void* data() const;
 
   static void registerAngelScriptTypes();
+
+  bool operator<(const Material& other) const; // #TODO use this or remove this
 };
 
 int qHash(Material::Type materialType);
