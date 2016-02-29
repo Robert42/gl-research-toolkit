@@ -306,6 +306,20 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
     child->collectSubtree(subTree);
 }
 
+Node::Component::MovabilityHint Node::Component::movabilityHint() const
+{
+  int movable = static_cast<int>(this->movable());
+  int mayBecomeMovable = static_cast<int>(this->mayBecomeMovable());
+  Q_ASSERT(movable<=1);
+  Q_ASSERT(mayBecomeMovable<=1);
+  int hintValue = (movable<<1) | (mayBecomeMovable & ~movable);
+
+  Q_ASSERT(hintValue == static_cast<int>(MovabilityHint::STATIC) ||
+           hintValue == static_cast<int>(MovabilityHint::MAY_BECOME_MOVABLE) ||
+           hintValue == static_cast<int>(MovabilityHint::MOVABLE));
+
+  return static_cast<MovabilityHint>(hintValue);
+}
 
 bool Node::Component::movable() const
 {

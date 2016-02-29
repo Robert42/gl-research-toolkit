@@ -10,7 +10,7 @@
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer-manager.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
-#include <glrt/renderer/material-buffer.h>
+#include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/light-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
@@ -63,7 +63,7 @@ private:
   };
 
   LightBuffer lightUniformBuffer;
-  MaterialBuffer materialUniformBuffer;
+  StaticMeshRenderer<> staticMeshRenderer;
   QMap<QPair<Pass, Material::Type>, MaterialShader*> materialShaderMetadata;
   Array<MaterialShader> materialShaders;
 

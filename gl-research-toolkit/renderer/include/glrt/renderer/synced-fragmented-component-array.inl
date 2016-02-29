@@ -33,7 +33,10 @@ void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::addComponen
           this, &SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleVisibilityComponents);
 
   if(component->visible())
+  {
+    dirty = true;
     fragmented_array.append_copy(component);
+  }
 }
 
 template<typename T_component, typename T_FragmentedArray>

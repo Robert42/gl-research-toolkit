@@ -3,6 +3,7 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/toolkit/uuid.h>
+#include <glrt/toolkit/array.h>
 
 #include <glhelper/gl.hpp>
 

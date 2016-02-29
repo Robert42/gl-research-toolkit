@@ -12,8 +12,12 @@ set(SOURCE_FILES
   include/glrt/renderer/gl/command-list.h
   include/glrt/renderer/gl/command-list-recorder.h
   include/glrt/renderer/gl/status-capture.h
+  include/glrt/renderer/implementation/fragmented-component-array.h
+  include/glrt/renderer/implementation/fragmented-component-array.inl
   include/glrt/renderer/implementation/fragmented-light-component-array.h
   include/glrt/renderer/implementation/fragmented-light-component-array.inl
+  include/glrt/renderer/implementation/fragmented-static-mesh-component-array.h
+  include/glrt/renderer/implementation/fragmented-static-mesh-component-array.inl
   include/glrt/renderer/light-buffer.h
   include/glrt/renderer/material-buffer.h
   include/glrt/renderer/material-shader.h
@@ -23,6 +27,8 @@ set(SOURCE_FILES
   include/glrt/renderer/simple-shader-storage-buffer.inl
   include/glrt/renderer/static-mesh-buffer.h
   include/glrt/renderer/static-mesh-buffer-manager.h
+  include/glrt/renderer/static-mesh-renderer.h
+  include/glrt/renderer/static-mesh-renderer.inl
   include/glrt/renderer/synced-fragmented-component-array.h
   include/glrt/renderer/synced-fragmented-component-array.inl
   include/glrt/renderer/toolkit/aligned-vector.h

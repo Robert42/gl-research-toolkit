@@ -6,10 +6,9 @@ namespace glrt {
 namespace renderer {
 
 
-LightBuffer::LightBuffer(Renderer* renderer)
-  : renderer(*renderer),
-    sphereAreaShaderStorageBuffer(this->renderer.scene),
-    rectAreaShaderStorageBuffer(this->renderer.scene)
+LightBuffer::LightBuffer(glrt::scene::Scene& scene)
+  : sphereAreaShaderStorageBuffer(scene),
+    rectAreaShaderStorageBuffer(scene)
 {
 }
 
@@ -31,8 +30,8 @@ bool LightBuffer::needRerecording() const
 
 
 void LightBuffer::recordBinding(gl::CommandListRecorder& recorder,
-                                           GLushort sphereAreaLightBindingIndex,
-                                           GLushort rectAreaLightBindingIndex)
+                                GLushort sphereAreaLightBindingIndex,
+                                GLushort rectAreaLightBindingIndex)
 {
   update();
 

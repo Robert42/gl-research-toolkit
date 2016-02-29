@@ -11,9 +11,7 @@ namespace renderer {
 class LightBuffer
 {
 public:
-  Renderer& renderer;
-
-  LightBuffer(Renderer* renderer);
+  LightBuffer(scene::Scene& scene);
   ~LightBuffer();
 
   bool needRerecording() const;
