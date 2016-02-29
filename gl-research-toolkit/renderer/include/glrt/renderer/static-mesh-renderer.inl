@@ -5,34 +5,6 @@
 
 namespace glrt {
 namespace renderer {
-namespace implementation {
-
-inline StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder)
-  : recorder(recorder)
-{
-}
-
-inline void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
-{
-}
-
-inline void StaticMeshRecorder::unbindMaterial(const Uuid<Material>& material)
-{
-}
-
-inline void StaticMeshRecorder::bindMesh(const Uuid<StaticMesh>& mesh)
-{
-}
-
-inline void StaticMeshRecorder::unbindMesh(const Uuid<StaticMesh>& mesh)
-{
-}
-
-inline void StaticMeshRecorder::drawInstances(int num)
-{
-}
-
-} // namespace implementation
 
 
 template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>

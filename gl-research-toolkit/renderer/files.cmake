@@ -59,6 +59,7 @@ set(SOURCE_FILES
   src/glrt/renderer/scene-renderer.cpp
   src/glrt/renderer/static-mesh-buffer.cpp
   src/glrt/renderer/static-mesh-buffer-manager.cpp
+  src/glrt/renderer/static-mesh-renderer.cpp
   src/glrt/renderer/toolkit/reloadable-shader.cpp
   src/glrt/renderer/toolkit/shader-compiler.cpp
   src/glrt/renderer/toolkit/temp-shader-file.cpp
