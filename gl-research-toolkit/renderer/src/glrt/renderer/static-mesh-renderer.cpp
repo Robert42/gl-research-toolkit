@@ -9,20 +9,19 @@ namespace renderer {
 namespace implementation {
 
 
-StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, StaticMeshBufferManager& staticMeshBufferManager)
+StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, StaticMeshBufferManager& staticMeshBufferManager)
   : recorder(recorder),
     resourceManager(resourceManager),
-    materialBuffer(recorder, resourceManager),
     staticMeshBufferManager(staticMeshBufferManager)
 {
-  // #TODO fill the material Buffer here?
+  initMaterials(materialSet);
 }
 
 void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
 {
-  Q_ASSERT(materialBuffer.gpuAddresses.contains(material)); // if the material is not known, the mateiral wasn't initialized correctly
+  Q_ASSERT(materialGpuAddresses.contains(material)); // if the material is not known, the mateiral wasn't initialized correctly
 
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, materialBuffer.gpuAddresses.value(material));
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
 }
 
 void StaticMeshRecorder::unbindMaterial(const Uuid<Material>& material)
@@ -48,6 +47,18 @@ void StaticMeshRecorder::drawInstances(int num)
   StaticMeshBuffer* staticMesh = staticMeshBufferManager.meshForUuid(currentMesh);
 
   staticMesh->recordDraw(recorder, num);
+}
+
+void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
+{
+  MaterialBuffer::Initializer materialBufferInitializer(recorder, resourceManager);
+
+  materialBufferInitializer.begin(materialSet.length());
+  for(Uuid<Material> m : materialSet)
+    materialBufferInitializer.append(m);
+  this->materialBuffer = std::move(materialBufferInitializer.end());
+
+  materialGpuAddresses = materialBufferInitializer.gpuAddresses;
 }
 
 

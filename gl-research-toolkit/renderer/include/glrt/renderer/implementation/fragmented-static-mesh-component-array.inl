@@ -10,6 +10,11 @@ namespace glrt {
 namespace renderer {
 namespace implementation {
 
+inline bool materialLessThan(const Material& a, const Material& b, const Uuid<Material>& uuidA, const Uuid<Material>& uuidB)
+{
+  return concatenated_lessThan(a, b, uuidA, uuidB);
+}
+
 template<class T_StaticMeshComponent, class T_recorder>
 void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::UpdateCaller::handle_value(T_StaticMeshComponent** components, int index, recorder_type* recorder)
 {
@@ -28,7 +33,7 @@ bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::Upda
 template<class T_StaticMeshComponent, class T_recorder>
 bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialHandler::segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b)
 {
-  return concatenated_lessThan(a->material(), b->material(), a->materialUuid, b->materialUuid);
+  return materialLessThan(a->material(), b->material(), a->materialUuid, b->materialUuid);
 }
 
 template<class T_StaticMeshComponent, class T_recorder>

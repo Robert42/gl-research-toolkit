@@ -857,6 +857,14 @@ void Array<T, T_traits,T_allocator>::stable_sort(T_lessThan lessThan)
 }
 
 template<typename T, class T_traits, class T_allocator>
+template<typename T_lessThan>
+void Array<T, T_traits,T_allocator>::sort(T_lessThan lessThan)
+{
+  // #ISSUE-61 STL
+  std::sort(this->data(), this->data()+this->length(), lessThan);
+}
+
+template<typename T, class T_traits, class T_allocator>
 void Array<T, T_traits,T_allocator>::append_by_memcpy(const void* src, size_t num)
 {
   static_assert(std::is_same<byte, T>::value, "append_by_memcpy only allowed for an array of the type byte");

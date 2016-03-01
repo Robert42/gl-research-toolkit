@@ -7,12 +7,15 @@ namespace glrt {
 namespace renderer {
 namespace implementation {
 
+typedef typename glrt::scene::resources::Material Material;
+
+bool materialLessThan(const Material& a, const Material& b, const Uuid<Material>& uuidA, const Uuid<Material>& uuidB);
+
 template<class T_StaticMeshComponent, class T_recorder>
 struct FragmentedStaticMeshComponentArray : public FragmentedComponentArray<T_StaticMeshComponent, T_recorder*>
 {
   typedef T_recorder recorder_type;
   typedef FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder> this_type;
-  typedef typename glrt::scene::resources::Material Material;
   typedef FragmentedComponentArray<T_StaticMeshComponent, recorder_type*> parent_type;
   typedef typename parent_type::MovabilityHintHandler MovabilityHintHandler;
   typedef typename parent_type::MovabilityHint MovabilityHint;

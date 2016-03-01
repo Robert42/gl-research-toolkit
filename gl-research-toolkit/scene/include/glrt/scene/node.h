@@ -188,6 +188,13 @@ private:
 
 
 } // namespace scene
+
+template<>
+struct DefaultTraits<glrt::scene::Node::Component::MovabilityHint>
+{
+  typedef ArrayTraits_Primitive<glrt::scene::Node::Component::MovabilityHint> type;
+};
+
 } // namespace glrt
 
 #include "node.inl"

@@ -57,7 +57,7 @@ struct MaterialBuffer::Initializer
   int append(const Uuid<Material>& materialUuid);
   MaterialBuffer end();
 
-  QMap<Uuid<Material>, GLuint64> gpuAddresses; // #TODO use this or remove this :)
+  QMap<Uuid<Material>, GLuint64> gpuAddresses;
 
 private:
   Array<byte> data;

@@ -20,9 +20,9 @@ public:
   gl::CommandListRecorder& recorder;
   ResourceManager& resourceManager;
 
-  MaterialBuffer::Initializer materialBuffer;
+  MaterialBuffer materialBuffer;
 
-  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, StaticMeshBufferManager& staticMeshBufferManager);
+  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, StaticMeshBufferManager& staticMeshBufferManager);
 
   void bindMaterial(const Uuid<Material>& material);
   void unbindMaterial(const Uuid<Material>& material);
@@ -33,8 +33,11 @@ public:
   void drawInstances(int num);
 
 private:
+  QMap<Uuid<Material>, GLuint64> materialGpuAddresses;
   Uuid<StaticMesh> currentMesh;
   StaticMeshBufferManager& staticMeshBufferManager;
+
+  void initMaterials(const Array<Uuid<Material>>& materialSet);
 };
 
 } // namespace implementation

@@ -36,20 +36,37 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
   meshComponents.dirty = false;
   fragmentedArray.updateSegments(nullptr);
 
-  if(fragmentedArray.length() == 0)
+  const int length = fragmentedArray.length();
+
+  if(length == 0)
   {
     objectUniforms = std::move(gl::Buffer());
     return;
   }
 
+  QSet<Uuid<Material>> materialSet;
+  T_Component** components = fragmentedArray.data();
+  glrt::scene::resources::ResourceManager& resourceManager = components[0]->resourceManager();
+
+  for(int i=0; i<length; ++i)
+    materialSet.insert(components[i]->materialUuid);
+  Array<Uuid<Material>> allMaterials;
+  allMaterials.reserve(materialSet.size());
+  for(Uuid<Material> m : materialSet)
+    allMaterials.append(m);
+  allMaterials.sort([&resourceManager](Uuid<Material> a, Uuid<Material> b){return implementation::materialLessThan(resourceManager.materialForUuid(a), resourceManager.materialForUuid(b), a, b);});
+
   T_Recorder staticMeshRecorder(recorder,
-                                fragmentedArray.data()[0]->resourceManager(),
+                                resourceManager,
+                                allMaterials,
                                 staticMeshBufferManager);
 
   fragmentedArray.iterate(&staticMeshRecorder);
 
   objectUniforms = std::move(gl::Buffer(sizeof(glm::mat4) * fragmentedArray.length(), gl::Buffer::MAP_WRITE));
   updateObjectUniforms(0, fragmentedArray.length());
+
+  this->materialBuffer = std::move(staticMeshRecorder.materialBuffer);
 }
 
 template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
