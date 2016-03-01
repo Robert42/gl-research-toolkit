@@ -10,14 +10,19 @@ namespace glrt {
 namespace renderer {
 namespace implementation {
 
-struct StaticMeshRecorder
+struct StaticMeshRecorder final
 {
+public:
   typedef typename glrt::scene::resources::Material Material;
   typedef typename glrt::scene::resources::StaticMesh StaticMesh;
+  typedef typename glrt::scene::resources::ResourceManager ResourceManager;
 
   gl::CommandListRecorder& recorder;
+  ResourceManager& resourceManager;
 
-  StaticMeshRecorder(gl::CommandListRecorder& recorder);
+  MaterialBuffer::Initializer materialBuffer;
+
+  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, StaticMeshBufferManager& staticMeshBufferManager);
 
   void bindMaterial(const Uuid<Material>& material);
   void unbindMaterial(const Uuid<Material>& material);
@@ -26,23 +31,25 @@ struct StaticMeshRecorder
   void unbindMesh(const Uuid<StaticMesh>& mesh);
 
   void drawInstances(int num);
+
+private:
+  Uuid<StaticMesh> currentMesh;
+  StaticMeshBufferManager& staticMeshBufferManager;
 };
 
 } // namespace implementation
 
 
 template<class T_Component=scene::StaticMeshComponent, class T_Recorder=implementation::StaticMeshRecorder, typename T_FragmentedArray=typename implementation::FragmentedStaticMeshComponentArray<T_Component, T_Recorder>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
-class StaticMeshRenderer
+class StaticMeshRenderer final
 {
 public:
-  StaticMeshRenderer(scene::Scene& scene);
+  StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager);
 
   void update();
 
   bool needRerecording() const;
   void recordCommandList(gl::CommandListRecorder& recorder);
-
-  void updateObjectUniforms(); //#TODO call and define
 
 private:
   typedef T_FragmentedArray FragmentedArray;
@@ -51,6 +58,10 @@ private:
   StaticMeshComponentArray meshComponents;
   MaterialBuffer materialBuffer;
   gl::Buffer objectUniforms;
+  StaticMeshBufferManager& staticMeshBufferManager;
+
+  void updateMovableObjectUniforms();
+  void updateObjectUniforms(int begin, int end);
 };
 
 } // namespace renderer

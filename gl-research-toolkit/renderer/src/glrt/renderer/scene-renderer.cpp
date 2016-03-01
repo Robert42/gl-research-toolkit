@@ -22,7 +22,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
-    staticMeshRenderer(this->scene),
+    staticMeshRenderer(this->scene, staticMeshBufferManager),
     workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
     workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
     cameraUniformBuffer(sizeof(CameraUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr)
@@ -94,9 +94,11 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
   for(Material::Type m : materialTypes)
     materialShaderMetadata[qMakePair(pass, m)] = materialShader;
 
+  StaticMeshBuffer::enableVertexArrays();
   framebuffer->Bind(false);
   materialShader->stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
   framebuffer->BindBackBuffer();
+  StaticMeshBuffer::disableVertexArrays();
 }
 
 bool Renderer::needRerecording() const

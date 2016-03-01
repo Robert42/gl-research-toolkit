@@ -3,6 +3,7 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/resources/static-mesh.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
 
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
@@ -41,11 +42,16 @@ public:
 
   void draw(GLenum mode = GL_TRIANGLES) const;
 
+  void recordDraw(gl::CommandListRecorder& recorder);
+  void recordDraw(gl::CommandListRecorder& recorder, int numInstances);
+
 private:
   gl::Buffer* indexBuffer;
   gl::Buffer* vertexBuffer;
   int numberIndices;
   int numberVertices;
+
+  void recordBind(gl::CommandListRecorder& recorder);
 
   static StaticMeshBuffer _createAsArray(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices);
 };

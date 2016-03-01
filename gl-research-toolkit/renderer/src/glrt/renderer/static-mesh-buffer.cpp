@@ -187,6 +187,53 @@ void StaticMeshBuffer::draw(GLenum mode) const
     GL_CALL(glDrawArrays, mode, 0, numberVertices);
 }
 
+void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder, int numInstances)
+{
+  recordBind(recorder);
+
+  if(numInstances == 1)
+  {
+    recordDraw(recorder);
+    return;
+  }
+
+  // #TODO really use instancing
+
+  while(numInstances)
+    recordDraw(recorder);
+}
+
+void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder)
+{
+  if(indexBuffer != nullptr)
+    recorder.append_token_DrawElements(numberIndices, 0, 0, gl::CommandListRecorder::Strip::NO_STRIP);
+  else
+    recorder.append_token_DrawArrays(numberVertices, 0, gl::CommandListRecorder::Strip::NO_STRIP);
+}
+
+void StaticMeshBuffer::recordBind(gl::CommandListRecorder& recorder)
+{
+  Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type
+
+  GLuint64 offset = 0;
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_POSITION, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 3 * sizeof(float);
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_NORMAL, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 3 * sizeof(float);
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_TANGENT, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 3 * sizeof(float);
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_UV, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 2 * sizeof(float);
+
+  if(indexBuffer != nullptr)
+  {
+    recorder.append_token_ElementAddress(indexBuffer->gpuBufferAddress(), indexBuffer->GetSize());
+  }else
+  {
+    recorder.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::NO_STRIP);
+  }
+}
+
 
 } // namespace renderer
 } // namespace glrt

@@ -63,7 +63,7 @@ public:
 
   static void registerAngelScriptTypes();
 
-  bool operator<(const Material& other) const; // #TODO use this or remove this
+  bool operator<(const Material& other) const;
 };
 
 int qHash(Material::Type materialType);
