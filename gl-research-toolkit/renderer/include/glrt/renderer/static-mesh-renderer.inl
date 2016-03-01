@@ -65,7 +65,21 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
 void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::updateObjectUniforms(int begin, int end)
 {
-  // #TODO
+  const int length = end-begin;
+  FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
+
+  const int n = fragmentedArray.length();
+  T_Component** component = fragmentedArray.data();
+  glm::mat4* transformation  =reinterpret_cast<glm::mat4*>(objectUniforms.Map(begin * sizeof(glm::mat4), length * sizeof(glm::mat4), gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
+
+  Q_ASSERT(begin<=end);
+  Q_ASSERT(end<=n);
+
+
+  for(int i=0; i<length; ++i)
+    transformation[i] = component[i]->globalCoordFrame().toMat4();
+
+  objectUniforms.Unmap();
 }
 
 
