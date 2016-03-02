@@ -97,7 +97,9 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
 
   StaticMeshBuffer::enableVertexArrays();
   framebuffer->Bind(false);
+  // #TODO decouple the state capture and framebuffer from the shader: we should be able to use the same shader for different states and different statebuffers
   materialShader->stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
+  materialShader->framebuffer = framebuffer;
   framebuffer->BindBackBuffer();
   StaticMeshBuffer::disableVertexArrays();
 }
@@ -109,13 +111,21 @@ bool Renderer::needRerecording() const
 
 void Renderer::recordCommandlist()
 {
+  const glm::ivec2 videoResolution = glrt::System::windowSize();
+  // #FIXME support different materials
+  MaterialShader* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
+
+  glm::ivec2 tokenRange;
   gl::CommandListRecorder recorder;
 
   recorder.beginTokenList();
+  recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformBuffer.gpuBufferAddress());
   lightUniformBuffer.recordBinding(recorder);
   staticMeshRenderer.recordCommandList(recorder);
-  recorder.endTokenList();
+  tokenRange = recorder.endTokenList();
+
+  recorder.append_drawcall(tokenRange, &materialShader->stateCapture, materialShader->framebuffer);
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
 }

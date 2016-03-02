@@ -11,6 +11,7 @@ class MaterialShader
 {
   Q_DISABLE_COPY(MaterialShader)
 public:
+  gl::FramebufferObject* framebuffer = nullptr;
   gl::StatusCapture stateCapture;
   ReloadableShader shader;
 
