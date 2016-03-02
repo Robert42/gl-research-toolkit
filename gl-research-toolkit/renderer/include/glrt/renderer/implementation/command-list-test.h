@@ -39,17 +39,22 @@ class CommandListTest::AcceptGivenFramebuffer : public CommandListTest
   Q_OBJECT
 
 public:
+  typedef QSharedPointer<AcceptGivenFramebuffer> Ptr;
+
   gl::FramebufferObject* const framebuffer;
 
   AcceptGivenFramebuffer(gl::FramebufferObject* framebuffer);
 
   virtual void captureStateNow(gl::StatusCapture::Mode mode);
+  virtual void recordCommands() = 0;
 };
 
 class CommandListTest::SimpleMesh : public AcceptGivenFramebuffer
 {
   Q_OBJECT
 public:
+  typedef QSharedPointer<SimpleMesh> Ptr;
+
   SimpleMesh(gl::FramebufferObject* framebuffer, const QString& shaderName);
 
   void captureStateNow(gl::StatusCapture::Mode mode) override;
@@ -66,9 +71,12 @@ class CommandListTest::SimpleRect : public SimpleMesh
   Q_OBJECT
 
 public:
+  typedef QSharedPointer<SimpleRect> Ptr;
+
   SimpleRect(gl::FramebufferObject* framebuffer, const QString& shaderName, const glm::vec2& rectMin=glm::vec2(-1, -1), const glm::vec2& rectMax=glm::vec2(1, 1));
 
-  void captureStateNow(gl::StatusCapture::Mode mode) override;
+  void captureStateNow(gl::StatusCapture::Mode mode) final override;
+  void recordCommands() final override;
 
 private:
   typedef SimpleMesh parent_class;
@@ -81,6 +89,8 @@ class CommandListTest::OrangeFullscreenRect : public SimpleRect
   Q_OBJECT
 
 public:
+  typedef QSharedPointer<OrangeFullscreenRect> Ptr;
+
   OrangeFullscreenRect(gl::FramebufferObject* framebuffer);
 
 private:

@@ -1,4 +1,6 @@
 #include <glrt/renderer/implementation/command-list-test.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
+#include <glrt/system.h>
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/toolkit/array.h>
 
@@ -63,13 +65,30 @@ void CommandListTest::SimpleRect::captureStateNow(gl::StatusCapture::Mode mode)
   GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
 }
 
+void CommandListTest::SimpleRect::recordCommands()
+{
+  glm::ivec2 tokenRange;
+  gl::CommandListRecorder recorder;
+
+  const glm::ivec2 videoResolution = glrt::System::windowSize();
+
+  recorder.beginTokenList();
+  recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_POSITION, buffer.gpuBufferAddress());
+  recorder.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
+  tokenRange = recorder.endTokenList();
+
+  recorder.append_drawcall(tokenRange, &statusCapture, framebuffer);
+
+  this->commandList = gl::CommandListRecorder::compile(std::move(recorder));
+}
 
 CommandListTest::OrangeFullscreenRect::OrangeFullscreenRect(gl::FramebufferObject* framebuffer)
   : SimpleRect(framebuffer, "orange-fullscreen-rect")
 {
   shader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
                              QString("#version 450 core\n"
-                             "in layout(location=%0 vec2 position;\n"
+                             "in layout(location=%0) vec2 position;\n"
                              "void main()\n"
                              "{\n"
                              "gl_Position = vec4(position.x, position.y, 0, 1);"

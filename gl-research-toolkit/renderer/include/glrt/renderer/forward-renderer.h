@@ -3,6 +3,7 @@
 
 #include "scene-renderer.h"
 #include <glrt/renderer/sample-resource-manager.h>
+#include <glrt/renderer/implementation/command-list-test.h>
 
 namespace glrt {
 namespace renderer {
@@ -22,6 +23,9 @@ protected:
   void applyFramebuffer() override;
 
 private:
+  typedef  implementation::CommandListTest CommandListTest;
+  CommandListTest::AcceptGivenFramebuffer::Ptr commandListTest;
+
   static QSet<QString> preprocessorBlock();
 };
 

@@ -16,6 +16,10 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_OPAQUE}, Pass::FORWARD_PASS);
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_MASKED}, Pass::FORWARD_PASS);
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS);
+
+  commandListTest = CommandListTest::AcceptGivenFramebuffer::Ptr(new CommandListTest::OrangeFullscreenRect(&framebuffer));
+  commandListTest->captureStateNow(gl::StatusCapture::Mode::TRIANGLES);
+  commandListTest->recordCommands();
 }
 
 void ForwardRenderer::clearFramebuffer()
@@ -31,6 +35,7 @@ void ForwardRenderer::clearFramebuffer()
 
 void ForwardRenderer::callExtraCommandLists()
 {
+  commandListTest->draw();
 }
 
 void ForwardRenderer::applyFramebuffer()
