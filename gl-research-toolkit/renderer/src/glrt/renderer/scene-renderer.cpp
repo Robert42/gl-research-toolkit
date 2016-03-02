@@ -52,6 +52,7 @@ void Renderer::render()
 
   applyFramebuffer();
 
+  cameraUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   visualizeCameras.render();
   visualizeSphereAreaLights.render();
   visualizeRectAreaLights.render();
