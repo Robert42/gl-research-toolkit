@@ -348,6 +348,12 @@ struct DefaultTraits<bool>
   typedef ArrayTraits_Primitive<bool> type;
 };
 
+template<>
+struct DefaultTraits<float>
+{
+  typedef ArrayTraits_Primitive<float> type;
+};
+
 template<typename T>
 struct DefaultTraits<T*>
 {
