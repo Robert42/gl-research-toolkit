@@ -50,6 +50,7 @@ public:
 
 protected:
   virtual void clearFramebuffer() = 0;
+  virtual void callExtraCommandLists(){}
   virtual void applyFramebuffer() = 0;
 
   void appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);

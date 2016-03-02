@@ -18,6 +18,7 @@ public:
 
 protected:
   void clearFramebuffer() override;
+  void callExtraCommandLists() override;
   void applyFramebuffer() override;
 
 private:

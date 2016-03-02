@@ -29,6 +29,10 @@ void ForwardRenderer::clearFramebuffer()
   framebuffer.BindBackBuffer();
 }
 
+void ForwardRenderer::callExtraCommandLists()
+{
+}
+
 void ForwardRenderer::applyFramebuffer()
 {
   framebuffer.BindRead();
