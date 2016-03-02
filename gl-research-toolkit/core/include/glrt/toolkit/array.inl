@@ -891,7 +891,7 @@ void Array<T, T_traits,T_allocator>::resize(int newSize)
   if(newSize <= 0)
     clear();
   else
-    _length = 0;
+    _length = newSize;
 }
 
 
