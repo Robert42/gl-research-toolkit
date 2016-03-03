@@ -5,8 +5,8 @@
 #include <glhelper/framebufferobject.hpp>
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>
-#include <glrt/renderer/gl/command-list.h>
-#include <glrt/renderer/gl/status-capture.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
+
 
 namespace glrt {
 namespace renderer {
@@ -81,6 +81,9 @@ public:
   void captureStateNow(gl::StatusCapture::Mode mode) final override;
   void recordCommands() final override;
 
+protected:
+  virtual void recordBindingStuff(gl::CommandListRecorder& recorder){}
+
 private:
   typedef SimpleMesh parent_class;
 
@@ -108,6 +111,9 @@ public:
   typedef QSharedPointer<Orange3dRect> Ptr;
 
   Orange3dRect(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress);
+
+protected:
+  void recordBindingStuff(gl::CommandListRecorder& recorder) override;
 
 private:
   typedef SimpleRect parent_class;

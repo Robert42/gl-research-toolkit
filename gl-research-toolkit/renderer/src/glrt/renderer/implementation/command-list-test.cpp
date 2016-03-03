@@ -1,5 +1,4 @@
 #include <glrt/renderer/implementation/command-list-test.h>
-#include <glrt/renderer/gl/command-list-recorder.h>
 #include <glrt/system.h>
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/toolkit/array.h>
@@ -81,6 +80,7 @@ void CommandListTest::SimpleRect::recordCommands()
   recorder.beginTokenList();
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_POSITION, buffer.gpuBufferAddress());
+  recordBindingStuff(recorder);
 
   if(useIndices)
   {
@@ -127,10 +127,17 @@ CommandListTest::Orange3dRect::Orange3dRect(gl::FramebufferObject* framebuffer, 
   shader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
                              QString("#version 450 core\n"
                              "in layout(location=%0) vec2 position;\n"
+                             "\n"
+                             "layout(binding=%1, std140) uniform SceneBlock\n"
+                             "{\n"
+                             "  mat4 view_projection;\n"
+                             "  vec3 camera_position;\n"
+                             "}scene;\n"
+                             "\n"
                              "void main()\n"
                              "{\n"
-                             "gl_Position = vec4(position.x, position.y, 0, 1);"
-                             "}\n").arg(VERTEX_ATTRIBUTE_LOCATION_POSITION).toStdString(),
+                             "gl_Position = scene.view_projection * vec4(position.x, position.y, 0, 1);"
+                             "}\n").arg(VERTEX_ATTRIBUTE_LOCATION_POSITION).arg(UNIFORM_BINDING_SCENE_BLOCK).toStdString(),
                              "main.cpp (orange vertex)");
   shader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
                              "#version 450 core\n"
@@ -143,6 +150,10 @@ CommandListTest::Orange3dRect::Orange3dRect(gl::FramebufferObject* framebuffer, 
   shader.CreateProgram();
 }
 
+void CommandListTest::Orange3dRect::recordBindingStuff(gl::CommandListRecorder& recorder)
+{
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformAddress);
+}
 
 
 } // namespace implementation
