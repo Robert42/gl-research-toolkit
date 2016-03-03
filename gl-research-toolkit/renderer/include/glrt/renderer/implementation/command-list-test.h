@@ -73,6 +73,8 @@ class CommandListTest::SimpleRect : public SimpleMesh
 public:
   typedef QSharedPointer<SimpleRect> Ptr;
 
+  bool useIndices = false;
+
   SimpleRect(gl::FramebufferObject* framebuffer, const QString& shaderName, const glm::vec2& rectMin=glm::vec2(-1, -1), const glm::vec2& rectMax=glm::vec2(1, 1));
 
   void captureStateNow(gl::StatusCapture::Mode mode) final override;
@@ -81,7 +83,7 @@ public:
 private:
   typedef SimpleMesh parent_class;
 
-  gl::Buffer buffer;
+  gl::Buffer buffer, indexBuffer;
 };
 
 class CommandListTest::OrangeFullscreenRect : public SimpleRect

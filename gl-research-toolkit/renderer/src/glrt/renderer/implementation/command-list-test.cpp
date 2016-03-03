@@ -54,14 +54,20 @@ CommandListTest::SimpleRect::SimpleRect(gl::FramebufferObject* framebuffer, cons
                                   rectMin.x, rectMax.y,
                                   rectMax.x, rectMin.y,
                                   rectMax.x, rectMax.y};
+  const Array<quint16> indices = {0, 1, 2, 2, 1, 3};
   buffer = std::move(gl::Buffer(positions.length()*sizeof(float), gl::Buffer::UsageFlag::IMMUTABLE, positions.data()));
+  indexBuffer = std::move(gl::Buffer(indices.length()*sizeof(quint16), gl::Buffer::UsageFlag::IMMUTABLE, indices.data()));
+
+  useIndices = true;
 }
 
 void CommandListTest::SimpleRect::captureStateNow(gl::StatusCapture::Mode mode)
 {
   GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_POSITION, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
   GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
+
   parent_class::captureStateNow(mode);
+
   GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
 }
 
@@ -75,7 +81,16 @@ void CommandListTest::SimpleRect::recordCommands()
   recorder.beginTokenList();
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_POSITION, buffer.gpuBufferAddress());
-  recorder.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
+
+  if(useIndices)
+  {
+    recorder.append_token_ElementAddress(indexBuffer.gpuBufferAddress(), sizeof(quint16));
+    recorder.append_token_DrawElements(6, 0, 0, gl::CommandListRecorder::Strip::NO_STRIP);
+  }else
+  {
+    recorder.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
+  }
+
   tokenRange = recorder.endTokenList();
 
   recorder.append_drawcall(tokenRange, &statusCapture, framebuffer);
