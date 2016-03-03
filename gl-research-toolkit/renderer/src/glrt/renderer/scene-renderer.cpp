@@ -47,7 +47,9 @@ void Renderer::render()
   clearFramebuffer();
 
   workaroundFramebuffer.Bind(false);
-  //commandList.call(); #TODO uncomment
+  /* #TODO uncomment
+  commandList.call();
+  */
   callExtraCommandLists();
   workaroundFramebuffer.BindBackBuffer();
 
