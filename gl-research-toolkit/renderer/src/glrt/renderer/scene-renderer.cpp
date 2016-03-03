@@ -170,6 +170,11 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   cameraUniformBuffer.Unmap();
 }
 
+GLuint64 Renderer::cameraUniformAddress() const
+{
+  return cameraUniformBuffer.gpuBufferAddress();
+}
+
 
 } // namespace renderer
 } // namespace glrt

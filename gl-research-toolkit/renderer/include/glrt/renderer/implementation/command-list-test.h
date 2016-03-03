@@ -19,6 +19,7 @@ class CommandListTest : public QObject
 
 public:
   class AcceptGivenFramebuffer;
+  class Orange3dRect;
   class OrangeFullscreenRect;
   class SimpleMesh;
   class SimpleRect;
@@ -97,6 +98,21 @@ public:
 
 private:
   typedef SimpleRect parent_class;
+};
+
+class CommandListTest::Orange3dRect : public SimpleRect
+{
+  Q_OBJECT
+
+public:
+  typedef QSharedPointer<Orange3dRect> Ptr;
+
+  Orange3dRect(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress);
+
+private:
+  typedef SimpleRect parent_class;
+
+  const GLuint64 cameraUniformAddress;
 };
 
 

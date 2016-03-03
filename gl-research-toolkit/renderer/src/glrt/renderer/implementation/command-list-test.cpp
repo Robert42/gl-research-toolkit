@@ -120,6 +120,30 @@ CommandListTest::OrangeFullscreenRect::OrangeFullscreenRect(gl::FramebufferObjec
   shader.CreateProgram();
 }
 
+CommandListTest::Orange3dRect::Orange3dRect(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress)
+  : SimpleRect(framebuffer, "orange-screen-rect"),
+    cameraUniformAddress(cameraUniformAddress)
+{
+  shader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
+                             QString("#version 450 core\n"
+                             "in layout(location=%0) vec2 position;\n"
+                             "void main()\n"
+                             "{\n"
+                             "gl_Position = vec4(position.x, position.y, 0, 1);"
+                             "}\n").arg(VERTEX_ATTRIBUTE_LOCATION_POSITION).toStdString(),
+                             "main.cpp (orange vertex)");
+  shader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
+                             "#version 450 core\n"
+                             "out vec4 color;\n"
+                             "void main()\n"
+                             "{\n"
+                             "color = vec4(1, 0.5, 0, 1);"
+                             "}\n",
+                             "main.cpp (orange fragment)");
+  shader.CreateProgram();
+}
+
+
 
 } // namespace implementation
 } // namespace renderer

@@ -55,6 +55,8 @@ protected:
 
   void appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
 
+  GLuint64 cameraUniformAddress() const;
+
 private:
   struct CameraUniformBlock
   {
