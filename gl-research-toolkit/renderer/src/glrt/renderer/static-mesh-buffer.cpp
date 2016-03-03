@@ -228,9 +228,6 @@ void StaticMeshBuffer::recordBind(gl::CommandListRecorder& recorder)
   if(indexBuffer != nullptr)
   {
     recorder.append_token_ElementAddress(indexBuffer->gpuBufferAddress(), sizeof(index_type));
-  }else
-  {
-    recorder.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::NO_STRIP);
   }
 }
 
