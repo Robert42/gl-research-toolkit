@@ -100,10 +100,12 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
 
   StaticMeshBuffer::enableVertexArrays();
   framebuffer->Bind(false);
+  materialShader->shader.shaderObject.Activate();
   // #TODO decouple the state capture and framebuffer from the shader: we should be able to use the same shader for different states and different statebuffers
   materialShader->stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
   materialShader->framebuffer = framebuffer;
   framebuffer->BindBackBuffer();
+  gl::ShaderObject::Deactivate();
   StaticMeshBuffer::disableVertexArrays();
 }
 
@@ -124,6 +126,7 @@ void Renderer::recordCommandlist()
   recorder.beginTokenList();
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, cameraUniformBuffer.gpuBufferAddress());
   lightUniformBuffer.recordBinding(recorder);
   staticMeshRenderer.recordCommandList(recorder);
   tokenRange = recorder.endTokenList();
