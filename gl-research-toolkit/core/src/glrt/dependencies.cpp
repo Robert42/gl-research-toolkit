@@ -47,6 +47,21 @@ QDebug operator<<(QDebug d, const glm::ivec4& v)
   return d << glm::to_string(v).c_str();
 }
 
+QDebug operator<<(QDebug d, const glm::uvec2& v)
+{
+  return d << glm::to_string(v).c_str();
+}
+
+QDebug operator<<(QDebug d, const glm::uvec3& v)
+{
+  return d << glm::to_string(v).c_str();
+}
+
+QDebug operator<<(QDebug d, const glm::uvec4& v)
+{
+  return d << glm::to_string(v).c_str();
+}
+
 QDebug operator<<(QDebug d, const glm::mat2& v)
 {
   return d << glm::to_string(v).c_str();

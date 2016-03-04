@@ -110,28 +110,42 @@ void PRINT_VALUE(in bvec4 v)
   implement_print_value(GLSL_DEBUGGING_TYPE_BOOL(4), value);
 }
 
-void PRINT_VALUE(in int v)
+void PRINT_VALUE(in int32_t v)
 {
   ivec4 value = ivec4(v, 0, 0, 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(1), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(1), value);
+}
+
+void PRINT_VALUE(in uint32_t v)
+{
+  ivec4 value = ivec4(int(v), 0, 0, 0);
+  implement_print_value(GLSL_DEBUGGING_TYPE_UINT32(1), value);
+}
+
+void PRINT_VALUE(in uint64_t v)
+{
+  uint32_t lower_bits = uint32_t(v&0xffffffff);
+  uint32_t upper_bits = uint32_t(v >> 32);
+  ivec4 value = ivec4(int(lower_bits), int(upper_bits), 0, 0);
+  implement_print_value(GLSL_DEBUGGING_TYPE_UINT64(1), value);
 }
 
 void PRINT_VALUE(in ivec2 v)
 {
   ivec4 value = ivec4(ivec2(v), 0, 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(2), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(2), value);
 }
 
 void PRINT_VALUE(in ivec3 v)
 {
   ivec4 value = ivec4(ivec3(v), 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(3), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(3), value);
 }
 
 void PRINT_VALUE(in ivec4 v)
 {
   ivec4 value = ivec4(v);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(4), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(4), value);
 }
 
 void PRINT_VALUE(in float v)

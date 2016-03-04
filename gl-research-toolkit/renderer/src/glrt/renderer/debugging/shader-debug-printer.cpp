@@ -30,7 +30,7 @@ struct ShaderDebugPrinter::WholeBuffer
 
 
 template<typename T, typename T_in>
-inline void ShaderDebugPrinter::printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize=false)
+inline void ShaderDebugPrinter::printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize)
 {
   switch(dimension)
   {
@@ -51,6 +51,19 @@ inline void ShaderDebugPrinter::printVectorChunk(int dimension, const char* scal
   default:
     Q_UNREACHABLE();
   }
+}
+
+
+inline void ShaderDebugPrinter::ShaderDebugPrinter::printUint64(const glm::ivec4& input)
+{
+  quint64 value;
+
+  quint64 lower = quint32(input[0]);
+  quint64 upper = quint32(input[1]);
+
+  value = lower | (upper << 32);
+
+  qDebug() << "uint64"  << value;
 }
 
 template<typename T, typename T_in>
@@ -107,8 +120,12 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 {
   if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_BOOL(1)[0])
     printVectorChunk<bool>(chunk.type.y, "bool", "b", chunk.integerValues);
-  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_INT(1)[0])
-    printVectorChunk<int>(chunk.type.y, "int", "i", chunk.integerValues);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_INT32(1)[0])
+    printVectorChunk<qint32>(chunk.type.y, "int32", "i", chunk.integerValues);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_UINT32(1)[0])
+    printVectorChunk<quint32>(chunk.type.y, "uint32", "i", chunk.integerValues);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_UINT64(1)[0])
+    printUint64(chunk.integerValues);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_FLOAT(1)[0])
     printVectorChunk<float>(chunk.type.y, "float", "", chunk.floatValues[0], chunk.integerValues[0]);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_MAT(1,1)[0])

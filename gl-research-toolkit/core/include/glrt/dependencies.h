@@ -60,6 +60,10 @@ QDebug operator<<(QDebug d, const glm::ivec2& v);
 QDebug operator<<(QDebug d, const glm::ivec3& v);
 QDebug operator<<(QDebug d, const glm::ivec4& v);
 
+QDebug operator<<(QDebug d, const glm::uvec2& v);
+QDebug operator<<(QDebug d, const glm::uvec3& v);
+QDebug operator<<(QDebug d, const glm::uvec4& v);
+
 QDebug operator<<(QDebug d, const glm::mat2& v);
 QDebug operator<<(QDebug d, const glm::mat3& v);
 QDebug operator<<(QDebug d, const glm::mat4& v);

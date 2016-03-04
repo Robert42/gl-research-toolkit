@@ -48,7 +48,8 @@ private:
   void setMouseCoordinate(const glm::ivec2& mouseCoordinate, Uint32 windowId);
 
   template<typename T, typename T_in>
-  void printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize);
+  void printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize=false);
+  void printUint64(const glm::ivec4& input);
   void printRay(const glm::vec3& origin, const glm::vec3& direction, bool visualize);
   void printChunk(const Chunk& chunk);
 };
