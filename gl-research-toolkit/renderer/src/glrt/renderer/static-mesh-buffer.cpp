@@ -187,7 +187,7 @@ void StaticMeshBuffer::draw(GLenum mode) const
     GL_CALL(glDrawArrays, mode, 0, numberVertices);
 }
 
-void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder, int numInstances)
+void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder, int numInstances) const
 {
   recordBind(recorder);
 
@@ -203,7 +203,7 @@ void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder, int numInst
     recordDraw(recorder);
 }
 
-void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder)
+void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder) const
 {
   if(indexBuffer != nullptr)
     recorder.append_token_DrawElements(numberIndices, 0, 0, gl::CommandListRecorder::Strip::NO_STRIP);
@@ -211,7 +211,7 @@ void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder)
     recorder.append_token_DrawArrays(numberVertices, 0, gl::CommandListRecorder::Strip::NO_STRIP);
 }
 
-void StaticMeshBuffer::recordBind(gl::CommandListRecorder& recorder)
+void StaticMeshBuffer::recordBind(gl::CommandListRecorder& recorder) const
 {
   Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type
 
