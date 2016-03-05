@@ -3,7 +3,7 @@
 namespace glrt {
 namespace renderer {
 
-#define GLRT_ENABLE_COMMANDLISTTEST 0
+#define GLRT_ENABLE_COMMANDLISTTEST 1
 
 ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager)
   : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager),
