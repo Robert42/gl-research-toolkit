@@ -26,6 +26,7 @@ public:
   StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
   StaticMeshLoader& operator=(StaticMeshLoader&&) = delete;
 
+  void loadStaticMesh(Uuid<StaticMesh> uuid, const ResourceManager* resourceManager);
   void loadStaticMesh(Uuid<StaticMesh> uuid, const std::string& filepath);
   void loadStaticMesh(const Uuid<StaticMesh>& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices);
   void loadStaticMesh(const Uuid<StaticMesh>& uuid, const StaticMesh& data);
