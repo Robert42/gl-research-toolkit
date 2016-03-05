@@ -23,6 +23,8 @@
 namespace glrt {
 namespace renderer {
 
+#define GLRT_ENABLE_SCENE_RENDERING 0
+
 class Renderer : public QObject
 {
   Q_OBJECT

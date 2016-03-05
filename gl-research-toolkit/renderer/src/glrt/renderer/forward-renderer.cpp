@@ -3,12 +3,15 @@
 namespace glrt {
 namespace renderer {
 
+#define GLRT_ENABLE_COMMANDLISTTEST 0
+
 ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager)
   : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager),
     colorFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH24_STENCIL8),
     framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true)
 {
+#if GLRT_ENABLE_SCENE_RENDERING
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::PLAIN_COLOR, Material::Type::TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS);
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_MASKED}, Pass::DEPTH_PREPASS);
 
@@ -16,10 +19,13 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_OPAQUE}, Pass::FORWARD_PASS);
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_MASKED}, Pass::FORWARD_PASS);
   appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS);
+#endif
 
+#if GLRT_ENABLE_COMMANDLISTTEST
   commandListTest = CommandListTest::AcceptGivenFramebuffer::Ptr(new CommandListTest::Orange3dRect(&framebuffer, cameraUniformAddress()));
   commandListTest->captureStateNow(gl::StatusCapture::Mode::TRIANGLES);
   commandListTest->recordCommands();
+#endif
 }
 
 void ForwardRenderer::clearFramebuffer()

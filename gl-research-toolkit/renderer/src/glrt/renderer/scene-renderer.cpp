@@ -37,19 +37,20 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
+#if GLRT_ENABLE_SCENE_RENDERING
   if(needRerecording())
     recordCommandlist();
 
   updateCameraUniform();
   lightUniformBuffer.update();
   staticMeshRenderer.update();
-
+#endif
   clearFramebuffer();
 
   workaroundFramebuffer.Bind(false);
-  /* #TODO uncomment
+#if GLRT_ENABLE_SCENE_RENDERING
   commandList.call();
-  */
+#endif
   callExtraCommandLists();
   workaroundFramebuffer.BindBackBuffer();
 
