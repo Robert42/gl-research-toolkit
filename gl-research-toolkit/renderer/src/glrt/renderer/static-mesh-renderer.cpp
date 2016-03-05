@@ -46,6 +46,7 @@ void StaticMeshRecorder::drawInstances(int num)
 
   StaticMeshBuffer* staticMesh = staticMeshBufferManager.meshForUuid(currentMesh);
 
+  staticMesh->recordBind(recorder);
   staticMesh->recordDraw(recorder, num);
 }
 

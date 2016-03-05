@@ -42,6 +42,7 @@ public:
 
   void draw(GLenum mode = GL_TRIANGLES) const;
 
+  void recordBind(gl::CommandListRecorder& recorder) const;
   void recordDraw(gl::CommandListRecorder& recorder) const;
   void recordDraw(gl::CommandListRecorder& recorder, int numInstances) const;
 
@@ -50,8 +51,6 @@ private:
   gl::Buffer* vertexBuffer;
   int numberIndices;
   int numberVertices;
-
-  void recordBind(gl::CommandListRecorder& recorder) const;
 
   static StaticMeshBuffer _createAsArray(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices);
 };

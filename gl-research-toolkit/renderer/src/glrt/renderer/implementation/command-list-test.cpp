@@ -205,6 +205,7 @@ void CommandListTest::OrangeStaticMesh::recordCommands()
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformAddress);
 
+  staticMeshBuffer->recordBind(recorder);
   staticMeshBuffer->recordDraw(recorder);
 
   tokenRange = recorder.endTokenList();

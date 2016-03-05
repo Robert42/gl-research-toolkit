@@ -189,8 +189,6 @@ void StaticMeshBuffer::draw(GLenum mode) const
 
 void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder, int numInstances) const
 {
-  recordBind(recorder);
-
   if(numInstances == 1)
   {
     recordDraw(recorder);
