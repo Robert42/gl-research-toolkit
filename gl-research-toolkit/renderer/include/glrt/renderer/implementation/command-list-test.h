@@ -6,6 +6,7 @@
 #include <glhelper/shaderobject.hpp>
 #include <glhelper/buffer.hpp>
 #include <glrt/renderer/gl/command-list-recorder.h>
+#include <glrt/renderer/static-mesh-buffer.h>
 
 
 namespace glrt {
@@ -23,6 +24,7 @@ public:
   class OrangeFullscreenRect;
   class SimpleMesh;
   class SimpleRect;
+  class OrangeStaticMesh;
 
   typedef QSharedPointer<CommandListTest> Ptr;
 
@@ -82,7 +84,7 @@ public:
   void recordCommands() final override;
 
 protected:
-  virtual void recordBindingStuff(gl::CommandListRecorder& recorder){}
+  virtual void recordBindingStuff(gl::CommandListRecorder&){}
 
 private:
   typedef SimpleMesh parent_class;
@@ -119,6 +121,25 @@ private:
   typedef SimpleRect parent_class;
 
   const GLuint64 cameraUniformAddress;
+};
+
+class CommandListTest::OrangeStaticMesh : public SimpleMesh
+{
+  Q_OBJECT
+
+public:
+  typedef QSharedPointer<Orange3dRect> Ptr;
+
+  OrangeStaticMesh(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress, const StaticMeshBuffer* staticMeshBuffer);
+
+  void captureStateNow(gl::StatusCapture::Mode mode) override;
+  void recordCommands() override;
+
+private:
+  typedef SimpleMesh parent_class;
+
+  const GLuint64 cameraUniformAddress;
+  const StaticMeshBuffer* staticMeshBuffer;
 };
 
 

@@ -156,6 +156,65 @@ void CommandListTest::Orange3dRect::recordBindingStuff(gl::CommandListRecorder& 
 }
 
 
+CommandListTest::OrangeStaticMesh::OrangeStaticMesh(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress, const StaticMeshBuffer* staticMeshBuffer)
+  : SimpleMesh(framebuffer, "orange-static-mesh"),
+    cameraUniformAddress(cameraUniformAddress),
+    staticMeshBuffer(staticMeshBuffer)
+{
+  shader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
+                             QString("#version 450 core\n"
+                             "in layout(location=%0) vec3 position;\n"
+                             "\n"
+                             "layout(binding=%1, std140) uniform SceneBlock\n"
+                             "{\n"
+                             "  mat4 view_projection;\n"
+                             "  vec3 camera_position;\n"
+                             "}scene;\n"
+                             "\n"
+                             "void main()\n"
+                             "{\n"
+                             "gl_Position = scene.view_projection * vec4(position.x, position.y, 0, 1);"
+                             "}\n").arg(VERTEX_ATTRIBUTE_LOCATION_POSITION).arg(UNIFORM_BINDING_SCENE_BLOCK).toStdString(),
+                             "main.cpp (orange vertex)");
+  shader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
+                             "#version 450 core\n"
+                             "out vec4 color;\n"
+                             "void main()\n"
+                             "{\n"
+                             "color = vec4(1, 0.5, 0, 1);"
+                             "}\n",
+                             "main.cpp (orange fragment)");
+  shader.CreateProgram();
+}
+
+void CommandListTest::OrangeStaticMesh::captureStateNow(gl::StatusCapture::Mode mode)
+{
+  StaticMeshBuffer::enableVertexArrays();
+  parent_class::captureStateNow(mode);
+  StaticMeshBuffer::disableVertexArrays();
+}
+
+void CommandListTest::OrangeStaticMesh::recordCommands()
+{
+  glm::ivec2 tokenRange;
+  gl::CommandListRecorder recorder;
+
+  const glm::ivec2 videoResolution = glrt::System::windowSize();
+
+  recorder.beginTokenList();
+  recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformAddress);
+
+  staticMeshBuffer->recordDraw(recorder);
+
+  tokenRange = recorder.endTokenList();
+
+  recorder.append_drawcall(tokenRange, &statusCapture, framebuffer);
+
+  this->commandList = gl::CommandListRecorder::compile(std::move(recorder));
+}
+
+
 } // namespace implementation
 } // namespace renderer
 } // namespace glrt
