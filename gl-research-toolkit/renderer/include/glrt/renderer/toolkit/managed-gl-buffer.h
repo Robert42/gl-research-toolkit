@@ -42,7 +42,7 @@ struct ManagedGLBuffer_NoHeader
   }
 
 private:
-  int _n_elements;
+  int _n_elements = 0;
 };
 
 template<typename T_header=SimpleShaderStorageBuffer_DefaultHeader, int minDistanceForDifferentSynchronizations=256>
