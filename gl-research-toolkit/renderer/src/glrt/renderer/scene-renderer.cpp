@@ -40,11 +40,11 @@ void Renderer::render()
 #if GLRT_ENABLE_SCENE_RENDERING
   if(needRerecording())
     recordCommandlist();
-
-  updateCameraUniform();
   lightUniformBuffer.update();
   staticMeshRenderer.update();
 #endif
+
+  updateCameraUniform();
   clearFramebuffer();
 
   workaroundFramebuffer.Bind(false);
