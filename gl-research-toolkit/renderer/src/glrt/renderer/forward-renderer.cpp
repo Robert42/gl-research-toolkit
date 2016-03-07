@@ -22,7 +22,8 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
 #endif
 
 #if GLRT_ENABLE_COMMANDLISTTEST
-  commandListTest = CommandListTest::AcceptGivenFramebuffer::Ptr(new CommandListTest::OrangeStaticMesh(&framebuffer, cameraUniformAddress(), resourceManager->staticMeshBufferManager->meshForUuid(SampleResourceManager::suzanneLowPoly())));
+  //commandListTest = CommandListTest::AcceptGivenFramebuffer::Ptr(new CommandListTest::OrangeStaticMesh(&framebuffer, cameraUniformAddress(), resourceManager->staticMeshBufferManager->meshForUuid(SampleResourceManager::suzanneLowPoly())));
+  commandListTest = CommandListTest::AcceptGivenFramebuffer::Ptr(new CommandListTest::Orange3dRect(&framebuffer, cameraUniformAddress()));
   commandListTest->captureStateNow(gl::StatusCapture::Mode::TRIANGLES);
   commandListTest->recordCommands();
 #endif
