@@ -25,7 +25,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
     workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
-    cameraUniformBuffer(sizeof(CameraUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr)
+    sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
@@ -56,7 +57,9 @@ void Renderer::render()
 
   applyFramebuffer();
 
-  cameraUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+  // #TODO: when usign command lists, is it possible to use the same biningsindex, if it's once vertex and once fragment shader?
+  sceneVertexUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_VERTEX_BLOCK);
+  sceneFragmentUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK);
   visualizeCameras.render();
   visualizeSphereAreaLights.render();
   visualizeRectAreaLights.render();
@@ -126,8 +129,8 @@ void Renderer::recordCommandlist()
 
   recorder.beginTokenList();
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformBuffer.gpuBufferAddress());
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, cameraUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
   lightUniformBuffer.recordBinding(recorder);
   staticMeshRenderer.recordCommandList(recorder);
   tokenRange = recorder.endTokenList();
@@ -168,15 +171,23 @@ void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
 
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
-  CameraUniformBlock& cameraUniformData =  *reinterpret_cast<CameraUniformBlock*>(cameraUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  cameraUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
-  cameraUniformData.camera_position = cameraParameter.position;
-  cameraUniformBuffer.Unmap();
+  SceneVertexUniformBlock& sceneVertexUniformData =  *reinterpret_cast<SceneVertexUniformBlock*>(sceneVertexUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  sceneVertexUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  sceneVertexUniformBuffer.Unmap();
+
+  SceneFragmentUniformBlock& sceneFragmentUniformData =  *reinterpret_cast<SceneFragmentUniformBlock*>(sceneFragmentUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  sceneFragmentUniformData.camera_position = cameraParameter.position;
+  sceneFragmentUniformBuffer.Unmap();
 }
 
-GLuint64 Renderer::cameraUniformAddress() const
+GLuint64 Renderer::sceneVertexUniformAddress() const
 {
-  return cameraUniformBuffer.gpuBufferAddress();
+  return sceneVertexUniformBuffer.gpuBufferAddress();
+}
+
+GLuint64 Renderer::sceneFragmentUniformAddress() const
+{
+  return sceneFragmentUniformBuffer.gpuBufferAddress();
 }
 
 

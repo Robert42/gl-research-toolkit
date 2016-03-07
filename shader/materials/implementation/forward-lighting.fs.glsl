@@ -2,7 +2,12 @@
 
 #include <lighting/rendering-equation.glsl>
 
-#include "common-uniform-blocks.glsl"
+#include <glrt/glsl/layout-constants.h>
+
+layout(binding=UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, std140) uniform SceneFragmentBlock
+{
+  vec3 camera_position;
+}scene;
 
 out vec4 color;
 

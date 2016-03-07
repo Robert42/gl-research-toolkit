@@ -1,6 +1,16 @@
 #include "output-block.vs.glsl"
 
-#include "common-uniform-blocks.glsl"
+#include <glrt/glsl/layout-constants.h>
+
+layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstanceBlock
+{
+  mat4 model_matrix;
+}mesh_instance;
+
+layout(binding=UNIFORM_BINDING_SCENE_VERTEX_BLOCK, std140) uniform SceneVertexBlock
+{
+  mat4 view_projection;
+}scene;
 
 layout(location=VERTEX_ATTRIBUTE_LOCATION_POSITION) in vec3 vertex_position;
 layout(location=VERTEX_ATTRIBUTE_LOCATION_NORMAL) in vec3 vertex_normal;

@@ -25,7 +25,6 @@ add_custom_target(
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
   materials/implementation/common-implementation.vs.glsl
-  materials/implementation/common-uniform-blocks.glsl
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/input-block.fs.glsl
   materials/implementation/material-implementation.fs.glsl

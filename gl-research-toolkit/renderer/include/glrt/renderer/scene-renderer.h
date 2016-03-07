@@ -57,12 +57,17 @@ protected:
 
   void appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
 
-  GLuint64 cameraUniformAddress() const;
+  GLuint64 sceneVertexUniformAddress() const;
+  GLuint64 sceneFragmentUniformAddress() const;
 
 private:
-  struct CameraUniformBlock
+  struct SceneVertexUniformBlock
   {
     glm::mat4 view_projection_matrix;
+  };
+
+  struct SceneFragmentUniformBlock
+  {
     glm::vec3 camera_position;
     padding<float> _padding;
   };
@@ -74,7 +79,8 @@ private:
 
   gl::Texture2D workaroundFramebufferTexture;
   gl::FramebufferObject workaroundFramebuffer;
-  gl::Buffer cameraUniformBuffer;
+  gl::Buffer sceneVertexUniformBuffer;
+  gl::Buffer sceneFragmentUniformBuffer;
   gl::CommandList commandList;
 
   bool needRerecording() const;
