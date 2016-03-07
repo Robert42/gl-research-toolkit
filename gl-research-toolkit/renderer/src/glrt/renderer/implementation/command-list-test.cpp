@@ -28,7 +28,6 @@ void CommandListTest::AcceptGivenFramebuffer::captureStateNow(gl::StatusCapture:
   framebuffer->Bind(false);
   statusCapture = gl::StatusCapture::capture(mode);
   framebuffer->BindBackBuffer();
-  gl::ShaderObject::Deactivate();
 }
 
 
