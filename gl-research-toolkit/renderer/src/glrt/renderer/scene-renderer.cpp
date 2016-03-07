@@ -41,7 +41,6 @@ void Renderer::render()
 #if GLRT_ENABLE_SCENE_RENDERING
   if(needRerecording())
     recordCommandlist();
-  lightUniformBuffer.update();
   staticMeshRenderer.update();
 #endif
 

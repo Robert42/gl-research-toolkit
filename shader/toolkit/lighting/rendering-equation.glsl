@@ -63,7 +63,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
 
   get_sphere_lights(num_sphere_lights, sphere_lights);
 
-  for(int i=0; i<num_sphere_lights; ++i)
+  for(uint32_t i=0; i<num_sphere_lights; ++i)
   {
     SphereAreaLight light = sphere_lights[i];
     
@@ -86,7 +86,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
 
   get_rect_lights(num_rect_lights, rect_lights);
 
-  for(int i=0; i<num_rect_lights; ++i))
+  for(uint32_t i=0; i<num_rect_lights; ++i)
   {
     RectAreaLight light = rect_lights[i];
     
