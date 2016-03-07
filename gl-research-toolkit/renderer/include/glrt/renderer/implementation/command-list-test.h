@@ -24,6 +24,7 @@ public:
   class OrangeFullscreenRect;
   class SimpleMesh;
   class SimpleRect;
+  class OrangeStaticMeshVertexBase;
   class OrangeStaticMesh;
 
   typedef QSharedPointer<CommandListTest> Ptr;
@@ -123,22 +124,43 @@ private:
   const GLuint64 cameraUniformAddress;
 };
 
-class CommandListTest::OrangeStaticMesh : public SimpleMesh
+class CommandListTest::OrangeStaticMeshVertexBase : public SimpleMesh
 {
   Q_OBJECT
 
 public:
-  typedef QSharedPointer<Orange3dRect> Ptr;
+  typedef QSharedPointer<OrangeStaticMeshVertexBase> Ptr;
 
-  OrangeStaticMesh(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress, const StaticMeshBuffer* staticMeshBuffer);
+  OrangeStaticMeshVertexBase(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress);
 
-  void captureStateNow(gl::StatusCapture::Mode mode) override;
-  void recordCommands() override;
+  void recordCommands() final override;
+
+protected:
+  virtual void recordBindingStuff(gl::CommandListRecorder& recorder) = 0;
 
 private:
   typedef SimpleMesh parent_class;
 
   const GLuint64 cameraUniformAddress;
+};
+
+class CommandListTest::OrangeStaticMesh : public OrangeStaticMeshVertexBase
+{
+  Q_OBJECT
+
+public:
+  typedef QSharedPointer<OrangeStaticMesh> Ptr;
+
+  OrangeStaticMesh(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress, const StaticMeshBuffer* staticMeshBuffer);
+
+  void captureStateNow(gl::StatusCapture::Mode mode) override;
+
+protected:
+  void recordBindingStuff(gl::CommandListRecorder& recorder) override;
+
+private:
+  typedef OrangeStaticMeshVertexBase parent_class;
+
   const StaticMeshBuffer* staticMeshBuffer;
 };
 

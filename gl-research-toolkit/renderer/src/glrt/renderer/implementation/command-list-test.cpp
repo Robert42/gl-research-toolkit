@@ -156,10 +156,9 @@ void CommandListTest::Orange3dRect::recordBindingStuff(gl::CommandListRecorder& 
 }
 
 
-CommandListTest::OrangeStaticMesh::OrangeStaticMesh(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress, const StaticMeshBuffer* staticMeshBuffer)
-  : SimpleMesh(framebuffer, "orange-static-mesh"),
-    cameraUniformAddress(cameraUniformAddress),
-    staticMeshBuffer(staticMeshBuffer)
+CommandListTest::OrangeStaticMeshVertexBase::OrangeStaticMeshVertexBase(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress)
+  : parent_class(framebuffer, "orange-static-mesh-vertex-base"),
+    cameraUniformAddress(cameraUniformAddress)
 {
   shader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
                              QString("#version 450 core\n"
@@ -187,14 +186,7 @@ CommandListTest::OrangeStaticMesh::OrangeStaticMesh(gl::FramebufferObject* frame
   shader.CreateProgram();
 }
 
-void CommandListTest::OrangeStaticMesh::captureStateNow(gl::StatusCapture::Mode mode)
-{
-  StaticMeshBuffer::enableVertexArrays();
-  parent_class::captureStateNow(mode);
-  StaticMeshBuffer::disableVertexArrays();
-}
-
-void CommandListTest::OrangeStaticMesh::recordCommands()
+void CommandListTest::OrangeStaticMeshVertexBase::recordCommands()
 {
   glm::ivec2 tokenRange;
   gl::CommandListRecorder recorder;
@@ -205,14 +197,33 @@ void CommandListTest::OrangeStaticMesh::recordCommands()
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, cameraUniformAddress);
 
-  staticMeshBuffer->recordBind(recorder);
-  staticMeshBuffer->recordDraw(recorder);
+  recordBindingStuff(recorder);
 
   tokenRange = recorder.endTokenList();
 
   recorder.append_drawcall(tokenRange, &statusCapture, framebuffer);
 
   this->commandList = gl::CommandListRecorder::compile(std::move(recorder));
+}
+
+
+CommandListTest::OrangeStaticMesh::OrangeStaticMesh(gl::FramebufferObject* framebuffer, GLuint64 cameraUniformAddress, const StaticMeshBuffer* staticMeshBuffer)
+  : parent_class(framebuffer, cameraUniformAddress),
+    staticMeshBuffer(staticMeshBuffer)
+{
+}
+
+void CommandListTest::OrangeStaticMesh::captureStateNow(gl::StatusCapture::Mode mode)
+{
+  StaticMeshBuffer::enableVertexArrays();
+  parent_class::captureStateNow(mode);
+  StaticMeshBuffer::disableVertexArrays();
+}
+
+void CommandListTest::OrangeStaticMesh::recordBindingStuff(gl::CommandListRecorder& recorder)
+{
+  staticMeshBuffer->recordBind(recorder);
+  staticMeshBuffer->recordDraw(recorder);
 }
 
 
