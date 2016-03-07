@@ -171,7 +171,7 @@ CommandListTest::OrangeStaticMeshVertexBase::OrangeStaticMeshVertexBase(gl::Fram
                              "\n"
                              "void main()\n"
                              "{\n"
-                             "gl_Position = scene.view_projection * vec4(position.x, position.y, 0, 1);"
+                             "gl_Position = scene.view_projection * vec4(position.xyz, 1);"
                              "}\n").arg(VERTEX_ATTRIBUTE_LOCATION_POSITION).arg(UNIFORM_BINDING_SCENE_BLOCK).toStdString(),
                              "main.cpp (orange vertex)");
   shader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
