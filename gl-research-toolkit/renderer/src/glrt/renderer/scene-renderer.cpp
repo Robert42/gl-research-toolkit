@@ -115,7 +115,7 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
 
 bool Renderer::needRerecording() const
 {
-  return lightUniformBuffer.needRerecording() || staticMeshRenderer.needRerecording();
+  return staticMeshRenderer.needRerecording();
 }
 
 void Renderer::recordCommandlist()
@@ -131,7 +131,6 @@ void Renderer::recordCommandlist()
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
-  lightUniformBuffer.recordBinding(recorder);
   staticMeshRenderer.recordCommandList(recorder);
   tokenRange = recorder.endTokenList();
 
@@ -177,6 +176,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 
   SceneFragmentUniformBlock& sceneFragmentUniformData =  *reinterpret_cast<SceneFragmentUniformBlock*>(sceneFragmentUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   sceneFragmentUniformData.camera_position = cameraParameter.position;
+  sceneFragmentUniformData.lightData = lightUniformBuffer.updateLightData();
   sceneFragmentUniformBuffer.Unmap();
 }
 

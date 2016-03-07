@@ -11,18 +11,24 @@ namespace renderer {
 class LightBuffer
 {
 public:
+  struct LightData
+  {
+    GLuint64 sphereAreaLightsBuffer;
+    GLuint64 rectAreaLightsBuffer;
+    quint32 numSphereLights;
+    quint32 numRectLights;
+  };
+
   LightBuffer(scene::Scene& scene);
   ~LightBuffer();
 
-  bool needRerecording() const;
-  void update();
-
-  void recordBinding(gl::CommandListRecorder& recorder, GLushort sphereAreaLightBindingIndex, GLushort rectAreaLightBindingIndex);
-  void recordBinding(gl::CommandListRecorder& recorder);
+  const LightData& updateLightData();
 
 private:
   SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
   SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
+
+  LightData _lightData;
 };
 
 } // namespace renderer

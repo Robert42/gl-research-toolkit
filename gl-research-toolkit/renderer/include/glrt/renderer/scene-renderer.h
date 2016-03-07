@@ -70,6 +70,7 @@ private:
   {
     glm::vec3 camera_position;
     padding<float> _padding;
+    LightBuffer::LightData lightData;
   };
 
   LightBuffer lightUniformBuffer;

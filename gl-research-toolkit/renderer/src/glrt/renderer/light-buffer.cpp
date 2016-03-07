@@ -16,36 +16,20 @@ LightBuffer::~LightBuffer()
 {
 }
 
-void LightBuffer::update()
+const LightBuffer::LightData& LightBuffer::updateLightData()
 {
   sphereAreaShaderStorageBuffer.update();
   rectAreaShaderStorageBuffer.update();
+
+  // #FIXME get the real data
+  _lightData.numRectLights = 0;
+  _lightData.numSphereLights = 0;
+  _lightData.rectAreaLightsBuffer = 0;
+  _lightData.sphereAreaLightsBuffer = 0;
+
+  return _lightData;
 }
 
-
-bool LightBuffer::needRerecording() const
-{
-  return sphereAreaShaderStorageBuffer.needRerecording() || rectAreaShaderStorageBuffer.needRerecording();
-}
-
-
-void LightBuffer::recordBinding(gl::CommandListRecorder& recorder,
-                                GLushort sphereAreaLightBindingIndex,
-                                GLushort rectAreaLightBindingIndex)
-{
-  update();
-
-  sphereAreaShaderStorageBuffer.recordBinding(recorder, sphereAreaLightBindingIndex, gl::ShaderObject::ShaderType::FRAGMENT);
-  rectAreaShaderStorageBuffer.recordBinding(recorder, rectAreaLightBindingIndex, gl::ShaderObject::ShaderType::FRAGMENT);
-}
-
-
-void LightBuffer::recordBinding(gl::CommandListRecorder& recorder)
-{
-  recordBinding(recorder,
-                SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA,
-                SHADERSTORAGE_BINDING_LIGHTS_RECTAREA);
-}
 
 
 } // namespace renderer
