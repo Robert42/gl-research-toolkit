@@ -13,7 +13,7 @@ namespace glrt {
 namespace renderer {
 
 // #ISSUE-64: try out different values for <512, 4096> to find the fastest one
-template<class T_Component, typename T_FragmentedArray=typename implementation::FragmentedLightComponentArray<T_Component>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>, class T_array_header=implementation::SimpleShaderStorageBuffer_DefaultHeader>
+template<class T_Component, typename T_FragmentedArray=typename implementation::FragmentedLightComponentArray<T_Component>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
 class SimpleShaderStorageBuffer
 {
 public:
@@ -24,15 +24,16 @@ public:
   void update();
 
   bool needRerecording() const;
-  void recordBinding(gl::CommandListRecorder& recorder, GLushort bindingIndex, gl::ShaderObject::ShaderType shaderType);
+  int numElements() const;
+  GLuint64 gpuBufferAddress() const;
 
 private:
-  typedef SimpleShaderStorageBuffer<T_Component, T_FragmentedArray, T_BufferCapacityTraits,T_array_header> this_type;
+  typedef SimpleShaderStorageBuffer<T_Component, T_FragmentedArray, T_BufferCapacityTraits> this_type;
   typedef T_FragmentedArray FragmentedArray;
   typedef SyncedFragmentedComponentArray<T_Component, FragmentedArray> LightComponentArray;
 
   LightComponentArray lightComponents;
-  ManagedGLBuffer<LightData, T_BufferCapacityTraits, implementation::ManagedGLBuffer_Header_With_Num_Elements<T_array_header>> buffer;
+  ManagedGLBuffer<LightData, T_BufferCapacityTraits, implementation::ManagedGLBuffer_NoHeader> buffer;
 };
 
 } // namespace renderer

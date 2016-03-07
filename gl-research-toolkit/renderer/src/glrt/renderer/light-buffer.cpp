@@ -21,11 +21,10 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
   sphereAreaShaderStorageBuffer.update();
   rectAreaShaderStorageBuffer.update();
 
-  // #FIXME get the real data
-  _lightData.numRectLights = 0;
-  _lightData.numSphereLights = 0;
-  _lightData.rectAreaLightsBuffer = 0;
-  _lightData.sphereAreaLightsBuffer = 0;
+  _lightData.numRectLights = rectAreaShaderStorageBuffer.numElements();
+  _lightData.numSphereLights = sphereAreaShaderStorageBuffer.numElements();
+  _lightData.rectAreaLightsBuffer = rectAreaShaderStorageBuffer.gpuBufferAddress();
+  _lightData.sphereAreaLightsBuffer = sphereAreaShaderStorageBuffer.gpuBufferAddress();
 
   return _lightData;
 }

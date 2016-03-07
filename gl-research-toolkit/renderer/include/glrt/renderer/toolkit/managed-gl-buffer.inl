@@ -48,6 +48,12 @@ void ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::setNumElemen
 }
 
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
+int ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::numElements() const
+{
+  return header.n_elements();
+}
+
+template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 int ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::byte_for_index(int index)
 {
   return T_header_traits::header_size() + sizeof(T_element) * index;

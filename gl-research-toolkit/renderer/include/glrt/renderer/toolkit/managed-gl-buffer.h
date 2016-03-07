@@ -114,6 +114,7 @@ public:
   void markElementDirty(int index);
   void setHeader(const header_type& header);
   void setNumElements(int numElements);
+  int numElements() const;
 
   int firstElementToCopy() const;
   bool needsUpdate() const;
