@@ -44,7 +44,7 @@ public:
 
   void recordBind(gl::CommandListRecorder& recorder) const;
   void recordDraw(gl::CommandListRecorder& recorder) const;
-  void recordDraw(gl::CommandListRecorder& recorder, int numInstances) const;
+  void recordDrawInstances(gl::CommandListRecorder& recorder, int begin, int end) const;
 
 private:
   gl::Buffer* indexBuffer;

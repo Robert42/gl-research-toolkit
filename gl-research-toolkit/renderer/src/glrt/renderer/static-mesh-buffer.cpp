@@ -187,18 +187,17 @@ void StaticMeshBuffer::draw(GLenum mode) const
     GL_CALL(glDrawArrays, mode, 0, numberVertices);
 }
 
-void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder, int numInstances) const
+void StaticMeshBuffer::recordDrawInstances(gl::CommandListRecorder& recorder, int begin, int end) const
 {
-  if(numInstances == 1)
+  int numInstances = end-begin;
+
+  if(indexBuffer != nullptr)
   {
-    recordDraw(recorder);
-    return;
+    recorder.append_token_DrawElementsInstanced(GL_TRIANGLES, numberIndices, numInstances, 0, 0, begin);
+  }else
+  {
+    recorder.append_token_DrawArraysInstanced(GL_TRIANGLES, numberIndices, numInstances, 0, begin);
   }
-
-  // #TODO really use instancing
-
-  while(numInstances)
-    recordDraw(recorder);
 }
 
 void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder) const

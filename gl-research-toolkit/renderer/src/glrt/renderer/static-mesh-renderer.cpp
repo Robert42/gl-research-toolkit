@@ -46,9 +46,8 @@ void StaticMeshRecorder::drawInstances(int begin, int end)
 
   StaticMeshBuffer* staticMesh = staticMeshBufferManager.meshForUuid(currentMesh);
 
-  int num = end - begin;
   staticMesh->recordBind(recorder);
-  staticMesh->recordDraw(recorder, num);
+  staticMesh->recordDrawInstances(recorder, begin, end);
 }
 
 void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
