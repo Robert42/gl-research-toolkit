@@ -88,7 +88,7 @@ int MaterialBuffer::Initializer::append(const Uuid<Material>& materialUuid)
   int indexOfCurrentUniformBlock = data.length();
   data.reserve(data.length() + blockSize.blockOffset);
   data.append_by_memcpy(material.data(), blockSize.dataSize);
-  data.resize(data.length() + blockSize.blockOffset);
+  data.resize(indexOfCurrentUniformBlock + blockSize.blockOffset);
 
   gpuAddresses[materialUuid] = indexOfCurrentUniformBlock;
 

@@ -21,9 +21,7 @@ void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
 {
   Q_ASSERT(materialGpuAddresses.contains(material)); // if the material is not known, the mateiral wasn't initialized correctly
 
-  /*
   recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
-  */
 }
 
 void StaticMeshRecorder::unbindMaterial(const Uuid<Material>& material)

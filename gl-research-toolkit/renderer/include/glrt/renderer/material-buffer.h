@@ -61,7 +61,6 @@ struct MaterialBuffer::Initializer
 
 private:
   Array<byte> data;
-  gl::Buffer buffer;
 };
 
 
