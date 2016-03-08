@@ -23,6 +23,11 @@ out vec4 color;
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
+#ifdef NO_LIGHTING
+  color = vec4(material.base_color, 1);
+  return;
+#endif
+
   vec3 incoming_luminance = light_material(material, surface.position, scene.camera_position);
   
   float exposure = 1.f; // Only dummy value, to be corrected
@@ -35,8 +40,7 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
 
 #ifdef FORWARD_PASS
   color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
-#endif 
-  
+#endif
 }
 
 void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)
