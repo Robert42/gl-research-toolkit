@@ -13,6 +13,8 @@
 namespace glrt {
 namespace renderer {
 
+// #TODO shader reload doesn't work (the state needs to be recaptured)
+// #TODO Use commandBindableNV also in the debug printer?
 
 Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager)
   : scene(*scene),
