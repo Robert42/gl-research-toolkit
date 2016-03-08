@@ -1,6 +1,7 @@
 #version 450 core
 #extension GL_NV_bindless_texture : require
 #extension GL_NV_gpu_shader5 : require
+#extension GL_NV_command_list : require
 
 #include "implementation/input-block.fs.glsl"
 #include "implementation/material-implementation.fs.glsl"
