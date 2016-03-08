@@ -177,7 +177,7 @@ CommandListTest::OrangeStaticMeshVertexBase::OrangeStaticMeshVertexBase(gl::Fram
                              "out vec4 color;\n"
                              "void main()\n"
                              "{\n"
-                             "color = vec4(1, 0.5, 0, 1);"
+                             "color = vec4(1, 0.5, 0, 1);\n"
                              "}\n",
                              "main.cpp (orange fragment)");
   shader.CreateProgram();

@@ -119,7 +119,6 @@ bool Renderer::needRerecording() const
 
 void Renderer::recordCommandlist()
 {
-  const glm::ivec2 videoResolution = glrt::System::windowSize();
   // #FIXME support different materials
   MaterialShader* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
 
