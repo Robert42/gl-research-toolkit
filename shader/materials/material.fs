@@ -11,7 +11,7 @@
 
 #ifdef PLAIN_COLOR
 // TODO: improve performance by doing this in the vertex shader and just passing the MaterialOutput instance (flat, without interpolation)
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
+layout(commandBindableNV,binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
   vec3 base_color;
   float smoothness;
@@ -40,7 +40,7 @@ void main()
 }
 #else
 
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
+layout(commandBindableNV,binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
 vec4 tint;
 vec2 smoothness_range;
