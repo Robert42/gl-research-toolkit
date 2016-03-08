@@ -40,12 +40,13 @@ void StaticMeshRecorder::unbindMesh(const Uuid<StaticMesh>& mesh)
   currentMesh = Uuid<StaticMesh>();
 }
 
-void StaticMeshRecorder::drawInstances(int num)
+void StaticMeshRecorder::drawInstances(int begin, int end)
 {
   Q_ASSERT(currentMesh != Uuid<StaticMesh>());
 
   StaticMeshBuffer* staticMesh = staticMeshBufferManager.meshForUuid(currentMesh);
 
+  int num = end - begin;
   staticMesh->recordBind(recorder);
   staticMesh->recordDraw(recorder, num);
 }

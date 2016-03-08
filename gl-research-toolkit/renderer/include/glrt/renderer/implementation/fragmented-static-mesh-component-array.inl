@@ -30,6 +30,44 @@ bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::Upda
 }
 
 
+// ====
+
+
+template<class T_StaticMeshComponent, class T_recorder>
+bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::StaticMeshHandler::segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b)
+{
+  return a->staticMeshUuid < b->staticMeshUuid;
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+Uuid<StaticMesh> FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::StaticMeshHandler::classify(const T_StaticMeshComponent* component)
+{
+  return component->staticMeshUuid;
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::StaticMeshHandler::handle_new_segment(T_StaticMeshComponent** objects, int begin, int end, Uuid<StaticMesh> mesh, recorder_type* recorder)
+{
+  Q_UNUSED(objects);
+
+  recorder->bindMesh(mesh);
+  recorder->drawInstances(begin, end);
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::StaticMeshHandler::handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, Uuid<StaticMesh> mesh, recorder_type* recorder)
+{
+  Q_UNUSED(objects);
+  Q_UNUSED(begin);
+  Q_UNUSED(end);
+
+  recorder->unbindMesh(mesh);
+}
+
+
+// ====
+
+
 template<class T_StaticMeshComponent, class T_recorder>
 bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialHandler::segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b)
 {
@@ -37,7 +75,7 @@ bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::Mate
 }
 
 template<class T_StaticMeshComponent, class T_recorder>
-Uuid<glrt::scene::resources::Material> FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialHandler::classify(const T_StaticMeshComponent* component)
+Uuid<Material> FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialHandler::classify(const T_StaticMeshComponent* component)
 {
   return component->materialUuid;
 }

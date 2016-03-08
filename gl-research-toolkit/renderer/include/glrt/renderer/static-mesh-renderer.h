@@ -30,7 +30,7 @@ public:
   void bindMesh(const Uuid<StaticMesh>& mesh);
   void unbindMesh(const Uuid<StaticMesh>& mesh);
 
-  void drawInstances(int num);
+  void drawInstances(int begin, int end);
 
 private:
   QMap<Uuid<Material>, GLuint64> materialGpuAddresses;

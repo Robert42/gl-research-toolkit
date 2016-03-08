@@ -8,6 +8,7 @@ namespace renderer {
 namespace implementation {
 
 typedef typename glrt::scene::resources::Material Material;
+typedef typename glrt::scene::resources::StaticMesh StaticMesh;
 
 bool materialLessThan(const Material& a, const Material& b, const Uuid<Material>& uuidA, const Uuid<Material>& uuidB);
 
@@ -31,6 +32,15 @@ struct FragmentedStaticMeshComponentArray : public FragmentedComponentArray<T_St
     inline static bool valueLessThan(T_StaticMeshComponent* a, T_StaticMeshComponent* b);
   };
 
+  struct StaticMeshHandler : public HandlerBase
+  {
+    inline static bool segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b);
+    inline static Uuid<StaticMesh> classify(const T_StaticMeshComponent* component);
+
+    inline static void handle_new_segment(T_StaticMeshComponent** objects, int begin, int end, Uuid<StaticMesh> mesh, recorder_type*);
+    inline static void handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, Uuid<StaticMesh> mesh, recorder_type*);
+  };
+
   struct MaterialHandler : public HandlerBase
   {
     inline static bool segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b);
@@ -41,7 +51,8 @@ struct FragmentedStaticMeshComponentArray : public FragmentedComponentArray<T_St
   };
 
   typedef FragmentedArray_Segment_Values<T_StaticMeshComponent*, UpdateCaller>  CallUpdateTrait;
-  typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<Material>, MaterialHandler, CallUpdateTrait> MaterialHandlerTrait;
+  typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<StaticMesh>, StaticMeshHandler, CallUpdateTrait> StaticMeshHandlerTrait;
+  typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<Material>, MaterialHandler, StaticMeshHandlerTrait> MaterialHandlerTrait;
   typedef FragmentedArray_Segment_Split_in_FixedNumberOfSegments<3, T_StaticMeshComponent*, MovabilityHint, MovabilityHintHandler, MaterialHandlerTrait> DynamicHintTraits;
 
   typedef FragmentedArray<T_StaticMeshComponent*, DynamicHintTraits> type;
