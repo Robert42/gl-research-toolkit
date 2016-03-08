@@ -58,9 +58,15 @@ private:
   typedef T_FragmentedArray FragmentedArray;
   typedef SyncedFragmentedComponentArray<T_Component, FragmentedArray> StaticMeshComponentArray;
 
+  struct StaticMeshInstancesUniformBlock
+  {
+    GLuint64 transformAddress;
+  };
+
   StaticMeshComponentArray meshComponents;
   MaterialBuffer materialBuffer;
-  gl::Buffer objectUniforms;
+  gl::Buffer transformations;
+  gl::Buffer staticMeshInstancesUniform;
   StaticMeshBufferManager& staticMeshBufferManager;
 
   void updateMovableObjectUniforms();

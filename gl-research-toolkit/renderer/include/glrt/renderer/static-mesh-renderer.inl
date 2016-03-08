@@ -4,6 +4,7 @@
 #include "static-mesh-renderer.h"
 
 #include <glrt/scene/node.h>
+#include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
 namespace renderer {
@@ -40,13 +41,21 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 
   if(length == 0)
   {
-    objectUniforms = std::move(gl::Buffer());
+    transformations = std::move(gl::Buffer());
+    staticMeshInstancesUniform = std::move(gl::Buffer());
     return;
   }
 
   QSet<Uuid<Material>> materialSet;
   T_Component** components = fragmentedArray.data();
   glrt::scene::resources::ResourceManager& resourceManager = components[0]->resourceManager();
+
+  transformations = std::move(gl::Buffer(sizeof(glm::mat4) * fragmentedArray.length(), gl::Buffer::MAP_WRITE));
+  StaticMeshInstancesUniformBlock instancesBlock;
+  instancesBlock.transformAddress = transformations.gpuBufferAddress();
+  staticMeshInstancesUniform = std::move(gl::Buffer(sizeof(StaticMeshInstancesUniformBlock), gl::Buffer::IMMUTABLE, &instancesBlock));
+
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, staticMeshInstancesUniform.gpuBufferAddress());
 
   for(int i=0; i<length; ++i)
     materialSet.insert(components[i]->materialUuid);
@@ -63,7 +72,6 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 
   fragmentedArray.iterate(&staticMeshRecorder);
 
-  objectUniforms = std::move(gl::Buffer(sizeof(glm::mat4) * fragmentedArray.length(), gl::Buffer::MAP_WRITE));
   updateObjectUniforms(0, fragmentedArray.length());
 
   this->materialBuffer = std::move(staticMeshRecorder.materialBuffer);
@@ -87,7 +95,7 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 
   const int n = fragmentedArray.length();
   T_Component** component = fragmentedArray.data();
-  glm::mat4* transformation  =reinterpret_cast<glm::mat4*>(objectUniforms.Map(begin * sizeof(glm::mat4), length * sizeof(glm::mat4), gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
+  glm::mat4* transformation  =reinterpret_cast<glm::mat4*>(transformations.Map(begin * sizeof(glm::mat4), length * sizeof(glm::mat4), gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
 
   Q_ASSERT(begin<=end);
   Q_ASSERT(end<=n);
@@ -96,7 +104,7 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
   for(int i=0; i<length; ++i)
     transformation[i] = component[i]->globalCoordFrame().toMat4();
 
-  objectUniforms.Unmap();
+  transformations.Unmap();
 }
 
 
