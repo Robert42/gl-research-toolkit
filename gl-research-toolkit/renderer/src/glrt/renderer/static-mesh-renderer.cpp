@@ -48,6 +48,7 @@ void StaticMeshRecorder::drawInstances(int begin, int end)
 
   staticMesh->recordBind(recorder);
   staticMesh->recordDrawInstances(recorder, begin, end);
+  // #TODO check, whether the mirrors are raelly instanced
 }
 
 void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
