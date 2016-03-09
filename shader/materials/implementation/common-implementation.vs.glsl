@@ -2,12 +2,12 @@
 
 #include <glrt/glsl/layout-constants.h>
 
-layout(commandBindableNV, binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstanceBlock
+layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstanceBlock
 {
   mat4 model_matrix;
 };
 
-layout(commandBindableNV, binding=UNIFORM_BINDING_SCENE_VERTEX_BLOCK, std140) uniform SceneVertexBlock
+layout(binding=UNIFORM_BINDING_SCENE_VERTEX_BLOCK, std140) uniform SceneVertexBlock
 {
   mat4 view_projection;
 }scene;
