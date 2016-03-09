@@ -12,14 +12,19 @@ struct DebuggingOutputChunk
 
 #ifdef SHADER_DEBUG_PRINTER
 
-layout(binding=UNIFORM_BINDING_VALUE_PRINTER, std140)
-uniform DebuggingOutputBlock
+struct DebuggingOutputData
 {
   vec2 fragment_coord;
   float treshold;
   float offset;
   uint64_t chunkAddress;
-}debugging_buffer;
+};
+
+layout(std140, binding=UNIFORM_BINDING_VALUE_PRINTER)
+uniform DebuggingOutputBlock
+{
+  DebuggingOutputData debugging_buffer;
+};
 #endif
 
 #ifdef SHADER_DEBUG_PRINTER
