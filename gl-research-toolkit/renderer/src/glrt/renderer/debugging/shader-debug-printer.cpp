@@ -186,6 +186,9 @@ void ShaderDebugPrinter::begin()
   if(!active || !mouse_is_pressed)
     return;
 
+  // Warning: This is an ugly hack to be able to read out the values fromt he buffer. If you delete the following line, the shader debugger won't work
+  chunkBuffer = std::move(gl::Buffer(sizeof(Chunk), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr));
+
   Header* header = reinterpret_cast<Header*>(headerBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
   header->fragment_coord = glm::vec2(mouseCoordinate);
@@ -207,8 +210,6 @@ void ShaderDebugPrinter::end()
 {
   if(!active || !mouse_is_pressed)
     return;
-
-  // #TODO: some memory barrier necessary here?
 
   Chunk chunk = *reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
   chunkBuffer.Unmap();
