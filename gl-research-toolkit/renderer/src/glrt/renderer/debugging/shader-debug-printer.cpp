@@ -19,12 +19,17 @@ struct ShaderDebugPrinter::Chunk
   glm::ivec4 integerValues;
 };
 
-struct ShaderDebugPrinter::WholeBuffer
+struct ShaderDebugPrinter::HeaderBuffer
 {
   glm::vec2 fragment_coord;
   float treshold;
   float offset;
 
+  GLuint64 address;
+};
+
+struct ShaderDebugPrinter::ContentBuffer
+{
   Chunk chunks[GLSL_DEBUGGING_LENGTH];
 };
 
@@ -146,7 +151,8 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 ShaderDebugPrinter::ShaderDebugPrinter()
   : shader(std::move(ShaderCompiler::createShaderFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
     counterBuffer(sizeof(int), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
-    buffer(sizeof(WholeBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
+    headerBuffer(sizeof(HeaderBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
+    contentBuffer(sizeof(ContentBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
     directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug))
 {
@@ -181,21 +187,24 @@ void ShaderDebugPrinter::begin()
   if(!active || !mouse_is_pressed)
     return;
 
-  WholeBuffer* whole_buffer = reinterpret_cast<WholeBuffer*>(buffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  HeaderBuffer* header = reinterpret_cast<HeaderBuffer*>(headerBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
-  memset(whole_buffer, 0, sizeof(WholeBuffer));
+  header->fragment_coord = glm::vec2(mouseCoordinate);
+  header->treshold = 0.5f;
+  header->offset = 0.5f;
+  header->address = contentBuffer.gpuBufferAddress();
 
-  whole_buffer->fragment_coord = glm::vec2(mouseCoordinate);
-  whole_buffer->treshold = 0.5f;
-  whole_buffer->offset = 0.5f;
+  headerBuffer.Unmap();
 
-  buffer.Unmap();
+  ContentBuffer* content = reinterpret_cast<ContentBuffer*>(contentBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  memset(content, 0, sizeof(ContentBuffer));
+  contentBuffer.Unmap();
 
   quint32& counter = *reinterpret_cast<quint32*>(counterBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   counter = 0;
   counterBuffer.Unmap();
 
-  buffer.BindShaderStorageBuffer(SHADERSTORAGE_BINDING_VALUE_PRINTER);
+  headerBuffer.BindUniformBuffer(UNIFORM_BINDING_VALUE_PRINTER);
   counterBuffer.BindAtomicCounterBuffer(ATOMIC_COUNTER_BINDING_VALUE_PRINTER);
 }
 
@@ -209,8 +218,8 @@ void ShaderDebugPrinter::end()
   const quint32 numberChunks = *reinterpret_cast<quint32*>(counterBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
   counterBuffer.Unmap();
 
-  WholeBuffer whole_buffer = *reinterpret_cast<WholeBuffer*>(buffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
-  buffer.Unmap();
+  ContentBuffer content = *reinterpret_cast<ContentBuffer*>(contentBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
+  contentBuffer.Unmap();
 
   if(numberChunks > 0)
     qDebug() << "\n\n";
@@ -220,10 +229,10 @@ void ShaderDebugPrinter::end()
 
   float min_z = INFINITY;
   for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
-    min_z = glm::min(whole_buffer.chunks[i].z_value, min_z);
+    min_z = glm::min(content.chunks[i].z_value, min_z);
   for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
-    if(whole_buffer.chunks[i].z_value == min_z)
-      printChunk(whole_buffer.chunks[i]);
+    if(content.chunks[i].z_value == min_z)
+      printChunk(content.chunks[i]);
 
   positionVisualization.update();
   directionVisualization.update();
@@ -244,7 +253,7 @@ void ShaderDebugPrinter::draw()
     return;
 
   shader.Activate();
-  buffer.BindShaderStorageBuffer(SHADERSTORAGE_BINDING_VALUE_PRINTER);
+  headerBuffer.BindShaderStorageBuffer(UNIFORM_BINDING_VALUE_PRINTER);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL_RECTANGLE_NV);
   GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 3);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
