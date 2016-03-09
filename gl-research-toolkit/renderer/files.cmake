@@ -38,6 +38,7 @@ set(SOURCE_FILES
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h
   include/glrt/renderer/toolkit/temp-shader-file.h
+  include/glrt/renderer/transformation-buffer.h
   include/glrt/sample-application.h
   include/glrt/splashscreen-style.h
   include/glrt/system.h
@@ -65,6 +66,7 @@ set(SOURCE_FILES
   src/glrt/renderer/toolkit/reloadable-shader.cpp
   src/glrt/renderer/toolkit/shader-compiler.cpp
   src/glrt/renderer/toolkit/temp-shader-file.cpp
+  src/glrt/renderer/transformation-buffer.cpp
   src/glrt/splashscreen-style.cpp
   src/glrt/system.cpp
 )

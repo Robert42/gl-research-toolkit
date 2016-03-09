@@ -41,8 +41,8 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 
   if(length == 0)
   {
-    transformations = std::move(gl::Buffer());
-    staticMeshInstancesUniform = std::move(gl::Buffer());
+    transformationBuffer = std::move(TransformationBuffer());
+    materialBuffer = std::move(MaterialBuffer());
     return;
   }
 
@@ -50,12 +50,7 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
   T_Component** components = fragmentedArray.data();
   glrt::scene::resources::ResourceManager& resourceManager = components[0]->resourceManager();
 
-  transformations = std::move(gl::Buffer(sizeof(glm::mat4) * fragmentedArray.length(), gl::Buffer::MAP_WRITE));
-  StaticMeshInstancesUniformBlock instancesBlock;
-  instancesBlock.transformAddress = transformations.gpuBufferAddress();
-  staticMeshInstancesUniform = std::move(gl::Buffer(sizeof(StaticMeshInstancesUniformBlock), gl::Buffer::IMMUTABLE, &instancesBlock));
-
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, staticMeshInstancesUniform.gpuBufferAddress());
+  transformationBuffer.init(const_cast<const T_Component**>(fragmentedArray.data()), fragmentedArray.length());
 
   for(int i=0; i<length; ++i)
     materialSet.insert(components[i]->materialUuid);
@@ -68,6 +63,7 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
   T_Recorder staticMeshRecorder(recorder,
                                 resourceManager,
                                 allMaterials,
+                                transformationBuffer,
                                 staticMeshBufferManager);
 
   fragmentedArray.iterate(&staticMeshRecorder);
@@ -90,21 +86,9 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
 void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::updateObjectUniforms(int begin, int end)
 {
-  const int length = end-begin;
   FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
 
-  const int n = fragmentedArray.length();
-  T_Component** component = fragmentedArray.data();
-  glm::mat4* transformation  =reinterpret_cast<glm::mat4*>(transformations.Map(begin * sizeof(glm::mat4), length * sizeof(glm::mat4), gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
-
-  Q_ASSERT(begin<=end);
-  Q_ASSERT(end<=n);
-
-
-  for(int i=0; i<length; ++i)
-    transformation[i] = component[i]->globalCoordFrame().toMat4();
-
-  transformations.Unmap();
+  transformationBuffer.update(begin, end, const_cast<const T_Component**>(fragmentedArray.data()), fragmentedArray.length());
 }
 
 

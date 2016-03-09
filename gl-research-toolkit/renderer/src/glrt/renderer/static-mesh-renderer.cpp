@@ -9,10 +9,11 @@ namespace renderer {
 namespace implementation {
 
 
-StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, StaticMeshBufferManager& staticMeshBufferManager)
+StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager)
   : recorder(recorder),
     resourceManager(resourceManager),
-    staticMeshBufferManager(staticMeshBufferManager)
+    staticMeshBufferManager(staticMeshBufferManager),
+    transformationBuffer(transformationBuffer)
 {
   initMaterials(materialSet);
 }
@@ -47,7 +48,11 @@ void StaticMeshRecorder::drawInstances(int begin, int end)
   StaticMeshBuffer* staticMesh = staticMeshBufferManager.meshForUuid(currentMesh);
 
   staticMesh->recordBind(recorder);
-  staticMesh->recordDrawInstances(recorder, begin, end);
+  for(int i=begin; i<end; ++i)
+  {
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, transformationBuffer.gpuAddressForInstance(i));
+    staticMesh->recordDraw(recorder);
+  }
   // #TODO check, whether the mirrors are raelly instanced
 }
 

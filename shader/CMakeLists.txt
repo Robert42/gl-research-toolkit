@@ -34,7 +34,6 @@ add_custom_target(
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
   toolkit/geometry/transform.glsl
-  toolkit/lighting/light-buffers.glsl
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl

@@ -4,6 +4,7 @@
 #include <glrt/renderer/implementation/fragmented-static-mesh-component-array.h>
 #include <glrt/renderer/synced-fragmented-component-array.h>
 #include <glrt/renderer/material-buffer.h>
+#include <glrt/renderer/transformation-buffer.h>
 
 
 namespace glrt {
@@ -22,7 +23,7 @@ public:
 
   MaterialBuffer materialBuffer;
 
-  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, StaticMeshBufferManager& staticMeshBufferManager);
+  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager);
 
   void bindMaterial(const Uuid<Material>& material);
   void unbindMaterial(const Uuid<Material>& material);
@@ -36,6 +37,7 @@ private:
   QMap<Uuid<Material>, GLuint64> materialGpuAddresses;
   Uuid<StaticMesh> currentMesh;
   StaticMeshBufferManager& staticMeshBufferManager;
+  TransformationBuffer& transformationBuffer;
 
   void initMaterials(const Array<Uuid<Material>>& materialSet);
 };
@@ -58,15 +60,9 @@ private:
   typedef T_FragmentedArray FragmentedArray;
   typedef SyncedFragmentedComponentArray<T_Component, FragmentedArray> StaticMeshComponentArray;
 
-  struct StaticMeshInstancesUniformBlock
-  {
-    GLuint64 transformAddress;
-  };
-
   StaticMeshComponentArray meshComponents;
   MaterialBuffer materialBuffer;
-  gl::Buffer transformations;
-  gl::Buffer staticMeshInstancesUniform;
+  TransformationBuffer transformationBuffer;
   StaticMeshBufferManager& staticMeshBufferManager;
 
   void updateMovableObjectUniforms();

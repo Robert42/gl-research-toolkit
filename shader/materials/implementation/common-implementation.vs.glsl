@@ -4,8 +4,8 @@
 
 layout(commandBindableNV, binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstanceBlock
 {
-  uint64_t instanceTransformationsAddress;
-}staticMeshInstances;
+  mat4 model_matrix;
+};
 
 layout(commandBindableNV, binding=UNIFORM_BINDING_SCENE_VERTEX_BLOCK, std140) uniform SceneVertexBlock
 {
@@ -20,10 +20,6 @@ layout(location=VERTEX_ATTRIBUTE_LOCATION_UV) in vec2 vertex_uv;
 
 void transform_vertex()
 {
-  mat4* instanceTransformations = (mat4*)staticMeshInstances.instanceTransformationsAddress;
-  
-  mat4 model_matrix = instanceTransformations[gl_InstanceID];
-  
   vec4 world_coordinate = model_matrix * vec4(vertex_position, 1);
   
   vec4 world_normal = model_matrix * vec4(vertex_normal, 0);
