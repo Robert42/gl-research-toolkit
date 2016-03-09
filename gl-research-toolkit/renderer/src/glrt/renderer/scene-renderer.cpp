@@ -74,9 +74,6 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
   else
     Q_UNREACHABLE();
 
-  // #FIXME remove
-  preprocessorBlock.insert("#define NO_LIGHTING");
-
   if(materialTypes.contains(Material::Type::PLAIN_COLOR) || materialTypes.contains(Material::Type::TEXTURED_OPAQUE))
     preprocessorBlock.insert("#define OPAQUE");
   else
