@@ -7,6 +7,7 @@
 #include <glhelper/shaderobject.hpp>
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
 
 namespace glrt {
 namespace renderer {
@@ -26,18 +27,20 @@ public:
   void begin();
   void end();
 
+  void recordBinding(gl::CommandListRecorder& recorder);
+
   void draw();
 
 private:
   struct Chunk;
-  struct WholeBuffer;
+  struct Header;
 
   bool active = false;
   bool mouse_is_pressed = false;
   glm::ivec2 mouseCoordinate;
   gl::ShaderObject shader;
-  gl::Buffer counterBuffer;
-  gl::Buffer buffer;
+  gl::Buffer headerBuffer;
+  gl::Buffer chunkBuffer;
 
   QVector<glm::vec3> positionsToDebug;
   QVector<Arrow> directionsToDebug;
@@ -48,7 +51,8 @@ private:
   void setMouseCoordinate(const glm::ivec2& mouseCoordinate, Uint32 windowId);
 
   template<typename T, typename T_in>
-  void printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize);
+  void printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize=false);
+  void printUint64(const glm::ivec4& input);
   void printRay(const glm::vec3& origin, const glm::vec3& direction, bool visualize);
   void printChunk(const Chunk& chunk);
 };

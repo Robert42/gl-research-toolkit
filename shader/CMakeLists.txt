@@ -25,24 +25,15 @@ add_custom_target(
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
   materials/implementation/common-implementation.vs.glsl
-  materials/implementation/common-uniform-blocks.glsl
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/input-block.fs.glsl
   materials/implementation/material-implementation.fs.glsl
   materials/implementation/output-block.vs.glsl
-  materials/implementation/texture-implementation.fs.glsl
-  materials/masked-meshes.fs
-  materials/masked-meshes.vs
-  materials/plain-color-materials.fs
-  materials/plain-color-materials.vs
-  materials/textured-meshes.fs
-  materials/textured-meshes.vs
-  materials/transparent-meshes.fs
-  materials/transparent-meshes.vs
+  materials/material.fs
+  materials/material.vs
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
   toolkit/geometry/transform.glsl
-  toolkit/lighting/light-buffers.glsl
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl

@@ -39,6 +39,7 @@
 
 #include <SDL2/SDL.h>
 
+typedef quint8 byte;
 
 template<typename T>
 inline int qHash(const QPointer<T>& ptr, int seed = 0)
@@ -58,6 +59,10 @@ QDebug operator<<(QDebug d, const glm::vec4& v);
 QDebug operator<<(QDebug d, const glm::ivec2& v);
 QDebug operator<<(QDebug d, const glm::ivec3& v);
 QDebug operator<<(QDebug d, const glm::ivec4& v);
+
+QDebug operator<<(QDebug d, const glm::uvec2& v);
+QDebug operator<<(QDebug d, const glm::uvec3& v);
+QDebug operator<<(QDebug d, const glm::uvec4& v);
 
 QDebug operator<<(QDebug d, const glm::mat2& v);
 QDebug operator<<(QDebug d, const glm::mat3& v);
@@ -126,7 +131,7 @@ private:
 };
 
 #define SPLASHSCREEN_MESSAGE(message) \
-SplashscreenMessage __splashscreenMessage(message); \
+::glrt::SplashscreenMessage __splashscreenMessage(message); \
 Q_UNUSED(__splashscreenMessage);
 
 

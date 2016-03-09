@@ -1,4 +1,5 @@
 #include <glrt/scene/resources/static-mesh-loader.h>
+#include <glrt/scene/resources/resource-manager.h>
 
 #include <angelscript-integration/call-script.h>
 
@@ -18,6 +19,13 @@ StaticMeshLoader::StaticMeshLoader()
 
 StaticMeshLoader::~StaticMeshLoader()
 {
+}
+
+void StaticMeshLoader::loadStaticMesh(Uuid<StaticMesh> uuid, const ResourceManager* resourceManager)
+{
+  QString file = resourceManager->staticMeshFileForUuid(uuid);
+  if(!file.isEmpty())
+    loadStaticMesh(uuid, file.toStdString());
 }
 
 void StaticMeshLoader::loadStaticMesh(Uuid<StaticMesh> uuid, const std::string& filepath)

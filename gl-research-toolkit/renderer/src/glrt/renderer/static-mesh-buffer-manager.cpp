@@ -3,7 +3,8 @@
 namespace glrt {
 namespace renderer {
 
-StaticMeshBufferManager::StaticMeshBufferManager()
+StaticMeshBufferManager::StaticMeshBufferManager(glrt::scene::resources::ResourceManager* resourceManager)
+  : resourceManager(resourceManager)
 {
 
 }
@@ -17,6 +18,12 @@ StaticMeshBufferManager::~StaticMeshBufferManager()
 StaticMeshBuffer* StaticMeshBufferManager::meshForUuid(const Uuid<StaticMesh>& uuid)
 {
   StaticMeshBuffer* buffer = staticMeshes.value(uuid, nullptr);
+
+  if(buffer == nullptr)
+  {
+    resourceManager->loadStaticMesh(uuid);
+    buffer = staticMeshes.value(uuid, nullptr);
+  }
 
   if(buffer == nullptr)
     throw GLRT_EXCEPTION(QString("Can't find static-mesh for the uuid %0").arg(uuid.toString()));

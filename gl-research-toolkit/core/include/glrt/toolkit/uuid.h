@@ -2,6 +2,7 @@
 #define GLRT_SCENE_RESOURCES_RESOURCEINDEX_INL
 
 #include <glrt/dependencies.h>
+#include <glrt/toolkit/array.h>
 
 #include <mutex>
 #include <unordered_map>
@@ -105,6 +106,13 @@ private:
 int qHash(UuidIndex uuidIndex);
 template<class T>
 int qHash(const Uuid<T>& uuid);
+
+
+template<typename T>
+struct DefaultTraits<Uuid<T>>
+{
+  typedef ArrayTraits_POD<Uuid<T>> type;
+};
 
 
 } // namespace scene

@@ -23,8 +23,16 @@ ReloadableShader::ReloadableShader(ReloadableShader&& other)
     shaderDir(other.shaderDir)
 {
   allReloadableShader().insert(this);
+  other.shaderDir = QDir();
 }
 
+ReloadableShader& ReloadableShader::operator=(ReloadableShader&& other)
+{
+  preprocessorBlock = std::move(other.preprocessorBlock);
+  shaderObject = std::move(other.shaderObject);
+  shaderDir = std::move(other.shaderDir);
+  return *this;
+}
 
 ReloadableShader::~ReloadableShader()
 {
@@ -37,6 +45,14 @@ QSet<ReloadableShader*>& ReloadableShader::allReloadableShader()
   static QSet<ReloadableShader*> reloadableShader;
 
   return reloadableShader;
+}
+
+
+QSet<ReloadableShader::Listener*>& ReloadableShader::allListeners()
+{
+  static QSet<Listener*> listeners;
+
+  return listeners;
 }
 
 
@@ -57,6 +73,11 @@ void ReloadableShader::reloadAll()
   {
     succeeded = reload(allReloadableShader());
   }while(!succeeded);
+
+  for(Listener* listener : allListeners())
+  {
+    listener->allShadersReloaded();
+  }
 }
 
 
@@ -72,6 +93,20 @@ bool ReloadableShader::reload(QSet<ReloadableShader*> shaders)
 QStringList ReloadableShader::wholeProprocessorBlock() const
 {
   return (globalPreprocessorBlock|preprocessorBlock).toList();
+}
+
+
+// ========
+
+
+ReloadableShader::Listener::Listener()
+{
+  allListeners().insert(this);
+}
+
+ReloadableShader::Listener::~Listener()
+{
+  allListeners().remove(this);
 }
 
 

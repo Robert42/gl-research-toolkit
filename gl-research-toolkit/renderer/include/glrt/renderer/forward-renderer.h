@@ -3,6 +3,7 @@
 
 #include "scene-renderer.h"
 #include <glrt/renderer/sample-resource-manager.h>
+#include <glrt/renderer/implementation/command-list-test.h>
 
 namespace glrt {
 namespace renderer {
@@ -10,14 +11,20 @@ namespace renderer {
 class ForwardRenderer final : public Renderer
 {
 public:
-  ForwardRenderer(scene::Scene* scene, SampleResourceManager* resourceManager);
+  ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter);
 
-  Pass plainColorMeshes;
-  Pass texturedMeshes;
-  Pass maskedMeshes;
-  Pass transparentMeshes;
+  gl::Texture2D colorFramebufferTexture;
+  gl::Texture2D depthFramebufferTexture;
+  gl::FramebufferObject framebuffer;
 
-  void renderImplementation() override;
+protected:
+  void clearFramebuffer() override;
+  void callExtraCommandLists() override;
+  void applyFramebuffer() override;
+
+private:
+  typedef  implementation::CommandListTest CommandListTest;
+  CommandListTest::AcceptGivenFramebuffer::Ptr commandListTest;
 
   static QSet<QString> preprocessorBlock();
 };

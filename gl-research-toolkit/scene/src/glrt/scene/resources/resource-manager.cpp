@@ -34,6 +34,11 @@ QList<Uuid<Scene> > ResourceManager::allRegisteredScenes()
   return uuids;
 }
 
+void ResourceManager::loadStaticMesh(const Uuid<StaticMesh>& uuid)
+{
+  this->staticMeshLoader.loadStaticMesh(uuid, this);
+}
+
 QString ResourceManager::labelForResourceUuid(const QUuid& uuid) const
 {
   return labelForResourceUuid(uuid, uuid.toString());
@@ -44,9 +49,14 @@ LightSource ResourceManager::lightSourceForUuid(const Uuid<LightSource>& uuid) c
   return indexForResourceUuid(uuid)->lightSources.value(uuid, Index::fallback.lightSources[uuids::fallbackLight]);
 }
 
-Material ResourceManager::materialSourceForUuid(const Uuid<Material>& uuid) const
+Material ResourceManager::materialForUuid(const Uuid<Material>& uuid) const
 {
   return indexForResourceUuid(uuid)->materials.value(uuid, Index::fallback.materials[uuids::fallbackMaterial]);
+}
+
+QString ResourceManager::staticMeshFileForUuid(const Uuid<StaticMesh>& uuid, const QString& fallback) const
+{
+  return indexForResourceUuid(uuid)->staticMeshAssetsFiles.value(uuid, fallback);
 }
 
 QString ResourceManager::sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback) const

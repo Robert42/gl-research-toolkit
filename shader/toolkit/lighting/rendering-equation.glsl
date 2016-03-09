@@ -1,4 +1,6 @@
-#include <lighting/light-buffers.glsl>
+#include <glrt/glsl/layout-constants.h>
+#include <glrt/glsl/math.h>
+#include "light-structs.glsl"
 
 #include <pbs/pbs.glsl>
 
@@ -43,6 +45,8 @@ vec3 do_the_lighting(in LightData light, in BrdfData_Generic brdf_g, in SurfaceD
   return illuminance * brdf;
 }
 
+void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights);
+void get_rect_lights(out uint32_t num_rect_lights, out RectAreaLight* rect_lights);
 
 vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
 {
@@ -54,9 +58,14 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
   
   vec3 outgoing_luminance = vec3(0);
   
-  for(int i=0; i<sphere_arealights.num; ++i)
+  uint32_t num_sphere_lights;
+  SphereAreaLight* sphere_lights;
+
+  get_sphere_lights(num_sphere_lights, sphere_lights);
+
+  for(uint32_t i=0; i<num_sphere_lights; ++i)
   {
-    SphereAreaLight light = sphere_arealights.lights[i];
+    SphereAreaLight light = sphere_lights[i];
     
     Sphere sphere;
     sphere.origin = light.light.origin;
@@ -72,9 +81,14 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
   
-  for(int i=0; i<rect_arealights.num; ++i)
+  uint32_t num_rect_lights;
+  RectAreaLight* rect_lights;
+
+  get_rect_lights(num_rect_lights, rect_lights);
+
+  for(uint32_t i=0; i<num_rect_lights; ++i)
   {
-    RectAreaLight light = rect_arealights.lights[i];
+    RectAreaLight light = rect_lights[i];
     
     Rect rect;
     rect.origin = light.light.origin;

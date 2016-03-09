@@ -16,8 +16,6 @@ struct SimpleShaderStorageBuffer_DefaultHeader
 
 struct ManagedGLBuffer_NoHeader
 {
-  typedef quint8 byte;
-
   static int header_size(){return 0;}
 
   int n_elements() const
@@ -44,15 +42,13 @@ struct ManagedGLBuffer_NoHeader
   }
 
 private:
-  int _n_elements;
+  int _n_elements = 0;
 };
 
 template<typename T_header=SimpleShaderStorageBuffer_DefaultHeader, int minDistanceForDifferentSynchronizations=256>
 struct ManagedGLBuffer_Header_With_Num_Elements
 {
   static_assert(sizeof(T_header) < minDistanceForDifferentSynchronizations, "minDistanceForDifferentSynchronizationsmust be larger than the header type");
-
-  typedef quint8 byte;
 
   T_header header;
 
@@ -105,18 +101,20 @@ private:
 } // namespace implementation
 
 template<typename T_element, typename T_CapacityTraits = ArrayCapacityTraits_Capacity_Blocks<>, typename T_header_traits=implementation::ManagedGLBuffer_NoHeader>
-class ManagedGLBuffer
+class ManagedGLBuffer final
 {
 public:
   typedef T_header_traits header_type;
 
   gl::Buffer buffer;
+  bool gpuAddressChanged : 1;
 
   ManagedGLBuffer();
 
   void markElementDirty(int index);
   void setHeader(const header_type& header);
   void setNumElements(int numElements);
+  int numElements() const;
 
   int firstElementToCopy() const;
   bool needsUpdate() const;
@@ -125,8 +123,6 @@ public:
   void Unmap();
 
 private:
-  typedef quint8 byte;
-
   int first_dirty_byte = 0;
   T_header_traits header;
 

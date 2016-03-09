@@ -143,6 +143,34 @@ gl::VertexArrayObject StaticMeshBuffer::generateVertexArrayObject()
                                           Attribute(Attribute::Type::FLOAT, 2, vertexBufferBinding)}));
 }
 
+
+void StaticMeshBuffer::enableVertexArrays()
+{
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_POSITION == 0);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_NORMAL == 1);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_TANGENT == 2);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_UV == 3);
+
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_UV, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_NORMAL);
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_TANGENT);
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_UV);
+}
+
+void StaticMeshBuffer::disableVertexArrays()
+{
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_NORMAL);
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_TANGENT);
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_UV);
+}
+
+
 void StaticMeshBuffer::bind(const gl::VertexArrayObject& vertexArrayObject)
 {
   if(indexBuffer != nullptr)
@@ -157,6 +185,47 @@ void StaticMeshBuffer::draw(GLenum mode) const
     GL_CALL(glDrawElements, mode, numberIndices, GL_UNSIGNED_SHORT, nullptr);
   else
     GL_CALL(glDrawArrays, mode, 0, numberVertices);
+}
+
+void StaticMeshBuffer::recordDrawInstances(gl::CommandListRecorder& recorder, int begin, int end) const
+{
+  int numInstances = end-begin;
+
+  if(indexBuffer != nullptr)
+  {
+    recorder.append_token_DrawElementsInstanced(GL_TRIANGLES, numberIndices, numInstances, 0, 0, begin);
+  }else
+  {
+    recorder.append_token_DrawArraysInstanced(GL_TRIANGLES, numberIndices, numInstances, 0, begin);
+  }
+}
+
+void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder) const
+{
+  if(indexBuffer != nullptr)
+    recorder.append_token_DrawElements(numberIndices, 0, 0, gl::CommandListRecorder::Strip::NO_STRIP);
+  else
+    recorder.append_token_DrawArrays(numberVertices, 0, gl::CommandListRecorder::Strip::NO_STRIP);
+}
+
+void StaticMeshBuffer::recordBind(gl::CommandListRecorder& recorder) const
+{
+  Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type
+
+  GLuint64 offset = 0;
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_POSITION, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 3 * sizeof(float);
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_NORMAL, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 3 * sizeof(float);
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_TANGENT, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 3 * sizeof(float);
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_UV, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 2 * sizeof(float);
+
+  if(indexBuffer != nullptr)
+  {
+    recorder.append_token_ElementAddress(indexBuffer->gpuBufferAddress(), sizeof(index_type));
+  }
 }
 
 

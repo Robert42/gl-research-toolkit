@@ -79,6 +79,12 @@ class Node::Component : public TickingObject
   Q_PROPERTY(bool mayBecomeMovable READ mayBecomeMovable WRITE setMayBecomeMovable)
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
+  enum class MovabilityHint
+  {
+    STATIC = 0,
+    MAY_BECOME_MOVABLE = 1,
+    MOVABLE = 2,
+  };
 
   Node& node;
   Component* const parent;
@@ -97,6 +103,7 @@ public:
   const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
+  MovabilityHint movabilityHint() const;
   bool movable() const;
   bool mayBecomeMovable() const;
   bool visible() const;
@@ -181,6 +188,13 @@ private:
 
 
 } // namespace scene
+
+template<>
+struct DefaultTraits<glrt::scene::Node::Component::MovabilityHint>
+{
+  typedef ArrayTraits_Primitive<glrt::scene::Node::Component::MovabilityHint> type;
+};
+
 } // namespace glrt
 
 #include "node.inl"

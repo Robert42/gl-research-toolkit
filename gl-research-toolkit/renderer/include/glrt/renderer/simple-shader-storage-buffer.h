@@ -4,6 +4,8 @@
 #include <glrt/renderer/implementation/fragmented-light-component-array.h>
 #include <glrt/renderer/synced-fragmented-component-array.h>
 #include <glrt/renderer/toolkit/managed-gl-buffer.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
+#include <glhelper/shaderobject.hpp>
 
 #include <glhelper/buffer.hpp>
 
@@ -11,26 +13,27 @@ namespace glrt {
 namespace renderer {
 
 // #ISSUE-64: try out different values for <512, 4096> to find the fastest one
-template<class T_LightComponent, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>, class T_array_header=implementation::SimpleShaderStorageBuffer_DefaultHeader, int block_to_update=64>
+template<class T_Component, typename T_FragmentedArray=typename implementation::FragmentedLightComponentArray<T_Component>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
 class SimpleShaderStorageBuffer
 {
 public:
-  typedef typename T_LightComponent::Data LightData;
-
+  typedef typename T_Component::Data LightData;
 
   SimpleShaderStorageBuffer(scene::Scene& scene);
 
   void update();
 
-  void bindShaderStorageBuffer(int bindingIndex);
+  bool needRerecording() const;
+  int numElements() const;
+  GLuint64 gpuBufferAddress() const;
 
 private:
-  typedef SimpleShaderStorageBuffer<T_LightComponent, T_BufferCapacityTraits,T_array_header, block_to_update> this_type;
-  typedef typename implementation::FragmentedLightComponentArray<T_LightComponent>::type FragmentedArray;
-  typedef SyncedFragmentedComponentArray<T_LightComponent, FragmentedArray> LightComponentArray;
+  typedef SimpleShaderStorageBuffer<T_Component, T_FragmentedArray, T_BufferCapacityTraits> this_type;
+  typedef T_FragmentedArray FragmentedArray;
+  typedef SyncedFragmentedComponentArray<T_Component, FragmentedArray> LightComponentArray;
 
   LightComponentArray lightComponents;
-  ManagedGLBuffer<LightData, T_BufferCapacityTraits, implementation::ManagedGLBuffer_Header_With_Num_Elements<T_array_header>> buffer;
+  ManagedGLBuffer<LightData, T_BufferCapacityTraits, implementation::ManagedGLBuffer_NoHeader> buffer;
 };
 
 } // namespace renderer

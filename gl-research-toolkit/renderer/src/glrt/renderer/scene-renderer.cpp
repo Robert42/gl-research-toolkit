@@ -14,15 +14,21 @@ namespace glrt {
 namespace renderer {
 
 
-Renderer::Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager)
+Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter)
   : scene(*scene),
     staticMeshBufferManager(*staticMeshBufferManager),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
-    cameraUniformBuffer(sizeof(CameraUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    staticMeshVertexArrayObject(std::move(StaticMeshBuffer::generateVertexArrayObject())),
-    _directLights(new DirectLights(this))
+    videoResolution(videoResolution),
+    lightUniformBuffer(this->scene),
+    staticMeshRenderer(this->scene, staticMeshBufferManager),
+    workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
+    workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
+    sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    _needRecapturing(true),
+    debugPrinter(*debugPrinter)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
@@ -30,20 +36,132 @@ Renderer::Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBuffe
 
 Renderer::~Renderer()
 {
-  delete _directLights;
 }
 
 void Renderer::render()
 {
+#if GLRT_ENABLE_SCENE_RENDERING
+  if(needRerecording())
+    recordCommandlist();
+  staticMeshRenderer.update();
+#endif
+
   updateCameraUniform();
+  clearFramebuffer();
 
-  cameraUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+  workaroundFramebuffer.Bind(false);
+#if GLRT_ENABLE_SCENE_RENDERING
+  commandList.call();
+#endif
+  callExtraCommandLists();
+  workaroundFramebuffer.BindBackBuffer();
 
-  renderImplementation();
+  applyFramebuffer();
 
+  sceneVertexUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_VERTEX_BLOCK);
   visualizeCameras.render();
   visualizeSphereAreaLights.render();
   visualizeRectAreaLights.render();
+}
+
+void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
+{
+  if(pass == Pass::DEPTH_PREPASS)
+    preprocessorBlock.insert("#define DEPTH_PREPASS");
+  else if(pass == Pass::FORWARD_PASS)
+    preprocessorBlock.insert("#define FORWARD_PASS");
+  else
+    Q_UNREACHABLE();
+
+  if(materialTypes.contains(Material::Type::PLAIN_COLOR) || materialTypes.contains(Material::Type::TEXTURED_OPAQUE))
+    preprocessorBlock.insert("#define OPAQUE");
+  else
+  {
+    preprocessorBlock.insert("#define OUTPUT_USES_ALPHA");
+
+    if(materialTypes.contains(Material::Type::TEXTURED_MASKED))
+      preprocessorBlock.insert("#define MASKED");
+    else if(materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
+      preprocessorBlock.insert("#define TRANSPARENT");
+    else
+      Q_UNREACHABLE();
+  }
+
+  if(materialTypes.contains(Material::Type::PLAIN_COLOR))
+    preprocessorBlock.insert("#define PLAIN_COLOR");
+  else if(materialTypes.contains(Material::Type::TEXTURED_OPAQUE)||materialTypes.contains(Material::Type::TEXTURED_MASKED)||materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
+    preprocessorBlock.insert("#define TEXTURED");
+  else
+    Q_UNREACHABLE();
+
+  materialShaders.append_move(std::move(MaterialShader(preprocessorBlock)));
+
+  MaterialShader* materialShader = &materialShaders.last();
+
+  for(Material::Type m : materialTypes)
+    materialShaderMetadata[qMakePair(pass, m)] = materialShader;
+
+  materialShader->framebuffer = framebuffer;
+  _needRecapturing = true;
+}
+
+bool Renderer::needRecapturing() const
+{
+  return _needRecapturing;
+}
+
+bool Renderer::needRerecording() const
+{
+  return staticMeshRenderer.needRerecording() || _needRecapturing;
+}
+
+void Renderer::captureStates()
+{
+  for(MaterialShader& materialShader : materialShaders)
+  {
+    gl::FramebufferObject& framebuffer = *materialShader.framebuffer;
+    ReloadableShader& shader = materialShader.shader;
+
+    StaticMeshBuffer::enableVertexArrays();
+    framebuffer.Bind(false);
+    shader.shaderObject.Activate();
+    // #TODO decouple the state capture and framebuffer from the shader: we should be able to use the same shader for different states and different statebuffers
+    materialShader.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
+    framebuffer.BindBackBuffer();
+    gl::ShaderObject::Deactivate();
+    StaticMeshBuffer::disableVertexArrays();
+  }
+}
+
+void Renderer::recordCommandlist()
+{
+  if(needRecapturing())
+    captureStates();
+
+  // #FIXME support different materials
+  MaterialShader* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
+
+  glm::ivec2 tokenRange;
+  gl::CommandListRecorder recorder;
+
+  recorder.beginTokenList();
+  debugPrinter.recordBinding(recorder);
+  recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
+  staticMeshRenderer.recordCommandList(recorder);
+  tokenRange = recorder.endTokenList();
+
+  recorder.append_drawcall(tokenRange, &materialShader->stateCapture, materialShader->framebuffer);
+
+  commandList = gl::CommandListRecorder::compile(std::move(recorder));
+
+  _needRecapturing = false;
+}
+
+void Renderer::allShadersReloaded()
+{
+  _needRecapturing = true;
 }
 
 void Renderer::updateCameraUniform()
@@ -71,307 +189,30 @@ void Renderer::updateCameraUniform()
 void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
 {
   Q_ASSERT(cameraComponent != nullptr);
-  cameraComponent->cameraParameter.aspect = System::windowAspectRatio();
+  cameraComponent->cameraParameter.aspect = float(videoResolution.x) / float(videoResolution.y);
   fillCameraUniform(cameraComponent->globalCameraParameter());
 }
 
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
-  CameraUniformBlock& cameraUniformData =  *reinterpret_cast<CameraUniformBlock*>(cameraUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  cameraUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
-  cameraUniformData.camera_position = cameraParameter.position;
-  cameraUniformBuffer.Unmap();
+  SceneVertexUniformBlock& sceneVertexUniformData =  *reinterpret_cast<SceneVertexUniformBlock*>(sceneVertexUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  sceneVertexUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  sceneVertexUniformBuffer.Unmap();
+
+  SceneFragmentUniformBlock& sceneFragmentUniformData =  *reinterpret_cast<SceneFragmentUniformBlock*>(sceneFragmentUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  sceneFragmentUniformData.camera_position = cameraParameter.position;
+  sceneFragmentUniformData.lightData = lightUniformBuffer.updateLightData();
+  sceneFragmentUniformBuffer.Unmap();
 }
 
-Renderer::DirectLights& Renderer::directLights()
+GLuint64 Renderer::sceneVertexUniformAddress() const
 {
-  return *this->_directLights;
+  return sceneVertexUniformBuffer.gpuBufferAddress();
 }
 
-
-// ======== DirectLights =======================================================
-
-
-Renderer::DirectLights::DirectLights(Renderer* renderer)
-  : renderer(*renderer),
-    sphereAreaShaderStorageBuffer(this->renderer.scene),
-    rectAreaShaderStorageBuffer(this->renderer.scene)
+GLuint64 Renderer::sceneFragmentUniformAddress() const
 {
-}
-
-Renderer::DirectLights::~DirectLights()
-{
-}
-
-
-void Renderer::DirectLights::bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex)
-{
-  sphereAreaShaderStorageBuffer.update();
-  rectAreaShaderStorageBuffer.update();
-
-  sphereAreaShaderStorageBuffer.bindShaderStorageBuffer(sphereAreaLightBindingIndex);
-  rectAreaShaderStorageBuffer.bindShaderStorageBuffer(rectAreaLightBindingIndex);
-}
-
-
-void Renderer::DirectLights::bindShaderStoreageBuffers()
-{
-  bindShaderStoreageBuffers(SHADERSTORAGE_BINDING_LIGHTS_SPHEREAREA,
-                            SHADERSTORAGE_BINDING_LIGHTS_RECTAREA);
-}
-
-
-
-// ======== Pass ===============================================================
-
-
-Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, ReloadableShader&& shader)
-  : type(type),
-    renderer(*renderer),
-    shader(std::move(shader)),
-    materialBuffer(MaterialBuffer::Type::PLAIN_COLOR),
-    isDirty(true)
-{
-  // #ISSUE-63 not pretty, we are just interested in changes of static mesh components
-  connect(&renderer->scene, SIGNAL(sceneCleared()), this, SLOT(markDirty()));
-  connect(&renderer->scene, SIGNAL(sceneLoaded(bool)), this, SLOT(markDirty()));
-}
-
-Renderer::Pass::Pass(Renderer* renderer, scene::resources::Material::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock)
-  : Pass(renderer,
-         type,
-         std::move(ReloadableShader(materialName,
-                                    QDir(GLRT_SHADER_DIR"/materials"),
-                                    preprocessorBlock)))
-{
-}
-
-Renderer::Pass::~Pass()
-{
-  clearCache();
-}
-
-
-bool orderByDrawCall(const scene::StaticMeshComponent* a, const scene::StaticMeshComponent*b)
-{
-  // Movables after unmovables
-  if(!a->movable() && b->movable())
-    return true;
-  if(a->movable() && !b->movable())
-    return false;
-
-  if(a->material().materialUser < b->material().materialUser)
-    return true;
-  if(a->material().materialUser > b->material().materialUser)
-    return false;
-
-  if(a->materialUuid < b->materialUuid)
-    return true;
-  if(a->materialUuid > b->materialUuid)
-    return false;
-
-  if(a->staticMeshUuid < b->staticMeshUuid)
-    return true;
-  if(a->staticMeshUuid > b->staticMeshUuid)
-    return false;
-
-  return a->uuid < b->uuid;
-}
-
-
-std::function<bool(scene::StaticMeshComponent* a)> allowOnly(scene::resources::Material::Type type)
-{
-  return [type](scene::StaticMeshComponent* a) -> bool {
-    return a->material().type == type;
-  };
-}
-
-void Renderer::Pass::render()
-{
-  updateCache();
-
-  renderStaticMeshes();
-}
-
-void Renderer::Pass::markDirty()
-{
-  isDirty = true;
-}
-
-void Renderer::Pass::renderStaticMeshes()
-{
-  if(materialRanges.empty())
-    return;
-
-  glEnable(GL_CULL_FACE);
-
-  const int N = materialRanges[materialRanges.size()-1].end;
-
-  this->shader.shaderObject.Activate();
-
-  renderer.staticMeshVertexArrayObject.Bind();
-  renderer.directLights().bindShaderStoreageBuffers();
-
-  MaterialRange* materialInstanceRange = &materialRanges[0];
-  MeshRange* meshInstanceRange = &meshRanges[0];
-  gl::Buffer* buffer = staticMeshInstance_Uniforms.data();
-  StaticMeshBuffer* mesh;
-
-  mesh= meshInstanceRange->mesh;
-  mesh->bind(renderer.staticMeshVertexArrayObject);
-
-  int material = 0;
-  materialBuffer.bind(material);
-
-  for(int i=0; i<N; ++i)
-  {
-    if(materialInstanceRange->end == i)
-    {
-      ++materialInstanceRange;
-      ++material;
-      materialBuffer.bind(material);
-    }
-    if(meshInstanceRange->end == i)
-    {
-      ++meshInstanceRange;
-      mesh = meshInstanceRange->mesh;
-
-      mesh->bind(renderer.staticMeshVertexArrayObject);
-    }
-
-    buffer->BindUniformBuffer(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, i*meshInstanceUniformOffset, sizeof(MeshInstanceUniform));
-
-    mesh->draw();
-  }
-
-  renderer.staticMeshVertexArrayObject.ResetBinding();
-}
-
-struct Renderer::Pass::StaticMeshBufferVerification
-{
-  QHash<int, Uuid<Material>> materials;
-  QHash<int, Uuid<StaticMesh>> meshes;
-
-  struct Instance
-  {
-    int material;
-    int mesh;
-  };
-
-  QVector<Instance> instances;
-
-  void appendMaterial(const Uuid<Material>& material)
-  {
-    materials[materials.size()] = material;
-  }
-
-  void appendStaticMesh(const Uuid<StaticMesh>& mesh)
-  {
-    meshes[meshes.size()] = mesh;
-  }
-
-  void addInstance()
-  {
-    instances.push_back(Instance{materials.size()-1, meshes.size()-1});
-  }
-
-  void verify(const Array<scene::StaticMeshComponent*>& comparison,
-              const QVector<MaterialRange>& materialRanges,
-              const QVector<MeshRange>& meshRanges) const
-  {
-    Q_ASSERT(comparison.length() == instances.length());
-    Q_ASSERT(materialRanges.length() == materials.size());
-    Q_ASSERT(meshRanges.length() == meshes.size());
-
-    for(int i=0; i<comparison.length(); ++i)
-    {
-      Q_ASSERT(comparison[i]->materialUuid == materials[instances[i].material]);
-      Q_ASSERT(comparison[i]->staticMeshUuid == meshes[instances[i].mesh]);
-    }
-
-    for(int i=0; i<materialRanges.size(); ++i)
-      for(int j=materialRanges[i].begin; j<materialRanges[i].end; ++j)
-        Q_ASSERT(instances[j].material == i);
-
-    for(int i=0; i<meshRanges.size(); ++i)
-      for(int j=meshRanges[i].begin; j<meshRanges[i].end; ++j)
-        Q_ASSERT(instances[j].mesh == i);
-  }
-};
-
-inline void Renderer::Pass::updateCache()
-{
-  if(!isDirty)
-    return;
-  isDirty = false;
-
-  StaticMeshBufferVerification verification;
-
-  scene::Scene& scene = renderer.scene;
-
-  aligned_vector<MeshInstanceUniform> transformations(aligned_vector<MeshInstanceUniform>::Alignment::UniformBufferOffsetAlignment);
-  meshInstanceUniformOffset = transformations.alignment();
-
-  Array<scene::StaticMeshComponent*> allStaticMeshComponents = glrt::scene::collectAllComponentsWithType<glrt::scene::StaticMeshComponent>(&scene, allowOnly(this->type));
-
-  std::sort(allStaticMeshComponents.begin(), allStaticMeshComponents.end(), orderByDrawCall);
-
-  clearCache();
-
-  if(!allStaticMeshComponents.isEmpty())
-  {
-    materialRanges.reserve(allStaticMeshComponents.length());
-    meshRanges.reserve(allStaticMeshComponents.length());
-    transformations.reserve(allStaticMeshComponents.length());
-
-    MeshRange* lastMeshRange = nullptr;
-    MaterialRange* lastMaterialInstanceRange = nullptr;
-    Uuid<StaticMesh> lastMesh;
-    Uuid<Material> lastMaterial;
-    MaterialBuffer::Initializer materials(materialBuffer, allStaticMeshComponents.length());
-
-    for(int i=0; i<allStaticMeshComponents.length(); ++i)
-    {
-      scene::StaticMeshComponent* staticMeshComponent = allStaticMeshComponents[i];
-
-      transformations.push_back(staticMeshComponent->globalCoordFrame().toMat4());
-
-      if(staticMeshComponent->materialUuid != lastMaterial)
-      {
-        materials.append(staticMeshComponent->material());
-        verification.appendMaterial(staticMeshComponent->materialUuid);
-        materialRanges.push_back(MaterialRange{i, i+1});
-        lastMaterialInstanceRange = &materialRanges[materialRanges.size()-1];
-      }
-
-      StaticMeshBuffer* currentStaticMesh = renderer.staticMeshBufferManager.meshForUuid(staticMeshComponent->staticMeshUuid);
-      if(staticMeshComponent->staticMeshUuid != lastMesh)
-      {
-        verification.appendStaticMesh(staticMeshComponent->staticMeshUuid);
-        meshRanges.push_back(MeshRange(MeshRange{currentStaticMesh, i, i+1}));
-        lastMeshRange = &meshRanges[meshRanges.size()-1];
-      }
-
-      Q_ASSERT(lastMeshRange!=nullptr);
-      Q_ASSERT(lastMaterialInstanceRange!=nullptr);
-
-      verification.addInstance();
-      lastMaterialInstanceRange->end = i+1;
-      lastMeshRange->end = i+1;
-    }
-
-    verification.verify(allStaticMeshComponents, materialRanges, meshRanges);
-
-    staticMeshInstance_Uniforms = QSharedPointer<gl::Buffer>(new gl::Buffer(transformations.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, transformations.data()));
-  }
-}
-
-void Renderer::Pass::clearCache()
-{
-  staticMeshInstance_Uniforms.clear();
-  materialRanges.clear();
-  materialBuffer.clear();
-  meshRanges.clear();
+  return sceneFragmentUniformBuffer.gpuBufferAddress();
 }
 
 

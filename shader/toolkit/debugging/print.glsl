@@ -11,16 +11,20 @@ struct DebuggingOutputChunk
 };
 
 #ifdef SHADER_DEBUG_PRINTER
-layout(binding=ATOMIC_COUNTER_BINDING_VALUE_PRINTER) uniform atomic_uint debugging_buffer_counter_numberChunks;
 
-layout(binding=SHADERSTORAGE_BINDING_VALUE_PRINTER, std140)
-buffer DebuggingOutputBlock
+struct DebuggingOutputData
 {
   vec2 fragment_coord;
   float treshold;
   float offset;
-  DebuggingOutputChunk chunks[];
-}debugging_buffer;
+  uint64_t chunkAddress;
+};
+
+layout(std140, binding=UNIFORM_BINDING_VALUE_PRINTER)
+uniform DebuggingOutputBlock
+{
+  DebuggingOutputData debugging_buffer;
+};
 #endif
 
 #ifdef SHADER_DEBUG_PRINTER
@@ -53,14 +57,16 @@ bool is_fragment_to_debug()
 #endif
 }
 
+
 void implement_print_chunk(in DebuggingOutputChunk chunk)
 {
 #ifdef SHADER_DEBUG_PRINTER
   if(is_fragment_to_debug())
   {
-    uint i = atomicCounterIncrement(debugging_buffer_counter_numberChunks);
     chunk.z_value = gl_FragCoord.z;
-    debugging_buffer.chunks[i] = chunk;
+    
+    DebuggingOutputChunk* chunks = (DebuggingOutputChunk*)debugging_buffer.chunkAddress;
+    chunks[0] = chunk;
   }
 #endif
 }
@@ -110,28 +116,42 @@ void PRINT_VALUE(in bvec4 v)
   implement_print_value(GLSL_DEBUGGING_TYPE_BOOL(4), value);
 }
 
-void PRINT_VALUE(in int v)
+void PRINT_VALUE(in int32_t v)
 {
   ivec4 value = ivec4(v, 0, 0, 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(1), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(1), value);
+}
+
+void PRINT_VALUE(in uint32_t v)
+{
+  ivec4 value = ivec4(int(v), 0, 0, 0);
+  implement_print_value(GLSL_DEBUGGING_TYPE_UINT32(1), value);
+}
+
+void PRINT_VALUE(in uint64_t v)
+{
+  uint32_t lower_bits = uint32_t(v&0xffffffff);
+  uint32_t upper_bits = uint32_t(v >> 32);
+  ivec4 value = ivec4(int(lower_bits), int(upper_bits), 0, 0);
+  implement_print_value(GLSL_DEBUGGING_TYPE_UINT64(1), value);
 }
 
 void PRINT_VALUE(in ivec2 v)
 {
   ivec4 value = ivec4(ivec2(v), 0, 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(2), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(2), value);
 }
 
 void PRINT_VALUE(in ivec3 v)
 {
   ivec4 value = ivec4(ivec3(v), 0);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(3), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(3), value);
 }
 
 void PRINT_VALUE(in ivec4 v)
 {
   ivec4 value = ivec4(v);
-  implement_print_value(GLSL_DEBUGGING_TYPE_INT(4), value);
+  implement_print_value(GLSL_DEBUGGING_TYPE_INT32(4), value);
 }
 
 void PRINT_VALUE(in float v)

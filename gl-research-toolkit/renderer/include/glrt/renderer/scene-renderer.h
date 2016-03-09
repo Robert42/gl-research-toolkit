@@ -1,28 +1,35 @@
 #ifndef GLRT_RENDERER_RENDERER_H
 #define GLRT_RENDERER_RENDERER_H
 
+
 #include <glrt/scene/scene.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/material.h>
+#include <glrt/renderer/declarations.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer-manager.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
-#include <glrt/renderer/material-buffer.h>
+#include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/renderer/declarations.h>
-#include <glrt/renderer/simple-shader-storage-buffer.h>
+#include <glrt/renderer/light-buffer.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
+#include <glrt/renderer/material-shader.h>
+#include <glrt/renderer/debugging/shader-debug-printer.h>
+
+#include <glhelper/framebufferobject.hpp>
+#include <glhelper/texture2d.hpp>
 
 
 namespace glrt {
 namespace renderer {
 
-class Renderer : public QObject
+#define GLRT_ENABLE_SCENE_RENDERING 1
+
+class Renderer : public QObject, public ReloadableShader::Listener
 {
   Q_OBJECT
 public:
-  class DirectLights;
-  class Pass;
-
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
 
@@ -32,115 +39,71 @@ public:
   debugging::VisualizationRenderer visualizeSphereAreaLights;
   debugging::VisualizationRenderer visualizeRectAreaLights;
 
+  glm::ivec2 videoResolution;
+
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
   Renderer& operator=(const Renderer&) = delete;
   Renderer& operator=(Renderer&&) = delete;
 
-  DirectLights& directLights();
-
-  Renderer(scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager);
+  Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter);
   virtual ~Renderer();
 
   void render();
 
 protected:
-  virtual void renderImplementation() = 0;
+  virtual void clearFramebuffer() = 0;
+  virtual void callExtraCommandLists(){}
+  virtual void applyFramebuffer() = 0;
+
+  void appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
+
+  GLuint64 sceneVertexUniformAddress() const;
+  GLuint64 sceneFragmentUniformAddress() const;
 
 private:
-  struct CameraUniformBlock
+  struct SceneVertexUniformBlock
   {
     glm::mat4 view_projection_matrix;
-    glm::vec3 camera_position;
-    padding<float> _padding;
   };
 
-  gl::Buffer cameraUniformBuffer;
+  struct SceneFragmentUniformBlock
+  {
+    glm::vec3 camera_position;
+    padding<float> _padding;
+    LightBuffer::LightData lightData;
+  };
 
-  gl::VertexArrayObject staticMeshVertexArrayObject;
+  LightBuffer lightUniformBuffer;
+  StaticMeshRenderer<> staticMeshRenderer;
+  QMap<QPair<Pass, Material::Type>, MaterialShader*> materialShaderMetadata;
+  Array<MaterialShader> materialShaders;
 
-  DirectLights* _directLights = nullptr;
+  gl::Texture2D workaroundFramebufferTexture;
+  gl::FramebufferObject workaroundFramebuffer;
+  gl::Buffer sceneVertexUniformBuffer;
+  gl::Buffer sceneFragmentUniformBuffer;
+  gl::CommandList commandList;
+
+  bool _needRecapturing : 1;
+  debugging::ShaderDebugPrinter& debugPrinter;
+
+  bool needRecapturing() const;
+  bool needRerecording() const;
+  void captureStates();
+  void recordCommandlist();
 
   void updateCameraUniform();
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);
 
-  void debugCameraPositions();
+  void allShadersReloaded() final override;
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
 };
 
 
-class Renderer::DirectLights final
-{
-public:
-  Renderer& renderer;
 
-  DirectLights(Renderer* renderer);
-  ~DirectLights();
-
-  void bindShaderStoreageBuffers(int sphereAreaLightBindingIndex, int rectAreaLightBindingIndex);
-  void bindShaderStoreageBuffers();
-
-private:
-  SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
-  SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
-};
-
-
-class Renderer::Pass final : public QObject
-{
-  Q_OBJECT
-public:
-  const scene::resources::Material::Type type;
-  Renderer& renderer;
-  ReloadableShader shader;
-
-  Pass(Renderer* renderer, scene::resources::Material::Type type, ReloadableShader&& shader);
-  Pass(Renderer* renderer, scene::resources::Material::Type type, const QString& materialName, const QSet<QString>& preprocessorBlock);
-  ~Pass();
-
-  Pass(const Pass&) = delete;
-  Pass(Pass&&) = delete;
-  Pass& operator=(const Pass&) = delete;
-  Pass& operator=(Pass&&) = delete;
-
-public:
-  void render();
-
-public slots:
-  void markDirty();
-
-private:
-  typedef glm::mat4 MeshInstanceUniform;
-
-  quint64 _cachedStaticStructureCacheIndex = 0;
-
-  struct MaterialRange
-  {
-    int begin, end;
-  };
-  struct MeshRange
-  {
-    StaticMeshBuffer* mesh;
-    int begin, end;
-  };
-
-  struct StaticMeshBufferVerification;
-
-  MaterialBuffer materialBuffer;
-
-  QVector<MaterialRange> materialRanges;
-  QVector<MeshRange> meshRanges;
-  QSharedPointer<gl::Buffer> staticMeshInstance_Uniforms;
-  GLint meshInstanceUniformOffset = 0;
-
-  bool isDirty;
-
-  void renderStaticMeshes();
-  void updateCache();
-  void clearCache();
-};
 
 
 

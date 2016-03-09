@@ -1,81 +1,111 @@
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/renderer/material-buffer.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
+#include <glrt/scene/resources/resource-manager.h>
 
 namespace glrt {
 namespace renderer {
 
 using glrt::scene::resources::Material;
 
-MaterialBuffer::MaterialBuffer(Type type)
-  : type(type),
-    buffer(nullptr)
+MaterialBuffer::MaterialBuffer()
+{
+}
+
+MaterialBuffer::MaterialBuffer(MaterialBuffer&& other)
+  : buffer(std::move(other.buffer))
+{
+}
+
+MaterialBuffer::~MaterialBuffer()
+{
+}
+
+MaterialBuffer& MaterialBuffer::operator=(MaterialBuffer&& other)
+{
+  this->buffer = std::move(other.buffer);
+  return *this;
+}
+
+template<typename T>
+MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType()
+{
+  BlockSize blockSize;
+  blockSize.dataSize = sizeof(T);
+  blockSize.blockOffset = aligned_vector<T>::retrieveAlignmentOffset(aligned_vector<T>::Alignment::UniformBufferOffsetAlignment);
+  return blockSize;
+}
+
+MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType(Type type)
 {
   switch(type)
   {
   case Type::PLAIN_COLOR:
-    initBlockOffset<Material::PlainColor>();
-    break;
+    return forType<Material::PlainColor>();
   case Type::TEXTURED_MASKED:
-    // #ISSUE-63
   case Type::TEXTURED_OPAQUE:
-    // #ISSUE-63
   case Type::TEXTURED_TRANSPARENT:
-    // #ISSUE-63
+    return forType<Material::Textured>();
   default:
     Q_UNREACHABLE();
   }
 }
 
-MaterialBuffer::~MaterialBuffer()
+int MaterialBuffer::BlockSize::expectedBlockOffset()
 {
-  delete buffer;
+  static_assert(sizeof(Material::PlainColor) <= sizeof(Material::Textured), "The expected offset should be the largest data struct");
+
+#ifdef QT_DEBUG
+  if(forType<Material::PlainColor>().blockOffset != forType<Material::Textured>().blockOffset)
+    qWarning() << "Warning: different block offset for material blocks.\n"
+                  "    PlainColor:" <<  forType<Material::PlainColor>().blockOffset << "\n    Textured: " << forType<Material::Textured>().blockOffset << "\n";
+#endif
+
+  return forType<Material::Textured>().blockOffset;
 }
 
-void MaterialBuffer::bind(int i)
+MaterialBuffer::Initializer::Initializer(gl::CommandListRecorder& recorder, const glrt::scene::resources::ResourceManager& resourceManager)
+  : recorder(recorder),
+    resourceManager(resourceManager)
 {
-  Q_ASSERT(buffer != nullptr);
-  buffer->BindUniformBuffer(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, i*blockOffset, dataSize);
 }
 
-void MaterialBuffer::clear()
+void MaterialBuffer::Initializer::begin(int expectedNumberMaterials)
 {
-  delete buffer;
-  buffer = nullptr;
+  data.clear();
+  data.reserve(expectedNumberMaterials * BlockSize::expectedBlockOffset());
 }
 
-
-template<typename T>
-void MaterialBuffer::initBlockOffset()
+int MaterialBuffer::Initializer::append(const Uuid<Material>& materialUuid)
 {
-  dataSize = sizeof(T);
-  blockOffset = aligned_vector<T>::retrieveAlignmentOffset(aligned_vector<T>::Alignment::UniformBufferOffsetAlignment);
+  Material material = resourceManager.materialForUuid(materialUuid);
+
+  BlockSize blockSize = BlockSize::forType(material.type);
+
+  if(data.capacity() < data.length() + blockSize.blockOffset)
+    data.reserve(data.capacity() + blockSize.blockOffset*64);
+
+  int indexOfCurrentUniformBlock = data.length();
+  data.reserve(data.length() + blockSize.blockOffset);
+  data.append_by_memcpy(material.data(), blockSize.dataSize);
+  data.resize(indexOfCurrentUniformBlock + blockSize.blockOffset);
+
+  gpuAddresses[materialUuid] = indexOfCurrentUniformBlock;
+
+  return indexOfCurrentUniformBlock;
 }
 
-
-
-MaterialBuffer::Initializer::Initializer(MaterialBuffer& buffer, int expectedNumberMaterials)
-  : buffer(buffer),
-    materialsAdded(0)
+MaterialBuffer MaterialBuffer::Initializer::end()
 {
-  data.reserve(expectedNumberMaterials*buffer.blockOffset);
-}
+  gl::Buffer buffer(data.length(), gl::Buffer::UsageFlag::IMMUTABLE, data.data());
 
-MaterialBuffer::Initializer::~Initializer()
-{
-  buffer.clear();
-  buffer.buffer = new gl::Buffer(data.length(), gl::Buffer::UsageFlag::IMMUTABLE, data.data());
-}
+  GLuint64 baseAddress = buffer.gpuBufferAddress();
+  for(GLuint64& address : gpuAddresses)
+    address += baseAddress;
 
-void MaterialBuffer::Initializer::append(const Material& material)
-{
-  if(data.capacity() < data.length() + buffer.blockOffset)
-    data.reserve(data.capacity() + buffer.blockOffset*64);
-
-  void* targetLocation = data.data() + data.length();
-  data.resize(data.length() + buffer.blockOffset);
-
-  std::memcpy(targetLocation, material.data(), buffer.dataSize);
+  MaterialBuffer materialBuffer;
+  materialBuffer.buffer = std::move(buffer);
+  return std::move(materialBuffer);
 }
 
 } // namespace renderer

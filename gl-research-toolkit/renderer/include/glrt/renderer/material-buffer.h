@@ -7,6 +7,9 @@
 
 #include <glrt/scene/resources/material.h>
 #include <glrt/renderer/declarations.h>
+#include <glrt/renderer/static-mesh-buffer-manager.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
+#include <glrt/toolkit/array.h>
 
 namespace glrt {
 namespace renderer {
@@ -14,44 +17,50 @@ namespace renderer {
 class MaterialBuffer final
 {
 public:
-  typedef scene::resources::Material::Type Type;
+  typedef scene::resources::Material Material;
+  typedef Material::Type Type;
 
   struct Initializer;
 
-  const Type type;
-
-
-  MaterialBuffer(Type type);
+  MaterialBuffer();
   ~MaterialBuffer();
 
-  MaterialBuffer(const MaterialBuffer&)=delete;
-  MaterialBuffer(MaterialBuffer&&)=delete;
-  MaterialBuffer&operator=(const MaterialBuffer&)=delete;
-  MaterialBuffer&operator=(MaterialBuffer&&)=delete;
+  MaterialBuffer(MaterialBuffer&&);
+  MaterialBuffer&operator=(MaterialBuffer&&);
 
-  void bind(int i);
-  void clear();
+  MaterialBuffer(const MaterialBuffer&)=delete;
+  MaterialBuffer&operator=(const MaterialBuffer&)=delete;
 
 private:
-  gl::Buffer* buffer;
-  int blockOffset;
-  int dataSize;
+  struct BlockSize
+  {
+    int blockOffset;
+    int dataSize;
 
+    template<typename T>
+    static BlockSize forType();
+    static BlockSize forType(Type type);
+    static int expectedBlockOffset();
+  };
 
-  template<typename T>
-  void initBlockOffset();
+  gl::Buffer buffer;
 };
 
 struct MaterialBuffer::Initializer
 {
-  MaterialBuffer& buffer;
-  int materialsAdded;
-  QVector<quint8> data;
+  gl::CommandListRecorder& recorder;
+  const glrt::scene::resources::ResourceManager& resourceManager;
 
-  Initializer(MaterialBuffer& buffer, int expectedNumberMaterials);
-  ~Initializer();
+  Initializer(gl::CommandListRecorder& recorder, const glrt::scene::resources::ResourceManager& resourceManager);
 
-  void append(const Material& material);
+  void begin(int expectedNumberMaterials);
+  int append(const Uuid<Material>& materialUuid);
+  MaterialBuffer end();
+
+  QMap<Uuid<Material>, GLuint64> gpuAddresses;
+
+private:
+  Array<byte> data;
 };
 
 

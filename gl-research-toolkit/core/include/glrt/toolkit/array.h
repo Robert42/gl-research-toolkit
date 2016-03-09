@@ -294,15 +294,64 @@ template<typename T>
 struct DefaultTraits;
 
 template<>
-struct DefaultTraits<int>
+struct DefaultTraits<qint8>
 {
-  typedef ArrayTraits_Primitive<int> type;
+  typedef ArrayTraits_Primitive<qint32> type;
 };
+
+template<>
+struct DefaultTraits<quint8>
+{
+  typedef ArrayTraits_Primitive<quint8> type;
+};
+
+template<>
+struct DefaultTraits<qint16>
+{
+  typedef ArrayTraits_Primitive<qint16> type;
+};
+
+template<>
+struct DefaultTraits<quint16>
+{
+  typedef ArrayTraits_Primitive<quint16> type;
+};
+
+template<>
+struct DefaultTraits<qint32>
+{
+  typedef ArrayTraits_Primitive<qint32> type;
+};
+
+template<>
+struct DefaultTraits<quint32>
+{
+  typedef ArrayTraits_Primitive<quint32> type;
+};
+
+template<>
+struct DefaultTraits<qint64>
+{
+  typedef ArrayTraits_Primitive<qint64> type;
+};
+
+template<>
+struct DefaultTraits<quint64>
+{
+  typedef ArrayTraits_Primitive<quint64> type;
+};
+
 
 template<>
 struct DefaultTraits<bool>
 {
   typedef ArrayTraits_Primitive<bool> type;
+};
+
+template<>
+struct DefaultTraits<float>
+{
+  typedef ArrayTraits_Primitive<float> type;
 };
 
 template<typename T>
@@ -404,6 +453,11 @@ public:
   int append(const T& value);
   int append(T&& value);
 
+  void append_by_memcpy(const void* src, size_t num);
+  template<typename T_value>
+  void append_by_memcpy(const T_value& value);
+  void resize(int newSize);
+
   void removeAt(int index);
   void removeAt(int index, int num_to_remove);
 
@@ -419,6 +473,9 @@ public:
 
   template<typename T_lessThan>
   void stable_sort(T_lessThan lessThan);
+
+  template<typename T_lessThan>
+  void sort(T_lessThan lessThan);
 
 private:
   T* _data;
