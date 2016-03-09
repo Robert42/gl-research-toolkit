@@ -23,6 +23,8 @@ out vec4 color;
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
+  PRINT_VALUE(scene.camera_position);
+  
 #ifdef NO_LIGHTING
   color = vec4(material.base_color, 1);
   return;
