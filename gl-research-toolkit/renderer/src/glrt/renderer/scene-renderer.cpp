@@ -14,7 +14,7 @@ namespace glrt {
 namespace renderer {
 
 
-Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager)
+Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter)
   : scene(*scene),
     staticMeshBufferManager(*staticMeshBufferManager),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
@@ -27,7 +27,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
     sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    _needRecapturing(true)
+    _needRecapturing(true),
+    debugPrinter(*debugPrinter)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
@@ -146,8 +147,7 @@ void Renderer::recordCommandlist()
   gl::CommandListRecorder recorder;
 
   recorder.beginTokenList();
-  if(debugPrinter != nullptr)
-    debugPrinter->recordBinding(recorder);
+  debugPrinter.recordBinding(recorder);
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());

@@ -5,8 +5,8 @@ namespace renderer {
 
 #define GLRT_ENABLE_COMMANDLISTTEST 0
 
-ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager)
-  : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager),
+ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter)
+  : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter),
     colorFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH24_STENCIL8),
     framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true)

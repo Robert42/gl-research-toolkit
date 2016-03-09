@@ -11,7 +11,7 @@ namespace renderer {
 class ForwardRenderer final : public Renderer
 {
 public:
-  ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager);
+  ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter);
 
   gl::Texture2D colorFramebufferTexture;
   gl::Texture2D depthFramebufferTexture;

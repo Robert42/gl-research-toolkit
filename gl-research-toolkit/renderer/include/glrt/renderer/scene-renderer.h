@@ -40,14 +40,13 @@ public:
   debugging::VisualizationRenderer visualizeRectAreaLights;
 
   glm::ivec2 videoResolution;
-  debugging::ShaderDebugPrinter* debugPrinter = nullptr;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
   Renderer& operator=(const Renderer&) = delete;
   Renderer& operator=(Renderer&&) = delete;
 
-  Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager);
+  Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter);
   virtual ~Renderer();
 
   void render();
@@ -87,6 +86,7 @@ private:
   gl::CommandList commandList;
 
   bool _needRecapturing : 1;
+  debugging::ShaderDebugPrinter& debugPrinter;
 
   bool needRecapturing() const;
   bool needRerecording() const;
