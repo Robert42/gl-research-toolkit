@@ -13,11 +13,16 @@ struct SceneLightData
   uint32_t num_rect_area_lights;
 };
 
-layout(binding=UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, std140) uniform SceneFragmentBlock
+struct SceneFragmentData
 {
   vec3 camera_position;
   SceneLightData lights;
-}scene;
+};
+
+layout(std140, binding=UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK) uniform SceneFragmentBlock
+{
+  SceneFragmentData scene;
+};
 
 out vec4 color;
 
