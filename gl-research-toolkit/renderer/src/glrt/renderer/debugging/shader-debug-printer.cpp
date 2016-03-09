@@ -118,6 +118,9 @@ inline void ShaderDebugPrinter::printRay(const glm::vec3& origin, const glm::vec
 
 inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 {
+  static quint64 warningId=0;
+  warningId++;
+
   if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_BOOL(1)[0])
     printVectorChunk<bool>(chunk.type.y, "bool", "b", chunk.integerValues);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_INT32(1)[0])
@@ -139,9 +142,9 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RAY[0])
     printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.integerValues[0]);
   else if(chunk.type == glm::GLSL_DEBUGGING_TYPE_NONE)
-    qCritical() << "ShaderDebugPrinter: Warning: trying to read chunk of type GLSL_DEBUGGING_TYPE_NONE";
+    qDebug() << "ShaderDebugPrinter: Warning["<<warningId<<"]: trying to read chunk of type GLSL_DEBUGGING_TYPE_NONE";
   else
-    qCritical() << "ShaderDebugPrinter: printChunk: Unknown chunk-type " << chunk.type;
+    qDebug() << "ShaderDebugPrinter: Error["<<warningId<<"]: printChunk: Unknown chunk-type " << chunk.type;
 }
 
 
