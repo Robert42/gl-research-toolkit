@@ -41,13 +41,6 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
 #ifdef FORWARD_PASS
   color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
 #endif
-
-  if(scene.camera_position.z == 0)
-    color.r = 1;
-  if(scene.lights.sphere_arealights_address == 0)
-    color.g = 1;
-  if(scene.lights.num_sphere_area_lights == 0)
-    color.b = 1;
 }
 
 void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)
