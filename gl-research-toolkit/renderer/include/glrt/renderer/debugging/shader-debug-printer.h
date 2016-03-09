@@ -33,16 +33,14 @@ public:
 
 private:
   struct Chunk;
-  struct HeaderBuffer;
-  struct ContentBuffer;
+  struct Header;
 
   bool active = false;
   bool mouse_is_pressed = false;
   glm::ivec2 mouseCoordinate;
   gl::ShaderObject shader;
-  gl::Buffer counterBuffer;
   gl::Buffer headerBuffer;
-  gl::Buffer contentBuffer;
+  gl::Buffer chunkBuffer;
 
   QVector<glm::vec3> positionsToDebug;
   QVector<Arrow> directionsToDebug;

@@ -19,18 +19,13 @@ struct ShaderDebugPrinter::Chunk
   glm::ivec4 integerValues;
 };
 
-struct ShaderDebugPrinter::HeaderBuffer
+struct ShaderDebugPrinter::Header
 {
   glm::vec2 fragment_coord;
   float treshold;
   float offset;
 
   GLuint64 address;
-};
-
-struct ShaderDebugPrinter::ContentBuffer
-{
-  Chunk chunks[GLSL_DEBUGGING_LENGTH];
 };
 
 
@@ -143,6 +138,8 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
     printPlane(chunk.floatValues[0].xyz(), chunk.floatValues[0].w);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RAY[0])
     printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.integerValues[0]);
+  else if(chunk.type == glm::GLSL_DEBUGGING_TYPE_NONE)
+    qCritical() << "ShaderDebugPrinter: Warning: trying to read chunk of type GLSL_DEBUGGING_TYPE_NONE";
   else
     qCritical() << "ShaderDebugPrinter: printChunk: Unknown chunk-type " << chunk.type;
 }
@@ -150,9 +147,8 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 
 ShaderDebugPrinter::ShaderDebugPrinter()
   : shader(std::move(ShaderCompiler::createShaderFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
-    counterBuffer(sizeof(int), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ|gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
-    headerBuffer(sizeof(HeaderBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
-    contentBuffer(sizeof(ContentBuffer), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
+    headerBuffer(sizeof(Header), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
+    chunkBuffer(sizeof(Chunk), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
     directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug))
 {
@@ -187,25 +183,21 @@ void ShaderDebugPrinter::begin()
   if(!active || !mouse_is_pressed)
     return;
 
-  HeaderBuffer* header = reinterpret_cast<HeaderBuffer*>(headerBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  Header* header = reinterpret_cast<Header*>(headerBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
   header->fragment_coord = glm::vec2(mouseCoordinate);
   header->treshold = 0.5f;
   header->offset = 0.5f;
-  header->address = contentBuffer.gpuBufferAddress();
+  header->address = chunkBuffer.gpuBufferAddress();
 
   headerBuffer.Unmap();
 
-  ContentBuffer* content = reinterpret_cast<ContentBuffer*>(contentBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  memset(content, 0, sizeof(ContentBuffer));
-  contentBuffer.Unmap();
-
-  quint32& counter = *reinterpret_cast<quint32*>(counterBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  counter = 0;
-  counterBuffer.Unmap();
+  Chunk* chunk = reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  chunk->z_value = INFINITY;
+  memset(chunk, 0, sizeof(Chunk));
+  chunkBuffer.Unmap();
 
   headerBuffer.BindUniformBuffer(UNIFORM_BINDING_VALUE_PRINTER);
-  counterBuffer.BindAtomicCounterBuffer(ATOMIC_COUNTER_BINDING_VALUE_PRINTER);
 }
 
 void ShaderDebugPrinter::end()
@@ -213,26 +205,19 @@ void ShaderDebugPrinter::end()
   if(!active || !mouse_is_pressed)
     return;
 
-  // TODO: some memory barrier necessary here?
+  // #TODO: some memory barrier necessary here?
 
-  const quint32 numberChunks = *reinterpret_cast<quint32*>(counterBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
-  counterBuffer.Unmap();
-
-  ContentBuffer content = *reinterpret_cast<ContentBuffer*>(contentBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
-  contentBuffer.Unmap();
-
-  if(numberChunks > 0)
-    qDebug() << "\n\n";
+  Chunk chunk = *reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
+  chunkBuffer.Unmap();
 
   positionsToDebug.clear();
   directionsToDebug.clear();
 
-  float min_z = INFINITY;
-  for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
-    min_z = glm::min(content.chunks[i].z_value, min_z);
-  for(quint32 i=0; i<numberChunks && i<GLSL_DEBUGGING_LENGTH; ++i)
-    if(content.chunks[i].z_value == min_z)
-      printChunk(content.chunks[i]);
+  if(!std::isinf(chunk.z_value))
+  {
+    qDebug() << "\n\n";
+    printChunk(chunk);
+  }
 
   positionVisualization.update();
   directionVisualization.update();
@@ -241,7 +226,6 @@ void ShaderDebugPrinter::end()
 void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)
 {
   recorder.append_token_UniformAddress(UNIFORM_BINDING_VALUE_PRINTER, gl::ShaderObject::ShaderType::FRAGMENT, headerBuffer.gpuBufferAddress());
-  recorder.append_token_UniformAddress(ATOMIC_COUNTER_BINDING_VALUE_PRINTER, gl::ShaderObject::ShaderType::FRAGMENT, counterBuffer.gpuBufferAddress());
 }
 
 void ShaderDebugPrinter::draw()

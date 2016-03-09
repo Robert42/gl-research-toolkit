@@ -11,7 +11,6 @@ struct DebuggingOutputChunk
 };
 
 #ifdef SHADER_DEBUG_PRINTER
-layout(binding=ATOMIC_COUNTER_BINDING_VALUE_PRINTER) uniform atomic_uint debugging_buffer_counter_numberChunks;
 
 layout(binding=UNIFORM_BINDING_VALUE_PRINTER, std140)
 uniform DebuggingOutputBlock
@@ -19,7 +18,7 @@ uniform DebuggingOutputBlock
   vec2 fragment_coord;
   float treshold;
   float offset;
-  uint64_t chunksAddress;
+  uint64_t chunkAddress;
 }debugging_buffer;
 #endif
 
@@ -53,19 +52,16 @@ bool is_fragment_to_debug()
 #endif
 }
 
+
 void implement_print_chunk(in DebuggingOutputChunk chunk)
 {
 #ifdef SHADER_DEBUG_PRINTER
   if(is_fragment_to_debug())
   {
-    uint i = atomicCounterIncrement(debugging_buffer_counter_numberChunks);
-    if(i>=GLSL_DEBUGGING_LENGTH)
-      return;
     chunk.z_value = gl_FragCoord.z;
     
-    DebuggingOutputChunk* chunks = (DebuggingOutputChunk*)debugging_buffer.chunksAddress;
-    
-    chunks[i] = chunk;
+    DebuggingOutputChunk* chunks = (DebuggingOutputChunk*)debugging_buffer.chunkAddress;
+    chunks[0] = chunk;
   }
 #endif
 }
