@@ -48,6 +48,14 @@ QSet<ReloadableShader*>& ReloadableShader::allReloadableShader()
 }
 
 
+QSet<ReloadableShader::Listener*>& ReloadableShader::allListeners()
+{
+  static QSet<Listener*> listeners;
+
+  return listeners;
+}
+
+
 bool ReloadableShader::reload()
 {
   ShaderCompiler compiler;
@@ -65,6 +73,11 @@ void ReloadableShader::reloadAll()
   {
     succeeded = reload(allReloadableShader());
   }while(!succeeded);
+
+  for(Listener* listener : allListeners())
+  {
+    listener->allShadersReloaded();
+  }
 }
 
 
@@ -80,6 +93,20 @@ bool ReloadableShader::reload(QSet<ReloadableShader*> shaders)
 QStringList ReloadableShader::wholeProprocessorBlock() const
 {
   return (globalPreprocessorBlock|preprocessorBlock).toList();
+}
+
+
+// ========
+
+
+ReloadableShader::Listener::Listener()
+{
+  allListeners().insert(this);
+}
+
+ReloadableShader::Listener::~Listener()
+{
+  allListeners().remove(this);
 }
 
 

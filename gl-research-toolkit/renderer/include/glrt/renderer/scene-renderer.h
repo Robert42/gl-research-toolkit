@@ -25,7 +25,7 @@ namespace renderer {
 
 #define GLRT_ENABLE_SCENE_RENDERING 1
 
-class Renderer : public QObject
+class Renderer : public QObject, public ReloadableShader::Listener
 {
   Q_OBJECT
 public:
@@ -84,11 +84,17 @@ private:
   gl::Buffer sceneFragmentUniformBuffer;
   gl::CommandList commandList;
 
+  bool _needRecapturing : 1;
+
+  bool needRecapturing() const;
   bool needRerecording() const;
+  void captureStates();
   void recordCommandlist();
 
   void updateCameraUniform();
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);
+
+  void allShadersReloaded() final override;
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);

@@ -11,6 +11,8 @@ namespace renderer {
 class ReloadableShader final
 {
 public:
+  class Listener;
+
   static QSet<QString> globalPreprocessorBlock;
   QSet<QString> preprocessorBlock;
 
@@ -31,11 +33,25 @@ public:
 private:
   QDir shaderDir;
 
+  static QSet<Listener*>& allListeners();
   static QSet<ReloadableShader*>& allReloadableShader();
 
   static bool reload(QSet<ReloadableShader*> shaders);
 
   QStringList wholeProprocessorBlock() const;
+};
+
+
+class ReloadableShader::Listener
+{
+public:
+  Listener();
+  virtual ~Listener();
+
+  Listener(const Listener&) = delete;
+  Listener& operator=(const Listener&) = delete;
+
+  virtual void allShadersReloaded() = 0;
 };
 
 } // namespace renderer

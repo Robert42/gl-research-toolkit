@@ -13,8 +13,6 @@
 namespace glrt {
 namespace renderer {
 
-// #TODO shader reload doesn't work (the state needs to be recaptured)
-// #TODO Use commandBindableNV also in the debug printer?
 
 Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager)
   : scene(*scene),
@@ -28,7 +26,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
     workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
     sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr)
+    sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    _needRecapturing(true)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
@@ -106,24 +105,43 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
   for(Material::Type m : materialTypes)
     materialShaderMetadata[qMakePair(pass, m)] = materialShader;
 
-  StaticMeshBuffer::enableVertexArrays();
-  framebuffer->Bind(false);
-  materialShader->shader.shaderObject.Activate();
-  // #TODO decouple the state capture and framebuffer from the shader: we should be able to use the same shader for different states and different statebuffers
-  materialShader->stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
   materialShader->framebuffer = framebuffer;
-  framebuffer->BindBackBuffer();
-  gl::ShaderObject::Deactivate();
-  StaticMeshBuffer::disableVertexArrays();
+  _needRecapturing = true;
+}
+
+bool Renderer::needRecapturing() const
+{
+  return _needRecapturing;
 }
 
 bool Renderer::needRerecording() const
 {
-  return staticMeshRenderer.needRerecording();
+  return staticMeshRenderer.needRerecording() || _needRecapturing;
+}
+
+void Renderer::captureStates()
+{
+  for(MaterialShader& materialShader : materialShaders)
+  {
+    gl::FramebufferObject& framebuffer = *materialShader.framebuffer;
+    ReloadableShader& shader = materialShader.shader;
+
+    StaticMeshBuffer::enableVertexArrays();
+    framebuffer.Bind(false);
+    shader.shaderObject.Activate();
+    // #TODO decouple the state capture and framebuffer from the shader: we should be able to use the same shader for different states and different statebuffers
+    materialShader.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
+    framebuffer.BindBackBuffer();
+    gl::ShaderObject::Deactivate();
+    StaticMeshBuffer::disableVertexArrays();
+  }
 }
 
 void Renderer::recordCommandlist()
 {
+  if(needRecapturing())
+    captureStates();
+
   // #FIXME support different materials
   MaterialShader* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
 
@@ -140,6 +158,13 @@ void Renderer::recordCommandlist()
   recorder.append_drawcall(tokenRange, &materialShader->stateCapture, materialShader->framebuffer);
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
+
+  _needRecapturing = false;
+}
+
+void Renderer::allShadersReloaded()
+{
+  _needRecapturing = true;
 }
 
 void Renderer::updateCameraUniform()
