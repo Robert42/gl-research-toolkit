@@ -196,8 +196,8 @@ void ShaderDebugPrinter::begin()
   headerBuffer.Unmap();
 
   Chunk* chunk = reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  chunk->z_value = INFINITY;
   memset(chunk, 0, sizeof(Chunk));
+  chunk->z_value = INFINITY;
   chunkBuffer.Unmap();
 
   headerBuffer.BindUniformBuffer(UNIFORM_BINDING_VALUE_PRINTER);
