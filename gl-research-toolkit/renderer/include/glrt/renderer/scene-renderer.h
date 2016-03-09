@@ -15,6 +15,7 @@
 #include <glrt/renderer/light-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
 #include <glrt/renderer/material-shader.h>
+#include <glrt/renderer/debugging/shader-debug-printer.h>
 
 #include <glhelper/framebufferobject.hpp>
 #include <glhelper/texture2d.hpp>
@@ -39,6 +40,7 @@ public:
   debugging::VisualizationRenderer visualizeRectAreaLights;
 
   glm::ivec2 videoResolution;
+  debugging::ShaderDebugPrinter* debugPrinter = nullptr;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;

@@ -149,6 +149,8 @@ void Renderer::recordCommandlist()
   gl::CommandListRecorder recorder;
 
   recorder.beginTokenList();
+  if(debugPrinter != nullptr)
+    debugPrinter->recordBinding(recorder);
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());

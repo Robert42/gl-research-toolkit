@@ -238,6 +238,12 @@ void ShaderDebugPrinter::end()
   directionVisualization.update();
 }
 
+void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)
+{
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_VALUE_PRINTER, gl::ShaderObject::ShaderType::FRAGMENT, headerBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(ATOMIC_COUNTER_BINDING_VALUE_PRINTER, gl::ShaderObject::ShaderType::FRAGMENT, counterBuffer.gpuBufferAddress());
+}
+
 void ShaderDebugPrinter::draw()
 {
   if(!active)

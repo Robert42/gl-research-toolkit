@@ -7,6 +7,7 @@
 #include <glhelper/shaderobject.hpp>
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
+#include <glrt/renderer/gl/command-list-recorder.h>
 
 namespace glrt {
 namespace renderer {
@@ -25,6 +26,8 @@ public:
 
   void begin();
   void end();
+
+  void recordBinding(gl::CommandListRecorder& recorder);
 
   void draw();
 
