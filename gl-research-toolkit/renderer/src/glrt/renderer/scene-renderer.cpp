@@ -58,9 +58,7 @@ void Renderer::render()
 
   applyFramebuffer();
 
-  // #TODO: when usign command lists, is it possible to use the same biningsindex, if it's once vertex and once fragment shader?
   sceneVertexUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_VERTEX_BLOCK);
-  sceneFragmentUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK);
   visualizeCameras.render();
   visualizeSphereAreaLights.render();
   visualizeRectAreaLights.render();
