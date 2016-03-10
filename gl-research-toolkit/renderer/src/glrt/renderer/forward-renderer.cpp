@@ -12,15 +12,22 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
     framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true)
 {
 #if GLRT_ENABLE_SCENE_RENDERING
-  appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::PLAIN_COLOR, Material::Type::TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS);
-  appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_MASKED}, Pass::DEPTH_PREPASS);
+  int opaqueDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {Material::Type::PLAIN_COLOR, Material::Type::TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS);
+  int maskedDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {Material::Type::TEXTURED_MASKED}, Pass::DEPTH_PREPASS);
 
-  appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::PLAIN_COLOR}, Pass::FORWARD_PASS);
-  appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_OPAQUE}, Pass::FORWARD_PASS);
-  appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_MASKED}, Pass::FORWARD_PASS);
-  appendMaterialShader(&framebuffer, preprocessorBlock(), {Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS);
+  int plainColorShader = appendMaterialShader(preprocessorBlock(), {Material::Type::PLAIN_COLOR}, Pass::FORWARD_PASS);
+  int texturedShader = appendMaterialShader(preprocessorBlock(), {Material::Type::TEXTURED_OPAQUE,Material::Type::TEXTURED_MASKED,Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS);
+
+  appendMaterialState(&framebuffer, {Material::Type::PLAIN_COLOR, Material::Type::TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS, opaqueDepthPrepassShader);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_MASKED}, Pass::DEPTH_PREPASS, maskedDepthPrepassShader);
+
+  appendMaterialState(&framebuffer, {Material::Type::PLAIN_COLOR}, Pass::FORWARD_PASS, plainColorShader);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_OPAQUE}, Pass::FORWARD_PASS, texturedShader);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_MASKED}, Pass::FORWARD_PASS, texturedShader);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS, texturedShader);
 #endif
 
+  // #TODO remove old debugging code
 #if GLRT_ENABLE_COMMANDLISTTEST
   commandListTest = CommandListTest::AcceptGivenFramebuffer::Ptr(new CommandListTest::OrangeStaticMesh(&framebuffer, sceneVertexUniformAddress(), resourceManager->staticMeshBufferManager->meshForUuid(SampleResourceManager::suzanneLowPoly())));
   commandListTest->captureStateNow(gl::StatusCapture::Mode::TRIANGLES);

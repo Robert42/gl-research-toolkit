@@ -64,7 +64,8 @@ void Renderer::render()
   visualizeRectAreaLights.render();
 }
 
-void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
+
+int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
 {
   if(pass == Pass::DEPTH_PREPASS)
     preprocessorBlock.insert("#define DEPTH_PREPASS");
@@ -94,9 +95,19 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
   else
     Q_UNREACHABLE();
 
-  materialShaders.append_move(std::move(MaterialShader(preprocessorBlock)));
+  ReloadableShader shader("material",
+                          QDir(GLRT_SHADER_DIR"/materials"),
+                          preprocessorBlock);
+  materialShaders.append_move(std::move(shader));
 
-  MaterialShader* materialShader = &materialShaders.last();
+  return materialShaders.length()-1;
+}
+
+void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader)
+{
+  materialStates.append_move(std::move(MaterialState(shader)));
+
+  MaterialState* materialShader = &materialStates.last();
 
   for(Material::Type m : materialTypes)
     materialShaderMetadata[qMakePair(pass, m)] = materialShader;
@@ -117,16 +128,15 @@ bool Renderer::needRerecording() const
 
 void Renderer::captureStates()
 {
-  for(MaterialShader& materialShader : materialShaders)
+  for(MaterialState& materialState : materialStates)
   {
-    gl::FramebufferObject& framebuffer = *materialShader.framebuffer;
-    ReloadableShader& shader = materialShader.shader;
+    gl::FramebufferObject& framebuffer = *materialState.framebuffer;
+    ReloadableShader& shader = materialShaders[materialState.shader];
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
     shader.shaderObject.Activate();
-    // #TODO decouple the state capture and framebuffer from the shader: we should be able to use the same shader for different states and different statebuffers
-    materialShader.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
+    materialState.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
     framebuffer.BindBackBuffer();
     gl::ShaderObject::Deactivate();
     StaticMeshBuffer::disableVertexArrays();
@@ -139,7 +149,7 @@ void Renderer::recordCommandlist()
     captureStates();
 
   // #FIXME support different materials
-  MaterialShader* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
+  MaterialState* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
 
   glm::ivec2 tokenRange;
   gl::CommandListRecorder recorder;

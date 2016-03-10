@@ -21,7 +21,7 @@ set(SOURCE_FILES
   include/glrt/renderer/implementation/fragmented-static-mesh-component-array.inl
   include/glrt/renderer/light-buffer.h
   include/glrt/renderer/material-buffer.h
-  include/glrt/renderer/material-shader.h
+  include/glrt/renderer/material-state.h
   include/glrt/renderer/sample-resource-manager.h
   include/glrt/renderer/scene-renderer.h
   include/glrt/renderer/simple-shader-storage-buffer.h
@@ -56,7 +56,7 @@ set(SOURCE_FILES
   src/glrt/renderer/implementation/command-list-test.cpp
   src/glrt/renderer/light-buffer.cpp
   src/glrt/renderer/material-buffer.cpp
-  src/glrt/renderer/material-shader.cpp
+  src/glrt/renderer/material-state.cpp
   src/glrt/renderer/sample-application.cpp
   src/glrt/renderer/sample-resource-manager.cpp
   src/glrt/renderer/scene-renderer.cpp
