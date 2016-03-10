@@ -9,7 +9,15 @@
 
 namespace glrt {
 namespace renderer {
+
+struct TokenRanges
+{
+  QMap<Material::Type, glm::ivec2> tokenRangeMovables;
+  QMap<Material::Type, glm::ivec2> tokenRangeNotMovable;
+};
+
 namespace implementation {
+
 
 struct StaticMeshRecorder final
 {
@@ -23,9 +31,13 @@ public:
 
   MaterialBuffer materialBuffer;
 
-  QMap<Material::Type, glm::ivec2> tokenRanges;
+  TokenRanges tokenRanges;
 
   StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList);
+
+  void bindNotMovableTokens();
+  void bindMovableTokens();
+  void unbindTokens();
 
   void bindMaterialType(Material::Type materialType);
   void unbindMaterialType(Material::Type materialType);
@@ -45,6 +57,7 @@ private:
   TransformationBuffer& transformationBuffer;
 
   const glm::ivec2 commonTokenList;
+  QMap<Material::Type, glm::ivec2>* boundTokenRanges = nullptr;
 
   void initMaterials(const Array<Uuid<Material>>& materialSet);
 };
@@ -63,7 +76,7 @@ public:
   void update();
 
   bool needRerecording() const;
-  QMap<Material::Type, glm::ivec2> recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList);
+  TokenRanges recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList);
 
 private:
   typedef T_FragmentedArray FragmentedArray;

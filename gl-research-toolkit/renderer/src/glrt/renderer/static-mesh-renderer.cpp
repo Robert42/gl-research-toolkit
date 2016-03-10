@@ -17,8 +17,26 @@ StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, Resour
     commonTokenList(commonTokenList)
 {
   initMaterials(materialSet);
+
+#if !GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
+  bindNotMovableTokens();
+#endif
 }
 
+void StaticMeshRecorder::bindNotMovableTokens()
+{
+  boundTokenRanges = &tokenRanges.tokenRangeNotMovable;
+}
+
+void StaticMeshRecorder::bindMovableTokens()
+{
+  boundTokenRanges = &tokenRanges.tokenRangeMovables;
+}
+
+void StaticMeshRecorder::unbindTokens()
+{
+  boundTokenRanges = nullptr;
+}
 
 void StaticMeshRecorder::bindMaterialType(Material::Type materialType)
 {
@@ -29,7 +47,8 @@ void StaticMeshRecorder::bindMaterialType(Material::Type materialType)
 
 void StaticMeshRecorder::unbindMaterialType(Material::Type materialType)
 {
-  tokenRanges[materialType] = recorder.endTokenList();
+  Q_ASSERT(boundTokenRanges != nullptr);
+  boundTokenRanges->insert(materialType, recorder.endTokenList());
 }
 
 void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)

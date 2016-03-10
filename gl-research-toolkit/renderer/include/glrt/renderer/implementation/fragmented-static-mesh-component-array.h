@@ -14,13 +14,12 @@ typedef typename glrt::scene::resources::StaticMesh StaticMesh;
 bool materialLessThan(const Material& a, const Material& b, const Uuid<Material>& uuidA, const Uuid<Material>& uuidB);
 
 template<class T_StaticMeshComponent, class T_recorder>
-struct FragmentedStaticMeshComponentArray : public FragmentedComponentArray<T_StaticMeshComponent, T_recorder*>
+struct FragmentedStaticMeshComponentArray
 {
   typedef T_recorder recorder_type;
   typedef FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder> this_type;
   typedef FragmentedComponentArray<T_StaticMeshComponent, recorder_type*> parent_type;
-  typedef typename parent_type::MovabilityHintHandler MovabilityHintHandler;
-  typedef typename parent_type::MovabilityHint MovabilityHint;
+  typedef glrt::scene::Node::Component::MovabilityHint MovabilityHint;
 
   struct HandlerBase
   {
@@ -60,12 +59,23 @@ struct FragmentedStaticMeshComponentArray : public FragmentedComponentArray<T_St
     inline static void handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, Material::Type materialType, recorder_type*);
   };
 
+  struct MovabilityHintHandler : public HandlerBase
+  {
+    inline static bool segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b);
+    inline static MovabilityHint classify(const T_StaticMeshComponent* component);
+    inline static int segment_as_index(MovabilityHint i);
+    inline static MovabilityHint segment_from_index(int i);
+
+    inline static void handle_new_segment(T_StaticMeshComponent** objects, int begin, int end, MovabilityHint hint, recorder_type*);
+    inline static void handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, MovabilityHint hint, recorder_type*);
+  };
+
   typedef FragmentedArray_Segment_Values<T_StaticMeshComponent*, UpdateCaller>  CallUpdateTrait;
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<StaticMesh>, StaticMeshHandler, CallUpdateTrait> StaticMeshHandlerTrait;
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<Material>, MaterialHandler, StaticMeshHandlerTrait> MaterialHandlerTrait;
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Material::Type, MaterialTypeHandler, MaterialHandlerTrait> MaterialTypeHandlerTrait;
 
-#define GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY 0
+#define GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY 1
 
 #if GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
   typedef FragmentedArray_Segment_Split_in_FixedNumberOfSegments<3, T_StaticMeshComponent*, MovabilityHint, MovabilityHintHandler, MaterialTypeHandlerTrait> DynamicHintTraits;

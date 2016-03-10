@@ -30,7 +30,7 @@ bool StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 }
 
 template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-QMap<Material::Type, glm::ivec2> StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
+TokenRanges StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
 {
   FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
 
@@ -43,7 +43,7 @@ QMap<Material::Type, glm::ivec2> StaticMeshRenderer<T_Component, T_Recorder, T_F
   {
     transformationBuffer = std::move(TransformationBuffer());
     materialBuffer = std::move(MaterialBuffer());
-    return QMap<Material::Type, glm::ivec2>();
+    return TokenRanges();
   }
 
   QSet<Uuid<Material>> materialSet;

@@ -151,10 +151,6 @@ void Renderer::recordCommandlist()
   glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
 
-#if GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
-#error Refactor, so the same shader is bound multiple times for movable and for not movable
-#endif
-
   recorder.beginTokenList();
   debugPrinter.recordBinding(recorder);
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
@@ -162,16 +158,26 @@ void Renderer::recordCommandlist()
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
   commonTokenList = recorder.endTokenList();
 
-  QMap<Material::Type, glm::ivec2> meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
+  TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
 
   for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
   {
     Material::Type materialType = i.key().second;
     const MaterialState& materialShader = *i.value();
 
-    glm::ivec2 range = meshDrawRanges[materialType];
+    glm::ivec2 range;
 
-    recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    if(meshDrawRanges.tokenRangeNotMovable.contains(materialType))
+    {
+      range = meshDrawRanges.tokenRangeNotMovable[materialType];
+      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    }
+
+    if(meshDrawRanges.tokenRangeMovables.contains(materialType))
+    {
+      range = meshDrawRanges.tokenRangeMovables[materialType];
+      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    }
   }
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
