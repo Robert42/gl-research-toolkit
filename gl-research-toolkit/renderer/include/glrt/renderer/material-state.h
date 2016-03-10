@@ -10,15 +10,39 @@ class MaterialState
 {
   Q_DISABLE_COPY(MaterialState)
 public:
+  enum class Flags : quint32
+  {
+    NONE = 0,
+    DEPTH_TEST = 1,
+    DEPTH_WRITE = 2,
+    COLOR_WRITE = 4,
+    ALPHA_WRITE = 8,
+    /* #TODO
+    FACE_CULLING = 0x10,
+    */
+  };
+
+  friend Flags operator|(Flags a, Flags b){return Flags(quint32(a) | quint32(b));}
+  friend Flags operator&(Flags a, Flags b){return Flags(quint32(a) & quint32(b));}
+
   gl::FramebufferObject* framebuffer = nullptr;
   gl::StatusCapture stateCapture;
   int shader;
 
-  MaterialState(int shader);
+  MaterialState(int shader, Flags flags);
   MaterialState(MaterialState&& other);
   MaterialState& operator=(MaterialState&& other);
 
   ~MaterialState();
+
+  void activateStateForFlags();
+  void deactivateStateForFlags();
+
+private:
+  Flags flags;
+
+  bool hasFlag(Flags flag) const;
+  GLboolean glHasFlag(Flags flag) const;
 };
 
 } // namespace renderer

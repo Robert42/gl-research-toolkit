@@ -18,13 +18,16 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   int plainColorShader = appendMaterialShader(preprocessorBlock(), {Material::Type::PLAIN_COLOR}, Pass::FORWARD_PASS);
   int texturedShader = appendMaterialShader(preprocessorBlock(), {Material::Type::TEXTURED_OPAQUE,Material::Type::TEXTURED_MASKED,Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS);
 
-  appendMaterialState(&framebuffer, {Material::Type::PLAIN_COLOR, Material::Type::TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS, opaqueDepthPrepassShader);
-  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_MASKED}, Pass::DEPTH_PREPASS, maskedDepthPrepassShader);
+  MaterialState::Flags depthPrepassFlags = MaterialState::Flags::DEPTH_WRITE|MaterialState::Flags::DEPTH_TEST;
+  MaterialState::Flags forwardPassFlags = MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::DEPTH_TEST;
 
-  appendMaterialState(&framebuffer, {Material::Type::PLAIN_COLOR}, Pass::FORWARD_PASS, plainColorShader);
-  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_OPAQUE}, Pass::FORWARD_PASS, texturedShader);
-  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_MASKED}, Pass::FORWARD_PASS, texturedShader);
-  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS, texturedShader);
+  appendMaterialState(&framebuffer, {Material::Type::PLAIN_COLOR, Material::Type::TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS, opaqueDepthPrepassShader, depthPrepassFlags);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_MASKED}, Pass::DEPTH_PREPASS, maskedDepthPrepassShader, depthPrepassFlags);
+
+  appendMaterialState(&framebuffer, {Material::Type::PLAIN_COLOR}, Pass::FORWARD_PASS, plainColorShader, forwardPassFlags);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_OPAQUE}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_MASKED}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
+  appendMaterialState(&framebuffer, {Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
 #endif
 
   // #TODO remove old debugging code

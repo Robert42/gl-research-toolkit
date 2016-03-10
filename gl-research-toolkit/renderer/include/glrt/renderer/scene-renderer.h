@@ -58,7 +58,7 @@ protected:
   virtual void applyFramebuffer() = 0;
 
   int appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
-  void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader);
+  void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
   GLuint64 sceneVertexUniformAddress() const;
   GLuint64 sceneFragmentUniformAddress() const;

@@ -103,9 +103,9 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
   return materialShaders.length()-1;
 }
 
-void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader)
+void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags)
 {
-  materialStates.append_move(std::move(MaterialState(shader)));
+  materialStates.append_move(std::move(MaterialState(shader, flags)));
 
   MaterialState* materialShader = &materialStates.last();
 
@@ -136,7 +136,9 @@ void Renderer::captureStates()
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
     shader.shaderObject.Activate();
+    materialState.activateStateForFlags();
     materialState.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
+    materialState.deactivateStateForFlags();
     framebuffer.BindBackBuffer();
     gl::ShaderObject::Deactivate();
     StaticMeshBuffer::disableVertexArrays();

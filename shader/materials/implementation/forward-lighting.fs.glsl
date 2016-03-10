@@ -28,15 +28,13 @@ out vec4 color;
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
-  PRINT_VALUE(scene.camera_position);
+#ifdef DEPTH_PREPASS
+  color = vec4(vec3(1, 0, 1), alpha);
+  return;
+#endif
   
 #ifdef NO_LIGHTING
   color = vec4(material.base_color, 1);
-  return;
-#endif
-
-#ifdef DEPTH_PREPASS
-  color = vec4(vec3(0), alpha);
   return;
 #endif
 
