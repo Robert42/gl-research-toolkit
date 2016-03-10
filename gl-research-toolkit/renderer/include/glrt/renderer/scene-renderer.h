@@ -53,7 +53,7 @@ public:
   void render();
 
 protected:
-  virtual void clearFramebuffer() = 0;
+  virtual void prepareFramebuffer() = 0;
   virtual void callExtraCommandLists(){}
   virtual void applyFramebuffer() = 0;
 
@@ -82,8 +82,6 @@ private:
   Array<ReloadableShader> materialShaders;
   Array<MaterialState> materialStates;
 
-  gl::Texture2D workaroundFramebufferTexture;
-  gl::FramebufferObject workaroundFramebuffer;
   gl::Buffer sceneVertexUniformBuffer;
   gl::Buffer sceneFragmentUniformBuffer;
   gl::CommandList commandList;

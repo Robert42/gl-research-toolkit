@@ -23,8 +23,6 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
-    workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
-    workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
     sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true),
@@ -47,14 +45,12 @@ void Renderer::render()
 #endif
 
   updateCameraUniform();
-  clearFramebuffer();
+  prepareFramebuffer();
 
-  workaroundFramebuffer.Bind(false);
 #if GLRT_ENABLE_SCENE_RENDERING
   commandList.call();
 #endif
   callExtraCommandLists();
-  workaroundFramebuffer.BindBackBuffer();
 
   applyFramebuffer();
 

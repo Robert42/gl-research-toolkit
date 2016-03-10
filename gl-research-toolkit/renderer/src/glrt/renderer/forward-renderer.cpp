@@ -38,15 +38,13 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
 #endif
 }
 
-void ForwardRenderer::clearFramebuffer()
+void ForwardRenderer::prepareFramebuffer()
 {
   framebuffer.Bind(true);
 
   Q_UNUSED(framebuffer);
   glClearColor(0.f, 0.f, 0.f, 1.f);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-  framebuffer.BindBackBuffer();
 }
 
 void ForwardRenderer::callExtraCommandLists()
@@ -58,6 +56,8 @@ void ForwardRenderer::callExtraCommandLists()
 
 void ForwardRenderer::applyFramebuffer()
 {
+  framebuffer.BindBackBuffer();
+
   framebuffer.BindRead();
   GL_CALL(glBlitFramebuffer, 0, 0, videoResolution.x, videoResolution.y, 0, 0, videoResolution.x, videoResolution.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST);
   framebuffer.UnbindRead();
