@@ -22,6 +22,8 @@ public:
     TEXTURED_TRANSPARENT
   };
 
+  static QVector<Type> allTypes();
+
   struct PlainColor
   {
     glm::vec3 base_color = glm::vec3(1);
@@ -70,6 +72,21 @@ int qHash(Material::Type materialType);
 
 } // namespace resources
 } // namespace scene
+
+
+template<>
+struct DefaultTraits<glrt::scene::resources::Material>
+{
+  typedef ArrayTraits_POD<glrt::scene::resources::Material> type;
+};
+
+template<>
+struct DefaultTraits<glrt::scene::resources::Material::Type>
+{
+  typedef ArrayTraits_POD<glrt::scene::resources::Material::Type> type;
+};
+
+
 } // namespace glrt
 
 #include "material.inl"

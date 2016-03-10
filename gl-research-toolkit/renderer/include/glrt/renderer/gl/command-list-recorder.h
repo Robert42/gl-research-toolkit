@@ -50,6 +50,7 @@ public:
   CommandListRecorder(CommandListRecorder&& other);
   CommandListRecorder& operator=(CommandListRecorder&& other);
 
+  void beginTokenListWithCopy(const glm::ivec2& src);
   void beginTokenList();
   template<typename T>
   void append_token(T* token, GLenum tokenId);

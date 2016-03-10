@@ -148,10 +148,7 @@ void Renderer::recordCommandlist()
   if(needRecapturing())
     captureStates();
 
-  // #FIXME support different materials
-  MaterialState* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
-
-  glm::ivec2 tokenRange;
+  glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
 
   recorder.beginTokenList();
@@ -159,10 +156,19 @@ void Renderer::recordCommandlist()
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
-  staticMeshRenderer.recordCommandList(recorder);
-  tokenRange = recorder.endTokenList();
+  commonTokenList = recorder.endTokenList();
 
-  recorder.append_drawcall(tokenRange, &materialShader->stateCapture, materialShader->framebuffer);
+  QMap<Material::Type, glm::ivec2> meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
+
+  for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
+  {
+    Material::Type materialType = i.key().second;
+    const MaterialState& materialShader = *i.value();
+
+    glm::ivec2 range = meshDrawRanges[materialType];
+
+    recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+  }
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
 

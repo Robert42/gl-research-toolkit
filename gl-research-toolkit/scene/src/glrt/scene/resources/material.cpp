@@ -6,6 +6,15 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+
+QVector<Material::Type> Material::allTypes()
+{
+  return {Type::PLAIN_COLOR,
+        Type::TEXTURED_OPAQUE,
+        Type::TEXTURED_MASKED,
+        Type::TEXTURED_TRANSPARENT};
+}
+
 using AngelScriptIntegration::AngelScriptCheck;
 
 Material::Material(const PlainColor& plainColor)

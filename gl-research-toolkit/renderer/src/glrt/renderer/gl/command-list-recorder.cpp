@@ -34,6 +34,22 @@ CommandListRecorder& CommandListRecorder::operator=(CommandListRecorder&& other)
 }
 
 
+void CommandListRecorder::beginTokenListWithCopy(const glm::ivec2& src)
+{
+  Q_ASSERT(!isInsideBeginEnd());
+
+  tokenBeginStart = commandTokens.length();
+
+  if(src[1] == tokenBeginStart)
+  {
+    tokenBeginStart = src[0];
+  }else
+  {
+    commandTokens.append_by_memcpy(commandTokens.data() + src[0], static_cast<size_t>(src[1] - src[0]));
+  }
+}
+
+
 void CommandListRecorder::beginTokenList()
 {
   Q_ASSERT(!isInsideBeginEnd());

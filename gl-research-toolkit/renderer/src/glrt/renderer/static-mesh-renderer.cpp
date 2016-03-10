@@ -9,13 +9,27 @@ namespace renderer {
 namespace implementation {
 
 
-StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager)
+StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList)
   : recorder(recorder),
     resourceManager(resourceManager),
     staticMeshBufferManager(staticMeshBufferManager),
-    transformationBuffer(transformationBuffer)
+    transformationBuffer(transformationBuffer),
+    commonTokenList(commonTokenList)
 {
   initMaterials(materialSet);
+}
+
+
+void StaticMeshRecorder::bindMaterialType(Material::Type materialType)
+{
+  Q_UNUSED(materialType)
+
+  recorder.beginTokenListWithCopy(commonTokenList);
+}
+
+void StaticMeshRecorder::unbindMaterialType(Material::Type materialType)
+{
+  tokenRanges[materialType] = recorder.endTokenList();
 }
 
 void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)

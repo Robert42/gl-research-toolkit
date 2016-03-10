@@ -2,6 +2,7 @@
 #define GLRT_RENDERER_IMPLEMENTATION_FRAGMENTEDSTATICMESHCOMPONENTARRAY_H
 
 #include "fragmented-component-array.h"
+#include <glrt/scene/resources/material.h>
 
 namespace glrt {
 namespace renderer {
@@ -50,10 +51,21 @@ struct FragmentedStaticMeshComponentArray : public FragmentedComponentArray<T_St
     inline static void handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, Uuid<Material> material, recorder_type*);
   };
 
+  struct MaterialTypeHandler : public HandlerBase
+  {
+    inline static bool segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b);
+    inline static Material::Type classify(const T_StaticMeshComponent* component);
+
+    inline static void handle_new_segment(T_StaticMeshComponent** objects, int begin, int end, Material::Type materialType, recorder_type*);
+    inline static void handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, Material::Type materialType, recorder_type*);
+  };
+
   typedef FragmentedArray_Segment_Values<T_StaticMeshComponent*, UpdateCaller>  CallUpdateTrait;
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<StaticMesh>, StaticMeshHandler, CallUpdateTrait> StaticMeshHandlerTrait;
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<Material>, MaterialHandler, StaticMeshHandlerTrait> MaterialHandlerTrait;
-  typedef FragmentedArray_Segment_Split_in_FixedNumberOfSegments<3, T_StaticMeshComponent*, MovabilityHint, MovabilityHintHandler, MaterialHandlerTrait> DynamicHintTraits;
+  typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Material::Type, MaterialTypeHandler, MaterialHandlerTrait> MaterialTypeHandlerTrait;
+  // #FIXME don't sort by movability? Becaues there are currently two shader switches for each shader
+  typedef FragmentedArray_Segment_Split_in_FixedNumberOfSegments<3, T_StaticMeshComponent*, MovabilityHint, MovabilityHintHandler, MaterialTypeHandlerTrait> DynamicHintTraits;
 
   typedef FragmentedArray<T_StaticMeshComponent*, DynamicHintTraits> type;
 };
