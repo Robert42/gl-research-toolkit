@@ -18,7 +18,7 @@ public:
   gl::FramebufferObject framebuffer;
 
 protected:
-  void clearFramebuffer() override;
+  void prepareFramebuffer() override;
   void callExtraCommandLists() override;
   void applyFramebuffer() override;
 

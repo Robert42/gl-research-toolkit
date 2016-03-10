@@ -14,8 +14,9 @@
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/light-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
-#include <glrt/renderer/material-shader.h>
+#include <glrt/renderer/material-state.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
+#include <glrt/renderer/toolkit/reloadable-shader.h>
 
 #include <glhelper/framebufferobject.hpp>
 #include <glhelper/texture2d.hpp>
@@ -52,11 +53,12 @@ public:
   void render();
 
 protected:
-  virtual void clearFramebuffer() = 0;
+  virtual void prepareFramebuffer() = 0;
   virtual void callExtraCommandLists(){}
   virtual void applyFramebuffer() = 0;
 
-  void appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
+  int appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
+  void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
   GLuint64 sceneVertexUniformAddress() const;
   GLuint64 sceneFragmentUniformAddress() const;
@@ -76,11 +78,10 @@ private:
 
   LightBuffer lightUniformBuffer;
   StaticMeshRenderer<> staticMeshRenderer;
-  QMap<QPair<Pass, Material::Type>, MaterialShader*> materialShaderMetadata;
-  Array<MaterialShader> materialShaders;
+  QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
+  Array<ReloadableShader> materialShaders;
+  Array<MaterialState> materialStates;
 
-  gl::Texture2D workaroundFramebufferTexture;
-  gl::FramebufferObject workaroundFramebuffer;
   gl::Buffer sceneVertexUniformBuffer;
   gl::Buffer sceneFragmentUniformBuffer;
   gl::CommandList commandList;

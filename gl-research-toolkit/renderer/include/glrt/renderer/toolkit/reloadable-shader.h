@@ -2,6 +2,7 @@
 #define GLRT_RENDERER_RELOADABLESHADER_H
 
 #include <glrt/dependencies.h>
+#include <glrt/toolkit/array.h>
 
 #include <glhelper/shaderobject.hpp>
 
@@ -55,6 +56,14 @@ public:
 };
 
 } // namespace renderer
+
+
+template<>
+struct DefaultTraits<renderer::ReloadableShader>
+{
+  typedef ArrayTraits_mCmOD<renderer::ReloadableShader> type;
+};
+
 } // namespace glrt
 
 #endif // GLRT_RENDERER_RELOADABLESHADER_H

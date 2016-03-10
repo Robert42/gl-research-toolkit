@@ -101,6 +101,94 @@ void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::Mate
 }
 
 
+// ====
+
+
+template<class T_StaticMeshComponent, class T_recorder>
+bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialTypeHandler::segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b)
+{
+  return materialLessThan(a->material(), b->material(), a->materialUuid, b->materialUuid);
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+Material::Type FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialTypeHandler::classify(const T_StaticMeshComponent* component)
+{
+  return component->material().type;
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialTypeHandler::handle_new_segment(T_StaticMeshComponent** objects, int begin, int end, Material::Type materialType, recorder_type* recorder)
+{
+  Q_UNUSED(objects);
+  Q_UNUSED(begin);
+  Q_UNUSED(end);
+
+  recorder->bindMaterialType(materialType);
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MaterialTypeHandler::handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, Material::Type materialType, recorder_type* recorder)
+{
+  Q_UNUSED(objects);
+  Q_UNUSED(begin);
+  Q_UNUSED(end);
+
+  recorder->unbindMaterialType(materialType);
+}
+
+
+// ====
+
+
+template<class T_StaticMeshComponent, class T_recorder>
+bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MovabilityHintHandler::segmentLessThan(const T_StaticMeshComponent* a, const T_StaticMeshComponent* b)
+{
+  return classify(a) < classify(b);
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+glrt::scene::Node::Component::MovabilityHint FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MovabilityHintHandler::classify(const T_StaticMeshComponent* component)
+{
+  return component->movabilityHint();
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+int FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MovabilityHintHandler::segment_as_index(MovabilityHint i)
+{
+  return static_cast<int>(i);
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+glrt::scene::Node::Component::MovabilityHint FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MovabilityHintHandler::segment_from_index(int i)
+{
+  return static_cast<MovabilityHint>(i);
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MovabilityHintHandler::handle_new_segment(T_StaticMeshComponent** objects, int begin, int end, MovabilityHint hint, T_recorder* recorder)
+{
+  Q_UNUSED(objects);
+  Q_UNUSED(begin);
+  Q_UNUSED(end);
+
+  if(hint == MovabilityHint::MOVABLE)
+    recorder->bindMovableTokens();
+  else
+    recorder->bindNotMovableTokens();
+}
+
+template<class T_StaticMeshComponent, class T_recorder>
+void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::MovabilityHintHandler::handle_end_segment(T_StaticMeshComponent** objects, int begin, int end, MovabilityHint hint, T_recorder* recorder)
+{
+  Q_UNUSED(objects);
+  Q_UNUSED(begin);
+  Q_UNUSED(end);
+  Q_UNUSED(hint);
+
+  recorder->unbindTokens();
+}
+
+
 } // namespace implementation
 } // namespace renderer
 } // namespace glrt

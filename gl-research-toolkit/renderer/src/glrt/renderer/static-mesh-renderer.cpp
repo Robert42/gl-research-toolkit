@@ -9,13 +9,46 @@ namespace renderer {
 namespace implementation {
 
 
-StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager)
+StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList)
   : recorder(recorder),
     resourceManager(resourceManager),
     staticMeshBufferManager(staticMeshBufferManager),
-    transformationBuffer(transformationBuffer)
+    transformationBuffer(transformationBuffer),
+    commonTokenList(commonTokenList)
 {
   initMaterials(materialSet);
+
+#if !GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
+  bindNotMovableTokens();
+#endif
+}
+
+void StaticMeshRecorder::bindNotMovableTokens()
+{
+  boundTokenRanges = &tokenRanges.tokenRangeNotMovable;
+}
+
+void StaticMeshRecorder::bindMovableTokens()
+{
+  boundTokenRanges = &tokenRanges.tokenRangeMovables;
+}
+
+void StaticMeshRecorder::unbindTokens()
+{
+  boundTokenRanges = nullptr;
+}
+
+void StaticMeshRecorder::bindMaterialType(Material::Type materialType)
+{
+  Q_UNUSED(materialType)
+
+  recorder.beginTokenListWithCopy(commonTokenList);
+}
+
+void StaticMeshRecorder::unbindMaterialType(Material::Type materialType)
+{
+  Q_ASSERT(boundTokenRanges != nullptr);
+  boundTokenRanges->insert(materialType, recorder.endTokenList());
 }
 
 void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
@@ -53,7 +86,7 @@ void StaticMeshRecorder::drawInstances(int begin, int end)
     recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, transformationBuffer.gpuAddressForInstance(i));
     staticMesh->recordDraw(recorder);
   }
-  // #TODO check, whether the mirrors are raelly instanced
+  // #TODO check, whether instancing is really working raelly instanced
 }
 
 void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)

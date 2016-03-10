@@ -23,8 +23,6 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
-    workaroundFramebufferTexture(4, 4, gl::TextureFormat::R8I),
-    workaroundFramebuffer(gl::FramebufferObject::Attachment(&workaroundFramebufferTexture)),
     sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true),
@@ -47,14 +45,12 @@ void Renderer::render()
 #endif
 
   updateCameraUniform();
-  clearFramebuffer();
+  prepareFramebuffer();
 
-  workaroundFramebuffer.Bind(false);
 #if GLRT_ENABLE_SCENE_RENDERING
   commandList.call();
 #endif
   callExtraCommandLists();
-  workaroundFramebuffer.BindBackBuffer();
 
   applyFramebuffer();
 
@@ -64,7 +60,8 @@ void Renderer::render()
   visualizeRectAreaLights.render();
 }
 
-void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
+
+int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
 {
   if(pass == Pass::DEPTH_PREPASS)
     preprocessorBlock.insert("#define DEPTH_PREPASS");
@@ -94,9 +91,19 @@ void Renderer::appendMaterialShader(gl::FramebufferObject* framebuffer, QSet<QSt
   else
     Q_UNREACHABLE();
 
-  materialShaders.append_move(std::move(MaterialShader(preprocessorBlock)));
+  ReloadableShader shader("material",
+                          QDir(GLRT_SHADER_DIR"/materials"),
+                          preprocessorBlock);
+  materialShaders.append_move(std::move(shader));
 
-  MaterialShader* materialShader = &materialShaders.last();
+  return materialShaders.length()-1;
+}
+
+void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags)
+{
+  materialStates.append_move(std::move(MaterialState(shader, flags)));
+
+  MaterialState* materialShader = &materialStates.last();
 
   for(Material::Type m : materialTypes)
     materialShaderMetadata[qMakePair(pass, m)] = materialShader;
@@ -117,16 +124,17 @@ bool Renderer::needRerecording() const
 
 void Renderer::captureStates()
 {
-  for(MaterialShader& materialShader : materialShaders)
+  for(MaterialState& materialState : materialStates)
   {
-    gl::FramebufferObject& framebuffer = *materialShader.framebuffer;
-    ReloadableShader& shader = materialShader.shader;
+    gl::FramebufferObject& framebuffer = *materialState.framebuffer;
+    ReloadableShader& shader = materialShaders[materialState.shader];
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
     shader.shaderObject.Activate();
-    // #TODO decouple the state capture and framebuffer from the shader: we should be able to use the same shader for different states and different statebuffers
-    materialShader.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
+    materialState.activateStateForFlags();
+    materialState.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
+    materialState.deactivateStateForFlags();
     framebuffer.BindBackBuffer();
     gl::ShaderObject::Deactivate();
     StaticMeshBuffer::disableVertexArrays();
@@ -138,10 +146,7 @@ void Renderer::recordCommandlist()
   if(needRecapturing())
     captureStates();
 
-  // #FIXME support different materials
-  MaterialShader* materialShader = materialShaderMetadata[qMakePair(Pass::FORWARD_PASS, Material::Type::PLAIN_COLOR)];
-
-  glm::ivec2 tokenRange;
+  glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
 
   recorder.beginTokenList();
@@ -149,10 +154,29 @@ void Renderer::recordCommandlist()
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
   recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
-  staticMeshRenderer.recordCommandList(recorder);
-  tokenRange = recorder.endTokenList();
+  commonTokenList = recorder.endTokenList();
 
-  recorder.append_drawcall(tokenRange, &materialShader->stateCapture, materialShader->framebuffer);
+  TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
+
+  for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
+  {
+    Material::Type materialType = i.key().second;
+    const MaterialState& materialShader = *i.value();
+
+    glm::ivec2 range;
+
+    if(meshDrawRanges.tokenRangeNotMovable.contains(materialType))
+    {
+      range = meshDrawRanges.tokenRangeNotMovable[materialType];
+      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    }
+
+    if(meshDrawRanges.tokenRangeMovables.contains(materialType))
+    {
+      range = meshDrawRanges.tokenRangeMovables[materialType];
+      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    }
+  }
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
 

@@ -9,7 +9,15 @@
 
 namespace glrt {
 namespace renderer {
+
+struct TokenRanges
+{
+  QMap<Material::Type, glm::ivec2> tokenRangeMovables;
+  QMap<Material::Type, glm::ivec2> tokenRangeNotMovable;
+};
+
 namespace implementation {
+
 
 struct StaticMeshRecorder final
 {
@@ -23,7 +31,16 @@ public:
 
   MaterialBuffer materialBuffer;
 
-  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager);
+  TokenRanges tokenRanges;
+
+  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList);
+
+  void bindNotMovableTokens();
+  void bindMovableTokens();
+  void unbindTokens();
+
+  void bindMaterialType(Material::Type materialType);
+  void unbindMaterialType(Material::Type materialType);
 
   void bindMaterial(const Uuid<Material>& material);
   void unbindMaterial(const Uuid<Material>& material);
@@ -39,6 +56,9 @@ private:
   StaticMeshBufferManager& staticMeshBufferManager;
   TransformationBuffer& transformationBuffer;
 
+  const glm::ivec2 commonTokenList;
+  QMap<Material::Type, glm::ivec2>* boundTokenRanges = nullptr;
+
   void initMaterials(const Array<Uuid<Material>>& materialSet);
 };
 
@@ -49,12 +69,14 @@ template<class T_Component=scene::StaticMeshComponent, class T_Recorder=implemen
 class StaticMeshRenderer final
 {
 public:
+  typedef typename glrt::scene::resources::Material Material;
+
   StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager);
 
   void update();
 
   bool needRerecording() const;
-  void recordCommandList(gl::CommandListRecorder& recorder);
+  TokenRanges recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList);
 
 private:
   typedef T_FragmentedArray FragmentedArray;
