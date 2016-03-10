@@ -151,6 +151,10 @@ void Renderer::recordCommandlist()
   glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
 
+#if GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
+#error Refactor, so the same shader is bound multiple times for movable and for not movable
+#endif
+
   recorder.beginTokenList();
   debugPrinter.recordBinding(recorder);
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));

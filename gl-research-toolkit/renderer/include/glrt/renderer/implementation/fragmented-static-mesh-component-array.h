@@ -64,10 +64,15 @@ struct FragmentedStaticMeshComponentArray : public FragmentedComponentArray<T_St
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<StaticMesh>, StaticMeshHandler, CallUpdateTrait> StaticMeshHandlerTrait;
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Uuid<Material>, MaterialHandler, StaticMeshHandlerTrait> MaterialHandlerTrait;
   typedef FragmentedArray_Segment_Generic<T_StaticMeshComponent*, Material::Type, MaterialTypeHandler, MaterialHandlerTrait> MaterialTypeHandlerTrait;
-  // #FIXME don't sort by movability? Becaues there are currently two shader switches for each shader
-  typedef FragmentedArray_Segment_Split_in_FixedNumberOfSegments<3, T_StaticMeshComponent*, MovabilityHint, MovabilityHintHandler, MaterialTypeHandlerTrait> DynamicHintTraits;
 
+#define GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY 0
+
+#if GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
+  typedef FragmentedArray_Segment_Split_in_FixedNumberOfSegments<3, T_StaticMeshComponent*, MovabilityHint, MovabilityHintHandler, MaterialTypeHandlerTrait> DynamicHintTraits;
   typedef FragmentedArray<T_StaticMeshComponent*, DynamicHintTraits> type;
+#else
+  typedef FragmentedArray<T_StaticMeshComponent*, MaterialTypeHandlerTrait> type;
+#endif
 };
 
 } // namespace implementation

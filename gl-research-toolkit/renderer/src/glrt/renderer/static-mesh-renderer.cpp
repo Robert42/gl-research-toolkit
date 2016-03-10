@@ -67,7 +67,7 @@ void StaticMeshRecorder::drawInstances(int begin, int end)
     recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, transformationBuffer.gpuAddressForInstance(i));
     staticMesh->recordDraw(recorder);
   }
-  // #TODO check, whether the mirrors are raelly instanced
+  // #TODO check, whether instancing is really working raelly instanced
 }
 
 void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)

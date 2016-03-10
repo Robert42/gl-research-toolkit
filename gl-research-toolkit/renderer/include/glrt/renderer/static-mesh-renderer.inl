@@ -81,9 +81,14 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 {
   FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
 
+
+#if GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
   glm::ivec2 range = fragmentedArray.section_boundaries(glrt::scene::Node::Component::MovabilityHint::MOVABLE);
 
   updateObjectUniforms(range.x, range.y);
+#else
+  updateObjectUniforms(0, fragmentedArray.length());
+#endif
 }
 
 template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
