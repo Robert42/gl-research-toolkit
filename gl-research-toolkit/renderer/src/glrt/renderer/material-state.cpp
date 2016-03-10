@@ -38,6 +38,11 @@ void MaterialState::activateStateForFlags()
     glDisable(GL_DEPTH_TEST);
   glDepthMask(glHasFlag(Flags::DEPTH_WRITE));
   glColorMask(glHasFlag(Flags::COLOR_WRITE), glHasFlag(Flags::COLOR_WRITE), glHasFlag(Flags::COLOR_WRITE), glHasFlag(Flags::ALPHA_WRITE));
+
+  if(hasFlag(Flags::FACE_CULLING))
+    glEnable(GL_CULL_FACE);
+  else
+    glDisable(GL_CULL_FACE);
 }
 
 void MaterialState::deactivateStateForFlags()
@@ -47,6 +52,8 @@ void MaterialState::deactivateStateForFlags()
 
   glDepthMask(GL_TRUE);
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+  glDisable(GL_CULL_FACE);
 }
 
 bool MaterialState::hasFlag(Flags flag) const

@@ -12,14 +12,12 @@ class MaterialState
 public:
   enum class Flags : quint32
   {
-    NONE = 0,
-    DEPTH_TEST = 1,
-    DEPTH_WRITE = 2,
-    COLOR_WRITE = 4,
-    ALPHA_WRITE = 8,
-    /* #TODO
+    NONE = 0x0,
+    DEPTH_TEST = 0x1,
+    DEPTH_WRITE = 0x2,
+    COLOR_WRITE = 0x4,
+    ALPHA_WRITE = 0x8,
     FACE_CULLING = 0x10,
-    */
   };
 
   friend Flags operator|(Flags a, Flags b){return Flags(quint32(a) | quint32(b));}
