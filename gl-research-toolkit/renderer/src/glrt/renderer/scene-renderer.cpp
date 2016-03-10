@@ -38,19 +38,14 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-#if GLRT_ENABLE_SCENE_RENDERING
   if(needRerecording())
     recordCommandlist();
   staticMeshRenderer.update();
-#endif
 
   updateCameraUniform();
   prepareFramebuffer();
 
-#if GLRT_ENABLE_SCENE_RENDERING
   commandList.call();
-#endif
-  callExtraCommandLists();
 
   applyFramebuffer();
 

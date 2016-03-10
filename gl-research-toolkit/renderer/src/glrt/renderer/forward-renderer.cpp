@@ -3,15 +3,12 @@
 namespace glrt {
 namespace renderer {
 
-#define GLRT_ENABLE_COMMANDLISTTEST 0
-
 ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter)
   : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter),
     colorFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH24_STENCIL8),
     framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true)
 {
-#if GLRT_ENABLE_SCENE_RENDERING
   int opaqueDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {Material::Type::PLAIN_COLOR, Material::Type::TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS);
   int maskedDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {Material::Type::TEXTURED_MASKED}, Pass::DEPTH_PREPASS);
 
@@ -30,14 +27,6 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   appendMaterialState(&framebuffer, {Material::Type::TEXTURED_OPAQUE}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
   appendMaterialState(&framebuffer, {Material::Type::TEXTURED_MASKED}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
   appendMaterialState(&framebuffer, {Material::Type::TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
-#endif
-
-  // #TODO remove old debugging code
-#if GLRT_ENABLE_COMMANDLISTTEST
-  commandListTest = CommandListTest::AcceptGivenFramebuffer::Ptr(new CommandListTest::OrangeStaticMesh(&framebuffer, sceneVertexUniformAddress(), resourceManager->staticMeshBufferManager->meshForUuid(SampleResourceManager::suzanneLowPoly())));
-  commandListTest->captureStateNow(gl::StatusCapture::Mode::TRIANGLES);
-  commandListTest->recordCommands();
-#endif
 }
 
 void ForwardRenderer::prepareFramebuffer()
@@ -47,13 +36,6 @@ void ForwardRenderer::prepareFramebuffer()
   Q_UNUSED(framebuffer);
   glClearColor(0.f, 0.f, 0.f, 1.f);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-}
-
-void ForwardRenderer::callExtraCommandLists()
-{
-#if GLRT_ENABLE_COMMANDLISTTEST
-  commandListTest->draw();
-#endif
 }
 
 void ForwardRenderer::applyFramebuffer()

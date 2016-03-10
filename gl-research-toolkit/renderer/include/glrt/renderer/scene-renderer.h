@@ -25,7 +25,6 @@
 namespace glrt {
 namespace renderer {
 
-#define GLRT_ENABLE_SCENE_RENDERING 1
 
 class Renderer : public QObject, public ReloadableShader::Listener
 {
@@ -54,7 +53,6 @@ public:
 
 protected:
   virtual void prepareFramebuffer() = 0;
-  virtual void callExtraCommandLists(){}
   virtual void applyFramebuffer() = 0;
 
   int appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
