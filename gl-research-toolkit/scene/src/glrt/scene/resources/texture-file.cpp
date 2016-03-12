@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <glrt/scene/resources/texture-file.h>
+#include <glrt/toolkit/plain-old-data-stream.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
 
@@ -11,29 +12,200 @@ namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
+int TextureFile::ImportSettings::bytesPerPixelForType(Type type)
+{
+  switch(type)
+  {
+  case Type::UINT8:
+  case Type::INT8:
+    return 1;
+  case Type::UINT16:
+  case Type::INT16:
+  case Type::FLOAT16:
+    return 2;
+  case Type::UINT32:
+  case Type::INT32:
+  case Type::FLOAT32:
+    return 4;
+  }
+  Q_UNREACHABLE();
+}
+
+class TextureFile::ImportedGlTexture
+{
+public:
+  GLuint textureId;
+
+  ImportedGlTexture(GLuint textureId)
+    : textureId(textureId)
+  {
+  }
+
+  ~ImportedGlTexture()
+  {
+    GL_CALL(glDeleteTextures, 1, &textureId);
+  }
+
+  ImportedGlTexture(const ImportedGlTexture&) = delete;
+  ImportedGlTexture&operator=(const ImportedGlTexture&) = delete;
+
+  GLint width(int level) const
+  {
+    Q_ASSERT(level >= 0);
+    Q_ASSERT(level < 65536);
+
+    GLint value;
+    GL_CALL(glGetTextureLevelParameteriv, textureId, level, GL_TEXTURE_WIDTH, &value);
+    Q_ASSERT(value > 0);
+    Q_ASSERT(value < 65536);
+    return value;
+  }
+
+  GLint height(int level) const
+  {
+    Q_ASSERT(level >= 0);
+    Q_ASSERT(level < 65536);
+
+    GLint value;
+    GL_CALL(glGetTextureLevelParameteriv, textureId, level, GL_TEXTURE_HEIGHT, &value);
+    Q_ASSERT(value > 0);
+    Q_ASSERT(value < 65536);
+    return value;
+  }
+
+  GLint depth(int level) const
+  {
+    Q_ASSERT(level >= 0);
+    Q_ASSERT(level < 65536);
+
+    GLint value;
+    GL_CALL(glGetTextureLevelParameteriv, textureId, level, GL_TEXTURE_DEPTH, &value);
+    Q_ASSERT(value > 0);
+    Q_ASSERT(value < 65536);
+    return value;
+  }
+
+  QPair<UncompressedImage, QVector<byte>> uncompressed2DImage(int level,
+                                                              ImportSettings::Format format,
+                                                              ImportSettings::Type type) const
+  {
+    UncompressedImage image;
+
+    image.width = quint16(this->width(level));
+    image.height = quint16(this->height(level));
+    image.mipmap = quint16(level);
+    image.target = ImportSettings::Target::TEXTURE_2D;
+    image.format = format;
+    image.type = type;
+    image.rawDataLength = image.width * image.height * ImportSettings::bytesPerPixelForType(type);
+
+    QVector<byte> rawData;
+    rawData.reserve(image.rawDataLength);
+
+    GL_CALL(glGetTextureImage, textureId, level, GLenum(format), GLenum(type), rawData.length(), rawData.data());
+
+    return qMakePair(image, rawData);
+  }
+};
+
 TextureFile::TextureFile()
 {
 }
 
 void TextureFile::import(QFileInfo& srcFile, const ImportSettings& importSettings)
 {
-  std::string sourceDilename = srcFile.absoluteFilePath().toStdString();
+  const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
   // #TODO: use the importSettings for the flags
-  quint32 flags = SOIL_FLAG_POWER_OF_TWO;
+  const quint32 flags = SOIL_FLAG_POWER_OF_TWO;
 
-  GLuint textureId = SOIL_load_OGL_texture(sourceDilename.c_str(),
-                                           SOIL_LOAD_AUTO,
-                                           SOIL_CREATE_NEW_ID,
-                                           flags);
+  ImportedGlTexture textureInformation(SOIL_load_OGL_texture(sourceFilename.c_str(),
+                                                             SOIL_LOAD_AUTO,
+                                                             SOIL_CREATE_NEW_ID,
+                                                             flags));
 
   // load the image data
+  const int firstMipMap = 0;
+  // #TODO
+  const int lastMipMap = 0;
 
-  glDeleteTextures(1, &textureId);
+  if(importSettings.compression == ImportSettings::Compression::NONE)
+  {
+    for(int level=firstMipMap; level<=lastMipMap; ++level)
+    {
+      QPair<UncompressedImage, QVector<byte>> image =  textureInformation.uncompressed2DImage(level, importSettings.format, importSettings.type);
+
+      image.first.rawDataStart = this->appendRawData(image.second);
+
+      this->uncompressedImages.append(image.first);
+    }
+  }else
+  {
+    Q_UNREACHABLE();
+  }
 }
 
 void TextureFile::save(QFileInfo& textureFile)
 {
+  QFile file(textureFile.absoluteFilePath());
+
+  if(!file.open(QFile::WriteOnly))
+    throw GLRT_EXCEPTION(QString("Can't write texture file <%0>").arg(textureFile.absoluteFilePath()));
+
+  Q_ASSERT(uncompressedImages.length() < 0x10000);
+
+  Header header;
+  header.numUncompressedImages = quint16(uncompressedImages.length());
+  header.numCompressedImages = 0;
+
+  writeValue(file, header);
+
+  for(const UncompressedImage& image : this->uncompressedImages)
+    writeValue(file, image);
+  for(const CompressedImage& image : this->compressedImages)
+    writeValue(file, image);
+
+  for(const QVector<byte>& rawData : this->rawData)
+    file.write(reinterpret_cast<const char*>(rawData.data()), rawData.length());
+}
+
+quint32 TextureFile::appendRawData(const QVector<byte>& rawData)
+{
+  quint32 offset = quint32(sizeof(Header));
+
+  offset += quint32(uncompressedImages.length()) * quint32(sizeof(CompressedImage));
+  offset += quint32(compressedImages.length()) * quint32(sizeof(UncompressedImage));
+
+  for(const QVector<byte>& rawData : this->rawData)
+    offset += quint32(rawData.length());
+
+  this->rawData.insert(offset, rawData);
+
+  return offset;
+}
+
+void TextureFile::clear()
+{
+  compressedImages.clear();
+  uncompressedImages.clear();
+  rawData.clear();
+}
+
+quint64 TextureFile::magicNumber()
+{
+  struct Str
+  {
+    char str[8];
+  };
+  union
+  {
+    quint64 magicNumber;
+    Str str;
+  };
+
+  std::memcpy(str.str, "glrt-tex", 8);
+
+  return magicNumber;
 }
 
 void TextureFile::ImportSettings::registerType()
