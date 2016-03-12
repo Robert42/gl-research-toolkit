@@ -1,6 +1,9 @@
+#include <GL/glew.h>
 #include <glrt/scene/resources/texture-file.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
+
+#include <SOIL/SOIL.h>
 
 namespace glrt {
 namespace scene {
