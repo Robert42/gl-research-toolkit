@@ -18,6 +18,11 @@ const Uuid<LightSource> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
 } // uuids
 
 
+
+class Texture;
+class TextureSampler;
+
+
 struct StaticMeshImportSettings
 {
   std::string sourceFile;
@@ -52,12 +57,14 @@ public:
   void registerMaterial(const Uuid<Material>& uuid, const Material& material);
   void registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file);
   void registerSceneFile(const Uuid<Scene>& uuid, const std::string& file);
+  void registerTextureFile(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler);
 
   bool isRegistered(const QUuid& uuid) const;
 
   QSet<QUuid> allRegisteredResources;
 
   QHash<Uuid<Scene>, QString> sceneFiles;
+  QHash<Uuid<Texture>, QString> textureFiles;
   QHash<Uuid<StaticMesh>, QString> staticMeshAssetsFiles;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;
