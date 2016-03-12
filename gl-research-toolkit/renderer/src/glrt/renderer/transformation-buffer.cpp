@@ -56,7 +56,7 @@ void TransformationBuffer::update(int begin, int end, const glrt::scene::StaticM
 
 GLuint64 TransformationBuffer::gpuAddressForInstance(int i) const
 {
-  Q_ASSERT(GLuint64(i+1) * GLuint64(alignment) <= this->buffer.GetSize());
+  Q_ASSERT(GLuint64(i+1) * GLuint64(alignment) <= GLuint64(this->buffer.GetSize()));
 
   return this->buffer.gpuBufferAddress() + GLuint64(i) * GLuint64(alignment);
 }
