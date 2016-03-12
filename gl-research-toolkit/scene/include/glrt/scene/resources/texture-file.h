@@ -52,7 +52,9 @@ public:
       TEXTURE_2D = GL_TEXTURE_2D,
     };
 
+    static int channelsPerPixelForFormat(Format format);
     static int bytesPerPixelForType(Type type);
+    static int bytesPerPixelForFormatType(Format format, Type type);
 
     Target target = Target::TEXTURE_2D;
     Type type = Type::UINT8;
@@ -88,7 +90,7 @@ private:
 
   struct UncompressedImage
   {
-    quint16 width, height, layers, mipmap;
+    quint32 rowStride, width, height, layers, mipmap;
     ImportSettings::Target target;
     ImportSettings::Format format;
     ImportSettings::Type type;

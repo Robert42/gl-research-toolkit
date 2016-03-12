@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <glm/gtc/round.hpp>
 #include <glrt/scene/resources/texture-file.h>
 #include <glrt/toolkit/plain-old-data-stream.h>
 #include <angelscript-integration/collection-converter.h>
@@ -11,6 +12,26 @@ namespace scene {
 namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
+
+int TextureFile::ImportSettings::channelsPerPixelForFormat(Format format)
+{
+  switch(format)
+  {
+  case Format::RED:
+  case Format::GREEN:
+  case Format::BLUE:
+    return 1;
+  case Format::RG:
+    return 2;
+  case Format::RGB:
+  case Format::BGR:
+    return 3;
+  case Format::RGBA:
+  case Format::BGRA:
+    return 4;
+  }
+  Q_UNREACHABLE();
+}
 
 int TextureFile::ImportSettings::bytesPerPixelForType(Type type)
 {
@@ -29,6 +50,11 @@ int TextureFile::ImportSettings::bytesPerPixelForType(Type type)
     return 4;
   }
   Q_UNREACHABLE();
+}
+
+int TextureFile::ImportSettings::bytesPerPixelForFormatType(Format format, Type type)
+{
+  return channelsPerPixelForFormat(format) * bytesPerPixelForType(type);
 }
 
 class TextureFile::ImportedGlTexture
@@ -91,16 +117,22 @@ public:
   {
     UncompressedImage image;
 
-    image.width = quint16(this->width(level));
-    image.height = quint16(this->height(level));
-    image.mipmap = quint16(level);
+    GLint packAlignment;
+    glGetIntegerv(GL_PACK_ALIGNMENT, &packAlignment);
+
+    quint32 bytesPerPixel = quint16(ImportSettings::bytesPerPixelForFormatType(format, type));
+
+    image.width = quint32(this->width(level));
+    image.rowStride = quint32(glm::ceilMultiple<quint32>(image.width * bytesPerPixel, quint32(packAlignment)));
+    image.height = quint32(this->height(level));
+    image.mipmap = quint32(level);
     image.target = ImportSettings::Target::TEXTURE_2D;
     image.format = format;
     image.type = type;
-    image.rawDataLength = image.width * image.height * ImportSettings::bytesPerPixelForType(type);
+    image.rawDataLength = image.rowStride * image.height;
 
     QVector<byte> rawData;
-    rawData.reserve(image.rawDataLength);
+    rawData.resize(int(image.rawDataLength));
 
     GL_CALL(glGetTextureImage, textureId, level, GLenum(format), GLenum(type), rawData.length(), rawData.data());
 
