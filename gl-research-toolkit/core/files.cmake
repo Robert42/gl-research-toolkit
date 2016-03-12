@@ -14,6 +14,7 @@ set(SOURCE_FILES
   include/glrt/toolkit/linked-tuple.h
   include/glrt/toolkit/logger.h
   include/glrt/toolkit/network.h
+  include/glrt/toolkit/plain-old-data-stream.h
   include/glrt/toolkit/profiler.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl
@@ -21,6 +22,7 @@ set(SOURCE_FILES
   src/glrt/toolkit/escape-string.cpp
   src/glrt/toolkit/logger.cpp
   src/glrt/toolkit/network.cpp
+  src/glrt/toolkit/plain-old-data-stream.cpp
   src/glrt/toolkit/profiler.cpp
   src/glrt/toolkit/uuid.cpp
 )
