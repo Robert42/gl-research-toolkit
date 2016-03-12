@@ -17,6 +17,19 @@ TextureFile::TextureFile()
 
 void TextureFile::import(QFileInfo& srcFile, const ImportSettings& importSettings)
 {
+  std::string sourceDilename = srcFile.absoluteFilePath().toStdString();
+
+  // #TODO: use the importSettings for the flags
+  quint32 flags = SOIL_FLAG_POWER_OF_TWO;
+
+  GLuint textureId = SOIL_load_OGL_texture(sourceDilename.c_str(),
+                                           SOIL_LOAD_AUTO,
+                                           SOIL_CREATE_NEW_ID,
+                                           flags);
+
+  // load the image data
+
+  glDeleteTextures(1, &textureId);
 }
 
 void TextureFile::save(QFileInfo& textureFile)
