@@ -7,6 +7,7 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/resources/texture-sampler.h>
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
@@ -45,7 +46,7 @@ void convertStaticMesh_wrapper(const std::string& meshFile,
 
 void convertTexture_wrapper(const std::string& textureFilename,
                             const std::string& sourceFilename,
-                            const TextureImportSettings* settings,
+                            const TextureFile::ImportSettings* settings,
                             const ResourceIndex* resourceIndex)
 {
   convertTexture(QString::fromStdString(textureFilename),
@@ -101,6 +102,7 @@ void ResourceIndex::registerAngelScriptAPI()
   StaticMeshComponent::registerAngelScriptAPI();
   CameraComponent::registerAngelScriptAPI();
   LightComponent::registerAngelScriptAPI();
+  TextureSampler::registerType();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in dirname)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
@@ -110,13 +112,14 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneLayerFile(const Uuid<SceneLayer> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneLayerFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTexture(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler, bool generateMipmaps)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
   MeshImportSettings::registerType();
-  TextureImportSettings::registerType();
+  TextureFile::ImportSettings::registerType();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\", const MeshImportSettings &in meshImportSettings = MeshImportSettings())", AngelScript::asFUNCTION(convertStaticMesh_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertTexture(const string &in textureFile, const string &in sourceFile, const MeshImportSettings &in textureImportSettings = TextureImportSettings())", AngelScript::asFUNCTION(convertTexture_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertTexture(const string &in textureFile, const string &in sourceFile, const TextureImportSettings &in settings)", AngelScript::asFUNCTION(convertTexture_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void set_label(const BaseUuid &in uuid, const string &in label)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);

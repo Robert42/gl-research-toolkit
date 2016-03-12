@@ -28,6 +28,9 @@ set(SOURCE_FILES
   include/glrt/scene/resources/resource-manager.inl
   include/glrt/scene/resources/static-mesh.h
   include/glrt/scene/resources/static-mesh-loader.h
+  include/glrt/scene/resources/texture-file.h
+  include/glrt/scene/resources/texture.h
+  include/glrt/scene/resources/texture-sampler.h
   include/glrt/scene/scene.h
   include/glrt/scene/scene.inl
   include/glrt/scene/scene-layer.h
@@ -51,6 +54,9 @@ set(SOURCE_FILES
   src/glrt/scene/resources/resource-manager.cpp
   src/glrt/scene/resources/static-mesh.cpp
   src/glrt/scene/resources/static-mesh-loader.cpp
+  src/glrt/scene/resources/texture.cpp
+  src/glrt/scene/resources/texture-file.cpp
+  src/glrt/scene/resources/texture-sampler.cpp
   src/glrt/scene/scene.cpp
   src/glrt/scene/scene-layer.cpp
   src/glrt/scene/static-mesh-component.cpp

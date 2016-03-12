@@ -2,6 +2,7 @@
 #define GLRT_SCENE_RESOURCES_ASSETCONVERTER_H
 
 #include <glrt/scene/declarations.h>
+#include <glrt/scene/resources/texture-file.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
 
@@ -43,21 +44,13 @@ struct MeshImportSettings final
   static void registerType();
 };
 
-struct TextureImportSettings final
-{
-  int maxResolution = 2048;
-  bool scaleDownToMultipleOfTwo = false;
-
-  static void registerType();
-};
-
 void convertStaticMesh(const QString& meshFile,
                        const QString& sourceFile,
                        const QString& groupToImport,
                        const MeshImportSettings& meshImportSettings);
 void convertTexture(const QString& textureFilename,
                     const QString& sourceFilename,
-                    const TextureImportSettings& textureImportSettings);
+                    const TextureFile::ImportSettings& textureImportSettings);
 void convertSceneGraph(const QString& sceneGraphFilename,
                        const QString& sourceFilename,
                        const Uuid<ResourceIndex>& uuid,

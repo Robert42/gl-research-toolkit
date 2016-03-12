@@ -97,10 +97,9 @@ void convertStaticMesh(const QString& meshFilename, const QString& sourceFilenam
   QFileInfo meshFile(meshFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
-
   if(shouldConvert(meshFile, sourceFile))
   {
+    SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
     if(sourceFile.suffix().toLower() == "blend")
       convertStaticMesh_BlenderToObj(meshFile, sourceFile, groupToImport, indexed);
     else
@@ -113,28 +112,28 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   QFileInfo sceneGraphFile(sceneGraphFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
-
   if(shouldConvert(sceneGraphFile, sourceFile))
   {
+    SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
     convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, uuid, settings, groupToImport);
   }
 }
 
-void convertTexture(const QString& textureFilename, const QString& sourceFilename, const TextureImportSettings& textureImportSettings)
+void convertTexture(const QString& textureFilename, const QString& sourceFilename, const TextureFile::ImportSettings& textureImportSettings)
 {
   QFileInfo textureFile(textureFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
-
-  if(shouldConvert(textureFilename, sourceFile))
+  // #TODO uncomment:
+  //if(shouldConvert(textureFilename, sourceFile))
   {
+    SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertTexture("<<textureFile.fileName()<<", "<<sourceFile.fileName()<<")";
 
-    // #ISSUE-27: This still must be implemented
-    Q_UNUSED(textureImportSettings);
+    TextureFile texture;
+    texture.import(sourceFile, textureImportSettings);
+    texture.save(textureFile);
   }
 }
 
@@ -915,16 +914,6 @@ void MeshImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "bool indexed", asOFFSET(MeshImportSettings,indexed)); AngelScriptCheck(r);
 }
 
-void TextureImportSettings::registerType()
-{
-  int r;
-  const char* name = "TextureImportSettings";
-
-  r = angelScriptEngine->RegisterObjectType(name, sizeof(MeshImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<TextureImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToMultipleOfTwo", asOFFSET(TextureImportSettings,scaleDownToMultipleOfTwo)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "int maxResolution", asOFFSET(TextureImportSettings,maxResolution)); AngelScriptCheck(r);
-}
 
 
 } // namespace resources
