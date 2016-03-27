@@ -8,7 +8,6 @@ namespace renderer {
 GlTextureManager::GlTextureManager(scene::resources::ResourceManager* resourceManager)
   : resourceManager(resourceManager)
 {
-  // #FIXME: make sure glrt::scene::resources::uuids::fallbackTexture has the id 0 and that the default texture sampler of the fallback texture also has the id 0
 }
 
 GlTextureManager::~GlTextureManager()
@@ -28,7 +27,10 @@ GlTextureManager::TextureHandle GlTextureManager::handleFor(const Uuid<Texture>&
   int textureSamplerId = textureSamplerIds.indexOf(sampler);
 
   if(textureId < 0)
-    textureId = textureIds.indexOf(glrt::scene::resources::uuids::fallbackTexture);
+  {
+    textureIds.append(texture);
+    textureId = textureIds.length()-1;
+  }
 
   if(textureSamplerId < 0)
     textureSamplerId = registerSampler(sampler);

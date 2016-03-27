@@ -16,7 +16,10 @@ namespace uuids {
 const Uuid<ResourceIndex> fallbackIndex("{8f26cd17-687c-4aab-946a-079740237011}");
 const Uuid<Material> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
 const Uuid<LightSource> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
-const Uuid<Texture> fallbackTexture("{8080488b-66e6-4763-aa5e-2393c7865139}");
+const Uuid<Texture> fallbackDiffuseTexture("{8080488b-66e6-4763-aa5e-2393c7865139}");
+const Uuid<Texture> fallbackNormalTexture("{d3d320ce-95b0-4bff-ba65-381ad005b012}");
+const Uuid<Texture> blackTexture("{a8b7ec89-cf66-4ef6-b68f-ec98d86dc6fb}");
+const Uuid<Texture> fallbackSRMOTexture("{1a6d4dc1-58b2-47e9-beb6-724da5d2d98f}");
 
 } // uuids
 

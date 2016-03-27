@@ -40,11 +40,11 @@ public:
   template<typename T_textureHandle>
   struct Textured
   {
-    glm::vec4 tint;
-    glm::vec2 smoothness_range;
-    glm::vec2 occlusion_range;
-    glm::vec2 reflectance_range;
-    float emission_factor;
+    glm::vec4 tint = glm::vec4(1);
+    glm::vec2 smoothness_range = glm::vec2(0,1);
+    glm::vec2 occlusion_range = glm::vec2(0,1);
+    glm::vec2 reflectance_range = glm::vec2(0,1);
+    float emission_factor = 1.f;
     padding<float, 1> _padding;
     T_textureHandle diffuse_map;
     T_textureHandle normal_map;
@@ -73,6 +73,7 @@ public:
   void addMaterialUser(const Uuid<T>& uuid);
 
   Material(const PlainColor& plainColor = PlainColor());
+  Material(const Textured<TextureHandle>& textured, Type type);
 
   const void* data() const;
 

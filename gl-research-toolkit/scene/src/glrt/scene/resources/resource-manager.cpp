@@ -69,12 +69,12 @@ Material ResourceManager::materialForUuid(const Uuid<Material>& uuid) const
 
 Texture ResourceManager::textureForUuid(const Uuid<Texture>& uuid) const
 {
-  return indexForResourceUuid(uuid)->textures.value(uuid, Index::fallback.textures[uuids::fallbackTexture]);
+  return indexForResourceUuid(uuid)->textures.value(uuid, Index::fallback.textures[uuids::fallbackDiffuseTexture]);
 }
 
 TextureSampler ResourceManager::defaultTextureSamplerForTextureUuid(const Uuid<Texture>& uuid) const
 {
-  return indexForResourceUuid(uuid)->defaultTextureSamplers.value(uuid, Index::fallback.defaultTextureSamplers[uuids::fallbackTexture]);
+  return indexForResourceUuid(uuid)->defaultTextureSamplers.value(uuid, Index::fallback.defaultTextureSamplers[uuids::fallbackDiffuseTexture]);
 }
 
 QString ResourceManager::staticMeshFileForUuid(const Uuid<StaticMesh>& uuid, const QString& fallback) const

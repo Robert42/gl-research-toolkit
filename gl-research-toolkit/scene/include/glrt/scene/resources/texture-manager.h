@@ -20,8 +20,8 @@ public:
 
   struct TextureHandle
   {
-    int textureId;
-    int samplerId;
+    int textureId = 0;
+    int samplerId = 0;
   };
 
   virtual TextureHandle handleFor(const Uuid<Texture>& texture) = 0;

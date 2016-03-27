@@ -224,8 +224,7 @@ void ResourceIndex::registerFallbackIndex()
   fallbackMaterial.emission = glm::vec3(1,0,1);
   registerMaterial(uuids::fallbackMaterial, fallbackMaterial);
   registerLightSource(uuids::fallbackLight, LightSource::SphereAreaLight());
-  textures[uuids::fallbackTexture] = Texture();
-  defaultTextureSamplers[uuids::fallbackTexture] = TextureSampler();
+  textures[uuids::fallbackDiffuseTexture] = Texture();
 }
 
 } // namespace resources
