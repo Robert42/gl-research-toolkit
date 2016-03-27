@@ -1,12 +1,13 @@
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/scene-layer.h>
+#include <glrt/scene/resources/texture.h>
+#include <glrt/scene/resources/texture-sampler.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
-
 
 resources::StaticMeshLoader* get_staticMeshLoader(resources::ResourceManager* resourceManager)
 {
@@ -16,14 +17,26 @@ resources::StaticMeshLoader* get_staticMeshLoader(resources::ResourceManager* re
 // -------- ResourceManager ----------------------------------------------------
 
 
-ResourceManager::ResourceManager(StaticMeshLoader* staticMeshLoader)
-  : staticMeshLoader(*staticMeshLoader)
+ResourceManager* ResourceManager::_singleton = nullptr;
+
+
+ResourceManager::ResourceManager(StaticMeshLoader* staticMeshLoader, TextureManager* textureManager)
+  : staticMeshLoader(*staticMeshLoader),
+    textureManager(*textureManager)
 {
+  _singleton = this;
+
   staticMeshLoader->setParent(this);
 }
 
 ResourceManager::~ResourceManager()
 {
+  _singleton = nullptr;
+}
+
+ResourceManager* ResourceManager::instance()
+{
+  return _singleton;
 }
 
 QList<Uuid<Scene> > ResourceManager::allRegisteredScenes()
@@ -52,6 +65,16 @@ LightSource ResourceManager::lightSourceForUuid(const Uuid<LightSource>& uuid) c
 Material ResourceManager::materialForUuid(const Uuid<Material>& uuid) const
 {
   return indexForResourceUuid(uuid)->materials.value(uuid, Index::fallback.materials[uuids::fallbackMaterial]);
+}
+
+Texture ResourceManager::textureForUuid(const Uuid<Texture>& uuid) const
+{
+  return indexForResourceUuid(uuid)->textures.value(uuid, Index::fallback.textures[uuids::fallbackTexture]);
+}
+
+TextureSampler ResourceManager::defaultTextureSamplerForTextureUuid(const Uuid<Texture>& uuid) const
+{
+  return indexForResourceUuid(uuid)->defaultTextureSamplers.value(uuid, Index::fallback.defaultTextureSamplers[uuids::fallbackTexture]);
 }
 
 QString ResourceManager::staticMeshFileForUuid(const Uuid<StaticMesh>& uuid, const QString& fallback) const

@@ -16,6 +16,8 @@ public:
 
   gl::SamplerObject::Desc description;
 
+  bool operator==(const TextureSampler& other) const;
+
   static void registerType();
 };
 

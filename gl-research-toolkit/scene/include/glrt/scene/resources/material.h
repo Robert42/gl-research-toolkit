@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 #include <glrt/toolkit/uuid.h>
 #include <glrt/toolkit/array.h>
+#include <glrt/scene/resources/texture-manager.h>
 
 #include <glhelper/gl.hpp>
 
@@ -14,6 +15,8 @@ namespace resources {
 class Material
 {
 public:
+  typedef TextureManager::TextureHandle TextureHandle;
+
   enum class Type
   {
     PLAIN_COLOR,
@@ -34,6 +37,7 @@ public:
     PlainColor(){}
   };
 
+  template<typename T_textureHandle>
   struct Textured
   {
     glm::vec4 tint;
@@ -42,18 +46,27 @@ public:
     glm::vec2 reflectance_range;
     float emission_factor;
     padding<float, 1> _padding;
-    GLuint64 diffuse_map;
-    GLuint64 normal_map;
-    GLuint64 height_map;
-    GLuint64 srmo_map; // smoothness, reflectance, metalic_map, occlusion
-    GLuint64 emission_map;
+    T_textureHandle diffuse_map;
+    T_textureHandle normal_map;
+    T_textureHandle height_map;
+    T_textureHandle srmo_map; // smoothness, reflectance, metalic_map, occlusion
+    T_textureHandle emission_map;
+  };
+
+  enum class TextureHandleType
+  {
+    Ids,
+    GpuPtrs
   };
 
   union
   {
     PlainColor plainColor;
+    Textured<TextureHandle> texturesIds;
+    Textured<GLuint64> textureGpuPtrs;
   };
   Type type;
+  TextureHandleType textureHandleType = TextureHandleType::Ids; // #TODO: make sure to convert the material before passing it to as material uniform
   UuidIndex materialUser;
 
   template<typename T>

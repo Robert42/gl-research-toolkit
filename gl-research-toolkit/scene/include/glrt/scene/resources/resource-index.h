@@ -5,6 +5,8 @@
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/resources/light-source.h>
 #include <glrt/scene/resources/material.h>
+#include <glrt/scene/resources/texture-sampler.h>
+#include <glrt/scene/resources/texture.h>
 
 namespace glrt {
 namespace scene {
@@ -14,13 +16,13 @@ namespace uuids {
 const Uuid<ResourceIndex> fallbackIndex("{8f26cd17-687c-4aab-946a-079740237011}");
 const Uuid<Material> fallbackMaterial("{a8f3fb1b-1168-433b-aaf8-e24632cce156}");
 const Uuid<LightSource> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
+const Uuid<Texture> fallbackTexture("{8080488b-66e6-4763-aa5e-2393c7865139}");
 
 } // uuids
 
 
 
 class Texture;
-class TextureSampler;
 
 
 struct StaticMeshImportSettings
@@ -57,14 +59,15 @@ public:
   void registerMaterial(const Uuid<Material>& uuid, const Material& material);
   void registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file);
   void registerSceneFile(const Uuid<Scene>& uuid, const std::string& file);
-  void registerTextureFile(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler);
+  void registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler);
 
   bool isRegistered(const QUuid& uuid) const;
 
   QSet<QUuid> allRegisteredResources;
 
   QHash<Uuid<Scene>, QString> sceneFiles;
-  QHash<Uuid<Texture>, QString> textureFiles;
+  QHash<Uuid<Texture>, Texture> textures;
+  QHash<Uuid<Texture>, TextureSampler> defaultTextureSamplers;
   QHash<Uuid<StaticMesh>, QString> staticMeshAssetsFiles;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;

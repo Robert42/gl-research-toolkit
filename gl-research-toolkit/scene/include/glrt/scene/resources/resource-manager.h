@@ -2,6 +2,7 @@
 #define GLRT_SCENE_RESOURCES_RESOURCEMANAGER_H
 
 #include <glrt/scene/resources/static-mesh-loader.h>
+#include <glrt/scene/resources/texture-manager.h>
 #include <glrt/scene/scene.h>
 
 namespace glrt {
@@ -12,6 +13,7 @@ class SceneLayer;
 
 namespace resources {
 
+class TextureManager;
 
 class ResourceManager : public QObject
 {
@@ -20,13 +22,16 @@ public:
   typedef ResourceIndex Index;
 
   StaticMeshLoader& staticMeshLoader;
+  TextureManager& textureManager;
 
-  ResourceManager(StaticMeshLoader* staticMeshLoader);
+  ResourceManager(StaticMeshLoader* staticMeshLoader, TextureManager* textureManager);
   ResourceManager(ResourceManager&&) = delete;
   void operator=(const ResourceManager&) = delete;
   void operator=(ResourceManager&&) = delete;
 
   virtual ~ResourceManager();
+
+  static ResourceManager* instance();
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
@@ -40,6 +45,8 @@ public:
 
   LightSource lightSourceForUuid(const Uuid<LightSource>& uuid) const;
   Material materialForUuid(const Uuid<Material>& uuid) const;
+  Texture textureForUuid(const Uuid<Texture>& uuid) const;
+  TextureSampler defaultTextureSamplerForTextureUuid(const Uuid<Texture>& uuid) const;
 
   QString staticMeshFileForUuid(const Uuid<StaticMesh>& uuid, const QString& fallback=QString()) const;
   QString sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback=QString()) const;
@@ -56,6 +63,8 @@ protected:
   virtual bool foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const = 0;
 
 private:
+  static ResourceManager* _singleton;
+
   friend class glrt::scene::SceneLayer;
   QList<SceneLayer*> _sceneLayers;
 

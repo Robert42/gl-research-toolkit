@@ -1,10 +1,16 @@
 #include <glrt/scene/resources/material.h>
 #include <glrt/toolkit/uuid.h>
 #include <glrt/toolkit/concatenated-less-than.h>
+#include <glrt/scene/resources/texture.h>
+#include <glrt/scene/resources/texture-manager.h>
+#include <glrt/scene/resources/texture-sampler.h>
+#include <glrt/scene/resources/resource-index.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
+
+typedef Material::TextureHandle TextureHandle;
 
 
 QVector<Material::Type> Material::allTypes()
@@ -34,11 +40,31 @@ inline void as_init_plain_color_material(Material::PlainColor* plainColor)
   *plainColor = Material::PlainColor();
 }
 
+inline void as_init_texture_handle_ts(TextureHandle* textureHandle, const Uuid<Texture>& texture, const TextureSampler& textureSampler)
+{
+  *textureHandle = TextureManager::instance()->handleFor(texture, textureSampler);
+}
+
+inline void as_init_texture_handle_t(TextureHandle* textureHandle, const Uuid<Texture>& texture)
+{
+  *textureHandle = TextureManager::instance()->handleFor(texture);
+}
+
+inline void as_init_texture_handle(TextureHandle* textureHandle)
+{
+  as_init_texture_handle_t(textureHandle, scene::resources::uuids::fallbackTexture);
+}
+
+// #TODO also sort materials by the used textures
+
 void Material::registerAngelScriptTypes()
 {
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   int r;
+  r = angelScriptEngine->RegisterObjectType("TextureHandle", sizeof(TextureHandle), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("TextureHandle", AngelScript::asBEHAVE_CONSTRUCT, "void ctor()", AngelScript::asFUNCTION(as_init_texture_handle), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("TextureHandle", AngelScript::asBEHAVE_CONSTRUCT, "void ctor(Uuid<Texture> &in texture)", AngelScript::asFUNCTION(as_init_texture_handle_t), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectType("PlainColorMaterial", sizeof(Material::PlainColor), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("PlainColorMaterial", AngelScript::asBEHAVE_CONSTRUCT, "void ctor()", AngelScript::asFUNCTION(as_init_plain_color_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
@@ -51,6 +77,8 @@ void Material::registerAngelScriptTypes()
   r = angelScriptEngine->RegisterObjectMethod("PlainColorMaterial", "Material opImplConv()", AngelScript::asFUNCTION(as_convert_to_plain_color_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   glrt::Uuid<void>::registerCustomizedUuidType("Material", false);
+
+  r = angelScriptEngine->RegisterObjectBehaviour("TextureHandle", AngelScript::asBEHAVE_CONSTRUCT, "void ctor(Uuid<Texture> &in texture, const TextureSampler &in textureSampler)", AngelScript::asFUNCTION(as_init_texture_handle_ts), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

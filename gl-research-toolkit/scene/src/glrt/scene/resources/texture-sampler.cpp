@@ -13,12 +13,19 @@ TextureSampler::TextureSampler()
 {
 }
 
+bool TextureSampler::operator==(const TextureSampler& other) const
+{
+  return other.description == this->description;
+}
+
 void TextureSampler::registerType()
 {
   Q_ASSERT(asOFFSET(TextureSampler, description) == 0);
 
   int r;
   const char* name = "TextureSampler";
+
+  asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
 
   r = angelScriptEngine->RegisterEnum("TextureFilter");
   r = angelScriptEngine->RegisterEnumValue("TextureFilter", "NEAREST", int(gl::SamplerObject::Filter::NEAREST)); AngelScriptCheck(r);
@@ -42,7 +49,7 @@ void TextureSampler::registerType()
   r = angelScriptEngine->RegisterEnumValue("TextureCompareMode", "NEVER", int(gl::SamplerObject::CompareMode::NEVER)); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectType(name, sizeof(TextureSampler), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectBehaviour("TextureSampler", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<TextureSampler>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour(name, AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<TextureSampler>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFilter minFilter", asOFFSET(gl::SamplerObject::Desc,minFilter)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFilter magFilter", asOFFSET(gl::SamplerObject::Desc,magFilter)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFilter mipFilter", asOFFSET(gl::SamplerObject::Desc,mipFilter)); AngelScriptCheck(r);
@@ -54,6 +61,8 @@ void TextureSampler::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureCompareMode compareMode", asOFFSET(gl::SamplerObject::Desc,compareMode)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "float minLod", asOFFSET(gl::SamplerObject::Desc,minLod)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "float maxLod", asOFFSET(gl::SamplerObject::Desc,maxLod)); AngelScriptCheck(r);
+
+  angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 

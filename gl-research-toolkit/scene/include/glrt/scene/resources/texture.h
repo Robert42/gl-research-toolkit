@@ -2,9 +2,10 @@
 #define GLRT_CSENE_RESOURCES_TEXTURE_H
 
 #include <QString>
+#include <QFileInfo>
 
 namespace glrt {
-namespace csene {
+namespace scene {
 namespace resources {
 
 class Texture
@@ -12,11 +13,11 @@ class Texture
 public:
   Texture();
 
-  QString path;
+  QFileInfo file;
 };
 
 } // namespace resources
-} // namespace csene
+} // namespace scene
 } // namespace glrt
 
 #endif // GLRT_CSENE_RESOURCES_TEXTURE_H

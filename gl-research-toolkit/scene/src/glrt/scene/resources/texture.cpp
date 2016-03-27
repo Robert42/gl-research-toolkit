@@ -1,7 +1,7 @@
 #include <glrt/scene/resources/texture.h>
 
 namespace glrt {
-namespace csene {
+namespace scene {
 namespace resources {
 
 Texture::Texture()
@@ -10,5 +10,5 @@ Texture::Texture()
 }
 
 } // namespace resources
-} // namespace csene
+} // namespace scene
 } // namespace glrt

@@ -45,7 +45,7 @@ MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType(Type type)
   case Type::TEXTURED_MASKED:
   case Type::TEXTURED_OPAQUE:
   case Type::TEXTURED_TRANSPARENT:
-    return forType<Material::Textured>();
+    return forType<Material::Textured<GLuint64>>();
   default:
     Q_UNREACHABLE();
   }
@@ -53,15 +53,15 @@ MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType(Type type)
 
 int MaterialBuffer::BlockSize::expectedBlockOffset()
 {
-  static_assert(sizeof(Material::PlainColor) <= sizeof(Material::Textured), "The expected offset should be the largest data struct");
+  static_assert(sizeof(Material::PlainColor) <= sizeof(Material::Textured<GLuint64>), "The expected offset should be the largest data struct");
 
 #ifdef QT_DEBUG
-  if(forType<Material::PlainColor>().blockOffset != forType<Material::Textured>().blockOffset)
+  if(forType<Material::PlainColor>().blockOffset != forType<Material::Textured<GLuint64>>().blockOffset)
     qWarning() << "Warning: different block offset for material blocks.\n"
-                  "    PlainColor:" <<  forType<Material::PlainColor>().blockOffset << "\n    Textured: " << forType<Material::Textured>().blockOffset << "\n";
+                  "    PlainColor:" <<  forType<Material::PlainColor>().blockOffset << "\n    Textured: " << forType<Material::Textured<GLuint64>>().blockOffset << "\n";
 #endif
 
-  return forType<Material::Textured>().blockOffset;
+  return forType<Material::Textured<GLuint64>>().blockOffset;
 }
 
 MaterialBuffer::Initializer::Initializer(gl::CommandListRecorder& recorder, const glrt::scene::resources::ResourceManager& resourceManager)

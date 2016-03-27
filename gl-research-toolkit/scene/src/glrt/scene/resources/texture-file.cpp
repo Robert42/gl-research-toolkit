@@ -1,3 +1,4 @@
+#include <QMetaEnum>
 #include <GL/glew.h>
 #include <glm/gtc/round.hpp>
 #include <glrt/scene/resources/texture-file.h>
@@ -18,16 +19,12 @@ int TextureFile::ImportSettings::channelsPerPixelForFormat(Format format)
   switch(format)
   {
   case Format::RED:
-  case Format::GREEN:
-  case Format::BLUE:
     return 1;
   case Format::RG:
     return 2;
   case Format::RGB:
-  case Format::BGR:
     return 3;
   case Format::RGBA:
-  case Format::BGRA:
     return 4;
   }
   Q_UNREACHABLE();
@@ -44,8 +41,6 @@ int TextureFile::ImportSettings::bytesPerPixelForType(Type type)
   case Type::INT16:
   case Type::FLOAT16:
     return 2;
-  case Type::UINT32:
-  case Type::INT32:
   case Type::FLOAT32:
     return 4;
   }
@@ -55,6 +50,101 @@ int TextureFile::ImportSettings::bytesPerPixelForType(Type type)
 int TextureFile::ImportSettings::bytesPerPixelForFormatType(Format format, Type type)
 {
   return channelsPerPixelForFormat(format) * bytesPerPixelForType(type);
+}
+
+GLenum TextureFile::ImportSettings::internalFormat(Format format, Type type, bool* supported)
+{
+  bool dummy=false;
+
+  if(!supported)
+    supported = &dummy;
+
+  *supported = true;
+
+  switch(type)
+  {
+  case Type::UINT8:
+    switch(format)
+    {
+    case Format::RED:
+      return GL_R8;
+    case Format::RG:
+      return GL_RG8;
+    case Format::RGB:
+      return GL_RGB8;
+    case Format::RGBA:
+      return GL_RGBA8;
+    }
+    break;
+  case Type::INT8:
+    switch(format)
+    {
+    case Format::RED:
+      return GL_R8_SNORM;
+    case Format::RG:
+      return GL_RG8_SNORM;
+    case Format::RGB:
+      return GL_RGB8_SNORM;
+    case Format::RGBA:
+      return GL_RGBA8_SNORM;
+    }
+    break;
+  case Type::UINT16:
+    switch(format)
+    {
+    case Format::RED:
+      return GL_R16;
+    case Format::RG:
+      return GL_RG16;
+    case Format::RGB:
+      break;
+    case Format::RGBA:
+      return GL_RGBA16;
+    }
+    break;
+  case Type::INT16:
+    switch(format)
+    {
+    case Format::RED:
+      return GL_R16_SNORM;
+    case Format::RG:
+      return GL_RG16_SNORM;
+    case Format::RGB:
+      return GL_RGB16_SNORM;
+    case Format::RGBA:
+      break;
+    }
+    break;
+  case Type::FLOAT16:
+    switch(format)
+    {
+    case Format::RED:
+      return GL_R16F;
+    case Format::RG:
+      return GL_RG16F;
+    case Format::RGB:
+      return GL_RGB16F;
+    case Format::RGBA:
+      return GL_RGBA16F;
+    }
+    break;
+  case Type::FLOAT32:
+    switch(format)
+    {
+    case Format::RED:
+      return GL_R32F;
+    case Format::RG:
+      return GL_RG32F;
+    case Format::RGB:
+      return GL_RGB32F;
+    case Format::RGBA:
+      return GL_RGBA32F;
+    }
+    break;
+  }
+  Q_UNREACHABLE();
+  *supported = false;
+  return GL_R8;
 }
 
 class TextureFile::ImportedGlTexture
@@ -112,24 +202,25 @@ public:
   }
 
   QPair<UncompressedImage, QVector<byte>> uncompressed2DImage(int level,
-                                                              ImportSettings::Format format,
-                                                              ImportSettings::Type type) const
+                                                              TextureFile::Format format,
+                                                              TextureFile::Type type) const
   {
     UncompressedImage image;
 
-    GLint packAlignment;
-    glGetIntegerv(GL_PACK_ALIGNMENT, &packAlignment);
-
-    quint32 bytesPerPixel = quint16(ImportSettings::bytesPerPixelForFormatType(format, type));
+    image.type = type;
+    image.format = format;
+    // format and type must be set before calling calcRowStride!
 
     image.width = quint32(this->width(level));
-    image.rowStride = quint32(glm::ceilMultiple<quint32>(image.width * bytesPerPixel, quint32(packAlignment)));
+    image.rowStride = image.calcRowStride();
     image.height = quint32(this->height(level));
     image.mipmap = quint32(level);
-    image.target = ImportSettings::Target::TEXTURE_2D;
-    image.format = format;
-    image.type = type;
+    image.target = TextureFile::Target::TEXTURE_2D;
     image.rawDataLength = image.rowStride * image.height;
+
+    bool supportedFormat;
+    ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
+    Q_ASSERT(supportedFormat);
 
     QVector<byte> rawData;
     rawData.resize(int(image.rawDataLength));
@@ -158,10 +249,10 @@ void TextureFile::import(QFileInfo& srcFile, const ImportSettings& importSetting
 
   // load the image data
   const int firstMipMap = 0;
-  // #TODO
+  // #TODO decide, whether to use mipmapping by
   const int lastMipMap = 0;
 
-  if(importSettings.compression == ImportSettings::Compression::NONE)
+  if(importSettings.compression == TextureFile::Compression::NONE)
   {
     for(int level=firstMipMap; level<=lastMipMap; ++level)
     {
@@ -199,6 +290,142 @@ void TextureFile::save(QFileInfo& textureFile)
 
   for(const QVector<byte>& rawData : this->rawData)
     file.write(reinterpret_cast<const char*>(rawData.data()), rawData.length());
+}
+
+GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
+{
+  QFile file(textureFile.absoluteFilePath());
+
+  if(!file.open(QFile::ReadOnly))
+    throw GLRT_EXCEPTION(QString("Can't read texture file <%0>").arg(textureFile.absoluteFilePath()));
+
+  GLuint textureHandle;
+  glGenTextures(1, &textureHandle);
+
+  quint64 offsetCheck = 0;
+
+  Header header = readValue<Header>(file);
+
+  if(header.magicNumber != TextureFile::magicNumber())
+    throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): Wrong magic number %1.").arg(textureFile.fileName()).arg(header.magicNumber));
+  if(header.headerLength != sizeof(Header))
+    throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): Unexpected Header size %1.").arg(textureFile.fileName()).arg(header.headerLength));
+  if(header.uncompressedImageSize != sizeof(UncompressedImage))
+    throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): Unexpected UncompressedImage %1.").arg(textureFile.fileName()).arg(header.uncompressedImageSize));
+  if(header.compressedImageSize != 0)
+    throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): Unexpected compressedImageSize %1.").arg(textureFile.fileName()).arg(header.compressedImageSize));
+  if(header.numCompressedImages != 0)
+    throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): Unexpected numCompressedImages %1.").arg(textureFile.fileName()).arg(header.compressedImageSize));
+
+  if(header.numCompressedImages != 0 && header.compressedImageSize != 0)
+    throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): Mixing uncompressed and uncompressed subimages within the same file is not possible.").arg(textureFile.fileName()));
+
+  offsetCheck += sizeof(Header);
+
+  QVector<UncompressedImage> uncompressedImages;
+  QVector<CompressedImage> compressedImages;
+
+  for(int i=0; i<header.numUncompressedImages; ++i)
+  {
+    UncompressedImage image = readValue<UncompressedImage>(file);
+    offsetCheck += sizeof(UncompressedImage);
+    uncompressedImages.append(image);
+  }
+
+  for(int i=0; i<header.numCompressedImages; ++i)
+  {
+    CompressedImage image = readValue<CompressedImage>(file);
+    offsetCheck += sizeof(CompressedImage);
+    compressedImages.append(image);
+  }
+
+  Array<byte> tempBuffer;
+
+  for(const UncompressedImage& image : uncompressedImages)
+  {
+    if(offsetCheck != image.rawDataStart)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): imageDataOffset has the wrong value %1, expected %2").arg(textureFile.fileName()).arg(image.rawDataStart).arg(offsetCheck));
+
+    QMetaEnum targetEnum = QMetaEnum::fromType<Target>();
+    QMetaEnum formatEnum = QMetaEnum::fromType<Format>();
+    QMetaEnum typeEnum = QMetaEnum::fromType<Type>();
+
+    Q_ASSERT(targetEnum.isValid());
+    Q_ASSERT(formatEnum.isValid());
+    Q_ASSERT(typeEnum.isValid());
+
+    const char* targetKey = targetEnum.valueToKey(int(image.target));
+    const char* formatKey = formatEnum.valueToKey(int(image.format));
+    const char* typeKey = typeEnum.valueToKey(int(image.type));
+
+    if(targetKey == nullptr)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid value for the target %1.").arg(textureFile.fileName()).arg(int(image.target)));
+    if(formatKey == nullptr)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid value for the format %1.").arg(textureFile.fileName()).arg(int(image.format)));
+    if(typeKey == nullptr)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid type for the format %1.").arg(textureFile.fileName()).arg(int(image.type)));
+    if(image.rawDataLength == 0)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): rawDataLength is not allowed to be 0.").arg(textureFile.fileName()));
+    if(image.width == 0)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): width is not allowed to be 0.").arg(textureFile.fileName()));
+    if(image.height == 0)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): height is not allowed to be 0.").arg(textureFile.fileName()));
+    if(image.depth == 0)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): depth is not allowed to be 0.").arg(textureFile.fileName()));
+    if(image.rowStride != image.calcRowStride())
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): rowStride has the wrong value.").arg(textureFile.fileName()));
+    if(image.rawDataLength != image.rowStride*image.height*image.depth)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): rawDataLength does not match the texture dimensions and the internal format of the texture.").arg(textureFile.fileName()));
+    if(image.rawDataLength > std::numeric_limits<int>::max())
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): rawDataLength is too long for an array to hold it.").arg(textureFile.fileName()));
+
+    if(tempBuffer.length() < int(image.rawDataLength))
+      tempBuffer.resize(int(image.rawDataLength));
+    file.read(reinterpret_cast<char*>(tempBuffer.data()), image.rawDataLength);
+    offsetCheck+=image.rawDataLength;
+
+    bool supportedFormat;
+    GLenum internalFormat = ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
+    if(!supportedFormat)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid format type combination of %1 and %2.").arg(textureFile.fileName()).arg(formatKey).arg(typeKey));
+
+    switch(image.target)
+    {
+    case Target::TEXTURE_1D:
+      if(image.width == 0 || image.depth != 1 || image.height!=1)
+        throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): a 1d image need layers to have the height 1 and 1 layer. Target: %1, width: %2, height: %3 depth: %4.").arg(textureFile.fileName()).arg(targetKey).arg(image.width).arg(image.height).arg(image.depth));
+      GL_CALL(glTexImage1D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),tempBuffer.data());
+      break;
+    case Target::CUBE_MAP_POSITIVE_X:
+    case Target::CUBE_MAP_NEGATIVE_X:
+    case Target::CUBE_MAP_POSITIVE_Y:
+    case Target::CUBE_MAP_NEGATIVE_Y:
+    case Target::CUBE_MAP_POSITIVE_Z:
+    case Target::CUBE_MAP_NEGATIVE_Z:
+    case Target::TEXTURE_2D:
+      if(image.width == 0 || image.height == 0 || image.depth != 1)
+        throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): a 2d image need layers to have 1 layer. Target: %1, width: %2, height: %3 depth: %4.").arg(textureFile.fileName()).arg(targetKey).arg(image.width).arg(image.height).arg(image.depth));
+      GL_CALL(glTexImage2D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, image.height, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),tempBuffer.data());
+      break;
+    case Target::TEXTURE_3D:
+      if(image.width == 0 || image.height == 0 || image.depth == 0)
+        throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): a 1d image need layers to have the height 1 and 1 layer. Target: %1, width: %2, height: %3 depth: %4.").arg(textureFile.fileName()).arg(targetKey).arg(image.width).arg(image.height).arg(image.depth));
+      GL_CALL(glTexImage3D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, image.height, image.depth, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),tempBuffer.data());
+      break;
+    }
+    // #FIXME: currently implementing
+  }
+
+  for(const CompressedImage& image : compressedImages)
+  {
+    Q_UNUSED(image);
+    Q_UNREACHABLE(); // Not implemented yet
+  }
+
+  if(quint64(file.size()) != offsetCheck)
+    throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): There are some unused bytes in the texture file").arg(textureFile.fileName()));
+
+  return textureHandle;
 }
 
 quint32 TextureFile::appendRawData(const QVector<byte>& rawData)
@@ -247,21 +474,15 @@ void TextureFile::ImportSettings::registerType()
 
   r = angelScriptEngine->RegisterEnum("TextureFormat"); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureFormat", "R", int(Format::RED)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterEnumValue("TextureFormat", "G", int(Format::GREEN)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterEnumValue("TextureFormat", "B", int(Format::BLUE)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureFormat", "RG", int(Format::RG)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureFormat", "RGB", int(Format::RGB)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterEnumValue("TextureFormat", "BGR", int(Format::BGR)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureFormat", "RGBA", int(Format::RGBA)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterEnumValue("TextureFormat", "BGRA", int(Format::BGRA)); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterEnum("TextureType"); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureType", "INT8", int(Type::INT8)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureType", "UINT8", int(Type::UINT8)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureType", "INT16", int(Type::INT16)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureType", "UINT16", int(Type::UINT16)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterEnumValue("TextureType", "INT32", int(Type::INT32)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterEnumValue("TextureType", "UINT32", int(Type::UINT32)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureType", "FLOAT16", int(Type::FLOAT16)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureType", "FLOAT32", int(Type::FLOAT32)); AngelScriptCheck(r);
 
@@ -271,6 +492,16 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "int width", asOFFSET(ImportSettings,width)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "int height", asOFFSET(ImportSettings,height)); AngelScriptCheck(r);
+}
+
+quint32 TextureFile::UncompressedImage::calcRowStride() const
+{
+  GLint packAlignment;
+  glGetIntegerv(GL_PACK_ALIGNMENT, &packAlignment);
+
+  quint32 bytesPerPixel = quint16(ImportSettings::bytesPerPixelForFormatType(format, type));
+
+  return quint32(glm::ceilMultiple<quint32>(width * bytesPerPixel, quint32(packAlignment)));
 }
 
 
