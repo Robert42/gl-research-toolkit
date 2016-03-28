@@ -50,7 +50,7 @@ vec2 occlusion_range;
 vec2 reflectance_range;
 float emission_factor;
 // sampler2D within Uniform Block possible thanks to GL_NV_bindless_texture
-sampler2D diffuse_map;
+sampler2D basecolor_map;
 sampler2D normal_map;
 sampler2D height_map;
 sampler2D srmo_map; // smoothness, reflectance, metalic_map, occlusion
@@ -70,7 +70,7 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   float metal_mask = srmo[2];
   float occlusion = srmo[3];
   
-  vec4 color = texture2D(material_instance.diffuse_map, uv) * material_instance.tint;
+  vec4 color = texture2D(material_instance.basecolor_map, uv) * material_instance.tint;
   
   material.normal = fragment.normal; // TODO implement normal mapping
   material.smoothness = mix(material_instance.smoothness_range[0], material_instance.smoothness_range[1], smoothness);

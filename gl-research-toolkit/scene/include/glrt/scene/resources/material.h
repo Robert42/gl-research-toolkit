@@ -46,7 +46,7 @@ public:
     glm::vec2 reflectance_range = glm::vec2(0,1);
     float emission_factor = 1.f;
     padding<float, 1> _padding;
-    T_textureHandle diffuse_map;
+    T_textureHandle basecolor_map;
     T_textureHandle normal_map;
     T_textureHandle height_map;
     T_textureHandle srmo_map; // smoothness, reflectance, metalic_map, occlusion

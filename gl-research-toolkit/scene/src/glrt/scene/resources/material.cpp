@@ -66,7 +66,7 @@ inline void as_init_plain_color_material(Material::PlainColor* plainColor)
 inline void as_init_textured_material(Material::Textured<TextureHandle>* texturedMaterial)
 {
   *texturedMaterial = Material::Textured<TextureHandle>();
-  texturedMaterial->diffuse_map = TextureManager::instance()->handleFor(uuids::fallbackDiffuseTexture);
+  texturedMaterial->basecolor_map = TextureManager::instance()->handleFor(uuids::fallbackDiffuseTexture);
   texturedMaterial->normal_map = TextureManager::instance()->handleFor(uuids::fallbackNormalTexture);
   texturedMaterial->emission_map = TextureManager::instance()->handleFor(uuids::blackTexture);
   texturedMaterial->srmo_map = TextureManager::instance()->handleFor(uuids::blackTexture);
@@ -119,7 +119,7 @@ void Material::registerAngelScriptTypes()
     r = angelScriptEngine->RegisterObjectProperty(type, "vec2 occlusion_range", asOFFSET(Material::Textured<TextureHandle>, occlusion_range)); AngelScriptCheck(r);
     r = angelScriptEngine->RegisterObjectProperty(type, "vec2 reflectance_range", asOFFSET(Material::Textured<TextureHandle>, reflectance_range)); AngelScriptCheck(r);
     r = angelScriptEngine->RegisterObjectProperty(type, "float emission_factor", asOFFSET(Material::Textured<TextureHandle>, emission_factor)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle diffuse_map", asOFFSET(Material::Textured<TextureHandle>, diffuse_map)); AngelScriptCheck(r);
+    r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle basecolor_map", asOFFSET(Material::Textured<TextureHandle>, basecolor_map)); AngelScriptCheck(r);
     r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle normal_map", asOFFSET(Material::Textured<TextureHandle>, normal_map)); AngelScriptCheck(r);
     r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle height_map", asOFFSET(Material::Textured<TextureHandle>, height_map)); AngelScriptCheck(r);
     r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle srmo_map", asOFFSET(Material::Textured<TextureHandle>, srmo_map)); AngelScriptCheck(r);
@@ -152,7 +152,7 @@ void Material::prepareForGpuBuffer()
   case Type::TEXTURED_TRANSPARENT:
     if(textureHandleType == TextureHandleType::Ids)
     {
-      textureGpuPtrs.diffuse_map = textureManager.gpuHandle(texturesIds.diffuse_map);
+      textureGpuPtrs.basecolor_map = textureManager.gpuHandle(texturesIds.basecolor_map);
       textureGpuPtrs.normal_map = textureManager.gpuHandle(texturesIds.normal_map);
       textureGpuPtrs.height_map = textureManager.gpuHandle(texturesIds.height_map);
       textureGpuPtrs.srmo_map = textureManager.gpuHandle(texturesIds.srmo_map);
