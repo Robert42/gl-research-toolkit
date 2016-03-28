@@ -888,10 +888,14 @@ void Array<T, T_traits,T_allocator>::resize(int newSize)
 
   Q_ASSERT(newSize>=0);
 
+
   if(newSize <= 0)
     clear();
   else
+  {
+    ensureCapacity(newSize);
     _length = newSize;
+  }
 }
 
 

@@ -116,7 +116,7 @@ private:
 
   QVector<CompressedImage> compressedImages;
   QVector<UncompressedImage> uncompressedImages;
-  QMap<quint32, QVector<byte>> rawData;
+  QVector<QVector<byte>> rawData;
 
   quint32 appendRawData(const QVector<byte>& rawData);
 

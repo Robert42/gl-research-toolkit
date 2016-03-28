@@ -471,17 +471,18 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(assets.meshInstances.size() > 1)
         throw GLRT_EXCEPTION(QString("Can't assign a used defined meshUuid (%0) to mesh, where the same name (%1) is used for multiple mesh instances!").arg(QUuid(settings.meshUuids[n]).toString()).arg(n));
       meshUuid = settings.meshUuids[n];
-    }
-
-    // Is this the second instance of the mesh just with a different material? => use the same uuid!!
-    if(useIndex < i)
-    {
-      meshUuid = assets.meshes[useIndex];
     }else
     {
-      // This is the first instance of this mesh? Also one that should be imported? => import it!
-      if(settings.shouldImportMesh(n))
-        allMeshesToImport[meshUuid] = i;
+      // Is this the second instance of the mesh just with a different material? => use the same uuid!!
+      if(useIndex < i)
+      {
+        meshUuid = assets.meshes[useIndex];
+      }else
+      {
+        // This is the first instance of this mesh? Also one that should be imported? => import it!
+        if(settings.shouldImportMesh(n))
+          allMeshesToImport[meshUuid] = i;
+      }
     }
 
     assets.meshes[i] = meshUuid;
@@ -545,9 +546,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   QTextStream outputStream(&file);
 
 
+  QFile meshFile(meshesFile.absoluteFilePath());
   if(!allMeshesToImport.isEmpty())
   {
-    QFile meshFile(meshesFile.absoluteFilePath());
     if(!meshFile.open(QFile::WriteOnly))
       throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshesFile.absoluteFilePath()));
     QTextStream meshOutputStream(&meshFile);
@@ -563,6 +564,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     outputStream << "#include \"" << escape_angelscript_string(meshesFile.fileName()) << "\"\n";
     outputStream << "\n";
+  }else if(meshesFile.exists())
+  {
+    meshFile.remove();
   }
 
   outputStream << "void main(SceneLayer@ sceneLayer)\n{\n";

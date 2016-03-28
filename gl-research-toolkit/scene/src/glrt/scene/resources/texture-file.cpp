@@ -154,7 +154,7 @@ public:
 
   ImportedGlTexture()
   {
-    glGenTextures(1, &textureId);
+    GL_CALL(glGenTextures, 1, &textureId);
   }
 
   ImportedGlTexture(GLuint textureId)
@@ -346,16 +346,24 @@ void TextureFile::save(QFileInfo& textureFile)
 
   Q_ASSERT(uncompressedImages.length() < 0x10000);
 
+  quint64 rawDataOffset = sizeof(Header) + quint64(this->uncompressedImages.length())*sizeof(UncompressedImage) + quint64(this->compressedImages.length())*sizeof(CompressedImage);
+
   Header header;
   header.numUncompressedImages = quint16(uncompressedImages.length());
   header.numCompressedImages = 0;
 
   writeValue(file, header);
 
-  for(const UncompressedImage& image : this->uncompressedImages)
+  for(UncompressedImage image : this->uncompressedImages)
+  {
+    image.rawDataStart += rawDataOffset;
     writeValue(file, image);
-  for(const CompressedImage& image : this->compressedImages)
+  }
+  for(CompressedImage image : this->compressedImages)
+  {
+    image.rawDataStart += rawDataOffset;
     writeValue(file, image);
+  }
 
   for(const QVector<byte>& rawData : this->rawData)
     file.write(reinterpret_cast<const char*>(rawData.data()), rawData.length());
@@ -410,6 +418,9 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
 
   Array<byte> tempBuffer;
 
+  QMap<GLenum, GLint> maxMipMap;
+  QMap<GLenum, GLint> minMipMap;
+
   for(const UncompressedImage& image : uncompressedImages)
   {
     if(offsetCheck != image.rawDataStart)
@@ -448,13 +459,16 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
     if(image.rawDataLength > std::numeric_limits<int>::max())
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): rawDataLength is too long for an array to hold it.").arg(textureFile.fileName()));
 
+    maxMipMap[GLenum(image.target)] = glm::max<GLint>(maxMipMap.value(GLenum(image.target), 0), GLint(image.mipmap));
+    minMipMap[GLenum(image.target)] = glm::max<GLint>(minMipMap.value(GLenum(image.target), std::numeric_limits<GLint>::max()), GLint(image.mipmap));
+
     if(tempBuffer.length() < int(image.rawDataLength))
       tempBuffer.resize(int(image.rawDataLength));
     file.read(reinterpret_cast<char*>(tempBuffer.data()), image.rawDataLength);
     offsetCheck+=image.rawDataLength;
 
     bool supportedFormat;
-    GLenum internalFormat = ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
+    ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
     if(!supportedFormat)
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid format type combination of %1 and %2.").arg(textureFile.fileName()).arg(formatKey).arg(typeKey));
 
@@ -493,22 +507,36 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
   if(quint64(file.size()) != offsetCheck)
     throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): There are some unused bytes in the texture file").arg(textureFile.fileName()));
 
+
   GLuint textureHandle = 0;
   std::swap(textureHandle, importedTexture.textureId);
+
+
+  for(auto i=maxMipMap.begin(); i!=maxMipMap.end(); ++i)
+  {
+    GLenum target = i.key();
+    GLint maxMipmapLevel = i.value();
+    GLint minMipmapLevel = minMipMap[target];
+
+    GL_CALL(glBindTexture, target, textureHandle);
+
+    GL_CALL(glTexParameteri, target, GL_TEXTURE_BASE_LEVEL, minMipmapLevel);
+    GL_CALL(glTexParameteri, target, GL_TEXTURE_MAX_LEVEL, maxMipmapLevel);
+
+    GL_CALL(glBindTexture, target, 0);
+  }
+
   return textureHandle;
 }
 
 quint32 TextureFile::appendRawData(const QVector<byte>& rawData)
 {
-  quint32 offset = quint32(sizeof(Header));
-
-  offset += quint32(uncompressedImages.length()) * quint32(sizeof(CompressedImage));
-  offset += quint32(compressedImages.length()) * quint32(sizeof(UncompressedImage));
+  quint32 offset = 0;
 
   for(const QVector<byte>& rawData : this->rawData)
     offset += quint32(rawData.length());
 
-  this->rawData.insert(offset, rawData);
+  this->rawData.append(rawData);
 
   return offset;
 }
