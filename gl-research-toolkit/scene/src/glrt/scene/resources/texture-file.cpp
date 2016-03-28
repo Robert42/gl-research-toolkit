@@ -152,6 +152,11 @@ class TextureFile::ImportedGlTexture
 public:
   GLuint textureId;
 
+  ImportedGlTexture()
+  {
+    glGenTextures(1, &textureId);
+  }
+
   ImportedGlTexture(GLuint textureId)
     : textureId(textureId)
   {
@@ -214,6 +219,7 @@ public:
     image.width = quint32(this->width(level));
     image.rowStride = image.calcRowStride();
     image.height = quint32(this->height(level));
+    image.depth = 1;
     image.mipmap = quint32(level);
     image.target = TextureFile::Target::TEXTURE_2D;
     image.rawDataLength = image.rowStride * image.height;
@@ -228,6 +234,66 @@ public:
     GL_CALL(glGetTextureImage, textureId, level, GLenum(format), GLenum(type), rawData.length(), rawData.data());
 
     return qMakePair(image, rawData);
+  }
+
+  void setUncompressed2DImage(const UncompressedImage& image, const void* data)
+  {
+    Q_ASSERT(image.width != 0);
+    Q_ASSERT(image.height != 0);
+    Q_ASSERT(image.depth != 0);
+    Q_ASSERT(image.rowStride == image.calcRowStride());
+    Q_ASSERT(image.rawDataLength == image.rowStride*image.height*image.depth);
+    Q_ASSERT(image.rawDataLength <= std::numeric_limits<int>::max());
+
+    bool supportedFormat;
+    GLenum internalFormat = ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
+    Q_ASSERT(supportedFormat);
+
+    GL_CALL(glBindTexture, static_cast<GLenum>(image.target), this->textureId);
+
+    switch(image.target)
+    {
+    case Target::TEXTURE_1D:
+      Q_ASSERT(image.width > 0 && image.depth == 1 && image.height==1);
+      GL_CALL(glTexImage1D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),data);
+      break;
+    case Target::CUBE_MAP_POSITIVE_X:
+    case Target::CUBE_MAP_NEGATIVE_X:
+    case Target::CUBE_MAP_POSITIVE_Y:
+    case Target::CUBE_MAP_NEGATIVE_Y:
+    case Target::CUBE_MAP_POSITIVE_Z:
+    case Target::CUBE_MAP_NEGATIVE_Z:
+    case Target::TEXTURE_2D:
+      Q_ASSERT(image.width > 0 || image.height > 0 || image.depth == 1);
+      GL_CALL(glTexImage2D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, image.height, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),data);
+      break;
+    case Target::TEXTURE_3D:
+      Q_ASSERT(image.width > 0 && image.depth > 0 && image.height>0);
+      GL_CALL(glTexImage3D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, image.height, image.depth, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),data);
+      break;
+    }
+
+    GL_CALL(glBindTexture, static_cast<GLenum>(image.target), 0);
+  }
+
+  void convertToSignedNormalMap(int level)
+  {
+    QPair<UncompressedImage, QVector<byte>> importedTexture = uncompressed2DImage(level, Format::RGBA, Type::FLOAT32);
+
+    QVector<byte> textureData = importedTexture.second;
+    const UncompressedImage& image = importedTexture.first;
+    byte* data = reinterpret_cast<byte*>(textureData.data());
+
+    quint32 w = image.width*4;
+    quint32 h = image.height * image.depth;
+    for(quint32 y=0; y<h; ++y)
+    {
+      float* line = reinterpret_cast<float*>(data + y * image.rowStride);
+      for(quint32 x=0; x<w; ++x)
+        line[x] = line[x]*2.f - 1.f;
+    }
+
+    setUncompressed2DImage(image, data);
   }
 };
 
@@ -256,6 +322,9 @@ void TextureFile::import(QFileInfo& srcFile, const ImportSettings& importSetting
   {
     for(int level=firstMipMap; level<=lastMipMap; ++level)
     {
+      if(importSettings.sourceIsNormalMap)
+        textureInformation.convertToSignedNormalMap(level);
+
       QPair<UncompressedImage, QVector<byte>> image =  textureInformation.uncompressed2DImage(level, importSettings.format, importSettings.type);
 
       image.first.rawDataStart = this->appendRawData(image.second);
@@ -299,8 +368,8 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
   if(!file.open(QFile::ReadOnly))
     throw GLRT_EXCEPTION(QString("Can't read texture file <%0>").arg(textureFile.absoluteFilePath()));
 
-  GLuint textureHandle;
-  glGenTextures(1, &textureHandle);
+
+  ImportedGlTexture importedTexture;
 
   quint64 offsetCheck = 0;
 
@@ -389,12 +458,12 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
     if(!supportedFormat)
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid format type combination of %1 and %2.").arg(textureFile.fileName()).arg(formatKey).arg(typeKey));
 
+
     switch(image.target)
     {
     case Target::TEXTURE_1D:
       if(image.width == 0 || image.depth != 1 || image.height!=1)
         throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): a 1d image need layers to have the height 1 and 1 layer. Target: %1, width: %2, height: %3 depth: %4.").arg(textureFile.fileName()).arg(targetKey).arg(image.width).arg(image.height).arg(image.depth));
-      GL_CALL(glTexImage1D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),tempBuffer.data());
       break;
     case Target::CUBE_MAP_POSITIVE_X:
     case Target::CUBE_MAP_NEGATIVE_X:
@@ -405,15 +474,14 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
     case Target::TEXTURE_2D:
       if(image.width == 0 || image.height == 0 || image.depth != 1)
         throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): a 2d image need layers to have 1 layer. Target: %1, width: %2, height: %3 depth: %4.").arg(textureFile.fileName()).arg(targetKey).arg(image.width).arg(image.height).arg(image.depth));
-      GL_CALL(glTexImage2D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, image.height, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),tempBuffer.data());
       break;
     case Target::TEXTURE_3D:
       if(image.width == 0 || image.height == 0 || image.depth == 0)
         throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): a 1d image need layers to have the height 1 and 1 layer. Target: %1, width: %2, height: %3 depth: %4.").arg(textureFile.fileName()).arg(targetKey).arg(image.width).arg(image.height).arg(image.depth));
-      GL_CALL(glTexImage3D, static_cast<GLenum>(image.target), image.mipmap, internalFormat, image.width, image.height, image.depth, 0, static_cast<GLenum>(image.format), static_cast<GLenum>(image.type),tempBuffer.data());
       break;
     }
-    // #FIXME: currently implementing
+
+    importedTexture.setUncompressed2DImage(image, tempBuffer.data());
   }
 
   for(const CompressedImage& image : compressedImages)
@@ -425,6 +493,8 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
   if(quint64(file.size()) != offsetCheck)
     throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): There are some unused bytes in the texture file").arg(textureFile.fileName()));
 
+  GLuint textureHandle = 0;
+  std::swap(textureHandle, importedTexture.textureId);
   return textureHandle;
 }
 
@@ -492,6 +562,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "int width", asOFFSET(ImportSettings,width)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "int height", asOFFSET(ImportSettings,height)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);
 }
 
 quint32 TextureFile::UncompressedImage::calcRowStride() const
@@ -499,7 +570,7 @@ quint32 TextureFile::UncompressedImage::calcRowStride() const
   GLint packAlignment;
   glGetIntegerv(GL_PACK_ALIGNMENT, &packAlignment);
 
-  quint32 bytesPerPixel = quint16(ImportSettings::bytesPerPixelForFormatType(format, type));
+  quint32 bytesPerPixel = quint32(ImportSettings::bytesPerPixelForFormatType(format, type));
 
   return quint32(glm::ceilMultiple<quint32>(width * bytesPerPixel, quint32(packAlignment)));
 }

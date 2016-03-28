@@ -71,8 +71,6 @@ public:
     Compression compression = Compression::NONE;
     int width = -1;
     int height = -1;
-
-    // #TODO test, whether the sampler code in the shader accepts signed bytes:
     int sourceIsNormalMap = false;
 
     static void registerType();
