@@ -61,7 +61,15 @@ quint64 GlTextureManager::gpuHandle(TextureHandle handle)
 
   GLuint sampler = samplerObject.GetInternHandle();
 
-  return glGetTextureSamplerHandleNV(texture, sampler);
+  GLuint64 ptr = GL_RET_CALL(glGetTextureSamplerHandleNV, texture, sampler);
+
+  if(!residentHandles.contains(ptr))
+  {
+    GL_CALL(glMakeTextureHandleResidentNV, ptr);
+    residentHandles.insert(ptr);
+  }
+
+  return ptr;
 }
 
 int GlTextureManager::registerSampler(const TextureSampler& sampler)

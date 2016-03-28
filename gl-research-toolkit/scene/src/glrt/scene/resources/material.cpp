@@ -140,6 +140,31 @@ const void* Material::data() const
   return &plainColor;
 }
 
+
+void Material::prepareForGpuBuffer()
+{
+  TextureManager& textureManager = *TextureManager::instance();
+
+  switch(type)
+  {
+  case Type::TEXTURED_MASKED:
+  case Type::TEXTURED_OPAQUE:
+  case Type::TEXTURED_TRANSPARENT:
+    if(textureHandleType == TextureHandleType::Ids)
+    {
+      textureGpuPtrs.diffuse_map = textureManager.gpuHandle(texturesIds.diffuse_map);
+      textureGpuPtrs.normal_map = textureManager.gpuHandle(texturesIds.normal_map);
+      textureGpuPtrs.height_map = textureManager.gpuHandle(texturesIds.height_map);
+      textureGpuPtrs.srmo_map = textureManager.gpuHandle(texturesIds.srmo_map);
+      textureGpuPtrs.emission_map = textureManager.gpuHandle(texturesIds.emission_map);
+      textureHandleType = TextureHandleType::GpuPtrs;
+    }
+    break;
+  case Type::PLAIN_COLOR:
+    break;
+  }
+}
+
 bool Material::operator<(const Material& other) const
 {
   return concatenated_lessThan(this->type, other.type, this->materialUser, this->materialUser);

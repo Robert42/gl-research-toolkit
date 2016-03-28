@@ -66,7 +66,7 @@ public:
     Textured<GLuint64> textureGpuPtrs;
   };
   Type type;
-  TextureHandleType textureHandleType = TextureHandleType::Ids; // #TODO: make sure to convert the material before passing it to as material uniform
+  TextureHandleType textureHandleType = TextureHandleType::Ids;
   UuidIndex materialUser;
 
   template<typename T>
@@ -76,6 +76,8 @@ public:
   Material(const Textured<TextureHandle>& textured, Type type);
 
   const void* data() const;
+
+  void prepareForGpuBuffer();
 
   static void registerAngelScriptTypes();
 

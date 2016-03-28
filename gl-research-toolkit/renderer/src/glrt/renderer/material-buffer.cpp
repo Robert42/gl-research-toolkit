@@ -78,6 +78,7 @@ void MaterialBuffer::Initializer::begin(int expectedNumberMaterials)
 
 int MaterialBuffer::Initializer::append(const Uuid<Material>& materialUuid)
 {
+  resourceManager.prepareForGpuBuffer(materialUuid);
   Material material = resourceManager.materialForUuid(materialUuid);
 
   BlockSize blockSize = BlockSize::forType(material.type);

@@ -30,7 +30,7 @@ private:
 
   QVector<GLuint> textures;
 
-
+  QSet<GLuint64> residentHandles;
 
   int registerSampler(const TextureSampler& sampler);
 };

@@ -48,6 +48,8 @@ public:
   Texture textureForUuid(const Uuid<Texture>& uuid) const;
   TextureSampler defaultTextureSamplerForTextureUuid(const Uuid<Texture>& uuid) const;
 
+  void prepareForGpuBuffer(const Uuid<Material>& uuid) const;
+
   QString staticMeshFileForUuid(const Uuid<StaticMesh>& uuid, const QString& fallback=QString()) const;
   QString sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback=QString()) const;
   QString sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, const QString& fallback=QString()) const;

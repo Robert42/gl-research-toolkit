@@ -67,6 +67,13 @@ Material ResourceManager::materialForUuid(const Uuid<Material>& uuid) const
   return indexForResourceUuid(uuid)->materials.value(uuid, Index::fallback.materials[uuids::fallbackMaterial]);
 }
 
+void ResourceManager::prepareForGpuBuffer(const Uuid<Material>& uuid) const
+{
+  auto iterator = indexForResourceUuid(uuid)->materials.find(uuid);
+  if(iterator != indexForResourceUuid(uuid)->materials.end())
+    const_cast<Material&>(iterator.value()).prepareForGpuBuffer(); // warning! pretty bad hack!
+}
+
 Texture ResourceManager::textureForUuid(const Uuid<Texture>& uuid) const
 {
   return indexForResourceUuid(uuid)->textures.value(uuid, Index::fallback.textures[uuids::fallbackDiffuseTexture]);
