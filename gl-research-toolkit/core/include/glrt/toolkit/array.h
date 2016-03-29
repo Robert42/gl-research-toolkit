@@ -454,6 +454,7 @@ public:
   int append(T&& value);
 
   void append_by_memcpy(const void* src, size_t num);
+  void append_by_memcpy_items(int first, int num);
   template<typename T_value>
   void append_by_memcpy(const T_value& value);
   void resize(int newSize);
