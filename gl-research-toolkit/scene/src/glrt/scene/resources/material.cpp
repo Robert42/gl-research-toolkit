@@ -87,8 +87,6 @@ inline void as_init_texture_handle(TextureHandle* textureHandle)
   as_init_texture_handle_t(textureHandle, scene::resources::uuids::fallbackDiffuseTexture);
 }
 
-// #TODO also sort materials by the used textures
-
 void Material::registerAngelScriptTypes()
 {
   asDWORD previousMask = angelScriptEngine->SetDefaultAccessMask(ACCESS_MASK_RESOURCE_LOADING);
@@ -175,7 +173,10 @@ void Material::prepareForGpuBuffer()
 
 bool Material::operator<(const Material& other) const
 {
-  return concatenated_lessThan(this->type, other.type, this->materialUser, this->materialUser);
+  if(this->isTextureType())
+    return concatenated_lessThan(this->type, other.type, this->materialUser, other.materialUser, this->textureGpuPtrs.basecolor_map, other.textureGpuPtrs.basecolor_map, this->textureGpuPtrs.normal_map, other.textureGpuPtrs.normal_map);
+  else
+    return concatenated_lessThan(this->type, other.type, this->materialUser, other.materialUser);
 }
 
 
