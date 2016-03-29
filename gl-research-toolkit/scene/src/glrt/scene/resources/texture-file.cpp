@@ -301,7 +301,7 @@ TextureFile::TextureFile()
 {
 }
 
-void TextureFile::import(QFileInfo& srcFile, const ImportSettings& importSettings)
+void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importSettings)
 {
   const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
@@ -337,36 +337,59 @@ void TextureFile::import(QFileInfo& srcFile, const ImportSettings& importSetting
   }
 }
 
-void TextureFile::save(QFileInfo& textureFile)
+void TextureFile::save(const QFileInfo& textureFile)
 {
-  QFile file(textureFile.absoluteFilePath());
-
-  if(!file.open(QFile::WriteOnly))
-    throw GLRT_EXCEPTION(QString("Can't write texture file <%0>").arg(textureFile.absoluteFilePath()));
-
   Q_ASSERT(uncompressedImages.length() < 0x10000);
+
+  QByteArray byteArray;
+  byteArray.reserve(expectedFileSize());
 
   quint64 rawDataOffset = sizeof(Header) + quint64(this->uncompressedImages.length())*sizeof(UncompressedImage) + quint64(this->compressedImages.length())*sizeof(CompressedImage);
 
   Header header;
   header.numUncompressedImages = quint16(uncompressedImages.length());
   header.numCompressedImages = 0;
+  header._padding.clear();
 
-  writeValue(file, header);
+  writeValue(byteArray, header);
 
   for(UncompressedImage image : this->uncompressedImages)
   {
     image.rawDataStart += rawDataOffset;
-    writeValue(file, image);
+    writeValue(byteArray, image);
   }
   for(CompressedImage image : this->compressedImages)
   {
     image.rawDataStart += rawDataOffset;
-    writeValue(file, image);
+    writeValue(byteArray, image);
   }
 
   for(const QVector<byte>& rawData : this->rawData)
-    file.write(reinterpret_cast<const char*>(rawData.data()), rawData.length());
+  {
+    const char* data = reinterpret_cast<const char*>(rawData.data());
+    int length = rawData.length();
+
+    byteArray.append(data, length);
+  }
+
+  QFile file(textureFile.absoluteFilePath());
+
+  if(!file.open(QFile::WriteOnly))
+    throw GLRT_EXCEPTION(QString("Can't write texture file <%0>").arg(textureFile.absoluteFilePath()));
+
+  file.write(byteArray);
+}
+
+int TextureFile::expectedFileSize() const
+{
+  int expectedSize = sizeof(Header);
+
+  expectedSize += int(sizeof(UncompressedImage)) * this->uncompressedImages.length();
+  expectedSize += int(sizeof(CompressedImage)) * this->compressedImages.length();
+
+  for(const QVector<byte>& rawData : this->rawData)
+    expectedSize += rawData.length();
+  return expectedSize;
 }
 
 GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)

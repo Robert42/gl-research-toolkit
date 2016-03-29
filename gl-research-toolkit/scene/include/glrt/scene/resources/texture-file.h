@@ -78,8 +78,8 @@ public:
 
   TextureFile();
 
-  void import(QFileInfo& srcFile, const ImportSettings& importSettings);
-  void save(QFileInfo& textureFile);
+  void import(const QFileInfo& srcFile, const ImportSettings& importSettings);
+  void save(const QFileInfo& textureFile);
   static GLuint loadFromFile(const QFileInfo& textureFile);
 
 private:
@@ -119,6 +119,7 @@ private:
   QVector<QVector<byte>> rawData;
 
   quint32 appendRawData(const QVector<byte>& rawData);
+  int expectedFileSize() const;
 
   void clear();
 
