@@ -18,10 +18,15 @@ public:
   GlTextureManager(glrt::scene::resources::ResourceManager* resourceManager);
   ~GlTextureManager();
 
+  void removeUnusedTextures(QSet<Uuid<Texture>> usedTextures) override;
+  Uuid<Texture> textureUuidForHandle(const TextureHandle& handle) override;
+  Uuid<Texture> textureUuidForGpuPtr(quint64 handle) override;
+
   TextureHandle handleFor(const Uuid<Texture>& texture) override;
   TextureHandle handleFor(const Uuid<Texture>& texture, const TextureSampler& sampler) override;
 
   quint64 gpuHandle(TextureHandle handle) override;
+
 
 private:
   // TODO: use hashes the other way round? because in runtime, the game will give the texture Handle and ask for the given GLTextureHandle
@@ -29,6 +34,8 @@ private:
   QVector<TextureSampler> textureSamplerIds;
 
   QVector<GLuint> textures;
+
+  QHash<GLuint64, Uuid<Texture>> _textureUuidForGpuPtr;
 
   QSet<GLuint64> residentHandles;
 

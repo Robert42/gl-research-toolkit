@@ -78,6 +78,7 @@ public:
   const void* data() const;
 
   void prepareForGpuBuffer();
+  bool isTextureType() const;
 
   static void registerAngelScriptTypes();
 

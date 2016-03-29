@@ -26,6 +26,8 @@ public:
   StaticMeshLoader& operator=(const StaticMeshLoader&) = delete;
   StaticMeshLoader& operator=(StaticMeshLoader&&) = delete;
 
+  virtual void removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> usedStaticMeshes) = 0;
+
   void loadStaticMesh(Uuid<StaticMesh> uuid, const ResourceManager* resourceManager);
   void loadStaticMesh(Uuid<StaticMesh> uuid, const std::string& filepath);
   void loadStaticMesh(const Uuid<StaticMesh>& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices);

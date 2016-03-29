@@ -24,13 +24,13 @@ public:
     int samplerId = 0;
   };
 
+  virtual void removeUnusedTextures(QSet<Uuid<Texture>> usedTextures) = 0;
+  virtual Uuid<Texture> textureUuidForHandle(const TextureHandle& handle) = 0;
+  virtual Uuid<Texture> textureUuidForGpuPtr(quint64 handle) = 0;
+
   virtual TextureHandle handleFor(const Uuid<Texture>& texture) = 0;
   virtual TextureHandle handleFor(const Uuid<Texture>& texture, const TextureSampler& sampler) = 0;
   virtual quint64 gpuHandle(TextureHandle handle) = 0;
-
-  // #TODO: vom static mesh manager abschauen?
-
-  // #TODO: clear, when a scene was laoded?
 };
 
 } // namespace resources

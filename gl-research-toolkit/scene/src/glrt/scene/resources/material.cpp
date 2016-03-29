@@ -141,15 +141,26 @@ const void* Material::data() const
 }
 
 
-void Material::prepareForGpuBuffer()
+bool Material::isTextureType() const
 {
-  TextureManager& textureManager = *TextureManager::instance();
-
   switch(type)
   {
   case Type::TEXTURED_MASKED:
   case Type::TEXTURED_OPAQUE:
   case Type::TEXTURED_TRANSPARENT:
+    return true;
+  case Type::PLAIN_COLOR:
+    return false;
+  }
+}
+
+
+void Material::prepareForGpuBuffer()
+{
+  TextureManager& textureManager = *TextureManager::instance();
+
+  if(isTextureType())
+  {
     if(textureHandleType == TextureHandleType::Ids)
     {
       textureGpuPtrs.basecolor_map = textureManager.gpuHandle(texturesIds.basecolor_map);
@@ -159,9 +170,6 @@ void Material::prepareForGpuBuffer()
       textureGpuPtrs.emission_map = textureManager.gpuHandle(texturesIds.emission_map);
       textureHandleType = TextureHandleType::GpuPtrs;
     }
-    break;
-  case Type::PLAIN_COLOR:
-    break;
   }
 }
 

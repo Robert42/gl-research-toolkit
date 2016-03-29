@@ -107,6 +107,8 @@ void Scene::load(const Uuid<Scene>& scene)
   sceneLoaded(success);
 
   qApp->processEvents();
+
+  unloadUnusedResources();
 }
 
 void Scene::loadSceneLayer(const Uuid<SceneLayer>& sceneLayerUuid)
@@ -171,6 +173,53 @@ void Scene::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("Scene", "ResourceManager@ get_resourceManager()", AngelScript::asFUNCTION(get_resourceManager), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+void Scene::unloadUnusedResources()
+{
+  using resources::StaticMesh;
+  using resources::StaticMeshLoader;
+  using resources::Texture;
+  using resources::TextureManager;
+  using resources::Material;
+
+  TextureManager& textureManager = resourceManager.textureManager;
+  StaticMeshLoader& staticMeshLoader = resourceManager.staticMeshLoader;
+
+  QSet<Uuid<StaticMesh>> allUsedStaticMeshes;
+  QSet<Uuid<Texture>> allUsedTextures;
+  Array<StaticMeshComponent*> allStaticMeshComponents = collectAllComponentsWithType<StaticMeshComponent>(this);
+
+  for(const StaticMeshComponent* staticMeshComponent : allStaticMeshComponents)
+  {
+    allUsedStaticMeshes.insert(staticMeshComponent->staticMeshUuid);
+
+    Material material = staticMeshComponent->material();
+
+    if(material.isTextureType())
+    {
+      switch(material.textureHandleType)
+      {
+      case Material::TextureHandleType::Ids:
+        allUsedTextures.insert(textureManager.textureUuidForHandle(material.texturesIds.basecolor_map));
+        allUsedTextures.insert(textureManager.textureUuidForHandle(material.texturesIds.normal_map));
+        allUsedTextures.insert(textureManager.textureUuidForHandle(material.texturesIds.height_map));
+        allUsedTextures.insert(textureManager.textureUuidForHandle(material.texturesIds.srmo_map));
+        allUsedTextures.insert(textureManager.textureUuidForHandle(material.texturesIds.emission_map));
+        break;
+      case Material::TextureHandleType::GpuPtrs:
+        allUsedTextures.insert(textureManager.textureUuidForGpuPtr(material.textureGpuPtrs.basecolor_map));
+        allUsedTextures.insert(textureManager.textureUuidForGpuPtr(material.textureGpuPtrs.normal_map));
+        allUsedTextures.insert(textureManager.textureUuidForGpuPtr(material.textureGpuPtrs.height_map));
+        allUsedTextures.insert(textureManager.textureUuidForGpuPtr(material.textureGpuPtrs.srmo_map));
+        allUsedTextures.insert(textureManager.textureUuidForGpuPtr(material.textureGpuPtrs.emission_map));
+        break;
+      }
+    }
+  }
+
+  textureManager.removeUnusedTextures(allUsedTextures);
+  staticMeshLoader.removeUnusedStaticMeshes(allUsedStaticMeshes);
 }
 
 

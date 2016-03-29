@@ -15,6 +15,11 @@ class MyMeshLoader final : public StaticMeshLoader
 public:
   StaticMesh data;
 
+  void removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> usedStaticMeshes) override
+  {
+    Q_UNUSED(usedStaticMeshes);
+  }
+
   void loadStaticMeshImpl(const Uuid<StaticMesh>&, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices) override
   {
     data.indices.resize(numIndices);
