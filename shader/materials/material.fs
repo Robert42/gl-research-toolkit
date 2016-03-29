@@ -42,7 +42,7 @@ void main()
 }
 #else
 
-layout(commandBindableNV,binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
+layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
 vec4 tint;
 vec2 smoothness_range;
