@@ -180,6 +180,7 @@ QString python_exportSceneAsObjMesh(const QString& objFile, const QString& group
 
   pythonScript += python_select_group_only(groupToImport);
 
+  // Missing: automatically switch to object mode?
 
   pythonScript += QString("bpy.ops.export_scene.obj("
                           "filepath=%0"
