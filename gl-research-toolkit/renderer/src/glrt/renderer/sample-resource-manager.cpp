@@ -13,6 +13,8 @@ SampleResourceManager::SampleResourceManager()
 
 SampleResourceManager::~SampleResourceManager()
 {
+  delete staticMeshBufferManager;
+  delete glTextureManager;
 }
 
 bool SampleResourceManager::foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const
