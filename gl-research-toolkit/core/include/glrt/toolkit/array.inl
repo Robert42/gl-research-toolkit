@@ -869,8 +869,24 @@ void Array<T, T_traits,T_allocator>::append_by_memcpy(const void* src, size_t nu
 {
   static_assert(std::is_same<byte, T>::value, "append_by_memcpy only allowed for an array of the type byte");
 
+  Q_ASSERT_X(src<this->_data || src >= this->_data+this->_capacity, "Array<>::append_by_memcpy()", "src must be from a buffer outside the buffer of the current array. Otherwise, reserve might invalidate the buffer");
+
   reserve(length() + num);
   std::memcpy(this->_data + this->_length, src, num);
+  this->_length += num;
+}
+
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::append_by_memcpy_items(int first, int num)
+{
+  static_assert(std::is_same<byte, T>::value, "append_by_memcpy only allowed for an array of the type byte");
+
+  Q_ASSERT(first>=0);
+  Q_ASSERT(num>=0);
+  Q_ASSERT(first+num<=this->length());
+
+  reserve(length() + num);
+  std::memcpy(this->_data + this->_length, this->_data+first, num);
   this->_length += num;
 }
 

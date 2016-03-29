@@ -28,6 +28,12 @@ void writeValue(QIODevice& device, const T& value)
 }
 
 template<typename T>
+void writeValue(QByteArray& device, const T& value)
+{
+  device.append(reinterpret_cast<const char*>(&value), sizeof(T));
+}
+
+template<typename T>
 T readValue(QIODevice& device)
 {
   T value;

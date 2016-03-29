@@ -13,6 +13,8 @@ SampleResourceManager::SampleResourceManager()
 
 SampleResourceManager::~SampleResourceManager()
 {
+  delete staticMeshBufferManager;
+  delete glTextureManager;
 }
 
 bool SampleResourceManager::foreachIndexImpl(const std::function<bool(const Index* index)>& lambda) const
@@ -29,6 +31,11 @@ Uuid<scene::Scene> SampleResourceManager::cornellBoxScene()
 Uuid<scene::Scene> SampleResourceManager::cornellBoxRoughnessScene()
 {
   return Uuid<scene::Scene>("{297e2f65-220b-42d7-ae10-1b9b45a75f7c}");
+}
+
+Uuid<scene::Scene> SampleResourceManager::cornellBoxSuzanneScene()
+{
+  return Uuid<scene::Scene>("{e8a07aee-d0d7-43b7-a9e2-867a824d2f48}");
 }
 
 Uuid<scene::resources::StaticMesh> SampleResourceManager::suzanneLowPoly()

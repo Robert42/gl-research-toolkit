@@ -139,7 +139,11 @@ void convertTexture(const QString& textureFilename, const QString& sourceFilenam
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile)
 {
-  QString blenderProgram("blender"); // #TODO, search for blender instead of just assuming it in the PATH variable?
+  // Hack to find the newest blender version on the PC in my campus
+  QString blenderProgram("blender-newest");
+  if(QProcess::execute(blenderProgram, {"--version"}) !=0)
+    blenderProgram = "blender";
+
   QStringList arguments = {"--background", blenderFile.absoluteFilePath(), "--python-expr", pythonScript};
 
   if(QProcess::execute(blenderProgram, arguments) !=0)
