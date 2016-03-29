@@ -97,10 +97,9 @@ void convertStaticMesh(const QString& meshFilename, const QString& sourceFilenam
   QFileInfo meshFile(meshFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
-
   if(shouldConvert(meshFile, sourceFile))
   {
+    SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
     if(sourceFile.suffix().toLower() == "blend")
       convertStaticMesh_BlenderToObj(meshFile, sourceFile, groupToImport, indexed);
     else
@@ -113,34 +112,38 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   QFileInfo sceneGraphFile(sceneGraphFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
-
   if(shouldConvert(sceneGraphFile, sourceFile))
   {
+    SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
     convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, uuid, settings, groupToImport);
   }
 }
 
-void convertTexture(const QString& textureFilename, const QString& sourceFilename, const TextureImportSettings& textureImportSettings)
+void convertTexture(const QString& textureFilename, const QString& sourceFilename, const TextureFile::ImportSettings& textureImportSettings)
 {
   QFileInfo textureFile(textureFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
-
-  if(shouldConvert(textureFilename, sourceFile))
+  // #TODO uncomment:
+  //if(shouldConvert(textureFilename, sourceFile))
   {
+    SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertTexture("<<textureFile.fileName()<<", "<<sourceFile.fileName()<<")";
 
-    // #ISSUE-27: This still must be implemented
-    Q_UNUSED(textureImportSettings);
+    TextureFile texture;
+    texture.import(sourceFile, textureImportSettings);
+    texture.save(textureFile);
   }
 }
 
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile)
 {
-  QString blenderProgram("blender"); // #TODO, search for blender instead of just assuming it in the PATH variable?
+  // Hack to find the newest blender version on the PC in my campus
+  QString blenderProgram("blender-newest");
+  if(QProcess::execute(blenderProgram, {"--version"}) !=0)
+    blenderProgram = "blender";
+
   QStringList arguments = {"--background", blenderFile.absoluteFilePath(), "--python-expr", pythonScript};
 
   if(QProcess::execute(blenderProgram, arguments) !=0)
@@ -472,17 +475,18 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(assets.meshInstances.size() > 1)
         throw GLRT_EXCEPTION(QString("Can't assign a used defined meshUuid (%0) to mesh, where the same name (%1) is used for multiple mesh instances!").arg(QUuid(settings.meshUuids[n]).toString()).arg(n));
       meshUuid = settings.meshUuids[n];
-    }
-
-    // Is this the second instance of the mesh just with a different material? => use the same uuid!!
-    if(useIndex < i)
-    {
-      meshUuid = assets.meshes[useIndex];
     }else
     {
-      // This is the first instance of this mesh? Also one that should be imported? => import it!
-      if(settings.shouldImportMesh(n))
-        allMeshesToImport[meshUuid] = i;
+      // Is this the second instance of the mesh just with a different material? => use the same uuid!!
+      if(useIndex < i)
+      {
+        meshUuid = assets.meshes[useIndex];
+      }else
+      {
+        // This is the first instance of this mesh? Also one that should be imported? => import it!
+        if(settings.shouldImportMesh(n))
+          allMeshesToImport[meshUuid] = i;
+      }
     }
 
     assets.meshes[i] = meshUuid;
@@ -546,9 +550,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   QTextStream outputStream(&file);
 
 
+  QFile meshFile(meshesFile.absoluteFilePath());
   if(!allMeshesToImport.isEmpty())
   {
-    QFile meshFile(meshesFile.absoluteFilePath());
     if(!meshFile.open(QFile::WriteOnly))
       throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshesFile.absoluteFilePath()));
     QTextStream meshOutputStream(&meshFile);
@@ -564,6 +568,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     outputStream << "#include \"" << escape_angelscript_string(meshesFile.fileName()) << "\"\n";
     outputStream << "\n";
+  }else if(meshesFile.exists())
+  {
+    meshFile.remove();
   }
 
   outputStream << "void main(SceneLayer@ sceneLayer)\n{\n";
@@ -915,16 +922,6 @@ void MeshImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "bool indexed", asOFFSET(MeshImportSettings,indexed)); AngelScriptCheck(r);
 }
 
-void TextureImportSettings::registerType()
-{
-  int r;
-  const char* name = "TextureImportSettings";
-
-  r = angelScriptEngine->RegisterObjectType(name, sizeof(MeshImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<TextureImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToMultipleOfTwo", asOFFSET(TextureImportSettings,scaleDownToMultipleOfTwo)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "int maxResolution", asOFFSET(TextureImportSettings,maxResolution)); AngelScriptCheck(r);
-}
 
 
 } // namespace resources

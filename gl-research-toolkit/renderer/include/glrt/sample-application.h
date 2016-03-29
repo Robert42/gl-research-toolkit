@@ -19,7 +19,7 @@ class SampleApplication : public glrt::Application
 public:
   struct Settings final
   {
-    Uuid<scene::Scene> sceneToLoad = glrt::renderer::SampleResourceManager::cornellBoxRoughnessScene();
+    Uuid<scene::Scene> sceneToLoad = glrt::renderer::SampleResourceManager::cornellBoxSuzanneScene();
 
     static Settings techDemo()
     {

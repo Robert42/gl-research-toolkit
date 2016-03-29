@@ -7,6 +7,8 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/resources/texture-sampler.h>
+#include <glrt/scene/resources/texture.h>
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
@@ -45,7 +47,7 @@ void convertStaticMesh_wrapper(const std::string& meshFile,
 
 void convertTexture_wrapper(const std::string& textureFilename,
                             const std::string& sourceFilename,
-                            const TextureImportSettings* settings,
+                            const TextureFile::ImportSettings* settings,
                             const ResourceIndex* resourceIndex)
 {
   convertTexture(QString::fromStdString(textureFilename),
@@ -92,6 +94,7 @@ void ResourceIndex::registerAngelScriptAPI()
   CameraComponent::registerAngelScriptAPIDeclarations();
   LightComponent::registerAngelScriptAPIDeclarations();
 
+  TextureSampler::registerType();
   Material::registerAngelScriptTypes();
   LightSource::registerAngelScriptTypes();
   ResourceManager::registerAngelScriptAPI();
@@ -110,13 +113,14 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneLayerFile(const Uuid<SceneLayer> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneLayerFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler, bool generateMipmaps)", AngelScript::asMETHOD(ResourceIndex,registerTexture), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
   MeshImportSettings::registerType();
-  TextureImportSettings::registerType();
+  TextureFile::ImportSettings::registerType();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\", const MeshImportSettings &in meshImportSettings = MeshImportSettings())", AngelScript::asFUNCTION(convertStaticMesh_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertTexture(const string &in textureFile, const string &in sourceFile, const MeshImportSettings &in textureImportSettings = TextureImportSettings())", AngelScript::asFUNCTION(convertTexture_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertTexture(const string &in textureFile, const string &in sourceFile, const TextureImportSettings &in settings)", AngelScript::asFUNCTION(convertTexture_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertSceneGraph(const string &in sceneGraphFile, const string &in sourceFile, const SceneGraphImportSettings@ settings, const string &in groupToImport=\"\")", AngelScript::asFUNCTION(convertSceneGraph_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void set_label(const BaseUuid &in uuid, const string &in label)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
@@ -197,6 +201,16 @@ void ResourceIndex::registerSceneFile(const Uuid<Scene>& uuid, const std::string
   sceneFiles[uuid] = QDir::current().absoluteFilePath(f);
 }
 
+void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler)
+{
+  validateNotYetRegistered(uuid);
+  allRegisteredResources.insert(uuid);
+  QString f = QString::fromStdString(file);
+  labels[uuid] = QFileInfo(f).baseName();
+  textures[uuid].file = QDir::current().absoluteFilePath(f);
+  defaultTextureSamplers[uuid] = textureSampler;
+}
+
 void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const
 {
   if(isRegistered(uuid))
@@ -210,6 +224,7 @@ void ResourceIndex::registerFallbackIndex()
   fallbackMaterial.emission = glm::vec3(1,0,1);
   registerMaterial(uuids::fallbackMaterial, fallbackMaterial);
   registerLightSource(uuids::fallbackLight, LightSource::SphereAreaLight());
+  textures[uuids::fallbackDiffuseTexture] = Texture();
 }
 
 } // namespace resources

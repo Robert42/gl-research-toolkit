@@ -12,7 +12,7 @@ class qt_tests : public ::testing::Test
 protected:
   void SetUp() override
   {
-    int argc;
+    int argc = 0;
     char** argv = nullptr;
     application = new QCoreApplication(argc, argv);
   }
@@ -56,8 +56,9 @@ TEST_F(qt_tests, queued_connection_everything_ok)
 TEST_F(qt_tests, queued_connection_everything_deleting_receiver_in_between)
 {
   Foo foo;
+  quint8 bar_buffer[sizeof(Foo)];
 
-  Foo* bar = new Foo();
+  Foo* bar = new(&bar_buffer) Foo();
 
   QObject::connect(&foo, SIGNAL(mySignal()), bar, SLOT(mySlot()), Qt::QueuedConnection);
 
@@ -65,7 +66,7 @@ TEST_F(qt_tests, queued_connection_everything_deleting_receiver_in_between)
 
   EXPECT_FALSE(bar->slotWasCalled);
 
-  delete bar;
+  bar->~Foo();
 
   qApp->processEvents();
 
@@ -88,6 +89,8 @@ TEST_F(qt_tests, queued_connection_everything_deleting_sender_in_between)
   qApp->processEvents();
 
   EXPECT_TRUE(bar->slotWasCalled);
+
+  delete bar;
 }
 
 

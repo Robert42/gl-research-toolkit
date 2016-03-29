@@ -12,6 +12,7 @@ set(SOURCE_FILES
   include/glrt/renderer/gl/command-list.h
   include/glrt/renderer/gl/command-list-recorder.h
   include/glrt/renderer/gl/status-capture.h
+  include/glrt/renderer/gl-texture-manager.h
   include/glrt/renderer/implementation/fragmented-component-array.h
   include/glrt/renderer/implementation/fragmented-component-array.inl
   include/glrt/renderer/implementation/fragmented-light-component-array.h
@@ -52,6 +53,7 @@ set(SOURCE_FILES
   src/glrt/renderer/gl/command-list.cpp
   src/glrt/renderer/gl/command-list-recorder.cpp
   src/glrt/renderer/gl/status-capture.cpp
+  src/glrt/renderer/gl-texture-manager.cpp
   src/glrt/renderer/light-buffer.cpp
   src/glrt/renderer/material-buffer.cpp
   src/glrt/renderer/material-state.cpp

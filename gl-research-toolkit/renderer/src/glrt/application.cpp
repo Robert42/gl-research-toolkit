@@ -149,6 +149,7 @@ void Application::initAngelScript()
 
   glrt::Uuid<void>::registerAngelScriptAPI();
   glrt::scene::CoordFrame::registerAngelScriptAPIDeclarations();
+  glrt::Uuid<void>::registerCustomizedUuidType("Texture", true);
   glrt::Uuid<void>::registerCustomizedUuidType("StaticMesh", true);
   glrt::Uuid<void>::registerCustomizedUuidType("CameraParameter", true);
   glrt::scene::CoordFrame::registerAngelScriptAPI();

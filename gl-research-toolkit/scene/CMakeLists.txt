@@ -9,7 +9,8 @@ add_library(glrt-scene
 target_link_libraries(glrt-scene
   PUBLIC
   glrt-core
-  glhelper #TODO move to the renderer
+  glhelper
+  soil
 )
 
 target_include_directories(

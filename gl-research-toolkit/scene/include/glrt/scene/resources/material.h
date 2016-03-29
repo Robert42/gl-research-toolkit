@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 #include <glrt/toolkit/uuid.h>
 #include <glrt/toolkit/array.h>
+#include <glrt/scene/resources/texture-manager.h>
 
 #include <glhelper/gl.hpp>
 
@@ -14,6 +15,8 @@ namespace resources {
 class Material
 {
 public:
+  typedef TextureManager::TextureHandle TextureHandle;
+
   enum class Type
   {
     PLAIN_COLOR,
@@ -34,34 +37,47 @@ public:
     PlainColor(){}
   };
 
+  template<typename T_textureHandle>
   struct Textured
   {
-    glm::vec4 tint;
-    glm::vec2 smoothness_range;
-    glm::vec2 occlusion_range;
-    glm::vec2 reflectance_range;
-    float emission_factor;
+    glm::vec4 tint = glm::vec4(1);
+    glm::vec2 smoothness_range = glm::vec2(0,1);
+    glm::vec2 occlusion_range = glm::vec2(0,1);
+    glm::vec2 reflectance_range = glm::vec2(0,1);
+    float emission_factor = 1.f;
     padding<float, 1> _padding;
-    GLuint64 diffuse_map;
-    GLuint64 normal_map;
-    GLuint64 height_map;
-    GLuint64 srmo_map; // smoothness, reflectance, metalic_map, occlusion
-    GLuint64 emission_map;
+    T_textureHandle basecolor_map;
+    T_textureHandle normal_map;
+    T_textureHandle height_map;
+    T_textureHandle srmo_map; // smoothness, reflectance, metalic_map, occlusion
+    T_textureHandle emission_map;
+  };
+
+  enum class TextureHandleType
+  {
+    Ids,
+    GpuPtrs
   };
 
   union
   {
     PlainColor plainColor;
+    Textured<TextureHandle> texturesIds;
+    Textured<GLuint64> textureGpuPtrs;
   };
   Type type;
+  TextureHandleType textureHandleType = TextureHandleType::Ids;
   UuidIndex materialUser;
 
   template<typename T>
   void addMaterialUser(const Uuid<T>& uuid);
 
   Material(const PlainColor& plainColor = PlainColor());
+  Material(const Textured<TextureHandle>& textured, Type type);
 
   const void* data() const;
+
+  void prepareForGpuBuffer();
 
   static void registerAngelScriptTypes();
 

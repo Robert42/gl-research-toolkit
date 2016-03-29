@@ -14,6 +14,9 @@ enum class Pass
 
 inline int qHash(Pass pass){return ::qHash(static_cast<int>(pass));}
 
+using glrt::scene::resources::Texture;
+using glrt::scene::resources::TextureSampler;
+using glrt::scene::resources::TextureManager;
 using glrt::scene::resources::StaticMesh;
 using glrt::scene::resources::StaticMeshLoader;
 using glrt::scene::resources::Material;

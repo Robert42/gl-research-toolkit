@@ -22,6 +22,9 @@ class LightSource;
 class Material;
 class StaticMesh;
 class StaticMeshLoader;
+class TextureManager;
+class Texture;
+class TextureSampler;
 
 } // namespace resources
 } // namespace scene
