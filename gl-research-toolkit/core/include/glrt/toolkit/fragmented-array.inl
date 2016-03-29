@@ -90,7 +90,7 @@ template<typename d, typename s, typename t, typename a>
 template<typename T_set>
 void FragmentedArray<d, s, t, a>::removeMultiple(const T_set& set)
 {
-  const int length = dataArray.length();
+  int length = dataArray.length();
   d* const data = dataArray.data();
 
   int i=0;
@@ -100,6 +100,7 @@ void FragmentedArray<d, s, t, a>::removeMultiple(const T_set& set)
     {
       beginRegionToUpdate = glm::min<int>(i, beginRegionToUpdate);
       dataArray.removeAt(i);
+      --length;
       break;
     }else
     {
@@ -110,9 +111,13 @@ void FragmentedArray<d, s, t, a>::removeMultiple(const T_set& set)
   while(i<length)
   {
     if(set.contains(data[i]))
+    {
       dataArray.removeAt(i);
-    else
+      --length;
+    }else
+    {
       ++i;
+    }
   }
 }
 

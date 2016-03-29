@@ -45,6 +45,11 @@ void CommandListRecorder::beginTokenListWithCopy(const glm::ivec2& src)
     tokenBeginStart = src[0];
   }else
   {
+    Q_ASSERT(src[0]>=0);
+    Q_ASSERT(src[1]>=0);
+    Q_ASSERT(src[0]<=src[1]);
+    Q_ASSERT(src[1]<commandTokens.length());
+    // #BUG: commandTokens.data() is passed and within append_by_memcpy, a new capacty is chosen, which invalidates the passed pointer
     commandTokens.append_by_memcpy(commandTokens.data() + src[0], static_cast<size_t>(src[1] - src[0]));
   }
 }
