@@ -306,7 +306,7 @@ void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importS
   const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
   // #TODO: use the importSettings for the flags
-  const quint32 flags = SOIL_FLAG_POWER_OF_TWO;
+  const quint32 flags = SOIL_FLAG_POWER_OF_TWO|SOIL_FLAG_INVERT_Y;
 
   ImportedGlTexture textureInformation(SOIL_load_OGL_texture(sourceFilename.c_str(),
                                                              SOIL_LOAD_AUTO,
