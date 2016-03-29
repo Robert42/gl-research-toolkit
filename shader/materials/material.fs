@@ -42,7 +42,6 @@ void main()
 }
 #else
 
-/*
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
 vec4 tint;
@@ -84,39 +83,6 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   surface.position = fragment.position;
   
   alpha = color.a;
-}
-*/
-
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
-{
-vec4 tint;
-vec2 smoothness_range;
-vec2 occlusion_range;
-vec2 reflectance_range;
-float emission_factor;
-// sampler2D within Uniform Block possible thanks to GL_NV_bindless_texture
-uint64_t basecolor_map;
-uint64_t normal_map;
-uint64_t height_map;
-uint64_t srmo_map; // smoothness, reflectance, metalic_map, occlusion
-uint64_t emission_map;
-}material_instance;
-
-
-
-void calculate_material_output(out BaseMaterial material, out SurfaceData surface, out float alpha)
-{
-  material.normal = fragment.normal; // TODO implement normal mapping
-  material.smoothness = 0.5;
-  material.base_color = vec3(1,0,0);
-  material.metal_mask = 0;
-  material.emission = vec3(0, 0.5, 0);
-  material.reflectance = 0.5f;
-  material.occlusion = 1;
-  
-  surface.position = fragment.position;
-  
-  alpha = 1;
 }
 
 
