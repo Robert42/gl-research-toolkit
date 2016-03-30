@@ -142,6 +142,8 @@ private:
 ::glrt::SplashscreenMessage __splashscreenMessage(message); \
 Q_UNUSED(__splashscreenMessage);
 
+quint64 magicNumberForString(const char* text);
+
 
 #define GLRT_EXCEPTION(message) Exception(__FILE__, __LINE__, __FUNCTION__, message)
 

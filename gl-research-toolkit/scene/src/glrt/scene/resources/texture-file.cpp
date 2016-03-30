@@ -585,19 +585,7 @@ void TextureFile::clear()
 
 quint64 TextureFile::magicNumber()
 {
-  struct Str
-  {
-    char str[8];
-  };
-  union
-  {
-    quint64 magicNumber;
-    Str str;
-  };
-
-  std::memcpy(str.str, "glrt-tex", 8);
-
-  return magicNumber;
+  return magicNumberForString("glrt-tex");
 }
 
 void TextureFile::ImportSettings::registerType()
