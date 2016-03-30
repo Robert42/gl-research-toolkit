@@ -55,6 +55,7 @@ public:
 
   void loadIndex(const std::string& filename);
   void loadIndexedDirectory(const std::string& filename);
+  void loadAllSubdirectoriesExcept(const std::string& filename);
 
   void addScriptIncludeDirectory(const std::string& filename);
 
