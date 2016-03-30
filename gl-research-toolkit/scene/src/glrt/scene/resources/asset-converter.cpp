@@ -125,8 +125,7 @@ void convertTexture(const QString& textureFilename, const QString& sourceFilenam
   QFileInfo textureFile(textureFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  // #TODO uncomment:
-  //if(shouldConvert(textureFilename, sourceFile))
+  if(shouldConvert(textureFilename, sourceFile))
   {
     SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertTexture("<<textureFile.fileName()<<", "<<sourceFile.fileName()<<")";
