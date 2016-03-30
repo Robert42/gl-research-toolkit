@@ -19,6 +19,7 @@ public:
   static Uuid<scene::Scene> cornellBoxScene();
   static Uuid<scene::Scene> cornellBoxRoughnessScene();
   static Uuid<scene::Scene> cornellBoxSuzanneScene();
+  static Uuid<scene::Scene> sponzaScene();
   static Uuid<scene::resources::StaticMesh> suzanneLowPoly();
   static Uuid<scene::resources::StaticMesh> suzanneSmooth();
 

@@ -92,6 +92,9 @@ void Scene::load(const Uuid<Scene>& scene)
 
   std::string filename = this->resourceManager.sceneFileForUuid(scene).toStdString();
 
+  if(filename.empty())
+    throw GLRT_EXCEPTION(QString("Trying to load the scene %0 which has no filename registered to it.").arg(scene.toString()));
+
   AngelScriptIntegration::ConfigCallScript config;
   config.accessMask = ACCESS_MASK_RESOURCE_LOADING | AngelScriptIntegration::ACCESS_MASK_GLM;
 

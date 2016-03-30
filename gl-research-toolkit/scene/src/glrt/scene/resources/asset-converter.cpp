@@ -451,7 +451,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   {
     QString n = scene->mMeshes[i]->mName.C_Str();
     if(n.isEmpty())
-      throw GLRT_EXCEPTION("meshes must have a name");
+      continue;
 
     StaticMesh data = loadMeshFromAssimp(scene->mMeshes+i, 1, glm::mat3(1), QString(" while converting %0 to %1 (occured on mesh %2 (assimp index %3))").arg(sceneGraphFile.filePath()).arg(sceneGraphFile.fileName()).arg(n).arg(i), assets.indexed);;;
 
@@ -604,7 +604,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     bool isUsingMesh = assimp_node->mNumMeshes > 0;
     bool isUsingCamera = assets.cameras.contains(n);
     bool isUsingLight = assets.lightUuids.contains(n);
-    bool isUsingComponent = isUsingMesh || isUsingCamera || isUsingLight;
+    bool isUsingComponent = false;
     bool isImportingNode = true;
 
     if(isImportingNode)
@@ -628,8 +628,10 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
         for(int i : meshesOfNode.values())
         {
-          aiMesh* mesh = scene->mMeshes[i];
           Uuid<StaticMesh> meshUuid = assets.meshes[i];
+          if(meshUuid == Uuid<StaticMesh>())
+            continue;
+          aiMesh* mesh = scene->mMeshes[i];
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
           outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
@@ -641,6 +643,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
             outputStream << "  sceneLayer.index.label[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
           outputStream << "  new_StaticMeshComponent(node: @node, uuid: Uuid<StaticMeshComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(meshUuid).toString()), QString("StaticMeshComponent[%0]").arg(i)).toString() << "\"), "
                        << "meshUuid: meshUuid, materialUuid: materialUuid);\n";
+          isUsingComponent = true;
         }
       }
       if(isUsingCamera)
@@ -653,6 +656,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           outputStream << "  sceneLayer.index.label[cameraComponentUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
         outputStream << "  new_CameraComponent(node: @node, uuid: cameraComponentUuid, "
                      << "aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
+        isUsingComponent = true;
       }
       if(isUsingLight)
       {
@@ -666,6 +670,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           outputStream << "  sceneLayer.index.label[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
         outputStream << "  new_LightComponent(node: @node, uuid: Uuid<LightComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(lightUuid).toString()), QString("LightComponent[%0]").arg(0)).toString() << "\"), "
                      << "lightSourceUuid: lightUuid);\n";
+        isUsingComponent = true;
       }
       if(!isUsingComponent)
       {

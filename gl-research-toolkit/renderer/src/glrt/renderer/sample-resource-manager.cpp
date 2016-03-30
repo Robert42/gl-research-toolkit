@@ -38,6 +38,11 @@ Uuid<scene::Scene> SampleResourceManager::cornellBoxSuzanneScene()
   return Uuid<scene::Scene>("{e8a07aee-d0d7-43b7-a9e2-867a824d2f48}");
 }
 
+Uuid<scene::Scene> SampleResourceManager::sponzaScene()
+{
+  return Uuid<scene::Scene>("{33702970-a9f9-4e7d-8441-2f363e19dad6}");
+}
+
 Uuid<scene::resources::StaticMesh> SampleResourceManager::suzanneLowPoly()
 {
   return Uuid<scene::resources::StaticMesh>("{0ecdf00b-f8fe-4988-aa4a-cda5c2644c83}");
