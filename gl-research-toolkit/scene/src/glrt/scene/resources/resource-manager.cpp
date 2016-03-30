@@ -176,5 +176,12 @@ void ResourceManager::registerAngelScriptAPI()
 
 } // namespace resources
 } // namespace scene
+
+
+QString labelForUuid(const QUuid& uuid)
+{
+  return scene::resources::ResourceManager::instance()->labelForResourceUuid(uuid);
+}
+
 } // namespace glrt
 

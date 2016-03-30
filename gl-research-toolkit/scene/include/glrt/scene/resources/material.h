@@ -25,7 +25,10 @@ public:
     TEXTURED_TRANSPARENT
   };
 
+  // #TODO double sided materials and single sided materials!
+
   static QVector<Type> allTypes();
+  static QString typeToString(Type type);
 
   struct PlainColor
   {

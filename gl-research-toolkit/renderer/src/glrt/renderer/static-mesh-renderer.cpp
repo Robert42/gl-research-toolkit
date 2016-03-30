@@ -8,6 +8,15 @@ namespace glrt {
 namespace renderer {
 namespace implementation {
 
+struct NoPrint
+{
+public:
+  template<typename T>
+  NoPrint operator<<(const T&){return NoPrint();}
+};
+
+#define LOG_MESH_LAODING NoPrint()
+//#define LOG_MESH_LAODING qDebug() << "StaticMeshRecorder: "
 
 StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList)
   : recorder(recorder),
@@ -42,6 +51,8 @@ void StaticMeshRecorder::bindMaterialType(Material::Type materialType)
 {
   Q_UNUSED(materialType)
 
+  LOG_MESH_LAODING << "bindMaterialType(" << Material::typeToString(materialType) << ")";
+
   recorder.beginTokenListWithCopy(commonTokenList);
 }
 
@@ -56,16 +67,21 @@ void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
   Q_ASSERT(materialGpuAddresses.contains(material)); // if the material is not known, the mateiral wasn't initialized correctly
 
   recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
+
+  LOG_MESH_LAODING << "bindMaterial(" << labelForUuid(material) << ")";
 }
 
 void StaticMeshRecorder::unbindMaterial(const Uuid<Material>& material)
 {
   Q_UNUSED(material);
+  LOG_MESH_LAODING;
 }
 
 void StaticMeshRecorder::bindMesh(const Uuid<StaticMesh>& mesh)
 {
   currentMesh = mesh;
+
+  LOG_MESH_LAODING << "bindMesh(" << labelForUuid(mesh) << ")";
 }
 
 void StaticMeshRecorder::unbindMesh(const Uuid<StaticMesh>& mesh)
@@ -76,6 +92,8 @@ void StaticMeshRecorder::unbindMesh(const Uuid<StaticMesh>& mesh)
 
 void StaticMeshRecorder::drawInstances(int begin, int end)
 {
+  LOG_MESH_LAODING << "drawInstances(" << end-begin << ")";
+
   Q_ASSERT(currentMesh != Uuid<StaticMesh>());
 
   StaticMeshBuffer* staticMesh = staticMeshBufferManager.meshForUuid(currentMesh);
@@ -86,7 +104,6 @@ void StaticMeshRecorder::drawInstances(int begin, int end)
     recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, transformationBuffer.gpuAddressForInstance(i));
     staticMesh->recordDraw(recorder);
   }
-  // #TODO check, whether instancing is really working raelly instanced
 }
 
 void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)

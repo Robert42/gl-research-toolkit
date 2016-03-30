@@ -21,6 +21,22 @@ QVector<Material::Type> Material::allTypes()
         Type::TEXTURED_TRANSPARENT};
 }
 
+QString Material::typeToString(Type type)
+{
+  switch(type)
+  {
+  case Type::PLAIN_COLOR:
+    return "PLAIN_COLOR";
+  case Type::TEXTURED_OPAQUE:
+    return "TEXTURED_OPAQUE";
+  case Type::TEXTURED_MASKED:
+    return "TEXTURED_MASKED";
+  case Type::TEXTURED_TRANSPARENT:
+    return "TEXTURED_TRANSPARENT";
+  }
+  return "Unknown Material::Type!!";
+}
+
 using AngelScriptIntegration::AngelScriptCheck;
 
 Material::Material(const PlainColor& plainColor)
