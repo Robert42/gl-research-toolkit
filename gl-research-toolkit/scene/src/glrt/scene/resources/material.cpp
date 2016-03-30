@@ -150,6 +150,7 @@ bool Material::isTextureType() const
   case Type::PLAIN_COLOR:
     return false;
   }
+  return false;
 }
 
 

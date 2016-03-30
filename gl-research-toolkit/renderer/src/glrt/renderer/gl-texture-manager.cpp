@@ -14,7 +14,7 @@ GlTextureManager::GlTextureManager(scene::resources::ResourceManager* resourceMa
 
 void GlTextureManager::removeUnusedTextures(QSet<Uuid<Texture>> usedTextures)
 {
-  usedTextures |= QSet<Uuid<Texture>>({scene::resources::uuids::blackTexture, scene::resources::uuids::fallbackDiffuseTexture, scene::resources::uuids::fallbackNormalTexture, scene::resources::uuids::fallbackSRMOTexture});
+  usedTextures |= QSet<Uuid<Texture>>({scene::resources::uuids::blackTexture, scene::resources::uuids::whiteTexture, scene::resources::uuids::fallbackDiffuseTexture, scene::resources::uuids::fallbackNormalTexture, scene::resources::uuids::fallbackSRMOTexture});
 
   QSet<GLuint64> copy = residentHandles;
   for(GLuint64 gpuPtr : copy)
