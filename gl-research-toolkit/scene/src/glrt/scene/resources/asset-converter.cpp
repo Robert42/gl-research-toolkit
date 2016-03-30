@@ -541,6 +541,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       allNodesToImport[nodeUuid] = node;
   }
 
+  // #TODO: think about using a simple data file for the mesh
   QFileInfo meshesFile(sceneGraphFile.filePath()+".mesh");
 
   QFile file(sceneGraphFile.absoluteFilePath());
