@@ -12,7 +12,7 @@ namespace resources {
 class StaticMeshFile
 {
 public:
-  QMap<Uuid<StaticMesh>, StaticMesh> staticMeshes;
+  StaticMesh staticMesh;
 
   StaticMeshFile();
 
@@ -20,30 +20,15 @@ public:
   void load(const QFileInfo& filename);
 
 private:
-  struct ArrayMesh
-  {
-    Uuid<StaticMesh> uuid;
-    quint32 indexOfFirstVertex;
-    quint32 numVertices;
-  };
-  struct IndexedMesh : public ArrayMesh
-  {
-    quint32 firstIndex;
-    quint32 numIndices;
-  };
-
   struct Header
   {
     quint64 magicNumber = StaticMeshFile::magicNumber();
     quint16 headerLength = sizeof(Header);
-    quint16 unindexedMeshSize = sizeof(ArrayMesh);
-    quint16 indexedMeshSize = sizeof(IndexedMesh);
-    quint16 numArrayMeshes = 0;
-    quint16 numIndexedMeshes = 0;
-    padding<quint16, 3> _padding;
-    quint32 totalNumVertices = 0;
-    quint32 totalNumIndices = 0;
-    padding<quint32, 2> _reserved;
+    quint16 vertexSize = sizeof(StaticMesh::Vertex);
+    quint16 indexedMeshSize = sizeof(StaticMesh::index_type);
+    quint16 numVertices = 0;
+    quint32 numIndices = 0;
+    padding<quint32,3> _padding;
   };
 
   static quint64 magicNumber();

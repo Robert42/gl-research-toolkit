@@ -28,8 +28,8 @@ public:
 
   virtual void removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> usedStaticMeshes) = 0;
 
-  void loadStaticMesh(Uuid<StaticMesh> uuid, const ResourceManager* resourceManager);
-  void loadStaticMesh(Uuid<StaticMesh> uuid, const std::string& filepath);
+  void loadStaticMesh(const Uuid<StaticMesh>& uuid, const ResourceManager* resourceManager);
+  void loadStaticMesh(const Uuid<StaticMesh>& uuid, const std::string& filepath);
   void loadStaticMesh(const Uuid<StaticMesh>& uuid, const AngelScript::CScriptArray* indices, const AngelScript::CScriptArray* vertices);
   void loadStaticMesh(const Uuid<StaticMesh>& uuid, const StaticMesh& data);
   void loadStaticMesh(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices);
