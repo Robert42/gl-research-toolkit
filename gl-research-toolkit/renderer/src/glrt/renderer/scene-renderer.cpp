@@ -170,11 +170,14 @@ void Renderer::recordCommandlist()
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
+  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRangeMovables.keys().toSet() | meshDrawRanges.tokenRangeNotMovable.keys().toSet();
 
   for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
   {
     Material::Type materialType = i.key().second;
     const MaterialState& materialShader = *i.value();
+
+    unusedMaterialTypes.remove(materialType);
 
     glm::ivec2 range;
 
@@ -190,6 +193,9 @@ void Renderer::recordCommandlist()
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }
+
+  for(Material::Type type : unusedMaterialTypes)
+    qWarning() << "MATERIAL-WARNING: There are materials with the type" << Material::typeToString(type) << "which are not supported by the scene renderer";
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
 
