@@ -103,6 +103,7 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
   {
     preprocessorBlock.insert("#define PLAIN_COLOR");
   }
+  preprocessorBlock.insert(QString("#define MASK_THRESHOLD %0").arg(maskAlphaThreshold));
 
   ReloadableShader shader("material",
                           QDir(GLRT_SHADER_DIR"/materials"),

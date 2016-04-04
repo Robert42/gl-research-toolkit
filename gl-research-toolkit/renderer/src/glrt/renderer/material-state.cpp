@@ -43,6 +43,12 @@ void MaterialState::activateStateForFlags()
     glEnable(GL_CULL_FACE);
   else
     glDisable(GL_CULL_FACE);
+
+  if(hasFlag(Flags::ALPHA_BLENDING))
+  {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
 }
 
 void MaterialState::deactivateStateForFlags()
@@ -54,6 +60,9 @@ void MaterialState::deactivateStateForFlags()
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
   glDisable(GL_CULL_FACE);
+
+  glDisable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ZERO);
 }
 
 bool MaterialState::hasFlag(Flags flag) const
