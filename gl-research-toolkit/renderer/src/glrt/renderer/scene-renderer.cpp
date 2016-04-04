@@ -57,10 +57,15 @@ void Renderer::render()
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
 {
+  int flagEnabled = 0;
+  int flagDisabled = 0;
   for(Material::Type type : types)
-    if(!type.testFlag(flag))
-      return false;
-  return true;
+    if(type.testFlag(flag))
+      flagEnabled++;
+    else
+      flagDisabled++;
+
+  return flagDisabled==0;
 }
 
 int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)

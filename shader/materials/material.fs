@@ -94,6 +94,10 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   material.occlusion = mix(material_instance.occlusion_range[0], material_instance.occlusion_range[1], occlusion);
   
   surface.position = fragment.position;
+  
+  #ifdef TWO_SIDED
+  material.normal = mix(-material.normal, material.normal, gl_FrontFacing);
+  #endif
 #endif
   alpha = color.a;
 }
