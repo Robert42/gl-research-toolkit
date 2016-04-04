@@ -30,7 +30,7 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
   {
     // If the target file also doesn't exist, print a warning
     if(!targetFile.exists())
-      qWarning() << "Couldn't locate the asset file " << targetFile.path() << " (and neither the source file "<<sourceFile.path()<<" to automatically convert it)";
+      qWarning() << "Couldn't locate the asset file " << targetFile.filePath() << " (and neither the source file "<<sourceFile.filePath()<<" to automatically convert it)";
 
     return false;
   }
