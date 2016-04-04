@@ -17,7 +17,7 @@ public:
     DEPTH_WRITE = 0x2,
     COLOR_WRITE = 0x4,
     ALPHA_WRITE = 0x8,
-    FACE_CULLING = 0x10,
+    NO_FACE_CULLING = 0x10,
   };
 
   friend Flags operator|(Flags a, Flags b){return Flags(quint32(a) | quint32(b));}

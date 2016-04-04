@@ -12,26 +12,30 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
 {
   const Material::Type  PLAIN_COLOR = Material::TypeFlag::PLAIN_COLOR | Material::TypeFlag::OPAQUE;
   const Material::Type  TEXTURED_OPAQUE = Material::TypeFlag::TEXTURED | Material::TypeFlag::OPAQUE;
-  const Material::Type  TEXTURED_MASKED = Material::TypeFlag::TEXTURED | Material::TypeFlag::MASKED;
+  const Material::Type  TEXTURED_MASKED_TWO_SIDED = Material::TypeFlag::TEXTURED | Material::TypeFlag::MASKED | Material::TypeFlag::TWO_SIDED;
   const Material::Type  TEXTURED_TRANSPARENT = Material::TypeFlag::TEXTURED | Material::TypeFlag::TRANSPARENT;
 
   int opaqueDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {PLAIN_COLOR, TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS);
-  int maskedDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_MASKED}, Pass::DEPTH_PREPASS);
+  int maskedDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_MASKED_TWO_SIDED}, Pass::DEPTH_PREPASS);
 
   int plainColorShader = appendMaterialShader(preprocessorBlock(), {PLAIN_COLOR}, Pass::FORWARD_PASS);
-  int texturedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_OPAQUE, TEXTURED_MASKED, TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS);
+  int texturedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_OPAQUE, TEXTURED_MASKED_TWO_SIDED, TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS);
 
-  MaterialState::Flags commonAccelerationFlags = MaterialState::Flags::DEPTH_TEST | MaterialState::Flags::FACE_CULLING;
+  MaterialState::Flags commonAccelerationFlags = MaterialState::Flags::DEPTH_TEST;
 
+  // #TODO when to use the prepass, when the main pass
   MaterialState::Flags depthPrepassFlags = MaterialState::Flags::DEPTH_WRITE|commonAccelerationFlags;
   MaterialState::Flags forwardPassFlags = MaterialState::Flags::COLOR_WRITE|commonAccelerationFlags;
 
+  MaterialState::Flags depthPrepassFlags_MaskedTwoSided = depthPrepassFlags | MaterialState::Flags::NO_FACE_CULLING;
+  MaterialState::Flags forwardPassFlags_MaskedTwoSided = forwardPassFlags | MaterialState::Flags::NO_FACE_CULLING;
+
   appendMaterialState(&framebuffer, {PLAIN_COLOR, TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS, opaqueDepthPrepassShader, depthPrepassFlags);
-  appendMaterialState(&framebuffer, {TEXTURED_MASKED}, Pass::DEPTH_PREPASS, maskedDepthPrepassShader, depthPrepassFlags);
+  appendMaterialState(&framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::DEPTH_PREPASS, maskedDepthPrepassShader, depthPrepassFlags_MaskedTwoSided);
 
   appendMaterialState(&framebuffer, {PLAIN_COLOR}, Pass::FORWARD_PASS, plainColorShader, forwardPassFlags);
   appendMaterialState(&framebuffer, {TEXTURED_OPAQUE}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
-  appendMaterialState(&framebuffer, {TEXTURED_MASKED}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
+  appendMaterialState(&framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags_MaskedTwoSided);
   appendMaterialState(&framebuffer, {TEXTURED_TRANSPARENT}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
 }
 

@@ -39,7 +39,7 @@ void MaterialState::activateStateForFlags()
   glDepthMask(glHasFlag(Flags::DEPTH_WRITE));
   glColorMask(glHasFlag(Flags::COLOR_WRITE), glHasFlag(Flags::COLOR_WRITE), glHasFlag(Flags::COLOR_WRITE), glHasFlag(Flags::ALPHA_WRITE));
 
-  if(hasFlag(Flags::FACE_CULLING))
+  if(!hasFlag(Flags::NO_FACE_CULLING))
     glEnable(GL_CULL_FACE);
   else
     glDisable(GL_CULL_FACE);

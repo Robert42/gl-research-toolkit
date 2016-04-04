@@ -29,8 +29,6 @@ public:
 
   Q_DECLARE_FLAGS(Type, TypeFlag)
 
-  // #TODO double sided materials and single sided materials!
-
   static QString typeToString(Type type);
 
   struct PlainColor
