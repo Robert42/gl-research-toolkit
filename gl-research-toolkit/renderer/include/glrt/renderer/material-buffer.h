@@ -18,6 +18,7 @@ class MaterialBuffer final
 {
 public:
   typedef scene::resources::Material Material;
+  typedef Material::TypeFlag TypeFlag;
   typedef Material::Type Type;
 
   struct Initializer;

@@ -17,17 +17,20 @@ class Material
 public:
   typedef TextureManager::TextureHandle TextureHandle;
 
-  enum class Type
+  enum class TypeFlag : quint32
   {
-    PLAIN_COLOR,
-    TEXTURED_OPAQUE,
-    TEXTURED_MASKED,
-    TEXTURED_TRANSPARENT
+    PLAIN_COLOR = 0x0,
+    OPAQUE = 0x0,
+    TEXTURED = 0x1,
+    TWO_SIDED = 0x20000000,
+    MASKED = 0x40000000,
+    TRANSPARENT = 0x80000000
   };
+
+  Q_DECLARE_FLAGS(Type, TypeFlag)
 
   // #TODO double sided materials and single sided materials!
 
-  static QVector<Type> allTypes();
   static QString typeToString(Type type);
 
   struct PlainColor
@@ -48,7 +51,7 @@ public:
     glm::vec2 occlusion_range = glm::vec2(0,1);
     glm::vec2 reflectance_range = glm::vec2(0,1);
     float emission_factor = 1.f;
-    padding<float, 1> _padding;
+    Type type = TypeFlag::TEXTURED; // for T_textureHandle==GLuint64, this is ignored
     T_textureHandle basecolor_map;
     T_textureHandle normal_map;
     T_textureHandle height_map;
@@ -75,7 +78,7 @@ public:
   template<typename T>
   void addMaterialUser(const Uuid<T>& uuid);
 
-  Material(const PlainColor& plainColor = PlainColor());
+  Material(const PlainColor& plainColor = PlainColor(), Type type=TypeFlag::PLAIN_COLOR);
   Material(const Textured<TextureHandle>& textured, Type type);
 
   const void* data() const;
@@ -108,6 +111,8 @@ struct DefaultTraits<glrt::scene::resources::Material::Type>
 
 
 } // namespace glrt
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(glrt::scene::resources::Material::Type);
 
 #include "material.inl"
 

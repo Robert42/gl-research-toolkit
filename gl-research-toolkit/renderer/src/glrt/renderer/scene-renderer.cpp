@@ -55,9 +55,22 @@ void Renderer::render()
   visualizeRectAreaLights.render();
 }
 
+bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
+{
+  for(Material::Type type : types)
+    if(!type.testFlag(flag))
+      return false;
+  return true;
+}
 
 int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
 {
+  if(materialTypes.isEmpty())
+  {
+    Q_UNREACHABLE();
+    return -1;
+  }
+
   if(pass == Pass::DEPTH_PREPASS)
     preprocessorBlock.insert("#define DEPTH_PREPASS");
   else if(pass == Pass::FORWARD_PASS)
@@ -65,26 +78,31 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
   else
     Q_UNREACHABLE();
 
-  if(materialTypes.contains(Material::Type::PLAIN_COLOR) || materialTypes.contains(Material::Type::TEXTURED_OPAQUE))
-    preprocessorBlock.insert("#define OPAQUE");
-  else
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::MASKED))
   {
     preprocessorBlock.insert("#define OUTPUT_USES_ALPHA");
-
-    if(materialTypes.contains(Material::Type::TEXTURED_MASKED))
-      preprocessorBlock.insert("#define MASKED");
-    else if(materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
-      preprocessorBlock.insert("#define TRANSPARENT");
-    else
-      Q_UNREACHABLE();
+    preprocessorBlock.insert("#define MASKED");
+  }else if(testFlagOnAll(materialTypes, Material::TypeFlag::TRANSPARENT))
+  {
+    preprocessorBlock.insert("#define OUTPUT_USES_ALPHA");
+    preprocessorBlock.insert("#define TRANSPARENT");
+  }else
+  {
+    preprocessorBlock.insert("#define OPAQUE");
   }
 
-  if(materialTypes.contains(Material::Type::PLAIN_COLOR))
-    preprocessorBlock.insert("#define PLAIN_COLOR");
-  else if(materialTypes.contains(Material::Type::TEXTURED_OPAQUE)||materialTypes.contains(Material::Type::TEXTURED_MASKED)||materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::TWO_SIDED))
+  {
+    preprocessorBlock.insert("#define TWO_SIDED");
+  }
+
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED))
+  {
     preprocessorBlock.insert("#define TEXTURED");
-  else
-    Q_UNREACHABLE();
+  }else
+  {
+    preprocessorBlock.insert("#define PLAIN_COLOR");
+  }
 
   ReloadableShader shader("material",
                           QDir(GLRT_SHADER_DIR"/materials"),

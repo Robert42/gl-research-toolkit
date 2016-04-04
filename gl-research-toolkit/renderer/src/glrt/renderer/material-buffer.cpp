@@ -38,17 +38,11 @@ MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType()
 
 MaterialBuffer::BlockSize MaterialBuffer::BlockSize::forType(Type type)
 {
-  switch(type)
-  {
-  case Type::PLAIN_COLOR:
-    return forType<Material::PlainColor>();
-  case Type::TEXTURED_MASKED:
-  case Type::TEXTURED_OPAQUE:
-  case Type::TEXTURED_TRANSPARENT:
+  if(type.testFlag(TypeFlag::TEXTURED))
     return forType<Material::Textured<GLuint64>>();
-  default:
-    Q_UNREACHABLE();
-  }
+  else if(type.testFlag(TypeFlag::PLAIN_COLOR))
+    return forType<Material::PlainColor>();
+  Q_UNREACHABLE();
 }
 
 int MaterialBuffer::BlockSize::expectedBlockOffset()
