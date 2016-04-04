@@ -1,5 +1,4 @@
 #include <glrt/system.h>
-#include <glrt/renderer/toolkit/temp-shader-file.h>
 #include <glrt/scene/fps-debug-controller.h>
 
 #include <glrt/glsl/layout-constants.h>
@@ -49,8 +48,6 @@ System::System(int& argc, char** argv, const Settings& settings)
   verifyGLFeatures();
   verifyNVidiaFeatures();
   verifyAssimpVersion();
-
-  renderer::TempShaderFile::init();
 }
 
 

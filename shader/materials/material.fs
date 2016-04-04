@@ -5,14 +5,14 @@
 
 layout(commandBindableNV)uniform;
 
-#include "implementation/input-block.fs.glsl"
-#include "implementation/material-implementation.fs.glsl"
-
 #ifdef DEPTH_PREPASS
 #ifndef MASKED
 layout(early_fragment_tests) in;
 #endif
 #endif
+
+#include "implementation/input-block.fs.glsl"
+#include "implementation/material-implementation.fs.glsl"
 
 #include <glrt/glsl/layout-constants.h>
 

@@ -1,5 +1,4 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
-#include <glrt/renderer/toolkit/temp-shader-file.h>
 #include <glrt/toolkit/logger.h>
 
 #include <set>
@@ -115,11 +114,9 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
   ShaderErrorDialog errorDialog;
 
-  TempShaderFile tempShaderFile;
-
   const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes = ShaderCompiler::shaderTypes();
 
-  tempShaderFile.addPreprocessorBlock(preprocessorBlock);
+  std::string prefixCode = preprocessorBlock.join("\n").toStdString();
 
   std::set<gl::ShaderObject::ShaderType> usedTypes;
 
@@ -134,7 +131,7 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
     gl::ShaderObject::ShaderType type = shaderTypes[extension];
 
-    shaderObject->AddShaderFromFile(type, file.absoluteFilePath().toStdString());
+    shaderObject->AddShaderFromFile(type, file.absoluteFilePath().toStdString(), prefixCode);
 
     usedTypes.insert(type);
   }
