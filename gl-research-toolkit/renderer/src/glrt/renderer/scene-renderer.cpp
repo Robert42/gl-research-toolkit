@@ -76,8 +76,6 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
     return -1;
   }
 
-//  preprocessorBlock.insert("#define NO_LIGHTING");
-
   if(pass == Pass::DEPTH_PREPASS)
     preprocessorBlock.insert("#define DEPTH_PREPASS");
   else if(pass == Pass::FORWARD_PASS)

@@ -296,6 +296,8 @@ private:
 
   gui::TweakBarCBVar<bool> toggleProfiler;
 
+  gui::TweakBarCBVar<bool> shader_flat_lighting;
+
   SceneEnumeration::Ptr sceneSwitcher;
   CameraEnumeration::Ptr cameraSwitcher;
 

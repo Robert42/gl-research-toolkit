@@ -140,6 +140,22 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
     TwAddVarRW(tweakBar, "Clear Scene", TW_TYPE_BOOLCPP, &shaderDebugPrinter->clearScene, "group=Debug");
   }
 
+  const QString flat_lighting_macro = "#define FLAT_LIGHTING";
+  typedef glrt::renderer::ReloadableShader ReloadableShader;
+  QSet<QString>& globalPreprocessorBlock = ReloadableShader::globalPreprocessorBlock;
+
+  shader_flat_lighting.getter = [flat_lighting_macro,&globalPreprocessorBlock]()->bool{return globalPreprocessorBlock.contains(flat_lighting_macro);};
+  shader_flat_lighting.setter = [flat_lighting_macro,&globalPreprocessorBlock](bool a){
+    if(a == globalPreprocessorBlock.contains(flat_lighting_macro))
+      return;
+    if(a)
+      globalPreprocessorBlock.insert(flat_lighting_macro);
+    else
+      globalPreprocessorBlock.remove(flat_lighting_macro);
+    ReloadableShader::reloadAll();
+  };
+  shader_flat_lighting.TwAddVarCB(tweakBar, "Flat Lighting", "key=F7 help='The Lighting will be disabled and the '");
+
   gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;
