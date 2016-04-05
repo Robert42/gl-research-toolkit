@@ -9,30 +9,17 @@ namespace renderer {
 namespace debugging {
 
 
-class VisualizationRenderer : public DebugRenderer
+class VisualizationRenderer final
 {
 public:
+  VisualizationRenderer() = delete;
+
   // Note, the given scene/vector instance must live longer than the returned instance
-  static VisualizationRenderer debugSceneCameras(scene::Scene* scene);
-  static VisualizationRenderer debugSphereAreaLights(scene::Scene* scene);
-  static VisualizationRenderer debugRectAreaLights(scene::Scene* scene);
-  static VisualizationRenderer debugPoints(QVector<glm::vec3>* points);
-  static VisualizationRenderer debugArrows(QVector<Arrow>* arrows);
-
-  VisualizationRenderer(const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory);
-  VisualizationRenderer(scene::Scene* scene, const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory);
-  VisualizationRenderer(const VisualizationRenderer&);
-  VisualizationRenderer(VisualizationRenderer&& other);
-  ~VisualizationRenderer();
-
-  void reinit() override;
-  void render() override;
-
-private:
-  std::function<DebugLineVisualisation::Ptr()> factory;
-  DebugLineVisualisation::Ptr visualization;
-
-  void createVisualization();
+  static DebugRenderer debugSceneCameras(scene::Scene* scene);
+  static DebugRenderer debugSphereAreaLights(scene::Scene* scene);
+  static DebugRenderer debugRectAreaLights(scene::Scene* scene);
+  static DebugRenderer debugPoints(QVector<glm::vec3>* points);
+  static DebugRenderer debugArrows(QVector<Arrow>* arrows);
 };
 
 

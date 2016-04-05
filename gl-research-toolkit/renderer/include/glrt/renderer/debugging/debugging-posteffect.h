@@ -8,26 +8,13 @@ namespace glrt {
 namespace renderer {
 namespace debugging {
 
-class DebuggingPosteffect : public DebugRenderer
+class DebuggingPosteffect
 {
 public:
-  static DebuggingPosteffect orangeScreen(float zValue, float radius, bool depthTest);
+  DebuggingPosteffect() = delete;
 
-  DebuggingPosteffect(scene::Scene* scene, ReloadableShader&& shader, bool depthTest);
-  DebuggingPosteffect(DebuggingPosteffect&& other);
-  ~DebuggingPosteffect();
-
-  DebuggingPosteffect(const DebuggingPosteffect& other) = delete;
-  DebuggingPosteffect& operator=(const DebuggingPosteffect&) = delete;
-  DebuggingPosteffect& operator=(DebuggingPosteffect&&) = delete;
-
-  void reinit() override;
-  void render() override;
-
-private:
-  scene::Scene* _scene;
-  ReloadableShader _shader;
-  bool _depthTest;
+  static DebugRenderer orangeScreen(float zValue, float radius, bool depthTest);
+  static DebugRenderer overlayLightSources();
 };
 
 } // namespace debugging
