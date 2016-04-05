@@ -58,7 +58,7 @@ void StaticMeshFile::load(const QFileInfo& filename)
   if(header.numIndices > std::numeric_limits<int>::max())
     throw GLRT_EXCEPTION(QString("Too many indicesin file  %0").arg(filename.filePath()));
 
-  if(file.size() != sizeof(Header) + sizeof(StaticMesh::Vertex)*header.numVertices + sizeof(StaticMesh::index_type)*header.numIndices)
+  if(file.size() != qint64(sizeof(Header)) + qint64(sizeof(StaticMesh::Vertex))*qint64(header.numVertices) + qint64(sizeof(StaticMesh::index_type))*qint64(header.numIndices))
     throw GLRT_EXCEPTION(QString("Filesize of %0 doesn't match with the content").arg(filename.filePath()));
 
   staticMesh.vertices.resize(header.numVertices);
