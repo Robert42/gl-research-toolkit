@@ -13,21 +13,37 @@ namespace resources {
 typedef Material::TextureHandle TextureHandle;
 
 
-QVector<Material::Type> Material::allTypes()
+
+QString Material::typeToString(Type type)
 {
-  return {Type::PLAIN_COLOR,
-        Type::TEXTURED_OPAQUE,
-        Type::TEXTURED_MASKED,
-        Type::TEXTURED_TRANSPARENT};
+  QStringList usedFlags;
+
+  if(type.testFlag(TypeFlag::TEXTURED))
+    usedFlags << "TEXTURED";
+  else
+    usedFlags << "PLAIN_COLOR";
+
+  if(type.testFlag(TypeFlag::MASKED))
+    usedFlags << "MASKED";
+  else if(type.testFlag(TypeFlag::TRANSPARENT))
+    usedFlags << "TRANSPARENT";
+  else
+    usedFlags << "OPAQUE";
+
+  if(type.testFlag(TypeFlag::TWO_SIDED))
+    usedFlags << "TWO_SIDED";
+
+  return usedFlags.join("|");
 }
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-Material::Material(const PlainColor& plainColor)
+Material::Material(const PlainColor& plainColor, Type type)
   : plainColor(plainColor),
-    type(Type::PLAIN_COLOR),
+    type(type),
     materialUser(UuidIndex::null_index<0>())
 {
+  Q_ASSERT(!type.testFlag(TypeFlag::TEXTURED));
 }
 
 Material::Material(const Textured<TextureHandle>& textured, Type type)
@@ -35,7 +51,7 @@ Material::Material(const Textured<TextureHandle>& textured, Type type)
   type(type),
   materialUser(UuidIndex::null_index<0>())
 {
-  Q_ASSERT(type != Type::PLAIN_COLOR);
+  Q_ASSERT(type.testFlag(TypeFlag::TEXTURED));
 }
 
 inline Material as_convert_to_plain_color_material(const Material::PlainColor* plainColor)
@@ -43,19 +59,9 @@ inline Material as_convert_to_plain_color_material(const Material::PlainColor* p
   return Material(*plainColor);
 }
 
-inline Material as_convert_textured_opaque_to_material(const Material::Textured<TextureHandle>* textured)
+inline Material as_convert_textured_to_material(const Material::Textured<TextureHandle>* textured)
 {
-  return Material(*textured, Material::Type::TEXTURED_OPAQUE);
-}
-
-inline Material as_convert_textured_masked_to_material(const Material::Textured<TextureHandle>* textured)
-{
-  return Material(*textured, Material::Type::TEXTURED_MASKED);
-}
-
-inline Material as_convert_textured_transparent_to_material(const Material::Textured<TextureHandle>* textured)
-{
-  return Material(*textured, Material::Type::TEXTURED_TRANSPARENT);
+  return Material(*textured, static_cast<Material::Type>(textured->type)|Material::TypeFlag::TEXTURED);
 }
 
 inline void as_init_plain_color_material(Material::PlainColor* plainColor)
@@ -87,7 +93,52 @@ inline void as_init_texture_handle(TextureHandle* textureHandle)
   as_init_texture_handle_t(textureHandle, scene::resources::uuids::fallbackDiffuseTexture);
 }
 
-// #TODO also sort materials by the used textures
+inline bool as_convert_get_two_sided(Material::Textured<TextureHandle>* texturedMaterial)
+{
+  return texturedMaterial->type.testFlag(Material::TypeFlag::TWO_SIDED);
+}
+
+inline void as_convert_set_two_sided(Material::Textured<TextureHandle>* texturedMaterial, bool value)
+{
+  if(value)
+    texturedMaterial->type |= Material::TypeFlag::TWO_SIDED;
+  else
+    texturedMaterial->type &= ~Material::Type(Material::TypeFlag::TWO_SIDED);
+}
+
+inline bool as_convert_get_masked(Material::Textured<TextureHandle>* texturedMaterial)
+{
+  return texturedMaterial->type.testFlag(Material::TypeFlag::MASKED);
+}
+
+inline void as_convert_set_masked(Material::Textured<TextureHandle>* texturedMaterial, bool value)
+{
+  if(value)
+  {
+    texturedMaterial->type &= ~Material::Type(Material::TypeFlag::TRANSPARENT);
+    texturedMaterial->type |= Material::TypeFlag::MASKED;
+  }else
+  {
+    texturedMaterial->type &= ~Material::Type(Material::TypeFlag::MASKED);
+  }
+}
+
+inline bool as_convert_get_transparent(Material::Textured<TextureHandle>* texturedMaterial)
+{
+  return texturedMaterial->type.testFlag(Material::TypeFlag::TRANSPARENT);
+}
+
+inline void as_convert_set_transparent(Material::Textured<TextureHandle>* texturedMaterial, bool value)
+{
+  if(value)
+  {
+    texturedMaterial->type &= ~Material::Type(Material::TypeFlag::MASKED);
+    texturedMaterial->type |= Material::TypeFlag::TRANSPARENT;
+  }else
+  {
+    texturedMaterial->type &= ~Material::Type(Material::TypeFlag::TRANSPARENT);
+  }
+}
 
 void Material::registerAngelScriptTypes()
 {
@@ -110,25 +161,26 @@ void Material::registerAngelScriptTypes()
   r = angelScriptEngine->RegisterObjectMethod("PlainColorMaterial", "Material opImplConv()", AngelScript::asFUNCTION(as_convert_to_plain_color_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   glrt::Uuid<void>::registerCustomizedUuidType("Material", false);
 
-  for(const char* type : {"TexturedMaterialOpaque", "TexturedMaterialMasked", "TexturedMaterialTransparent"})
-  {
-    r = angelScriptEngine->RegisterObjectType(type, sizeof(Material::Textured<TextureHandle>), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectBehaviour(type, AngelScript::asBEHAVE_CONSTRUCT, "void ctor()", AngelScript::asFUNCTION(as_init_textured_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "vec4 tint", asOFFSET(Material::Textured<TextureHandle>, tint)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "vec2 smoothness_range", asOFFSET(Material::Textured<TextureHandle>, smoothness_range)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "vec2 occlusion_range", asOFFSET(Material::Textured<TextureHandle>, occlusion_range)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "vec2 reflectance_range", asOFFSET(Material::Textured<TextureHandle>, reflectance_range)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "float emission_factor", asOFFSET(Material::Textured<TextureHandle>, emission_factor)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle basecolor_map", asOFFSET(Material::Textured<TextureHandle>, basecolor_map)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle normal_map", asOFFSET(Material::Textured<TextureHandle>, normal_map)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle height_map", asOFFSET(Material::Textured<TextureHandle>, height_map)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle srmo_map", asOFFSET(Material::Textured<TextureHandle>, srmo_map)); AngelScriptCheck(r);
-    r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle emission_map", asOFFSET(Material::Textured<TextureHandle>, emission_map)); AngelScriptCheck(r);
-  }
-  r = angelScriptEngine->RegisterObjectMethod("TexturedMaterialOpaque", "Material opImplConv()", AngelScript::asFUNCTION(as_convert_textured_opaque_to_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("TexturedMaterialMasked", "Material opImplConv()", AngelScript::asFUNCTION(as_convert_textured_masked_to_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("TexturedMaterialTransparent", "Material opImplConv()", AngelScript::asFUNCTION(as_convert_textured_transparent_to_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
-
+  const char* type = "TexturedMaterial";
+  r = angelScriptEngine->RegisterObjectType(type, sizeof(Material::Textured<TextureHandle>), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour(type, AngelScript::asBEHAVE_CONSTRUCT, "void ctor()", AngelScript::asFUNCTION(as_init_textured_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "vec4 tint", asOFFSET(Material::Textured<TextureHandle>, tint)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 smoothness_range", asOFFSET(Material::Textured<TextureHandle>, smoothness_range)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 occlusion_range", asOFFSET(Material::Textured<TextureHandle>, occlusion_range)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 reflectance_range", asOFFSET(Material::Textured<TextureHandle>, reflectance_range)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "float emission_factor", asOFFSET(Material::Textured<TextureHandle>, emission_factor)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle basecolor_map", asOFFSET(Material::Textured<TextureHandle>, basecolor_map)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle normal_map", asOFFSET(Material::Textured<TextureHandle>, normal_map)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle height_map", asOFFSET(Material::Textured<TextureHandle>, height_map)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle srmo_map", asOFFSET(Material::Textured<TextureHandle>, srmo_map)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle emission_map", asOFFSET(Material::Textured<TextureHandle>, emission_map)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(type, "Material opImplConv()", AngelScript::asFUNCTION(as_convert_textured_to_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(type, "bool get_two_sided()", AngelScript::asFUNCTION(as_convert_get_two_sided), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(type, "void set_two_sided(bool two_sided)", AngelScript::asFUNCTION(as_convert_set_two_sided), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(type, "bool get_masked()", AngelScript::asFUNCTION(as_convert_get_masked), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(type, "void set_masked(bool masked)", AngelScript::asFUNCTION(as_convert_set_masked), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(type, "bool get_transparent()", AngelScript::asFUNCTION(as_convert_get_transparent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(type, "void set_transparent(bool transparent)", AngelScript::asFUNCTION(as_convert_set_transparent), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectBehaviour("TextureHandle", AngelScript::asBEHAVE_CONSTRUCT, "void ctor(Uuid<Texture> &in texture, const TextureSampler &in textureSampler)", AngelScript::asFUNCTION(as_init_texture_handle_ts), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
@@ -141,15 +193,18 @@ const void* Material::data() const
 }
 
 
+bool Material::isTextureType() const
+{
+  return type.testFlag(TypeFlag::TEXTURED);
+}
+
+
 void Material::prepareForGpuBuffer()
 {
   TextureManager& textureManager = *TextureManager::instance();
 
-  switch(type)
+  if(isTextureType())
   {
-  case Type::TEXTURED_MASKED:
-  case Type::TEXTURED_OPAQUE:
-  case Type::TEXTURED_TRANSPARENT:
     if(textureHandleType == TextureHandleType::Ids)
     {
       textureGpuPtrs.basecolor_map = textureManager.gpuHandle(texturesIds.basecolor_map);
@@ -159,15 +214,15 @@ void Material::prepareForGpuBuffer()
       textureGpuPtrs.emission_map = textureManager.gpuHandle(texturesIds.emission_map);
       textureHandleType = TextureHandleType::GpuPtrs;
     }
-    break;
-  case Type::PLAIN_COLOR:
-    break;
   }
 }
 
 bool Material::operator<(const Material& other) const
 {
-  return concatenated_lessThan(this->type, other.type, this->materialUser, this->materialUser);
+  if(this->isTextureType())
+    return concatenated_lessThan(this->type, other.type, this->materialUser, other.materialUser, this->textureGpuPtrs.basecolor_map, other.textureGpuPtrs.basecolor_map, this->textureGpuPtrs.normal_map, other.textureGpuPtrs.normal_map);
+  else
+    return concatenated_lessThan(this->type, other.type, this->materialUser, other.materialUser);
 }
 
 

@@ -69,9 +69,9 @@ public:
     Type type = Type::UINT8;
     Format format = Format::RGBA;
     Compression compression = Compression::NONE;
-    int width = -1;
-    int height = -1;
-    int sourceIsNormalMap = false;
+    bool sourceIsNormalMap = false;
+    bool sourceIsBumpMap = false;
+    bool generateMipmaps = true;
 
     static void registerType();
   };

@@ -1,6 +1,7 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/static-mesh.h>
 #include <glrt/scene/resources/resource-index.h>
+#include <glrt/scene/resources/static-mesh-file.h>
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/coord-frame.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
@@ -29,7 +30,7 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
   {
     // If the target file also doesn't exist, print a warning
     if(!targetFile.exists())
-      qWarning() << "Couldn't locate the asset file " << targetFile.path() << " (and neither the source file "<<sourceFile.path()<<" to automatically convert it)";
+      qWarning() << "Couldn't locate the asset file " << targetFile.filePath() << " (and neither the source file "<<sourceFile.filePath()<<" to automatically convert it)";
 
     return false;
   }
@@ -125,8 +126,7 @@ void convertTexture(const QString& textureFilename, const QString& sourceFilenam
   QFileInfo textureFile(textureFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  // #TODO uncomment:
-  //if(shouldConvert(textureFilename, sourceFile))
+  if(shouldConvert(textureFilename, sourceFile))
   {
     SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertTexture("<<textureFile.fileName()<<", "<<sourceFile.fileName()<<")";
@@ -180,6 +180,7 @@ QString python_exportSceneAsObjMesh(const QString& objFile, const QString& group
 
   pythonScript += python_select_group_only(groupToImport);
 
+  // Missing: automatically switch to object mode?
 
   pythonScript += QString("bpy.ops.export_scene.obj("
                           "filepath=%0"
@@ -244,65 +245,6 @@ typedef StaticMesh::index_type index_type;
 typedef StaticMesh::Vertex Vertex;
 
 StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transformation, const QString& context, bool indexed);
-void writeToScriptLoadingStaticMesh(QTextStream& stream, const QString& uuid, const StaticMesh& data, int i)
-{
-  static_assert(sizeof(index_type)==2, "For uint16 as array type to be correct, index_type must be also a 16bit integer");
-  stream << "  ";
-  if(data.isIndexed())
-  {
-    stream << "array<uint16> indices";
-    if(i>=0)
-      stream << i;
-    stream << " = \n";
-    stream << "  {";
-    int j=0;
-    for(index_type i : data.indices)
-    {
-      if(j!=0)
-        stream << ",";
-      if(j%16 == 0)
-        stream << "\n    " << i;
-      else
-        stream << " " << i;
-      j++;
-    }
-    stream << "\n  };\n";
-  }
-
-  stream << "  ";
-  stream << "array<float> vertexData";
-  if(i>=0)
-    stream << i;
-  stream << " = \n  {";
-  int j=0;
-  for(const Vertex& v : data.vertices)
-  {
-    if(j!=0)
-      stream << ",";
-    stream << "\n    ";
-
-    stream << v.position[0] << ", ";
-    stream << v.position[1] << ", ";
-    stream << v.position[2] << ", ";
-    stream << v.normal[0] << ", ";
-    stream << v.normal[1] << ", ";
-    stream << v.normal[2] << ", ";
-    stream << v.tangent[0] << ", ";
-    stream << v.tangent[1] << ", ";
-    stream << v.tangent[2] << ", ";
-    stream << v.uv[0] << ", ";
-    stream << v.uv[1];
-
-    j++;
-  }
-
-  stream << "\n  };\n";
-  stream << "  loader.loadStaticMesh("<<uuid<<", ";
-  if(i>=0)
-    stream << "indices"<<i<<", vertexData"<<i<<");\n";
-  else
-    stream << "indices, vertexData);\n";
-}
 
 void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& sourceFile, bool indexed)
 {
@@ -338,16 +280,9 @@ void convertStaticMesh_assimpToMesh(const QFileInfo& meshFile, const QFileInfo& 
 
   StaticMesh data = loadMeshFromAssimp(scene->mMeshes, scene->mNumMeshes, transform, QString("\n(in file <%0>)").arg(sourceFilepath), indexed);
 
-  QFile file(meshFile.absoluteFilePath());
-
-  if(!file.open(QFile::WriteOnly))
-    throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshFile.absoluteFilePath()));
-
-  QTextStream outputStream(&file);
-
-  outputStream << "void main(StaticMeshLoader@ loader, Uuid<StaticMesh> &in uuid)\n{\n";
-  writeToScriptLoadingStaticMesh(outputStream, "uuid", data, -1);
-  outputStream << "}";
+  StaticMeshFile staticMeshFile;
+  staticMeshFile.staticMesh = data;
+  staticMeshFile.save(meshFile);
 }
 
 struct SceneGraphImportAssets
@@ -450,7 +385,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   {
     QString n = scene->mMeshes[i]->mName.C_Str();
     if(n.isEmpty())
-      throw GLRT_EXCEPTION("meshes must have a name");
+      continue;
 
     StaticMesh data = loadMeshFromAssimp(scene->mMeshes+i, 1, glm::mat3(1), QString(" while converting %0 to %1 (occured on mesh %2 (assimp index %3))").arg(sceneGraphFile.filePath()).arg(sceneGraphFile.fileName()).arg(n).arg(i), assets.indexed);;;
 
@@ -549,30 +484,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
   QTextStream outputStream(&file);
 
-
-  QFile meshFile(meshesFile.absoluteFilePath());
-  if(!allMeshesToImport.isEmpty())
-  {
-    if(!meshFile.open(QFile::WriteOnly))
-      throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(meshesFile.absoluteFilePath()));
-    QTextStream meshOutputStream(&meshFile);
-    meshOutputStream << "void loadMeshes(StaticMeshLoader@ loader)\n{\n";
-    for(uint32_t i : allMeshesToImport.values())
-    {
-      if(i>0)
-        meshOutputStream << "\n";
-      meshOutputStream << "  // " << scene->mMeshes[i]->mName.C_Str() << "  -- (assimp index: " << i << ")" << "\n";
-      writeToScriptLoadingStaticMesh(meshOutputStream, QString("Uuid<StaticMesh>(\"%0\")").arg(QUuid(assets.meshes[i]).toString()), assets.meshData[i], i);
-    }
-    meshOutputStream << "}";
-
-    outputStream << "#include \"" << escape_angelscript_string(meshesFile.fileName()) << "\"\n";
-    outputStream << "\n";
-  }else if(meshesFile.exists())
-  {
-    meshFile.remove();
-  }
-
   outputStream << "void main(SceneLayer@ sceneLayer)\n{\n";
   outputStream << "\n";
   outputStream << "  ResourceManager@ resourceManager = sceneLayer.scene.resourceManager;\n";
@@ -591,7 +502,21 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   if(!allMeshesToImport.isEmpty())
   {
     outputStream << "\n";
-    outputStream << "  loadMeshes(resourceManager.staticMeshLoader);\n\n";
+
+    for(uint32_t i : allMeshesToImport.values())
+    {
+      QString uuid = QUuid(assets.meshes[i]).toString();
+      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid);
+      outputStream << QString("  resourceManager.staticMeshLoader.loadStaticMesh(Uuid<StaticMesh>(\"%0\"), \"%1\");\n").arg(uuid).arg(filename);
+      StaticMeshFile meshFile;
+      meshFile.staticMesh = assets.meshData[i];
+      meshFile.save(filename);
+    }
+    outputStream << "\n";
+    outputStream << "\n";
+  }else if(meshesFile.exists())
+  {
+    QFile::remove(meshesFile.absoluteFilePath());
   }
 
   for(aiNode* assimp_node : allNodesToImport.values())
@@ -603,7 +528,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     bool isUsingMesh = assimp_node->mNumMeshes > 0;
     bool isUsingCamera = assets.cameras.contains(n);
     bool isUsingLight = assets.lightUuids.contains(n);
-    bool isUsingComponent = isUsingMesh || isUsingCamera || isUsingLight;
+    bool isUsingComponent = false;
     bool isImportingNode = true;
 
     if(isImportingNode)
@@ -627,8 +552,10 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
         for(int i : meshesOfNode.values())
         {
-          aiMesh* mesh = scene->mMeshes[i];
           Uuid<StaticMesh> meshUuid = assets.meshes[i];
+          if(meshUuid == Uuid<StaticMesh>())
+            continue;
+          aiMesh* mesh = scene->mMeshes[i];
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
           outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
@@ -640,6 +567,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
             outputStream << "  sceneLayer.index.label[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
           outputStream << "  new_StaticMeshComponent(node: @node, uuid: Uuid<StaticMeshComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(meshUuid).toString()), QString("StaticMeshComponent[%0]").arg(i)).toString() << "\"), "
                        << "meshUuid: meshUuid, materialUuid: materialUuid);\n";
+          isUsingComponent = true;
         }
       }
       if(isUsingCamera)
@@ -652,6 +580,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           outputStream << "  sceneLayer.index.label[cameraComponentUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
         outputStream << "  new_CameraComponent(node: @node, uuid: cameraComponentUuid, "
                      << "aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
+        isUsingComponent = true;
       }
       if(isUsingLight)
       {
@@ -665,6 +594,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           outputStream << "  sceneLayer.index.label[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
         outputStream << "  new_LightComponent(node: @node, uuid: Uuid<LightComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(lightUuid).toString()), QString("LightComponent[%0]").arg(0)).toString() << "\"), "
                      << "lightSourceUuid: lightUuid);\n";
+        isUsingComponent = true;
       }
       if(!isUsingComponent)
       {

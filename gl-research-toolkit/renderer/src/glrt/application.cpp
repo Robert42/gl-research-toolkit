@@ -65,6 +65,8 @@ float Application::update()
 void Application::showWindow()
 {
   system.showWindow();
+
+  shaderRecompileWorkaround();
 }
 
 

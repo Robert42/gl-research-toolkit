@@ -55,6 +55,8 @@ private:
   void deinitAssimp();
   void initAngelScript();
   void deinitAngelScript();
+
+  virtual void shaderRecompileWorkaround(){}
 };
 
 } // namespace glrt

@@ -106,6 +106,7 @@ void ResourceIndex::registerAngelScriptAPI()
   LightComponent::registerAngelScriptAPI();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadIndex(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,loadIndex), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadAllSubdirectoriesExcept(const string &in dirname)", AngelScript::asMETHOD(ResourceIndex,loadAllSubdirectoriesExcept), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void loadSubdirectory(const string &in dirname)", AngelScript::asMETHOD(ResourceIndex,loadIndexedDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void addIncludeDirectory(const string &in filename)", AngelScript::asMETHOD(ResourceIndex,addScriptIncludeDirectory), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerStaticMesh(const Uuid<StaticMesh> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerStaticMesh), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
@@ -145,6 +146,13 @@ void ResourceIndex::loadIndex(const std::string& filename)
 void ResourceIndex::loadIndexedDirectory(const std::string& dir)
 {
   loadIndex(dir+"/asset-index");
+}
+
+void ResourceIndex::loadAllSubdirectoriesExcept(const std::string& dir)
+{
+  for(const QFileInfo& fileInfo : QDir::current().entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot))
+    if(fileInfo.fileName()!=QString::fromStdString(dir) && fileInfo.isDir() && QDir(fileInfo.filePath()).exists("asset-index"))
+      loadIndexedDirectory(fileInfo.fileName().toStdString());
 }
 
 void ResourceIndex::addScriptIncludeDirectory(const std::string& d)

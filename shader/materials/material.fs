@@ -5,6 +5,12 @@
 
 layout(commandBindableNV)uniform;
 
+#ifdef DEPTH_PREPASS
+#ifndef MASKED
+layout(early_fragment_tests) in;
+#endif
+#endif
+
 #include "implementation/input-block.fs.glsl"
 #include "implementation/material-implementation.fs.glsl"
 
@@ -23,6 +29,10 @@ layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform Material
 
 void main()
 {
+#ifdef DEPTH_PREPASS
+  fragment_color = vec4(1, 0, 1, 1);
+  return;
+#endif
   BaseMaterial material;
   
   material.normal = fragment.normal;
@@ -61,16 +71,19 @@ sampler2D emission_map;
 
 void calculate_material_output(out BaseMaterial material, out SurfaceData surface, out float alpha)
 {
-  vec2 uv = fragment.uv; // TODO simple parallax mapping using the green channel from rhmo_map
+  vec2 uv = fragment.uv;
   
+  // TODO simple parallax mapping using height_map
+  
+  vec4 color = texture2D(material_instance.basecolor_map, uv) * material_instance.tint;
+  
+#ifndef DEPTH_PREPASS
   vec4 srmo = texture2D(material_instance.srmo_map, uv);
   
   float smoothness = srmo[0];
   float reflectance = srmo[1];
   float metal_mask = srmo[2];
   float occlusion = srmo[3];
-  
-  vec4 color = texture2D(material_instance.basecolor_map, uv) * material_instance.tint;
   
   material.normal = fragment.normal; // TODO implement normal mapping
   material.smoothness = mix(material_instance.smoothness_range[0], material_instance.smoothness_range[1], smoothness);
@@ -82,16 +95,35 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   
   surface.position = fragment.position;
   
+  #ifdef TWO_SIDED
+  material.normal.z = mix(-material.normal.z, material.normal.z, gl_FrontFacing);
+  #endif
+#endif
   alpha = color.a;
 }
 
 
 void main()
 {
+#ifdef DEPTH_PREPASS
+  fragment_color = vec4(1, 0, 1, 1);
+#ifdef OPAQUE
+  return;
+#endif
+#endif
+
   BaseMaterial material;
   SurfaceData surface;
   float alpha;
   calculate_material_output(material, surface, alpha);
+  
+#ifdef DEPTH_PREPASS
+#ifdef MASKED
+  if(alpha < MASK_THRESHOLD)
+    discard;
+#endif
+  return;
+#endif
   
   apply_material(material, surface, alpha);
 }

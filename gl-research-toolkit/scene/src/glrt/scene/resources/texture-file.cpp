@@ -206,6 +206,18 @@ public:
     return value;
   }
 
+  GLint maxLevel() const
+  {
+    for(GLint level=0; level<1000; ++level)
+    {
+      GLint value;
+      GL_CALL(glGetTextureLevelParameteriv, textureId, level, GL_TEXTURE_WIDTH, &value);
+      if(value <= 0)
+        return level-1;
+    }
+    return -1;
+  }
+
   QPair<UncompressedImage, QVector<byte>> uncompressed2DImage(int level,
                                                               TextureFile::Format format,
                                                               TextureFile::Type type) const
@@ -305,24 +317,24 @@ void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importS
 {
   const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
-  // #TODO: use the importSettings for the flags
-  const quint32 flags = SOIL_FLAG_POWER_OF_TWO;
+  quint32 flags = SOIL_FLAG_POWER_OF_TWO|SOIL_FLAG_INVERT_Y;
+
+  if(importSettings.generateMipmaps)
+    flags |= SOIL_FLAG_MIPMAPS;
 
   ImportedGlTexture textureInformation(SOIL_load_OGL_texture(sourceFilename.c_str(),
                                                              SOIL_LOAD_AUTO,
                                                              SOIL_CREATE_NEW_ID,
                                                              flags));
 
-  // load the image data
   const int firstMipMap = 0;
-  // #TODO decide, whether to use mipmapping by
-  const int lastMipMap = 0;
+  const int lastMipMap = textureInformation.maxLevel();
 
   if(importSettings.compression == TextureFile::Compression::NONE)
   {
     for(int level=firstMipMap; level<=lastMipMap; ++level)
     {
-      if(importSettings.sourceIsNormalMap)
+      if(importSettings.sourceIsNormalMap || importSettings.sourceIsBumpMap)
         textureInformation.convertToSignedNormalMap(level);
 
       QPair<UncompressedImage, QVector<byte>> image =  textureInformation.uncompressed2DImage(level, importSettings.format, importSettings.type);
@@ -483,7 +495,7 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): rawDataLength is too long for an array to hold it.").arg(textureFile.fileName()));
 
     maxMipMap[GLenum(image.target)] = glm::max<GLint>(maxMipMap.value(GLenum(image.target), 0), GLint(image.mipmap));
-    minMipMap[GLenum(image.target)] = glm::max<GLint>(minMipMap.value(GLenum(image.target), std::numeric_limits<GLint>::max()), GLint(image.mipmap));
+    minMipMap[GLenum(image.target)] = glm::min<GLint>(minMipMap.value(GLenum(image.target), std::numeric_limits<GLint>::max()), GLint(image.mipmap));
 
     if(tempBuffer.length() < int(image.rawDataLength))
       tempBuffer.resize(int(image.rawDataLength));
@@ -573,19 +585,7 @@ void TextureFile::clear()
 
 quint64 TextureFile::magicNumber()
 {
-  struct Str
-  {
-    char str[8];
-  };
-  union
-  {
-    quint64 magicNumber;
-    Str str;
-  };
-
-  std::memcpy(str.str, "glrt-tex", 8);
-
-  return magicNumber;
+  return magicNumberForString("glrt-tex");
 }
 
 void TextureFile::ImportSettings::registerType()
@@ -611,9 +611,9 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "int width", asOFFSET(ImportSettings,width)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "int height", asOFFSET(ImportSettings,height)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsBumpMap", asOFFSET(ImportSettings,sourceIsBumpMap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
 }
 
 quint32 TextureFile::UncompressedImage::calcRowStride() const

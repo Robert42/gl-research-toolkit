@@ -85,6 +85,8 @@ private:
   QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
 
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
+
+  void unloadUnusedResources();
 };
 
 

@@ -144,4 +144,23 @@ void SplashscreenMessage::show(const QString& message)
   Q_UNUSED(suppressLog);
 }
 
+quint64 magicNumberForString(const char* text)
+{
+  Q_ASSERT(strlen(text) == 8);
+
+  struct Str
+  {
+    char str[8];
+  };
+  union
+  {
+    quint64 magicNumber;
+    Str str;
+  };
+
+  std::memcpy(str.str, text, 8);
+
+  return magicNumber;
+}
+
 } // namespace glrt

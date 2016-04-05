@@ -1,5 +1,6 @@
 #include <glrt/renderer/gl-texture-manager.h>
 #include <glrt/scene/resources/texture-file.h>
+#include <glrt/scene/resources/resource-index.h>
 
 namespace glrt {
 namespace renderer {
@@ -10,9 +11,47 @@ GlTextureManager::GlTextureManager(scene::resources::ResourceManager* resourceMa
 {
 }
 
+
+void GlTextureManager::removeUnusedTextures(QSet<Uuid<Texture>> usedTextures)
+{
+  usedTextures |= QSet<Uuid<Texture>>({scene::resources::uuids::blackTexture, scene::resources::uuids::whiteTexture, scene::resources::uuids::fallbackDiffuseTexture, scene::resources::uuids::fallbackNormalTexture, scene::resources::uuids::fallbackSRMOTexture});
+
+  QSet<GLuint64> copy = residentHandles;
+  for(GLuint64 gpuPtr : copy)
+  {
+    Q_ASSERT(_textureUuidForGpuPtr.contains(gpuPtr));
+    if(!_textureUuidForGpuPtr.contains(gpuPtr))
+      continue;
+
+    Uuid<Texture> texture = _textureUuidForGpuPtr.value(gpuPtr);
+
+    if(usedTextures.contains(texture))
+      continue;
+
+    residentHandles.remove(gpuPtr);
+
+    GL_CALL(glMakeTextureHandleNonResidentNV, gpuPtr);
+  }
+}
+
+Uuid<Texture> GlTextureManager::textureUuidForHandle(const TextureHandle& handle)
+{
+  if(handle.textureId < textureIds.length())
+    return textureIds[handle.textureId];
+  return scene::resources::uuids::blackTexture;
+}
+
+Uuid<Texture> GlTextureManager::textureUuidForGpuPtr(quint64 handle)
+{
+  if(_textureUuidForGpuPtr.contains(handle))
+    return _textureUuidForGpuPtr[handle];
+  return scene::resources::uuids::blackTexture;
+}
+
+
 GlTextureManager::~GlTextureManager()
 {
-  glDeleteTextures(textures.length(), textures.data());
+  GL_CALL(glDeleteTextures,textures.length(), textures.data());
 }
 
 
@@ -62,6 +101,9 @@ quint64 GlTextureManager::gpuHandle(TextureHandle handle)
   GLuint sampler = samplerObject.GetInternHandle();
 
   GLuint64 ptr = GL_RET_CALL(glGetTextureSamplerHandleNV, texture, sampler);
+
+  if(!_textureUuidForGpuPtr.contains(ptr))
+    _textureUuidForGpuPtr.insert(ptr, textureUuidForHandle(handle));
 
   if(!residentHandles.contains(ptr))
   {

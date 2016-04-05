@@ -6,6 +6,10 @@
 namespace glrt {
 namespace renderer {
 
+
+
+const float maskAlphaThreshold = 0.5f;
+
 class MaterialState
 {
   Q_DISABLE_COPY(MaterialState)
@@ -17,7 +21,8 @@ public:
     DEPTH_WRITE = 0x2,
     COLOR_WRITE = 0x4,
     ALPHA_WRITE = 0x8,
-    FACE_CULLING = 0x10,
+    ALPHA_BLENDING = 0x10,
+    NO_FACE_CULLING = 0x20,
   };
 
   friend Flags operator|(Flags a, Flags b){return Flags(quint32(a) | quint32(b));}

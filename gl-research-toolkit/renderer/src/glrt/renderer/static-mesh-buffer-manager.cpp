@@ -15,6 +15,19 @@ StaticMeshBufferManager::~StaticMeshBufferManager()
     delete buffer;
 }
 
+void StaticMeshBufferManager::removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> usedStaticMeshes)
+{
+  QList<Uuid<StaticMesh>> allMeshes = staticMeshes.keys();
+  for(Uuid<StaticMesh> staticMesh : allMeshes)
+  {
+    if(usedStaticMeshes.contains(staticMesh))
+      continue;
+
+    delete staticMeshes[staticMesh];
+    staticMeshes.remove(staticMesh);
+  }
+}
+
 StaticMeshBuffer* StaticMeshBufferManager::meshForUuid(const Uuid<StaticMesh>& uuid)
 {
   StaticMeshBuffer* buffer = staticMeshes.value(uuid, nullptr);

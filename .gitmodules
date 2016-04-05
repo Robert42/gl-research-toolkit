@@ -22,3 +22,6 @@
 [submodule "external/soil"]
 	path = external/soil
 	url = git@github.com:Robert42/SOIL.git
+[submodule "external/assets/advanced"]
+	path = external/assets/advanced
+	url = git@github.com:Robert42/gl-research-toolkit-advanced-assets.git

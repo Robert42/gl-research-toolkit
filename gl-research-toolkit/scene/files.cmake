@@ -26,6 +26,7 @@ set(SOURCE_FILES
   include/glrt/scene/resources/resource-index.inl
   include/glrt/scene/resources/resource-manager.h
   include/glrt/scene/resources/resource-manager.inl
+  include/glrt/scene/resources/static-mesh-file.h
   include/glrt/scene/resources/static-mesh.h
   include/glrt/scene/resources/static-mesh-loader.h
   include/glrt/scene/resources/texture-file.h
@@ -54,6 +55,7 @@ set(SOURCE_FILES
   src/glrt/scene/resources/resource-index.cpp
   src/glrt/scene/resources/resource-manager.cpp
   src/glrt/scene/resources/static-mesh.cpp
+  src/glrt/scene/resources/static-mesh-file.cpp
   src/glrt/scene/resources/static-mesh-loader.cpp
   src/glrt/scene/resources/texture.cpp
   src/glrt/scene/resources/texture-file.cpp

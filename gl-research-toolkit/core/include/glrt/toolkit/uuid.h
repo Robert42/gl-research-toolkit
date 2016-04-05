@@ -114,6 +114,8 @@ struct DefaultTraits<Uuid<T>>
   typedef ArrayTraits_POD<Uuid<T>> type;
 };
 
+QString labelForUuid(const QUuid& uuid);
+
 
 } // namespace scene
 

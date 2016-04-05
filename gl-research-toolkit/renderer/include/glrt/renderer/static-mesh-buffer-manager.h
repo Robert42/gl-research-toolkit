@@ -17,6 +17,8 @@ public:
 
   StaticMeshBuffer* meshForUuid(const Uuid<StaticMesh>& uuid);
 
+  void removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> usedStaticMeshes) override;
+
 private:
   QHash<Uuid<StaticMesh>, StaticMeshBuffer*> staticMeshes;
   glrt::scene::resources::ResourceManager* resourceManager;

@@ -19,6 +19,7 @@ const Uuid<LightSource> fallbackLight("{893463c4-143a-406f-9ef7-3506817d5837}");
 const Uuid<Texture> fallbackDiffuseTexture("{8080488b-66e6-4763-aa5e-2393c7865139}");
 const Uuid<Texture> fallbackNormalTexture("{d3d320ce-95b0-4bff-ba65-381ad005b012}");
 const Uuid<Texture> blackTexture("{a8b7ec89-cf66-4ef6-b68f-ec98d86dc6fb}");
+const Uuid<Texture> whiteTexture("{fa46351a-eed3-4b6c-91f6-a8a62a6c6b02}");
 const Uuid<Texture> fallbackSRMOTexture("{1a6d4dc1-58b2-47e9-beb6-724da5d2d98f}");
 
 } // uuids
@@ -54,6 +55,7 @@ public:
 
   void loadIndex(const std::string& filename);
   void loadIndexedDirectory(const std::string& filename);
+  void loadAllSubdirectoriesExcept(const std::string& filename);
 
   void addScriptIncludeDirectory(const std::string& filename);
 

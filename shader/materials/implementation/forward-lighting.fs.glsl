@@ -24,17 +24,16 @@ layout(std140, binding=UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK) uniform SceneFragme
   SceneFragmentData scene;
 };
 
-out vec4 color;
+out vec4 fragment_color;
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
-#ifdef DEPTH_PREPASS
-  color = vec4(vec3(1, 0, 1), alpha);
-  return;
+#ifdef MASKED
+  alpha = step(MASK_THRESHOLD, alpha);
 #endif
   
 #ifdef NO_LIGHTING
-  color = vec4(material.base_color, 1);
+  fragment_color = vec4(material.base_color, alpha);
   return;
 #endif
 
@@ -45,7 +44,7 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
   incoming_luminance *= exposure;
 
 #ifdef FORWARD_PASS
-  color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
+  fragment_color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
 #endif
 }
 

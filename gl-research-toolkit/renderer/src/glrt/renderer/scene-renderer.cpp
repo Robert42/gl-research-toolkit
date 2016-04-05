@@ -55,9 +55,29 @@ void Renderer::render()
   visualizeRectAreaLights.render();
 }
 
+bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
+{
+  int flagEnabled = 0;
+  int flagDisabled = 0;
+  for(Material::Type type : types)
+    if(type.testFlag(flag))
+      flagEnabled++;
+    else
+      flagDisabled++;
+
+  return flagDisabled==0;
+}
 
 int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
 {
+  if(materialTypes.isEmpty())
+  {
+    Q_UNREACHABLE();
+    return -1;
+  }
+
+//  preprocessorBlock.insert("#define NO_LIGHTING");
+
   if(pass == Pass::DEPTH_PREPASS)
     preprocessorBlock.insert("#define DEPTH_PREPASS");
   else if(pass == Pass::FORWARD_PASS)
@@ -65,26 +85,32 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
   else
     Q_UNREACHABLE();
 
-  if(materialTypes.contains(Material::Type::PLAIN_COLOR) || materialTypes.contains(Material::Type::TEXTURED_OPAQUE))
-    preprocessorBlock.insert("#define OPAQUE");
-  else
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::MASKED))
   {
     preprocessorBlock.insert("#define OUTPUT_USES_ALPHA");
-
-    if(materialTypes.contains(Material::Type::TEXTURED_MASKED))
-      preprocessorBlock.insert("#define MASKED");
-    else if(materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
-      preprocessorBlock.insert("#define TRANSPARENT");
-    else
-      Q_UNREACHABLE();
+    preprocessorBlock.insert("#define MASKED");
+  }else if(testFlagOnAll(materialTypes, Material::TypeFlag::TRANSPARENT))
+  {
+    preprocessorBlock.insert("#define OUTPUT_USES_ALPHA");
+    preprocessorBlock.insert("#define TRANSPARENT");
+  }else
+  {
+    preprocessorBlock.insert("#define OPAQUE");
   }
 
-  if(materialTypes.contains(Material::Type::PLAIN_COLOR))
-    preprocessorBlock.insert("#define PLAIN_COLOR");
-  else if(materialTypes.contains(Material::Type::TEXTURED_OPAQUE)||materialTypes.contains(Material::Type::TEXTURED_MASKED)||materialTypes.contains(Material::Type::TEXTURED_TRANSPARENT))
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::TWO_SIDED))
+  {
+    preprocessorBlock.insert("#define TWO_SIDED");
+  }
+
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED))
+  {
     preprocessorBlock.insert("#define TEXTURED");
-  else
-    Q_UNREACHABLE();
+  }else
+  {
+    preprocessorBlock.insert("#define PLAIN_COLOR");
+  }
+  preprocessorBlock.insert(QString("#define MASK_THRESHOLD %0").arg(maskAlphaThreshold));
 
   ReloadableShader shader("material",
                           QDir(GLRT_SHADER_DIR"/materials"),
@@ -96,6 +122,8 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
 
 void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags)
 {
+  Q_ASSERT(framebuffer != nullptr);
+
   materialStates.append_move(std::move(MaterialState(shader, flags)));
 
   MaterialState* materialShader = &materialStates.last();
@@ -123,6 +151,9 @@ void Renderer::captureStates()
   {
     gl::FramebufferObject& framebuffer = *materialState.framebuffer;
     ReloadableShader& shader = materialShaders[materialState.shader];
+
+    Q_ASSERT(&framebuffer != nullptr);
+    Q_ASSERT(&shader != nullptr);
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
@@ -152,11 +183,14 @@ void Renderer::recordCommandlist()
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
+  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRangeMovables.keys().toSet() | meshDrawRanges.tokenRangeNotMovable.keys().toSet();
 
   for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
   {
     Material::Type materialType = i.key().second;
     const MaterialState& materialShader = *i.value();
+
+    unusedMaterialTypes.remove(materialType);
 
     glm::ivec2 range;
 
@@ -172,6 +206,9 @@ void Renderer::recordCommandlist()
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }
+
+  for(Material::Type type : unusedMaterialTypes)
+    qWarning() << "MATERIAL-WARNING: There are materials with the type" << Material::typeToString(type) << "which are not supported by the scene renderer";
 
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
 
