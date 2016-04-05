@@ -76,6 +76,8 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
     return -1;
   }
 
+//  preprocessorBlock.insert("#define NO_LIGHTING");
+
   if(pass == Pass::DEPTH_PREPASS)
     preprocessorBlock.insert("#define DEPTH_PREPASS");
   else if(pass == Pass::FORWARD_PASS)
@@ -120,6 +122,8 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
 
 void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags)
 {
+  Q_ASSERT(framebuffer != nullptr);
+
   materialStates.append_move(std::move(MaterialState(shader, flags)));
 
   MaterialState* materialShader = &materialStates.last();
@@ -147,6 +151,9 @@ void Renderer::captureStates()
   {
     gl::FramebufferObject& framebuffer = *materialState.framebuffer;
     ReloadableShader& shader = materialShaders[materialState.shader];
+
+    Q_ASSERT(&framebuffer != nullptr);
+    Q_ASSERT(&shader != nullptr);
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);

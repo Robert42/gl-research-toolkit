@@ -49,8 +49,10 @@ public:
   void drawScene();
   void endDrawing();
 
-public:
+private:
   void initGui();
+
+  void shaderRecompileWorkaround() override;
 };
 
 } // namespace glrt

@@ -65,5 +65,17 @@ void SampleApplication::initGui()
   antweakbar.createProfilerBar(&profiler);
 }
 
+void SampleApplication::shaderRecompileWorkaround()
+{
+  // This hack is recompiles all shaders after simulating drawing the scene once.
+  // this is an ugly workaround for a problem, were the screen kept black until all shaders were recompiled
+  const float deltaTime = 1.f / 60.f;
+  scene.update(deltaTime);
+
+  drawScene();
+
+  glrt::renderer::ReloadableShader::reloadAll();
+}
+
 
 } // namespace glrt
