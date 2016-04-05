@@ -223,8 +223,8 @@ void ShaderDebugPrinter::end()
     printChunk(chunk);
   }
 
-  positionVisualization.update();
-  directionVisualization.update();
+  positionVisualization.reinit();
+  directionVisualization.reinit();
 }
 
 void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)

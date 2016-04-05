@@ -68,34 +68,23 @@ VisualizationRenderer::VisualizationRenderer(const std::function<DebugLineVisual
 
 
 VisualizationRenderer::VisualizationRenderer(scene::Scene* scene, const std::function<DebugLineVisualisation::Ptr()>& visualizationFactory)
-  : scene(scene),
-    _enabled(false),
+  : DebugRenderer(scene),
     factory(visualizationFactory)
 {
-  guiToggle.getter = std::bind(&VisualizationRenderer::isEnabled, this);
-  guiToggle.setter = std::bind(&VisualizationRenderer::setEnabled, this, std::placeholders::_1);
-
-  if(scene)
-    loadSceneConnection = QObject::connect(scene, &scene::Scene::sceneLoaded, std::bind(&VisualizationRenderer::update, this));
 }
 
 VisualizationRenderer::VisualizationRenderer(const VisualizationRenderer& other)
-  : VisualizationRenderer(other.scene, other.factory)
+  : VisualizationRenderer(other.scene(), other.factory)
 {
-  if(other.isEnabled())
-    this->setEnabled(true);
 }
 
 VisualizationRenderer::VisualizationRenderer(VisualizationRenderer&& other)
-  : VisualizationRenderer(other.scene, other.factory)
+  : VisualizationRenderer(other.scene(), other.factory)
 {
-  if(other.isEnabled())
-    this->setEnabled(true);
 }
 
 VisualizationRenderer::~VisualizationRenderer()
 {
-  QObject::disconnect(loadSceneConnection);
 }
 
 
@@ -105,22 +94,7 @@ void VisualizationRenderer::render()
     visualization->draw();
 }
 
-void VisualizationRenderer::setEnabled(bool enabled)
-{
-  if(enabled == this->isEnabled())
-    return;
-
-  this->_enabled = enabled;
-
-  update();
-}
-
-bool VisualizationRenderer::isEnabled() const
-{
-  return this->_enabled;
-}
-
-void VisualizationRenderer::update()
+void VisualizationRenderer::reinit()
 {
   if(this->isEnabled())
     createVisualization();
