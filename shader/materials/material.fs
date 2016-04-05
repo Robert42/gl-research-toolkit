@@ -96,7 +96,7 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   surface.position = fragment.position;
   
   #ifdef TWO_SIDED
-  material.normal = mix(-material.normal, material.normal, gl_FrontFacing);
+  material.normal.z = mix(-material.normal.z, material.normal.z, gl_FrontFacing);
   #endif
 #endif
   alpha = color.a;
