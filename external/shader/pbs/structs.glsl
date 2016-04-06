@@ -115,6 +115,14 @@ void precomputeData(in BaseMaterial material,
   
   brdf_data.NdotV             = NdotV;
   brdf_data.roughness         = roughness;
+  
+#ifdef LIGHTING_ONLY_SPECULAR
+  surface_data.diffuse_color = vec3(0);
+#endif
+#ifdef LIGHTING_ONLY_DIFFUSE
+surface_data.f0 = vec3(0);
+surface_data.f90 = 0;
+#endif
 }
 
 BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V)
