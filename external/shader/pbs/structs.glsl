@@ -80,6 +80,10 @@ void precomputeData(in BaseMaterial material,
   vec3 emission = material.emission;
   float AO = material.occlusion;
   
+  #if defined(LIGHTING_ONLY)
+  base_color = vec3(0.5);
+  #endif
+  
   #if defined(LIGHTING_SILVER) || defined(LIGHTING_MIRROR_PERFECT) || defined(LIGHTING_MIRROR_ROUGH) || defined(LIGHTING_MIRROR_SMOOTH)
   base_color = vec3(1);
   emission = vec3(0);
