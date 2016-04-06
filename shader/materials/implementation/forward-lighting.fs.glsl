@@ -47,7 +47,7 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
   fragment_color = vec4(fragment.uv, 0, 1);
   return;
 #elif defined(MESH_TANGENTS_WS)
-  fragment_color = vec4(encode_direction_as_color(normalize(fragment.tangent)), 1);sdsd
+  fragment_color = vec4(encode_direction_as_color(normalize(fragment.tangent)), 1);
   return;
 #endif
 
