@@ -11,6 +11,8 @@
 
 #include "debug-mesh.h"
 
+#include <glrt/renderer/debugging/debug-renderer.h>
+
 namespace glrt {
 namespace scene {
 
@@ -31,11 +33,9 @@ struct Arrow
 };
 
 
-class DebugLineVisualisation final
+class DebugLineVisualisation final : public DebugRenderer::Implementation
 {
 public:
-  typedef QSharedPointer<DebugLineVisualisation> Ptr;
-
   DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, gl::ShaderObject&& shaderObject, int numDrawCalls, int uniformBufferOffset, int uniformBufferElementSize);
   DebugLineVisualisation(DebugLineVisualisation&&);
   ~DebugLineVisualisation();
@@ -45,17 +45,17 @@ public:
   template<typename UniformType>
   static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData, gl::ShaderObject&& shaderObject);
 
-  static Ptr drawCameras(const QList<scene::CameraParameter>& sceneCameras);
-  static Ptr drawSphereAreaLights(const QList<scene::SphereAreaLightComponent::Data>& sphereAreaLights);
-  static Ptr drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights);
-  static Ptr drawPositions(const QVector<glm::vec3>& positions);
-  static Ptr drawArrows(const QVector<Arrow>& arrows);
+  static DebugRenderer::Implementation* drawCameras(const QList<scene::CameraParameter>& sceneCameras);
+  static DebugRenderer::Implementation* drawSphereAreaLights(const QList<scene::SphereAreaLightComponent::Data>& sphereAreaLights);
+  static DebugRenderer::Implementation* drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights);
+  static DebugRenderer::Implementation* drawPositions(const QVector<glm::vec3>& positions);
+  static DebugRenderer::Implementation* drawArrows(const QVector<Arrow>& arrows);
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;
   DebugLineVisualisation& operator=(const DebugLineVisualisation&) = delete;
   DebugLineVisualisation& operator=(DebugLineVisualisation&&) = delete;
 
-  void draw();
+  void render() override;
 
 private:
   gl::VertexArrayObject vertexArrayObject;

@@ -2,8 +2,10 @@ set(SOURCE_FILES
   include/glrt/application.h
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
+  include/glrt/renderer/debugging/debugging-posteffect.h
   include/glrt/renderer/debugging/debug-line-visualisation.h
   include/glrt/renderer/debugging/debug-mesh.h
+  include/glrt/renderer/debugging/debug-renderer.h
   include/glrt/renderer/debugging/shader-debug-printer.h
   include/glrt/renderer/debugging/visualization-renderer.h
   include/glrt/renderer/declarations.h
@@ -44,8 +46,10 @@ set(SOURCE_FILES
   src/glrt/application.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
+  src/glrt/renderer/debugging/debugging-posteffect.cpp
   src/glrt/renderer/debugging/debug-line-visualisation.cpp
   src/glrt/renderer/debugging/debug-mesh.cpp
+  src/glrt/renderer/debugging/debug-renderer.cpp
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp

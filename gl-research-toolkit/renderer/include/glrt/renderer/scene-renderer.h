@@ -35,9 +35,10 @@ public:
 
   QPointer<scene::CameraComponent> cameraComponent;
 
-  debugging::VisualizationRenderer visualizeCameras;
-  debugging::VisualizationRenderer visualizeSphereAreaLights;
-  debugging::VisualizationRenderer visualizeRectAreaLights;
+  debugging::DebugRenderer visualizeCameras;
+  debugging::DebugRenderer visualizeSphereAreaLights;
+  debugging::DebugRenderer visualizeRectAreaLights;
+  debugging::DebugRenderer::List debugDrawList;
 
   glm::ivec2 videoResolution;
 

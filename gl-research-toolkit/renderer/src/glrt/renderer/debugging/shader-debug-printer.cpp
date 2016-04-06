@@ -157,6 +157,9 @@ ShaderDebugPrinter::ShaderDebugPrinter()
 {
   clearScene = false;
 
+  renderList.connectTo(&positionVisualization);
+  renderList.connectTo(&directionVisualization);
+
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
     this->active = active;
@@ -223,8 +226,8 @@ void ShaderDebugPrinter::end()
     printChunk(chunk);
   }
 
-  positionVisualization.update();
-  directionVisualization.update();
+  positionVisualization.reinit();
+  directionVisualization.reinit();
 }
 
 void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)
@@ -240,8 +243,7 @@ void ShaderDebugPrinter::draw()
   if(clearScene)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  positionVisualization.render();
-  directionVisualization.render();
+  renderList.render();
 
   if(!mouse_is_pressed)
     return;
