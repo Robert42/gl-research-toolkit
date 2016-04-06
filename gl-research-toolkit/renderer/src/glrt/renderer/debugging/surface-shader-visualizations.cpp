@@ -12,11 +12,11 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
 {
   QMap<QString, SurfaceShaderVisualization> map;
 
-#define VALUE(FLAT_LIGHTING) map[#FLAT_LIGHTING] = SurfaceShaderVisualization::FLAT_LIGHTING
+#define VALUE(MACRO) map[#MACRO] = SurfaceShaderVisualization::MACRO
 
   map[" - "] = SurfaceShaderVisualization::NONE;
 
-  VALUE(FLAT_LIGHTING);
+  VALUE(LIGHTING_FLAT);
 
   return map;
 }

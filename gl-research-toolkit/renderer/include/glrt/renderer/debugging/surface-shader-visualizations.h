@@ -10,7 +10,7 @@ namespace renderer {
 enum class SurfaceShaderVisualization
 {
   NONE,
-  FLAT_LIGHTING,
+  LIGHTING_FLAT,
 };
 
 extern SurfaceShaderVisualization currentSurfaceShaderVisualization;
