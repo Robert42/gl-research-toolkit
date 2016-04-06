@@ -27,6 +27,8 @@ layout(std140, binding=UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK) uniform SceneFragme
 
 out vec4 fragment_color;
 
+#include "highlight-numeric-issues.glsl"
+
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
 #ifdef MASKED
@@ -55,9 +57,9 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
   
   incoming_luminance *= exposure;
 
-#ifdef FORWARD_PASS
   fragment_color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
-#endif
+
+  highlight_numeric_issues();
 }
 
 void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)
