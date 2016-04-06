@@ -80,13 +80,17 @@ void precomputeData(in BaseMaterial material,
   vec3 emission = material.emission;
   float AO = material.occlusion;
   
-  #if defined(LIGHTING_SILVER) || defined(LIGHTING_SMOOTH_SILVER)
+  #if defined(LIGHTING_SILVER) || defined(LIGHTING_PERFECT_MIRROR) || defined(LIGHTING_ROUGH_MIRROR) || defined(LIGHTING_SMOOTH_MIRROR)
   base_color = vec3(1);
   emission = vec3(0);
   metal_mask = 1;
   reflectance = 1;
-  #ifdef LIGHTING_SMOOTH_SILVER
+  #if defined(LIGHTING_PERFECT_MIRROR)
   smoothness = 1;
+  #elif defined(LIGHTING_ROUGH_MIRROR)
+  smoothness = 0.5;
+  #elif defined(LIGHTING_SMOOTH_MIRROR)
+  smoothness = 0.8;
   #endif
   #endif
   

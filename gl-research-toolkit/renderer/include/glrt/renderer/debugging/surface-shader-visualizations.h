@@ -14,7 +14,9 @@ enum class SurfaceShaderVisualization
   LIGHTING_ONLY_DIFFUSE,
   LIGHTING_ONLY_SPECULAR,
   LIGHTING_SILVER,
-  LIGHTING_SMOOTH_SILVER,
+  LIGHTING_PERFECT_MIRROR,
+  LIGHTING_ROUGH_MIRROR,
+  LIGHTING_SMOOTH_MIRROR,
 };
 
 extern SurfaceShaderVisualization currentSurfaceShaderVisualization;
