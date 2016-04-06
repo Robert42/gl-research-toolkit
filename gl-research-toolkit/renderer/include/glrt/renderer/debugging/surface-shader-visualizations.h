@@ -13,6 +13,8 @@ enum class SurfaceShaderVisualization
   LIGHTING_FLAT,
   LIGHTING_ONLY_DIFFUSE,
   LIGHTING_ONLY_SPECULAR,
+  LIGHTING_SILVER,
+  LIGHTING_SMOOTH_SILVER,
 };
 
 extern SurfaceShaderVisualization currentSurfaceShaderVisualization;

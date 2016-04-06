@@ -19,6 +19,8 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   VALUE(LIGHTING_FLAT);
   VALUE(LIGHTING_ONLY_DIFFUSE);
   VALUE(LIGHTING_ONLY_SPECULAR);
+  VALUE(LIGHTING_SILVER);
+  VALUE(LIGHTING_SMOOTH_SILVER);
 
   return map;
 }
