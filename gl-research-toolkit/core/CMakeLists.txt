@@ -14,7 +14,6 @@ endif()
 
 find_package(Qt5Core 5.5 REQUIRED)
 find_package(Qt5Network 5.5 REQUIRED)
-find_package(OpenMP REQUIRED)
 
 add_library(glrt-core
   ${SOURCE_FILES}
@@ -51,7 +50,6 @@ target_compile_options(glrt-core
   -std=c++11
   -Wall
   -Wextra
-  ${OpenMP_CXX_FLAGS}
 )
 
 target_link_libraries(glrt-core
