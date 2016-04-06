@@ -14,7 +14,8 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
 
 #define VALUE(FLAT_LIGHTING) map[#FLAT_LIGHTING] = SurfaceShaderVisualization::FLAT_LIGHTING
 
-  VALUE(NONE);
+  map[" - "] = SurfaceShaderVisualization::NONE;
+
   VALUE(FLAT_LIGHTING);
 
   return map;
