@@ -17,6 +17,9 @@ enum class SurfaceShaderVisualization
   LIGHTING_MIRROR_ROUGH,
   LIGHTING_MIRROR_SMOOTH,
   LIGHTING_SILVER,
+  MESH_NORMALS_WS,
+  MESH_UVS,
+  MESH_TANGENTS_WS,
 };
 
 extern SurfaceShaderVisualization currentSurfaceShaderVisualization;

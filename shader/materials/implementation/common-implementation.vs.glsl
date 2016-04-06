@@ -27,7 +27,7 @@ void transform_vertex()
     
   fragment.position = world_coordinate.xyz;
   fragment.normal = world_normal.xyz;
-  fragment.tagent = world_tangent.xyz;
+  fragment.tangent = world_tangent.xyz;
   fragment.uv = vertex_uv;
   
   gl_Position = scene.view_projection * world_coordinate;

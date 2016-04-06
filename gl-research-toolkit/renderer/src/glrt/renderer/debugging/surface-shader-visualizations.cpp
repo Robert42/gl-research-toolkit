@@ -23,6 +23,9 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   VALUE(LIGHTING_MIRROR_PERFECT);
   VALUE(LIGHTING_MIRROR_ROUGH);
   VALUE(LIGHTING_MIRROR_SMOOTH);
+  VALUE(MESH_NORMALS_WS);
+  VALUE(MESH_UVS);
+  VALUE(MESH_TANGENTS_WS);
 
   return map;
 }

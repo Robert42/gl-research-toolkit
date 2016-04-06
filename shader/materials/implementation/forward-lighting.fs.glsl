@@ -1,6 +1,7 @@
 #ifdef FORWARD_RENDERER
 
 #include <lighting/rendering-equation.glsl>
+#include <debugging/normal.glsl>
 
 #include <glrt/glsl/layout-constants.h>
 
@@ -31,9 +32,20 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
 #ifdef MASKED
   alpha = step(MASK_THRESHOLD, alpha);
 #endif
-  
+
 #ifdef LIGHTING_FLAT
   fragment_color = vec4(material.base_color + material.emission, alpha);
+  return;
+#endif
+
+#if defined(MESH_NORMALS_WS)
+  fragment_color = vec4(encode_direction_as_color(fragment.normal), 1);
+  return;
+#elif defined(MESH_UVS)
+  fragment_color = vec4(fragment.uv, 0, 1);
+  return;
+#elif defined(MESH_TANGENTS_WS)
+  fragment_color = vec4(encode_direction_as_color(fragment.tangent), 1);
   return;
 #endif
 
