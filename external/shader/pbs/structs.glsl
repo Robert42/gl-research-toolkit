@@ -80,6 +80,16 @@ void precomputeData(in BaseMaterial material,
   vec3 emission = material.emission;
   float AO = material.occlusion;
   
+  #if defined(LIGHTING_SILVER) || defined(LIGHTING_SMOOTH_SILVER)
+  base_color = vec3(1);
+  emission = vec3(0);
+  metal_mask = 1;
+  reflectance = 1;
+  #ifdef LIGHTING_SMOOTH_SILVER
+  smoothness = 1;
+  #endif
+  #endif
+  
   vec3 R                  = reflect(-V, N);
   
   float NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
