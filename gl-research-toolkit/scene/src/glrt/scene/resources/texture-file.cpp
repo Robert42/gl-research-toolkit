@@ -298,6 +298,8 @@ public:
 
     quint32 w = image.width*4;
     quint32 h = image.height * image.depth;
+
+    #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
       float* line = reinterpret_cast<float*>(data + y * image.rowStride);
