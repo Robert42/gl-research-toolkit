@@ -151,7 +151,7 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 ShaderDebugPrinter::ShaderDebugPrinter()
   : shader(std::move(ShaderCompiler::createShaderFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
     headerBuffer(sizeof(Header), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
-    chunkBuffer(sizeof(Chunk), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
+    chunkBuffer(sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS, gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
     directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug))
 {
@@ -190,7 +190,7 @@ void ShaderDebugPrinter::begin()
     return;
 
   // Warning: This is an ugly hack to be able to read out the values fromt he buffer. If you delete the following line, the shader debugger won't work
-  chunkBuffer = std::move(gl::Buffer(sizeof(Chunk), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr));
+  chunkBuffer = std::move(gl::Buffer(sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS, gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr));
 
   Header* header = reinterpret_cast<Header*>(headerBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
@@ -202,8 +202,9 @@ void ShaderDebugPrinter::begin()
   headerBuffer.Unmap();
 
   Chunk* chunk = reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  memset(chunk, 0, sizeof(Chunk));
-  chunk->z_value = INFINITY;
+  memset(chunk, 0, sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS);
+  for(int i=0; i<GLSL_DEBUGGING_MAX_NUM_CHUNKS; ++i)
+    chunk[i].z_value = INFINITY;
   chunkBuffer.Unmap();
 
   headerBuffer.BindUniformBuffer(UNIFORM_BINDING_VALUE_PRINTER);
@@ -214,16 +215,23 @@ void ShaderDebugPrinter::end()
   if(!active || !mouse_is_pressed)
     return;
 
-  Chunk chunk = *reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
+  Chunk readChunks[GLSL_DEBUGGING_MAX_NUM_CHUNKS];
+
+  Chunk* chunks = reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
+  memcpy(readChunks, chunks, sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS);
   chunkBuffer.Unmap();
 
   positionsToDebug.clear();
   directionsToDebug.clear();
 
-  if(!std::isinf(chunk.z_value))
+  for(int i=0; i<GLSL_DEBUGGING_MAX_NUM_CHUNKS; ++i)
   {
-    qDebug() << "\n\n";
-    printChunk(chunk);
+    if(!std::isinf(readChunks[i].z_value))
+    {
+      if(i==0)
+        qDebug() << "\n\n";
+      printChunk(readChunks[i]);
+    }
   }
 
   positionVisualization.reinit();
