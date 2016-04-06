@@ -5,6 +5,7 @@
 #include <glrt/gui/toolbar.h>
 #include <glrt/toolkit/uuid.h>
 #include <glrt/scene/resources/resource-manager.h>
+#include <glrt/renderer/debugging/surface-shader-visualizations.h>
 
 #include <glrt/scene/camera-parameter.h>
 
@@ -36,7 +37,7 @@ using glrt::scene::CameraParameter;
 using glrt::scene::Scene;
 
 
-template<typename T, typename T_Map>
+template<typename T, typename T_Map=QMap<QString, T>>
 class TweakBarEnum
 {
 public:
@@ -291,15 +292,15 @@ public:
 
 
 private:
-  typedef TweakBarEnum<Uuid<Scene>, QMap<QString, Uuid<Scene>>> SceneEnumeration;
-  typedef TweakBarEnum<QPointer<scene::CameraComponent>, QMap<QString, QPointer<scene::CameraComponent>>> CameraEnumeration;
+  typedef TweakBarEnum<Uuid<Scene>> SceneEnumeration;
+  typedef TweakBarEnum<QPointer<scene::CameraComponent>> CameraEnumeration;
+  typedef TweakBarEnum<glrt::renderer::SurfaceShaderVisualization> VisualizationEnumeration;
 
   gui::TweakBarCBVar<bool> toggleProfiler;
 
-  gui::TweakBarCBVar<bool> shader_flat_lighting;
-
   SceneEnumeration::Ptr sceneSwitcher;
   CameraEnumeration::Ptr cameraSwitcher;
+  VisualizationEnumeration::Ptr visualizationSwitcher;
 
   void updateAntTweakBarWindowSize();
 

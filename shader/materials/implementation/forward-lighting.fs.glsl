@@ -32,7 +32,7 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
   alpha = step(MASK_THRESHOLD, alpha);
 #endif
   
-#ifdef FLAT_LIGHTING
+#ifdef LIGHTING_FLAT
   fragment_color = vec4(material.base_color + material.emission, alpha);
   return;
 #endif
