@@ -77,6 +77,7 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]");
 
   TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &profiler->printFramerate, "");
+  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
 
   toggleProfiler.getter = [profiler]()->bool{return profiler->isActive();};
   toggleProfiler.setter = [profiler](bool a){
@@ -102,6 +103,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwBar* tweakBar = TwNewBar("Scene");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
+  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
 
   sceneSwitcher = SceneEnumeration::Ptr(new SceneEnumeration("CurrentSceneEnum", tweakBar, "Current Scene", ""));
   sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, scene.resourceManager.allRegisteredScenes());
@@ -132,6 +134,7 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
   TwBar* tweakBar = TwNewBar("Shader");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a shader.");
+  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
 
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
