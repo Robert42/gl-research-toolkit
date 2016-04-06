@@ -219,7 +219,13 @@ void AntTweakBar::handeledEvent(const SDL_Event& event)
     if(event.button.button == SDL_BUTTON_LEFT)
     {
       bool captured_mouse = event.button.state==SDL_PRESSED;
-      SDL_SetWindowGrab(application->sdlWindow, captured_mouse ? SDL_TRUE : SDL_FALSE);
+      // Workaround:
+      // Don't capture the mouse immediatly, as if the application freezes,
+      // (because of an error while handling a pressed button),
+      // the mouse should not be captured so the user can use other applications
+      // As the event is lgging behind, wait 20 frames before capturing the mouse
+      captureMouseDeferred = captured_mouse ? MouseCaptureState(20) : MouseCaptureState::IDLE;
+      SDL_SetWindowGrab(application->sdlWindow, SDL_FALSE);
     }
     return;
   default:
@@ -276,6 +282,19 @@ bool AntTweakBar::unhandeledEvent(const SDL_Event& event)
   }
 }
 
+// The mouse wasn't captured immediatly, as if the application freezes, because of an error while handling a pressed button, the mouse should not be captured during debugging
+inline void AntTweakBar::deferredMouseCapture()
+{
+  if(captureMouseDeferred==MouseCaptureState::CAPTURE_NOW && this->visible)
+  {
+    captureMouseDeferred = MouseCaptureState::IDLE;
+    SDL_SetWindowGrab(application->sdlWindow, SDL_TRUE);
+  }else if(captureMouseDeferred>=MouseCaptureState::CAPTURE_NEXT_FRAME)
+  {
+    captureMouseDeferred = MouseCaptureState(int(captureMouseDeferred)-1);
+  }
+}
+
 
 void AntTweakBar::draw()
 {
@@ -283,6 +302,8 @@ void AntTweakBar::draw()
 
   if(visible)
     TwDraw();
+
+  deferredMouseCapture();
 }
 
 
