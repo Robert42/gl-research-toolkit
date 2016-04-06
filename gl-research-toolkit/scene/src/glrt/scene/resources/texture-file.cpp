@@ -382,14 +382,10 @@ void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importS
         TextureAsFloats asFloats = textureInformation.asFloats(level);
 
         if(importSettings.sourceIsBumpMap || importSettings.sourceIsNormalMap)
-        {
           asFloats.convertToSignedNormalized();
-        }
 
         if(importSettings.need_remapping())
-        {
           asFloats.remap(importSettings.offset, importSettings.factor);
-        }
 
         textureInformation.fromFloats(asFloats);
       }
