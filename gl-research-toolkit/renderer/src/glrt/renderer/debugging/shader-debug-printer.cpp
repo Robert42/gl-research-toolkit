@@ -217,7 +217,7 @@ void ShaderDebugPrinter::end()
 
   Chunk readChunks[GLSL_DEBUGGING_MAX_NUM_CHUNKS];
 
-  Chunk* chunks = reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
+  const Chunk* chunks = const_cast<const Chunk*>(reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE)));
   memcpy(readChunks, chunks, sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS);
   chunkBuffer.Unmap();
 
