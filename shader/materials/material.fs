@@ -55,9 +55,8 @@ void main()
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
 vec4 tint;
-vec2 smoothness_range;
-vec2 occlusion_range;
-vec2 reflectance_range;
+vec4 srmo_range_0;
+vec4 srmo_range_1;
 float emission_factor;
 // sampler2D within Uniform Block possible thanks to GL_NV_bindless_texture
 sampler2D basecolor_map;
@@ -80,18 +79,20 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
 #ifndef DEPTH_PREPASS
   vec4 srmo = texture2D(material_instance.srmo_map, uv);
   
+  srmo = mix(material_instance.srmo_range_0, material_instance.srmo_range_1, srmo);
+  
   float smoothness = srmo[0];
   float reflectance = srmo[1];
   float metal_mask = srmo[2];
   float occlusion = srmo[3];
   
   material.normal = fragment.normal; // TODO implement normal mapping
-  material.smoothness = mix(material_instance.smoothness_range[0], material_instance.smoothness_range[1], smoothness);
+  material.smoothness = smoothness;
   material.base_color = color.rgb;
   material.metal_mask = metal_mask;
   material.emission = texture2D(material_instance.emission_map, uv).xyz * material_instance.emission_factor;
-  material.reflectance = mix(material_instance.reflectance_range[0], material_instance.reflectance_range[1], reflectance);
-  material.occlusion = mix(material_instance.occlusion_range[0], material_instance.occlusion_range[1], occlusion);
+  material.reflectance = reflectance;
+  material.occlusion = occlusion;
   
   surface.position = fragment.position;
   
