@@ -25,6 +25,12 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile)
 {
+  QDir targetDir = targetFile.path();
+  if(targetDir.exists("FORCE-REIMPORT"))
+    return true;
+  if(targetDir.exists(targetFile.baseName()+".FORCE-REIMPORT"))
+    return true;
+
   // No conversion possible if the source file doesn't exist
   if(!sourceFile.exists())
   {
