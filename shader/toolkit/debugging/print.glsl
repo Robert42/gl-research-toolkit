@@ -66,7 +66,8 @@ void implement_print_chunk(in DebuggingOutputChunk chunk)
     chunk.z_value = gl_FragCoord.z;
     
     DebuggingOutputChunk* chunks = (DebuggingOutputChunk*)debugging_buffer.chunkAddress;
-    chunks[nextChunkToWrite++] = chunk;
+    chunks[nextChunkToWrite] = chunk;
+    nextChunkToWrite++; // chunks[nextChunkToWrite++] seems not to be supported
   }
 #endif
 }
