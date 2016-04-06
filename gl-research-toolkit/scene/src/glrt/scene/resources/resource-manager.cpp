@@ -76,6 +76,8 @@ void ResourceManager::prepareForGpuBuffer(const Uuid<Material>& uuid) const
 
 Texture ResourceManager::textureForUuid(const Uuid<Texture>& uuid) const
 {
+  Q_ASSERT(Index::fallback.textures[uuids::fallbackDiffuseTexture].file.filePath().isEmpty() == false);
+
   return indexForResourceUuid(uuid)->textures.value(uuid, Index::fallback.textures[uuids::fallbackDiffuseTexture]);
 }
 
