@@ -40,7 +40,7 @@ void main()
 
   BaseMaterial material;
   
-  material.normal = fragment.normal;
+  material.normal = normalize(fragment.normal);
   material.smoothness = material_instance.smoothness;
   material.base_color = material_instance.base_color;
   material.metal_mask  = material_instance.metal_mask;
@@ -124,7 +124,7 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   
   emission *= material_instance.emission_factor;
   
-  material.normal = fragment.normal; // TODO implement normal mapping
+  material.normal = normalize(fragment.normal); // TODO implement normal mapping
   material.smoothness = smoothness;
   material.base_color = color.rgb;
   material.metal_mask = metal_mask;

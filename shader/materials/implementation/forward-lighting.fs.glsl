@@ -39,13 +39,13 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
 #endif
 
 #if defined(MESH_NORMALS_WS)
-  fragment_color = vec4(encode_direction_as_color(fragment.normal), 1);
+  fragment_color = vec4(encode_direction_as_color(normalize(fragment.normal)), 1);
   return;
 #elif defined(MESH_UVS)
   fragment_color = vec4(fragment.uv, 0, 1);
   return;
 #elif defined(MESH_TANGENTS_WS)
-  fragment_color = vec4(encode_direction_as_color(fragment.tangent), 1);
+  fragment_color = vec4(encode_direction_as_color(normalize(fragment.tangent)), 1);sdsd
   return;
 #endif
 
