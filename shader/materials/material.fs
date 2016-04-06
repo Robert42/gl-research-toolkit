@@ -85,7 +85,7 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   vec3 normal = texture2D(material_instance.normal_map, uv).xyz;
   vec4 srmo = texture2D(material_instance.srmo_map, uv);
   vec3 emission = texture2D(material_instance.emission_map, uv).rgb;
-  
+
   #if defined(TEXTURE_BASECOLOR)
     fragment_color = color;
     return;
@@ -146,7 +146,8 @@ void main()
 {
 #ifdef DEPTH_PREPASS
   fragment_color = vec4(1, 0, 1, 1);
-#ifdef OPAQUE
+  // ignore the alpha in the depth prepass, if the material is opaque, or the alpha channel itself is current being debugged
+#if defined(OPAQUE) || defined(MATERIAL_NORMAL_WS) || defined(MATERIAL_ALPHA)
   return;
 #endif
 #endif

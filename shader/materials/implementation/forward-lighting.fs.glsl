@@ -40,6 +40,32 @@ void apply_material(in BaseMaterial material, in SurfaceData surface, float alph
   return;
 #endif
 
+#if defined(MATERIAL_NORMAL_WS)
+  fragment_color = vec4(encode_direction_as_color(material.normal), alpha);
+  return;
+#elif defined(MATERIAL_ALPHA)
+  fragment_color = vec4(vec3(alpha), 1);
+  return;
+#elif defined(MATERIAL_SMOOTHNESS)
+  fragment_color = vec4(vec3(material.smoothness), alpha);
+  return;
+#elif defined(MATERIAL_BASE_COLOR)
+  fragment_color = vec4(material.base_color, alpha);
+  return;
+#elif defined(MATERIAL_METAL_MASK)
+  fragment_color = vec4(vec3(material.metal_mask), alpha);
+return;
+#elif defined(MATERIAL_EMISSION)
+  fragment_color = vec4(material.emission, alpha);
+  return;
+#elif defined(MATERIAL_REFLECTANCE)
+  fragment_color = vec4(vec3(material.reflectance), alpha);
+  return;
+#elif defined(MATERIAL_OCCLUSION)
+  fragment_color = vec4(vec3(material.occlusion), alpha);
+  return;
+#endif
+
 #if defined(MESH_NORMALS_WS)
   fragment_color = vec4(encode_direction_as_color(normalize(fragment.normal)), 1);
   return;
