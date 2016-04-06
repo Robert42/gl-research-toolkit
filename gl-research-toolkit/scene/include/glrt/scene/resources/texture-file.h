@@ -72,6 +72,18 @@ public:
     bool sourceIsNormalMap = false;
     bool sourceIsBumpMap = false;
     bool generateMipmaps = true;
+    glm::vec4 offset = glm::vec4(0);
+    glm::vec4 factor = glm::vec4(1);
+
+    bool need_remapping() const
+    {
+      return factor!=glm::vec4(1) || offset!=glm::vec4(0);
+    }
+
+    bool need_processing() const
+    {
+      return sourceIsNormalMap || sourceIsBumpMap || need_remapping();
+    }
 
     static void registerType();
   };
@@ -84,6 +96,7 @@ public:
 
 private:
   class ImportedGlTexture;
+  class TextureAsFloats;
 
   struct Header
   {

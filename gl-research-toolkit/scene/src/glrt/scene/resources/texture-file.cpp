@@ -147,6 +147,57 @@ GLenum TextureFile::ImportSettings::internalFormat(Format format, Type type, boo
   return GL_R8;
 }
 
+
+struct TextureFile::TextureAsFloats
+{
+  TextureFile::UncompressedImage image;
+  QVector<byte> textureData;
+  byte* data;
+  quint32 w, w_float, h;
+
+  TextureAsFloats(const QPair<UncompressedImage, QVector<byte>>& importedTexture)
+  {
+    image = importedTexture.first;
+    textureData = importedTexture.second;
+    data = reinterpret_cast<byte*>(textureData.data());
+    w = image.width;
+    w_float = w*4;
+    h = image.height*image.depth;
+  }
+
+  float* lineData_AsFloat(quint32 y)
+  {
+    return reinterpret_cast<float*>(data + y * image.rowStride);
+  }
+
+  glm::vec4* lineData_AsVec4(quint32 y)
+  {
+    return reinterpret_cast<glm::vec4*>(data + y * image.rowStride);
+  }
+
+  void convertToSignedNormalized()
+  {
+    #pragma omp parallel for
+    for(quint32 y=0; y<h; ++y)
+    {
+      float* line = this->lineData_AsFloat(y);
+      for(quint32 x=0; x<w_float; ++x)
+        line[x] = line[x]*2.f - 1.f;
+    }
+  }
+
+  void remap(glm::vec4 offset, glm::vec4 factor)
+  {
+    #pragma omp parallel for
+    for(quint32 y=0; y<h; ++y)
+    {
+      glm::vec4* line = this->lineData_AsVec4(y);
+      for(quint32 x=0; x<w; ++x)
+        line[x] = line[x]*factor + offset;
+    }
+  }
+};
+
 class TextureFile::ImportedGlTexture
 {
 public:
@@ -288,26 +339,16 @@ public:
     GL_CALL(glBindTexture, static_cast<GLenum>(image.target), 0);
   }
 
-  void convertToSignedNormalMap(int level)
+  TextureAsFloats asFloats(int level)
   {
     QPair<UncompressedImage, QVector<byte>> importedTexture = uncompressed2DImage(level, Format::RGBA, Type::FLOAT32);
 
-    QVector<byte> textureData = importedTexture.second;
-    const UncompressedImage& image = importedTexture.first;
-    byte* data = reinterpret_cast<byte*>(textureData.data());
+    return importedTexture;
+  }
 
-    quint32 w = image.width*4;
-    quint32 h = image.height * image.depth;
-
-    #pragma omp parallel for
-    for(quint32 y=0; y<h; ++y)
-    {
-      float* line = reinterpret_cast<float*>(data + y * image.rowStride);
-      for(quint32 x=0; x<w; ++x)
-        line[x] = line[x]*2.f - 1.f;
-    }
-
-    setUncompressed2DImage(image, data);
+  void fromFloats(const TextureAsFloats& texture)
+  {
+    setUncompressed2DImage(texture.image, texture.data);
   }
 };
 
@@ -336,8 +377,22 @@ void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importS
   {
     for(int level=firstMipMap; level<=lastMipMap; ++level)
     {
-      if(importSettings.sourceIsNormalMap || importSettings.sourceIsBumpMap)
-        textureInformation.convertToSignedNormalMap(level);
+      if(importSettings.need_processing())
+      {
+        TextureAsFloats asFloats = textureInformation.asFloats(level);
+
+        if(importSettings.sourceIsBumpMap || importSettings.sourceIsNormalMap)
+        {
+          asFloats.convertToSignedNormalized();
+        }
+
+        if(importSettings.need_remapping())
+        {
+          asFloats.remap(importSettings.offset, importSettings.factor);
+        }
+
+        textureInformation.fromFloats(asFloats);
+      }
 
       QPair<UncompressedImage, QVector<byte>> image =  textureInformation.uncompressed2DImage(level, importSettings.format, importSettings.type);
 
@@ -616,6 +671,8 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsBumpMap", asOFFSET(ImportSettings,sourceIsBumpMap)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "vec4 factor", asOFFSET(ImportSettings,factor)); AngelScriptCheck(r);
 }
 
 quint32 TextureFile::UncompressedImage::calcRowStride() const
