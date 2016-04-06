@@ -440,8 +440,10 @@ TextureFile::TextureFile()
 {
 }
 
-void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importSettings)
+void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings)
 {
+  importSettings.preprocess();
+
   const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
   quint32 flags = SOIL_FLAG_POWER_OF_TWO|SOIL_FLAG_INVERT_Y;
@@ -825,6 +827,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "bool merge_green_as_grey", asOFFSET(ImportSettings,merge_green_as_grey)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool merge_blue_as_grey", asOFFSET(ImportSettings,merge_blue_as_grey)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool merge_alpha_as_grey", asOFFSET(ImportSettings,merge_alpha_as_grey)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "vec4 force_value", asOFFSET(ImportSettings,force_value)); AngelScriptCheck(r);
 }
 
 quint32 TextureFile::UncompressedImage::calcRowStride() const

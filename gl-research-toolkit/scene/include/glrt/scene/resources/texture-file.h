@@ -82,10 +82,35 @@ public:
     bool merge_green_as_grey = true;
     bool merge_blue_as_grey = true;
     bool merge_alpha_as_grey = true;
+    glm::vec4 force_value = glm::vec4(NAN);
+
+    void preprocess()
+    {
+      if(!glm::isnan(force_value.r))
+      {
+        offset.r = force_value.r;
+        factor.r = 0;
+      }
+      if(!glm::isnan(force_value.g))
+      {
+        offset.g = force_value.g;
+        factor.g = 0;
+      }
+      if(!glm::isnan(force_value.b))
+      {
+        offset.b = force_value.b;
+        factor.b = 0;
+      }
+      if(!glm::isnan(force_value.a))
+      {
+        offset.a = force_value.a;
+        factor.a = 0;
+      }
+    }
 
     bool need_remapping() const
     {
-      return factor!=glm::vec4(1) || offset!=glm::vec4(0);
+      return factor!=glm::vec4(1) || offset!=glm::vec4(0) || force_value!=glm::vec4(NAN);
     }
 
     bool need_merging() const
@@ -103,7 +128,7 @@ public:
 
   TextureFile();
 
-  void import(const QFileInfo& srcFile, const ImportSettings& importSettings);
+  void import(const QFileInfo& srcFile, ImportSettings importSettings);
   void save(const QFileInfo& textureFile);
   static GLuint loadFromFile(const QFileInfo& textureFile);
 
