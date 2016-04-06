@@ -32,6 +32,12 @@ void main()
   fragment_color = vec4(1, 0, 1, 1);
   return;
 #endif
+
+#if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_HEIGHT) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
+  fragment_color = checkerboard();
+  return;
+#endif
+
   BaseMaterial material;
   
   material.normal = fragment.normal;
@@ -71,12 +77,43 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
 {
   vec2 uv = fragment.uv;
   
+  float height = texture2D(material_instance.height_map, uv).r;
   // TODO simple parallax mapping using height_map
   
   vec4 color = texture2D(material_instance.basecolor_map, uv) * material_instance.tint;
-  
 #ifndef DEPTH_PREPASS
+  vec3 normal = texture2D(material_instance.normal_map, uv).xyz;
   vec4 srmo = texture2D(material_instance.srmo_map, uv);
+  vec3 emission = texture2D(material_instance.emission_map, uv).rgb;
+  
+  #if defined(TEXTURE_BASECOLOR)
+    fragment_color = color;
+    return;
+  #elif defined(TEXTURE_BASECOLOR_ALPHA)
+    fragment_color = vec4(color.aaa, 1);
+    return;
+  #elif defined(TEXTURE_NORMAL_LS)
+    fragment_color = vec4(encode_direction_as_color(normal), 1);
+    return;
+  #elif defined(TEXTURE_HEIGHT)
+    fragment_color = vec4(vec3(height), 1);
+    return;
+  #elif defined(TEXTURE_SMOOTHENESS)
+    fragment_color = vec4(vec3(srmo[0]), 1);
+    return;
+  #elif defined(TEXTURE_REFLECTIVITY)
+    fragment_color = vec4(vec3(srmo[1]), 1);
+    return;
+  #elif defined(TEXTURE_METALLIC)
+    fragment_color = vec4(vec3(srmo[2]), 1);
+    return;
+  #elif defined(TEXTURE_AO)
+    fragment_color = vec4(vec3(srmo[3]), 1);
+    return;
+  #elif defined(TEXTURE_EMISSION)
+    fragment_color = vec4(vec3(emission), 1);
+    return;
+  #endif
   
   srmo = mix(material_instance.srmo_range_0, material_instance.srmo_range_1, srmo);
   
@@ -85,11 +122,13 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   float metal_mask = srmo[2];
   float occlusion = srmo[3];
   
+  emission *= material_instance.emission_factor;
+  
   material.normal = fragment.normal; // TODO implement normal mapping
   material.smoothness = smoothness;
   material.base_color = color.rgb;
   material.metal_mask = metal_mask;
-  material.emission = texture2D(material_instance.emission_map, uv).xyz * material_instance.emission_factor;
+  material.emission = emission;
   material.reflectance = reflectance;
   material.occlusion = occlusion;
   
@@ -116,6 +155,10 @@ void main()
   SurfaceData surface;
   float alpha;
   calculate_material_output(material, surface, alpha);
+  
+#if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_HEIGHT) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
+  return;
+#endif
   
 #ifdef DEPTH_PREPASS
 #ifdef MASKED

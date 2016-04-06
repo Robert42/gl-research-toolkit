@@ -20,6 +20,15 @@ enum class SurfaceShaderVisualization
   MESH_NORMALS_WS,
   MESH_UVS,
   MESH_TANGENTS_WS,
+  TEXTURE_BASECOLOR,
+  TEXTURE_BASECOLOR_ALPHA,
+  TEXTURE_NORMAL_LS,
+  TEXTURE_HEIGHT,
+  TEXTURE_SMOOTHENESS,
+  TEXTURE_REFLECTIVITY,
+  TEXTURE_METALLIC,
+  TEXTURE_AO,
+  TEXTURE_EMISSION,
 };
 
 extern SurfaceShaderVisualization currentSurfaceShaderVisualization;
