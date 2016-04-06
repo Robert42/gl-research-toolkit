@@ -114,7 +114,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneLayerFile(const Uuid<SceneLayer> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneLayerFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler, bool generateMipmaps)", AngelScript::asMETHOD(ResourceIndex,registerTexture), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler)", AngelScript::asMETHOD(ResourceIndex,registerTexture), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
   MeshImportSettings::registerType();
