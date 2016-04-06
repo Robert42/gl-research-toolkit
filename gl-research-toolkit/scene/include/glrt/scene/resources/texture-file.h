@@ -74,15 +74,28 @@ public:
     bool generateMipmaps = true;
     glm::vec4 offset = glm::vec4(0);
     glm::vec4 factor = glm::vec4(1);
+    std::string red_channel_suffix;
+    std::string green_channel_suffix;
+    std::string blue_channel_suffix;
+    std::string alpha_channel_suffix;
+    bool merge_red_as_grey = true;
+    bool merge_green_as_grey = true;
+    bool merge_blue_as_grey = true;
+    bool merge_alpha_as_grey = true;
 
     bool need_remapping() const
     {
       return factor!=glm::vec4(1) || offset!=glm::vec4(0);
     }
 
+    bool need_merging() const
+    {
+      return !red_channel_suffix.empty() || !green_channel_suffix.empty() || !blue_channel_suffix.empty() || !alpha_channel_suffix.empty();
+    }
+
     bool need_processing() const
     {
-      return sourceIsNormalMap || sourceIsBumpMap || need_remapping();
+      return sourceIsNormalMap || sourceIsBumpMap || need_remapping() || need_merging();
     }
 
     static void registerType();

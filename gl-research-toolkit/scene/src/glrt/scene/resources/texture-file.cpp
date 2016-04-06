@@ -152,8 +152,10 @@ struct TextureFile::TextureAsFloats
 {
   TextureFile::UncompressedImage image;
   QVector<byte> textureData;
-  byte* data;
-  quint32 w, w_float, h;
+  byte* data = nullptr;
+  quint32 w = 0, w_float=0, h = 0;
+
+  TextureAsFloats() = delete;
 
   TextureAsFloats(const QPair<UncompressedImage, QVector<byte>>& importedTexture)
   {
@@ -173,6 +175,11 @@ struct TextureFile::TextureAsFloats
   glm::vec4* lineData_AsVec4(quint32 y)
   {
     return reinterpret_cast<glm::vec4*>(data + y * image.rowStride);
+  }
+
+  const glm::vec4* lineData_AsVec4(quint32 y) const
+  {
+    return reinterpret_cast<const glm::vec4*>(data + y * image.rowStride);
   }
 
   void convertToSignedNormalized()
@@ -195,6 +202,83 @@ struct TextureFile::TextureAsFloats
       for(quint32 x=0; x<w; ++x)
         line[x] = line[x]*factor + offset;
     }
+  }
+
+  void mergeWith_as_grey(const TextureAsFloats& red, const TextureAsFloats& green, const TextureAsFloats& blue, const TextureAsFloats& alpha)
+  {
+    Q_ASSERT(red.w == this->w);
+    Q_ASSERT(red.h == this->h);
+    Q_ASSERT(green.w == this->w);
+    Q_ASSERT(green.h == this->h);
+    Q_ASSERT(blue.w == this->w);
+    Q_ASSERT(blue.h == this->h);
+    Q_ASSERT(alpha.w == this->w);
+    Q_ASSERT(alpha.h == this->h);
+
+    #pragma omp parallel for
+    for(quint32 y=0; y<h; ++y)
+    {
+      glm::vec4* targetLine = this->lineData_AsVec4(y);
+      const glm::vec4* redLine = red.lineData_AsVec4(y);
+      const glm::vec4* greenLine = green.lineData_AsVec4(y);
+      const glm::vec4* blueLine = blue.lineData_AsVec4(y);
+      const glm::vec4* alphaLine = alpha.lineData_AsVec4(y);
+      for(quint32 x=0; x<w; ++x)
+      {
+        targetLine[x].r = glm::length(redLine[x].rgb());
+        targetLine[x].g = glm::length(greenLine[x].rgb());
+        targetLine[x].b = glm::length(blueLine[x].rgb());
+        targetLine[x].a = glm::length(alphaLine[x].rgb());
+      }
+    }
+  }
+
+  void mergeWith_channelwise(const TextureAsFloats& red, const TextureAsFloats& green, const TextureAsFloats& blue, const TextureAsFloats& alpha)
+  {
+    Q_ASSERT(red.w == this->w);
+    Q_ASSERT(red.h == this->h);
+    Q_ASSERT(green.w == this->w);
+    Q_ASSERT(green.h == this->h);
+    Q_ASSERT(blue.w == this->w);
+    Q_ASSERT(blue.h == this->h);
+    Q_ASSERT(alpha.w == this->w);
+    Q_ASSERT(alpha.h == this->h);
+
+    #pragma omp parallel for
+    for(quint32 y=0; y<h; ++y)
+    {
+      glm::vec4* targetLine = this->lineData_AsVec4(y);
+      const glm::vec4* redLine = red.lineData_AsVec4(y);
+      const glm::vec4* greenLine = green.lineData_AsVec4(y);
+      const glm::vec4* blueLine = blue.lineData_AsVec4(y);
+      const glm::vec4* alphaLine = alpha.lineData_AsVec4(y);
+      for(quint32 x=0; x<w; ++x)
+      {
+        targetLine[x].r = redLine[x].r;
+        targetLine[x].g = greenLine[x].g;
+        targetLine[x].b = blueLine[x].b;
+        targetLine[x].a = alphaLine[x].b;
+      }
+    }
+  }
+
+  void mergeWith(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha,
+                 bool merge_red_as_grey, bool merge_green_as_grey, bool merge_blue_as_grey, bool merge_alpha_as_grey)
+  {
+    const TextureAsFloats* redAsGrey = red&&merge_red_as_grey ? red : this;
+    const TextureAsFloats* greenAsGrey = green&&merge_green_as_grey ? red : this;
+    const TextureAsFloats* blueAsGrey = blue&&merge_blue_as_grey ? red : this;
+    const TextureAsFloats* alphaAsGrey = alpha&&merge_alpha_as_grey ? red : this;
+
+    const TextureAsFloats* redChannelwise = red&&!merge_red_as_grey ? red : this;
+    const TextureAsFloats* greenChannelwise = green&&!merge_green_as_grey ? red : this;
+    const TextureAsFloats* blueChannelwise = blue&&!merge_blue_as_grey ? red : this;
+    const TextureAsFloats* alphaChannelwise = alpha&&!merge_alpha_as_grey ? red : this;
+
+    if(merge_red_as_grey || merge_green_as_grey || merge_blue_as_grey || merge_alpha_as_grey)
+      mergeWith_as_grey(*redAsGrey, *greenAsGrey, *blueAsGrey, *alphaAsGrey);
+    if(!merge_red_as_grey || !merge_green_as_grey || !merge_blue_as_grey || !merge_alpha_as_grey)
+      mergeWith_channelwise(*redChannelwise, *greenChannelwise, *blueChannelwise, *alphaChannelwise);
   }
 };
 
@@ -370,8 +454,35 @@ void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importS
                                                              SOIL_CREATE_NEW_ID,
                                                              flags));
 
+  ImportedGlTexture* red_texture = nullptr;
+  ImportedGlTexture* green_texture = nullptr;
+  ImportedGlTexture* blue_texture = nullptr;
+  ImportedGlTexture* alpha_texture = nullptr;
+
   const int firstMipMap = 0;
   const int lastMipMap = textureInformation.maxLevel();
+
+  if(importSettings.need_merging())
+  {
+    auto createChannelTextureInfo = [flags,&srcFile,&textureInformation](const std::string& filename) {
+      ImportedGlTexture* tex = nullptr;
+      if(!filename.empty())
+      {
+        tex = new ImportedGlTexture(SOIL_load_OGL_texture(filename.c_str(),
+                                                          SOIL_LOAD_AUTO,
+                                                          SOIL_CREATE_NEW_ID,
+                                                          flags));
+        if(tex->width(0) != textureInformation.width(0) || tex->height(0) == textureInformation.height(0))
+          throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1").arg(srcFile.filePath()).arg(filename.c_str()));
+      }
+      return tex;
+    };
+
+    red_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
+    green_texture = createChannelTextureInfo(importSettings.blue_channel_suffix);
+    blue_texture = createChannelTextureInfo(importSettings.green_channel_suffix);
+    alpha_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
+  }
 
   if(importSettings.compression == TextureFile::Compression::NONE)
   {
@@ -380,6 +491,37 @@ void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importS
       if(importSettings.need_processing())
       {
         TextureAsFloats asFloats = textureInformation.asFloats(level);
+
+        if(importSettings.need_merging())
+        {
+          const TextureAsFloats* redAsFloats = nullptr;
+          const TextureAsFloats* greenAsFloats = nullptr;
+          const TextureAsFloats* blueAsFloats = nullptr;
+          const TextureAsFloats* alphaAsFloats = nullptr;
+
+          if(red_texture)
+            redAsFloats = new TextureAsFloats(red_texture->asFloats(level));
+          if(green_texture)
+            greenAsFloats = new TextureAsFloats(green_texture->asFloats(level));
+          if(blue_texture)
+            blueAsFloats = new TextureAsFloats(blue_texture->asFloats(level));
+          if(alpha_texture)
+            alphaAsFloats = new TextureAsFloats(alpha_texture->asFloats(level));
+
+          asFloats.mergeWith(redAsFloats,
+                             greenAsFloats,
+                             blueAsFloats,
+                             alphaAsFloats,
+                             importSettings.merge_red_as_grey,
+                             importSettings.merge_green_as_grey,
+                             importSettings.merge_blue_as_grey,
+                             importSettings.merge_alpha_as_grey);
+
+          delete redAsFloats;
+          delete greenAsFloats;
+          delete blueAsFloats;
+          delete alphaAsFloats;
+        }
 
         if(importSettings.sourceIsBumpMap || importSettings.sourceIsNormalMap)
           asFloats.convertToSignedNormalized();
@@ -400,6 +542,11 @@ void TextureFile::import(const QFileInfo& srcFile, const ImportSettings& importS
   {
     Q_UNREACHABLE();
   }
+
+  delete red_texture;
+  delete green_texture;
+  delete blue_texture;
+  delete alpha_texture;
 }
 
 void TextureFile::save(const QFileInfo& textureFile)
@@ -660,8 +807,9 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterEnumValue("TextureType", "FLOAT16", int(Type::FLOAT16)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("TextureType", "FLOAT32", int(Type::FLOAT32)); AngelScriptCheck(r);
 
-  r = angelScriptEngine->RegisterObjectType(name, sizeof(ImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectType(name, sizeof(ImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_DESTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_destructor<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);
@@ -669,6 +817,14 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 factor", asOFFSET(ImportSettings,factor)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "string red_channel_suffix", asOFFSET(ImportSettings,red_channel_suffix)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "string green_channel_suffix", asOFFSET(ImportSettings,green_channel_suffix)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "string blue_channel_suffix", asOFFSET(ImportSettings,blue_channel_suffix)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "string alpha_channel_suffix", asOFFSET(ImportSettings,alpha_channel_suffix)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool merge_red_as_grey", asOFFSET(ImportSettings,merge_red_as_grey)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool merge_green_as_grey", asOFFSET(ImportSettings,merge_green_as_grey)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool merge_blue_as_grey", asOFFSET(ImportSettings,merge_blue_as_grey)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool merge_alpha_as_grey", asOFFSET(ImportSettings,merge_alpha_as_grey)); AngelScriptCheck(r);
 }
 
 quint32 TextureFile::UncompressedImage::calcRowStride() const
