@@ -17,6 +17,7 @@ reset_cmake_prefix_path()
 adapt_cmake_prefix_path(QT5_DIR)
 find_package(Qt5Core 5.5 REQUIRED)
 reset_cmake_prefix_path()
+find_package(OpenMP REQUIRED)
 
 set(GLRT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(GLRT_ASSET_DIR ${GLRT_DIR}/external/assets)
@@ -26,6 +27,8 @@ set(GLRT_TEMP_SHADER_DIR ${CMAKE_CURRENT_BINARY_DIR}/temp-shader)
 set(GLRT_PROFILER_DEFAULT_PORT 4315)
 
 add_definitions("-DGLRT_PROFILER_DEFAULT_PORT=${GLRT_PROFILER_DEFAULT_PORT}")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 add_subdirectory(external)
 add_subdirectory(shader)

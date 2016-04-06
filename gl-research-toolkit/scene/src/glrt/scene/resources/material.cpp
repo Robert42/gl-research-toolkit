@@ -165,9 +165,8 @@ void Material::registerAngelScriptTypes()
   r = angelScriptEngine->RegisterObjectType(type, sizeof(Material::Textured<TextureHandle>), AngelScript::asOBJ_VALUE | AngelScript::asOBJ_POD | AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour(type, AngelScript::asBEHAVE_CONSTRUCT, "void ctor()", AngelScript::asFUNCTION(as_init_textured_material), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(type, "vec4 tint", asOFFSET(Material::Textured<TextureHandle>, tint)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 smoothness_range", asOFFSET(Material::Textured<TextureHandle>, smoothness_range)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 occlusion_range", asOFFSET(Material::Textured<TextureHandle>, occlusion_range)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 reflectance_range", asOFFSET(Material::Textured<TextureHandle>, reflectance_range)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 srmo_range_0", asOFFSET(Material::Textured<TextureHandle>, srmo_range_0)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(type, "vec2 srmo_range_1", asOFFSET(Material::Textured<TextureHandle>, srmo_range_1)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(type, "float emission_factor", asOFFSET(Material::Textured<TextureHandle>, emission_factor)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle basecolor_map", asOFFSET(Material::Textured<TextureHandle>, basecolor_map)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(type, "TextureHandle normal_map", asOFFSET(Material::Textured<TextureHandle>, normal_map)); AngelScriptCheck(r);

@@ -45,9 +45,8 @@ public:
   struct Textured
   {
     glm::vec4 tint = glm::vec4(1);
-    glm::vec2 smoothness_range = glm::vec2(0,1);
-    glm::vec2 occlusion_range = glm::vec2(0,1);
-    glm::vec2 reflectance_range = glm::vec2(0,1);
+    glm::vec4 srmo_range_0 = glm::vec4(0);
+    glm::vec4 srmo_range_1 = glm::vec4(1);
     float emission_factor = 1.f;
     Type type = TypeFlag::TEXTURED; // for T_textureHandle==GLuint64, this is ignored
     T_textureHandle basecolor_map;
