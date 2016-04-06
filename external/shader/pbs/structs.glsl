@@ -30,7 +30,6 @@ struct SurfaceData
   vec3 normal;
   float roughness;
   vec3 diffuse_color;
-  float metal_mask;
   vec3 f0;
   float f90;
   vec3 R;
@@ -103,7 +102,6 @@ void precomputeData(in BaseMaterial material,
   surface_data.normal = N;
   surface_data.roughness =roughness;
   surface_data.diffuse_color = diffuseColor;
-  surface_data.metal_mask = metal_mask;
   surface_data.f0 = f0;
   surface_data.f90 = f90;
   surface_data.R = R;
