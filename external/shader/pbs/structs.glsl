@@ -30,7 +30,6 @@ struct SurfaceData
   vec3 normal;
   float roughness;
   vec3 diffuse_color;
-  float metal_mask;
   vec3 f0;
   float f90;
   vec3 R;
@@ -81,6 +80,16 @@ void precomputeData(in BaseMaterial material,
   vec3 emission = material.emission;
   float AO = material.occlusion;
   
+  #if defined(LIGHTING_SILVER) || defined(LIGHTING_SMOOTH_SILVER)
+  base_color = vec3(1);
+  emission = vec3(0);
+  metal_mask = 1;
+  reflectance = 1;
+  #ifdef LIGHTING_SMOOTH_SILVER
+  smoothness = 1;
+  #endif
+  #endif
+  
   vec3 R                  = reflect(-V, N);
   
   float NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
@@ -103,7 +112,6 @@ void precomputeData(in BaseMaterial material,
   surface_data.normal = N;
   surface_data.roughness =roughness;
   surface_data.diffuse_color = diffuseColor;
-  surface_data.metal_mask = metal_mask;
   surface_data.f0 = f0;
   surface_data.f90 = f90;
   surface_data.R = R;
@@ -115,6 +123,14 @@ void precomputeData(in BaseMaterial material,
   
   brdf_data.NdotV             = NdotV;
   brdf_data.roughness         = roughness;
+  
+#ifdef LIGHTING_ONLY_SPECULAR
+  surface_data.diffuse_color = vec3(0);
+#endif
+#ifdef LIGHTING_ONLY_DIFFUSE
+surface_data.f0 = vec3(0);
+surface_data.f90 = 0;
+#endif
 }
 
 BrdfData_WithLight init_brdf_data_with_light(in vec3 N, in vec3 L, in vec3 V)
