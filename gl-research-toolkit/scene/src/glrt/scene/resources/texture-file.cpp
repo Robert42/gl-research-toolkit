@@ -815,6 +815,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectType(name, sizeof(ImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_DESTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_destructor<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("TextureImportSettings", "void opAssign(const TextureImportSettings &in other)", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_assign_operator<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);
