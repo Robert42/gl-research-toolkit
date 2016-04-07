@@ -69,6 +69,7 @@ inline std::string get_label(ResourceIndex* index, const Uuid<void>& uuid)
 // --------------
 
 const ResourceIndex ResourceIndex::fallback(uuids::fallbackIndex);
+ResourceIndex* ResourceIndex::_fallback = nullptr;
 
 ResourceIndex::ResourceIndex(const Uuid<ResourceIndex>& uuid)
   : uuid(uuid)
@@ -211,6 +212,13 @@ void ResourceIndex::registerSceneFile(const Uuid<Scene>& uuid, const std::string
 
 void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler)
 {
+  if(uuid == uuids::fallbackDiffuseTexture && _fallback!=this)
+  {
+    Q_ASSERT(_fallback != nullptr);
+    _fallback->registerTexture(uuid, file, textureSampler);
+    return;
+  }
+
   validateNotYetRegistered(uuid);
   allRegisteredResources.insert(uuid);
   QString f = QString::fromStdString(file);
@@ -227,6 +235,7 @@ void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const
 
 void ResourceIndex::registerFallbackIndex()
 {
+  _fallback = this;
   Material::PlainColor fallbackMaterial;
   fallbackMaterial.base_color = glm::vec3(0);
   fallbackMaterial.emission = glm::vec3(1,0,1);
