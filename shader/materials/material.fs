@@ -115,6 +115,11 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
     return;
   #endif
   
+  vec3 fragment_normal = normalize(fragment.normal);
+  vec3 fragment_tangent = normalize(fragment.tangent);
+  vec3 fragment_bitangent = normalize(cross(fragment_normal, fragment_tangent));
+  normal = normalize(normal.x * fragment_tangent + normal.y * fragment_bitangent + normal.z * fragment_normal);
+  
   srmo = mix(material_instance.srmo_range_0, material_instance.srmo_range_1, srmo);
   
   float smoothness = srmo[0];
@@ -124,7 +129,7 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   
   emission *= material_instance.emission_factor;
   
-  material.normal = normalize(fragment.normal); // TODO implement normal mapping
+  material.normal = normal;
   material.smoothness = smoothness;
   material.base_color = color.rgb;
   material.metal_mask = metal_mask;
