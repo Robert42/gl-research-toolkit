@@ -43,9 +43,12 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   activateShader();
   GL_CALL(glVertexAttribFormatNV, bindingIndex, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
   GL_CALL(glEnableVertexAttribArray, bindingIndex);
+  if(depthTest)
+    GL_CALL(glEnable, GL_DEPTH_TEST);
   statusCapture = gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES);
   framebuffer.BindBackBuffer();
   gl::ShaderObject::Deactivate();
+  GL_CALL(glDisable, GL_DEPTH_TEST);
   GL_CALL(glDisableVertexAttribArray, bindingIndex);
 
 
