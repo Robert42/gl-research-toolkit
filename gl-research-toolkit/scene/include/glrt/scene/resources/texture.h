@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QFileInfo>
+#include <QDebug>
 
 namespace glrt {
 namespace scene {
@@ -15,6 +16,8 @@ public:
 
   QFileInfo file;
 };
+
+QDebug operator<<(QDebug d, const Texture& t);
 
 } // namespace resources
 } // namespace scene

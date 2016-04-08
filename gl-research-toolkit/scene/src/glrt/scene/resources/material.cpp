@@ -73,9 +73,10 @@ inline void as_init_textured_material(Material::Textured<TextureHandle>* texture
 {
   *texturedMaterial = Material::Textured<TextureHandle>();
   texturedMaterial->basecolor_map = TextureManager::instance()->handleFor(uuids::fallbackDiffuseTexture);
+  texturedMaterial->height_map = TextureManager::instance()->handleFor(uuids::blackTexture);
   texturedMaterial->normal_map = TextureManager::instance()->handleFor(uuids::fallbackNormalTexture);
   texturedMaterial->emission_map = TextureManager::instance()->handleFor(uuids::blackTexture);
-  texturedMaterial->srmo_map = TextureManager::instance()->handleFor(uuids::blackTexture);
+  texturedMaterial->srmo_map = TextureManager::instance()->handleFor(uuids::fallbackSRMOTexture);
 }
 
 inline void as_init_texture_handle_ts(TextureHandle* textureHandle, const Uuid<Texture>& texture, const TextureSampler& textureSampler)

@@ -9,6 +9,11 @@ Texture::Texture()
 
 }
 
+QDebug operator<<(QDebug d, const Texture& t)
+{
+  return d << "Texture("<<t.file.absoluteFilePath()<<")";
+}
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt

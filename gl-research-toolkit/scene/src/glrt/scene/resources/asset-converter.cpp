@@ -25,6 +25,12 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile)
 {
+  QDir targetDir = targetFile.path();
+  if(targetDir.exists("FORCE-REIMPORT"))
+    return true;
+  if(targetDir.exists(targetFile.baseName()+".FORCE-REIMPORT"))
+    return true;
+
   // No conversion possible if the source file doesn't exist
   if(!sourceFile.exists())
   {
@@ -680,7 +686,10 @@ StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3&
       vertex.position = transform * to_glm_vec3(mesh->mVertices[j]);
       vertex.normal = transform * to_glm_vec3(mesh->mNormals[j]);
       vertex.tangent = transform * to_glm_vec3(mesh->mTangents[j]);
+      vertex.bitangent = transform * to_glm_vec3(mesh->mBitangents[j]);
       vertex.uv = to_glm_vec3(mesh->mTextureCoords[0][j]).xy();
+
+      vertex.cleanUp();
 
       vertices.push_back(vertex);
     }

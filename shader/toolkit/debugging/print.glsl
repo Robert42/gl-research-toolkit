@@ -29,6 +29,7 @@ uniform DebuggingOutputBlock
 
 #ifdef SHADER_DEBUG_PRINTER
 int g_suppress_print=0;
+int nextChunkToWrite = 0;
 #endif
 
 void SUPPRESS_PRINT()
@@ -51,12 +52,11 @@ bool is_fragment_to_debug()
   bool is_right_fragment = distance(gl_FragCoord.xy, debugging_buffer.fragment_coord+debugging_buffer.offset) <= debugging_buffer.treshold;
   bool is_suppressed = g_suppress_print>0;
   
-  return is_right_fragment && !is_suppressed;
+  return is_right_fragment && !is_suppressed && nextChunkToWrite<GLSL_DEBUGGING_MAX_NUM_CHUNKS;
 #else
   return false;
 #endif
 }
-
 
 void implement_print_chunk(in DebuggingOutputChunk chunk)
 {
@@ -66,7 +66,8 @@ void implement_print_chunk(in DebuggingOutputChunk chunk)
     chunk.z_value = gl_FragCoord.z;
     
     DebuggingOutputChunk* chunks = (DebuggingOutputChunk*)debugging_buffer.chunkAddress;
-    chunks[0] = chunk;
+    chunks[nextChunkToWrite] = chunk;
+    nextChunkToWrite++; // chunks[nextChunkToWrite++] seems not to be supported
   }
 #endif
 }

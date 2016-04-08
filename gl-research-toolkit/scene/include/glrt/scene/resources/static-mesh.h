@@ -14,10 +14,13 @@ struct StaticMesh
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec3 tangent;
+    glm::vec3 bitangent;
     glm::vec2 uv;
 
     bool operator==(const Vertex& other) const;
     bool isNearlyTheSame(const Vertex& other, float epsilon) const;
+
+    void cleanUp();
   };
   typedef quint16 index_type;
 

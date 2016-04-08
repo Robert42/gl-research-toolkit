@@ -76,6 +76,14 @@ void ResourceManager::prepareForGpuBuffer(const Uuid<Material>& uuid) const
 
 Texture ResourceManager::textureForUuid(const Uuid<Texture>& uuid) const
 {
+#ifdef QT_DEBUG
+  if(!indexForResourceUuid(uuid)->textures.contains(uuid))
+    qWarning() << "Trying to access the not registered texture" << uuid;
+#endif
+
+  Q_ASSERT(Index::fallback.textures.contains(uuids::fallbackDiffuseTexture));
+  Q_ASSERT(Index::fallback.textures[uuids::fallbackDiffuseTexture].file.filePath().isEmpty() == false);
+
   return indexForResourceUuid(uuid)->textures.value(uuid, Index::fallback.textures[uuids::fallbackDiffuseTexture]);
 }
 
