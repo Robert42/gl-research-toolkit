@@ -31,6 +31,8 @@ DebuggingPosteffect::Renderer::Renderer(bool depthTest)
 
 void DebuggingPosteffect::Renderer::recordCommandList()
 {
+  Q_ASSERT(!renderingData.isNull());
+
   const glm::ivec2 videoResolution = glrt::System::windowSize();
   gl::FramebufferObject& framebuffer = renderingData->framebuffer;
   //glrt::renderer::Renderer& renderer = renderingData->renderer; #TODO use the buffers from the renderer!
@@ -64,14 +66,7 @@ void DebuggingPosteffect::Renderer::recordCommandList()
 
 void DebuggingPosteffect::Renderer::render()
 {
-  // #TODO: avoid binding!!
-  gl::FramebufferObject& framebuffer = renderingData->framebuffer;
-
-  framebuffer.Bind(false);
-
   commandList.call();
-
-  framebuffer.BindBackBuffer();
 }
 
 
@@ -91,7 +86,7 @@ public:
                                      "{\n"
                                      "gl_Position = vec4(position.x, position.y, 0, 1);"
                                      "}\n",
-                                     "main.cpp (orange vertex)");
+                                     "main.debugging-posteffect.cpp (orange vertex)");
     orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
                                      "#version 450 core\n"
                                      "out vec4 color;\n"
@@ -99,8 +94,10 @@ public:
                                      "{\n"
                                      "color = vec4(1, 0.5, 0, 1);"
                                      "}\n",
-                                     "main.cpp (orange fragment)");
+                                     "main.debugging-posteffect.cpp (orange fragment)");
     orangeShader.CreateProgram();
+
+    recordCommandList();
   }
 
   void activateShader() override;

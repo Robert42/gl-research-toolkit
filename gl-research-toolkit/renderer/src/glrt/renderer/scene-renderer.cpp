@@ -33,9 +33,10 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
 
-  debugDrawList.connectTo(&visualizeCameras);
-  debugDrawList.connectTo(&visualizeSphereAreaLights);
-  debugDrawList.connectTo(&visualizeRectAreaLights);
+  debugDrawList_Backbuffer.connectTo(&visualizeCameras);
+  debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
+  debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
 }
 
 Renderer::~Renderer()
@@ -53,10 +54,12 @@ void Renderer::render()
 
   commandList.call();
 
+  debugDrawList_Framebuffer.render();
+
   applyFramebuffer();
 
   sceneVertexUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_VERTEX_BLOCK);
-  debugDrawList.render();
+  debugDrawList_Backbuffer.render();
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)

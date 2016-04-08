@@ -40,7 +40,8 @@ public:
   debugging::DebugRenderer visualizeRectAreaLights;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
-  debugging::DebugRenderer::List debugDrawList;
+  debugging::DebugRenderer::List debugDrawList_Framebuffer;
+  debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
   glm::ivec2 videoResolution;
 
