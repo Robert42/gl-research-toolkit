@@ -73,57 +73,49 @@ void DebuggingPosteffect::Renderer::render()
 }
 
 
-class OrangeScreen : public DebuggingPosteffect::Renderer
+class OrangeSphere : public DebuggingPosteffect::Renderer
 {
 public:
-  gl::ShaderObject orangeShader;
+  ReloadableShader shader;
 
-  OrangeScreen(float zValue, float radius, bool depthTest)
-    : Renderer(depthTest),
-      orangeShader("orange-shader")
+  struct SphereBufferData
   {
-    const glm::ivec2 videoResolution = glrt::System::windowSize();
-    orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
-                                     QString("#version 450 core\n"
-                                             "in layout(location=0) vec2 position;\n"
-                                             "void main()\n"
-                                             "{\n"
-                                             "gl_Position = vec4(position.x, position.y, %0, 1);"
-                                             "}\n")
-                                     .arg(zValue)
-                                     .toStdString(),
-                                     "main.debugging-posteffect.cpp (orange vertex)");
-    orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
-                                     QString("#version 450 core\n"
-                                             "out vec4 color;\n"
-                                             "void main()\n"
-                                             "{\n"
-                                             "if(distance(gl_FragCoord.xy, %0) > %1)\n"
-                                             "  discard;\n"
-                                             "color = vec4(1, 0.5, 0, 1);"
-                                             "}\n")
-                                     .arg(QString("vec2(%0,%1)").arg(videoResolution.x/2).arg(videoResolution.y/2))
-                                     .arg(radius)
-                                     .toStdString(),
-                                     "main.debugging-posteffect.cpp (orange fragment)");
-    orangeShader.CreateProgram();
+    glm::vec3 origin;
+    float radius;
+  };
 
-    recordCommandList();
-  }
+  gl::Buffer sphereBuffer;
+
+  OrangeSphere(const glm::vec3& origin, float radius, bool depthTest);
 
   void activateShader() override;
 };
 
-void OrangeScreen::activateShader()
+
+OrangeSphere::OrangeSphere(const glm::vec3& origin, float radius, bool depthTest)
+  : Renderer(depthTest),
+    shader("orange-sphere",
+           QDir(GLRT_SHADER_DIR"/debugging/posteffects"))
 {
-  orangeShader.Activate();
+  SphereBufferData data;
+  data.origin = origin;
+  data.radius = radius;
+
+  sphereBuffer = std::move(gl::Buffer(sizeof(SphereBufferData), gl::Buffer::IMMUTABLE, &data));
+
+  recordCommandList();
+}
+
+void OrangeSphere::activateShader()
+{
+  shader.shaderObject.Activate();
 }
 
 
-DebugRenderer DebuggingPosteffect::orangeScreen(float zValue, float radius, bool depthTest)
+DebugRenderer DebuggingPosteffect::orangeSphere(const glm::vec3& origin, float radius, bool depthTest)
 {
-  padding<byte,3> padding;
-  return DebugRenderer::ImplementationFactory([zValue, radius, depthTest, padding](){return new OrangeScreen(zValue, radius, depthTest);});
+  padding<byte, 3> padding;
+  return DebugRenderer::ImplementationFactory([origin, radius, depthTest, padding](){return new OrangeSphere(origin, radius, depthTest);});
 }
 
 QSharedPointer<DebuggingPosteffect::SharedRenderingData> DebuggingPosteffect::renderingData;

@@ -21,7 +21,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
-    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeScreen(-0.99f, 1024, true)),
+    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
