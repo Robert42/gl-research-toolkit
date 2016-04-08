@@ -40,6 +40,7 @@ public:
                     const SampleApplication::Settings& sampleApplicationSettings=SampleApplication::Settings::techDemo(),
                     const Application::Settings& applicationSettings=Application::Settings::techDemo(),
                     const System::Settings& systemSettings = System::Settings::simpleWindow());
+  ~SampleApplication();
 
   bool handleEvents(const SDL_Event& event);
 
