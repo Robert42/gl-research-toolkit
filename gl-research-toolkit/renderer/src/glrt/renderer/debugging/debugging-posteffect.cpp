@@ -79,6 +79,7 @@ public:
     : Renderer(depthTest),
       orangeShader("orange-shader")
   {
+    const glm::ivec2 videoResolution = glrt::System::windowSize();
     orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
                                      QString("#version 450 core\n"
                                              "in layout(location=0) vec2 position;\n"
@@ -94,8 +95,12 @@ public:
                                              "out vec4 color;\n"
                                              "void main()\n"
                                              "{\n"
+                                             "if(distance(gl_FragCoord.xy, %0) > %1)\n"
+                                             "  discard;\n"
                                              "color = vec4(1, 0.5, 0, 1);"
                                              "}\n")
+                                     .arg(QString("vec2(%0,%1)").arg(videoResolution.x/2).arg(videoResolution.y/2))
+                                     .arg(radius)
                                      .toStdString(),
                                      "main.debugging-posteffect.cpp (orange fragment)");
     orangeShader.CreateProgram();
