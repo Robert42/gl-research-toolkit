@@ -118,7 +118,8 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   vec3 fragment_normal = normalize(fragment.normal);
   vec3 fragment_tangent = normalize(fragment.tangent);
   vec3 fragment_bitangent = normalize(fragment.bitangent);
-  normal = normalize(normal.x * fragment_tangent + normal.y * fragment_bitangent + normal.z * fragment_normal);
+  mat3 tanget_to_world_space = mat3(fragment_tangent, fragment_bitangent, fragment_normal);
+  normal = normalize(tanget_to_world_space * normal);
   
   srmo = mix(material_instance.srmo_range_0, material_instance.srmo_range_1, srmo);
   

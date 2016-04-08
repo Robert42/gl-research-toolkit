@@ -73,6 +73,13 @@ bool StaticMesh::Vertex::isNearlyTheSame(const Vertex& other, float epsilon) con
       && glm::distance(uv, other.uv) <= epsilon;
 }
 
+void StaticMesh::Vertex::cleanUp()
+{
+  tangent = glm::normalize(tangent);
+  bitangent = glm::normalize(bitangent);
+  normal = glm::normalize(normal);
+}
+
 bool StaticMesh::operator!=(const StaticMesh& other) const
 {
   return !(*this == other);
