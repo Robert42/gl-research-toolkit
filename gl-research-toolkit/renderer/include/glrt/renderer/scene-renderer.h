@@ -38,6 +38,8 @@ public:
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
+
+  debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer::List debugDrawList;
 
   glm::ivec2 videoResolution;

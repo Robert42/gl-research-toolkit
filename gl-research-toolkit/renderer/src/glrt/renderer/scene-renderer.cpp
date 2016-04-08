@@ -9,6 +9,7 @@
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/renderer/debugging/debugging-posteffect.h>
 
 namespace glrt {
 namespace renderer {
@@ -20,6 +21,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
+    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeScreen(0.5f, 64, false)),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
