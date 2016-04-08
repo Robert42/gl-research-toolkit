@@ -29,6 +29,7 @@ enum class SurfaceShaderVisualization
   MESH_NORMALS_WS,
   MESH_UVS,
   MESH_TANGENTS_WS,
+  MESH_BITANGENTS_WS,
   SHOW_NAN,
   SHOW_INF,
   TEXTURE_BASECOLOR,

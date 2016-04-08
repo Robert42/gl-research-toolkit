@@ -35,6 +35,7 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   VALUE(MESH_NORMALS_WS);
   VALUE(MESH_UVS);
   VALUE(MESH_TANGENTS_WS);
+  VALUE(MESH_BITANGENTS_WS);
   VALUE(SHOW_NAN);
   VALUE(SHOW_INF);
   VALUE(TEXTURE_BASECOLOR);

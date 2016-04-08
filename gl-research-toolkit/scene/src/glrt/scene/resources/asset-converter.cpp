@@ -686,6 +686,7 @@ StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3&
       vertex.position = transform * to_glm_vec3(mesh->mVertices[j]);
       vertex.normal = transform * to_glm_vec3(mesh->mNormals[j]);
       vertex.tangent = transform * to_glm_vec3(mesh->mTangents[j]);
+      vertex.bitangent = transform * to_glm_vec3(mesh->mBitangents[j]);
       vertex.uv = to_glm_vec3(mesh->mTextureCoords[0][j]).xy();
 
       vertices.push_back(vertex);
