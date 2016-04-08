@@ -266,14 +266,14 @@ struct TextureFile::TextureAsFloats
                  bool merge_red_as_grey, bool merge_green_as_grey, bool merge_blue_as_grey, bool merge_alpha_as_grey)
   {
     const TextureAsFloats* redAsGrey = red&&merge_red_as_grey ? red : this;
-    const TextureAsFloats* greenAsGrey = green&&merge_green_as_grey ? red : this;
-    const TextureAsFloats* blueAsGrey = blue&&merge_blue_as_grey ? red : this;
-    const TextureAsFloats* alphaAsGrey = alpha&&merge_alpha_as_grey ? red : this;
+    const TextureAsFloats* greenAsGrey = green&&merge_green_as_grey ? green : this;
+    const TextureAsFloats* blueAsGrey = blue&&merge_blue_as_grey ? blue : this;
+    const TextureAsFloats* alphaAsGrey = alpha&&merge_alpha_as_grey ? alpha : this;
 
     const TextureAsFloats* redChannelwise = red&&!merge_red_as_grey ? red : this;
-    const TextureAsFloats* greenChannelwise = green&&!merge_green_as_grey ? red : this;
-    const TextureAsFloats* blueChannelwise = blue&&!merge_blue_as_grey ? red : this;
-    const TextureAsFloats* alphaChannelwise = alpha&&!merge_alpha_as_grey ? red : this;
+    const TextureAsFloats* greenChannelwise = green&&!merge_green_as_grey ? green : this;
+    const TextureAsFloats* blueChannelwise = blue&&!merge_blue_as_grey ? blue : this;
+    const TextureAsFloats* alphaChannelwise = alpha&&!merge_alpha_as_grey ? alpha : this;
 
     if(merge_red_as_grey || merge_green_as_grey || merge_blue_as_grey || merge_alpha_as_grey)
       mergeWith_as_grey(*redAsGrey, *greenAsGrey, *blueAsGrey, *alphaAsGrey);
@@ -467,23 +467,23 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
   if(importSettings.need_merging())
   {
     auto createChannelTextureInfo = [flags,&srcFile,&textureInformation](const std::string& suffix) {
-      QFileInfo newFile = QDir(srcFile.path()).filePath(srcFile.baseName().replace(QRegularExpression("[-_]+$"), QString::fromStdString(suffix)) + "." + srcFile.suffix());
-      if(!newFile.exists())
-        throw GLRT_EXCEPTION(QString("The file %0 doesn't exist.").arg(newFile.filePath()));
       ImportedGlTexture* tex = nullptr;
       if(!suffix.empty())
       {
-        tex = new ImportedGlTexture(SOIL_load_OGL_texture(suffix.c_str(),
+        QFileInfo newFile = QDir(srcFile.path()).filePath(srcFile.baseName().replace(QRegularExpression("[-_][^-_]+$"), QString::fromStdString(suffix)));
+        if(!newFile.exists())
+          throw GLRT_EXCEPTION(QString("The file %0 doesn't exist.").arg(newFile.filePath()));
+        tex = new ImportedGlTexture(SOIL_load_OGL_texture(newFile.absoluteFilePath().toStdString().c_str(),
                                                           SOIL_LOAD_AUTO,
                                                           SOIL_CREATE_NEW_ID,
                                                           flags));
-        if(tex->width(0) != textureInformation.width(0) || tex->height(0) == textureInformation.height(0))
-          throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1").arg(srcFile.filePath()).arg(newFile.filePath()));
+        if(tex->width(0) != textureInformation.width(0) || tex->height(0) != textureInformation.height(0))
+          throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1. (the channel texture has the size %2x%3 and the original tetxure has the size %4x%5)").arg(srcFile.filePath()).arg(newFile.filePath()).arg(tex->width(0)).arg(tex->height(0)).arg(textureInformation.width(0)).arg(textureInformation.height(0)));
       }
       return tex;
     };
 
-    red_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
+    red_texture = createChannelTextureInfo(importSettings.red_channel_suffix);
     green_texture = createChannelTextureInfo(importSettings.blue_channel_suffix);
     blue_texture = createChannelTextureInfo(importSettings.green_channel_suffix);
     alpha_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
