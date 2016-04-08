@@ -80,20 +80,23 @@ public:
       orangeShader("orange-shader")
   {
     orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
-                                     "#version 450 core\n"
-                                     "in layout(location=0) vec2 position;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "gl_Position = vec4(position.x, position.y, 0, 1);"
-                                     "}\n",
+                                     QString("#version 450 core\n"
+                                             "in layout(location=0) vec2 position;\n"
+                                             "void main()\n"
+                                             "{\n"
+                                             "gl_Position = vec4(position.x, position.y, %0, 1);"
+                                             "}\n")
+                                     .arg(zValue)
+                                     .toStdString(),
                                      "main.debugging-posteffect.cpp (orange vertex)");
     orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
-                                     "#version 450 core\n"
-                                     "out vec4 color;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "color = vec4(1, 0.5, 0, 1);"
-                                     "}\n",
+                                     QString("#version 450 core\n"
+                                             "out vec4 color;\n"
+                                             "void main()\n"
+                                             "{\n"
+                                             "color = vec4(1, 0.5, 0, 1);"
+                                             "}\n")
+                                     .toStdString(),
                                      "main.debugging-posteffect.cpp (orange fragment)");
     orangeShader.CreateProgram();
 
