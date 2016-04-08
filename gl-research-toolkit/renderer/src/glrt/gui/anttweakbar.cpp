@@ -77,6 +77,7 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]");
 
   TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &profiler->printFramerate, "");
+  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
 
   toggleProfiler.getter = [profiler]()->bool{return profiler->isActive();};
   toggleProfiler.setter = [profiler](bool a){
@@ -102,6 +103,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwBar* tweakBar = TwNewBar("Scene");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a scene.");
+  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
 
   sceneSwitcher = SceneEnumeration::Ptr(new SceneEnumeration("CurrentSceneEnum", tweakBar, "Current Scene", ""));
   sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, scene.resourceManager.allRegisteredScenes());
@@ -132,6 +134,7 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
   TwBar* tweakBar = TwNewBar("Shader");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a shader.");
+  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
 
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
@@ -216,7 +219,13 @@ void AntTweakBar::handeledEvent(const SDL_Event& event)
     if(event.button.button == SDL_BUTTON_LEFT)
     {
       bool captured_mouse = event.button.state==SDL_PRESSED;
-      SDL_SetWindowGrab(application->sdlWindow, captured_mouse ? SDL_TRUE : SDL_FALSE);
+      // Workaround:
+      // Don't capture the mouse immediatly, as if the application freezes,
+      // (because of an error while handling a pressed button),
+      // the mouse should not be captured so the user can use other applications
+      // As the event is lgging behind, wait 20 frames before capturing the mouse
+      captureMouseDeferred = captured_mouse ? MouseCaptureState(20) : MouseCaptureState::IDLE;
+      SDL_SetWindowGrab(application->sdlWindow, SDL_FALSE);
     }
     return;
   default:
@@ -273,6 +282,19 @@ bool AntTweakBar::unhandeledEvent(const SDL_Event& event)
   }
 }
 
+// The mouse wasn't captured immediatly, as if the application freezes, because of an error while handling a pressed button, the mouse should not be captured during debugging
+inline void AntTweakBar::deferredMouseCapture()
+{
+  if(captureMouseDeferred==MouseCaptureState::CAPTURE_NOW && this->visible)
+  {
+    captureMouseDeferred = MouseCaptureState::IDLE;
+    SDL_SetWindowGrab(application->sdlWindow, SDL_TRUE);
+  }else if(captureMouseDeferred>=MouseCaptureState::CAPTURE_NEXT_FRAME)
+  {
+    captureMouseDeferred = MouseCaptureState(int(captureMouseDeferred)-1);
+  }
+}
+
 
 void AntTweakBar::draw()
 {
@@ -280,6 +302,8 @@ void AntTweakBar::draw()
 
   if(visible)
     TwDraw();
+
+  deferredMouseCapture();
 }
 
 

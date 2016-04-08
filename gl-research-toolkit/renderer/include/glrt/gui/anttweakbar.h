@@ -298,6 +298,16 @@ private:
 
   gui::TweakBarCBVar<bool> toggleProfiler;
 
+  enum class MouseCaptureState : int
+  {
+    IDLE,
+    CAPTURE_NOW,
+    CAPTURE_NEXT_FRAME
+  };
+
+  MouseCaptureState captureMouseDeferred = MouseCaptureState::IDLE;
+  void deferredMouseCapture();
+
   SceneEnumeration::Ptr sceneSwitcher;
   CameraEnumeration::Ptr cameraSwitcher;
   VisualizationEnumeration::Ptr visualizationSwitcher;

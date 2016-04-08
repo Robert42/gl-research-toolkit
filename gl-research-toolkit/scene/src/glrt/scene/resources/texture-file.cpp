@@ -466,16 +466,19 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
   if(importSettings.need_merging())
   {
-    auto createChannelTextureInfo = [flags,&srcFile,&textureInformation](const std::string& filename) {
+    auto createChannelTextureInfo = [flags,&srcFile,&textureInformation](const std::string& suffix) {
+      QFileInfo newFile = QDir(srcFile.path()).filePath(srcFile.baseName().replace(QRegularExpression("[-_]+$"), QString::fromStdString(suffix)) + "." + srcFile.suffix());
+      if(!newFile.exists())
+        throw GLRT_EXCEPTION(QString("The file %0 doesn't exist.").arg(newFile.filePath()));
       ImportedGlTexture* tex = nullptr;
-      if(!filename.empty())
+      if(!suffix.empty())
       {
-        tex = new ImportedGlTexture(SOIL_load_OGL_texture(filename.c_str(),
+        tex = new ImportedGlTexture(SOIL_load_OGL_texture(suffix.c_str(),
                                                           SOIL_LOAD_AUTO,
                                                           SOIL_CREATE_NEW_ID,
                                                           flags));
         if(tex->width(0) != textureInformation.width(0) || tex->height(0) == textureInformation.height(0))
-          throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1").arg(srcFile.filePath()).arg(filename.c_str()));
+          throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1").arg(srcFile.filePath()).arg(newFile.filePath()));
       }
       return tex;
     };
@@ -812,6 +815,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectType(name, sizeof(ImportSettings), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour("TextureImportSettings", AngelScript::asBEHAVE_DESTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_destructor<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("TextureImportSettings", "void opAssign(const TextureImportSettings &in other)", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_assign_operator<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);

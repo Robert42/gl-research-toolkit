@@ -69,6 +69,7 @@ inline std::string get_label(ResourceIndex* index, const Uuid<void>& uuid)
 // --------------
 
 const ResourceIndex ResourceIndex::fallback(uuids::fallbackIndex);
+ResourceIndex* ResourceIndex::_fallback = nullptr;
 
 ResourceIndex::ResourceIndex(const Uuid<ResourceIndex>& uuid)
   : uuid(uuid)
@@ -114,7 +115,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneLayerFile(const Uuid<SceneLayer> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneLayerFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler, bool generateMipmaps)", AngelScript::asMETHOD(ResourceIndex,registerTexture), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler)", AngelScript::asMETHOD(ResourceIndex,registerTexture), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
   MeshImportSettings::registerType();
@@ -211,6 +212,13 @@ void ResourceIndex::registerSceneFile(const Uuid<Scene>& uuid, const std::string
 
 void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler)
 {
+  if(uuid == uuids::fallbackDiffuseTexture && _fallback!=this)
+  {
+    Q_ASSERT(_fallback != nullptr);
+    _fallback->registerTexture(uuid, file, textureSampler);
+    return;
+  }
+
   validateNotYetRegistered(uuid);
   allRegisteredResources.insert(uuid);
   QString f = QString::fromStdString(file);
@@ -227,6 +235,7 @@ void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const
 
 void ResourceIndex::registerFallbackIndex()
 {
+  _fallback = this;
   Material::PlainColor fallbackMaterial;
   fallbackMaterial.base_color = glm::vec3(0);
   fallbackMaterial.emission = glm::vec3(1,0,1);

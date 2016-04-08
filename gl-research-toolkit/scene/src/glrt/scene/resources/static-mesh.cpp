@@ -59,7 +59,8 @@ bool StaticMesh::Vertex::operator==(const Vertex& other) const
 {
   return position==other.position
       && normal==other.normal
-      && tangent==other.normal
+      && tangent==other.tangent
+      && bitangent==other.bitangent
       && uv==other.uv;
 }
 
@@ -68,7 +69,15 @@ bool StaticMesh::Vertex::isNearlyTheSame(const Vertex& other, float epsilon) con
   return glm::distance(position, other.position) <= epsilon
       && glm::distance(normal, other.normal) <= epsilon
       && glm::distance(tangent, other.tangent) <= epsilon
+      && glm::distance(bitangent, other.bitangent) <= epsilon
       && glm::distance(uv, other.uv) <= epsilon;
+}
+
+void StaticMesh::Vertex::cleanUp()
+{
+  tangent = glm::normalize(tangent);
+  bitangent = glm::normalize(bitangent);
+  normal = glm::normalize(normal);
 }
 
 bool StaticMesh::operator!=(const StaticMesh& other) const

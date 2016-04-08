@@ -135,9 +135,11 @@ gl::VertexArrayObject StaticMeshBuffer::generateVertexArrayObject()
   Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_POSITION == 0);
   Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_NORMAL == 1);
   Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_TANGENT == 2);
-  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_UV == 3);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_BITANGENT == 3);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_UV == 4);
 
   return std::move(gl::VertexArrayObject({Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
+                                          Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 3, vertexBufferBinding),
                                           Attribute(Attribute::Type::FLOAT, 2, vertexBufferBinding)}));
@@ -149,16 +151,19 @@ void StaticMeshBuffer::enableVertexArrays()
   Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_POSITION == 0);
   Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_NORMAL == 1);
   Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_TANGENT == 2);
-  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_UV == 3);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_BITANGENT == 3);
+  Q_ASSERT(VERTEX_ATTRIBUTE_LOCATION_UV == 4);
 
   GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
   GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
   GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_TANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
+  GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_BITANGENT, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex));
   GL_CALL(glVertexAttribFormatNV, VERTEX_ATTRIBUTE_LOCATION_UV, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex));
 
   GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
   GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_NORMAL);
   GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_TANGENT);
+  GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_BITANGENT);
   GL_CALL(glEnableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_UV);
 }
 
@@ -167,6 +172,7 @@ void StaticMeshBuffer::disableVertexArrays()
   GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_POSITION);
   GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_NORMAL);
   GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_TANGENT);
+  GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_BITANGENT);
   GL_CALL(glDisableVertexAttribArray, VERTEX_ATTRIBUTE_LOCATION_UV);
 }
 
@@ -218,6 +224,8 @@ void StaticMeshBuffer::recordBind(gl::CommandListRecorder& recorder) const
   recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_NORMAL, vertexBuffer->gpuBufferAddress()+offset);
   offset += 3 * sizeof(float);
   recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_TANGENT, vertexBuffer->gpuBufferAddress()+offset);
+  offset += 3 * sizeof(float);
+  recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_BITANGENT, vertexBuffer->gpuBufferAddress()+offset);
   offset += 3 * sizeof(float);
   recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_UV, vertexBuffer->gpuBufferAddress()+offset);
   offset += 2 * sizeof(float);

@@ -81,6 +81,8 @@ public:
   QHash<QUuid, QString> labels;
 
 private:
+  static ResourceIndex* _fallback;
+
   QVector<QDir> scriptIncludeDirectories;
 
   void validateNotYetRegistered(const QUuid& uuid) const;
