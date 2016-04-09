@@ -193,6 +193,9 @@ void System::verifyNVidiaFeatures()
   if(!GLEW_NV_bindless_texture)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_bindless_texture"));
 
+  if(!GLEW_EXT_texture_filter_anisotropic)
+    throw GLRT_EXCEPTION(QString("Missing opengl extension EXT_texture_filter_anisotropic"));
+
   // http://developer.download.nvidia.com/opengl/specs/GL_NV_command_list.txt
   // http://on-demand.gputechconf.com/gtc/2015/presentation/S5135-Christoph-Kubisch-Pierre-Boudier.pdf
   if(glDrawCommandsNV == nullptr)

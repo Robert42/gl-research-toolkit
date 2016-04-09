@@ -11,6 +11,7 @@ using AngelScriptIntegration::AngelScriptCheck;
 TextureSampler::TextureSampler()
   : description(gl::SamplerObject::Filter::LINEAR, gl::SamplerObject::Filter::LINEAR, gl::SamplerObject::Filter::LINEAR, gl::SamplerObject::Border::REPEAT)
 {
+  description.maxAnisotropy = 5;
 }
 
 bool TextureSampler::operator==(const TextureSampler& other) const
