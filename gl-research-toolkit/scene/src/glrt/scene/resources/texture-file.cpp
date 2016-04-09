@@ -484,8 +484,8 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
     };
 
     red_texture = createChannelTextureInfo(importSettings.red_channel_suffix);
-    green_texture = createChannelTextureInfo(importSettings.blue_channel_suffix);
-    blue_texture = createChannelTextureInfo(importSettings.green_channel_suffix);
+    green_texture = createChannelTextureInfo(importSettings.green_channel_suffix);
+    blue_texture = createChannelTextureInfo(importSettings.blue_channel_suffix);
     alpha_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
   }
 
