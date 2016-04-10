@@ -204,54 +204,96 @@ struct TextureFile::TextureAsFloats
     }
   }
 
-  void mergeWith_as_grey(const TextureAsFloats& red, const TextureAsFloats& green, const TextureAsFloats& blue, const TextureAsFloats& alpha)
+  void mergeWith_as_grey(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha)
   {
-    Q_ASSERT(red.w == this->w);
-    Q_ASSERT(red.h == this->h);
-    Q_ASSERT(green.w == this->w);
-    Q_ASSERT(green.h == this->h);
-    Q_ASSERT(blue.w == this->w);
-    Q_ASSERT(blue.h == this->h);
-    Q_ASSERT(alpha.w == this->w);
-    Q_ASSERT(alpha.h == this->h);
+    if(!red && !green && !blue && !alpha)
+      return;
 
-    #pragma omp parallel for
-    for(quint32 y=0; y<h; ++y)
+    if(red)
     {
-      glm::vec4* targetLine = this->lineData_AsVec4(y);
-      const glm::vec4* redLine = red.lineData_AsVec4(y);
-      const glm::vec4* greenLine = green.lineData_AsVec4(y);
-      const glm::vec4* blueLine = blue.lineData_AsVec4(y);
-      const glm::vec4* alphaLine = alpha.lineData_AsVec4(y);
-      for(quint32 x=0; x<w; ++x)
+      Q_ASSERT(red->w == this->w);
+      Q_ASSERT(red->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
       {
-        targetLine[x].r = glm::length(redLine[x].rgb());
-        targetLine[x].g = glm::length(greenLine[x].rgb());
-        targetLine[x].b = glm::length(blueLine[x].rgb());
-        targetLine[x].a = glm::length(alphaLine[x].rgb());
+        glm::vec4* targetLine = this->lineData_AsVec4(y);
+        const glm::vec4* redLine = red->lineData_AsVec4(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].r = glm::length(redLine[x].rgb());
+      }
+    }
+    if(green)
+    {
+      Q_ASSERT(green->w == this->w);
+      Q_ASSERT(green->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
+      {
+        glm::vec4* targetLine = this->lineData_AsVec4(y);
+        const glm::vec4* greenLine = green->lineData_AsVec4(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].g = glm::length(greenLine[x].rgb());
+      }
+    }
+    if(blue)
+    {
+      Q_ASSERT(blue->w == this->w);
+      Q_ASSERT(blue->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
+      {
+        glm::vec4* targetLine = this->lineData_AsVec4(y);
+        const glm::vec4* blueLine = blue->lineData_AsVec4(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].b = glm::length(blueLine[x].rgb());
+      }
+    }
+    if(alpha)
+    {
+      Q_ASSERT(alpha->w == this->w);
+      Q_ASSERT(alpha->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
+      {
+        glm::vec4* targetLine = this->lineData_AsVec4(y);
+        const glm::vec4* alphaLine = alpha->lineData_AsVec4(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].a = glm::length(alphaLine[x].rgb());
       }
     }
   }
 
-  void mergeWith_channelwise(const TextureAsFloats& red, const TextureAsFloats& green, const TextureAsFloats& blue, const TextureAsFloats& alpha)
+  void mergeWith_channelwise(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha)
   {
-    Q_ASSERT(red.w == this->w);
-    Q_ASSERT(red.h == this->h);
-    Q_ASSERT(green.w == this->w);
-    Q_ASSERT(green.h == this->h);
-    Q_ASSERT(blue.w == this->w);
-    Q_ASSERT(blue.h == this->h);
-    Q_ASSERT(alpha.w == this->w);
-    Q_ASSERT(alpha.h == this->h);
+    if(!red && !green && !blue && !alpha)
+      return;
+
+    Q_ASSERT(red->w == this->w);
+    Q_ASSERT(red->h == this->h);
+    Q_ASSERT(green->w == this->w);
+    Q_ASSERT(green->h == this->h);
+    Q_ASSERT(blue->w == this->w);
+    Q_ASSERT(blue->h == this->h);
+    Q_ASSERT(alpha->w == this->w);
+    Q_ASSERT(alpha->h == this->h);
+
+    if(!red)
+      red = this;
+    if(!green)
+      green = this;
+    if(!blue)
+      blue = this;
+    if(!alpha)
+      alpha = this;
 
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
       glm::vec4* targetLine = this->lineData_AsVec4(y);
-      const glm::vec4* redLine = red.lineData_AsVec4(y);
-      const glm::vec4* greenLine = green.lineData_AsVec4(y);
-      const glm::vec4* blueLine = blue.lineData_AsVec4(y);
-      const glm::vec4* alphaLine = alpha.lineData_AsVec4(y);
+      const glm::vec4* redLine = red->lineData_AsVec4(y);
+      const glm::vec4* greenLine = green->lineData_AsVec4(y);
+      const glm::vec4* blueLine = blue->lineData_AsVec4(y);
+      const glm::vec4* alphaLine = alpha->lineData_AsVec4(y);
       for(quint32 x=0; x<w; ++x)
       {
         targetLine[x].r = redLine[x].r;
@@ -265,20 +307,18 @@ struct TextureFile::TextureAsFloats
   void mergeWith(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha,
                  bool merge_red_as_grey, bool merge_green_as_grey, bool merge_blue_as_grey, bool merge_alpha_as_grey)
   {
-    const TextureAsFloats* redAsGrey = red&&merge_red_as_grey ? red : this;
-    const TextureAsFloats* greenAsGrey = green&&merge_green_as_grey ? green : this;
-    const TextureAsFloats* blueAsGrey = blue&&merge_blue_as_grey ? blue : this;
-    const TextureAsFloats* alphaAsGrey = alpha&&merge_alpha_as_grey ? alpha : this;
+    const TextureAsFloats* redAsGrey = red&&merge_red_as_grey ? red : nullptr;
+    const TextureAsFloats* greenAsGrey = green&&merge_green_as_grey ? green : nullptr;
+    const TextureAsFloats* blueAsGrey = blue&&merge_blue_as_grey ? blue : nullptr;
+    const TextureAsFloats* alphaAsGrey = alpha&&merge_alpha_as_grey ? alpha : nullptr;
 
-    const TextureAsFloats* redChannelwise = red&&!merge_red_as_grey ? red : this;
-    const TextureAsFloats* greenChannelwise = green&&!merge_green_as_grey ? green : this;
-    const TextureAsFloats* blueChannelwise = blue&&!merge_blue_as_grey ? blue : this;
-    const TextureAsFloats* alphaChannelwise = alpha&&!merge_alpha_as_grey ? alpha : this;
+    const TextureAsFloats* redChannelwise = red&&!merge_red_as_grey ? red : nullptr;
+    const TextureAsFloats* greenChannelwise = green&&!merge_green_as_grey ? green : nullptr;
+    const TextureAsFloats* blueChannelwise = blue&&!merge_blue_as_grey ? blue : nullptr;
+    const TextureAsFloats* alphaChannelwise = alpha&&!merge_alpha_as_grey ? alpha : nullptr;
 
-    if(merge_red_as_grey || merge_green_as_grey || merge_blue_as_grey || merge_alpha_as_grey)
-      mergeWith_as_grey(*redAsGrey, *greenAsGrey, *blueAsGrey, *alphaAsGrey);
-    if(!merge_red_as_grey || !merge_green_as_grey || !merge_blue_as_grey || !merge_alpha_as_grey)
-      mergeWith_channelwise(*redChannelwise, *greenChannelwise, *blueChannelwise, *alphaChannelwise);
+    mergeWith_as_grey(redAsGrey, greenAsGrey, blueAsGrey, alphaAsGrey);
+    mergeWith_channelwise(redChannelwise, greenChannelwise, blueChannelwise, alphaChannelwise);
   }
 };
 
