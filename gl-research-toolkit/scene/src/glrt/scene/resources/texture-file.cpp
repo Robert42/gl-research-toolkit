@@ -167,19 +167,16 @@ struct TextureFile::TextureAsFloats
     h = image.height*image.depth;
   }
 
-  float* lineData_AsFloat(quint32 y)
+  template<typename T>
+  T* lineData_As(quint32 y)
   {
-    return reinterpret_cast<float*>(data + y * image.rowStride);
+    return reinterpret_cast<T*>(data + y * image.rowStride);
   }
 
-  glm::vec4* lineData_AsVec4(quint32 y)
+  template<typename T>
+  const T* lineData_As(quint32 y) const
   {
-    return reinterpret_cast<glm::vec4*>(data + y * image.rowStride);
-  }
-
-  const glm::vec4* lineData_AsVec4(quint32 y) const
-  {
-    return reinterpret_cast<const glm::vec4*>(data + y * image.rowStride);
+    return reinterpret_cast<const T*>(data + y * image.rowStride);
   }
 
   void remapSourceAsSigned()
@@ -187,9 +184,20 @@ struct TextureFile::TextureAsFloats
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
-      float* line = this->lineData_AsFloat(y);
+      float* line = this->lineData_As<float>(y);
       for(quint32 x=0; x<w_float; ++x)
         line[x] = line[x]*2.f - 1.f;
+    }
+  }
+
+  void remapSourceAsUnsigned()
+  {
+    #pragma omp parallel for
+    for(quint32 y=0; y<h; ++y)
+    {
+      float* line = this->lineData_As<float>(y);
+      for(quint32 x=0; x<w_float; ++x)
+        line[x] = line[x]*.5f + 0.5f;
     }
   }
 
@@ -198,10 +206,15 @@ struct TextureFile::TextureAsFloats
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
-      glm::vec4* line = this->lineData_AsVec4(y);
+      glm::vec4* line = this->lineData_As<glm::vec4>(y);
       for(quint32 x=0; x<w; ++x)
         line[x] = line[x]*factor + offset;
     }
+  }
+
+  inline static float grey(const glm::vec3& x)
+  {
+    return (x.r + x.g + x.b) / 3.f;
   }
 
   void mergeWith_as_grey(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha)
@@ -216,10 +229,10 @@ struct TextureFile::TextureAsFloats
 #pragma omp parallel for
       for(quint32 y=0; y<h; ++y)
       {
-        glm::vec4* targetLine = this->lineData_AsVec4(y);
-        const glm::vec4* redLine = red->lineData_AsVec4(y);
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* redLine = red->lineData_As<glm::vec4>(y);
         for(quint32 x=0; x<w; ++x)
-          targetLine[x].r = glm::length(redLine[x].rgb());
+          targetLine[x].r = grey(redLine[x].rgb());
       }
     }
     if(green)
@@ -229,10 +242,10 @@ struct TextureFile::TextureAsFloats
 #pragma omp parallel for
       for(quint32 y=0; y<h; ++y)
       {
-        glm::vec4* targetLine = this->lineData_AsVec4(y);
-        const glm::vec4* greenLine = green->lineData_AsVec4(y);
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* greenLine = green->lineData_As<glm::vec4>(y);
         for(quint32 x=0; x<w; ++x)
-          targetLine[x].g = glm::length(greenLine[x].rgb());
+          targetLine[x].g = grey(greenLine[x].rgb());
       }
     }
     if(blue)
@@ -242,10 +255,10 @@ struct TextureFile::TextureAsFloats
 #pragma omp parallel for
       for(quint32 y=0; y<h; ++y)
       {
-        glm::vec4* targetLine = this->lineData_AsVec4(y);
-        const glm::vec4* blueLine = blue->lineData_AsVec4(y);
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* blueLine = blue->lineData_As<glm::vec4>(y);
         for(quint32 x=0; x<w; ++x)
-          targetLine[x].b = glm::length(blueLine[x].rgb());
+          targetLine[x].b = grey(blueLine[x].rgb());
       }
     }
     if(alpha)
@@ -255,10 +268,10 @@ struct TextureFile::TextureAsFloats
 #pragma omp parallel for
       for(quint32 y=0; y<h; ++y)
       {
-        glm::vec4* targetLine = this->lineData_AsVec4(y);
-        const glm::vec4* alphaLine = alpha->lineData_AsVec4(y);
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* alphaLine = alpha->lineData_As<glm::vec4>(y);
         for(quint32 x=0; x<w; ++x)
-          targetLine[x].a = glm::length(alphaLine[x].rgb());
+          targetLine[x].a = grey(alphaLine[x].rgb());
       }
     }
   }
@@ -289,11 +302,11 @@ struct TextureFile::TextureAsFloats
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
-      glm::vec4* targetLine = this->lineData_AsVec4(y);
-      const glm::vec4* redLine = red->lineData_AsVec4(y);
-      const glm::vec4* greenLine = green->lineData_AsVec4(y);
-      const glm::vec4* blueLine = blue->lineData_AsVec4(y);
-      const glm::vec4* alphaLine = alpha->lineData_AsVec4(y);
+      glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+      const glm::vec4* redLine = red->lineData_As<glm::vec4>(y);
+      const glm::vec4* greenLine = green->lineData_As<glm::vec4>(y);
+      const glm::vec4* blueLine = blue->lineData_As<glm::vec4>(y);
+      const glm::vec4* alphaLine = alpha->lineData_As<glm::vec4>(y);
       for(quint32 x=0; x<w; ++x)
       {
         targetLine[x].r = redLine[x].r;
