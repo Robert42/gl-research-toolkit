@@ -69,8 +69,7 @@ public:
     Type type = Type::UINT8;
     Format format = Format::RGBA;
     Compression compression = Compression::NONE;
-    bool sourceIsNormalMap = false;
-    bool sourceIsBumpMap = false;
+    bool remapSourceAsSigned = false;
     bool generateMipmaps = true;
     glm::vec4 offset = glm::vec4(0);
     glm::vec4 factor = glm::vec4(1);
@@ -120,7 +119,7 @@ public:
 
     bool need_processing() const
     {
-      return sourceIsNormalMap || sourceIsBumpMap || need_remapping() || need_merging();
+      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging();
     }
 
     static void registerType();

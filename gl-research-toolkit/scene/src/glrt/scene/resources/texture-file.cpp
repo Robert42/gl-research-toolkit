@@ -182,7 +182,7 @@ struct TextureFile::TextureAsFloats
     return reinterpret_cast<const glm::vec4*>(data + y * image.rowStride);
   }
 
-  void convertToSignedNormalized()
+  void remapSourceAsSigned()
   {
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
@@ -568,8 +568,8 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
           delete alphaAsFloats;
         }
 
-        if(importSettings.sourceIsBumpMap || importSettings.sourceIsNormalMap)
-          asFloats.convertToSignedNormalized();
+        if(importSettings.remapSourceAsSigned)
+          asFloats.remapSourceAsSigned();
 
         if(importSettings.need_remapping())
           asFloats.remap(importSettings.offset, importSettings.factor);
@@ -858,8 +858,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectMethod("TextureImportSettings", "void opAssign(const TextureImportSettings &in other)", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_assign_operator<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsBumpMap", asOFFSET(ImportSettings,sourceIsBumpMap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool remapSourceAsSigned", asOFFSET(ImportSettings,remapSourceAsSigned)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 factor", asOFFSET(ImportSettings,factor)); AngelScriptCheck(r);
