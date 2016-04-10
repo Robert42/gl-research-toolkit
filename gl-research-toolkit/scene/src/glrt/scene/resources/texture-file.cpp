@@ -5,12 +5,18 @@
 #include <glrt/toolkit/plain-old-data-stream.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
+#include <QLabel>
+#include <QDialog>
+#include <QImage>
+#include <QVBoxLayout>
 
 #include <SOIL/SOIL.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
+
+#define SHOW_TEXTURE_IN_DIALOG 0
 
 using AngelScriptIntegration::AngelScriptCheck;
 
@@ -333,6 +339,49 @@ struct TextureFile::TextureAsFloats
     mergeWith_as_grey(redAsGrey, greenAsGrey, blueAsGrey, alphaAsGrey);
     mergeWith_channelwise(redChannelwise, greenChannelwise, blueChannelwise, alphaChannelwise);
   }
+
+  QImage asQImage() const
+  {
+    QImage image(int(w), int(h), QImage::Format_RGBA8888);
+
+    quint8* targetData = reinterpret_cast<quint8*>(image.bits());
+
+#pragma omp parallel for
+    for(int y=0; y<int(h); ++y)
+    {
+      const float* srcLine = this->lineData_As<float>(quint32(y));
+      quint8* targetLine = targetData + y*image.bytesPerLine();
+      for(int x=0; x<int(w_float); ++x)
+        targetLine[x] = static_cast<quint8>(glm::clamp<float>(srcLine[x] * 255.f, 0.f, 255.f));
+    }
+
+    return image;
+  }
+
+  QImage asChannelQImage(int channel) const
+  {
+    QImage image(int(w), int(h), QImage::Format_RGBA8888);
+
+    quint8* targetData = reinterpret_cast<quint8*>(image.bits());
+
+#pragma omp parallel for
+    for(int y=0; y<int(h); ++y)
+    {
+      const glm::vec4* srcLine = this->lineData_As<glm::vec4>(quint32(y));
+      glm::tvec4<quint8>* targetLine = reinterpret_cast<glm::tvec4<quint8>*>(targetData + y*image.bytesPerLine());
+      for(int x=0; x<int(w); ++x)
+      {
+        quint8 v = static_cast<quint8>(glm::clamp<float>(srcLine[x][channel] * 255.f, 0.f, 255.f));
+
+        targetLine[x].r = v;
+        targetLine[x].g = v;
+        targetLine[x].b = v;
+        targetLine[x].a = 255;
+      }
+    }
+
+    return image;
+  }
 };
 
 class TextureFile::ImportedGlTexture
@@ -596,6 +645,33 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
       this->uncompressedImages.append(image.first);
     }
+
+#if SHOW_TEXTURE_IN_DIALOG
+    {
+      TextureAsFloats _asFloats = textureInformation.asFloats(1);
+      glm::vec4 smallestValue = glm::vec4(INFINITY);
+      glm::vec4 largestValue = glm::vec4(-INFINITY);
+      for(quint32 y=0; y<_asFloats.h; ++y)
+      {
+        glm::vec4* line = _asFloats.lineData_As<glm::vec4>(y);
+        for(quint32 x=0; x<_asFloats.w; ++x)
+        {
+          smallestValue = glm::min(line[x], smallestValue);
+          largestValue = glm::max(line[x], largestValue);
+        }
+      }
+      QImage debugImage = _asFloats.asChannelQImage(3);
+      //            QImage debugImage = _asFloats.asQImage();
+      QDialog texturePreview;
+      QVBoxLayout vbox(&texturePreview);
+      QLabel label;
+      vbox.addWidget(&label);
+      qDebug() << "min: " << smallestValue << "max: " << largestValue;
+      label.setPixmap(QPixmap::fromImage(debugImage));
+      label.setVisible(true);
+      texturePreview.exec();
+    }
+#endif
   }else
   {
     Q_UNREACHABLE();
