@@ -10,6 +10,8 @@ add_custom_target(
   common-with-cpp/glrt/glsl/geometry/structs.h
   common-with-cpp/glrt/glsl/layout-constants.h
   common-with-cpp/glrt/glsl/math.h
+  debugging/posteffects/orange-sphere.fs
+  debugging/posteffects/orange-sphere.vs
   debugging/visualizations/common-debug-line-visualization.fs.glsl
   debugging/visualizations/common-debug-line-visualization.vs.glsl
   debugging/visualizations/visualize-arrow.fs
