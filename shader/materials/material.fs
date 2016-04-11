@@ -1,9 +1,5 @@
 #version 450 core
-#extension GL_NV_bindless_texture : require
-#extension GL_NV_gpu_shader5 : require
-#extension GL_NV_command_list : require
-
-layout(commandBindableNV)uniform;
+#include <extensions/command_list.glsl>
 
 #ifdef DEPTH_PREPASS
 #ifndef MASKED

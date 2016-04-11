@@ -1,5 +1,5 @@
 #version 450 core
-#extension GL_NV_gpu_shader5 : enable
+#include <extensions/common.glsl>
 
 #define SHADER_DEBUG_PRINTER
 
