@@ -20,6 +20,7 @@ public:
   gl::Buffer fragmentUniformBuffer;
 
   Renderer(bool depthTest);
+  ~Renderer();
 
   virtual void activateShader() = 0;
 
@@ -36,6 +37,15 @@ DebuggingPosteffect::Renderer::Renderer(bool depthTest)
   : depthTest(depthTest)
 {
   enqueueRerecordingCommandList();
+
+  // This really makes no sense. Part of the uglies workaround of my life :(
+  // For some reason activating the shader debug printer prevents the debuggig posteffect from wobbling..
+  debugging::ShaderDebugPrinter::workaround71++;
+}
+
+DebuggingPosteffect::Renderer::~Renderer()
+{
+  debugging::ShaderDebugPrinter::workaround71--;
 }
 
 void DebuggingPosteffect::Renderer::recordCommandList()

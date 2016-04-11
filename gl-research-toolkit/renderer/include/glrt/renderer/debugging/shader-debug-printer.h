@@ -31,6 +31,8 @@ public:
 
   void draw();
 
+  static int workaround71;
+
 private:
   struct Chunk;
   struct Header;
