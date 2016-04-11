@@ -189,7 +189,7 @@ void ShaderDebugPrinter::begin()
 {
   bool execute = (active && mouse_is_pressed) || workaround71!=0;
 
-  if(!execute)
+  if(Q_LIKELY(!execute))
     return;
 
   // Warning: This is an ugly hack to be able to read out the values fromt he buffer. If you delete the following line, the shader debugger won't work
@@ -218,7 +218,7 @@ void ShaderDebugPrinter::end()
   bool show_results = active && mouse_is_pressed;
   bool execute = show_results || workaround71!=0;
 
-  if(!execute)
+  if(Q_LIKELY(!execute))
     return;
 
   Chunk readChunks[GLSL_DEBUGGING_MAX_NUM_CHUNKS];
@@ -257,7 +257,7 @@ void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)
 
 void ShaderDebugPrinter::draw()
 {
-  if(!active)
+  if(Q_LIKELY(!active))
     return;
 
   if(clearScene)
@@ -277,7 +277,7 @@ void ShaderDebugPrinter::draw()
 
 bool ShaderDebugPrinter::handleEvents(const SDL_Event& event)
 {
-  if(!active)
+  if(Q_LIKELY(!active))
     return false;
 
   switch(event.type)
