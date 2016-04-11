@@ -1,6 +1,7 @@
 #include <glrt/renderer/debugging/debugging-posteffect.h>
 #include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/system.h>
+#include <glrt/glsl/math.h>
 #include <QTimer>
 
 namespace glrt {
@@ -16,6 +17,7 @@ public:
   bool depthTest;
   bool needRerecording = true;
   padding<byte, 2> _padding;
+  gl::Buffer fragmentUniformBuffer;
 
   Renderer(bool depthTest);
 
@@ -72,6 +74,8 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.append_token_AttributeAddress(bindingIndex, renderingData->vertexBuffer.gpuBufferAddress());
   segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneVertexUniformAddress());
   segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderer.sceneFragmentUniformAddress());
+  if(fragmentUniformBuffer.GetSize() != 0)
+    segment.append_token_UniformAddress(UNIFORM_BINDING_DEBUG_POSTEFFECT, gl::ShaderObject::ShaderType::FRAGMENT, fragmentUniformBuffer.gpuBufferAddress());
   segment.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
   tokenRange = segment.endTokenList();
 
@@ -105,14 +109,6 @@ class OrangeSphere : public DebuggingPosteffect::Renderer
 public:
   ReloadableShader shader;
 
-  struct SphereBufferData
-  {
-    glm::vec3 origin;
-    float radius;
-  };
-
-  gl::Buffer sphereBuffer;
-
   OrangeSphere(const glm::vec3& origin, float radius, bool depthTest);
 
   void activateShader() override;
@@ -124,11 +120,12 @@ OrangeSphere::OrangeSphere(const glm::vec3& origin, float radius, bool depthTest
     shader("orange-sphere",
            QDir(GLRT_SHADER_DIR"/debugging/posteffects"))
 {
-  SphereBufferData data;
-  data.origin = origin;
-  data.radius = radius;
+  glsl::Sphere sphere;
 
-  sphereBuffer = std::move(gl::Buffer(sizeof(SphereBufferData), gl::Buffer::IMMUTABLE, &data));
+  sphere.origin = origin;
+  sphere.radius = radius;
+
+  fragmentUniformBuffer = std::move(gl::Buffer(sizeof(glsl::Sphere), gl::Buffer::IMMUTABLE, &sphere));
 }
 
 void OrangeSphere::activateShader()

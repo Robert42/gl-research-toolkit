@@ -16,7 +16,7 @@ float FragCoord_z_toFragDepth(float z)
   return (0.5 * z + 0.5) * gl_DepthRange.diff + gl_DepthRange.near;
 }
 
-float rayMarch(in Ray ray, out vec4 color);
+vec3 rayMarch(in Ray ray, out vec4 color);
 
 out vec4 fragment_color;
 void main()
@@ -25,8 +25,7 @@ void main()
   ray.origin = scene.camera_position;
   ray.direction = normalize(fragment.look_target - scene.camera_position);
   
-  float point_distance = rayMarch(ray, fragment_color);
-  vec4 point = vec4(get_point(ray, point_distance), 1);
+  vec4 point = vec4(rayMarch(ray, fragment_color), 1);
   
   point = fragment.view_projection * point;
   point /= point.w;
