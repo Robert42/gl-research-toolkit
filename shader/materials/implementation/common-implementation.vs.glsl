@@ -2,15 +2,12 @@
 
 #include <glrt/glsl/layout-constants.h>
 
+#include <scene/uniforms.vs.glsl>
+
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstanceBlock
 {
   mat4 model_matrix;
 };
-
-layout(binding=UNIFORM_BINDING_SCENE_VERTEX_BLOCK, std140) uniform SceneVertexBlock
-{
-  mat4 view_projection;
-}scene;
 
 layout(location=VERTEX_ATTRIBUTE_LOCATION_POSITION) in vec3 vertex_position;
 layout(location=VERTEX_ATTRIBUTE_LOCATION_NORMAL) in vec3 vertex_normal;
