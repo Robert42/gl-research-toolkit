@@ -32,6 +32,7 @@ class Renderer : public QObject, public ReloadableShader::Listener
 public:
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
+  debugging::ShaderDebugPrinter& debugPrinter;
 
   QPointer<scene::CameraComponent> cameraComponent;
 
@@ -89,7 +90,6 @@ private:
   gl::CommandList commandList;
 
   bool _needRecapturing : 1;
-  debugging::ShaderDebugPrinter& debugPrinter;
 
   bool needRecapturing() const;
   bool needRerecording() const;

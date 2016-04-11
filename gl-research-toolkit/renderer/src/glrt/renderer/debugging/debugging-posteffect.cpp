@@ -67,6 +67,7 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   gl::CommandListRecorder segment;
 
   segment.beginTokenList();
+  renderer.debugPrinter.recordBinding(segment);
   segment.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   segment.append_token_AttributeAddress(bindingIndex, renderingData->vertexBuffer.gpuBufferAddress());
   segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneVertexUniformAddress());

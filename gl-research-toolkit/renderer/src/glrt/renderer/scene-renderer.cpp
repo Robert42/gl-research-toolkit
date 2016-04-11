@@ -18,6 +18,7 @@ namespace renderer {
 Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter)
   : scene(*scene),
     staticMeshBufferManager(*staticMeshBufferManager),
+    debugPrinter(*debugPrinter),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
@@ -27,8 +28,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    _needRecapturing(true),
-    debugPrinter(*debugPrinter)
+    _needRecapturing(true)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
