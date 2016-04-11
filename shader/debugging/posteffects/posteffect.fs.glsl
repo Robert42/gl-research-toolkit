@@ -24,5 +24,8 @@ void main()
   
   vec4 point = vec4(get_point(ray, point_distance), 1);
   
-  gl_FragDepth = FragCoord_z_toFragDepth(0.f);
+  point = fragment.view_projection * point;
+  point /= point.w;
+  
+  gl_FragDepth = FragCoord_z_toFragDepth(point.z);
 }
