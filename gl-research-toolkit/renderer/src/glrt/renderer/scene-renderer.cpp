@@ -227,7 +227,7 @@ void Renderer::allShadersReloaded()
 
 void Renderer::updateCameraUniform()
 {
-  if(!this->cameraComponent)
+  if(Q_UNLIKELY(!this->cameraComponent))
   {
     Array<scene::CameraComponent*> cameraComponents = scene::collectAllComponentsWithType<scene::CameraComponent>(&scene);
 
@@ -243,7 +243,7 @@ void Renderer::updateCameraUniform()
       this->cameraComponent = cameraComponents.first();
   }
 
-  if(this->cameraComponent)
+  if(Q_LIKELY(this->cameraComponent))
     updateCameraComponent(this->cameraComponent);
 }
 
