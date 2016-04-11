@@ -1,10 +1,11 @@
 #version 450 core
 #include <extensions/command_list.glsl>
 
-#ifdef DEPTH_PREPASS
-#ifndef MASKED
+#if defined(DEPTH_PREPASS) &&  defined(MASKED)
+// https://www.opengl.org/registry/specs/ARB/conservative_depth.txt
+layout(depth_unchanged) out float gl_FragDepth;
+#else
 layout(early_fragment_tests) in;
-#endif
 #endif
 
 #include "implementation/material-implementation.fs.glsl"
