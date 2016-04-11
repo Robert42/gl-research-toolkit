@@ -75,7 +75,7 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneVertexUniformAddress());
   segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderer.sceneFragmentUniformAddress());
   if(fragmentUniformBuffer.GetSize() != 0)
-    segment.append_token_UniformAddress(UNIFORM_BINDING_DEBUG_POSTEFFECT, gl::ShaderObject::ShaderType::FRAGMENT, fragmentUniformBuffer.gpuBufferAddress());
+    segment.append_token_UniformAddress(UNIFORM_BINDING_DEBUG_POSTEFFECT_FRAGMENT, gl::ShaderObject::ShaderType::FRAGMENT, fragmentUniformBuffer.gpuBufferAddress());
   segment.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
   tokenRange = segment.endTokenList();
 
