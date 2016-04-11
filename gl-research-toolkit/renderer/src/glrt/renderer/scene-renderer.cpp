@@ -45,7 +45,7 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-  if(needRerecording())
+  if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
   staticMeshRenderer.update();
 
