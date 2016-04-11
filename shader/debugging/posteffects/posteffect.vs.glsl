@@ -19,6 +19,6 @@ void main()
   
   mat4 invMat = inverse(scene.view_projection);
   
-  vec4 look_target_w = invMat * vec4(position, 0, 1);
+  vec4 look_target_w = invMat * vec4(position, 1, 1);
   fragment.look_target = look_target_w.xyz / look_target_w.w;
 }
