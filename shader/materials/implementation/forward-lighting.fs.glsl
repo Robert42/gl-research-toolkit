@@ -73,17 +73,5 @@ return;
   highlight_numeric_issues();
 }
 
-void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)
-{
-  num_sphere_lights = scene.lights.num_sphere_area_lights;
-  sphere_lights = scene.lights.sphere_arealights_address;
-}
-
-void get_rect_lights(out uint32_t num_rect_lights, out RectAreaLight* rect_lights)
-{
-  num_rect_lights = scene.lights.num_rect_area_lights;
-  rect_lights = scene.lights.rect_arealights_address;
-}
-
 
 #endif // FORWARD_RENDERER
