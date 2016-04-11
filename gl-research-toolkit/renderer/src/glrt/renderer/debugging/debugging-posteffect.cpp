@@ -1,36 +1,47 @@
 #include <glrt/renderer/debugging/debugging-posteffect.h>
 #include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/system.h>
+#include <QTimer>
 
 namespace glrt {
 namespace renderer {
 namespace debugging {
 
 
-class DebuggingPosteffect::Renderer : public DebugRenderer::Implementation
+class DebuggingPosteffect::Renderer : public DebugRenderer::Implementation, public ReloadableShader::Listener
 {
 public:
   gl::StatusCapture statusCapture;
   gl::CommandList commandList;
   bool depthTest;
-  padding<byte, 3> _padding;
+  bool needRerecording = true;
+  padding<byte, 2> _padding;
 
   Renderer(bool depthTest);
 
   virtual void activateShader() = 0;
 
-  void recordCommandList();
+  void enqueueRerecordingCommandList();
   void render() override;
+
+private:
+  void recordCommandList();
+  void allShadersReloaded() override;
 };
 
 
 DebuggingPosteffect::Renderer::Renderer(bool depthTest)
   : depthTest(depthTest)
 {
+  enqueueRerecordingCommandList();
 }
 
 void DebuggingPosteffect::Renderer::recordCommandList()
 {
+  if(!needRerecording)
+    return;
+  needRerecording = false;
+
   Q_ASSERT(!renderingData.isNull());
 
   const glm::ivec2 videoResolution = glrt::System::windowSize();
@@ -66,9 +77,22 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   commandList = gl::CommandListRecorder::compile(std::move(segment));
 }
 
+void DebuggingPosteffect::Renderer::enqueueRerecordingCommandList()
+{
+  needRerecording = true;
+  QTimer::singleShot(0, this, &DebuggingPosteffect::Renderer::recordCommandList);
+}
+
+void DebuggingPosteffect::Renderer::allShadersReloaded()
+{
+  enqueueRerecordingCommandList();
+}
+
 
 void DebuggingPosteffect::Renderer::render()
 {
+  Q_ASSERT(!needRerecording);
+
   commandList.call();
 }
 
@@ -102,8 +126,6 @@ OrangeSphere::OrangeSphere(const glm::vec3& origin, float radius, bool depthTest
   data.radius = radius;
 
   sphereBuffer = std::move(gl::Buffer(sizeof(SphereBufferData), gl::Buffer::IMMUTABLE, &data));
-
-  recordCommandList();
 }
 
 void OrangeSphere::activateShader()
