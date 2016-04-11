@@ -46,7 +46,7 @@ void DebuggingPosteffect::Renderer::recordCommandList()
 
   const glm::ivec2 videoResolution = glrt::System::windowSize();
   gl::FramebufferObject& framebuffer = renderingData->framebuffer;
-  //glrt::renderer::Renderer& renderer = renderingData->renderer; #TODO use the buffers from the renderer!
+  glrt::renderer::Renderer& renderer = renderingData->renderer;
 
   const int bindingIndex = 0;
 
@@ -69,6 +69,8 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.beginTokenList();
   segment.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   segment.append_token_AttributeAddress(bindingIndex, renderingData->vertexBuffer.gpuBufferAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneVertexUniformAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderer.sceneFragmentUniformAddress());
   segment.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
   tokenRange = segment.endTokenList();
 

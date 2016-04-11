@@ -1,8 +1,8 @@
 #version 450 core
+#include "posteffect.fs.glsl"
 
-out vec4 color;
-void main()
+float rayMarch(in Ray ray, out vec4 color)
 {
   color = vec4(1, 0.5, 0, 1);
-  gl_FragDepth = 0.99;
+  return 1.f;
 }
