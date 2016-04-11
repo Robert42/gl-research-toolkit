@@ -1,4 +1,4 @@
-in FagmentBlock
+in FragmentBlock
 {
   vec3 color;
 }fragment;
