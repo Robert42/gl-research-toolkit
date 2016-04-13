@@ -32,13 +32,17 @@ class Renderer : public QObject, public ReloadableShader::Listener
 public:
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
+  debugging::ShaderDebugPrinter& debugPrinter;
 
   QPointer<scene::CameraComponent> cameraComponent;
 
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
-  debugging::DebugRenderer::List debugDrawList;
+
+  debugging::DebugRenderer visualizePosteffect_OrangeTest;
+  debugging::DebugRenderer::List debugDrawList_Framebuffer;
+  debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
   glm::ivec2 videoResolution;
 
@@ -52,15 +56,15 @@ public:
 
   void render();
 
+  GLuint64 sceneVertexUniformAddress() const;
+  GLuint64 sceneFragmentUniformAddress() const;
+
 protected:
   virtual void prepareFramebuffer() = 0;
   virtual void applyFramebuffer() = 0;
 
   int appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
   void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
-
-  GLuint64 sceneVertexUniformAddress() const;
-  GLuint64 sceneFragmentUniformAddress() const;
 
 private:
   struct SceneVertexUniformBlock
@@ -86,7 +90,6 @@ private:
   gl::CommandList commandList;
 
   bool _needRecapturing : 1;
-  debugging::ShaderDebugPrinter& debugPrinter;
 
   bool needRecapturing() const;
   bool needRerecording() const;

@@ -1,4 +1,5 @@
 #include <glrt/renderer/forward-renderer.h>
+#include <glrt/renderer/debugging/debugging-posteffect.h>
 
 namespace glrt {
 namespace renderer {
@@ -38,6 +39,15 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   appendMaterialState(&framebuffer, {TEXTURED_OPAQUE}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
   appendMaterialState(&framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::FORWARD_PASS, maskedTwoSidedShader, forwardPassFlags | maskedTwoSidedFlags);
   appendMaterialState(&framebuffer, {TEXTURED_TRANSPARENT_TWO_SIDED}, Pass::FORWARD_PASS, transparentTwoSidedShader, forwardPassFlags | transparentTwoSidedFlags);
+
+  framebuffer.Bind(true);
+  glrt::renderer::debugging::DebuggingPosteffect::init(&framebuffer, this);
+  framebuffer.BindBackBuffer();
+}
+
+ForwardRenderer::~ForwardRenderer()
+{
+  glrt::renderer::debugging::DebuggingPosteffect::deinit();
 }
 
 void ForwardRenderer::prepareFramebuffer()

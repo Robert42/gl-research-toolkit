@@ -1,5 +1,6 @@
 #include <glrt/sample-application.h>
 
+
 namespace glrt {
 
 SampleApplication::SampleApplication(int& argc, char** argv,
@@ -14,7 +15,12 @@ SampleApplication::SampleApplication(int& argc, char** argv,
 {
   initGui();
 
+
   scene.load(sampleApplicationSettings.sceneToLoad);
+}
+
+SampleApplication::~SampleApplication()
+{
 }
 
 bool SampleApplication::handleEvents(const SDL_Event& event)

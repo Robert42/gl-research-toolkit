@@ -22,6 +22,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+# Assets
+
+For the assets (found in the submodules in `/external/assets`), please check each scenes directory for the license and/or copyright notes.
+
 # External Dependencies used by this Toolkit
 
 - [AngelScript](http://www.angelcode.com/angelscript/) (zlib license)

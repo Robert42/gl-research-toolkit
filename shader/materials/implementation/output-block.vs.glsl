@@ -1,4 +1,4 @@
-out FagmentBlock
+out FragmentBlock
 {
   vec3 position;
   vec3 normal;

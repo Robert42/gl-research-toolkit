@@ -10,6 +10,7 @@ namespace glrt {
 namespace renderer {
 namespace debugging {
 
+int ShaderDebugPrinter::workaround71 = 0;
 
 struct ShaderDebugPrinter::Chunk
 {
@@ -186,7 +187,9 @@ ShaderDebugPrinter::~ShaderDebugPrinter()
 
 void ShaderDebugPrinter::begin()
 {
-  if(!active || !mouse_is_pressed)
+  bool execute = (active && mouse_is_pressed) || workaround71!=0;
+
+  if(Q_LIKELY(!execute))
     return;
 
   // Warning: This is an ugly hack to be able to read out the values fromt he buffer. If you delete the following line, the shader debugger won't work
@@ -212,7 +215,10 @@ void ShaderDebugPrinter::begin()
 
 void ShaderDebugPrinter::end()
 {
-  if(!active || !mouse_is_pressed)
+  bool show_results = active && mouse_is_pressed;
+  bool execute = show_results || workaround71!=0;
+
+  if(Q_LIKELY(!execute))
     return;
 
   Chunk readChunks[GLSL_DEBUGGING_MAX_NUM_CHUNKS];
@@ -220,6 +226,12 @@ void ShaderDebugPrinter::end()
   const Chunk* chunks = const_cast<const Chunk*>(reinterpret_cast<Chunk*>(chunkBuffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE)));
   memcpy(readChunks, chunks, sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS);
   chunkBuffer.Unmap();
+
+  // This really makes no sense. Part of the uglies workaround of my life :(
+  // For some reason activating the shader debug printer prevents the debuggig posteffect from wobbling...
+  // ... But if it's activated for debugging, don't show the debugging results if not asked.
+  if(!show_results)
+    return;
 
   positionsToDebug.clear();
   directionsToDebug.clear();
@@ -245,7 +257,7 @@ void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)
 
 void ShaderDebugPrinter::draw()
 {
-  if(!active)
+  if(Q_LIKELY(!active))
     return;
 
   if(clearScene)
@@ -265,7 +277,7 @@ void ShaderDebugPrinter::draw()
 
 bool ShaderDebugPrinter::handleEvents(const SDL_Event& event)
 {
-  if(!active)
+  if(Q_LIKELY(!active))
     return false;
 
   switch(event.type)

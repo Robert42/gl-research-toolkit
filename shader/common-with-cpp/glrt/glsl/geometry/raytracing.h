@@ -220,6 +220,19 @@ inline vec3 perspective_projection_unclamped(in Plane plane, in vec3 view_positi
 
 // ======== Sphere =============================================================
 
+inline vec3 nearest_point_on_sphere_unclamped(in Sphere sphere, in Ray ray)
+{
+  vec3 nearest_point = nearest_point_unclamped(ray, sphere.origin);
+
+  float distance_to_ray = distance(sphere.origin, nearest_point);
+  
+  float d = min(distance_to_ray, sphere.radius);
+
+  nearest_point = sphere.origin + d * (nearest_point - sphere.origin) / distance_to_ray;
+  
+  return nearest_point - ray.direction * sphere.radius * sin(acos(d/sphere.radius));
+}
+
 inline bool intersects(in Sphere sphere, in Ray ray)
 {
   float d = sq_distance_to(ray, sphere.origin);

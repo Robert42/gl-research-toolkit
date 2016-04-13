@@ -1,14 +1,12 @@
 #version 450 core
-#extension GL_NV_bindless_texture : require
-#extension GL_NV_gpu_shader5 : require
-#extension GL_NV_command_list : require
+#include <extensions/command_list.glsl>
 
-layout(commandBindableNV)uniform;
-
-#ifdef DEPTH_PREPASS
-#ifndef MASKED
+#if defined(DEPTH_PREPASS) &&  defined(MASKED)
+// TODO test, how this affects performance. Would performance be improved, if this layout woul dbe active always?
+// https://www.opengl.org/registry/specs/ARB/conservative_depth.txt
+layout(depth_unchanged) out float gl_FragDepth;
+#else
 layout(early_fragment_tests) in;
-#endif
 #endif
 
 #include "implementation/material-implementation.fs.glsl"
@@ -33,7 +31,7 @@ void main()
   return;
 #endif
 
-#if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_HEIGHT) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
+#if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_BUMP) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
   fragment_color = checkerboard();
   return;
 #endif
@@ -95,8 +93,8 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
   #elif defined(TEXTURE_NORMAL_LS)
     fragment_color = vec4(encode_direction_as_color(normal), 1);
     return;
-  #elif defined(TEXTURE_HEIGHT)
-    fragment_color = vec4(vec3(height), 1);
+  #elif defined(TEXTURE_BUMP)
+    fragment_color = vec4(encode_signed_normalized_vector_as_color(vec3(height)), 1);
     return;
   #elif defined(TEXTURE_SMOOTHENESS)
     fragment_color = vec4(vec3(srmo[0]), 1);
@@ -163,7 +161,7 @@ void main()
   float alpha;
   calculate_material_output(material, surface, alpha);
   
-#if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_HEIGHT) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
+#if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_BUMP) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
   return;
 #endif
   

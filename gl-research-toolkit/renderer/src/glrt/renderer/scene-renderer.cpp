@@ -9,6 +9,7 @@
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/renderer/debugging/debugging-posteffect.h>
 
 namespace glrt {
 namespace renderer {
@@ -17,23 +18,25 @@ namespace renderer {
 Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter)
   : scene(*scene),
     staticMeshBufferManager(*staticMeshBufferManager),
+    debugPrinter(*debugPrinter),
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
+    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    _needRecapturing(true),
-    debugPrinter(*debugPrinter)
+    _needRecapturing(true)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
 
-  debugDrawList.connectTo(&visualizeCameras);
-  debugDrawList.connectTo(&visualizeSphereAreaLights);
-  debugDrawList.connectTo(&visualizeRectAreaLights);
+  debugDrawList_Backbuffer.connectTo(&visualizeCameras);
+  debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
+  debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
 }
 
 Renderer::~Renderer()
@@ -42,7 +45,7 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-  if(needRerecording())
+  if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
   staticMeshRenderer.update();
 
@@ -51,10 +54,12 @@ void Renderer::render()
 
   commandList.call();
 
+  debugDrawList_Framebuffer.render();
+
   applyFramebuffer();
 
   sceneVertexUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_VERTEX_BLOCK);
-  debugDrawList.render();
+  debugDrawList_Backbuffer.render();
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
@@ -222,7 +227,7 @@ void Renderer::allShadersReloaded()
 
 void Renderer::updateCameraUniform()
 {
-  if(!this->cameraComponent)
+  if(Q_UNLIKELY(!this->cameraComponent))
   {
     Array<scene::CameraComponent*> cameraComponents = scene::collectAllComponentsWithType<scene::CameraComponent>(&scene);
 
@@ -238,7 +243,7 @@ void Renderer::updateCameraUniform()
       this->cameraComponent = cameraComponents.first();
   }
 
-  if(this->cameraComponent)
+  if(Q_LIKELY(this->cameraComponent))
     updateCameraComponent(this->cameraComponent);
 }
 

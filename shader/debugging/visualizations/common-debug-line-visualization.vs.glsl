@@ -5,7 +5,7 @@ layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_PARAMETER1) in float vertex
 layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_COLOR) in vec3 vertex_color;
 layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_PARAMETER2) in float vertex_parameter2;
 
-out FagmentBlock
+out FragmentBlock
 {
   vec3 color;
 }fragment;

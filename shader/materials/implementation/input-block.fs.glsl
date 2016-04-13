@@ -1,5 +1,5 @@
 
-in FagmentBlock
+in FragmentBlock
 {
   vec3 position;
   vec3 normal;

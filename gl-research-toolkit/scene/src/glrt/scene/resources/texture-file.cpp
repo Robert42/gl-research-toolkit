@@ -5,12 +5,18 @@
 #include <glrt/toolkit/plain-old-data-stream.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
+#include <QLabel>
+#include <QDialog>
+#include <QImage>
+#include <QVBoxLayout>
 
 #include <SOIL/SOIL.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
+
+#define SHOW_TEXTURE_IN_DIALOG 0
 
 using AngelScriptIntegration::AngelScriptCheck;
 
@@ -167,29 +173,37 @@ struct TextureFile::TextureAsFloats
     h = image.height*image.depth;
   }
 
-  float* lineData_AsFloat(quint32 y)
+  template<typename T>
+  T* lineData_As(quint32 y)
   {
-    return reinterpret_cast<float*>(data + y * image.rowStride);
+    return reinterpret_cast<T*>(data + y * image.rowStride);
   }
 
-  glm::vec4* lineData_AsVec4(quint32 y)
+  template<typename T>
+  const T* lineData_As(quint32 y) const
   {
-    return reinterpret_cast<glm::vec4*>(data + y * image.rowStride);
+    return reinterpret_cast<const T*>(data + y * image.rowStride);
   }
 
-  const glm::vec4* lineData_AsVec4(quint32 y) const
-  {
-    return reinterpret_cast<const glm::vec4*>(data + y * image.rowStride);
-  }
-
-  void convertToSignedNormalized()
+  void remapSourceAsSigned()
   {
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
-      float* line = this->lineData_AsFloat(y);
+      float* line = this->lineData_As<float>(y);
       for(quint32 x=0; x<w_float; ++x)
         line[x] = line[x]*2.f - 1.f;
+    }
+  }
+
+  void remapSourceAsUnsigned()
+  {
+    #pragma omp parallel for
+    for(quint32 y=0; y<h; ++y)
+    {
+      float* line = this->lineData_As<float>(y);
+      for(quint32 x=0; x<w_float; ++x)
+        line[x] = line[x]*.5f + 0.5f;
     }
   }
 
@@ -198,60 +212,107 @@ struct TextureFile::TextureAsFloats
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
-      glm::vec4* line = this->lineData_AsVec4(y);
+      glm::vec4* line = this->lineData_As<glm::vec4>(y);
       for(quint32 x=0; x<w; ++x)
         line[x] = line[x]*factor + offset;
     }
   }
 
-  void mergeWith_as_grey(const TextureAsFloats& red, const TextureAsFloats& green, const TextureAsFloats& blue, const TextureAsFloats& alpha)
+  inline static float grey(const glm::vec3& x)
   {
-    Q_ASSERT(red.w == this->w);
-    Q_ASSERT(red.h == this->h);
-    Q_ASSERT(green.w == this->w);
-    Q_ASSERT(green.h == this->h);
-    Q_ASSERT(blue.w == this->w);
-    Q_ASSERT(blue.h == this->h);
-    Q_ASSERT(alpha.w == this->w);
-    Q_ASSERT(alpha.h == this->h);
+    return (x.r + x.g + x.b) / 3.f;
+  }
 
-    #pragma omp parallel for
-    for(quint32 y=0; y<h; ++y)
+  void mergeWith_as_grey(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha)
+  {
+    if(!red && !green && !blue && !alpha)
+      return;
+
+    if(red)
     {
-      glm::vec4* targetLine = this->lineData_AsVec4(y);
-      const glm::vec4* redLine = red.lineData_AsVec4(y);
-      const glm::vec4* greenLine = green.lineData_AsVec4(y);
-      const glm::vec4* blueLine = blue.lineData_AsVec4(y);
-      const glm::vec4* alphaLine = alpha.lineData_AsVec4(y);
-      for(quint32 x=0; x<w; ++x)
+      Q_ASSERT(red->w == this->w);
+      Q_ASSERT(red->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
       {
-        targetLine[x].r = glm::length(redLine[x].rgb());
-        targetLine[x].g = glm::length(greenLine[x].rgb());
-        targetLine[x].b = glm::length(blueLine[x].rgb());
-        targetLine[x].a = glm::length(alphaLine[x].rgb());
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* redLine = red->lineData_As<glm::vec4>(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].r = grey(redLine[x].rgb());
+      }
+    }
+    if(green)
+    {
+      Q_ASSERT(green->w == this->w);
+      Q_ASSERT(green->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
+      {
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* greenLine = green->lineData_As<glm::vec4>(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].g = grey(greenLine[x].rgb());
+      }
+    }
+    if(blue)
+    {
+      Q_ASSERT(blue->w == this->w);
+      Q_ASSERT(blue->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
+      {
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* blueLine = blue->lineData_As<glm::vec4>(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].b = grey(blueLine[x].rgb());
+      }
+    }
+    if(alpha)
+    {
+      Q_ASSERT(alpha->w == this->w);
+      Q_ASSERT(alpha->h == this->h);
+#pragma omp parallel for
+      for(quint32 y=0; y<h; ++y)
+      {
+        glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+        const glm::vec4* alphaLine = alpha->lineData_As<glm::vec4>(y);
+        for(quint32 x=0; x<w; ++x)
+          targetLine[x].a = grey(alphaLine[x].rgb());
       }
     }
   }
 
-  void mergeWith_channelwise(const TextureAsFloats& red, const TextureAsFloats& green, const TextureAsFloats& blue, const TextureAsFloats& alpha)
+  void mergeWith_channelwise(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha)
   {
-    Q_ASSERT(red.w == this->w);
-    Q_ASSERT(red.h == this->h);
-    Q_ASSERT(green.w == this->w);
-    Q_ASSERT(green.h == this->h);
-    Q_ASSERT(blue.w == this->w);
-    Q_ASSERT(blue.h == this->h);
-    Q_ASSERT(alpha.w == this->w);
-    Q_ASSERT(alpha.h == this->h);
+    if(!red && !green && !blue && !alpha)
+      return;
+
+    Q_ASSERT(red->w == this->w);
+    Q_ASSERT(red->h == this->h);
+    Q_ASSERT(green->w == this->w);
+    Q_ASSERT(green->h == this->h);
+    Q_ASSERT(blue->w == this->w);
+    Q_ASSERT(blue->h == this->h);
+    Q_ASSERT(alpha->w == this->w);
+    Q_ASSERT(alpha->h == this->h);
+
+    if(!red)
+      red = this;
+    if(!green)
+      green = this;
+    if(!blue)
+      blue = this;
+    if(!alpha)
+      alpha = this;
 
     #pragma omp parallel for
     for(quint32 y=0; y<h; ++y)
     {
-      glm::vec4* targetLine = this->lineData_AsVec4(y);
-      const glm::vec4* redLine = red.lineData_AsVec4(y);
-      const glm::vec4* greenLine = green.lineData_AsVec4(y);
-      const glm::vec4* blueLine = blue.lineData_AsVec4(y);
-      const glm::vec4* alphaLine = alpha.lineData_AsVec4(y);
+      glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
+      const glm::vec4* redLine = red->lineData_As<glm::vec4>(y);
+      const glm::vec4* greenLine = green->lineData_As<glm::vec4>(y);
+      const glm::vec4* blueLine = blue->lineData_As<glm::vec4>(y);
+      const glm::vec4* alphaLine = alpha->lineData_As<glm::vec4>(y);
       for(quint32 x=0; x<w; ++x)
       {
         targetLine[x].r = redLine[x].r;
@@ -265,20 +326,61 @@ struct TextureFile::TextureAsFloats
   void mergeWith(const TextureAsFloats* red, const TextureAsFloats* green, const TextureAsFloats* blue, const TextureAsFloats* alpha,
                  bool merge_red_as_grey, bool merge_green_as_grey, bool merge_blue_as_grey, bool merge_alpha_as_grey)
   {
-    const TextureAsFloats* redAsGrey = red&&merge_red_as_grey ? red : this;
-    const TextureAsFloats* greenAsGrey = green&&merge_green_as_grey ? red : this;
-    const TextureAsFloats* blueAsGrey = blue&&merge_blue_as_grey ? red : this;
-    const TextureAsFloats* alphaAsGrey = alpha&&merge_alpha_as_grey ? red : this;
+    const TextureAsFloats* redAsGrey = red&&merge_red_as_grey ? red : nullptr;
+    const TextureAsFloats* greenAsGrey = green&&merge_green_as_grey ? green : nullptr;
+    const TextureAsFloats* blueAsGrey = blue&&merge_blue_as_grey ? blue : nullptr;
+    const TextureAsFloats* alphaAsGrey = alpha&&merge_alpha_as_grey ? alpha : nullptr;
 
-    const TextureAsFloats* redChannelwise = red&&!merge_red_as_grey ? red : this;
-    const TextureAsFloats* greenChannelwise = green&&!merge_green_as_grey ? red : this;
-    const TextureAsFloats* blueChannelwise = blue&&!merge_blue_as_grey ? red : this;
-    const TextureAsFloats* alphaChannelwise = alpha&&!merge_alpha_as_grey ? red : this;
+    const TextureAsFloats* redChannelwise = red&&!merge_red_as_grey ? red : nullptr;
+    const TextureAsFloats* greenChannelwise = green&&!merge_green_as_grey ? green : nullptr;
+    const TextureAsFloats* blueChannelwise = blue&&!merge_blue_as_grey ? blue : nullptr;
+    const TextureAsFloats* alphaChannelwise = alpha&&!merge_alpha_as_grey ? alpha : nullptr;
 
-    if(merge_red_as_grey || merge_green_as_grey || merge_blue_as_grey || merge_alpha_as_grey)
-      mergeWith_as_grey(*redAsGrey, *greenAsGrey, *blueAsGrey, *alphaAsGrey);
-    if(!merge_red_as_grey || !merge_green_as_grey || !merge_blue_as_grey || !merge_alpha_as_grey)
-      mergeWith_channelwise(*redChannelwise, *greenChannelwise, *blueChannelwise, *alphaChannelwise);
+    mergeWith_as_grey(redAsGrey, greenAsGrey, blueAsGrey, alphaAsGrey);
+    mergeWith_channelwise(redChannelwise, greenChannelwise, blueChannelwise, alphaChannelwise);
+  }
+
+  QImage asQImage() const
+  {
+    QImage image(int(w), int(h), QImage::Format_RGBA8888);
+
+    quint8* targetData = reinterpret_cast<quint8*>(image.bits());
+
+#pragma omp parallel for
+    for(int y=0; y<int(h); ++y)
+    {
+      const float* srcLine = this->lineData_As<float>(quint32(y));
+      quint8* targetLine = targetData + y*image.bytesPerLine();
+      for(int x=0; x<int(w_float); ++x)
+        targetLine[x] = static_cast<quint8>(glm::clamp<float>(srcLine[x] * 255.f, 0.f, 255.f));
+    }
+
+    return image;
+  }
+
+  QImage asChannelQImage(int channel) const
+  {
+    QImage image(int(w), int(h), QImage::Format_RGBA8888);
+
+    quint8* targetData = reinterpret_cast<quint8*>(image.bits());
+
+#pragma omp parallel for
+    for(int y=0; y<int(h); ++y)
+    {
+      const glm::vec4* srcLine = this->lineData_As<glm::vec4>(quint32(y));
+      glm::tvec4<quint8>* targetLine = reinterpret_cast<glm::tvec4<quint8>*>(targetData + y*image.bytesPerLine());
+      for(int x=0; x<int(w); ++x)
+      {
+        quint8 v = static_cast<quint8>(glm::clamp<float>(srcLine[x][channel] * 255.f, 0.f, 255.f));
+
+        targetLine[x].r = v;
+        targetLine[x].g = v;
+        targetLine[x].b = v;
+        targetLine[x].a = 255;
+      }
+    }
+
+    return image;
   }
 };
 
@@ -467,25 +569,25 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
   if(importSettings.need_merging())
   {
     auto createChannelTextureInfo = [flags,&srcFile,&textureInformation](const std::string& suffix) {
-      QFileInfo newFile = QDir(srcFile.path()).filePath(srcFile.baseName().replace(QRegularExpression("[-_]+$"), QString::fromStdString(suffix)) + "." + srcFile.suffix());
-      if(!newFile.exists())
-        throw GLRT_EXCEPTION(QString("The file %0 doesn't exist.").arg(newFile.filePath()));
       ImportedGlTexture* tex = nullptr;
       if(!suffix.empty())
       {
-        tex = new ImportedGlTexture(SOIL_load_OGL_texture(suffix.c_str(),
+        QFileInfo newFile = QDir(srcFile.path()).filePath(srcFile.baseName().replace(QRegularExpression("[-_][^-_]+$"), QString::fromStdString(suffix)));
+        if(!newFile.exists())
+          throw GLRT_EXCEPTION(QString("The file %0 doesn't exist.").arg(newFile.filePath()));
+        tex = new ImportedGlTexture(SOIL_load_OGL_texture(newFile.absoluteFilePath().toStdString().c_str(),
                                                           SOIL_LOAD_AUTO,
                                                           SOIL_CREATE_NEW_ID,
                                                           flags));
-        if(tex->width(0) != textureInformation.width(0) || tex->height(0) == textureInformation.height(0))
-          throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1").arg(srcFile.filePath()).arg(newFile.filePath()));
+        if(tex->width(0) != textureInformation.width(0) || tex->height(0) != textureInformation.height(0))
+          throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1. (the channel texture has the size %2x%3 and the original tetxure has the size %4x%5)").arg(srcFile.filePath()).arg(newFile.filePath()).arg(tex->width(0)).arg(tex->height(0)).arg(textureInformation.width(0)).arg(textureInformation.height(0)));
       }
       return tex;
     };
 
-    red_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
-    green_texture = createChannelTextureInfo(importSettings.blue_channel_suffix);
-    blue_texture = createChannelTextureInfo(importSettings.green_channel_suffix);
+    red_texture = createChannelTextureInfo(importSettings.red_channel_suffix);
+    green_texture = createChannelTextureInfo(importSettings.green_channel_suffix);
+    blue_texture = createChannelTextureInfo(importSettings.blue_channel_suffix);
     alpha_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
   }
 
@@ -528,8 +630,8 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
           delete alphaAsFloats;
         }
 
-        if(importSettings.sourceIsBumpMap || importSettings.sourceIsNormalMap)
-          asFloats.convertToSignedNormalized();
+        if(importSettings.remapSourceAsSigned)
+          asFloats.remapSourceAsSigned();
 
         if(importSettings.need_remapping())
           asFloats.remap(importSettings.offset, importSettings.factor);
@@ -543,6 +645,33 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
       this->uncompressedImages.append(image.first);
     }
+
+#if SHOW_TEXTURE_IN_DIALOG
+    {
+      TextureAsFloats _asFloats = textureInformation.asFloats(1);
+      glm::vec4 smallestValue = glm::vec4(INFINITY);
+      glm::vec4 largestValue = glm::vec4(-INFINITY);
+      for(quint32 y=0; y<_asFloats.h; ++y)
+      {
+        glm::vec4* line = _asFloats.lineData_As<glm::vec4>(y);
+        for(quint32 x=0; x<_asFloats.w; ++x)
+        {
+          smallestValue = glm::min(line[x], smallestValue);
+          largestValue = glm::max(line[x], largestValue);
+        }
+      }
+      QImage debugImage = _asFloats.asChannelQImage(3);
+      //            QImage debugImage = _asFloats.asQImage();
+      QDialog texturePreview;
+      QVBoxLayout vbox(&texturePreview);
+      QLabel label;
+      vbox.addWidget(&label);
+      qDebug() << "min: " << smallestValue << "max: " << largestValue;
+      label.setPixmap(QPixmap::fromImage(debugImage));
+      label.setVisible(true);
+      texturePreview.exec();
+    }
+#endif
   }else
   {
     Q_UNREACHABLE();
@@ -818,8 +947,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectMethod("TextureImportSettings", "void opAssign(const TextureImportSettings &in other)", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_assign_operator<ImportSettings>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsNormalMap", asOFFSET(ImportSettings,sourceIsNormalMap)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "bool sourceIsBumpMap", asOFFSET(ImportSettings,sourceIsBumpMap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool remapSourceAsSigned", asOFFSET(ImportSettings,remapSourceAsSigned)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 factor", asOFFSET(ImportSettings,factor)); AngelScriptCheck(r);
