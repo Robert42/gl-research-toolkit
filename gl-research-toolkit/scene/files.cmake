@@ -3,6 +3,8 @@ set(SOURCE_FILES
   include/glrt/scene/camera-parameter.h
   include/glrt/scene/collect-scene-data.h
   include/glrt/scene/collect-scene-data.inl
+  include/glrt/scene/component-decorator.h
+  include/glrt/scene/component-decorator.inl
   include/glrt/scene/coord-constraints.h
   include/glrt/scene/coord-frame.h
   include/glrt/scene/coord-frame.inl
