@@ -38,6 +38,10 @@ public:
 
   QList<Uuid<Scene>> allRegisteredScenes();
 
+  Uuid<Material> materialUuidForLuminance(const glm::vec3& luminance);
+  Uuid<Material> materialUuidForLightSource(const LightSource::SphereAreaLight& data);
+  Uuid<Material> materialUuidForLightSource(const LightSource::RectAreaLight& data);
+
   void loadStaticMesh(const Uuid<StaticMesh>& uuid);
 
   QString labelForResourceUuid(const QUuid& uuid, const QString& fallback) const;

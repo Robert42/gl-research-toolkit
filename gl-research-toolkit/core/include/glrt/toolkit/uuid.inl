@@ -30,6 +30,18 @@ Uuid<T>::Uuid(UuidIndex index)
 
 
 template<class T>
+Uuid<T> Uuid<T>::create()
+{
+  return Uuid<T>(QUuid::createUuid());
+}
+
+template<class T>
+Uuid<T> Uuid<T>::create(const QString& string)
+{
+  return Uuid<T>(QUuid::createUuidV5(QUuid::createUuid(), string));
+}
+
+template<class T>
 Uuid<T>::operator QUuid() const
 {
   return toQUuid();

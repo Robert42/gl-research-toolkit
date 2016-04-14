@@ -6,6 +6,7 @@
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/material.h>
+#include <glrt/scene/component-decorator.h>
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer-manager.h>
@@ -43,6 +44,8 @@ public:
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;
+
+  glrt::scene::ComponentDecorator<glrt::scene::LightComponent> lightComponentVisualization;
 
   glm::ivec2 videoResolution;
 

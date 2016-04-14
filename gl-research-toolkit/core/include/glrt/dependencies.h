@@ -2,6 +2,7 @@
 #define GLRT_DEPENDENCIES_H
 
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/round.hpp>
@@ -75,6 +76,11 @@ QDebug operator<<(QDebug d, const std::string& s);
 
 namespace glrt {
 
+template<typename T>
+inline T sq(T x)
+{
+  return x;
+}
 
 using AngelScript::asDWORD;
 

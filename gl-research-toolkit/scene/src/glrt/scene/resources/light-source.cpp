@@ -1,5 +1,6 @@
 #include <glrt/scene/resources/light-source.h>
 #include <glrt/scene/light-component.h>
+#include <pbs/cpp/luminance-for-luminous-power.inl>
 
 namespace glrt {
 namespace scene {
@@ -95,6 +96,19 @@ void LightSource::registerAngelScriptTypes()
   glrt::Uuid<void>::registerCustomizedUuidType("LightSource", false);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+// =====================
+
+
+glm::vec3 LightSource::SphereAreaLight::luminance() const
+{
+  return pbs::luminance_for_sphere(areaLightCommon.luminous_power*areaLightCommon.color, this->radius);
+}
+
+glm::vec3 LightSource::RectAreaLight::luminance() const
+{
+  return pbs::luminance_for_rect(areaLightCommon.luminous_power*areaLightCommon.color, this->half_width*2.f, this->half_height*2.f);
 }
 
 

@@ -6,6 +6,7 @@ set(SOURCE_FILES
   include/glrt/renderer/debugging/debug-line-visualisation.h
   include/glrt/renderer/debugging/debug-mesh.h
   include/glrt/renderer/debugging/debug-renderer.h
+  include/glrt/renderer/debugging/light-visualization.h
   include/glrt/renderer/debugging/shader-debug-printer.h
   include/glrt/renderer/debugging/surface-shader-visualizations.h
   include/glrt/renderer/debugging/visualization-renderer.h
@@ -51,6 +52,7 @@ set(SOURCE_FILES
   src/glrt/renderer/debugging/debug-line-visualisation.cpp
   src/glrt/renderer/debugging/debug-mesh.cpp
   src/glrt/renderer/debugging/debug-renderer.cpp
+  src/glrt/renderer/debugging/light-visualization.cpp
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/surface-shader-visualizations.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
