@@ -38,6 +38,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
+
+  lightComponentVisualization.setVisible(true);
 }
 
 Renderer::~Renderer()

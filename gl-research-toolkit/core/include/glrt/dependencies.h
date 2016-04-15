@@ -37,6 +37,7 @@
 #include <thread>
 #include <atomic>
 #include <cstring>
+#include <type_traits>
 
 #include <SDL2/SDL.h>
 

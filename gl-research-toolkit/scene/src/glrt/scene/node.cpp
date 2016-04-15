@@ -215,7 +215,8 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     _hiddenBecauseDeletedNextFrame(false),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
-{  if(this->parent !=nullptr)
+{
+  if(this->parent !=nullptr)
   {
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);

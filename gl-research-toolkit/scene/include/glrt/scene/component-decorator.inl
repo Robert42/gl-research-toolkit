@@ -16,12 +16,13 @@ ComponentDecorator<T_Component>::ComponentDecorator(Scene* scene, const Decorato
   for(T_Component* component : collectAllComponentsWithType<T_Component>(scene))
     addDecoration(component);
 
-  connect(scene, &Scene::componentAdded, this, &ComponentDecorator<T_Component>::handleAddedComponent);
+  connect(scene, &Scene::componentAdded, this, &ComponentDecorator<T_Component>::handleAddedComponent, Qt::QueuedConnection);
 }
 
 template<class T_Component>
 void ComponentDecorator<T_Component>::setVisible(bool visible)
 {
+  this->visible = visible;
   for(Node::Component* decorator : allDecorators)
     decorator->show(visible);
 }

@@ -10,6 +10,8 @@ namespace debugging {
 
 glrt::scene::Node::Component* createLightDecoration(glrt::scene::LightComponent* l)
 {
+  // Just a note: If the Light component changes, the visualization doesn't get updated
+
   glrt::scene::SphereAreaLightComponent* sphereAreaLightComponent = dynamic_cast<glrt::scene::SphereAreaLightComponent*>(l);
   glrt::scene::RectAreaLightComponent* rectAreaLightComponent = dynamic_cast<glrt::scene::RectAreaLightComponent*>(l);
   glrt::scene::resources::ResourceManager& resourceManager = l->resourceManager();
@@ -24,6 +26,7 @@ glrt::scene::Node::Component* createLightDecoration(glrt::scene::LightComponent*
   }
 
   Q_UNREACHABLE();
+  return nullptr;
 }
 
 
