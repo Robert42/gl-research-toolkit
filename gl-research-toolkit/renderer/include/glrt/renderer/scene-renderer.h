@@ -45,8 +45,6 @@ public:
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
-  glrt::scene::ComponentDecorator<glrt::scene::LightComponent> lightComponentVisualization;
-
   glm::ivec2 videoResolution;
 
   Renderer(const Renderer&) = delete;

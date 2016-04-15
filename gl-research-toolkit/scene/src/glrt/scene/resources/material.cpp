@@ -33,12 +33,6 @@ QString Material::typeToString(Type type)
   if(type.testFlag(TypeFlag::TWO_SIDED))
     usedFlags << "TWO_SIDED";
 
-  if(type.testFlag(TypeFlag::EMISSION_ONLY))
-    usedFlags << "EMISSION_ONLY";
-
-  if(type.testFlag(TypeFlag::PER_INSTANCE_FREE_TRANSFORM))
-    usedFlags << "PER_INSTANCE_FREE_TRANSFORM";
-
   return usedFlags.join("|");
 }
 

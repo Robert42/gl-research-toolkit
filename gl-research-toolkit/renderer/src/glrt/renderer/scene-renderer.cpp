@@ -10,7 +10,6 @@
 #include <glrt/renderer/toolkit/aligned-vector.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/renderer/debugging/debugging-posteffect.h>
-#include <glrt/renderer/debugging/light-visualization.h>
 
 namespace glrt {
 namespace renderer {
@@ -23,7 +22,6 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
-    lightComponentVisualization(scene, debugging::createLightDecoration),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
@@ -38,8 +36,6 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
-
-  lightComponentVisualization.setVisible(true);
 }
 
 Renderer::~Renderer()
