@@ -37,7 +37,7 @@ void main()
 }
 #else
 
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_FRAGMENT_BLOCK, std140) uniform MaterialInstanceBlock
+layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
 vec4 tint;
 vec4 srmo_range_0;

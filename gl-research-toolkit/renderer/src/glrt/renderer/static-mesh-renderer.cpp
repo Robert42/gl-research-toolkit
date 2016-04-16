@@ -67,9 +67,9 @@ void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
   Q_ASSERT(materialGpuAddresses.contains(material)); // if the material is not known, the mateiral wasn't initialized correctly
 
   if(currentMaterialType.testFlag(Material::TypeFlag::FRAGMENT_SHADER_UNIFORM))
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
   else if(currentMaterialType.testFlag(Material::TypeFlag::VERTEX_SHADER_UNIFORM))
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, materialGpuAddresses.value(material));
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, materialGpuAddresses.value(material));
   else
     Q_UNREACHABLE();
 

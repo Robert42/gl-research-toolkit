@@ -3,7 +3,7 @@
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/glsl/math.h>
 
-#include <scene/uniforms.vs.glsl>
+#include <scene/uniforms.glsl>
 
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstanceBlock
 {
@@ -21,7 +21,7 @@ layout(location=VERTEX_ATTRIBUTE_LOCATION_UV) in vec2 vertex_uv;
 
 #include <pbs/pbs.glsl>
 
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_VERTEX_BLOCK, std140) uniform MaterialInstanceBlock
+layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
   vec3 base_color;
   float smoothness;

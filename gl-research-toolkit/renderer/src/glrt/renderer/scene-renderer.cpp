@@ -25,8 +25,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
-    sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true)
 {
   fillCameraUniform(scene::CameraParameter());
@@ -57,7 +56,7 @@ void Renderer::render()
 
   applyFramebuffer();
 
-  sceneVertexUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_VERTEX_BLOCK);
+  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Backbuffer.render();
 }
 
@@ -182,8 +181,8 @@ void Renderer::recordCommandlist()
   recorder.beginTokenList();
   debugPrinter.recordBinding(recorder);
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneUniformBuffer.gpuBufferAddress());
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
@@ -255,24 +254,16 @@ void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
 
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
-  SceneVertexUniformBlock& sceneVertexUniformData =  *reinterpret_cast<SceneVertexUniformBlock*>(sceneVertexUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneVertexUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
-  sceneVertexUniformBuffer.Unmap();
-
-  SceneFragmentUniformBlock& sceneFragmentUniformData =  *reinterpret_cast<SceneFragmentUniformBlock*>(sceneFragmentUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneFragmentUniformData.camera_position = cameraParameter.position;
-  sceneFragmentUniformData.lightData = lightUniformBuffer.updateLightData();
-  sceneFragmentUniformBuffer.Unmap();
+  SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  sceneUniformData.camera_position = cameraParameter.position;
+  sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  sceneUniformData.lightData = lightUniformBuffer.updateLightData();
+  sceneUniformBuffer.Unmap();
 }
 
-GLuint64 Renderer::sceneVertexUniformAddress() const
+GLuint64 Renderer::sceneUniformAddress() const
 {
-  return sceneVertexUniformBuffer.gpuBufferAddress();
-}
-
-GLuint64 Renderer::sceneFragmentUniformAddress() const
-{
-  return sceneFragmentUniformBuffer.gpuBufferAddress();
+  return sceneUniformBuffer.gpuBufferAddress();
 }
 
 
