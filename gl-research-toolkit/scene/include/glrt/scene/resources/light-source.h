@@ -51,8 +51,6 @@ struct LightSource final
 
       return data;
     }
-
-    glm::vec3 luminance() const;
   };
   static_assert(sizeof(SphereAreaLight)==48, "Please make sure the struct SphereAreaLightComponent::Data is std140 compatible");
 
@@ -75,8 +73,6 @@ struct LightSource final
 
       return data;
     }
-
-    glm::vec3 luminance() const;
   };
   static_assert(sizeof(RectAreaLight)==64, "Please make sure the struct RectAreaLightComponent::Data is std140 compatible");
 

@@ -18,5 +18,4 @@ target_include_directories(
   glrt-scene
   PUBLIC
   include
-  ${GLRT_EXTERNAL_SHADER_DIR}
 )

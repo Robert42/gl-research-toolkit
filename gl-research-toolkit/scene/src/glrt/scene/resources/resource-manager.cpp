@@ -47,38 +47,6 @@ QList<Uuid<Scene> > ResourceManager::allRegisteredScenes()
   return uuids;
 }
 
-Uuid<Material> ResourceManager::materialUuidForLuminance(const glm::vec3& luminance)
-{
-/*
-  auto i = _lightDebugMaterials.find(luminance);
-  if(i != _lightDebugMaterials.end())
-    return i.second();
-
-  Material::PlainColor plainColor;
-  plainColor.base_color = glm::vec3(0);
-  plainColor.emission = luminance;
-  Material material(plainColor, Material::TypeFlag::PLAIN_COLOR|Material::TypeFlag::EMISSION_ONLY|Material::TypeFlag::PER_INSTANCE_FREE_TRANSFORM);
-
-//#TODO emissive material erstellen
-  Uuid<Material> uuid = regsiterMaterial(material);
-  _lightDebugMaterials.insert(luminance, uuid);
-
-//#TODO: shader flag für emmisive only materials, damit nicht für emmissive lights auch noch lichtquellen überprüft werden  (umsetzen mithilfe von EMISSION_ONLY)
-//#TODO: shader flag für per intsnace mesh transform erstellen, damit eine matrix erstellt werden kann, die das Mesh im vertex shader frei verformt (radius der sphere und nicht uniforme Ausmaße vom Rect light) (umsetzen mithilfe von PER_INSTANCE_FREE_TRANSFORM)
-*/
-  return uuids::fallbackMaterial;
-}
-
-Uuid<Material> ResourceManager::materialUuidForLightSource(const LightSource::SphereAreaLight& data)
-{
-  return materialUuidForLuminance(data.luminance());
-}
-
-Uuid<Material> ResourceManager::materialUuidForLightSource(const LightSource::RectAreaLight& data)
-{
-  return materialUuidForLuminance(data.luminance());
-}
-
 void ResourceManager::loadStaticMesh(const Uuid<StaticMesh>& uuid)
 {
   this->staticMeshLoader.loadStaticMesh(uuid, this);
