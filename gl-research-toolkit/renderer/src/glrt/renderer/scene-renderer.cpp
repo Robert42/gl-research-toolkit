@@ -43,11 +43,12 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
+  updateCameraUniform(); // This must be called before calling recordCommandlist
+
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
   staticMeshRenderer.update();
 
-  updateCameraUniform();
   prepareFramebuffer();
 
   commandList.call();
@@ -116,7 +117,7 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
     if(testFlagOnAll(materialTypes, Material::TypeFlag::SPHERE_LIGHT))
       preprocessorBlock.insert("#define SPHERE_LIGHT");
     if(testFlagOnAll(materialTypes, Material::TypeFlag::RECT_LIGHT))
-      preprocessorBlock.insert("#define SPHERE_LIGHT");
+      preprocessorBlock.insert("#define RECT_LIGHT");
   }
 
   if(testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED))
@@ -206,17 +207,20 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
     }else if(materialType.testFlag(Material::TypeFlag::RECT_LIGHT))
     {
       staticMesh = staticMeshBufferManager.meshForUuid(glrt::scene::resources::uuids::unitRectMesh);
-      numLights = lightUniformBuffer.numVisibleSphereAreaLights();
+      numLights = lightUniformBuffer.numVisibleRectAreaLights();
     }else
       Q_UNREACHABLE();
 
     Q_ASSERT(numLights <= std::numeric_limits<int>::max());
 
-    recorder.beginTokenListWithCopy(commonTokenList);
-    staticMesh->recordBind(recorder);
-    staticMesh->recordDrawInstances(recorder, 0, int(numLights));
-    range = recorder.endTokenList();
-    recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    if(numLights > 0)
+    {
+      recorder.beginTokenListWithCopy(commonTokenList);
+      staticMesh->recordBind(recorder);
+      staticMesh->recordDrawInstances(recorder, 0, int(numLights));
+      range = recorder.endTokenList();
+      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    }
   }
 }
 
