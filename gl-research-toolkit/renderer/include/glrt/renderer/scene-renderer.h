@@ -90,6 +90,7 @@ private:
   bool needRerecording() const;
   void captureStates();
   void recordCommandlist();
+  void recordLightVisualization(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList);
 
   void updateCameraUniform();
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);

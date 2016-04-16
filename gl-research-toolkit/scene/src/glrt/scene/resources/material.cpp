@@ -28,6 +28,15 @@ QString Material::typeToString(Type type)
   if(type.testFlag(TypeFlag::FRAGMENT_SHADER_UNIFORM))
     usedFlags << "FRAGMENT_SHADER_UNIFORM";
 
+  if(type.testFlag(TypeFlag::AREA_LIGHT))
+  {
+    usedFlags << "AREA_LIGHT";
+    if(type.testFlag(TypeFlag::PLAIN_COLOR))
+      usedFlags << "PLAIN_COLOR";
+    if(type.testFlag(TypeFlag::RECT_LIGHT))
+      usedFlags << "RECT_LIGHT";
+  }
+
   if(type.testFlag(TypeFlag::MASKED))
     usedFlags << "MASKED";
   else if(type.testFlag(TypeFlag::TRANSPARENT))

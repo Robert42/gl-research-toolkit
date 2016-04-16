@@ -106,6 +106,16 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
     preprocessorBlock.insert("#define TWO_SIDED");
   }
 
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT))
+  {
+    preprocessorBlock.insert("#define AREA_LIGHT");
+    preprocessorBlock.insert("#define NO_LIGHTING"); // when rendering arealights themselves, don't calculate the lighting, because they are emissive only
+    if(testFlagOnAll(materialTypes, Material::TypeFlag::SPHERE_LIGHT))
+      preprocessorBlock.insert("#define SPHERE_LIGHT");
+    if(testFlagOnAll(materialTypes, Material::TypeFlag::RECT_LIGHT))
+      preprocessorBlock.insert("#define SPHERE_LIGHT");
+  }
+
   if(testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED))
   {
     preprocessorBlock.insert("#define TEXTURED");
@@ -145,7 +155,7 @@ bool Renderer::needRecapturing() const
 
 bool Renderer::needRerecording() const
 {
-  return staticMeshRenderer.needRerecording() || _needRecapturing;
+  return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.numVisibleChanged();
 }
 
 void Renderer::captureStates()
@@ -170,10 +180,41 @@ void Renderer::captureStates()
   }
 }
 
+void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList)
+{
+  if(materialType.testFlag(Material::TypeFlag::AREA_LIGHT))
+  {
+    glm::ivec2 range;
+
+    StaticMeshBuffer* staticMesh = nullptr;
+    quint32 numLights;
+    if(materialType.testFlag(Material::TypeFlag::SPHERE_LIGHT))
+    {
+      staticMesh = staticMeshBufferManager.meshForUuid(glrt::scene::resources::uuids::unitSphereMesh);
+      numLights = lightUniformBuffer.numVisibleSphereAreaLights();
+    }else if(materialType.testFlag(Material::TypeFlag::RECT_LIGHT))
+    {
+      staticMesh = staticMeshBufferManager.meshForUuid(glrt::scene::resources::uuids::unitRectMesh);
+      numLights = lightUniformBuffer.numVisibleSphereAreaLights();
+    }else
+      Q_UNREACHABLE();
+
+    Q_ASSERT(numLights <= std::numeric_limits<int>::max());
+
+    recorder.beginTokenListWithCopy(commonTokenList);
+    staticMesh->recordBind(recorder);
+    staticMesh->recordDrawInstances(recorder, 0, int(numLights));
+    range = recorder.endTokenList();
+    recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+  }
+}
+
 void Renderer::recordCommandlist()
 {
-  if(needRecapturing())
+  if(Q_UNLIKELY(needRecapturing()))
     captureStates();
+
+  lightUniformBuffer.updateNumberOfLights();
 
   glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
@@ -196,6 +237,8 @@ void Renderer::recordCommandlist()
     unusedMaterialTypes.remove(materialType);
 
     glm::ivec2 range;
+
+    recordLightVisualization(recorder, materialType, materialShader, commonTokenList);
 
     if(meshDrawRanges.tokenRangeNotMovable.contains(materialType))
     {

@@ -14,7 +14,7 @@ layout(early_fragment_tests) in;
 #include <glrt/glsl/layout-constants.h>
 
 
-#ifdef PLAIN_COLOR
+#if defined(PLAIN_COLOR) || defined(AREA_LIGHT)
 
 flat in BaseMaterial plainColorMaterial;
 
@@ -35,7 +35,8 @@ void main()
   
   apply_material(plainColorMaterial, surface, 1.f);
 }
-#else
+
+#elif defined(TEXTURED)
 
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {

@@ -21,14 +21,20 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
   sphereAreaShaderStorageBuffer.update();
   rectAreaShaderStorageBuffer.update();
 
-  _lightData.numRectLights = rectAreaShaderStorageBuffer.numElements();
-  _lightData.numSphereLights = sphereAreaShaderStorageBuffer.numElements();
+  _lightData.numRectLights = numVisibleRectAreaLights();
+  _lightData.numSphereLights = numVisibleSphereAreaLights();
   _lightData.rectAreaLightsBuffer = rectAreaShaderStorageBuffer.gpuBufferAddress();
   _lightData.sphereAreaLightsBuffer = sphereAreaShaderStorageBuffer.gpuBufferAddress();
 
   return _lightData;
 }
 
+
+void LightBuffer::updateNumberOfLights()
+{
+  _numVisibleRectAreaLights = numVisibleRectAreaLights();
+  _numVisibleSphereAreaLights = numVisibleSphereAreaLights();
+}
 
 
 } // namespace renderer
