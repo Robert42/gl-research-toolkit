@@ -7,6 +7,7 @@ add_custom_target(
   pbs/brdf.glsl
   pbs/camera.glsl
   pbs/light.glsl
+  pbs/luminance-for-luminous-power.glsl
   pbs/material.glsl
   pbs/pbs.glsl
   pbs/structs.glsl

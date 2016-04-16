@@ -64,6 +64,8 @@ signals:
   void sceneLoadedExt(scene::Scene* scene, bool success);
   void sceneLoaded(bool success);
 
+  void sceneRerecordedCommands();
+
   void nodeAdded(Node* node);
   void nodeRemoved(Node* node);
 

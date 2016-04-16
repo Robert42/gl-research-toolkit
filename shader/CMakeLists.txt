@@ -32,8 +32,10 @@ add_custom_target(
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/highlight-numeric-issues.glsl
   materials/implementation/input-block.fs.glsl
+  materials/implementation/instance-matrix.vs.glsl
   materials/implementation/material-implementation.fs.glsl
   materials/implementation/output-block.vs.glsl
+  materials/implementation/vertex-material.vs.glsl
   materials/material.fs
   materials/material.vs
   toolkit/debugging/normal.glsl
@@ -44,6 +46,5 @@ add_custom_target(
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
-  toolkit/scene/uniforms.fs.glsl
-  toolkit/scene/uniforms.vs.glsl
+  toolkit/scene/uniforms.glsl
 )

@@ -274,6 +274,8 @@ void Renderer::recordCommandlist()
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
 
   _needRecapturing = false;
+
+  scene.sceneRerecordedCommands();
 }
 
 void Renderer::allShadersReloaded()
