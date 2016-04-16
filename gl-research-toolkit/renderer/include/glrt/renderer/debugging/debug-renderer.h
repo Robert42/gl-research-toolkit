@@ -36,6 +36,7 @@ public:
 
 public slots:
   void reinit();
+  void handleLoadedScene();
 
 signals:
   void debuggingRenderingEnabled(DebugRenderer* renderer, Implementation* implementation);
