@@ -6,7 +6,6 @@ set(SOURCE_FILES
   include/glrt/renderer/debugging/debug-line-visualisation.h
   include/glrt/renderer/debugging/debug-mesh.h
   include/glrt/renderer/debugging/debug-renderer.h
-  include/glrt/renderer/debugging/light-visualization.h
   include/glrt/renderer/debugging/shader-debug-printer.h
   include/glrt/renderer/debugging/surface-shader-visualizations.h
   include/glrt/renderer/debugging/visualization-renderer.h
