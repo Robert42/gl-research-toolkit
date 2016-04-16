@@ -57,6 +57,7 @@ Material::Material(const PlainColor& plainColor, Type type)
     type(type | TypeFlag::VERTEX_SHADER_UNIFORM),
     materialUser(UuidIndex::null_index<0>())
 {
+  Q_ASSERT(!this->type.testFlag(TypeFlag::AREA_LIGHT));
   Q_ASSERT(!this->type.testFlag(TypeFlag::TEXTURED));
   Q_ASSERT(this->type.testFlag(TypeFlag::PLAIN_COLOR));
   Q_ASSERT(this->type.testFlag(TypeFlag::VERTEX_SHADER_UNIFORM));
@@ -68,6 +69,7 @@ Material::Material(const Textured<TextureHandle>& textured, Type type)
   type(type|Material::TypeFlag::TEXTURED|Material::TypeFlag::FRAGMENT_SHADER_UNIFORM),
   materialUser(UuidIndex::null_index<0>())
 {
+  Q_ASSERT(!this->type.testFlag(TypeFlag::AREA_LIGHT));
   Q_ASSERT(this->type.testFlag(TypeFlag::TEXTURED));
   Q_ASSERT(!this->type.testFlag(TypeFlag::PLAIN_COLOR));
   Q_ASSERT(this->type.testFlag(TypeFlag::FRAGMENT_SHADER_UNIFORM));

@@ -108,6 +108,9 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
 
   if(testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT))
   {
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED));
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::PLAIN_COLOR));
+
     preprocessorBlock.insert("#define AREA_LIGHT");
     preprocessorBlock.insert("#define NO_LIGHTING"); // when rendering arealights themselves, don't calculate the lighting, because they are emissive only
     if(testFlagOnAll(materialTypes, Material::TypeFlag::SPHERE_LIGHT))
@@ -118,11 +121,19 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
 
   if(testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED))
   {
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::PLAIN_COLOR));
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT));
+
     preprocessorBlock.insert("#define TEXTURED");
-  }else
+  }
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::PLAIN_COLOR))
   {
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED));
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT));
+
     preprocessorBlock.insert("#define PLAIN_COLOR");
   }
+
   preprocessorBlock.insert(QString("#define MASK_THRESHOLD %0").arg(maskAlphaThreshold));
 
   ReloadableShader shader("material",

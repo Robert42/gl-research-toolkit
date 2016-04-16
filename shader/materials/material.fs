@@ -14,17 +14,20 @@ layout(early_fragment_tests) in;
 #include <glrt/glsl/layout-constants.h>
 
 
-#if defined(PLAIN_COLOR) || defined(AREA_LIGHT)
+#if defined(DEPTH_PREPASS) && defined(OPAQUE)
+
+void main()
+{
+  fragment_color = vec4(1, 0, 1, 1);
+  return;
+}
+
+#elif defined(PLAIN_COLOR) || defined(AREA_LIGHT)
 
 flat in BaseMaterial plainColorMaterial;
 
 void main()
 {
-#ifdef DEPTH_PREPASS
-  fragment_color = vec4(1, 0, 1, 1);
-  return;
-#endif
-
 #if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_BUMP) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
   fragment_color = checkerboard();
   return;
@@ -158,5 +161,9 @@ void main()
   
   apply_material(material, surface, alpha);
 }
+
+#else
+
+#error No valid main function found for the material.fs
 
 #endif

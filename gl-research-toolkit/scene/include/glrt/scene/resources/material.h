@@ -23,7 +23,7 @@ public:
     PLAIN_COLOR = 0x1,
     TEXTURED = 0x2,
 
-    AREA_LIGHT = 0x01000000 | Material::TypeFlag::OPAQUE | Material::TypeFlag::PLAIN_COLOR,
+    AREA_LIGHT = 0x01000000 | Material::TypeFlag::OPAQUE,
     SPHERE_LIGHT = 0x02000000 | AREA_LIGHT,
     RECT_LIGHT   = 0x04000000 | AREA_LIGHT,
     
