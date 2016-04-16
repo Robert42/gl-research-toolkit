@@ -75,6 +75,9 @@ public:
   explicit Uuid(const QUuid& uuid=QUuid());
   explicit Uuid(UuidIndex index);
 
+  static this_type create();
+  static this_type create(const QString& string);
+
   template<typename T>
   Uuid(const Uuid<T>& _uuid) : _index(_uuid.index()) {static_assert(std::is_base_of<_identifier, T>::value, "T must inherit from: identifier");}
   Uuid(const Uuid<_identifier>& uuid) : _index(uuid.index()) {}

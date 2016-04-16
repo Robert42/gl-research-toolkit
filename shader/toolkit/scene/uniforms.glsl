@@ -8,18 +8,20 @@ struct SceneLightData
   uint32_t num_rect_area_lights;
 };
 
-struct SceneFragmentData
+struct SceneData
 {
+  mat4 view_projection;
   vec3 camera_position;
   SceneLightData lights;
 };
 
 #include <glrt/glsl/layout-constants.h>
 
-layout(std140, binding=UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK) uniform SceneFragmentBlock
+layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
 {
-  SceneFragmentData scene;
+  SceneData scene;
 };
+
 
 void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)
 {

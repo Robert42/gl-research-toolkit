@@ -1,4 +1,5 @@
 #include <glrt/renderer/debugging/debug-renderer.h>
+#include <QTimer>
 
 namespace glrt {
 namespace renderer {
@@ -10,9 +11,6 @@ DebugRenderer::DebugRenderer(scene::Scene* scene, const ImplementationFactory& f
 {
   guiToggle.getter = std::bind(&DebugRenderer::isEnabled, this);
   guiToggle.setter = std::bind(&DebugRenderer::setEnabled, this, std::placeholders::_1);
-
-  if(scene)
-    QObject::connect(scene, &scene::Scene::sceneLoaded, std::bind(&DebugRenderer::reinit, this));
 }
 
 DebugRenderer::DebugRenderer(const ImplementationFactory& factory)
@@ -29,6 +27,7 @@ DebugRenderer::DebugRenderer(const DebugRenderer& other)
 
 DebugRenderer::~DebugRenderer()
 {
+  QObject::disconnect(_connection);
   deleteImplementation();
 }
 
@@ -39,6 +38,11 @@ void DebugRenderer::setEnabled(bool enabled)
     return;
 
   this->_enabled = enabled;
+
+  QObject::disconnect(_connection);
+
+  if(enabled)
+    _connection = QObject::connect(_scene, &scene::Scene::sceneRerecordedCommands, std::bind(&DebugRenderer::reinit, this));
 
   reinit();
 }

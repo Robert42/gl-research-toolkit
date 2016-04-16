@@ -21,6 +21,8 @@ const Uuid<Texture> fallbackNormalTexture("{d3d320ce-95b0-4bff-ba65-381ad005b012
 const Uuid<Texture> blackTexture("{a8b7ec89-cf66-4ef6-b68f-ec98d86dc6fb}");
 const Uuid<Texture> whiteTexture("{fa46351a-eed3-4b6c-91f6-a8a62a6c6b02}");
 const Uuid<Texture> fallbackSRMOTexture("{1a6d4dc1-58b2-47e9-beb6-724da5d2d98f}");
+const Uuid<StaticMesh> unitSphereMesh("{0c8b1ea9-1c5c-4966-98ef-5521fd2bf1ce}");
+const Uuid<StaticMesh> unitRectMesh("{eb1697d3-75a9-43dc-9b3e-5daff21b9731}");
 
 } // uuids
 

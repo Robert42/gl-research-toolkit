@@ -5,7 +5,7 @@
 
 #include <glrt/glsl/layout-constants.h>
 
-#include <scene/uniforms.fs.glsl>
+#include <scene/uniforms.glsl>
 
 out vec4 fragment_color;
 

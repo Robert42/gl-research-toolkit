@@ -12,6 +12,8 @@ add_custom_target(
   common-with-cpp/glrt/glsl/math.h
   debugging/posteffects/orange-sphere.fs
   debugging/posteffects/orange-sphere.vs
+  debugging/posteffects/posteffect.fs.glsl
+  debugging/posteffects/posteffect.vs.glsl
   debugging/visualizations/common-debug-line-visualization.fs.glsl
   debugging/visualizations/common-debug-line-visualization.vs.glsl
   debugging/visualizations/visualize-arrow.fs
@@ -30,14 +32,19 @@ add_custom_target(
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/highlight-numeric-issues.glsl
   materials/implementation/input-block.fs.glsl
+  materials/implementation/instance-matrix.vs.glsl
   materials/implementation/material-implementation.fs.glsl
   materials/implementation/output-block.vs.glsl
+  materials/implementation/vertex-material.vs.glsl
   materials/material.fs
   materials/material.vs
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
+  toolkit/extensions/command_list.glsl
+  toolkit/extensions/common.glsl
   toolkit/geometry/transform.glsl
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
+  toolkit/scene/uniforms.glsl
 )

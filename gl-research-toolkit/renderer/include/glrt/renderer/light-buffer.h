@@ -24,11 +24,20 @@ public:
 
   const LightData& updateLightData();
 
+  quint32 numVisibleRectAreaLights() const {return static_cast<quint32>(rectAreaShaderStorageBuffer.numElements());}
+  quint32 numVisibleSphereAreaLights() const {return static_cast<quint32>(sphereAreaShaderStorageBuffer.numElements());}
+  bool numVisibleChanged() const {return _numVisibleRectAreaLights!=numVisibleRectAreaLights() || _numVisibleSphereAreaLights!=numVisibleSphereAreaLights();}
+
+  void updateNumberOfLights();
+
 private:
   SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
   SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
 
   LightData _lightData;
+
+  quint32 _numVisibleRectAreaLights = 0;
+  quint32 _numVisibleSphereAreaLights = 0;
 };
 
 } // namespace renderer

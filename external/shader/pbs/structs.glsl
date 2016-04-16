@@ -80,6 +80,8 @@ void precomputeData(in BaseMaterial material,
   vec3 emission = material.emission;
   float AO = material.occlusion;
   
+  #ifndef AREA_LIGHT
+  
   #if defined(LIGHTING_ONLY)
   base_color = vec3(0.5);
   #endif
@@ -97,6 +99,8 @@ void precomputeData(in BaseMaterial material,
   smoothness = 0.8;
   #endif
   #endif
+  
+  #endif // AREA_LIGHT
   
   vec3 R                  = reflect(-V, N);
   

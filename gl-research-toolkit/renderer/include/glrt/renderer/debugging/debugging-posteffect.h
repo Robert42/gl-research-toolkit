@@ -23,8 +23,6 @@ public:
   static void deinit();
 
   static DebugRenderer orangeSphere(const glm::vec3& origin=glm::vec3(0), float radius = 1.f, bool depthTest=true); // #TODO
-  static DebugRenderer overlayLightSources(bool depthTest); // #TODO implement posteffect for drawing light sources (don't forget gamma)
-  // #TODO: Think about writing a debug (mesh based) renderer for lgith sources
 
 private:
   struct SharedRenderingData

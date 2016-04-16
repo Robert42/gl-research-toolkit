@@ -14,7 +14,6 @@
 namespace glrt {
 namespace renderer {
 
-
 Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter)
   : scene(*scene),
     staticMeshBufferManager(*staticMeshBufferManager),
@@ -26,8 +25,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
-    sceneVertexUniformBuffer(sizeof(SceneVertexUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    sceneFragmentUniformBuffer(sizeof(SceneFragmentUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true)
 {
   fillCameraUniform(scene::CameraParameter());
@@ -45,11 +43,12 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
+  updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
+
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
   staticMeshRenderer.update();
 
-  updateCameraUniform();
   prepareFramebuffer();
 
   commandList.call();
@@ -58,7 +57,7 @@ void Renderer::render()
 
   applyFramebuffer();
 
-  sceneVertexUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_VERTEX_BLOCK);
+  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Backbuffer.render();
 }
 
@@ -108,13 +107,34 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
     preprocessorBlock.insert("#define TWO_SIDED");
   }
 
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT))
+  {
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED));
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::PLAIN_COLOR));
+
+    preprocessorBlock.insert("#define AREA_LIGHT");
+    preprocessorBlock.insert("#define NO_LIGHTING"); // when rendering arealights themselves, don't calculate the lighting, because they are emissive only
+    if(testFlagOnAll(materialTypes, Material::TypeFlag::SPHERE_LIGHT))
+      preprocessorBlock.insert("#define SPHERE_LIGHT");
+    if(testFlagOnAll(materialTypes, Material::TypeFlag::RECT_LIGHT))
+      preprocessorBlock.insert("#define RECT_LIGHT");
+  }
+
   if(testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED))
   {
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::PLAIN_COLOR));
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT));
+
     preprocessorBlock.insert("#define TEXTURED");
-  }else
+  }
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::PLAIN_COLOR))
   {
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED));
+    Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT));
+
     preprocessorBlock.insert("#define PLAIN_COLOR");
   }
+
   preprocessorBlock.insert(QString("#define MASK_THRESHOLD %0").arg(maskAlphaThreshold));
 
   ReloadableShader shader("material",
@@ -147,7 +167,7 @@ bool Renderer::needRecapturing() const
 
 bool Renderer::needRerecording() const
 {
-  return staticMeshRenderer.needRerecording() || _needRecapturing;
+  return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.numVisibleChanged();
 }
 
 void Renderer::captureStates()
@@ -172,10 +192,44 @@ void Renderer::captureStates()
   }
 }
 
+void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList)
+{
+  if(materialType.testFlag(Material::TypeFlag::AREA_LIGHT))
+  {
+    glm::ivec2 range;
+
+    StaticMeshBuffer* staticMesh = nullptr;
+    quint32 numLights;
+    if(materialType.testFlag(Material::TypeFlag::SPHERE_LIGHT))
+    {
+      staticMesh = staticMeshBufferManager.meshForUuid(glrt::scene::resources::uuids::unitSphereMesh);
+      numLights = lightUniformBuffer.numVisibleSphereAreaLights();
+    }else if(materialType.testFlag(Material::TypeFlag::RECT_LIGHT))
+    {
+      staticMesh = staticMeshBufferManager.meshForUuid(glrt::scene::resources::uuids::unitRectMesh);
+      numLights = lightUniformBuffer.numVisibleRectAreaLights();
+    }else
+      Q_UNREACHABLE();
+
+    Q_ASSERT(numLights <= std::numeric_limits<int>::max());
+
+    if(numLights > 0)
+    {
+      recorder.beginTokenListWithCopy(commonTokenList);
+      staticMesh->recordBind(recorder);
+      staticMesh->recordDrawInstances(recorder, 0, int(numLights));
+      range = recorder.endTokenList();
+      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+    }
+  }
+}
+
 void Renderer::recordCommandlist()
 {
-  if(needRecapturing())
+  if(Q_UNLIKELY(needRecapturing()))
     captureStates();
+
+  lightUniformBuffer.updateNumberOfLights();
 
   glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
@@ -183,8 +237,8 @@ void Renderer::recordCommandlist()
   recorder.beginTokenList();
   debugPrinter.recordBinding(recorder);
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneVertexUniformBuffer.gpuBufferAddress());
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneFragmentUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneUniformBuffer.gpuBufferAddress());
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
@@ -198,6 +252,8 @@ void Renderer::recordCommandlist()
     unusedMaterialTypes.remove(materialType);
 
     glm::ivec2 range;
+
+    recordLightVisualization(recorder, materialType, materialShader, commonTokenList);
 
     if(meshDrawRanges.tokenRangeNotMovable.contains(materialType))
     {
@@ -218,6 +274,8 @@ void Renderer::recordCommandlist()
   commandList = gl::CommandListRecorder::compile(std::move(recorder));
 
   _needRecapturing = false;
+
+  scene.sceneRerecordedCommands();
 }
 
 void Renderer::allShadersReloaded()
@@ -256,24 +314,16 @@ void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
 
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
-  SceneVertexUniformBlock& sceneVertexUniformData =  *reinterpret_cast<SceneVertexUniformBlock*>(sceneVertexUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneVertexUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
-  sceneVertexUniformBuffer.Unmap();
-
-  SceneFragmentUniformBlock& sceneFragmentUniformData =  *reinterpret_cast<SceneFragmentUniformBlock*>(sceneFragmentUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneFragmentUniformData.camera_position = cameraParameter.position;
-  sceneFragmentUniformData.lightData = lightUniformBuffer.updateLightData();
-  sceneFragmentUniformBuffer.Unmap();
+  SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  sceneUniformData.camera_position = cameraParameter.position;
+  sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  sceneUniformData.lightData = lightUniformBuffer.updateLightData();
+  sceneUniformBuffer.Unmap();
 }
 
-GLuint64 Renderer::sceneVertexUniformAddress() const
+GLuint64 Renderer::sceneUniformAddress() const
 {
-  return sceneVertexUniformBuffer.gpuBufferAddress();
-}
-
-GLuint64 Renderer::sceneFragmentUniformAddress() const
-{
-  return sceneFragmentUniformBuffer.gpuBufferAddress();
+  return sceneUniformBuffer.gpuBufferAddress();
 }
 
 

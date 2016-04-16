@@ -59,6 +59,8 @@ private:
   const glm::ivec2 commonTokenList;
   QMap<Material::Type, glm::ivec2>* boundTokenRanges = nullptr;
 
+  Material::Type currentMaterialType;
+
   void initMaterials(const Array<Uuid<Material>>& materialSet);
 };
 

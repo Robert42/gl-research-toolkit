@@ -14,46 +14,32 @@ layout(early_fragment_tests) in;
 #include <glrt/glsl/layout-constants.h>
 
 
-#ifdef PLAIN_COLOR
-// TODO: improve performance by doing this in the vertex shader and just passing the MaterialOutput instance (flat, without interpolation)
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
-{
-  vec3 base_color;
-  float smoothness;
-  vec3 emission;
-  float metal_mask;
-}material_instance;
+#if defined(DEPTH_PREPASS) && defined(OPAQUE)
 
 void main()
 {
-#ifdef DEPTH_PREPASS
   fragment_color = vec4(1, 0, 1, 1);
   return;
-#endif
+}
 
+#elif defined(PLAIN_COLOR) || defined(AREA_LIGHT)
+
+flat in BaseMaterial plainColorMaterial;
+
+void main()
+{
 #if defined(TEXTURE_BASECOLOR) || defined(TEXTURE_BASECOLOR_ALPHA) || defined(TEXTURE_NORMAL_LS) || defined(TEXTURE_BUMP) || defined(TEXTURE_SMOOTHENESS) || defined(TEXTURE_REFLECTIVITY) || defined(TEXTURE_METALLIC) || defined(TEXTURE_AO) || defined(TEXTURE_EMISSION)
   fragment_color = checkerboard();
   return;
 #endif
-
-  BaseMaterial material;
-  
-  material.normal = normalize(fragment.normal);
-  material.smoothness = material_instance.smoothness;
-  material.base_color = material_instance.base_color;
-  material.metal_mask  = material_instance.metal_mask;
-  material.emission = material_instance.emission;
-  material.reflectance = 0.5f;
-  material.occlusion = 1;
   
   SurfaceData surface;
   surface.position = fragment.position;
   
-  // No normal mapping here, so uv and tangent are unused
-  
-  apply_material(material, surface, 1.f);
+  apply_material(plainColorMaterial, surface, 1.f);
 }
-#else
+
+#elif defined(TEXTURED)
 
 layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
 {
@@ -175,5 +161,9 @@ void main()
   
   apply_material(material, surface, alpha);
 }
+
+#else
+
+#error No valid main function found for the material.fs
 
 #endif

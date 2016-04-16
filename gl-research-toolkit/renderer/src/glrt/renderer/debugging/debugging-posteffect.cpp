@@ -81,8 +81,8 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.beginTokenList();
   segment.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   segment.append_token_AttributeAddress(bindingIndex, renderingData->vertexBuffer.gpuBufferAddress());
-  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_VERTEX_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneVertexUniformAddress());
-  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_FRAGMENT_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderer.sceneFragmentUniformAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneUniformAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderer.sceneUniformAddress());
   renderer.debugPrinter.recordBinding(segment);
   if(fragmentUniformBuffer.GetSize() != 0)
     segment.append_token_UniformAddress(UNIFORM_BINDING_DEBUG_POSTEFFECT_FRAGMENT, gl::ShaderObject::ShaderType::FRAGMENT, fragmentUniformBuffer.gpuBufferAddress());

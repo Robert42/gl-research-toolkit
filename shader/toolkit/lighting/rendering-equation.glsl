@@ -57,6 +57,8 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
   vec3 R = reflect(-viewDir, worldNormal);
   
   vec3 outgoing_luminance = vec3(0);
+
+#ifndef NO_LIGHTING
   
   uint32_t num_sphere_lights;
   SphereAreaLight* sphere_lights;
@@ -106,6 +108,8 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
   }
+  
+#endif
   
   return outgoing_luminance + surface.emission;
 }

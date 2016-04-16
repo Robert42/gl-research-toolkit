@@ -1,7 +1,7 @@
 #include <extensions/command_list.glsl>
 
 #include <glrt/glsl/math.h>
-#include <scene/uniforms.fs.glsl>
+#include <scene/uniforms.glsl>
 
 
 in FragmentBlock

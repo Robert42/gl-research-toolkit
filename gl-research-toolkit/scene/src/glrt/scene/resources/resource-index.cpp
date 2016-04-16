@@ -238,6 +238,7 @@ void ResourceIndex::registerFallbackIndex()
   _fallback = this;
   Material::PlainColor fallbackMaterial;
   fallbackMaterial.base_color = glm::vec3(0);
+  fallbackMaterial.metal_mask = 1.f; // by having metal=1, the black coor results in absolutely no lighting at all
   fallbackMaterial.emission = glm::vec3(1,0,1);
   registerMaterial(uuids::fallbackMaterial, fallbackMaterial);
   registerLightSource(uuids::fallbackLight, LightSource::SphereAreaLight());

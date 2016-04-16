@@ -1,13 +1,11 @@
 #include "output-block.vs.glsl"
 
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/glsl/math.h>
 
-#include <scene/uniforms.vs.glsl>
+#include <scene/uniforms.glsl>
 
-layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140) uniform MeshInstanceBlock
-{
-  mat4 model_matrix;
-};
+#include "instance-matrix.vs.glsl"
 
 layout(location=VERTEX_ATTRIBUTE_LOCATION_POSITION) in vec3 vertex_position;
 layout(location=VERTEX_ATTRIBUTE_LOCATION_NORMAL) in vec3 vertex_normal;
@@ -18,6 +16,8 @@ layout(location=VERTEX_ATTRIBUTE_LOCATION_UV) in vec2 vertex_uv;
 
 void transform_vertex()
 {
+  const mat4 model_matrix = get_model_matrix();
+  
   vec4 world_coordinate = model_matrix * vec4(vertex_position, 1);
   
   vec4 world_normal = model_matrix * vec4(vertex_normal, 0);

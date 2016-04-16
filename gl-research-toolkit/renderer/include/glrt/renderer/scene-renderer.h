@@ -6,6 +6,7 @@
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/material.h>
+#include <glrt/scene/component-decorator.h>
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/static-mesh-buffer-manager.h>
@@ -56,8 +57,7 @@ public:
 
   void render();
 
-  GLuint64 sceneVertexUniformAddress() const;
-  GLuint64 sceneFragmentUniformAddress() const;
+  GLuint64 sceneUniformAddress() const;
 
 protected:
   virtual void prepareFramebuffer() = 0;
@@ -67,13 +67,9 @@ protected:
   void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
 private:
-  struct SceneVertexUniformBlock
+  struct SceneUniformBlock
   {
     glm::mat4 view_projection_matrix;
-  };
-
-  struct SceneFragmentUniformBlock
-  {
     glm::vec3 camera_position;
     padding<float> _padding;
     LightBuffer::LightData lightData;
@@ -85,8 +81,7 @@ private:
   Array<ReloadableShader> materialShaders;
   Array<MaterialState> materialStates;
 
-  gl::Buffer sceneVertexUniformBuffer;
-  gl::Buffer sceneFragmentUniformBuffer;
+  gl::Buffer sceneUniformBuffer;
   gl::CommandList commandList;
 
   bool _needRecapturing : 1;
@@ -95,6 +90,7 @@ private:
   bool needRerecording() const;
   void captureStates();
   void recordCommandlist();
+  void recordLightVisualization(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList);
 
   void updateCameraUniform();
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);

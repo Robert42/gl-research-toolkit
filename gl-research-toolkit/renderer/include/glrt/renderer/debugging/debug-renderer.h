@@ -48,6 +48,8 @@ private:
   Implementation* _implementation = nullptr;
   bool _enabled = false;
 
+  QMetaObject::Connection _connection;
+
   void createImplementation();
   void deleteImplementation();
 };

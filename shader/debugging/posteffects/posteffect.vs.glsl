@@ -1,7 +1,7 @@
 #version 450 core
 #include <extensions/command_list.glsl>
 
-#include <scene/uniforms.vs.glsl>
+#include <scene/uniforms.glsl>
 
 in layout(location=0) vec2 position;
 
