@@ -11,7 +11,6 @@ class SyncedFragmentedComponentArray : public QObject
 {
 public:
   T_FragmentedArray fragmented_array;
-  quint32 numberVisibleComponents = 0;
   scene::Scene& scene;
   bool dirty : 1;
 

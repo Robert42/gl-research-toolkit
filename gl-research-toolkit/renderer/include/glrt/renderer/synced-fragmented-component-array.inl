@@ -35,7 +35,6 @@ void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::addComponen
   if(component->visible())
   {
     dirty = true;
-    numberVisibleComponents++;
     fragmented_array.append_copy(component);
   }
 }
@@ -59,12 +58,10 @@ void SyncedFragmentedComponentArray<T_component, T_FragmentedArray>::handleVisib
     Q_ASSERT(is_instance_of<T_component>(node_component));
     Q_ASSERT(fragmented_array.indexOf(component) == -1);
     fragmented_array.append_copy(component);
-    numberVisibleComponents++;
   }else
   {
     Q_ASSERT(fragmented_array.indexOf(component) != -1);
     fragmented_array.remove(fragmented_array.indexOf(component));
-    numberVisibleComponents--;
   }
 }
 
