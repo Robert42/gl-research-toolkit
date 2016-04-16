@@ -10,7 +10,7 @@ out FragmentBlock
   vec3 color;
 }fragment;
 
-layout(binding=UNIFORM_BINDING_SCENE_VERTEX_BLOCK, std140) uniform SceneBlock
+layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
 {
   mat4 view_projection;
 }scene;

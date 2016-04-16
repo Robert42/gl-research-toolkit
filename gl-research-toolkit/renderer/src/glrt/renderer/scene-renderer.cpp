@@ -43,7 +43,7 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-  updateCameraUniform(); // This must be called before calling recordCommandlist
+  updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
 
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
