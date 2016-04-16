@@ -68,7 +68,7 @@ void DebugRenderer::reinit()
 void DebugRenderer::handleLoadedScene()
 {
   deleteImplementation();
-  QTimer::singleShot(50, this, SLOT(reinit()));
+  QTimer::singleShot(50, this, SLOT(reinit())); // Workaround
 }
 
 void DebugRenderer::createImplementation()
