@@ -15,14 +15,8 @@ layout(early_fragment_tests) in;
 
 
 #ifdef PLAIN_COLOR
-// TODO: improve performance by doing this in the vertex shader and just passing the MaterialOutput instance (flat, without interpolation)
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
-{
-  vec3 base_color;
-  float smoothness;
-  vec3 emission;
-  float metal_mask;
-}material_instance;
+
+flat in BaseMaterial plainColorMaterial;
 
 void main()
 {
@@ -35,27 +29,15 @@ void main()
   fragment_color = checkerboard();
   return;
 #endif
-
-  BaseMaterial material;
-  
-  material.normal = normalize(fragment.normal);
-  material.smoothness = material_instance.smoothness;
-  material.base_color = material_instance.base_color;
-  material.metal_mask  = material_instance.metal_mask;
-  material.emission = material_instance.emission;
-  material.reflectance = 0.5f;
-  material.occlusion = 1;
   
   SurfaceData surface;
   surface.position = fragment.position;
   
-  // No normal mapping here, so uv and tangent are unused
-  
-  apply_material(material, surface, 1.f);
+  apply_material(plainColorMaterial, surface, 1.f);
 }
 #else
 
-layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, std140) uniform MaterialInstanceBlock
+layout(binding=UNIFORM_BINDING_MATERIAL_INSTANCE_FRAGMENT_BLOCK, std140) uniform MaterialInstanceBlock
 {
 vec4 tint;
 vec4 srmo_range_0;

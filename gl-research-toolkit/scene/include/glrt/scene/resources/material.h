@@ -19,9 +19,11 @@ public:
 
   enum class TypeFlag : quint32
   {
-    PLAIN_COLOR = 0x0,
     OPAQUE = 0x0,
-    TEXTURED = 0x1,
+    PLAIN_COLOR = 0x1,
+    TEXTURED = 0x2,
+    VERTEX_SHADER_UNIFORM   = 0x08000000,
+    FRAGMENT_SHADER_UNIFORM   = 0x10000000,
     TWO_SIDED = 0x20000000,
     MASKED = 0x40000000,
     TRANSPARENT = 0x80000000

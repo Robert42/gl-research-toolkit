@@ -20,8 +20,13 @@ QString Material::typeToString(Type type)
 
   if(type.testFlag(TypeFlag::TEXTURED))
     usedFlags << "TEXTURED";
-  else
+  if(type.testFlag(TypeFlag::PLAIN_COLOR))
     usedFlags << "PLAIN_COLOR";
+
+  if(type.testFlag(TypeFlag::VERTEX_SHADER_UNIFORM))
+    usedFlags << "VERTEX_SHADER_UNIFORM";
+  if(type.testFlag(TypeFlag::FRAGMENT_SHADER_UNIFORM))
+    usedFlags << "FRAGMENT_SHADER_UNIFORM";
 
   if(type.testFlag(TypeFlag::MASKED))
     usedFlags << "MASKED";
@@ -40,18 +45,24 @@ using AngelScriptIntegration::AngelScriptCheck;
 
 Material::Material(const PlainColor& plainColor, Type type)
   : plainColor(plainColor),
-    type(type),
+    type(type | TypeFlag::VERTEX_SHADER_UNIFORM),
     materialUser(UuidIndex::null_index<0>())
 {
-  Q_ASSERT(!type.testFlag(TypeFlag::TEXTURED));
+  Q_ASSERT(!this->type.testFlag(TypeFlag::TEXTURED));
+  Q_ASSERT(this->type.testFlag(TypeFlag::PLAIN_COLOR));
+  Q_ASSERT(this->type.testFlag(TypeFlag::VERTEX_SHADER_UNIFORM));
+  Q_ASSERT(!this->type.testFlag(TypeFlag::FRAGMENT_SHADER_UNIFORM));
 }
 
 Material::Material(const Textured<TextureHandle>& textured, Type type)
   : texturesIds(textured),
-  type(type),
+  type(type|Material::TypeFlag::TEXTURED|Material::TypeFlag::FRAGMENT_SHADER_UNIFORM),
   materialUser(UuidIndex::null_index<0>())
 {
-  Q_ASSERT(type.testFlag(TypeFlag::TEXTURED));
+  Q_ASSERT(this->type.testFlag(TypeFlag::TEXTURED));
+  Q_ASSERT(!this->type.testFlag(TypeFlag::PLAIN_COLOR));
+  Q_ASSERT(this->type.testFlag(TypeFlag::FRAGMENT_SHADER_UNIFORM));
+  Q_ASSERT(!this->type.testFlag(TypeFlag::VERTEX_SHADER_UNIFORM));
 }
 
 inline Material as_convert_to_plain_color_material(const Material::PlainColor* plainColor)
@@ -61,7 +72,7 @@ inline Material as_convert_to_plain_color_material(const Material::PlainColor* p
 
 inline Material as_convert_textured_to_material(const Material::Textured<TextureHandle>* textured)
 {
-  return Material(*textured, static_cast<Material::Type>(textured->type)|Material::TypeFlag::TEXTURED);
+  return Material(*textured, static_cast<Material::Type>(textured->type));
 }
 
 inline void as_init_plain_color_material(Material::PlainColor* plainColor)
