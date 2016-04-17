@@ -10,7 +10,6 @@ target_link_libraries(glrt-scene
   PUBLIC
   glrt-core
   glhelper
-  soil
   Qt5::Widgets
 )
 
