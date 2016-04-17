@@ -10,8 +10,6 @@
 #include <QImage>
 #include <QVBoxLayout>
 
-#include <SOIL/SOIL.h>
-
 namespace glrt {
 namespace scene {
 namespace resources {
@@ -162,6 +160,34 @@ struct TextureFile::TextureAsFloats
   quint32 w = 0, w_float=0, h = 0;
 
   TextureAsFloats() = delete;
+
+  TextureAsFloats(quint32 width, quint32 height)
+  {
+    w = width;
+    h = height;
+    w_float = w * 4;
+
+    image.type = TextureFile::Type::FLOAT32;
+    image.format = TextureFile::Format::RGBA;
+    // format and type must be set before calling calcRowStride!
+
+    image.width = w;
+    image.rowStride = image.calcRowStride();
+    image.height = h;
+    image.depth = 1;
+    image.mipmap = 0;
+    image.target = TextureFile::Target::TEXTURE_2D;
+    image.rawDataLength = image.rowStride * image.height;
+
+    textureData.resize(int(this->image.rowStride * h));
+    data = reinterpret_cast<byte*>(textureData.data());
+  }
+
+  TextureAsFloats(const QImage& qImage)
+    : TextureAsFloats(quint32(qImage.width()), quint32(qImage.height()))
+  {
+    fromQImage(qImage);
+  }
 
   TextureAsFloats(const QPair<UncompressedImage, QVector<byte>>& importedTexture)
   {
@@ -340,6 +366,41 @@ struct TextureFile::TextureAsFloats
     mergeWith_channelwise(redChannelwise, greenChannelwise, blueChannelwise, alphaChannelwise);
   }
 
+  void flipY()
+  {
+    quint32 half_h = h/2;
+
+#pragma omp parallel for
+    for(quint32 y=0; y<half_h; ++y)
+    {
+      float* srcLine = this->lineData_As<float>(y);
+      float* targetLine = this->lineData_As<float>(h-1-y);
+      for(quint32 x=0; x<w_float; ++x)
+      {
+        std::swap(srcLine[x], targetLine[x]);
+      }
+    }
+  }
+
+  void fromQImage(QImage image)
+  {
+    image = image.convertToFormat(QImage::Format_RGBA8888);
+
+    Q_ASSERT(image.width() == int(w));
+    Q_ASSERT(image.height() == int(h));
+
+    const quint8* srcData = reinterpret_cast<quint8*>(image.bits());
+
+#pragma omp parallel for
+    for(int y=0; y<int(h); ++y)
+    {
+      float* targetLine = this->lineData_As<float>(quint32(y));
+      const quint8* srcLine = srcData + y*image.bytesPerLine();
+      for(int x=0; x<int(w_float); ++x)
+        targetLine[x] = srcLine[x] / 255.f;
+    }
+  }
+
   QImage asQImage() const
   {
     QImage image(int(w), int(h), QImage::Format_RGBA8888);
@@ -394,9 +455,36 @@ public:
     GL_CALL(glGenTextures, 1, &textureId);
   }
 
-  ImportedGlTexture(GLuint textureId)
-    : textureId(textureId)
+  ImportedGlTexture(const QFileInfo& fileToBeImported, ImportSettings importSettings)
+    : ImportedGlTexture()
   {
+    QString suffix = fileToBeImported.suffix().toCaseFolded();
+
+    if(suffix == "png")
+    {
+      QImage image;
+
+      if(!image.load(fileToBeImported.absoluteFilePath()) || image.isNull())
+      {
+        qDebug() << "Couldn't load image file" << fileToBeImported.absoluteFilePath();
+        Q_UNREACHABLE();
+      }
+
+      // #TODO resize to power of two?
+
+      TextureAsFloats textureData(image);
+
+      textureData.flipY();
+
+      fromFloats(textureData);
+
+      if(importSettings.generateMipmaps)
+        GL_CALL(glGenerateTextureMipmap, textureId);
+    }else
+    {
+      qDebug() << "Unsupported image format" << suffix << "used with the file" << fileToBeImported.absoluteFilePath();
+      Q_UNREACHABLE();
+    }
   }
 
   ~ImportedGlTexture()
@@ -548,15 +636,7 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
   const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
-  quint32 flags = SOIL_FLAG_POWER_OF_TWO|SOIL_FLAG_INVERT_Y;
-
-  if(importSettings.generateMipmaps)
-    flags |= SOIL_FLAG_MIPMAPS;
-
-  ImportedGlTexture textureInformation(SOIL_load_OGL_texture(sourceFilename.c_str(),
-                                                             SOIL_LOAD_AUTO,
-                                                             SOIL_CREATE_NEW_ID,
-                                                             flags));
+  ImportedGlTexture textureInformation(srcFile, importSettings);
 
   ImportedGlTexture* red_texture = nullptr;
   ImportedGlTexture* green_texture = nullptr;
@@ -568,17 +648,14 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
   if(importSettings.need_merging())
   {
-    auto createChannelTextureInfo = [flags,&srcFile,&textureInformation](const std::string& suffix) {
+    auto createChannelTextureInfo = [importSettings,&srcFile,&textureInformation](const std::string& suffix) {
       ImportedGlTexture* tex = nullptr;
       if(!suffix.empty())
       {
         QFileInfo newFile = QDir(srcFile.path()).filePath(srcFile.baseName().replace(QRegularExpression("[-_][^-_]+$"), QString::fromStdString(suffix)));
         if(!newFile.exists())
           throw GLRT_EXCEPTION(QString("The file %0 doesn't exist.").arg(newFile.filePath()));
-        tex = new ImportedGlTexture(SOIL_load_OGL_texture(newFile.absoluteFilePath().toStdString().c_str(),
-                                                          SOIL_LOAD_AUTO,
-                                                          SOIL_CREATE_NEW_ID,
-                                                          flags));
+        tex = new ImportedGlTexture(newFile, importSettings);
         if(tex->width(0) != textureInformation.width(0) || tex->height(0) != textureInformation.height(0))
           throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1. (the channel texture has the size %2x%3 and the original tetxure has the size %4x%5)").arg(srcFile.filePath()).arg(newFile.filePath()).arg(tex->width(0)).arg(tex->height(0)).arg(textureInformation.width(0)).arg(textureInformation.height(0)));
       }
