@@ -89,6 +89,8 @@ private:
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
 
   void unloadUnusedResources();
+
+  void createTestVoxelGrid();
 };
 
 
