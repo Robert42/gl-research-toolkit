@@ -283,7 +283,7 @@ public:
   // The caller owns the given instance.
   // You must ensure, that the given debugPrinter lives longer than the created bar.
   // Note: debugPritnercan be null
-  TwBar* createDebugShaderBar(renderer::debugging::ShaderDebugPrinter* debugPrinter=nullptr);
+  TwBar* createDebugShaderBar(renderer::Renderer* renderer, renderer::debugging::ShaderDebugPrinter* debugPrinter=nullptr);
 
 
   bool handleEvents(const SDL_Event& event);
@@ -297,6 +297,7 @@ private:
   typedef TweakBarEnum<glrt::renderer::SurfaceShaderVisualization> VisualizationEnumeration;
 
   gui::TweakBarCBVar<bool> toggleProfiler;
+  gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
 
   enum class MouseCaptureState : int
   {
@@ -321,6 +322,8 @@ private:
 
 private slots:
   void handleSceneLoaded(Scene* scene);
+
+  void setTweaBarAllocation(TwBar* tweakBar, glm::ivec2 pos, glm::ivec2 size, const glm::ivec2& marginToWindowBorder);
 };
 
 

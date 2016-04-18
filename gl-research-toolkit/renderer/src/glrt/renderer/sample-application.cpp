@@ -67,7 +67,7 @@ void SampleApplication::endDrawing()
 void SampleApplication::initGui()
 {
   antweakbar.createDebugSceneBar(&renderer);
-  antweakbar.createDebugShaderBar(&shaderDebugPrinter);
+  antweakbar.createDebugShaderBar(&renderer, &shaderDebugPrinter);
   antweakbar.createProfilerBar(&profiler);
 }
 

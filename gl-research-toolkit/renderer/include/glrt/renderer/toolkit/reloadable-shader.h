@@ -15,6 +15,8 @@ public:
   class Listener;
 
   static QSet<QString> globalPreprocessorBlock;
+  static bool isMacroDefined(const QString& macro);
+  static void defineMacro(const QString& macro, bool defined);
   QSet<QString> preprocessorBlock;
 
   gl::ShaderObject shaderObject;

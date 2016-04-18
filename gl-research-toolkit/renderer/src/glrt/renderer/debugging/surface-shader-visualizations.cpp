@@ -26,6 +26,8 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   VALUE(LIGHTING_MIRROR_SMOOTH);
   VALUE(MATERIAL_NORMAL_WS);
   VALUE(MATERIAL_ALPHA);
+  VALUE(MATERIAL_ROUGHNESS_ADJUSTED);
+  VALUE(MATERIAL_ROUGHNESS_UNADJUSTED);
   VALUE(MATERIAL_SMOOTHNESS);
   VALUE(MATERIAL_BASE_COLOR);
   VALUE(MATERIAL_METAL_MASK);
@@ -56,8 +58,6 @@ void setCurrentSurfaceShaderVisualization(SurfaceShaderVisualization visualizati
   if(currentSurfaceShaderVisualization == visualization)
     return;
 
-  QSet<QString>& globalPreprocessorBlock = ReloadableShader::globalPreprocessorBlock;
-
   QMap<QString, SurfaceShaderVisualization> map = allSurfaceShaderVisualizations();
 
   currentSurfaceShaderVisualization = visualization;
@@ -69,13 +69,7 @@ void setCurrentSurfaceShaderVisualization(SurfaceShaderVisualization visualizati
 
     QString macro = QString("#define %0").arg(key);
 
-    if(visualization == value && visualization!=SurfaceShaderVisualization::NONE)
-    {
-      globalPreprocessorBlock.insert(macro);
-    }else
-    {
-      globalPreprocessorBlock.remove(macro);
-    }
+    ReloadableShader::defineMacro(key, visualization == value && visualization!=SurfaceShaderVisualization::NONE);
   }
 
   ReloadableShader::reloadAll();

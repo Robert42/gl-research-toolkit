@@ -55,6 +55,16 @@ TwBar* AntTweakBar::createCustomBar(QString name,
 
   TwBar* tweakBar = TwNewBar(name.toStdString().c_str());
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, help.toStdString().c_str());
+
+  setTweaBarAllocation(tweakBar, pos, size, glm::ivec2(marginToWindowBorder));
+
+  gui::Toolbar::registerTweakBar(tweakBar);
+
+  return tweakBar;
+}
+
+void AntTweakBar::setTweaBarAllocation(TwBar* tweakBar, glm::ivec2 pos, glm::ivec2 size, const glm::ivec2& marginToWindowBorder)
+{
   TwSetParam(tweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
 
   glm::ivec2 windowSize;
@@ -63,12 +73,7 @@ TwBar* AntTweakBar::createCustomBar(QString name,
 
   pos = glm::clamp(pos, glm::ivec2(marginToWindowBorder), windowSize-size-marginToWindowBorder);
   TwSetParam(tweakBar, nullptr, "position", TW_PARAM_INT32, 2, &pos);
-
-  gui::Toolbar::registerTweakBar(tweakBar);
-
-  return tweakBar;
 }
-
 
 TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 {
@@ -131,14 +136,19 @@ void __reload_all_shaders(void*)
 }
 
 
-TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter* shaderDebugPrinter)
+TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer::debugging::ShaderDebugPrinter* shaderDebugPrinter)
 {
   TwBar* tweakBar = TwNewBar("Shader");
 
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to debug a shader.");
-  TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
+  setTweaBarAllocation(tweakBar, glm::ivec2(0, 4096), glm::ivec2(480, 160), glm::ivec2(32, 8));
+  TwSetParam(tweakBar, nullptr, "valueswidth", TW_PARAM_CSTRING, 1, "256");
 
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
+
+  roughnessAdjustmentToggle.setter = [renderer](bool ar){renderer->setAdjustRoughness(ar);};
+  roughnessAdjustmentToggle.getter = [renderer]() -> bool {return renderer->adjustRoughness();};
+  roughnessAdjustmentToggle.TwAddVarCB(tweakBar, "Roughness Adjustment", "group=PBS");
 
   if(shaderDebugPrinter != nullptr)
   {

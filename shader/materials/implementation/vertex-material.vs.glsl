@@ -29,6 +29,7 @@ void apply_material()
   material.normal = normalize(fragment.normal);
   material.reflectance = 0.5f;
   material.occlusion = 1;
+  material.normal_length = 1;
   
   plainColorMaterial = material;
 }

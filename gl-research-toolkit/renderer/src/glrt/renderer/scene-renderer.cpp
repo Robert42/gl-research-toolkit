@@ -26,7 +26,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     lightUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    _needRecapturing(true)
+    _needRecapturing(true),
+    _adjustRoughness(false)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
@@ -35,6 +36,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
+
+  setAdjustRoughness(true);
 }
 
 Renderer::~Renderer()
@@ -324,6 +327,21 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 GLuint64 Renderer::sceneUniformAddress() const
 {
   return sceneUniformBuffer.gpuBufferAddress();
+}
+
+bool Renderer::adjustRoughness() const
+{
+  return _adjustRoughness;
+}
+
+void Renderer::setAdjustRoughness(bool adjustRoughness)
+{
+  if(_adjustRoughness != adjustRoughness)
+  {
+    _adjustRoughness = adjustRoughness;
+    ReloadableShader::defineMacro("ADJUST_ROUGHNESS", adjustRoughness);
+    ReloadableShader::reloadAll();
+  }
 }
 
 
