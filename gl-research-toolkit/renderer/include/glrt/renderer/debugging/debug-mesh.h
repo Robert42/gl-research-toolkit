@@ -76,7 +76,8 @@ public:
   void addCube(const glm::vec3& min, const glm::vec3& max);
   void addArrow(float length, float tipLength);
 
-  void pushMatrix(const glm::vec3& position, const glm::vec3& normal=glm::vec3(0, 0, 1), bool multiply = true);
+  void pushMatrix(const glm::vec3& position, bool multiply = true);
+  void pushMatrix(const glm::vec3& position, const glm::vec3& normal, bool multiply = true);
   void pushMatrix(const glm::vec3& position, const glm::vec3& normal, const glm::vec3& firstPointDirection, bool multiply = true);
   void pushMatrix(const glm::mat4& matrix=glm::mat4(1), bool multiply = true);
   void popMatrix();

@@ -215,6 +215,13 @@ void DebugMesh::Painter::addArrow(float length, float tipLength)
   }
 }
 
+void DebugMesh::Painter::pushMatrix(const glm::vec3& position, bool multiply)
+{
+  glm::mat4 matrix = glm::mat4(1);
+  matrix[3] = glm::vec4(position, 1);
+
+  pushMatrix(matrix, multiply);
+}
 
 void DebugMesh::Painter::pushMatrix(const glm::vec3& position, const glm::vec3& normal, bool multiply)
 {
