@@ -233,6 +233,7 @@ void Scene::createTestVoxelGrid()
   SceneLayer* sceneLayer = new SceneLayer(Uuid<SceneLayer>::create(), *this);
   Node* node = new Node(*sceneLayer, Uuid<Node>::create());
   VoxelDataComponent* voxelData = new VoxelDataComponent(*node, nullptr, Uuid<VoxelDataComponent>::create());
+  voxelData->data.voxelCount = glm::vec3(3, 2, 2);
 }
 
 } // namespace scene
