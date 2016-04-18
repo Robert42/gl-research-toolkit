@@ -212,8 +212,14 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
 
   for(int dimension = 0; dimension<3; ++dimension)
   {
-    const int n = maxGridSize[dimension];
     glm::mat4 matrix(1);
+    for(int d = 0; d<3; ++d)
+      if(d!=dimension)
+        matrix[d] *= maxGridSize[d];
+    painter.pushMatrix(matrix);
+
+    const int n = maxGridSize[dimension];
+    matrix = glm::mat4(1);
     std::swap(matrix[2], matrix[dimension]);
     painter.pushMatrix(matrix);
     for(int i=0; i<=n; ++i)
@@ -222,6 +228,7 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
       painter.addRect(glm::vec2(0), glm::vec2(1));
       painter.popMatrix();
     }
+    painter.popMatrix();
     painter.popMatrix();
   }
 
