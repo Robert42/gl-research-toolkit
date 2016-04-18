@@ -69,6 +69,10 @@ return;
   incoming_luminance *= exposure;
 
   fragment_color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
+  
+#if DEBUG_FRAGMENT_COLOR
+  fragment_color = vec4(debug_fragment_color, alpha);
+#endif
 
   highlight_numeric_issues();
 }

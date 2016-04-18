@@ -66,6 +66,12 @@ float computeSpecOcclusion(float NdotV, float AO, float roughness)
     return saturate(pow(NdotV + AO, exp2(-16.0f * roughness - 1.0f)) - 1.0f + AO);
 }
 
+#define DEBUG_FRAGMENT_COLOR defined(MATERIAL_ROUGHNESS_UNADJUSTED) || defined(MATERIAL_ROUGHNESS_ADJUSTED)
+
+#if DEBUG_FRAGMENT_COLOR
+vec3 debug_fragment_color;
+#endif
+
 void precomputeData(in BaseMaterial material,
                     in vec3 surface_position,
                     in vec3 camera_position,
@@ -109,7 +115,15 @@ void precomputeData(in BaseMaterial material,
   float NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
   
   float roughness = sq(1.f-smoothness); // 3.2.1 & Figure 12
+#ifdef MATERIAL_ROUGHNESS_UNADJUSTED
+  debug_fragment_color = vec3(roughness);
+#endif
+#ifdef ADJUST_ROUGHNESS
   roughness = adjustRoughness(roughness, normal_length);
+#endif
+#ifdef MATERIAL_ROUGHNESS_ADJUSTED
+  debug_fragment_color = vec3(roughness);
+#endif
   vec3 f0 = mix(vec3(0.16f * sq(reflectance)), base_color, metal_mask); // 3.2.1 & Appendix D
   float f90 = saturate(50.0 * dot(f0, vec3(0.33))); // listing 27
   vec3 diffuseColor = mix(base_color, vec3(0), metal_mask); // Appendix D

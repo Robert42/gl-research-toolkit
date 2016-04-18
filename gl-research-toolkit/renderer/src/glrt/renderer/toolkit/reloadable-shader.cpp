@@ -7,6 +7,26 @@ namespace renderer {
 
 QSet<QString> ReloadableShader::globalPreprocessorBlock;
 
+inline QString preprocessorForMacroName(const QString& macro)
+{
+  return QString("#define %0").arg(macro);
+}
+
+bool ReloadableShader::isMacroDefined(const QString& macro)
+{
+  return globalPreprocessorBlock.contains(preprocessorForMacroName(macro));
+}
+
+void ReloadableShader::defineMacro(const QString& macro, bool defined)
+{
+  QString proprocessor = preprocessorForMacroName(macro);
+
+  if(defined)
+    globalPreprocessorBlock.insert(proprocessor);
+  else
+    globalPreprocessorBlock.remove(proprocessor);
+}
+
 
 ReloadableShader::ReloadableShader(const QString& name, const QDir& shaderDir, const QSet<QString>& preprocessorBlock)
   : preprocessorBlock(preprocessorBlock),

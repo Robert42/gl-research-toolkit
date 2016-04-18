@@ -131,7 +131,7 @@ void __reload_all_shaders(void*)
 }
 
 
-TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter* shaderDebugPrinter)
+TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer::debugging::ShaderDebugPrinter* shaderDebugPrinter)
 {
   TwBar* tweakBar = TwNewBar("Shader");
 
@@ -139,6 +139,10 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::debugging::ShaderDebugPrinter
   TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");
 
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
+
+  roughnessAdjustmentToggle.setter = [renderer](bool ar){renderer->setAdjustRoughness(ar);};
+  roughnessAdjustmentToggle.getter = [renderer]() -> bool {return renderer->adjustRoughness();};
+  roughnessAdjustmentToggle.TwAddVarCB(tweakBar, "Roughness Adjustment", "group=PBS");
 
   if(shaderDebugPrinter != nullptr)
   {

@@ -2,6 +2,8 @@
 
 float adjustRoughness(float inputRoughness, float avgNormalLength)
 {
+  // TODO: test, whether avoiding the if is performanter
+  
   // Based on The Order : 1886 SIGGRAPH course notes implementation
   if(avgNormalLength < 1.0f)
   {

@@ -59,6 +59,9 @@ public:
 
   GLuint64 sceneUniformAddress() const;
 
+  bool adjustRoughness() const;
+  void setAdjustRoughness(bool adjustRoughness);
+
 protected:
   virtual void prepareFramebuffer() = 0;
   virtual void applyFramebuffer() = 0;
@@ -85,6 +88,7 @@ private:
   gl::CommandList commandList;
 
   bool _needRecapturing : 1;
+  bool _adjustRoughness : 1;
 
   bool needRecapturing() const;
   bool needRerecording() const;
