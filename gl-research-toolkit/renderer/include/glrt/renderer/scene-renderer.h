@@ -40,6 +40,7 @@ public:
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
+  debugging::DebugRenderer visualizeVoxelGrids;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
