@@ -13,9 +13,9 @@ struct VoxelData
   glm::mat4 worldToVoxelSpace = glm::mat4(1);
   glm::ivec3 voxelCount = glm::ivec3(1);
 
-  friend VoxelData operator*(const CoordFrame& coordFrame, VoxelData data)
+  friend VoxelData operator*(const CoordFrame& localToWorldSpace, VoxelData data)
   {
-    data.worldToVoxelSpace = data.worldToVoxelSpace * coordFrame.inverse().toMat4();
+    data.worldToVoxelSpace = data.worldToVoxelSpace * localToWorldSpace.inverse().toMat4();
     return data;
   }
 };
