@@ -1,5 +1,6 @@
 #define saturate(value) clamp(value, 0.f, 1.f)
 
+#include "roughness-adaptation.glsl"
 #include "structs.glsl"
 #include "brdf.glsl"
 #include "material.glsl"
