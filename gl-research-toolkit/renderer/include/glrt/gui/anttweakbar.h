@@ -322,6 +322,8 @@ private:
 
 private slots:
   void handleSceneLoaded(Scene* scene);
+
+  void setTweaBarAllocation(TwBar* tweakBar, glm::ivec2 pos, glm::ivec2 size, const glm::ivec2& marginToWindowBorder);
 };
 
 
