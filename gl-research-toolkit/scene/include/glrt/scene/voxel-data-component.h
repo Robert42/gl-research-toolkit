@@ -19,6 +19,8 @@ struct VoxelData
     data.worldToVoxelSpace = data.worldToVoxelSpace * localToWorldSpace.inverse().toMat4();
     return data;
   }
+
+  void initSize(const glm::vec3& meshBoundingBoxMin, const glm::vec3& meshBoundingBoxMax, float extend, int maxSize, float voxelsPerMeter);
 };
 
 class VoxelDataComponent : public glrt::scene::Node::Component
