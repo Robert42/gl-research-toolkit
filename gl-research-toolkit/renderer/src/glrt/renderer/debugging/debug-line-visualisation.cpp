@@ -156,13 +156,27 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
   DebugMesh::Painter painter;
 
   // Tango Desktop theme: https://en.wikipedia.org/w/index.php?title=Tango_Desktop_Project&oldid=705500829
+  glm::vec3 grey = vec3FromRgb(0x888a85);
   glm::vec3 red = vec3FromRgb(0xef2929);
   glm::vec3 green = vec3FromRgb(0x8ae234);
   glm::vec3 blue = vec3FromRgb(0x729fcf);
 
   QVector<int> vector = {42};
 
-  painter.nextAttribute.color = red;
+  painter.nextAttribute.color = grey;
+  int l = 1;
+  for(int x=-l; x<=l; ++x)
+  {
+    for(int y=-l; y<=l; ++y)
+    {
+      int X = x+1;
+      int Y = y+1;
+      painter.addVertex( x, Y);
+      painter.addVertex( x,-Y);
+      painter.addVertex( X, y);
+      painter.addVertex(-X, y);
+    }
+  }
 
   painter.nextAttribute.color = red;
   painter.pushMatrix(glm::vec3(0), glm::vec3(1,0,0));
