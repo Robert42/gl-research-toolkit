@@ -9,9 +9,10 @@ namespace scene {
 
 struct VoxelData
 {
-  quint64 gpuTextureHandle = 0;
   glm::mat4 worldToVoxelSpace = glm::mat4(1);
   glm::ivec3 voxelCount = glm::ivec3(1);
+  padding<int, 1> _padding;
+  quint64 gpuTextureHandle = 0;
 
   friend VoxelData operator*(const CoordFrame& localToWorldSpace, VoxelData data)
   {
