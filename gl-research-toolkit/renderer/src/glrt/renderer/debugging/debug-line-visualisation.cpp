@@ -151,6 +151,37 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawArrows(const QVector<
 }
 
 
+DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrid(const QList<scene::VoxelDataComponent::Data>& voxelData)
+{
+  DebugMesh::Painter painter;
+
+  glm::ivec3 maxGridSize(0);
+
+  for(const scene::VoxelDataComponent::Data& data : voxelData)
+    maxGridSize = glm::max(maxGridSize, data.voxelCount);
+
+  for(int dimension = 0; dimension<3; ++dimension)
+  {
+    const int n = maxGridSize[dimension];
+    glm::mat4 matrix(1);
+    std::swap(matrix[2], matrix[dimension]);
+    painter.pushMatrix(matrix);
+    for(int i=0; i<n; ++i)
+    {
+      painter.pushMatrix(glm::vec3(0, 0, i));
+      painter.addRect(glm::vec2(0), glm::vec2(1));
+      painter.popMatrix();
+    }
+    painter.popMatrix();
+  }
+
+  return new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                             voxelData.toVector(),
+                                                             std::move(ShaderCompiler::createShaderFromFiles("visualize-voxel-grids",
+                                                                                                             QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+}
+
+
 void DebugLineVisualisation::render()
 {
   bool use_depth_test = glIsEnabled(GL_DEPTH_TEST);
