@@ -175,18 +175,20 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
     painter.popMatrix();
   }
 
-  return new DebugLineVisualisation(std::move(debugRendering(painter,
-                                                             voxelData.toVector(),
-                                                             std::move(ShaderCompiler::createShaderFromFiles("visualize-voxel-grids",
-                                                                                                             QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  voxelData.toVector(),
+                                                                                  std::move(ShaderCompiler::createShaderFromFiles("visualize-voxel-grids",
+                                                                                                                                  QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  v->use_dephtest = true;
+  return v;
 }
 
 
 void DebugLineVisualisation::render()
 {
-  bool use_depth_test = glIsEnabled(GL_DEPTH_TEST);
+  bool temporary_disable_depthtest = !use_dephtest && glIsEnabled(GL_DEPTH_TEST);
 
-  if(use_depth_test)
+  if(temporary_disable_depthtest)
     glDisable(GL_DEPTH_TEST);
 
   shaderObject.Activate();
@@ -202,7 +204,7 @@ void DebugLineVisualisation::render()
 
   vertexArrayObject.ResetBinding();
 
-  if(use_depth_test)
+  if(temporary_disable_depthtest)
     glEnable(GL_DEPTH_TEST);
 }
 

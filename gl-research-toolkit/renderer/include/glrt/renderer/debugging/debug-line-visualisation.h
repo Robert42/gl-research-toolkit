@@ -67,6 +67,7 @@ private:
   int numDrawCalls;
   int uniformBufferOffset;
   int uniformBufferElementSize;
+  bool use_dephtest = false;
 };
 
 template<typename UniformType>
