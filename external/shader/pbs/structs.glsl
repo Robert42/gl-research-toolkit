@@ -15,12 +15,13 @@ struct BrdfData_Generic
 struct BaseMaterial
 {
   vec3 normal;
-  float smoothness;
+  float normal_length;
   vec3 base_color;
   float metal_mask;
   vec3 emission;
   float reflectance;
   float occlusion;
+  float smoothness;
 };
 
 struct SurfaceData
@@ -73,12 +74,13 @@ void precomputeData(in BaseMaterial material,
 {
   vec3 V = normalize(camera_position-surface_position);
   vec3 N = material.normal;
-  float smoothness = material.smoothness;
+  float normal_length = material.normal_length;
   vec3 base_color = material.base_color;
   float metal_mask = material.metal_mask;
   float reflectance = material.reflectance;
   vec3 emission = material.emission;
   float AO = material.occlusion;
+  float smoothness = material.smoothness;
   
   #ifndef AREA_LIGHT
   
@@ -107,6 +109,7 @@ void precomputeData(in BaseMaterial material,
   float NdotV             = abs(dot(N, V)) + 1e-5f; // avoid artifact
   
   float roughness = sq(1.f-smoothness); // 3.2.1 & Figure 12
+  roughness = adjustRoughness(roughness, normal_length);
   vec3 f0 = mix(vec3(0.16f * sq(reflectance)), base_color, metal_mask); // 3.2.1 & Appendix D
   float f90 = saturate(50.0 * dot(f0, vec3(0.33))); // listing 27
   vec3 diffuseColor = mix(base_color, vec3(0), metal_mask); // Appendix D
