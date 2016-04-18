@@ -166,7 +166,7 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
     glm::mat4 matrix(1);
     std::swap(matrix[2], matrix[dimension]);
     painter.pushMatrix(matrix);
-    for(int i=0; i<n; ++i)
+    for(int i=0; i<=n; ++i)
     {
       painter.pushMatrix(glm::vec3(0, 0, i));
       painter.addRect(glm::vec2(0), glm::vec2(1));
