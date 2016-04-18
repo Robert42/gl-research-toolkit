@@ -21,6 +21,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
+    visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     videoResolution(videoResolution),
@@ -37,6 +38,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
+  debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
 
   setAdjustRoughness(true);

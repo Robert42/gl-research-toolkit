@@ -71,6 +71,13 @@ DebugRenderer VisualizationRenderer::debugArrows(QVector<Arrow>* arrows)
   });
 }
 
+DebugRenderer VisualizationRenderer::showWorldGrid()
+{
+  return DebugRenderer([]() -> DebugRenderer::Implementation* {
+    return debugging::DebugLineVisualisation::drawWorldGrid();
+  });
+}
+
 
 } // namespace debugging
 } // namespace renderer

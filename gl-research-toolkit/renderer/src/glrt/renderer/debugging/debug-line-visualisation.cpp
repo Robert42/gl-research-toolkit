@@ -151,6 +151,42 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawArrows(const QVector<
 }
 
 
+DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
+{
+  DebugMesh::Painter painter;
+
+  // Tango Desktop theme: https://en.wikipedia.org/w/index.php?title=Tango_Desktop_Project&oldid=705500829
+  glm::vec3 red = vec3FromRgb(0xef2929);
+  glm::vec3 green = vec3FromRgb(0x8ae234);
+  glm::vec3 blue = vec3FromRgb(0x729fcf);
+
+  QVector<int> vector = {42};
+
+  painter.nextAttribute.color = red;
+
+  painter.nextAttribute.color = red;
+  painter.pushMatrix(glm::vec3(0), glm::vec3(1,0,0));
+  painter.addArrow(1.f, 0.1f);
+  painter.popMatrix();
+
+  painter.nextAttribute.color = green;
+  painter.pushMatrix(glm::vec3(0), glm::vec3(0,1,0));
+  painter.addArrow(1.f, 0.1f);
+  painter.popMatrix();
+
+  painter.nextAttribute.color = blue;
+  painter.pushMatrix(glm::vec3(0), glm::vec3(0,0,1));
+  painter.addArrow(1.f, 0.1f);
+  painter.popMatrix();
+
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  vector,
+                                                                                  std::move(ShaderCompiler::createShaderFromFiles("visualize-position",
+                                                                                                                                  QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  return v;
+}
+
+
 DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<scene::VoxelDataComponent::Data>& voxelData)
 {
   DebugMesh::Painter painter;

@@ -118,6 +118,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   cameraSwitcher->valueChanged = [&scene](const QPointer<scene::CameraComponent>& otherCamera){switchDebugCameraTo(&scene, otherCamera);};
   TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene::FpsDebugInputHandler::locked, "group=Camera");
 
+  renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group=Debug");
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group=Debug");

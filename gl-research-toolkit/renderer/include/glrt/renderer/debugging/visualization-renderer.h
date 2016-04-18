@@ -21,6 +21,7 @@ public:
   static DebugRenderer debugVoxelGrids(scene::Scene* scene);
   static DebugRenderer debugPoints(QVector<glm::vec3>* points);
   static DebugRenderer debugArrows(QVector<Arrow>* arrows);
+  static DebugRenderer showWorldGrid();
 };
 
 

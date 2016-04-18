@@ -28,6 +28,8 @@ add_custom_target(
   debugging/visualizations/visualize-scene-camera.vs
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
+  debugging/visualizations/visualize-voxel-grids.fs
+  debugging/visualizations/visualize-voxel-grids.vs
   materials/implementation/common-implementation.vs.glsl
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/highlight-numeric-issues.glsl

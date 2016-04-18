@@ -88,6 +88,11 @@ using AngelScript::asDWORD;
 const asDWORD ACCESS_MASK_RESOURCE_LOADING = AngelScriptIntegration::ACCESS_MASK_USER;
 const asDWORD ACCESS_MASK_USER = ACCESS_MASK_RESOURCE_LOADING<<1;
 
+glm::vec3 vec3FromColor(const QColor& c);
+glm::vec4 vec4FromColor(const QColor& c);
+glm::vec3 vec3FromRgb(quint32 rgb);
+glm::vec4 vec4FromRgba(quint32 rgba);
+
 class Exception final
 {
 public:
