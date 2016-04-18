@@ -41,7 +41,7 @@ void DebugRenderer::setEnabled(bool enabled)
 
   QObject::disconnect(_connection);
 
-  if(enabled)
+  if(_scene && enabled)
     _connection = QObject::connect(_scene, &scene::Scene::sceneRerecordedCommands, std::bind(&DebugRenderer::reinit, this));
 
   reinit();
