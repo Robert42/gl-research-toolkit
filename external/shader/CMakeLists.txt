@@ -10,5 +10,6 @@ add_custom_target(
   pbs/luminance-for-luminous-power.glsl
   pbs/material.glsl
   pbs/pbs.glsl
+  pbs/roughness-adaptation.glsl
   pbs/structs.glsl
 )
