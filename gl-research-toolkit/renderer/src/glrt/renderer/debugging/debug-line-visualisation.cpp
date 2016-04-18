@@ -160,7 +160,7 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
   for(const scene::VoxelDataComponent::Data& data : voxelData)
     maxGridSize = glm::max(maxGridSize, data.voxelCount);
 
-  for(int dimension = 0; dimension<3; ++dimension)
+  for(int dimension = 0; dimension<=0; ++dimension)
   {
     const int n = maxGridSize[dimension];
     glm::mat4 matrix(1);
