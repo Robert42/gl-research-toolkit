@@ -151,7 +151,7 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawArrows(const QVector<
 }
 
 
-DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrid(const QList<scene::VoxelDataComponent::Data>& voxelData)
+DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<scene::VoxelDataComponent::Data>& voxelData)
 {
   DebugMesh::Painter painter;
 

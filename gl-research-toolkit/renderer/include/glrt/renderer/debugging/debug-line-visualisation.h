@@ -51,7 +51,7 @@ public:
   static DebugRenderer::Implementation* drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights);
   static DebugRenderer::Implementation* drawPositions(const QVector<glm::vec3>& positions);
   static DebugRenderer::Implementation* drawArrows(const QVector<Arrow>& arrows);
-  static DebugRenderer::Implementation* drawVoxelGrid(const QList<scene::VoxelDataComponent::Data>& voxelData);
+  static DebugRenderer::Implementation* drawVoxelGrids(const QList<scene::VoxelDataComponent::Data>& voxelData);
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;
   DebugLineVisualisation& operator=(const DebugLineVisualisation&) = delete;
