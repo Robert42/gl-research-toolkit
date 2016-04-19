@@ -4,6 +4,7 @@
 #include <QString>
 #include <QFileInfo>
 #include <QDebug>
+#include <QSharedPointer>
 
 #include <GL/glew.h>
 
@@ -20,10 +21,15 @@ public:
 
   GLuint load();
 
+  void clear();
   void setFile(const QFileInfo& file);
 
 private:
-  QFileInfo _file;
+  class Source;
+  class Empty;
+  class FileSource;
+
+  QSharedPointer<Source> source;
 
   friend QDebug operator<<(QDebug d, const Texture& t);
 };
