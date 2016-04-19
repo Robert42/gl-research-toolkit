@@ -29,6 +29,7 @@ const Uuid<StaticMesh> unitRectMesh("{eb1697d3-75a9-43dc-9b3e-5daff21b9731}");
 
 
 class Texture;
+class Voxelizer;
 
 
 struct StaticMeshImportSettings

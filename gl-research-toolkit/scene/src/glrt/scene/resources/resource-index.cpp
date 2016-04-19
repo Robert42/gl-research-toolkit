@@ -9,6 +9,7 @@
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/texture-sampler.h>
 #include <glrt/scene/resources/texture.h>
+#include <glrt/scene/resources/voxelizer.h>
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
@@ -120,6 +121,7 @@ void ResourceIndex::registerAngelScriptAPI()
   SceneGraphImportSettings::registerType();
   MeshImportSettings::registerType();
   TextureFile::ImportSettings::registerType();
+  Voxelizer::registerAngelScriptAPI();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\", const MeshImportSettings &in meshImportSettings = MeshImportSettings())", AngelScript::asFUNCTION(convertStaticMesh_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertTexture(const string &in textureFile, const string &in sourceFile, const TextureImportSettings &in settings)", AngelScript::asFUNCTION(convertTexture_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
