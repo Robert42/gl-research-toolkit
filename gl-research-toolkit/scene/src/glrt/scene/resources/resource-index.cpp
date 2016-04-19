@@ -67,6 +67,11 @@ inline std::string get_label(ResourceIndex* index, const Uuid<void>& uuid)
   return index->labels[uuid].toStdString();
 }
 
+inline Voxelizer get_default_voxelizer(ResourceIndex* index)
+{
+  return Voxelizer(index);
+}
+
 // --------------
 
 const ResourceIndex ResourceIndex::fallback(uuids::fallbackIndex);
@@ -129,6 +134,8 @@ void ResourceIndex::registerAngelScriptAPI()
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void set_label(const BaseUuid &in uuid, const string &in label)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "string get_label(const BaseUuid &in uuid)", AngelScript::asFUNCTION(get_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "Voxelizer get_defaultVoxelizer()", AngelScript::asFUNCTION(get_default_voxelizer), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

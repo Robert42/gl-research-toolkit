@@ -29,11 +29,14 @@ public:
   float voxelsPerMeter = 8;
 
   Voxelizer();
+  Voxelizer(ResourceIndex* resourceIndex);
   ~Voxelizer();
 
   static void registerAngelScriptAPI();
 
   void voxelize(const Uuid<StaticMesh>& staticMesh);
+
+  bool isEnabled() const;
 };
 
 
