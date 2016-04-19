@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <QDebug>
 
+#include <GL/glew.h>
+
 namespace glrt {
 namespace scene {
 namespace resources {
@@ -15,6 +17,8 @@ public:
   Texture();
 
   QFileInfo file;
+
+  GLuint load();
 };
 
 QDebug operator<<(QDebug d, const Texture& t);

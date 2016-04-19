@@ -1,5 +1,4 @@
 #include <glrt/renderer/gl-texture-manager.h>
-#include <glrt/scene/resources/texture-file.h>
 #include <glrt/scene/resources/resource-index.h>
 
 namespace glrt {
@@ -96,7 +95,7 @@ quint64 GlTextureManager::gpuHandle(TextureHandle handle)
   GLuint& texture = textures[handle.textureId];
 
   if(!texture)
-    texture = glrt::scene::resources::TextureFile::loadFromFile(resourceManager->textureForUuid(textureIds[handle.textureId]).file);
+    texture = resourceManager->textureForUuid(textureIds[handle.textureId]).load();
 
   GLuint sampler = samplerObject.GetInternHandle();
 
