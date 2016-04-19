@@ -11,7 +11,7 @@ public:
   virtual ~Source();
 
   virtual bool isEmpty() const = 0;
-  virtual GLuint load() = 0;
+  virtual GLuint load(ResourceManager& resourceManager) = 0;
   virtual QDebug print(QDebug d) = 0;
 };
 
@@ -30,7 +30,7 @@ public:
 
   bool isEmpty() const final override;
 
-  GLuint load() final override;
+  GLuint load(ResourceManager& resourceManager) final override;
 
   QDebug print(QDebug d) final override;
 };
@@ -45,8 +45,9 @@ bool Texture::FileSource::isEmpty() const
   return file.filePath().isEmpty();
 }
 
-GLuint Texture::FileSource::load()
+GLuint Texture::FileSource::load(ResourceManager& resourceManager)
 {
+  Q_UNUSED(resourceManager);
   return glrt::scene::resources::TextureFile::loadFromFile(this->file);
 }
 
@@ -66,7 +67,7 @@ public:
 
   bool isEmpty() const final override;
 
-  GLuint load() final override;
+  GLuint load(ResourceManager& resourceManager) final override;
 
   QDebug print(QDebug d) final override;
 };
@@ -80,8 +81,9 @@ bool Texture::Empty::isEmpty() const
   return true;
 }
 
-GLuint Texture::Empty::load()
+GLuint Texture::Empty::load(ResourceManager& resourceManager)
 {
+  Q_UNUSED(resourceManager);
   Q_ASSERT_X(false, "Texture::Empty::load()", "Trying to load from an empty source");
   return 0;
 }
@@ -107,9 +109,9 @@ QDebug operator<<(QDebug d, const Texture& t)
   return t.source->print(d);
 }
 
-GLuint Texture::load()
+GLuint Texture::load(ResourceManager& resourceManager)
 {
-  return source->load();;
+  return source->load(resourceManager);
 }
 
 void Texture::clear()

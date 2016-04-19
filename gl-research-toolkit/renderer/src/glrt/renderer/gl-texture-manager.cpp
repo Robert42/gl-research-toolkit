@@ -95,7 +95,9 @@ quint64 GlTextureManager::gpuHandle(TextureHandle handle)
   GLuint& texture = textures[handle.textureId];
 
   if(!texture)
-    texture = resourceManager->textureForUuid(textureIds[handle.textureId]).load();
+    texture = resourceManager->textureForUuid(textureIds[handle.textureId]).load(*resourceManager);
+
+  Q_ASSERT(texture!=0);
 
   GLuint sampler = samplerObject.GetInternHandle();
 
