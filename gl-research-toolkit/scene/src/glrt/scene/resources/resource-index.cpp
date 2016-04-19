@@ -223,7 +223,7 @@ void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string
   allRegisteredResources.insert(uuid);
   QString f = QString::fromStdString(file);
   labels[uuid] = QFileInfo(f).baseName();
-  textures[uuid].file = QDir::current().absoluteFilePath(f);
+  textures[uuid].setFile(QDir::current().absoluteFilePath(f));
   defaultTextureSamplers[uuid] = textureSampler;
 }
 

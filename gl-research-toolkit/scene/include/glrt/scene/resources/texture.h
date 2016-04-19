@@ -16,9 +16,16 @@ class Texture
 public:
   Texture();
 
-  QFileInfo file;
+  bool isEmpty() const;
 
   GLuint load();
+
+  void setFile(const QFileInfo& file);
+
+private:
+  QFileInfo _file;
+
+  friend QDebug operator<<(QDebug d, const Texture& t);
 };
 
 QDebug operator<<(QDebug d, const Texture& t);
