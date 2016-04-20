@@ -1,6 +1,6 @@
 #include <glrt/scene/resources/voxelizer.h>
 #include <glrt/scene/resources/voxel-file.h>
-#include <glrt/scene/resources/resource-index.h>
+#include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/resources/static-mesh-file.h>
 
 namespace glrt {
@@ -9,25 +9,15 @@ namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFile, Voxelizer::FieldType type, const Voxelizer::Hints& hints);
+VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, const Voxelizer::Hints& hints);
 
 
 Voxelizer::Voxelizer()
 {
 }
 
-Voxelizer::Voxelizer(ResourceIndex* resourceIndex)
-  : resourceIndex(resourceIndex)
-{
-}
-
 Voxelizer::~Voxelizer()
 {
-}
-
-bool Voxelizer::enabled() const
-{
-  return this->resourceIndex != nullptr;
 }
 
 void Voxelizer::registerAngelScriptAPI()
@@ -52,8 +42,6 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectType(nameVoxelizer, sizeof(Voxelizer), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<Voxelizer>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "bool get_enabled()", AngelScript::asMETHOD(Voxelizer,enabled), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
@@ -61,9 +49,10 @@ void Voxelizer::registerAngelScriptAPI()
 
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
 {
-  if(!enabled())
-    throw GLRT_EXCEPTION(QString("Can't voxelize the static mesh %0 with a disabled Voxelizer").arg(staticMeshUuid.toString()));
-  if(!resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
+  ResourceManager& resourceManager = *ResourceManager::instance();
+  ResourceIndex* resourceIndex = resourceManager.writableIndexForResourceUuid(staticMeshUuid, nullptr);
+
+  if(resourceIndex == nullptr || !resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
   QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
@@ -82,6 +71,9 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
     voxelFile.textureFiles[signedDistanceFieldFileName] = voxelizeImplementation(staticMesh, signedDistanceFieldFileName, FieldType::SIGNED_DISTANCE_FIELD, signedDistanceField);
 
   voxelFile.save(voxelFileName);
+
+  for(auto i=voxelFile.textureFiles.begin(); i!=voxelFile.textureFiles.end(); ++i)
+    resourceIndex->registerVoxelizedMesh(staticMeshUuid, i.key(), i.value());
 }
 
 
@@ -136,15 +128,27 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   return metaData;
 }
 
-VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFile, Voxelizer::FieldType type, const Voxelizer::Hints& hints)
+VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, const Voxelizer::Hints& hints)
 {
   AABB aabb = staticMesh.boundingBox();
 
   VoxelFile::MetaData metaData = initSize(aabb, hints);
   metaData.fieldType = type;
 
-  // #TODO do the voxelization itself
-  qDebug() << "TODO: do the voxelization itself ("<<targetTextureFile.absoluteFilePath() <<")";
+  TextureFile textureFile;
+  QVector<float*> data;
+
+  switch(type)
+  {
+  case Voxelizer::FieldType::SIGNED_DISTANCE_FIELD:
+    data.resize(metaData.gridSize.x * metaData.gridSize.y * metaData.gridSize.z);
+    // #TODO do the voxelization itself
+    qDebug() << "TODO: do the voxelization itself ("<<targetTextureFileName.absoluteFilePath() <<")";
+    textureFile.appendImage(data,metaData.gridSize, TextureFile::Target::TEXTURE_3D, TextureFile::Type::FLOAT16, TextureFile::Format::RED);
+    break;
+  }
+
+  textureFile.save(targetTextureFileName);
 
   return metaData;
 }

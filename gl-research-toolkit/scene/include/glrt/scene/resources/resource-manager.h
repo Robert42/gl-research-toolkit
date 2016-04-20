@@ -57,6 +57,7 @@ public:
   void foreachIndex(const std::function<bool(const Index* index)>& lambda) const;
   QList<const Index*> allIndices() const;
   const Index* indexForResourceUuid(const QUuid& uuid, const Index* fallback=&Index::fallback) const;
+  ResourceIndex* writableIndexForResourceUuid(const QUuid& uuid, Index* fallback);
 
   template<typename T>
   void addMaterialUser(const Uuid<Material>& material, const Uuid<T>& materialuser);
@@ -71,7 +72,6 @@ private:
   QList<SceneLayer*> _sceneLayers;
 
   void foreachWritableIndex(const std::function<bool(Index* index)>& lambda);
-  ResourceIndex* writableIndexForResourceUuid(const QUuid& uuid, Index* fallback);
 };
 
 

@@ -718,9 +718,7 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
       QPair<UncompressedImage, QVector<byte>> image =  textureInformation.uncompressed2DImage(level, importSettings.format, importSettings.type);
 
-      image.first.rawDataStart = this->appendRawData(image.second);
-
-      this->uncompressedImages.append(image.first);
+      appendUncompressedImage(image.first, image.second);
     }
 
 #if SHOW_TEXTURE_IN_DIALOG
@@ -973,6 +971,16 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
   }
 
   return textureHandle;
+}
+
+void TextureFile::appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData)
+{
+  if(image.rawDataLength == 0)
+    image.rawDataLength = rawData.length();
+  Q_ASSERT(image.rawDataLength == rawData.length());
+  image.rawDataStart = this->appendRawData(rawData);
+
+  this->uncompressedImages.append(image);
 }
 
 quint32 TextureFile::appendRawData(const QVector<byte>& rawData)

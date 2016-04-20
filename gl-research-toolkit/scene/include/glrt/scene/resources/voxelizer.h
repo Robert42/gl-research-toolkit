@@ -19,8 +19,6 @@ public:
     SIGNED_DISTANCE_FIELD,
   };
 
-  ResourceIndex* resourceIndex = nullptr;
-
   struct Hints
   {
     TextureFile::Type voxelType = TextureFile::Type::FLOAT16;
@@ -35,14 +33,11 @@ public:
 
 
   Voxelizer();
-  Voxelizer(ResourceIndex* resourceIndex);
   ~Voxelizer();
 
   static void registerAngelScriptAPI();
 
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid);
-
-  bool enabled() const;
 };
 
 
