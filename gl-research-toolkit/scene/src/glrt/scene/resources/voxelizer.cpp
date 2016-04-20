@@ -101,6 +101,7 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   minSize = int(glm::ceilPowerOfTwo<int>(minSize));
   maxSize = int(glm::ceilPowerOfTwo<int>(maxSize));
 
+  Q_ASSERT(minSize > 1);
   Q_ASSERT(maxSize >= minSize);
   Q_ASSERT(glm::all(glm::lessThanEqual(meshBoundingBoxMin, meshBoundingBoxMax)));
 
@@ -119,7 +120,7 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
     if(glm::isnan(scale[i]) || glm::isinf(scale[i]) || scale[i] <=0.f)
       scale[i] = 1.f;
     else
-      uniformScaleFactor = glm::min(uniformScaleFactor, uniformScaleFactor);
+      uniformScaleFactor = glm::min(scale[i], uniformScaleFactor);
 
   if(glm::isinf(uniformScaleFactor))
   {
@@ -127,9 +128,9 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
     uniformScaleFactor = 1.f;
   }
 
-  CoordFrame offsetLocalSpace(-meshBoundingBoxMin);
+  CoordFrame offsetLocalSpace(-(meshBoundingBoxMin+meshBoundingBoxMax)*0.5f);
   CoordFrame scaleWorldToVoxel(glm::vec3(0), glm::quat(), uniformScaleFactor);
-  CoordFrame offsetVoxelSpace(glm::vec3(-extend));
+  CoordFrame offsetVoxelSpace(glm::vec3(metaData.gridSize)*0.5f);
 
   metaData.localToVoxelSpace = offsetVoxelSpace * scaleWorldToVoxel * offsetLocalSpace;
   return metaData;
