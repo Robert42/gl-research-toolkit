@@ -21,12 +21,18 @@ public:
 
   ResourceIndex* resourceIndex = nullptr;
 
-  FieldType fieldType = FieldType::SIGNED_DISTANCE_FIELD;
-  TextureFile::Type voxelType = TextureFile::Type::FLOAT16;
-  float extend = 1.f;
-  int minSize = 4;
-  int maxSize = 128;
-  float voxelsPerMeter = 8;
+  struct Hints
+  {
+    TextureFile::Type voxelType = TextureFile::Type::FLOAT16;
+    float extend = 1.f;
+    int minSize = 4;
+    int maxSize = 128;
+    float voxelsPerMeter = 8;
+    bool enabled = true;
+  };
+
+  Hints signedDistanceField;
+
 
   Voxelizer();
   Voxelizer(ResourceIndex* resourceIndex);
@@ -36,7 +42,7 @@ public:
 
   void voxelize(const Uuid<StaticMesh>& staticMesh);
 
-  bool isEnabled() const;
+  bool enabled() const;
 };
 
 
