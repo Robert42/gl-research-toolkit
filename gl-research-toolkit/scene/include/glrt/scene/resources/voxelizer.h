@@ -40,7 +40,7 @@ public:
 
   static void registerAngelScriptAPI();
 
-  void voxelize(const Uuid<StaticMesh>& staticMesh);
+  void voxelize(const Uuid<StaticMesh>& staticMeshUuid);
 
   bool enabled() const;
 };

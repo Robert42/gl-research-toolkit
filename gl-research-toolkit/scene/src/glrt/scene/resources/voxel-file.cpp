@@ -40,8 +40,8 @@ void VoxelFile::load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Wrong magic number %1.").arg(file.fileName()).arg(header.magicNumber));
   if(header.headerLength != sizeof(Header))
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unexpected Header size %1.").arg(file.fileName()).arg(header.headerLength));
-  if(header.voxelFileMetaDataLength != sizeof(VoxelFileMetaData))
-    throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unexpected VoxelFileMetaData length %1.").arg(file.fileName()).arg(header.voxelFileMetaDataLength));
+  if(header.metaDataLength != sizeof(MetaData))
+    throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unexpected VoxelFileMetaData length %1.").arg(file.fileName()).arg(header.metaDataLength));
   if(header.numVoxelFiles == 0)
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unexpected numVoxelFiles %1.").arg(file.fileName()).arg(header.numVoxelFiles));
   if(header._padding != 0)
@@ -51,13 +51,13 @@ void VoxelFile::load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid
   if(header.meshValidationUuid != meshUuid.toQUuid())
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Wrong mesh uuid: %1 expected: %2").arg(file.fileName()).arg(header.meshValidationUuid.toString()).arg(meshUuid.toString()));
 
-  if(file.size() <= qint64(sizeof(Header) + sizeof(VoxelFileMetaData) * header.numVoxelFiles))
+  if(file.size() <= qint64(sizeof(Header) + sizeof(MetaData) * header.numVoxelFiles))
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):Invalid file (too small) 0x2").arg(file.fileName()));
 
-  QVector<VoxelFileMetaData> metaData;
+  QVector<MetaData> metaData;
   metaData.resize(header.numVoxelFiles);
 
-  if(file.read(reinterpret_cast<char*>(metaData.data()), sizeof(VoxelFileMetaData) * header.numVoxelFiles) != sizeof(VoxelFileMetaData) * header.numVoxelFiles)
+  if(file.read(reinterpret_cast<char*>(metaData.data()), sizeof(MetaData) * header.numVoxelFiles) != sizeof(MetaData) * header.numVoxelFiles)
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unknown IO error 0x1").arg(file.fileName()));
 
   QStringList files = QString::fromUtf8(file.readAll()).split("\n");
@@ -88,6 +88,14 @@ void VoxelFile::load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid
       throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0105").arg(file.fileName()));
     if(glm::isnan(metaData[i].localToVoxelSpace.scaleFactor))
       throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0106").arg(file.fileName()));
+    if(metaData[i]._padding2 != 0)
+      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0107").arg(file.fileName()));
+    if(metaData[i].gridSize[0] <= 0)
+      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0108").arg(file.fileName()));
+    if(metaData[i].gridSize[1] <= 0)
+      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0109").arg(file.fileName()));
+    if(metaData[i].gridSize[2] <= 0)
+      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x010a").arg(file.fileName()));
 
     QFileInfo textureFile = dir.absoluteFilePath(files[i]);
 
@@ -115,8 +123,8 @@ void VoxelFile::save(const QFileInfo& fileInfo)
   header.numVoxelFiles = quint16(textureFiles.size());
 
   data.append(reinterpret_cast<char*>(&header), sizeof(Header));
-  for(const VoxelFileMetaData& metaData : textureFiles.values())
-    data.append(reinterpret_cast<const char*>(&metaData), sizeof(VoxelFileMetaData));
+  for(const MetaData& metaData : textureFiles.values())
+    data.append(reinterpret_cast<const char*>(&metaData), sizeof(MetaData));
   QStringList relativeFilePaths;
   for(const QFileInfo& textureFile : textureFiles.keys())
   {

@@ -1,11 +1,15 @@
 #include <glrt/scene/resources/voxelizer.h>
+#include <glrt/scene/resources/voxel-file.h>
 #include <glrt/scene/resources/resource-index.h>
+#include <glrt/scene/resources/static-mesh-file.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
+
+VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFile, Voxelizer::FieldType type, const Voxelizer::Hints& hints);
 
 
 Voxelizer::Voxelizer()
@@ -55,15 +59,93 @@ void Voxelizer::registerAngelScriptAPI()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMesh)
+void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
 {
   if(!enabled())
-    throw GLRT_EXCEPTION(QString("Can't voxelize the static mesh %0 with a disabled Voxelizer").arg(staticMesh.toString()));
-  if(!resourceIndex->staticMeshAssetsFiles.contains(staticMesh))
-    throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMesh.toString()));
+    throw GLRT_EXCEPTION(QString("Can't voxelize the static mesh %0 with a disabled Voxelizer").arg(staticMeshUuid.toString()));
+  if(!resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
+    throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
-  QString staticMeshFile = resourceIndex->staticMeshAssetsFiles.value(staticMesh);
-  qDebug() << "TODO: voxelize " << staticMeshFile;
+  QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
+
+  StaticMeshFile staticMeshFile;
+  staticMeshFile.load(staticMeshFileName);
+  const StaticMesh& staticMesh = staticMeshFile.staticMesh;
+
+  VoxelFile voxelFile;
+  voxelFile.meshUuid = staticMeshUuid;
+
+  QString voxelFileName = staticMeshFileName + ".voxel-metadata";
+  QString signedDistanceFieldFileName = staticMeshFileName + ".signed-distance-field.texture";
+
+  if(signedDistanceField.enabled)
+    voxelFile.textureFiles[signedDistanceFieldFileName] = voxelizeImplementation(staticMesh, signedDistanceFieldFileName, FieldType::SIGNED_DISTANCE_FIELD, signedDistanceField);
+
+  voxelFile.save(voxelFileName);
+}
+
+
+
+VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints& hints)
+{
+  const glm::vec3& meshBoundingBoxMin = meshBoundingBox.minPoint;
+  const glm::vec3& meshBoundingBoxMax = meshBoundingBox.maxPoint;
+
+  float voxelsPerMeter = hints.voxelsPerMeter;
+  float extend = hints.extend;
+  int minSize = hints.minSize;
+  int maxSize = hints.maxSize;
+
+  VoxelFile::MetaData metaData;
+
+  minSize = int(glm::ceilPowerOfTwo<int>(minSize));
+  maxSize = int(glm::ceilPowerOfTwo<int>(maxSize));
+
+  Q_ASSERT(maxSize >= minSize);
+  Q_ASSERT(glm::all(glm::lessThanEqual(meshBoundingBoxMin, meshBoundingBoxMax)));
+
+  glm::vec3 meshSize = meshBoundingBoxMax-meshBoundingBoxMin;
+
+  glm::ivec3 voxels = glm::ceil(voxelsPerMeter * meshSize + extend*2.f);
+  voxels = glm::ceilPowerOfTwo(voxels);
+  voxels = glm::clamp(voxels, glm::ivec3(minSize), glm::ivec3(maxSize));
+  metaData.gridSize = glm::ivec3(voxels);
+
+  glm::vec3 scale = (glm::vec3(voxels)-extend*2.f) / meshSize;
+
+  float uniformScaleFactor = INFINITY;
+
+  for(int i=0; i<3; ++i)
+    if(glm::isnan(scale[i]) || glm::isinf(scale[i]) || scale[i] <=0.f)
+      scale[i] = 1.f;
+    else
+      uniformScaleFactor = glm::min(uniformScaleFactor, uniformScaleFactor);
+
+  if(glm::isinf(uniformScaleFactor))
+  {
+    qWarning() << "uniformScaleFactor == inf";
+    uniformScaleFactor = 1.f;
+  }
+
+  CoordFrame offsetLocalSpace(-meshBoundingBoxMin);
+  CoordFrame scaleWorldToVoxel(glm::vec3(0), glm::quat(), uniformScaleFactor);
+  CoordFrame offsetVoxelSpace(glm::vec3(-extend));
+
+  metaData.localToVoxelSpace = offsetVoxelSpace * scaleWorldToVoxel * offsetLocalSpace;
+  return metaData;
+}
+
+VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFile, Voxelizer::FieldType type, const Voxelizer::Hints& hints)
+{
+  AABB aabb = staticMesh.boundingBox();
+
+  VoxelFile::MetaData metaData = initSize(aabb, hints);
+  metaData.fieldType = type;
+
+  // #TODO do the voxelization itself
+  qDebug() << "TODO: do the voxelization itself ("<<targetTextureFile.absoluteFilePath() <<")";
+
+  return metaData;
 }
 
 

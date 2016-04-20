@@ -85,6 +85,23 @@ bool StaticMesh::operator!=(const StaticMesh& other) const
   return !(*this == other);
 }
 
+
+AABB StaticMesh::boundingBox() const
+{
+  AABB aabb;
+  aabb.minPoint = glm::vec3(INFINITY);
+  aabb.maxPoint = glm::vec3(-INFINITY);
+
+  for(const Vertex& vertex : vertices)
+  {
+    aabb.minPoint = glm::min(aabb.minPoint, vertex.position);
+    aabb.maxPoint = glm::max(aabb.maxPoint, vertex.position);
+  }
+
+  return aabb;
+}
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt

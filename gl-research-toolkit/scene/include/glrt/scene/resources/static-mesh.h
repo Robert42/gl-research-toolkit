@@ -7,6 +7,12 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+struct AABB
+{
+  glm::vec3 minPoint;
+  glm::vec3 maxPoint;
+};
+
 struct StaticMesh
 {
   struct Vertex
@@ -26,6 +32,8 @@ struct StaticMesh
 
   QVector<index_type> indices;
   QVector<Vertex> vertices;
+
+  AABB boundingBox() const;
 
   bool isIndexed() const;
   bool operator==(const StaticMesh& other) const;
