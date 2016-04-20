@@ -2,6 +2,7 @@
 #define GLRT_PLAINOLDDATASTREAM_H
 
 #include <QIODevice>
+#include <glrt/dependencies.h>
 
 namespace glrt {
 
@@ -37,7 +38,8 @@ template<typename T>
 T readValue(QIODevice& device)
 {
   T value;
-  device.read(reinterpret_cast<char*>(&value), sizeof(T));
+  if(device.read(reinterpret_cast<char*>(&value), sizeof(T)) != sizeof(T))
+    throw GLRT_EXCEPTION("readValue<T> IO error");
   return value;
 }
 

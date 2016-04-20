@@ -14,7 +14,7 @@ class ResourceIndex;
 class Voxelizer final
 {
 public:
-  enum class FieldType
+  enum class FieldType : quint32
   {
     SIGNED_DISTANCE_FIELD,
   };
