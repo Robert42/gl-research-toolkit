@@ -76,11 +76,12 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
 
   for(auto i=voxelFile.textureFiles.begin(); i!=voxelFile.textureFiles.end(); ++i)
   {
-
     Uuid<Texture> textureUuid = Uuid<Texture>::create();
     Uuid<VoxelIndex> voxelUuid = Uuid<VoxelIndex>::create();
 
-    resourceIndex->registerTexture(textureUuid, ...);
+    // #FIXME: for signed distance fields: don't use normalized uv coordinates but used linear interpolated values
+    TextureSampler textureSampler;
+    resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
 
     VoxelIndex voxelIndex;
     voxelIndex.factor = i.value().factor;
@@ -153,7 +154,7 @@ VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const Q
   metaData.fieldType = type;
 
   TextureFile textureFile;
-  QVector<float*> data;
+  QVector<float> data;
 
   switch(type)
   {
@@ -171,6 +172,13 @@ VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const Q
 }
 
 
+uint qHash(glrt::scene::resources::Voxelizer::FieldType type)
+{
+  return ::qHash(uint(type));
+}
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt
+

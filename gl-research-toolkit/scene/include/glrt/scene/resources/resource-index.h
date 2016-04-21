@@ -67,7 +67,8 @@ public:
   void registerMaterial(const Uuid<Material>& uuid, const Material& material);
   void registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file);
   void registerSceneFile(const Uuid<Scene>& uuid, const std::string& file);
-  void registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler);
+  void registerTexture_std_string(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler);
+  void registerTexture(const Uuid<Texture>& uuid, const QFileInfo& file, const TextureSampler& textureSampler);
 
   void registerVoxelizedMesh(const Uuid<VoxelIndex>& uuid, const Uuid<StaticMesh>& meshUuid, Voxelizer::FieldType fieldType, const VoxelIndex& voxelIndex);
 

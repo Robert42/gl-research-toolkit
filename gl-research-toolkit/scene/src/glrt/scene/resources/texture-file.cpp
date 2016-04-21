@@ -630,6 +630,36 @@ TextureFile::TextureFile()
 {
 }
 
+void TextureFile::appendImage(const QVector<float>& data, const glm::ivec3& size, Target target, Type type, Format format)
+{
+  quint32 nChannels = quint32(ImportSettings::channelsPerPixelForFormat(format));
+
+  Q_ASSERT(quint32(data.length()) == nChannels*quint32(size.x*size.y*size.z));
+
+  ImportedGlTexture glTex;
+
+  UncompressedImage inputImage;
+
+  inputImage.width = quint32(size.x);
+  inputImage.height = quint32(size.y);
+  inputImage.depth = quint32(size.z);
+  inputImage.format = format;
+  inputImage.mipmap = 0;
+  inputImage.rawDataLength = quint32(data.length())*sizeof(float);
+  inputImage.rawDataStart = 0;
+  inputImage.target = target;
+  inputImage.type = Type::FLOAT32;
+  inputImage.rowStride = inputImage.calcRowStride();
+
+  Q_ASSERT(inputImage.rowStride == nChannels*quint32(size.x)*sizeof(float));
+
+  glTex.setUncompressed2DImage(inputImage, data.data());
+
+  QPair<UncompressedImage, QVector<byte>> image =  glTex.uncompressed2DImage(0, format, type);
+
+  appendUncompressedImage(image.first, image.second);
+}
+
 void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings)
 {
   importSettings.preprocess();
@@ -976,8 +1006,8 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
 void TextureFile::appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData)
 {
   if(image.rawDataLength == 0)
-    image.rawDataLength = rawData.length();
-  Q_ASSERT(image.rawDataLength == rawData.length());
+    image.rawDataLength = quint32(rawData.length());
+  Q_ASSERT(image.rawDataLength == quint32(rawData.length()));
   image.rawDataStart = this->appendRawData(rawData);
 
   this->uncompressedImages.append(image);

@@ -121,7 +121,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneLayerFile(const Uuid<SceneLayer> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneLayerFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler)", AngelScript::asMETHOD(ResourceIndex,registerTexture), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler)", AngelScript::asMETHOD(ResourceIndex,registerTexture_std_string), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
   MeshImportSettings::registerType();
@@ -219,7 +219,12 @@ void ResourceIndex::registerSceneFile(const Uuid<Scene>& uuid, const std::string
   sceneFiles[uuid] = QDir::current().absoluteFilePath(f);
 }
 
-void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler)
+void ResourceIndex::registerTexture_std_string(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler)
+{
+  registerTexture(uuid, QString::fromStdString(file), textureSampler);
+}
+
+void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const QFileInfo& file, const TextureSampler& textureSampler)
 {
   if(uuid == uuids::fallbackDiffuseTexture && _fallback!=this)
   {
@@ -230,9 +235,8 @@ void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string
 
   validateNotYetRegistered(uuid);
   allRegisteredResources.insert(uuid);
-  QString f = QString::fromStdString(file);
-  labels[uuid] = QFileInfo(f).baseName();
-  textures[uuid].setFile(QDir::current().absoluteFilePath(f));
+  labels[uuid] = file.baseName();
+  textures[uuid].setFile(file.absoluteFilePath());
   defaultTextureSamplers[uuid] = textureSampler;
 }
 

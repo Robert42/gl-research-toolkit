@@ -42,6 +42,8 @@ public:
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid);
 };
 
+uint qHash(glrt::scene::resources::Voxelizer::FieldType type);
+
 
 } // namespace resources
 } // namespace scene
