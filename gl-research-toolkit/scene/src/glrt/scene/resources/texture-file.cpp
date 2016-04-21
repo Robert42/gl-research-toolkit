@@ -543,6 +543,28 @@ public:
     return -1;
   }
 
+  Target target() const
+  {
+    GLint value;
+    GL_CALL(glGetTextureParameterIiv, textureId, GL_TEXTURE_TARGET, &value);
+    Target target = static_cast<Target>(value);
+    switch(target)
+    {
+    case Target::TEXTURE_1D:
+    case Target::TEXTURE_2D:
+    case Target::TEXTURE_3D:
+    case Target::CUBE_MAP_NEGATIVE_X:
+    case Target::CUBE_MAP_NEGATIVE_Y:
+    case Target::CUBE_MAP_NEGATIVE_Z:
+    case Target::CUBE_MAP_POSITIVE_X:
+    case Target::CUBE_MAP_POSITIVE_Y:
+    case Target::CUBE_MAP_POSITIVE_Z:
+      return target;
+    }
+    Q_UNREACHABLE();
+    return Target::TEXTURE_2D;
+  }
+
   QPair<UncompressedImage, QVector<byte>> uncompressed2DImage(int level,
                                                               TextureFile::Format format,
                                                               TextureFile::Type type) const
@@ -556,10 +578,10 @@ public:
     image.width = quint32(this->width(level));
     image.rowStride = image.calcRowStride();
     image.height = quint32(this->height(level));
-    image.depth = 1;
+    image.depth = quint32(this->depth(level));
     image.mipmap = quint32(level);
-    image.target = TextureFile::Target::TEXTURE_2D;
-    image.rawDataLength = image.rowStride * image.height;
+    image.target = target();
+    image.rawDataLength = image.rowStride * image.height * image.depth;
 
     bool supportedFormat;
     ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
