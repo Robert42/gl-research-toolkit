@@ -12,7 +12,8 @@ using AngelScriptIntegration::AngelScriptCheck;
 VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, const Voxelizer::Hints& hints);
 
 
-Voxelizer::Voxelizer()
+Voxelizer::Voxelizer(ResourceIndex* resourceIndex)
+  : resourceIndex(resourceIndex)
 {
 }
 
@@ -40,7 +41,8 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectProperty(nameHints, "float voxelsPerMeter", asOFFSET(Hints,voxelsPerMeter)); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectType(nameVoxelizer, sizeof(Voxelizer), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f()", AngelScript::asFUNCTION(&AngelScriptIntegration::wrap_constructor<Voxelizer>), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f(ResourceIndex@ index)", AngelScript::asFUNCTION((&AngelScriptIntegration::wrap_constructor<Voxelizer, ResourceIndex*>)), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
@@ -49,10 +51,10 @@ void Voxelizer::registerAngelScriptAPI()
 
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
 {
-  ResourceManager& resourceManager = *ResourceManager::instance();
-  ResourceIndex* resourceIndex = resourceManager.writableIndexForResourceUuid(staticMeshUuid, nullptr);
+  // There should be no way to create a voxelizer without valid ResourceIndex
+  Q_ASSERT(resourceIndex != nullptr);
 
-  if(resourceIndex == nullptr || !resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
+  if(!resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
   QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);

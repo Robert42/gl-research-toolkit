@@ -19,6 +19,8 @@ public:
     SIGNED_DISTANCE_FIELD,
   };
 
+  ResourceIndex* resourceIndex = nullptr;
+
   struct Hints
   {
     TextureFile::Type voxelType = TextureFile::Type::FLOAT16;
@@ -32,7 +34,7 @@ public:
   Hints signedDistanceField;
 
 
-  Voxelizer();
+  Voxelizer(ResourceIndex* resourceIndex);
   ~Voxelizer();
 
   static void registerAngelScriptAPI();

@@ -7,6 +7,7 @@
 #include <glrt/scene/resources/material.h>
 #include <glrt/scene/resources/texture-sampler.h>
 #include <glrt/scene/resources/texture.h>
+#include <glrt/scene/resources/voxel-file.h>
 
 namespace glrt {
 namespace scene {
@@ -68,6 +69,8 @@ public:
   void registerSceneLayerFile(const Uuid<SceneLayer>& uuid, const std::string& file);
   void registerSceneFile(const Uuid<Scene>& uuid, const std::string& file);
   void registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler);
+
+  void registerVoxelizedMesh(const Uuid<StaticMesh>& uuid, const QString& voxelTextureFile, const VoxelFile::MetaData& metaData);
 
   bool isRegistered(const QUuid& uuid) const;
 

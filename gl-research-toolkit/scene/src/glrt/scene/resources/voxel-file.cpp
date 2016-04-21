@@ -57,7 +57,7 @@ void VoxelFile::load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid
   QVector<MetaData> metaData;
   metaData.resize(header.numVoxelFiles);
 
-  if(file.read(reinterpret_cast<char*>(metaData.data()), sizeof(MetaData) * header.numVoxelFiles) != sizeof(MetaData) * header.numVoxelFiles)
+  if(file.read(reinterpret_cast<char*>(metaData.data()), sizeof(MetaData) * header.numVoxelFiles) != qint64(sizeof(MetaData)) * qint64(header.numVoxelFiles))
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unknown IO error 0x1").arg(file.fileName()));
 
   QStringList files = QString::fromUtf8(file.readAll()).split("\n");
