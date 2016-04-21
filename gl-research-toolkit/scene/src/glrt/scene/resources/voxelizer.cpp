@@ -75,7 +75,22 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
   voxelFile.save(voxelFileName);
 
   for(auto i=voxelFile.textureFiles.begin(); i!=voxelFile.textureFiles.end(); ++i)
-    resourceIndex->registerVoxelizedMesh(staticMeshUuid, i.key(), i.value());
+  {
+
+    Uuid<Texture> textureUuid = Uuid<Texture>::create();
+    Uuid<VoxelIndex> voxelUuid = Uuid<VoxelIndex>::create();
+
+    resourceIndex->registerTexture(textureUuid, ...);
+
+    VoxelIndex voxelIndex;
+    voxelIndex.factor = i.value().factor;
+    voxelIndex.offset = i.value().offset;
+    voxelIndex.gridSize = i.value().gridSize;
+    voxelIndex.texture3D = textureUuid;
+    voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
+
+    resourceIndex->registerVoxelizedMesh(voxelUuid, staticMeshUuid, i.value().fieldType, voxelIndex);
+  }
 }
 
 

@@ -236,6 +236,20 @@ void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string
   defaultTextureSamplers[uuid] = textureSampler;
 }
 
+void ResourceIndex::registerVoxelizedMesh(const Uuid<VoxelIndex>& uuid, const Uuid<StaticMesh>& meshUuid, Voxelizer::FieldType fieldType, const VoxelIndex& voxelIndex)
+{
+  validateNotYetRegistered(uuid);
+  allRegisteredResources.insert(uuid);
+
+  if(labels.contains(meshUuid))
+    labels[uuid] = labels.value(meshUuid);
+  else if(labels.contains(voxelIndex.texture3D))
+    labels[uuid] = labels.value(voxelIndex.texture3D);
+
+  voxelIndicesIndex[meshUuid][fieldType] = uuid;
+  voxelIndices[uuid] = voxelIndex;
+}
+
 void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const
 {
   if(isRegistered(uuid))

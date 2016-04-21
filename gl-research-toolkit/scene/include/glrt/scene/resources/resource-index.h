@@ -7,7 +7,7 @@
 #include <glrt/scene/resources/material.h>
 #include <glrt/scene/resources/texture-sampler.h>
 #include <glrt/scene/resources/texture.h>
-#include <glrt/scene/resources/voxel-file.h>
+#include <glrt/scene/resources/voxel-data.h>
 
 namespace glrt {
 namespace scene {
@@ -30,7 +30,6 @@ const Uuid<StaticMesh> unitRectMesh("{eb1697d3-75a9-43dc-9b3e-5daff21b9731}");
 
 
 class Texture;
-class Voxelizer;
 
 
 struct StaticMeshImportSettings
@@ -70,7 +69,7 @@ public:
   void registerSceneFile(const Uuid<Scene>& uuid, const std::string& file);
   void registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler);
 
-  void registerVoxelizedMesh(const Uuid<StaticMesh>& uuid, const QString& voxelTextureFile, const VoxelFile::MetaData& metaData);
+  void registerVoxelizedMesh(const Uuid<VoxelIndex>& uuid, const Uuid<StaticMesh>& meshUuid, Voxelizer::FieldType fieldType, const VoxelIndex& voxelIndex);
 
   bool isRegistered(const QUuid& uuid) const;
 
@@ -80,6 +79,8 @@ public:
   QHash<Uuid<Texture>, Texture> textures;
   QHash<Uuid<Texture>, TextureSampler> defaultTextureSamplers;
   QHash<Uuid<StaticMesh>, QString> staticMeshAssetsFiles;
+  QHash<Uuid<StaticMesh>, QHash<Voxelizer::FieldType, Uuid<VoxelIndex>>> voxelIndicesIndex;
+  QHash<Uuid<VoxelIndex>, VoxelIndex> voxelIndices;
   QHash<Uuid<LightSource>, LightSource> lightSources;
   QHash<Uuid<Material>, Material> materials;
   QHash<Uuid<SceneLayer>, QString> sceneLayerFiles;
