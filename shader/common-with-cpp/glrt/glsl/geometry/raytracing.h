@@ -70,6 +70,29 @@ inline float distance_to(in Ray ray, in vec3 point)
   return distance(nearest_point(ray, point), point);
 }
 
+// ---- intersection_distance
+
+inline vec3 intersection_distance_to_axis_planes(in Ray ray, in vec3 common_point)
+{
+  return (common_point - ray.origin) / ray.direction;
+}
+
+inline vec3 intersection_distance_to_grid(in Ray ray)
+{
+  vec3 common_point = floor(ray.origin) + max(vec3(0), sign(ray.direction));
+
+  return intersection_distance_to_axis_planes(ray, common_point);
+}
+
+inline vec3 intersection_distance_to_grid(in Ray ray, in vec3 aabbMin, in vec3 aabbMax)
+{
+  vec3 common_point = floor(ray.origin) + max(vec3(0), sign(ray.direction));
+
+  common_point = clamp(common_point, aabbMin, aabbMax);
+
+  return intersection_distance_to_axis_planes(ray, common_point);
+}
+
 // ---- contains
 
 inline bool contains(in Ray ray, in vec3 point, float epsilon)
@@ -81,6 +104,25 @@ inline bool contains_unclamped(in Ray ray, in vec3 point, float epsilon)
 {
   return sq_distance_to_unclamped(ray, point)<= sq(epsilon);
 }
+
+// ---- intersects
+
+inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax)
+{
+  // Choose componentwise the nearer value
+  vec3 common_point = mix(aabbMin, aabbMax, max(vec3(0), sign(ray.origin - (aabbMin+aabbMax)*0.5f)));
+
+  vec3 distances = intersection_distance_to_axis_planes(ray, common_point);
+
+  vec3 p1 = get_point(ray, distances.x);
+  vec3 p2 = get_point(ray, distances.y);
+  vec3 p3 = get_point(ray, distances.z);
+
+  return (all(lessThanEqual(aabbMin.yz, p1.yz)) && all(lessThanEqual(p1.yz, aabbMax.yz))) ||
+         (all(lessThanEqual(aabbMin.xz, p2.yz)) && all(lessThanEqual(p2.yz, aabbMax.xz))) ||
+         (all(lessThanEqual(aabbMin.xy, p3.yz)) && all(lessThanEqual(p3.yz, aabbMax.xy)));
+}
+
 
 
 // ======== Plane ==============================================================

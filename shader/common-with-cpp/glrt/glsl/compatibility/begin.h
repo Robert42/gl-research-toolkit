@@ -21,6 +21,14 @@ using glm::sin;
 using glm::acos;
 using glm::asin;
 
+using glm::all;
+using glm::any;
+
+using glm::lessThanEqual;
+using glm::lessThan;
+using glm::greaterThanEqual;
+using glm::greaterThan;
+
 #ifndef in
 #define in
 #endif
@@ -41,6 +49,7 @@ inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 #define xyxy xyxy()
 #define xz xz()
 #define yw yw()
+#define yz yz()
 #define xy xy()
 #define zw zw()
 
