@@ -46,8 +46,6 @@ void VoxelFile::load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unexpected numVoxelFiles %1.").arg(file.fileName()).arg(header.numVoxelFiles));
   if(header._padding != 0)
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unexpected value in reserved padding bytes.").arg(file.fileName()).arg(header.numVoxelFiles));
-  if(header.meshValidationUuid != 0)
-    throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Unexpected value in reserved padding bytes.").arg(file.fileName()).arg(header.numVoxelFiles));
   if(header.meshValidationUuid != meshUuid.toQUuid())
     throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0): Wrong mesh uuid: %1 expected: %2").arg(file.fileName()).arg(header.meshValidationUuid.toString()).arg(meshUuid.toString()));
 
@@ -121,6 +119,7 @@ void VoxelFile::save(const QFileInfo& fileInfo)
 
   Q_ASSERT(textureFiles.size() < std::numeric_limits<quint16>::max());
   header.numVoxelFiles = quint16(textureFiles.size());
+  header.meshValidationUuid = meshUuid;
 
   data.append(reinterpret_cast<char*>(&header), sizeof(Header));
   for(const MetaData& metaData : textureFiles.values())

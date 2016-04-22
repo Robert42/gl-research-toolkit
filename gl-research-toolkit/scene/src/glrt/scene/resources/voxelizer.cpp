@@ -58,30 +58,20 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
   QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
+  QString voxelFileName = staticMeshFileName + ".voxel-metadata";
 
-  StaticMeshFile staticMeshFile;
-  staticMeshFile.load(staticMeshFileName);
-  const StaticMesh& staticMesh = staticMeshFile.staticMesh;
+  // #TODO: wenn die voxel metafile bereits existiert die laden und verwendenn anstattalles nochmal neu zu importieren
+  bool shouldRevoxelizeMesh = true;
+  if(shouldRevoxelizeMesh)
+    revoxelizeMesh(staticMeshUuid, staticMeshFileName, voxelFileName);
 
   VoxelFile voxelFile;
-  voxelFile.meshUuid = staticMeshUuid;
-
-  QString voxelFileName = staticMeshFileName + ".voxel-metadata";
-  QString signedDistanceFieldFileName = staticMeshFileName + ".signed-distance-field.texture";
-
-  if(signedDistanceField.enabled)
-    voxelFile.textureFiles[signedDistanceFieldFileName] = voxelizeImplementation(staticMesh, signedDistanceFieldFileName, FieldType::SIGNED_DISTANCE_FIELD, signedDistanceField);
-
-  voxelFile.save(voxelFileName);
+  voxelFile.load(voxelFileName, staticMeshUuid);
 
   for(auto i=voxelFile.textureFiles.begin(); i!=voxelFile.textureFiles.end(); ++i)
   {
     Uuid<Texture> textureUuid = Uuid<Texture>::create();
     Uuid<VoxelIndex> voxelUuid = Uuid<VoxelIndex>::create();
-
-    // #FIXME: for signed distance fields: don't use normalized uv coordinates but used linear interpolated values
-    TextureSampler textureSampler;
-    resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
 
     VoxelIndex voxelIndex;
     voxelIndex.factor = i.value().factor;
@@ -90,8 +80,31 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
     voxelIndex.texture3D = textureUuid;
     voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
 
+    // #FIXME: for signed distance fields: don't use normalized uv coordinates but used linear interpolated values
+    TextureSampler textureSampler;
+    resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
+
     resourceIndex->registerVoxelizedMesh(voxelUuid, staticMeshUuid, i.value().fieldType, voxelIndex);
   }
+}
+
+void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName)
+{
+  SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(staticMeshFileName).fileName()));
+
+  StaticMeshFile staticMeshFile;
+  staticMeshFile.load(staticMeshFileName);
+  const StaticMesh& staticMesh = staticMeshFile.staticMesh;
+
+  VoxelFile voxelFile;
+  voxelFile.meshUuid = staticMeshUuid;
+
+  QString signedDistanceFieldFileName = staticMeshFileName + ".signed-distance-field.texture";
+
+  if(signedDistanceField.enabled)
+    voxelFile.textureFiles[signedDistanceFieldFileName] = voxelizeImplementation(staticMesh, signedDistanceFieldFileName, FieldType::SIGNED_DISTANCE_FIELD, signedDistanceField);
+
+  voxelFile.save(voxelFileName);
 }
 
 
@@ -146,6 +159,20 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   return metaData;
 }
 
+void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize, const glm::vec3& origin, float radius)
+{
+#pragma omp parallel for
+    for(int x=0; x<gridSize.x; ++x)
+      for(int y=0; y<gridSize.y; ++y)
+        for(int z=0; z<gridSize.z; ++z)
+          data[x + gridSize.x * (y + gridSize.y * z)] = distance(glm::vec3(x,y,z), origin) - radius;
+}
+
+void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize)
+{
+  voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, glm::min(gridSize.x, glm::min(gridSize.y, gridSize.z))*0.5f);
+}
+
 VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, const Voxelizer::Hints& hints)
 {
   AABB aabb = staticMesh.boundingBox();
@@ -160,6 +187,9 @@ VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const Q
   {
   case Voxelizer::FieldType::SIGNED_DISTANCE_FIELD:
     data.resize(metaData.gridSize.x * metaData.gridSize.y * metaData.gridSize.z);
+    voxelizeToSphere(data, metaData.gridSize);
+
+
     // #TODO do the voxelization itself
     qDebug() << "TODO: do the voxelization itself ("<<targetTextureFileName.absoluteFilePath() <<")";
     textureFile.appendImage(data,metaData.gridSize, TextureFile::Target::TEXTURE_3D, TextureFile::Type::FLOAT16, TextureFile::Format::RED);

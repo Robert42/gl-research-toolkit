@@ -40,6 +40,9 @@ public:
   static void registerAngelScriptAPI();
 
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid);
+
+private:
+  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName);
 };
 
 uint qHash(glrt::scene::resources::Voxelizer::FieldType type);
