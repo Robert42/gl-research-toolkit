@@ -71,6 +71,7 @@ public:
     Compression compression = Compression::NONE;
     bool remapSourceAsSigned = false;
     bool generateMipmaps = true;
+    bool scaleDownToPowerOfTwo = true;
     glm::vec4 offset = glm::vec4(0);
     glm::vec4 factor = glm::vec4(1);
     std::string red_channel_suffix;

@@ -1,6 +1,5 @@
 #include <QMetaEnum>
 #include <GL/glew.h>
-#include <glm/gtc/round.hpp>
 #include <glrt/scene/resources/texture-file.h>
 #include <glrt/toolkit/plain-old-data-stream.h>
 #include <angelscript-integration/collection-converter.h>
@@ -470,7 +469,11 @@ public:
         Q_UNREACHABLE();
       }
 
-      // #TODO resize to power of two?
+      if(importSettings.scaleDownToPowerOfTwo && (!glm::isPowerOfTwo(image.width()) || !glm::isPowerOfTwo(image.height())))
+        image = image.scaled(glm::floorPowerOfTwo<int>(image.width()),
+                             glm::floorPowerOfTwo<int>(image.height()),
+                             Qt::IgnoreAspectRatio,
+                             Qt::SmoothTransformation);
 
       TextureAsFloats textureData(image);
 
@@ -1086,6 +1089,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool remapSourceAsSigned", asOFFSET(ImportSettings,remapSourceAsSigned)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToPowerOfTwo", asOFFSET(ImportSettings,scaleDownToPowerOfTwo)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 factor", asOFFSET(ImportSettings,factor)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "string red_channel_suffix", asOFFSET(ImportSettings,red_channel_suffix)); AngelScriptCheck(r);
