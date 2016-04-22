@@ -4,8 +4,9 @@ namespace glrt {
 namespace scene {
 
 
-VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid)
-  : Component(node, parent, uuid)
+VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data)
+  : Component(node, parent, uuid),
+    data(data)
 {
 }
 

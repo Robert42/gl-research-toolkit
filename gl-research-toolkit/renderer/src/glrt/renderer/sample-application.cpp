@@ -10,11 +10,14 @@ SampleApplication::SampleApplication(int& argc, char** argv,
                                      const System::Settings& systemSettings)
   : Application(argc, argv, systemSettings, applicationSettings),
     scene(&resourceManager),
+    voxelizedScene(scene),
     renderer(systemSettings.windowSize, &scene, &resourceManager, &shaderDebugPrinter),
     antweakbar(this, guiSettings)
 {
   initGui();
 
+  if(sampleApplicationSettings.loadDistanceField)
+    voxelizedScene.enabledSignedDistanceFields();
 
   scene.load(sampleApplicationSettings.sceneToLoad);
 }

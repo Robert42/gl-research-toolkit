@@ -7,6 +7,7 @@
 #include <glrt/renderer/sample-resource-manager.h>
 #include <glrt/renderer/forward-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
+#include <glrt/renderer/voxelized-scene.h>
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/gui/toolbar.h>
 
@@ -20,6 +21,7 @@ public:
   struct Settings final
   {
     Uuid<scene::Scene> sceneToLoad = glrt::renderer::SampleResourceManager::sponzaScene();
+    bool loadDistanceField = true;
 
     static Settings techDemo()
     {
@@ -29,6 +31,7 @@ public:
 
   glrt::renderer::SampleResourceManager resourceManager;
   glrt::scene::Scene scene;
+  glrt::renderer::VoxelizedScene voxelizedScene;
 
   glrt::renderer::ForwardRenderer renderer;
   glrt::renderer::debugging::ShaderDebugPrinter shaderDebugPrinter;
@@ -54,6 +57,8 @@ private:
   void initGui();
 
   void shaderRecompileWorkaround() override;
+
+  void loadDistanceField();
 };
 
 } // namespace glrt
