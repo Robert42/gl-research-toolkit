@@ -16,7 +16,7 @@ uniform PositionBlock
 
 void main()
 {
-  vec3 ws_position = transform_point(worldToVoxelSpace, vertex_position);
+  vec3 ws_position = transform_point(inverse(worldToVoxelSpace), vertex_position);
 
   pass_attributes_to_fragment_shader(ws_position, vertex_color);
 }
