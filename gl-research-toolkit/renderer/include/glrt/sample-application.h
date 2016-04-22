@@ -20,6 +20,7 @@ class SampleApplication : public glrt::Application
 public:
   struct Settings final
   {
+    // #FIXME: reproducable crash if loading glrt::renderer::SampleResourceManager::cornellBoxSuzanneScene(); first
     Uuid<scene::Scene> sceneToLoad = glrt::renderer::SampleResourceManager::sponzaScene();
     bool loadDistanceField = true;
 
