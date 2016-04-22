@@ -1,1 +1,1 @@
-/home/robert/WorkingCopies/gl-research-toolkit/shader/debugging/posteffects/posteffect.vs.glsl
+posteffect.vs.glsl
