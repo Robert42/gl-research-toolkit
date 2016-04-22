@@ -44,6 +44,7 @@ public:
   debugging::DebugRenderer visualizeVoxelGrids;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
+  debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;
 

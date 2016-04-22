@@ -114,21 +114,46 @@ void DebuggingPosteffect::Renderer::render()
 }
 
 
-class OrangeSphere : public DebuggingPosteffect::Renderer
+class SingleShader : public DebuggingPosteffect::Renderer
 {
 public:
   ReloadableShader shader;
 
-  OrangeSphere(const glm::vec3& origin, float radius, bool depthTest);
+  SingleShader(const QString& name, bool depthTest);
 
   void activateShader() override;
 };
 
 
-OrangeSphere::OrangeSphere(const glm::vec3& origin, float radius, bool depthTest)
+class OrangeSphere : public SingleShader
+{
+public:
+  OrangeSphere(const glm::vec3& origin, float radius, bool depthTest);
+};
+
+
+class HighlightVoxelGrids : public SingleShader
+{
+public:
+  HighlightVoxelGrids(bool depthTest);
+};
+
+
+SingleShader::SingleShader(const QString& name, bool depthTest)
   : Renderer(depthTest),
-    shader("orange-sphere",
+    shader(name,
            QDir(GLRT_SHADER_DIR"/debugging/posteffects"))
+{
+}
+
+void SingleShader::activateShader()
+{
+  shader.shaderObject.Activate();
+}
+
+
+OrangeSphere::OrangeSphere(const glm::vec3& origin, float radius, bool depthTest)
+  : SingleShader("orange-sphere", depthTest)
 {
   glsl::Sphere sphere;
 
@@ -138,9 +163,10 @@ OrangeSphere::OrangeSphere(const glm::vec3& origin, float radius, bool depthTest
   fragmentUniformBuffer = std::move(gl::Buffer(sizeof(glsl::Sphere), gl::Buffer::IMMUTABLE, &sphere));
 }
 
-void OrangeSphere::activateShader()
+
+HighlightVoxelGrids::HighlightVoxelGrids(bool depthTest)
+  : SingleShader("highlight-voxel-bounding-rect", depthTest)
 {
-  shader.shaderObject.Activate();
 }
 
 
@@ -148,6 +174,12 @@ DebugRenderer DebuggingPosteffect::orangeSphere(const glm::vec3& origin, float r
 {
   padding<byte, 3> padding;
   return DebugRenderer::ImplementationFactory([origin, radius, depthTest, padding](){return new OrangeSphere(origin, radius, depthTest);});
+}
+
+DebugRenderer DebuggingPosteffect::voxelGridBoundingBox(bool depthTest)
+{
+  padding<byte, 3> padding;
+  return DebugRenderer::ImplementationFactory([depthTest, padding](){return new HighlightVoxelGrids(depthTest);});
 }
 
 QSharedPointer<DebuggingPosteffect::SharedRenderingData> DebuggingPosteffect::renderingData;
