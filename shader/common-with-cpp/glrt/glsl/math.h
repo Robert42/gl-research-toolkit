@@ -64,6 +64,25 @@ inline float min_component(vec4 vector)
   return min4(vector.x, vector.y, vector.z, vector.w);
 }
 
+inline int index_of_min_component(vec3 vector)
+{
+  // TODO optimize? (using bvec4?) using ?: ?
+  
+  float smallest_value = vector[0];
+  int smallest_index = 0;
+  for(int i=1; i<3; ++i)
+  {
+    float value = vector[i];
+    if(value < smallest_value)
+    {
+      smallest_value = value;
+      smallest_index = i;
+    }
+  }
+  
+  return smallest_index;
+}
+
 inline int index_of_min_component(vec4 vector)
 {
   // TODO optimize? (using bvec4?) using ?: ?
