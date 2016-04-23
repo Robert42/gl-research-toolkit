@@ -20,6 +20,6 @@ inline Ray transform_ray(in mat4 t, in Ray ray)
 {
   Ray r;
   r.origin = transform_point(t, ray.origin);
-  r.origin = transform_direction(t, ray.direction);
+  r.direction = transform_direction(t, ray.direction);
   return r;
 }
