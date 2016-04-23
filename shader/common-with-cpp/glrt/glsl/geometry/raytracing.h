@@ -152,20 +152,11 @@ inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(fl
 {
   bvec3 intersects;
   vec3 distances = __intersects_aabb_bvec3(ray, aabbMin, aabbMax, intersects);
-  
-  bool has_intersection = any(intersects);
-  
-  if(!has_intersection)
-    return false;
-  
-  intersection_distance = inf;
-  for(int i=0; i<3; ++i)
-  {
-    if(intersects[i] && distances[i]>=0.f)
-      intersection_distance = min(distances[i], intersection_distance);
-  }
 
-  return true;
+  int i = index_of_min_component_masked(distances, intersects);
+  intersection_distance = distances[i];
+    
+  return any(intersects);
 }
 
 

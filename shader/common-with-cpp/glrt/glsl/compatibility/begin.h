@@ -31,6 +31,7 @@ using glm::asin;
 
 using glm::all;
 using glm::any;
+using glm::not_;
 
 using glm::lessThanEqual;
 using glm::lessThan;
@@ -56,11 +57,24 @@ inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 
 #define xyz xyz()
 #define xyxy xyxy()
+#define xx xx()
+#define xxx xxx()
+#define xxxx xxxx()
+#define yy yy()
+#define yyy yyy()
+#define yyyy yyyy()
+#define yzw yzw()
+#define yzx yzx()
+#define zxy zxy()
 #define xz xz()
 #define yw yw()
 #define yz yz()
 #define xy xy()
 #define zw zw()
+#define xyzw xyzw()
+#define yzwx yzwx()
+#define zwxy zwxy()
+#define wxyz wxyz()
 
 // ======== GLSL ===============================================================
 #else
@@ -68,6 +82,8 @@ inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 #ifndef inline
 #define inline
 #endif
+
+#define not_ not
 
 #ifndef out
 #define out(t) out t
