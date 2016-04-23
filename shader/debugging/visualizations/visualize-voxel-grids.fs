@@ -5,5 +5,5 @@
 
 void main()
 {
-  apply_color();
+  color = vec4(1, 0.5, 0, 1);
 }
