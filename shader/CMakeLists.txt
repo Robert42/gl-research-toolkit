@@ -10,6 +10,8 @@ add_custom_target(
   common-with-cpp/glrt/glsl/geometry/structs.h
   common-with-cpp/glrt/glsl/layout-constants.h
   common-with-cpp/glrt/glsl/math.h
+  debugging/posteffects/highlight-voxel-bounding-rect.fs
+  debugging/posteffects/highlight-voxel-bounding-rect.vs
   debugging/posteffects/orange-sphere.fs
   debugging/posteffects/orange-sphere.vs
   debugging/posteffects/posteffect.fs.glsl

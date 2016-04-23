@@ -56,6 +56,17 @@ struct ComponentAddedSignal<RectAreaLightComponent>
   }
 };
 
+template<>
+struct ComponentAddedSignal<VoxelDataComponent>
+{
+  typedef void(Scene::*function_type)(VoxelDataComponent* component);
+  static function_type signal(scene::Scene* scene)
+  {
+    Q_ASSERT(is_instance_of<scene::Scene>(scene));
+    return &Scene::VoxelDataComponentAdded;
+  }
+};
+
 } // namespace implementation
 } // namespace scene
 } // namespace glrt

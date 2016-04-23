@@ -26,6 +26,7 @@ class SphereAreaLightComponent;
 class RectAreaLightComponent;
 class CameraComponent;
 class StaticMeshComponent;
+class VoxelDataComponent;
 
 namespace uuids {
 const Uuid<SceneLayer> debugCameraLayer("{af7b2fab-9e07-40b9-8a77-591eae9a7d12}");

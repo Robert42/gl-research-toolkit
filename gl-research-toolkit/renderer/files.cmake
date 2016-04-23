@@ -41,6 +41,8 @@ set(SOURCE_FILES
   include/glrt/renderer/toolkit/reloadable-shader.h
   include/glrt/renderer/toolkit/shader-compiler.h
   include/glrt/renderer/transformation-buffer.h
+  include/glrt/renderer/voxel-buffer.cpp
+  include/glrt/renderer/voxel-buffer.h
   include/glrt/renderer/voxelized-scene.h
   include/glrt/sample-application.h
   include/glrt/splashscreen-style.h

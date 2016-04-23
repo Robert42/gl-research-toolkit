@@ -15,6 +15,8 @@ public:
   Data data;
 
   VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data=Data());
+
+  Data globalData() const;
 };
 
 } // namespace scene

@@ -27,6 +27,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
+    voxelUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true),
@@ -327,6 +328,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.camera_position = cameraParameter.position;
   sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
   sceneUniformData.lightData = lightUniformBuffer.updateLightData();
+  sceneUniformData.voxelHeader = voxelUniformBuffer.updateVoxelHeader();
   sceneUniformBuffer.Unmap();
 }
 
