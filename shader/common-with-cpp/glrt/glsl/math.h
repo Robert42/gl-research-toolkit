@@ -163,6 +163,8 @@ inline vec4 blend_screen(vec4 x, vec4 y)
 
 
 #include <glrt/glsl/geometry/raytracing.h>
+#include <glrt/glsl/geometry/transform.h>
+
 
 #include <glrt/glsl/compatibility/end.h>
 

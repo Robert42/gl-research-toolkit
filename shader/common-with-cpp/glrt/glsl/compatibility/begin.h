@@ -17,6 +17,9 @@ using glm::ivec2;
 using glm::ivec3;
 using glm::ivec4;
 
+using glm::mat3;
+using glm::mat4;
+
 using glm::dot;
 using glm::max;
 using glm::min;
@@ -51,6 +54,7 @@ using glm::greaterThan;
 template<typename T>
 inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 
+#define xyz xyz()
 #define xyxy xyxy()
 #define xz xz()
 #define yw yw()

@@ -3,7 +3,6 @@
 #include "common-debug-line-visualization.vs.glsl"
 
 #include <lighting/light-structs.glsl>
-#include <geometry/transform.glsl>
 
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
 uniform LightBlock

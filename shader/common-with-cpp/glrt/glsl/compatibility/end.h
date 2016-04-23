@@ -13,9 +13,11 @@
 #undef inout
 #endif
 
+#undef xyz
 #undef xyxy
 #undef xz
 #undef yw
+#undef yz
 #undef xy
 #undef zw
 
