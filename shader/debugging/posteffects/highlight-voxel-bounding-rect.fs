@@ -17,13 +17,11 @@ vec3 rayMarch(in Ray ray, out vec4 color)
     float intersection_distance;
     if(intersects_aabb(r, vec3(0), vec3(voxelData.voxelCount), intersection_distance))
     {
-      vec3 p_voxelspace = get_point(ray, intersection_distance);
+      vec3 p_voxelspace = get_point(r, intersection_distance);
       vec3 p_worldspace = transform_point(inverse(voxelData.worldToVoxelSpace), p_voxelspace);
       return p_worldspace;
     }
   }
-  
-  PRINT_VALUE(num_distance_fields);
   
   discard;
 }
