@@ -4,9 +4,14 @@
 namespace glrt {
 namespace glsl {
 
+using glm::bvec2;
+using glm::bvec3;
+using glm::bvec4;
+
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
+
 
 using glm::ivec2;
 using glm::ivec3;

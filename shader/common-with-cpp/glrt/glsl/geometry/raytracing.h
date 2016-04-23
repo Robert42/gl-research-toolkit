@@ -115,7 +115,7 @@ inline vec3 __intersects_aabb_intersection_distances(in Ray ray, in vec3 aabbMin
   return intersection_distance_to_axis_planes(ray, common_point);
 }
 
-inline vec3 __intersects_aabb_intersection_candidates(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out vec3 p1, out vec3 p2, out vec3 p3)
+inline vec3 __intersects_aabb_intersection_candidates(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(vec3) p1, out(vec3) p2, out(vec3) p3)
 {
   vec3 distances = __intersects_aabb_intersection_distances(ray, aabbMin, aabbMax);
 
@@ -126,7 +126,7 @@ inline vec3 __intersects_aabb_intersection_candidates(in Ray ray, in vec3 aabbMi
   return distances;
 }
 
-inline vec3 __intersects_aabb_bvec3(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out bvec3 intersects)
+inline vec3 __intersects_aabb_bvec3(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(bvec3) intersects)
 {
   vec3 p1;
   vec3 p2;
@@ -148,7 +148,7 @@ inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax)
   return any(intersects);
 }
 
-inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out float intersection_distance)
+inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(float) intersection_distance)
 {
   bvec3 intersects;
   vec3 distances = __intersects_aabb_bvec3(ray, aabbMin, aabbMax, intersects);
