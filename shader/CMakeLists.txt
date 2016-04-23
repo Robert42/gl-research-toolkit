@@ -8,6 +8,7 @@ add_custom_target(
   common-with-cpp/glrt/glsl/debugging/printer-types.h
   common-with-cpp/glrt/glsl/geometry/raytracing.h
   common-with-cpp/glrt/glsl/geometry/structs.h
+  common-with-cpp/glrt/glsl/geometry/transform.h
   common-with-cpp/glrt/glsl/layout-constants.h
   common-with-cpp/glrt/glsl/math.h
   debugging/posteffects/highlight-voxel-bounding-rect.fs
@@ -46,9 +47,9 @@ add_custom_target(
   toolkit/debugging/print.glsl
   toolkit/extensions/command_list.glsl
   toolkit/extensions/common.glsl
-  toolkit/geometry/transform.glsl
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
   toolkit/scene/uniforms.glsl
+  toolkit/voxels/voxel-structs.glsl
 )

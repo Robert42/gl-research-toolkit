@@ -1,4 +1,4 @@
-#include "voxel-buffer.h"
+#include <glrt/renderer/voxel-buffer.h>
 
 namespace glrt {
 namespace renderer {
