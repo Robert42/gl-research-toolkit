@@ -26,7 +26,8 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
   distanceFieldTextureHandleStorageBuffer.update();
 
   _voxelHeader.numDistanceFields = numVisibleVoxelGrids();
-  _voxelHeader.distanceFieldDataHeaders = voxelDataStorageBuffer.gpuBufferAddress();
+  _voxelHeader.distanceFieldAABBs = distanceFieldAABBsStorageBuffer.gpuBufferAddress();
+  _voxelHeader.distanceFieldTextures = distanceFieldTextureHandleStorageBuffer.gpuBufferAddress();
 
   return _voxelHeader;
 }

@@ -25,8 +25,8 @@ public:
   const VoxelHeader& updateVoxelHeader();
 
 private:
-  implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::AABB, &scene::VoxelDataComponent::globalAabbData> distanceFieldAABBsStorageBuffer;
-  implementation::RandomComponentDataDescription<scene::VoxelDataComponent, quint64, &scene::VoxelDataComponent::textureData> distanceFieldTextureHandleStorageBuffer;
+  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::AABB, &scene::VoxelDataComponent::globalAabbData>> distanceFieldAABBsStorageBuffer;
+  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, quint64, &scene::VoxelDataComponent::textureData>> distanceFieldTextureHandleStorageBuffer;
 
   VoxelHeader _voxelHeader;
 
