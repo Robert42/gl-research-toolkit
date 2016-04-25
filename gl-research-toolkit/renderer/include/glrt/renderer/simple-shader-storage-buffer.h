@@ -21,6 +21,14 @@ struct DefaultDataDescription
   static data_type data_from_component(const T_Component* component);
 };
 
+template<typename T_Component, typename T_Data, T_Data(T_Component::*get_data_ptr)() const>
+struct RandomComponentDataDescription
+{
+  typedef T_Data data_type;
+
+  static data_type data_from_component(const T_Component* component);
+};
+
 } // namespace
 
 

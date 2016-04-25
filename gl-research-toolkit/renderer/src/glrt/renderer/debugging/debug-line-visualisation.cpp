@@ -201,13 +201,13 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
 }
 
 
-DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<scene::VoxelDataComponent::Data>& voxelData)
+DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<scene::VoxelDataComponent::AABB>& voxelData)
 {
   DebugMesh::Painter painter;
 
   glm::ivec3 maxGridSize(0);
 
-  for(const scene::VoxelDataComponent::Data& data : voxelData)
+  for(const scene::VoxelDataComponent::AABB& data : voxelData)
     maxGridSize = glm::max(maxGridSize, data.voxelCount);
 
   for(int dimension = 0; dimension<3; ++dimension)

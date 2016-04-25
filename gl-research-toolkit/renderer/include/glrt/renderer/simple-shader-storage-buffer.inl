@@ -13,6 +13,12 @@ typename DefaultDataDescription<T_Component>::data_type DefaultDataDescription<T
   return component->globalData();
 }
 
+template<typename T_Component, typename T_Data, T_Data(T_Component::*get_data_ptr)() const>
+T_Data RandomComponentDataDescription<T_Component, T_Data, get_data_ptr>::data_from_component(const T_Component* component)
+{
+  return (component->*get_data_ptr)();
+}
+
 } // namespace renderer
 
 template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>

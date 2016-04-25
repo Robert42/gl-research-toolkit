@@ -13,17 +13,9 @@ namespace resources {
 
 struct VoxelData
 {
-  glm::mat4 worldToVoxelSpace = glm::mat4(1);
+  CoordFrame localToVoxelSpace;
   glm::ivec3 voxelCount = glm::ivec3(1);
-  padding<int, 1> _padding;
   quint64 gpuTextureHandle = 0;
-  padding<quint64, 1> _padding2;
-
-  friend VoxelData operator*(const CoordFrame& localToWorldSpace, VoxelData data)
-  {
-    data.worldToVoxelSpace = data.worldToVoxelSpace * localToWorldSpace.inverse().toMat4();
-    return data;
-  }
 };
 
 struct VoxelIndex

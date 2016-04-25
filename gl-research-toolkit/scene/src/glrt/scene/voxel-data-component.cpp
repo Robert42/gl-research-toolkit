@@ -13,9 +13,19 @@ VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, cons
 }
 
 
-VoxelDataComponent::Data VoxelDataComponent::globalData() const
+VoxelDataComponent::AABB VoxelDataComponent::globalAabbData() const
 {
-  return globalCoordFrame() * data;
+  AABB aabb;
+
+  aabb.worldToVoxelSpace = (data.localToVoxelSpace * globalCoordFrame().inverse()).toMat4();
+  aabb.voxelCount = data.voxelCount;
+
+  return aabb;
+}
+
+quint64 VoxelDataComponent::textureData() const
+{
+  return data.gpuTextureHandle;
 }
 
 

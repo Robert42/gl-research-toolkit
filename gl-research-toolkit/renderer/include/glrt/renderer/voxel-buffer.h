@@ -14,7 +14,8 @@ class VoxelBuffer
 public:
   struct VoxelHeader
   {
-    GLuint64 distanceFieldDataHeaders;
+    GLuint64 distanceFieldAABBs;
+    GLuint64 distanceFieldTextures;
     quint32 numDistanceFields;
   };
 
@@ -24,11 +25,12 @@ public:
   const VoxelHeader& updateVoxelHeader();
 
 private:
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent> voxelDataStorageBuffer;
+  implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::AABB, &scene::VoxelDataComponent::globalAabbData> distanceFieldAABBsStorageBuffer;
+  implementation::RandomComponentDataDescription<scene::VoxelDataComponent, quint64, &scene::VoxelDataComponent::textureData> distanceFieldTextureHandleStorageBuffer;
 
   VoxelHeader _voxelHeader;
 
-  quint32 numVisibleVoxelGrids() const {return static_cast<quint32>(voxelDataStorageBuffer.numElements());}
+  quint32 numVisibleVoxelGrids() const;
 
   quint32 _numVisibleVoxelGrids = 0;
 };

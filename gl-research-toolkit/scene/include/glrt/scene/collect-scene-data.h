@@ -41,8 +41,8 @@ QHash<QString, scene::SphereAreaLightComponent::Data> collectNamedSphereAreaLigh
 QVector<RectAreaLightComponent::Data> collectRectAreaLights(Scene* scene);
 QHash<QString, RectAreaLightComponent::Data> collectNamedRectAreaLights(Scene* scene);
 
-QVector<VoxelDataComponent::Data> collectVoxelGrids(Scene* scene);
-QHash<QString, VoxelDataComponent::Data> collectNamedVoxelGrids(Scene* scene);
+QVector<VoxelDataComponent::AABB> collectVoxelAabbs(Scene* scene);
+QHash<QString, VoxelDataComponent::AABB> collectNamedVoxelAabbs(Scene* scene);
 
 
 } // namespace scene

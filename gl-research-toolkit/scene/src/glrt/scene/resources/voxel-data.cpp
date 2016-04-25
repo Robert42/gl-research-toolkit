@@ -13,7 +13,7 @@ VoxelData VoxelIndex::toData(ResourceManager& resourceManager) const
 
   data.gpuTextureHandle = resourceManager.textureManager.gpuHandle(resourceManager.textureManager.handleFor(this->texture3D));
   data.voxelCount = this->gridSize;
-  data.worldToVoxelSpace = this->localToVoxelSpace.toMat4();
+  data.localToVoxelSpace = this->localToVoxelSpace;
 
   return data;
 }
