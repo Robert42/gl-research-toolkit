@@ -80,7 +80,6 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
     voxelIndex.texture3D = textureUuid;
     voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
 
-    // #FIXME: for signed distance fields: don't use normalized uv coordinates but used linear interpolated values
     TextureSampler textureSampler;
     resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
 
