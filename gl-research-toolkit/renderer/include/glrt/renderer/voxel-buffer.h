@@ -17,6 +17,7 @@ public:
     GLuint64 distanceFieldAABBs;
     GLuint64 distanceFieldTextures;
     quint32 numDistanceFields;
+    padding<quint32, 3> _padding;
   };
 
   VoxelBuffer(scene::Scene& scene);

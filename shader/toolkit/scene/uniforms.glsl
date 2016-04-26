@@ -1,5 +1,6 @@
 #include <lighting/light-structs.glsl>
 #include <voxels/voxel-structs.glsl>
+#include <alignment.glsl>
 
 struct SceneLightData
 {
@@ -14,6 +15,7 @@ struct SceneVoxelHeader
   uint64_t distance_field_aabbs_array_address;
   uint64_t distance_field_textures_array_address;
   uint32_t num_distance_fields;
+  padding3(uint32_t, _padding);
 };
 
 struct SceneData
