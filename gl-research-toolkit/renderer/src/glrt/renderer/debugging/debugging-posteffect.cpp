@@ -68,6 +68,8 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   GL_CALL(glEnableVertexAttribArray, bindingIndex);
   if(depthTest)
     GL_CALL(glEnable, GL_DEPTH_TEST);
+  else
+    GL_CALL(glDisable, GL_DEPTH_TEST);
   statusCapture = gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES);
   framebuffer.BindBackBuffer();
   gl::ShaderObject::Deactivate();
@@ -139,6 +141,13 @@ public:
 };
 
 
+class CubicVoxelRaymarch : public SingleShader
+{
+public:
+  CubicVoxelRaymarch(bool depthTest);
+};
+
+
 SingleShader::SingleShader(const QString& name, bool depthTest)
   : Renderer(depthTest),
     shader(name,
@@ -170,6 +179,12 @@ HighlightVoxelGrids::HighlightVoxelGrids(bool depthTest)
 }
 
 
+CubicVoxelRaymarch::CubicVoxelRaymarch(bool depthTest)
+  : SingleShader("highlight-voxel-bounding-rect", depthTest)
+{
+}
+
+
 DebugRenderer DebuggingPosteffect::orangeSphere(const glm::vec3& origin, float radius, bool depthTest)
 {
   padding<byte, 3> padding;
@@ -180,6 +195,12 @@ DebugRenderer DebuggingPosteffect::voxelGridBoundingBox(bool depthTest)
 {
   padding<byte, 3> padding;
   return DebugRenderer::ImplementationFactory([depthTest, padding](){return new HighlightVoxelGrids(depthTest);});
+}
+
+DebugRenderer DebuggingPosteffect::voxelGridCubicRaymarch(bool mixWithScene)
+{
+  padding<byte, 3> padding;
+  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new CubicVoxelRaymarch(mixWithScene);});
 }
 
 QSharedPointer<DebuggingPosteffect::SharedRenderingData> DebuggingPosteffect::renderingData;
