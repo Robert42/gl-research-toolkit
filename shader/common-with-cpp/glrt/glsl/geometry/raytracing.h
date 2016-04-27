@@ -148,17 +148,17 @@ inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax)
   return any(intersects);
 }
 
-inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(float) intersection_distance)
+inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(float) intersection_distance, out(int) dimension)
 {
   bvec3 intersects;
   vec3 distances = __intersects_aabb_bvec3(ray, aabbMin, aabbMax, intersects);
 
   int i = index_of_min_component_masked(distances, intersects);
+  dimension = i;
   intersection_distance = distances[i];
     
   return any(intersects);
 }
-
 
 
 // ======== Plane ==============================================================

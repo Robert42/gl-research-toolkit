@@ -2,6 +2,7 @@
 
 #include <glrt/glsl/math.h>
 #include <scene/uniforms.glsl>
+#include <debugging/normal.glsl>
 
 
 in FragmentBlock
