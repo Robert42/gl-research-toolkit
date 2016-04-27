@@ -17,6 +17,8 @@ add_custom_target(
   debugging/posteffects/orange-sphere.vs
   debugging/posteffects/posteffect.fs.glsl
   debugging/posteffects/posteffect.vs.glsl
+  debugging/posteffects/show-distancefield-as-cubic-voxel.fs
+  debugging/posteffects/show-distancefield-as-cubic-voxel.vs
   debugging/visualizations/common-debug-line-visualization.fs.glsl
   debugging/visualizations/common-debug-line-visualization.vs.glsl
   debugging/visualizations/visualize-arrow.fs
@@ -43,6 +45,7 @@ add_custom_target(
   materials/implementation/vertex-material.vs.glsl
   materials/material.fs
   materials/material.vs
+  toolkit/alignment.glsl
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
   toolkit/extensions/command_list.glsl
@@ -51,5 +54,6 @@ add_custom_target(
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
   toolkit/scene/uniforms.glsl
+  toolkit/voxels/raymarching-cubic-voxels.glsl
   toolkit/voxels/voxel-structs.glsl
 )
