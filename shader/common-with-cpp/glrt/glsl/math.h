@@ -27,6 +27,21 @@ inline float sq(vec4 x)
   return dot(x, x);
 }
 
+inline float sq_distance(vec2 a, vec2 b)
+{
+  return sq(a-b);
+}
+
+inline float sq_distance(vec3 a, vec3 b)
+{
+  return sq(a-b);
+}
+
+inline float sq_distance(vec4 a, vec4 b)
+{
+  return sq(a-b);
+}
+
 // min
 
 inline int min3(int a, int b, int c)
