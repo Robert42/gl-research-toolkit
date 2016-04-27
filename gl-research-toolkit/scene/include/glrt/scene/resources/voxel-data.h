@@ -14,14 +14,18 @@ namespace resources {
 struct VoxelData
 {
   CoordFrame localToVoxelSpace;
+  glm::vec3 meshScaleFactor = glm::vec3(1);
   glm::ivec3 voxelCount = glm::ivec3(1);
   quint64 gpuTextureHandle = 0;
+
+  glm::mat4 worldToVoxelSpaceMatrix(const CoordFrame& localToWorldSpace) const;
 };
 
 struct VoxelIndex
 {
   CoordFrame localToVoxelSpace;
-  glm::ivec3 gridSize = glm::vec3(0);
+  glm::vec3 meshScaleFactor = glm::vec3(1);
+  glm::ivec3 gridSize = glm::ivec3(0);
   Uuid<Texture> texture3D;
   float factor = 1.f; // reserved for future usage (in case uint8 is used for signed distacne fields -- currently unused and must be 1)
   float offset = 0.f; // reserved for future usage (in case uint8 is used for signed distacne fields -- currently unused and must be 0)

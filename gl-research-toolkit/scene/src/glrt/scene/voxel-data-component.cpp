@@ -17,7 +17,7 @@ VoxelDataComponent::AABB VoxelDataComponent::globalAabbData() const
 {
   AABB aabb;
 
-  aabb.worldToVoxelSpace = (data.localToVoxelSpace * globalCoordFrame().inverse()).toMat4();
+  aabb.worldToVoxelSpace = data.worldToVoxelSpaceMatrix(globalCoordFrame());
   aabb.voxelCount = data.voxelCount;
 
   return aabb;

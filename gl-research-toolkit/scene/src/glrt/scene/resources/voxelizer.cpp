@@ -79,6 +79,7 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
     voxelIndex.gridSize = i.value().gridSize;
     voxelIndex.texture3D = textureUuid;
     voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
+    voxelIndex.meshScaleFactor = i.value().meshScaleFactor;
 
     TextureSampler textureSampler;
     resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
@@ -150,10 +151,12 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
     uniformScaleFactor = 1.f;
   }
 
-  CoordFrame offsetLocalSpace(-(meshBoundingBoxMin+meshBoundingBoxMax)*0.5f);
-  CoordFrame scaleWorldToVoxel(glm::vec3(0), glm::quat(), uniformScaleFactor);
-  CoordFrame offsetVoxelSpace(glm::vec3(metaData.gridSize)*0.5f);
 
+  CoordFrame offsetLocalSpace(-meshBoundingBoxMin);
+  CoordFrame scaleWorldToVoxel(glm::vec3(0), glm::quat::IDENTITY, uniformScaleFactor);
+  CoordFrame offsetVoxelSpace(glm::vec3(extend, extend, extend));
+
+  metaData.meshScaleFactor = scale / uniformScaleFactor;
   metaData.localToVoxelSpace = offsetVoxelSpace * scaleWorldToVoxel * offsetLocalSpace;
   return metaData;
 }
