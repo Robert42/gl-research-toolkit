@@ -101,6 +101,9 @@ void DebugRenderer::List::render()
   if(Q_LIKELY(implementations.isEmpty()))
     return;
 
+  if(Q_UNLIKELY(clearBuffer))
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
   for(Implementation* i : implementations)
     i->render();
 }
