@@ -11,6 +11,9 @@ vec3 rayMarch(in Ray ray, out vec4 color)
   VoxelData_AABB* distance_field_data_aabb;
   get_distance_field_data(num_distance_fields, distance_field_data_aabb);
   
+  float nearest_distance = inf;
+  vec3 final_world_pos;
+  
   for(int i=0; i<num_distance_fields; ++i)
   {
     VoxelData_AABB voxelData = distance_field_data_aabb[i];
@@ -22,10 +25,19 @@ vec3 rayMarch(in Ray ray, out vec4 color)
     {
       vec3 p_voxelspace = get_point(r, intersection_distance);
       vec3 p_worldspace = transform_point(inverse(voxelData.worldToVoxelSpace), p_voxelspace);
-      color.rgb = encode_signed_normalized_vector_as_color(cubic_voxel_surface_normal(r, intersection_dimension));
-      return p_worldspace;
+      
+      float current_distance = dot(p_worldspace, ray.origin);
+      if(nearest_distance > current_distance)
+      {
+        nearest_distance = current_distance;
+        color.rgb = encode_signed_normalized_vector_as_color(cubic_voxel_surface_normal(r, intersection_dimension));
+        final_world_pos = p_worldspace;
+      }
     }
   }
   
-  discard;
+  if(isinf(nearest_distance))
+    discard;
+  
+  return final_world_pos;
 }
