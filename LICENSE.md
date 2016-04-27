@@ -1,5 +1,8 @@
 # OpenGL Research Toolkit
 
+The SourceCode from this Toolkit is using the MIT license.
+For the assets, please take a look at the license files of the submodules.
+
 The MIT License (MIT)
 
 Copyright (c) 2015 Robert Hildebrandt
