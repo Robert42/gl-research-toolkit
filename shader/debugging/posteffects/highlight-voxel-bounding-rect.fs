@@ -26,7 +26,7 @@ vec3 rayMarch(in Ray ray, out vec4 color)
       vec3 p_voxelspace = get_point(r, intersection_distance);
       vec3 p_worldspace = transform_point(inverse(voxelData.worldToVoxelSpace), p_voxelspace);
       
-      float current_distance = dot(p_worldspace, ray.origin);
+      float current_distance = sq_distance(p_worldspace, ray.origin);
       if(nearest_distance > current_distance)
       {
         nearest_distance = current_distance;
