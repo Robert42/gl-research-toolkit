@@ -350,7 +350,6 @@ void Renderer::setAdjustRoughness(bool adjustRoughness)
   {
     _adjustRoughness = adjustRoughness;
     ReloadableShader::defineMacro("ADJUST_ROUGHNESS", adjustRoughness);
-    ReloadableShader::reloadAll();
   }
 }
 

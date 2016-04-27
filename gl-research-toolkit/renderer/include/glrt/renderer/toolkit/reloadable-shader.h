@@ -16,7 +16,7 @@ public:
 
   static QSet<QString> globalPreprocessorBlock;
   static bool isMacroDefined(const QString& macro);
-  static void defineMacro(const QString& macro, bool defined);
+  static void defineMacro(const QString& macro, bool defined, bool autoReloadShaders=true);
   QSet<QString> preprocessorBlock;
 
   gl::ShaderObject shaderObject;

@@ -13,7 +13,8 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   : application(application),
     visible(settings.showByDefault),
     toggleHelp(settings.toggleHelp),
-    toggleGui(settings.toggleGui)
+    toggleGui(settings.toggleGui),
+    togglePosteffectVisualization("POSTEFFECT_VISUALIZATION_SHADER_LIGHTED")
 {
   Q_ASSERT(application != nullptr);
 
@@ -126,6 +127,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
 
   TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
   renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");
+  togglePosteffectVisualization.TwAddVarCB(tweakBar, "Enable Lighting in Debug", "group='Debug Shader'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
 //  renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
 
@@ -332,6 +334,17 @@ void AntTweakBar::updateAntTweakBarWindowSize()
 
   TwWindowSize(size.x,
                size.y);
+}
+
+
+TweakBarShaderToggle::TweakBarShaderToggle(const QString& macroName)
+{
+  getter = [macroName]() -> bool {
+           return glrt::renderer::ReloadableShader::isMacroDefined(macroName);
+  };
+  setter = [macroName](bool value) {
+           glrt::renderer::ReloadableShader::defineMacro(macroName, value);
+  };
 }
 
 

@@ -4,6 +4,7 @@
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
 
+#include <lighting/rendering-equation.glsl>
 
 in FragmentBlock
 {
@@ -29,6 +30,21 @@ void main()
   vec3 world_pos, world_normal;
   
   rayMarch(ray, fragment_color,  world_pos, world_normal);
+  
+#ifdef POSTEFFECT_VISUALIZATION_SHADER_LIGHTED
+  BaseMaterial material;
+  material.normal = world_normal;
+  material.normal_length = 1.f;
+  material.base_color = fragment_color.rgb;
+  material.metal_mask = 0.f;
+  material.emission = vec3(0.f);
+  material.reflectance = 0.5f;
+  material.occlusion = 1.f;
+  material.smoothness = 0.5f;
+  
+  vec3 incoming_luminance = light_material(material, world_pos, scene.camera_position);
+  fragment_color.rgb = accurateLinearToSRGB(incoming_luminance);;
+#endif
   
   vec4 point = vec4(world_pos, 1);
   
