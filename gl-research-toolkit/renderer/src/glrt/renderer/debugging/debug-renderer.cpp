@@ -98,6 +98,9 @@ void DebugRenderer::List::connectTo(DebugRenderer* renderer)
 
 void DebugRenderer::List::render()
 {
+  if(Q_LIKELY(implementations.isEmpty()))
+    return;
+
   for(Implementation* i : implementations)
     i->render();
 }
