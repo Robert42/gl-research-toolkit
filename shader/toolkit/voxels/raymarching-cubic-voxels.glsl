@@ -19,9 +19,9 @@ vec3 point_voxel_to_worldspace(in vec3 p, in VoxelData_AABB aabb)
     return transform_point(inverse(aabb.worldToVoxelSpace), p);
 }
 
-vec3 direction_voxel_to_worldspace(in vec3 d, in VoxelData_AABB aabb)
+vec3 direction_voxel_to_worldspace_slow(in vec3 d, in VoxelData_AABB aabb)
 {
-    return transform_direction(inverse(aabb.worldToVoxelSpace), d);
+    return normalize(transform_direction(inverse(aabb.worldToVoxelSpace), d));
 }
 
 bool is_within_voxel_grid(in VoxelData_AABB aabb, in vec3 pos_voxelspace)
@@ -97,7 +97,7 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sam
        intersection_normal = cubic_voxel_surface_normal(ray_voxelspace, hit_dimension);
        
        intersection_point = point_voxel_to_worldspace(intersection_point, aabb);
-       intersection_normal = direction_voxel_to_worldspace(intersection_normal, aabb);
+       intersection_normal = direction_voxel_to_worldspace_slow(intersection_normal, aabb);
        return true;
      }
      
