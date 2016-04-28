@@ -85,6 +85,7 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.append_token_AttributeAddress(bindingIndex, renderingData->vertexBuffer.gpuBufferAddress());
   segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneUniformAddress());
   segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderer.sceneUniformAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderingData->uniformBuffer.gpuBufferAddress());
   renderer.debugPrinter.recordBinding(segment);
   if(fragmentUniformBuffer.GetSize() != 0)
     segment.append_token_UniformAddress(UNIFORM_BINDING_DEBUG_POSTEFFECT_FRAGMENT, gl::ShaderObject::ShaderType::FRAGMENT, fragmentUniformBuffer.gpuBufferAddress());
@@ -111,6 +112,9 @@ void DebuggingPosteffect::Renderer::allShadersReloaded()
 void DebuggingPosteffect::Renderer::render()
 {
   Q_ASSERT(!needRerecording);
+
+  Q_ASSERT(!renderingData.isNull());
+  renderingData->updateUniforms();
 
   commandList.call();
 }
@@ -232,11 +236,18 @@ DebuggingPosteffect::SharedRenderingData::SharedRenderingData(gl::FramebufferObj
                                         max_coord, max_coord};
 
   vertexBuffer = std::move(gl::Buffer(sizeof(float)*8, gl::Buffer::UsageFlag::IMMUTABLE, positions.data()));
-
+  uniformBuffer = std::move(gl::Buffer(sizeof(debugging::PosteffectVisualizationDataBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr));
 }
 
 DebuggingPosteffect::SharedRenderingData::~SharedRenderingData()
 {
+}
+
+void DebuggingPosteffect::SharedRenderingData::updateUniforms()
+{
+  PosteffectVisualizationDataBlock* data_block = reinterpret_cast<PosteffectVisualizationDataBlock*>(uniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  *data_block = renderer.debugPosteffect;
+  uniformBuffer.Unmap();
 }
 
 

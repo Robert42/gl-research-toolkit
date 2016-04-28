@@ -91,6 +91,8 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sam
   {
      float voxel_value = texelFetch(voxelTexture, voxelCoord, 0).r;
      
+     voxel_value += posteffect_param.distancefield_offset;
+     
      if(voxel_value <= treshold)
      {
        intersection_point = ray_voxelspace.origin;
