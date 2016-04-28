@@ -10,6 +10,8 @@
 struct PosteffectVisualizationData
 {
   float distancefield_offset;
+  bool showNormals;
+  bool useLighting;
 };
 
 layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform PosteffectVisualizationDataBlock
@@ -45,23 +47,23 @@ void main()
   
   rayMarch(ray, fragment_color,  world_pos, world_normal);
   
-#ifdef POSTEFFECT_VISUALIZATION_SHADER_SHOW_NORMALS
-  fragment_color.rgb = encode_signed_normalized_vector_as_color(world_normal);
-#endif
-#ifdef POSTEFFECT_VISUALIZATION_SHADER_LIGHTED
-  BaseMaterial material;
-  material.normal = world_normal;
-  material.normal_length = 1.f;
-  material.base_color = fragment_color.rgb;
-  material.metal_mask = 0.f;
-  material.emission = vec3(0.f);
-  material.reflectance = 0.5f;
-  material.occlusion = 1.f;
-  material.smoothness = 0.5f;
+  if(posteffect_param.showNormals)
+    fragment_color.rgb = encode_signed_normalized_vector_as_color(world_normal);
+  if(posteffect_param.useLighting)
+  {
+    BaseMaterial material;
+    material.normal = world_normal;
+    material.normal_length = 1.f;
+    material.base_color = fragment_color.rgb;
+    material.metal_mask = 0.f;
+    material.emission = vec3(0.f);
+    material.reflectance = 0.5f;
+    material.occlusion = 1.f;
+    material.smoothness = 0.5f;
   
-  vec3 incoming_luminance = light_material(material, world_pos, scene.camera_position);
-  fragment_color.rgb = accurateLinearToSRGB(incoming_luminance);;
-#endif
+    vec3 incoming_luminance = light_material(material, world_pos, scene.camera_position);
+    fragment_color.rgb = accurateLinearToSRGB(incoming_luminance);
+  }
   
   vec4 point = vec4(world_pos, 1);
   
