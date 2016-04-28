@@ -14,7 +14,7 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
   for(int i=0; i<num_distance_fields; ++i)
   {
     VoxelData_AABB voxelData = distance_field_data_aabb[i];
-    Ray r = transform_ray(voxelData.worldToVoxelSpace, ray);
+    Ray r = ray_world_to_voxelspace(ray, voxelData);
     
     float intersection_distance;
     int intersection_dimension;
