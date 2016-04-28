@@ -55,17 +55,15 @@ bool enter_cubic_voxel_grid_voxelspace(inout Ray ray_voxelspace, in VoxelData_AA
   return valid_intersection;
 }
 
-void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in VoxelData_AABB aabb, inout ivec3 voxelCoord, out int dimension)
+void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marchingStep, in VoxelData_AABB aabb, inout ivec3 voxelCoord, out int dimension)
 {
-  voxelCoord.x++; // #TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE TODO DELETE
-
   const float epsilon = voxelgrid_epsilon;
   
   vec3 distances = intersection_distance_to_grid(ray_voxelspace, vec3(0), vec3(aabb.voxelCount));
     
   int i = index_of_min_component_masked(distances, not_(equal(vec3(0), ray_voxelspace.direction)));
   
-  voxelCoord[i] += int(sign(ray_voxelspace.direction[i]));
+  voxelCoord[i] += marchingStep[i];
 
   ray_voxelspace.origin = get_point(ray_voxelspace, distances[i]);
   ray_voxelspace.origin = clamp(ray_voxelspace.origin, ray_voxelspace.origin, vec3(voxelCoord+1-epsilon));
@@ -85,6 +83,7 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sam
     
   sampler3D voxelTexture = voxelTextures[index];
   
+  ivec3 marchingStep = ivec3(sign(ray_voxelspace.direction));
   ivec3 voxelCoord = ivec3(floor(ray_voxelspace.origin));
 
   int max_num_loops = 65536;
@@ -103,7 +102,7 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sam
        return true;
      }
      
-     next_cubic_grid_cell_voxelspace(ray_voxelspace, aabb, voxelCoord, hit_dimension);
+     next_cubic_grid_cell_voxelspace(ray_voxelspace, marchingStep, aabb, voxelCoord, hit_dimension);
   }
   
   return false;
