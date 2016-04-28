@@ -17,14 +17,19 @@ bool ReloadableShader::isMacroDefined(const QString& macro)
   return globalPreprocessorBlock.contains(preprocessorForMacroName(macro));
 }
 
-void ReloadableShader::defineMacro(const QString& macro, bool defined)
+void ReloadableShader::defineMacro(const QString& macro, bool defined, bool autoReloadShaders)
 {
   QString proprocessor = preprocessorForMacroName(macro);
+
+  bool prevValue = isMacroDefined(macro);
 
   if(defined)
     globalPreprocessorBlock.insert(proprocessor);
   else
     globalPreprocessorBlock.remove(proprocessor);
+
+  if(autoReloadShaders && prevValue != defined)
+    reloadAll();
 }
 
 

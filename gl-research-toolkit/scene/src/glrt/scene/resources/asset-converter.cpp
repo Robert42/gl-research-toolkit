@@ -413,7 +413,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     if(settings.meshUuids.contains(n))
     {
-      if(assets.meshInstances.size() > 1)
+      if(assets.meshInstances[n].size() > 1)
         throw GLRT_EXCEPTION(QString("Can't assign a used defined meshUuid (%0) to mesh, where the same name (%1) is used for multiple mesh instances!").arg(QUuid(settings.meshUuids[n]).toString()).arg(n));
       meshUuid = settings.meshUuids[n];
     }else

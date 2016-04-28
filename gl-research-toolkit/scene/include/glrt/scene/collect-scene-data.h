@@ -5,6 +5,7 @@
 
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/voxel-data-component.h>
 
 namespace glrt {
 namespace scene {
@@ -39,6 +40,9 @@ QHash<QString, scene::SphereAreaLightComponent::Data> collectNamedSphereAreaLigh
 
 QVector<RectAreaLightComponent::Data> collectRectAreaLights(Scene* scene);
 QHash<QString, RectAreaLightComponent::Data> collectNamedRectAreaLights(Scene* scene);
+
+QVector<VoxelDataComponent::AABB> collectVoxelAabbs(Scene* scene);
+QHash<QString, VoxelDataComponent::AABB> collectNamedVoxelAabbs(Scene* scene);
 
 
 } // namespace scene

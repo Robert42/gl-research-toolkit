@@ -11,13 +11,33 @@
 
 namespace glrt {
 namespace renderer {
+namespace implementation {
+
+template<typename T_Component>
+struct DefaultDataDescription
+{
+  typedef typename T_Component::Data data_type;
+
+  static data_type data_from_component(const T_Component* component);
+};
+
+template<typename T_Component, typename T_Data, T_Data(T_Component::*get_data_ptr)() const>
+struct RandomComponentDataDescription
+{
+  typedef T_Data data_type;
+
+  static data_type data_from_component(const T_Component* component);
+};
+
+} // namespace
+
 
 // #ISSUE-64: try out different values for <512, 4096> to find the fastest one
-template<class T_Component, typename T_FragmentedArray=typename implementation::FragmentedLightComponentArray<T_Component>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
+template<class T_Component, typename T_DataDescription=implementation::DefaultDataDescription<T_Component>, typename T_FragmentedArray=typename implementation::FragmentedLightComponentArray<T_Component>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
 class SimpleShaderStorageBuffer
 {
 public:
-  typedef typename T_Component::Data LightData;
+  typedef typename T_DataDescription::data_type data_type;
 
   SimpleShaderStorageBuffer(scene::Scene& scene);
 
@@ -33,7 +53,7 @@ private:
   typedef SyncedFragmentedComponentArray<T_Component, FragmentedArray> LightComponentArray;
 
   LightComponentArray lightComponents;
-  ManagedGLBuffer<LightData, T_BufferCapacityTraits, implementation::ManagedGLBuffer_NoHeader> buffer;
+  ManagedGLBuffer<data_type, T_BufferCapacityTraits, implementation::ManagedGLBuffer_NoHeader> buffer;
 };
 
 } // namespace renderer

@@ -71,6 +71,7 @@ public:
     Compression compression = Compression::NONE;
     bool remapSourceAsSigned = false;
     bool generateMipmaps = true;
+    bool scaleDownToPowerOfTwo = true;
     glm::vec4 offset = glm::vec4(0);
     glm::vec4 factor = glm::vec4(1);
     std::string red_channel_suffix;
@@ -127,6 +128,8 @@ public:
 
   TextureFile();
 
+  void appendImage(const QVector<float>& data, const glm::ivec3& size, Target target = Target::TEXTURE_2D, Type type = Type::UINT8, Format format = Format::RGBA);
+
   void import(const QFileInfo& srcFile, ImportSettings importSettings);
   void save(const QFileInfo& textureFile);
   static GLuint loadFromFile(const QFileInfo& textureFile);
@@ -167,6 +170,8 @@ private:
   QVector<CompressedImage> compressedImages;
   QVector<UncompressedImage> uncompressedImages;
   QVector<QVector<byte>> rawData;
+
+  void appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData);
 
   quint32 appendRawData(const QVector<byte>& rawData);
   int expectedFileSize() const;

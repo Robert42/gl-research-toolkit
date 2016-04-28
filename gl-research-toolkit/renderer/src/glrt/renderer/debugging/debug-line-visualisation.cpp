@@ -151,11 +151,99 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawArrows(const QVector<
 }
 
 
+DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
+{
+  DebugMesh::Painter painter;
+
+  // Tango Desktop theme: https://en.wikipedia.org/w/index.php?title=Tango_Desktop_Project&oldid=705500829
+  glm::vec3 grey = vec3FromRgb(0x888a85);
+  glm::vec3 red = vec3FromRgb(0xef2929);
+  glm::vec3 green = vec3FromRgb(0x8ae234);
+  glm::vec3 blue = vec3FromRgb(0x729fcf);
+
+  QVector<int> vector = {42};
+
+  painter.nextAttribute.color = grey;
+  int l = 1;
+  for(int x=-l; x<=l; ++x)
+  {
+    for(int y=-l; y<=l; ++y)
+    {
+      int X = x+1;
+      int Y = y+1;
+      painter.addVertex( x, Y);
+      painter.addVertex( x,-Y);
+      painter.addVertex( X, y);
+      painter.addVertex(-X, y);
+    }
+  }
+
+  painter.nextAttribute.color = red;
+  painter.pushMatrix(glm::vec3(0), glm::vec3(1,0,0));
+  painter.addArrow(1.f, 0.1f);
+  painter.popMatrix();
+
+  painter.nextAttribute.color = green;
+  painter.pushMatrix(glm::vec3(0), glm::vec3(0,1,0));
+  painter.addArrow(1.f, 0.1f);
+  painter.popMatrix();
+
+  painter.nextAttribute.color = blue;
+  painter.pushMatrix(glm::vec3(0), glm::vec3(0,0,1));
+  painter.addArrow(1.f, 0.1f);
+  painter.popMatrix();
+
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  vector,
+                                                                                  std::move(ShaderCompiler::createShaderFromFiles("visualize-position",
+                                                                                                                                  QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  return v;
+}
+
+
+DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<scene::VoxelDataComponent::AABB>& voxelData)
+{
+  DebugMesh::Painter painter;
+
+  glm::ivec3 maxGridSize(0);
+
+  for(const scene::VoxelDataComponent::AABB& data : voxelData)
+    maxGridSize = glm::max(maxGridSize, data.voxelCount);
+
+  for(int dimension = 0; dimension<3; ++dimension)
+  {
+    glm::vec3 color(0);
+    color[dimension] = 1;
+
+    const int n = maxGridSize[dimension];
+    glm::mat4 matrix = glm::mat4(1);
+    std::swap(matrix[2], matrix[dimension]);
+    painter.pushMatrix(matrix);
+    for(int i=0; i<=n; ++i)
+    {
+      glm::vec3 color(0);
+      color[dimension] = i;
+
+      painter.nextAttribute.color = color;
+      painter.addRect(glm::vec2(0), glm::vec2(1));
+    }
+    painter.popMatrix();
+  }
+
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  voxelData.toVector(),
+                                                                                  std::move(ShaderCompiler::createShaderFromFiles("visualize-voxel-grids",
+                                                                                                                                  QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  v->use_dephtest = true;
+  return v;
+}
+
+
 void DebugLineVisualisation::render()
 {
-  bool use_depth_test = glIsEnabled(GL_DEPTH_TEST);
+  bool temporary_disable_depthtest = !use_dephtest && glIsEnabled(GL_DEPTH_TEST);
 
-  if(use_depth_test)
+  if(temporary_disable_depthtest)
     glDisable(GL_DEPTH_TEST);
 
   shaderObject.Activate();
@@ -171,7 +259,7 @@ void DebugLineVisualisation::render()
 
   vertexArrayObject.ResetBinding();
 
-  if(use_depth_test)
+  if(temporary_disable_depthtest)
     glEnable(GL_DEPTH_TEST);
 }
 

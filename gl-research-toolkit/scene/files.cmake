@@ -35,12 +35,16 @@ set(SOURCE_FILES
   include/glrt/scene/resources/texture.h
   include/glrt/scene/resources/texture-manager.h
   include/glrt/scene/resources/texture-sampler.h
+  include/glrt/scene/resources/voxel-data.h
+  include/glrt/scene/resources/voxel-file.h
+  include/glrt/scene/resources/voxelizer.h
   include/glrt/scene/scene.h
   include/glrt/scene/scene.inl
   include/glrt/scene/scene-layer.h
   include/glrt/scene/static-mesh-component.h
   include/glrt/scene/ticking-object.h
   include/glrt/scene/tick-manager.h
+  include/glrt/scene/voxel-data-component.h
   src/glrt/scene/camera-component.cpp
   src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/collect-scene-data.cpp
@@ -63,9 +67,13 @@ set(SOURCE_FILES
   src/glrt/scene/resources/texture-file.cpp
   src/glrt/scene/resources/texture-manager.cpp
   src/glrt/scene/resources/texture-sampler.cpp
+  src/glrt/scene/resources/voxel-data.cpp
+  src/glrt/scene/resources/voxel-file.cpp
+  src/glrt/scene/resources/voxelizer.cpp
   src/glrt/scene/scene.cpp
   src/glrt/scene/scene-layer.cpp
   src/glrt/scene/static-mesh-component.cpp
   src/glrt/scene/ticking-object.cpp
   src/glrt/scene/tick-manager.cpp
+  src/glrt/scene/voxel-data-component.cpp
 )

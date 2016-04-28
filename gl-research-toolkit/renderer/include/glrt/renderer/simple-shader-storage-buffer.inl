@@ -5,16 +5,31 @@
 
 namespace glrt {
 namespace renderer {
+namespace implementation {
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits>::SimpleShaderStorageBuffer(scene::Scene& scene)
+template<typename T_Component>
+typename DefaultDataDescription<T_Component>::data_type DefaultDataDescription<T_Component>::data_from_component(const T_Component* component)
+{
+  return component->globalData();
+}
+
+template<typename T_Component, typename T_Data, T_Data(T_Component::*get_data_ptr)() const>
+T_Data RandomComponentDataDescription<T_Component, T_Data, get_data_ptr>::data_from_component(const T_Component* component)
+{
+  return (component->*get_data_ptr)();
+}
+
+} // namespace renderer
+
+template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>
+SimpleShaderStorageBuffer<T_Component,T_DataDescription,T_FragmentedArray,T_BufferCapacityTraits>::SimpleShaderStorageBuffer(scene::Scene& scene)
   : lightComponents(scene)
 {
 }
 
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-void SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits>::update()
+template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>
+void SimpleShaderStorageBuffer<T_Component,T_DataDescription,T_FragmentedArray,T_BufferCapacityTraits>::update()
 {
   FragmentedArray& fragmented_array = lightComponents.fragmented_array;
   const int indexOfFirstUpdated = fragmented_array.updateSegments(nullptr);
@@ -26,30 +41,30 @@ void SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTra
   if(buffer.needsUpdate())
   {
     T_Component** src = fragmented_array.data();
-    LightData* dest = buffer.Map();
+    data_type* dest = buffer.Map();
 
     // ISSUE-61 OMP
     for(int i=buffer.firstElementToCopy(); i<length; ++i)
-      dest[i] = src[i]->globalData();
+      dest[i] = T_DataDescription::data_from_component(src[i]);
 
     buffer.Unmap();
   }
 }
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-bool SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits>::needRerecording() const
+template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>
+bool SimpleShaderStorageBuffer<T_Component,T_DataDescription,T_FragmentedArray,T_BufferCapacityTraits>::needRerecording() const
 {
   return buffer.gpuAddressChanged;
 }
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-int SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits>::numElements() const
+template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>
+int SimpleShaderStorageBuffer<T_Component,T_DataDescription,T_FragmentedArray,T_BufferCapacityTraits>::numElements() const
 {
   return buffer.numElements();
 }
 
-template<class T_Component, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-GLuint64 SimpleShaderStorageBuffer<T_Component,T_FragmentedArray,T_BufferCapacityTraits>::gpuBufferAddress() const
+template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>
+GLuint64 SimpleShaderStorageBuffer<T_Component,T_DataDescription,T_FragmentedArray,T_BufferCapacityTraits>::gpuBufferAddress() const
 {
   return buffer.buffer.gpuBufferAddress();
 }

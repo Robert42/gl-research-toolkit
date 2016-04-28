@@ -13,7 +13,9 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   : application(application),
     visible(settings.showByDefault),
     toggleHelp(settings.toggleHelp),
-    toggleGui(settings.toggleGui)
+    toggleGui(settings.toggleGui),
+    togglePosteffectVisualization_Light("POSTEFFECT_VISUALIZATION_SHADER_LIGHTED"),
+    togglePosteffectVisualization_Normals("POSTEFFECT_VISUALIZATION_SHADER_SHOW_NORMALS")
 {
   Q_ASSERT(application != nullptr);
 
@@ -118,11 +120,18 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   cameraSwitcher->valueChanged = [&scene](const QPointer<scene::CameraComponent>& otherCamera){switchDebugCameraTo(&scene, otherCamera);};
   TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene::FpsDebugInputHandler::locked, "group=Camera");
 
-  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group=Debug");
-  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group=Debug");
-  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group=Debug");
+  renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group='Debug Scene'");
+  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
+  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
+  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
+  renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
 
-  renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group=Debug");
+  TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
+  renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");
+  togglePosteffectVisualization_Light.TwAddVarCB(tweakBar, "Enable Lighting in Debug", "group='Debug Shader'");
+  togglePosteffectVisualization_Normals.TwAddVarCB(tweakBar, "Show Normals in Debug", "group='Debug Shader'");
+  renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
+  renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
 
   gui::Toolbar::registerTweakBar(tweakBar, true);
 
@@ -327,6 +336,17 @@ void AntTweakBar::updateAntTweakBarWindowSize()
 
   TwWindowSize(size.x,
                size.y);
+}
+
+
+TweakBarShaderToggle::TweakBarShaderToggle(const QString& macroName)
+{
+  getter = [macroName]() -> bool {
+           return glrt::renderer::ReloadableShader::isMacroDefined(macroName);
+  };
+  setter = [macroName](bool value) {
+           glrt::renderer::ReloadableShader::defineMacro(macroName, value);
+  };
 }
 
 

@@ -76,6 +76,7 @@ class DebugRenderer::List final : public QObject
   Q_OBJECT
 public:
   QVector<Implementation*> implementations;
+  bool clearBuffer = false;
 
   void connectTo(DebugRenderer* renderer);
 

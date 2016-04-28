@@ -59,6 +59,17 @@ QHash<QString, scene::RectAreaLightComponent::Data> collectNamedRectAreaLights(S
 }
 
 
+QVector<VoxelDataComponent::AABB> collectVoxelAabbs(Scene* scene)
+{
+  return collectData<VoxelDataComponent,VoxelDataComponent::AABB>(scene, [](VoxelDataComponent* c) -> VoxelDataComponent::AABB{return c->globalAabbData();});
+}
+
+QHash<QString, VoxelDataComponent::AABB> collectNamedVoxelAabbs(Scene* scene)
+{
+  return collectNamedData<VoxelDataComponent,VoxelDataComponent::AABB>(scene, [](VoxelDataComponent* c) -> VoxelDataComponent::AABB{return c->globalAabbData();});
+}
+
+
 } // namespace scene
 } // namespace glrt
 

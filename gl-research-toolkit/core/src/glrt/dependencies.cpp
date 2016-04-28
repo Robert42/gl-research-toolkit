@@ -1,5 +1,6 @@
 #include <glrt/dependencies.h>
 #include <glrt/toolkit/logger.h>
+#include <QColor>
 
 
 QDebug operator<<(QDebug d, const glm::bvec2& v)
@@ -162,5 +163,32 @@ quint64 magicNumberForString(const char* text)
 
   return magicNumber;
 }
+
+
+glm::vec3 vec3FromColor(const QColor& c)
+{
+  return glm::vec3(c.redF(),
+                   c.greenF(),
+                   c.blueF());
+}
+
+glm::vec4 vec4FromColor(const QColor& c)
+{
+  return glm::vec4(c.redF(),
+                   c.greenF(),
+                   c.blueF(),
+                   c.alphaF());
+}
+
+glm::vec3 vec3FromRgb(quint32 rgb)
+{
+  return vec3FromColor(QColor::fromRgb(rgb));
+}
+
+glm::vec4 vec4FromRgba(quint32 rgba)
+{
+  return vec4FromColor(QColor::fromRgba(rgba));
+}
+
 
 } // namespace glrt

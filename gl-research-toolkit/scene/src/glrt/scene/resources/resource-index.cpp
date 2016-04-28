@@ -9,6 +9,7 @@
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/resources/texture-sampler.h>
 #include <glrt/scene/resources/texture.h>
+#include <glrt/scene/resources/voxelizer.h>
 #include <QThread>
 
 #include <angelscript-integration/call-script.h>
@@ -66,6 +67,11 @@ inline std::string get_label(ResourceIndex* index, const Uuid<void>& uuid)
   return index->labels[uuid].toStdString();
 }
 
+inline Voxelizer get_default_voxelizer(ResourceIndex* index)
+{
+  return Voxelizer(index);
+}
+
 // --------------
 
 const ResourceIndex ResourceIndex::fallback(uuids::fallbackIndex);
@@ -115,11 +121,12 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerMaterial(const Uuid<Material> &in uuid, const Material &in material)", AngelScript::asMETHOD(ResourceIndex,registerMaterial), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneLayerFile(const Uuid<SceneLayer> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneLayerFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerSceneFile(const Uuid<Scene> &in uuid, const string &in file)", AngelScript::asMETHOD(ResourceIndex,registerSceneFile), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler)", AngelScript::asMETHOD(ResourceIndex,registerTexture), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void registerTextureFile(const Uuid<Texture> &in uuid, const string &in file, const TextureSampler &in defaultSampler)", AngelScript::asMETHOD(ResourceIndex,registerTexture_std_string), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   SceneGraphImportSettings::registerType();
   MeshImportSettings::registerType();
   TextureFile::ImportSettings::registerType();
+  Voxelizer::registerAngelScriptAPI();
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertStaticMesh(const string &in meshFile, const string &in sourceFile, const string &in groupToImport=\"\", const MeshImportSettings &in meshImportSettings = MeshImportSettings())", AngelScript::asFUNCTION(convertStaticMesh_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void convertTexture(const string &in textureFile, const string &in sourceFile, const TextureImportSettings &in settings)", AngelScript::asFUNCTION(convertTexture_wrapper), AngelScript::asCALL_CDECL_OBJLAST); AngelScriptCheck(r);
@@ -127,6 +134,8 @@ void ResourceIndex::registerAngelScriptAPI()
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "void set_label(const BaseUuid &in uuid, const string &in label)", AngelScript::asFUNCTION(set_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "string get_label(const BaseUuid &in uuid)", AngelScript::asFUNCTION(get_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "Voxelizer get_defaultVoxelizer()", AngelScript::asFUNCTION(get_default_voxelizer), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -210,7 +219,12 @@ void ResourceIndex::registerSceneFile(const Uuid<Scene>& uuid, const std::string
   sceneFiles[uuid] = QDir::current().absoluteFilePath(f);
 }
 
-void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler)
+void ResourceIndex::registerTexture_std_string(const Uuid<Texture>& uuid, const std::string& file, const TextureSampler& textureSampler)
+{
+  registerTexture(uuid, QString::fromStdString(file), textureSampler);
+}
+
+void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const QFileInfo& file, const TextureSampler& textureSampler)
 {
   if(uuid == uuids::fallbackDiffuseTexture && _fallback!=this)
   {
@@ -221,10 +235,23 @@ void ResourceIndex::registerTexture(const Uuid<Texture>& uuid, const std::string
 
   validateNotYetRegistered(uuid);
   allRegisteredResources.insert(uuid);
-  QString f = QString::fromStdString(file);
-  labels[uuid] = QFileInfo(f).baseName();
-  textures[uuid].file = QDir::current().absoluteFilePath(f);
+  labels[uuid] = file.baseName();
+  textures[uuid].setFile(file.absoluteFilePath());
   defaultTextureSamplers[uuid] = textureSampler;
+}
+
+void ResourceIndex::registerVoxelizedMesh(const Uuid<VoxelIndex>& uuid, const Uuid<StaticMesh>& meshUuid, Voxelizer::FieldType fieldType, const VoxelIndex& voxelIndex)
+{
+  validateNotYetRegistered(uuid);
+  allRegisteredResources.insert(uuid);
+
+  if(labels.contains(meshUuid))
+    labels[uuid] = labels.value(meshUuid);
+  else if(labels.contains(voxelIndex.texture3D))
+    labels[uuid] = labels.value(voxelIndex.texture3D);
+
+  voxelIndicesIndex[meshUuid][fieldType] = uuid;
+  voxelIndices[uuid] = voxelIndex;
 }
 
 void ResourceIndex::validateNotYetRegistered(const QUuid& uuid) const

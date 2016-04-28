@@ -40,6 +40,17 @@ DebugRenderer VisualizationRenderer::debugRectAreaLights(scene::Scene* scene)
   });
 }
 
+DebugRenderer VisualizationRenderer::debugVoxelGrids(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    QHash<QString, scene::VoxelDataComponent::AABB> voxelGrids = scene::collectNamedVoxelAabbs(scene);
+    if(voxelGrids.isEmpty())
+      return nullptr;
+    else
+      return debugging::DebugLineVisualisation::drawVoxelGrids(voxelGrids.values());
+  });
+}
+
 DebugRenderer VisualizationRenderer::debugPoints(QVector<glm::vec3>* points)
 {
   return DebugRenderer([points]() -> DebugRenderer::Implementation* {
@@ -57,6 +68,13 @@ DebugRenderer VisualizationRenderer::debugArrows(QVector<Arrow>* arrows)
       return nullptr;
     else
       return debugging::DebugLineVisualisation::drawArrows(*arrows);
+  });
+}
+
+DebugRenderer VisualizationRenderer::showWorldGrid()
+{
+  return DebugRenderer([]() -> DebugRenderer::Implementation* {
+    return debugging::DebugLineVisualisation::drawWorldGrid();
   });
 }
 

@@ -3,6 +3,7 @@
 
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/light-component.h>
+#include <glrt/scene/voxel-data-component.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
 
 #include <glhelper/buffer.hpp>
@@ -50,6 +51,9 @@ public:
   static DebugRenderer::Implementation* drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights);
   static DebugRenderer::Implementation* drawPositions(const QVector<glm::vec3>& positions);
   static DebugRenderer::Implementation* drawArrows(const QVector<Arrow>& arrows);
+  static DebugRenderer::Implementation* drawWorldGrid();
+  static DebugRenderer::Implementation* drawVoxelGrids(const QList<scene::VoxelDataComponent::AABB>& voxelData);
+
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;
   DebugLineVisualisation& operator=(const DebugLineVisualisation&) = delete;
@@ -65,6 +69,7 @@ private:
   int numDrawCalls;
   int uniformBufferOffset;
   int uniformBufferElementSize;
+  bool use_dephtest = false;
 };
 
 template<typename UniformType>

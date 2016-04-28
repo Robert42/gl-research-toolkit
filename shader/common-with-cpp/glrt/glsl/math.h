@@ -27,6 +27,21 @@ inline float sq(vec4 x)
   return dot(x, x);
 }
 
+inline float sq_distance(vec2 a, vec2 b)
+{
+  return sq(a-b);
+}
+
+inline float sq_distance(vec3 a, vec3 b)
+{
+  return sq(a-b);
+}
+
+inline float sq_distance(vec4 a, vec4 b)
+{
+  return sq(a-b);
+}
+
 // min
 
 inline int min3(int a, int b, int c)
@@ -49,6 +64,16 @@ inline float min4(float a, float b, float c, float d)
   return min(min(a, b), min(c, d));
 }
 
+inline vec4 min3(vec4 a, vec4 b, vec4 c)
+{
+  return min(min(a, b), c);
+}
+
+inline vec4 min4(vec4 a, vec4 b, vec4 c, vec4 d)
+{
+  return min(min(a, b), min(c, d));
+}
+
 inline float min_component(vec2 vector)
 {
   return min(vector.x, vector.y);
@@ -64,23 +89,31 @@ inline float min_component(vec4 vector)
   return min4(vector.x, vector.y, vector.z, vector.w);
 }
 
-inline int index_of_min_component(vec4 vector)
+inline int index_of_first_true(bvec3 boolean)
 {
-  // TODO optimize? (using bvec4?) using ?: ?
-  
-  float smallest_value = vector[0];
-  int smallest_index = 0;
-  for(int i=1; i<4; ++i)
-  {
-    float value = vector[i];
-    if(value < smallest_value)
-    {
-      smallest_value = value;
-      smallest_index = i;
-    }
-  }
-  
-  return smallest_index;
+  boolean.yz = boolean.yz && not_(boolean.xx);
+  boolean.z = boolean.z && !boolean.y;
+
+  return int(dot(vec2(1,2), vec2(boolean.yz)));
+}
+
+inline int index_of_first_true(bvec4 boolean)
+{
+  boolean.yzw = boolean.yzw && not_(boolean.xxx);
+  boolean.zw = boolean.zw && not_(boolean.yy);
+  boolean.w = boolean.w && !boolean.z;
+
+  return int(dot(vec3(1,2,3), vec3(boolean.yzw)));
+}
+
+inline bvec3 is_smallest(vec3 vector)
+{
+  return lessThanEqual(vector.xyz, min(vector.yzx, vector.zxy));
+}
+
+inline bvec4 is_smallest(vec4 vector)
+{
+  return lessThanEqual(vector.xyzw, min3(vector.yzwx, vector.zwxy, vector.wxyz));
 }
 
 // max
@@ -105,6 +138,16 @@ inline float max4(float a, float b, float c, float d)
   return max(max(a, b), max(c, d));
 }
 
+inline vec4 max3(vec4 a, vec4 b, vec4 c)
+{
+  return max(max(a, b), c);
+}
+
+inline vec4 max4(vec4 a, vec4 b, vec4 c, vec4 d)
+{
+  return max(max(a, b), max(c, d));
+}
+
 inline float max_component(vec2 vector)
 {
   return max(vector.x, vector.y);
@@ -118,6 +161,34 @@ inline float max_component(vec3 vector)
 inline float max_component(vec4 vector)
 {
   return max4(vector.x, vector.y, vector.z, vector.w);
+}
+
+
+
+inline int index_of_min_component(vec3 vector)
+{
+  return index_of_first_true(is_smallest(vector));
+}
+
+inline int index_of_min_component_masked(vec3 vector, bvec3 mask)
+{
+  // preventing  the components, where mask is false to be the smallest one
+  vector += 10.f*max_component(abs(vector)) * vec3(not_(mask));
+  
+  return index_of_first_true(is_smallest(vector));
+}
+
+inline int index_of_min_component(vec4 vector)
+{
+  return index_of_first_true(is_smallest(vector));
+}
+
+inline int index_of_min_component_masked(vec4 vector, bvec4 mask)
+{
+  // preventing  the components, where mask is false to be the smallest one
+  vector += 10.f*max_component(abs(vector)) * vec4(not_(mask));
+  
+  return index_of_first_true(is_smallest(vector) && mask);
 }
 
 // blending
@@ -144,6 +215,8 @@ inline vec4 blend_screen(vec4 x, vec4 y)
 
 
 #include <glrt/glsl/geometry/raytracing.h>
+#include <glrt/glsl/geometry/transform.h>
+
 
 #include <glrt/glsl/compatibility/end.h>
 

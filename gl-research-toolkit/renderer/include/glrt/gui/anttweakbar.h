@@ -221,7 +221,11 @@ inline TwType TweakBarCBVar<bool>::type()
   return TW_TYPE_BOOLCPP;
 }
 
-
+class TweakBarShaderToggle : public TweakBarCBVar<bool>
+{
+public:
+  TweakBarShaderToggle(const QString& macroName);
+};
 
 
 class AntTweakBar final : public QObject
@@ -298,6 +302,9 @@ private:
 
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
+
+  TweakBarShaderToggle togglePosteffectVisualization_Light;
+  TweakBarShaderToggle togglePosteffectVisualization_Normals;
 
   enum class MouseCaptureState : int
   {

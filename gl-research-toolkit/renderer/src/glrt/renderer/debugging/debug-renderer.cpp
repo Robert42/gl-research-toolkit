@@ -41,7 +41,7 @@ void DebugRenderer::setEnabled(bool enabled)
 
   QObject::disconnect(_connection);
 
-  if(enabled)
+  if(_scene && enabled)
     _connection = QObject::connect(_scene, &scene::Scene::sceneRerecordedCommands, std::bind(&DebugRenderer::reinit, this));
 
   reinit();
@@ -98,6 +98,12 @@ void DebugRenderer::List::connectTo(DebugRenderer* renderer)
 
 void DebugRenderer::List::render()
 {
+  if(Q_LIKELY(implementations.isEmpty()))
+    return;
+
+  if(Q_UNLIKELY(clearBuffer))
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
   for(Implementation* i : implementations)
     i->render();
 }

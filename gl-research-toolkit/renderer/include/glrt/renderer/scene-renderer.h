@@ -14,6 +14,7 @@
 #include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/light-buffer.h>
+#include <glrt/renderer/voxel-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
 #include <glrt/renderer/material-state.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
@@ -40,8 +41,12 @@ public:
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
+  debugging::DebugRenderer visualizeWorldGrid;
+  debugging::DebugRenderer visualizeVoxelGrids;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
+  debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
+  debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
@@ -76,9 +81,11 @@ private:
     glm::vec3 camera_position;
     padding<float> _padding;
     LightBuffer::LightData lightData;
+    VoxelBuffer::VoxelHeader voxelHeader;
   };
 
   LightBuffer lightUniformBuffer;
+  VoxelBuffer voxelUniformBuffer;
   StaticMeshRenderer<> staticMeshRenderer;
   QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
   Array<ReloadableShader> materialShaders;

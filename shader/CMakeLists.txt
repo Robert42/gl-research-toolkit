@@ -8,12 +8,17 @@ add_custom_target(
   common-with-cpp/glrt/glsl/debugging/printer-types.h
   common-with-cpp/glrt/glsl/geometry/raytracing.h
   common-with-cpp/glrt/glsl/geometry/structs.h
+  common-with-cpp/glrt/glsl/geometry/transform.h
   common-with-cpp/glrt/glsl/layout-constants.h
   common-with-cpp/glrt/glsl/math.h
+  debugging/posteffects/highlight-voxel-bounding-rect.fs
+  debugging/posteffects/highlight-voxel-bounding-rect.vs
   debugging/posteffects/orange-sphere.fs
   debugging/posteffects/orange-sphere.vs
   debugging/posteffects/posteffect.fs.glsl
   debugging/posteffects/posteffect.vs.glsl
+  debugging/posteffects/show-distancefield-as-cubic-voxel.fs
+  debugging/posteffects/show-distancefield-as-cubic-voxel.vs
   debugging/visualizations/common-debug-line-visualization.fs.glsl
   debugging/visualizations/common-debug-line-visualization.vs.glsl
   debugging/visualizations/visualize-arrow.fs
@@ -28,6 +33,8 @@ add_custom_target(
   debugging/visualizations/visualize-scene-camera.vs
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
+  debugging/visualizations/visualize-voxel-grids.fs
+  debugging/visualizations/visualize-voxel-grids.vs
   materials/implementation/common-implementation.vs.glsl
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/highlight-numeric-issues.glsl
@@ -38,13 +45,15 @@ add_custom_target(
   materials/implementation/vertex-material.vs.glsl
   materials/material.fs
   materials/material.vs
+  toolkit/alignment.glsl
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
   toolkit/extensions/command_list.glsl
   toolkit/extensions/common.glsl
-  toolkit/geometry/transform.glsl
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
   toolkit/scene/uniforms.glsl
+  toolkit/voxels/raymarching-cubic-voxels.glsl
+  toolkit/voxels/voxel-structs.glsl
 )

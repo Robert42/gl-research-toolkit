@@ -29,7 +29,6 @@ public:
 
 
 private:
-  // TODO: use hashes the other way round? because in runtime, the game will give the texture Handle and ask for the given GLTextureHandle
   QVector<Uuid<Texture>> textureIds;
   QVector<TextureSampler> textureSamplerIds;
 

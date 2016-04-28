@@ -2,6 +2,7 @@
 #include <glrt/scene/scene-layer.h>
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/camera-component.h>
+#include <glrt/scene/voxel-data-component.h>
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/collect-scene-data.h>
 #include <glrt/scene/fps-debug-controller.h>
@@ -102,6 +103,8 @@ void Scene::load(const Uuid<Scene>& scene)
   AngelScriptIntegration::callScriptExt<void>(angelScriptEngine, filename.c_str(), "void main(Scene@ scene)", "scene-file", config, this);
 
   angelScriptEngine->GarbageCollect();
+
+  createTestVoxelGrid();
 
   qApp->processEvents();
 
@@ -225,6 +228,15 @@ void Scene::unloadUnusedResources()
   staticMeshLoader.removeUnusedStaticMeshes(allUsedStaticMeshes);
 }
 
+void Scene::createTestVoxelGrid()
+{
+  /* #TODO delete this function
+  SceneLayer* sceneLayer = new SceneLayer(Uuid<SceneLayer>::create(), *this);
+  Node* node = new Node(*sceneLayer, Uuid<Node>::create());
+  VoxelDataComponent* voxelData = new VoxelDataComponent(*node, nullptr, Uuid<VoxelDataComponent>::create());
+  voxelData->data.voxelCount = glm::vec3(3, 2, 2);
+  */
+}
 
 } // namespace scene
 } // namespace glrt

@@ -21,9 +21,14 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
+    visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
+    visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
+    visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
+    visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
+    voxelUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true),
@@ -35,7 +40,11 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeCameras);
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
+  debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
+  debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
 
   setAdjustRoughness(true);
 }
@@ -321,6 +330,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.camera_position = cameraParameter.position;
   sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
   sceneUniformData.lightData = lightUniformBuffer.updateLightData();
+  sceneUniformData.voxelHeader = voxelUniformBuffer.updateVoxelHeader();
   sceneUniformBuffer.Unmap();
 }
 
@@ -340,7 +350,6 @@ void Renderer::setAdjustRoughness(bool adjustRoughness)
   {
     _adjustRoughness = adjustRoughness;
     ReloadableShader::defineMacro("ADJUST_ROUGHNESS", adjustRoughness);
-    ReloadableShader::reloadAll();
   }
 }
 

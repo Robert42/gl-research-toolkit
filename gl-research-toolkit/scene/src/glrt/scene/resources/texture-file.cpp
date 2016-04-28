@@ -1,6 +1,5 @@
 #include <QMetaEnum>
 #include <GL/glew.h>
-#include <glm/gtc/round.hpp>
 #include <glrt/scene/resources/texture-file.h>
 #include <glrt/toolkit/plain-old-data-stream.h>
 #include <angelscript-integration/collection-converter.h>
@@ -470,7 +469,11 @@ public:
         Q_UNREACHABLE();
       }
 
-      // #TODO resize to power of two?
+      if(importSettings.scaleDownToPowerOfTwo && (!glm::isPowerOfTwo(image.width()) || !glm::isPowerOfTwo(image.height())))
+        image = image.scaled(glm::floorPowerOfTwo<int>(image.width()),
+                             glm::floorPowerOfTwo<int>(image.height()),
+                             Qt::IgnoreAspectRatio,
+                             Qt::SmoothTransformation);
 
       TextureAsFloats textureData(image);
 
@@ -543,6 +546,28 @@ public:
     return -1;
   }
 
+  Target target() const
+  {
+    GLint value;
+    GL_CALL(glGetTextureParameterIiv, textureId, GL_TEXTURE_TARGET, &value);
+    Target target = static_cast<Target>(value);
+    switch(target)
+    {
+    case Target::TEXTURE_1D:
+    case Target::TEXTURE_2D:
+    case Target::TEXTURE_3D:
+    case Target::CUBE_MAP_NEGATIVE_X:
+    case Target::CUBE_MAP_NEGATIVE_Y:
+    case Target::CUBE_MAP_NEGATIVE_Z:
+    case Target::CUBE_MAP_POSITIVE_X:
+    case Target::CUBE_MAP_POSITIVE_Y:
+    case Target::CUBE_MAP_POSITIVE_Z:
+      return target;
+    }
+    Q_UNREACHABLE();
+    return Target::TEXTURE_2D;
+  }
+
   QPair<UncompressedImage, QVector<byte>> uncompressed2DImage(int level,
                                                               TextureFile::Format format,
                                                               TextureFile::Type type) const
@@ -556,10 +581,10 @@ public:
     image.width = quint32(this->width(level));
     image.rowStride = image.calcRowStride();
     image.height = quint32(this->height(level));
-    image.depth = 1;
+    image.depth = quint32(this->depth(level));
     image.mipmap = quint32(level);
-    image.target = TextureFile::Target::TEXTURE_2D;
-    image.rawDataLength = image.rowStride * image.height;
+    image.target = target();
+    image.rawDataLength = image.rowStride * image.height * image.depth;
 
     bool supportedFormat;
     ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
@@ -628,6 +653,36 @@ public:
 
 TextureFile::TextureFile()
 {
+}
+
+void TextureFile::appendImage(const QVector<float>& data, const glm::ivec3& size, Target target, Type type, Format format)
+{
+  quint32 nChannels = quint32(ImportSettings::channelsPerPixelForFormat(format));
+
+  Q_ASSERT(quint32(data.length()) == nChannels*quint32(size.x*size.y*size.z));
+
+  ImportedGlTexture glTex;
+
+  UncompressedImage inputImage;
+
+  inputImage.width = quint32(size.x);
+  inputImage.height = quint32(size.y);
+  inputImage.depth = quint32(size.z);
+  inputImage.format = format;
+  inputImage.mipmap = 0;
+  inputImage.rawDataLength = quint32(data.length())*sizeof(float);
+  inputImage.rawDataStart = 0;
+  inputImage.target = target;
+  inputImage.type = Type::FLOAT32;
+  inputImage.rowStride = inputImage.calcRowStride();
+
+  Q_ASSERT(inputImage.rowStride == nChannels*quint32(size.x)*sizeof(float));
+
+  glTex.setUncompressed2DImage(inputImage, data.data());
+
+  QPair<UncompressedImage, QVector<byte>> image =  glTex.uncompressed2DImage(0, format, type);
+
+  appendUncompressedImage(image.first, image.second);
 }
 
 void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings)
@@ -718,9 +773,7 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
       QPair<UncompressedImage, QVector<byte>> image =  textureInformation.uncompressed2DImage(level, importSettings.format, importSettings.type);
 
-      image.first.rawDataStart = this->appendRawData(image.second);
-
-      this->uncompressedImages.append(image.first);
+      appendUncompressedImage(image.first, image.second);
     }
 
 #if SHOW_TEXTURE_IN_DIALOG
@@ -975,6 +1028,16 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
   return textureHandle;
 }
 
+void TextureFile::appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData)
+{
+  if(image.rawDataLength == 0)
+    image.rawDataLength = quint32(rawData.length());
+  Q_ASSERT(image.rawDataLength == quint32(rawData.length()));
+  image.rawDataStart = this->appendRawData(rawData);
+
+  this->uncompressedImages.append(image);
+}
+
 quint32 TextureFile::appendRawData(const QVector<byte>& rawData)
 {
   quint32 offset = 0;
@@ -1026,6 +1089,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool remapSourceAsSigned", asOFFSET(ImportSettings,remapSourceAsSigned)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToPowerOfTwo", asOFFSET(ImportSettings,scaleDownToPowerOfTwo)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 factor", asOFFSET(ImportSettings,factor)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "string red_channel_suffix", asOFFSET(ImportSettings,red_channel_suffix)); AngelScriptCheck(r);

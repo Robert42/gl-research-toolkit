@@ -17,6 +17,7 @@ public:
     GLuint64 rectAreaLightsBuffer;
     quint32 numSphereLights;
     quint32 numRectLights;
+    padding<quint32, 2> _padding;
   };
 
   LightBuffer(scene::Scene& scene);

@@ -82,7 +82,7 @@ Texture ResourceManager::textureForUuid(const Uuid<Texture>& uuid) const
 #endif
 
   Q_ASSERT(Index::fallback.textures.contains(uuids::fallbackDiffuseTexture));
-  Q_ASSERT(Index::fallback.textures[uuids::fallbackDiffuseTexture].file.filePath().isEmpty() == false);
+  Q_ASSERT(Index::fallback.textures[uuids::fallbackDiffuseTexture].isEmpty() == false);
 
   return indexForResourceUuid(uuid)->textures.value(uuid, Index::fallback.textures[uuids::fallbackDiffuseTexture]);
 }

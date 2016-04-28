@@ -79,6 +79,7 @@ signals:
   void LightComponentAdded(LightComponent* component);
   void SphereAreaLightComponentAdded(SphereAreaLightComponent* component);
   void RectAreaLightComponentAdded(RectAreaLightComponent* component);
+  void VoxelDataComponentAdded(VoxelDataComponent* component);
   void StaticMeshComponentAdded(StaticMeshComponent* component);
 
 private:
@@ -89,6 +90,8 @@ private:
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
 
   void unloadUnusedResources();
+
+  void createTestVoxelGrid();
 };
 
 

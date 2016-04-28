@@ -69,9 +69,6 @@ private:
 
   friend class glrt::scene::SceneLayer;
   QList<SceneLayer*> _sceneLayers;
-
-  void foreachWritableIndex(const std::function<bool(Index* index)>& lambda);
-  ResourceIndex* writableIndexForResourceUuid(const QUuid& uuid, Index* fallback);
 };
 
 
