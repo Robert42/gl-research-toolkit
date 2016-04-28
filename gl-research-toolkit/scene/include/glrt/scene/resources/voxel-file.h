@@ -33,7 +33,6 @@ public:
     glm::ivec3 gridSize = glm::vec3(0);
     quint32 _padding2 = 0;
     CoordFrame localToVoxelSpace;
-    glm::vec3 meshScaleFactor = glm::vec3(1);
   };
 
   static quint64 magicNumber();

@@ -80,7 +80,6 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
     voxelIndex.gridSize = i.value().gridSize;
     voxelIndex.texture3D = textureUuid;
     voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
-    voxelIndex.meshScaleFactor = i.value().meshScaleFactor;
 
     TextureSampler textureSampler;
     resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
@@ -139,12 +138,18 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   glm::vec3 scale = (glm::vec3(voxels)-extend*2.f) / meshSize;
 
   float uniformScaleFactor = INFINITY;
+  int outermost_dimension = 0;
 
   for(int i=0; i<3; ++i)
+  {
     if(glm::isnan(scale[i]) || glm::isinf(scale[i]) || scale[i] <=0.f)
       scale[i] = 1.f;
-    else
-      uniformScaleFactor = glm::min(scale[i], uniformScaleFactor);
+    else if(scale[i] < uniformScaleFactor)
+    {
+      uniformScaleFactor = scale[i];
+      outermost_dimension = i;
+    }
+  }
 
   if(glm::isinf(uniformScaleFactor))
   {
@@ -152,10 +157,9 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
     uniformScaleFactor = 1.f;
   }
 
-  metaData.meshScaleFactor = scale / uniformScaleFactor;
-  CoordFrame offsetLocalSpace(-meshBoundingBoxMin);
+  CoordFrame offsetLocalSpace(-(meshBoundingBoxMin+meshBoundingBoxMax)*0.5f);
   CoordFrame scaleWorldToVoxel(glm::vec3(0), glm::quat::IDENTITY, uniformScaleFactor);
-  CoordFrame offsetVoxelSpace(extend / metaData.meshScaleFactor);
+  CoordFrame offsetVoxelSpace(glm::vec3(metaData.gridSize)*0.5f);
 
   metaData.localToVoxelSpace = offsetVoxelSpace * scaleWorldToVoxel * offsetLocalSpace;
 
@@ -163,19 +167,17 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   {
     float epsilon = 1.e-4f;
     glm::vec3 vec3_extend(extend);
-    glm::vec3 vec3_epsilon(epsilon);
 
     VoxelData data;
     data.localToVoxelSpace = metaData.localToVoxelSpace;
-    data.meshScaleFactor = metaData.meshScaleFactor;
     data.voxelCount = metaData.gridSize;
     glm::mat4 _localToVoxelSpace = data.worldToVoxelSpaceMatrix(CoordFrame());
 
     glm::vec3 p_min = transform_point(_localToVoxelSpace, meshBoundingBoxMin);
     glm::vec3 p_max = transform_point(_localToVoxelSpace, meshBoundingBoxMax);
 
-    Q_ASSERT(glm::all(glm::lessThanEqual(glm::abs(p_min - vec3_extend), vec3_epsilon)));
-    Q_ASSERT(glm::all(glm::lessThanEqual(glm::abs(p_max - glm::vec3(voxels) + vec3_extend), vec3_epsilon)));
+    Q_ASSERT(glm::abs(p_min - extend)[outermost_dimension] <= epsilon);
+    Q_ASSERT(glm::abs(p_max - (glm::vec3(voxels) - vec3_extend))[outermost_dimension] <= epsilon);
 
     glm::vec3 p[2] = {p_min, p_max};
     for(int i=0; i<2; ++i)

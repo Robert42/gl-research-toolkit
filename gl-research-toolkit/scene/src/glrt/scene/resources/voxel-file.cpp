@@ -94,12 +94,6 @@ void VoxelFile::load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid
       throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0109").arg(file.fileName()));
     if(metaData[i].gridSize[2] <= 0)
       throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x010a").arg(file.fileName()));
-    if(glm::any(glm::isnan(metaData[i].meshScaleFactor)))
-      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x010b").arg(file.fileName()));
-    if(glm::any(glm::isnan(metaData[i].meshScaleFactor)))
-      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x010c").arg(file.fileName()));
-    if(glm::any(glm::lessThanEqual(metaData[i].meshScaleFactor, glm::vec3(0))))
-      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x010d").arg(file.fileName()));
 
     QFileInfo textureFile = dir.absoluteFilePath(files[i]);
 
