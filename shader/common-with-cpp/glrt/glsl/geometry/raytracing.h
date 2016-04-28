@@ -20,6 +20,13 @@ inline vec3 get_point(in Ray ray, float t)
   return ray.origin + ray.direction * t;
 }
 
+inline void get_points(in Ray ray, vec3 t, out vec3 p1, out vec3 p2, out vec3 p3)
+{
+  p1 = get_point(ray, t.x);
+  p2 = get_point(ray, t.y);
+  p3 = get_point(ray, t.z);
+}
+
 // ---- nearest_point
 
 inline vec3 nearest_point(in Ray ray, in vec3 point)
@@ -107,36 +114,60 @@ inline bool contains_unclamped(in Ray ray, in vec3 point, float epsilon)
 
 // ---- intersects
 
-inline vec3 __intersects_aabb_intersection_distances(in Ray ray, in vec3 aabbMin, in vec3 aabbMax)
+inline void __intersects_aabb_common_points(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(vec3) frontFace, out(vec3) backFace)
 {
   // Choose componentwise the nearer value
-  vec3 common_point = mix(aabbMin, aabbMax, max(vec3(0), sign(ray.origin - (aabbMin+aabbMax)*0.5f)));
-
-  return intersection_distance_to_axis_planes(ray, common_point);
+  vec3 use_for_frontface = max(vec3(0), sign(ray.origin - (aabbMin+aabbMax)*0.5f));
+  vec3 use_for_backface = vec3(1) - use_min;
+  
+  frontFace = mix(aabbMin, aabbMax, use_for_frontface);
+  backFace = mix(aabbMin, aabbMax, use_for_backface);
 }
 
-inline vec3 __intersects_aabb_intersection_candidates(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(vec3) p1, out(vec3) p2, out(vec3) p3)
+inline vec3 __intersects_aabb_intersection_with_common_point(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, in vec3 common_point, out(bvec3) intersects)
 {
   vec3 distances = __intersects_aabb_intersection_distances(ray, aabbMin, aabbMax);
-
-  p1 = get_point(ray, distances.x);
-  p2 = get_point(ray, distances.y);
-  p3 = get_point(ray, distances.z);
-  
-  return distances;
-}
-
-inline vec3 __intersects_aabb_bvec3(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(bvec3) intersects)
-{
   vec3 p1;
   vec3 p2;
   vec3 p3;
   
-  vec3 distances = __intersects_aabb_intersection_candidates(ray, aabbMin, aabbMax, p1, p2, p3);
+  get_points(ray, distances, p1, p2, p3);
 
-  intersects = bvec3((all(lessThanEqual(aabbMin.yz, p1.yz)) && all(lessThanEqual(p1.yz, aabbMax.yz))),
-                     (all(lessThanEqual(aabbMin.xz, p2.xz)) && all(lessThanEqual(p2.xz, aabbMax.xz))),
-                     (all(lessThanEqual(aabbMin.xy, p3.xy)) && all(lessThanEqual(p3.xy, aabbMax.xy))));
+  bvec3 intersects = bvec3((all(lessThanEqual(aabbMin.yz, p1.yz)) && all(lessThanEqual(p1.yz, aabbMax.yz))),
+                           (all(lessThanEqual(aabbMin.xz, p2.xz)) && all(lessThanEqual(p2.xz, aabbMax.xz))),
+                           (all(lessThanEqual(aabbMin.xy, p3.xy)) && all(lessThanEqual(p3.xy, aabbMax.xy))));
+                           
+  return distances;
+}
+
+// --
+
+inline vec3 __intersects_aabb_intersection_distances(in Ray ray, in vec3 aabbMin, in vec3 aabbMax)
+{
+  vec3 frontFace;
+  vec3 backFace;
+  __intersects_aabb_common_points(ray, aabbMin, aabbMax, frontFace, backFace);
+  
+  vec3 common_point = frontFace;
+
+  return intersection_distance_to_axis_planes(ray, common_point);
+}
+
+inline vec3 __intersects_aabb_bvec3(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(bvec3) intersects)
+{
+  vec3 frontFace;
+  vec3 backFace;
+  __intersects_aabb_common_points(ray, aabbMin, aabbMax, frontFace, backFace);
+  
+  vec3 common_point = frontFace;
+  
+  __intersects_aabb_intersection_with_common_point();
+  
+  vec3 distances = __intersects_aabb_intersection_distances();
+  vec3 p2;
+  vec3 p3;
+  
+  vec3 distances = __intersects_aabb_intersection_candidates(ray, aabbMin, aabbMax, p1, p2, p3);
                      
   return distances;
 }
