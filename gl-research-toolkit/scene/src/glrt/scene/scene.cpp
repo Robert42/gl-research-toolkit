@@ -104,8 +104,6 @@ void Scene::load(const Uuid<Scene>& scene)
 
   angelScriptEngine->GarbageCollect();
 
-  createTestVoxelGrid();
-
   qApp->processEvents();
 
   bool success = AngelScriptIntegration::errorCount==0;
@@ -226,16 +224,6 @@ void Scene::unloadUnusedResources()
 
   textureManager.removeUnusedTextures(allUsedTextures);
   staticMeshLoader.removeUnusedStaticMeshes(allUsedStaticMeshes);
-}
-
-void Scene::createTestVoxelGrid()
-{
-  /* #TODO delete this function
-  SceneLayer* sceneLayer = new SceneLayer(Uuid<SceneLayer>::create(), *this);
-  Node* node = new Node(*sceneLayer, Uuid<Node>::create());
-  VoxelDataComponent* voxelData = new VoxelDataComponent(*node, nullptr, Uuid<VoxelDataComponent>::create());
-  voxelData->data.voxelCount = glm::vec3(3, 2, 2);
-  */
 }
 
 } // namespace scene
