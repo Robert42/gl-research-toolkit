@@ -8,6 +8,12 @@ namespace glrt {
 namespace renderer {
 namespace debugging {
 
+
+struct PosteffectVisualizationDataBlock
+{
+  float distanceFieldOffset = 0;
+};
+
 class DebugRenderer final : public QObject
 {
   Q_OBJECT

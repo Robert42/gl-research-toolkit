@@ -50,6 +50,8 @@ public:
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
+  debugging::PosteffectVisualizationDataBlock debugPosteffect;
+
   glm::ivec2 videoResolution;
 
   Renderer(const Renderer&) = delete;

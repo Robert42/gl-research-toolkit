@@ -6,6 +6,18 @@
 
 #include <lighting/rendering-equation.glsl>
 
+
+struct PosteffectVisualizationData
+{
+  float distancefield_offset;
+};
+
+layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform PosteffectVisualizationDataBlock
+{
+  PosteffectVisualizationData posteffect_param;
+};
+
+
 in FragmentBlock
 {
   flat mat4 view_projection;
