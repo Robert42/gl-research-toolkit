@@ -6,8 +6,6 @@ vec3 cubic_voxel_surface_normal(in Ray ray, int hit_dimension)
   
   normal[hit_dimension] = sign(-ray.direction[hit_dimension]);
   
-  PRINT_VALUE(hit_dimension);
-  
   return normal;
 }
 
@@ -60,13 +58,15 @@ void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marching
   const float epsilon = voxelgrid_epsilon;
   
   vec3 distances = intersection_distance_to_grid(ray_voxelspace, vec3(0), vec3(aabb.voxelCount));
+  
+  bvec3 valid_direction = not_(equal(vec3(0), ray_voxelspace.direction));
     
-  int i = index_of_min_component_masked(distances, not_(equal(vec3(0), ray_voxelspace.direction)));
+  int i = index_of_min_component_masked(distances, valid_direction);
   
   voxelCoord[i] += marchingStep[i];
 
   ray_voxelspace.origin = get_point(ray_voxelspace, distances[i]);
-  ray_voxelspace.origin = clamp(ray_voxelspace.origin, ray_voxelspace.origin, vec3(voxelCoord+1-epsilon));
+  ray_voxelspace.origin = clamp(ray_voxelspace.origin, voxelCoord, vec3(voxelCoord+1-epsilon));
 
   dimension = i;
 }
@@ -89,7 +89,6 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sam
   int max_num_loops = 65536;
   while(is_valid_voxel_index(aabb, voxelCoord) && 0<=max_num_loops--)
   {
-
      float voxel_value = texelFetch(voxelTexture, voxelCoord, 0).r;
      
      if(voxel_value <= treshold)
