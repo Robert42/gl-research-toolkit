@@ -13,9 +13,7 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   : application(application),
     visible(settings.showByDefault),
     toggleHelp(settings.toggleHelp),
-    toggleGui(settings.toggleGui),
-    togglePosteffectVisualization_Light("POSTEFFECT_VISUALIZATION_SHADER_LIGHTED"),
-    togglePosteffectVisualization_Normals("POSTEFFECT_VISUALIZATION_SHADER_SHOW_NORMALS")
+    toggleGui(settings.toggleGui)
 {
   Q_ASSERT(application != nullptr);
 
@@ -128,8 +126,9 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
 
   TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
   renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");
-  togglePosteffectVisualization_Light.TwAddVarCB(tweakBar, "Enable Lighting in Debug", "group='Debug Shader'");
-  togglePosteffectVisualization_Normals.TwAddVarCB(tweakBar, "Show Normals in Debug", "group='Debug Shader'");
+  TwAddVarRW(tweakBar, "Enable Lighting in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.useLighting, "group='Debug Shader'");
+  TwAddVarRW(tweakBar, "Show Normals in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNormals, "group='Debug Shader'");
+  TwAddVarRW(tweakBar, "Distance-Field Offset", TW_TYPE_FLOAT, &renderer->debugPosteffect.distanceFieldOffset, "group='Debug Shader' precision=3 min=-32 max=32 step=0.001");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
 

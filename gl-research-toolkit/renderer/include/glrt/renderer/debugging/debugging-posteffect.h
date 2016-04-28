@@ -32,6 +32,7 @@ private:
     gl::FramebufferObject& framebuffer;
     glrt::renderer::Renderer& renderer;
     gl::Buffer vertexBuffer;
+    gl::Buffer uniformBuffer;
 
     SharedRenderingData(gl::FramebufferObject* framebuffer, glrt::renderer::Renderer* renderer);
     ~SharedRenderingData();
@@ -40,6 +41,8 @@ private:
     SharedRenderingData(SharedRenderingData&&) = delete;
     void operator=(const SharedRenderingData&) = delete;
     void operator=(SharedRenderingData&&) = delete;
+
+    void updateUniforms();
   };
 
   static QSharedPointer<SharedRenderingData> renderingData;
