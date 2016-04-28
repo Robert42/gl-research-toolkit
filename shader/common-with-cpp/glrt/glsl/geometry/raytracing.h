@@ -170,6 +170,30 @@ inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(fl
   return any(intersects);
 }
 
+inline bool intersects_aabb_twice(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, out(float) intersection_distance_front, out(float) intersection_distance_back)
+{
+  vec3 front_face_common;
+  vec3 back_face_common;
+  __intersects_aabb_common_points(ray, aabbMin, aabbMax, front_face_common, back_face_common);
+
+  bvec3 intersects_front;
+  bvec3 intersects_back;
+  vec3 distances_front = __intersects_aabb_intersection_with_common_point(ray, aabbMin, aabbMax, front_face_common, intersects_front);
+  vec3 distances_back = __intersects_aabb_intersection_with_common_point(ray, aabbMin, aabbMax, back_face_common, intersects_back);
+
+  int i_front = index_of_min_component_masked(distances_front, intersects_front);
+  int i_back = index_of_min_component_masked(distances_front, intersects_front);
+  intersection_distance_front = distances_front[i_front];
+  intersection_distance_back = distances_back[i_back];
+
+  bool within_aabb = aabb_contains(ray.origin, in vec3 aabbMin, in vec3 aabbMax);
+
+  // #TODO: test, whether this is necessary
+  intersection_distance_front = mix(intersection_distance_front, ray.origin, float(within_aabb));
+    
+  return (within_aabb || any(intersects_front)) && any(intersects_back);
+}
+
 
 // ======== Plane ==============================================================
 
