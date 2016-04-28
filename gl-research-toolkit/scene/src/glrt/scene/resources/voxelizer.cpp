@@ -2,6 +2,7 @@
 #include <glrt/scene/resources/voxel-file.h>
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/resources/static-mesh-file.h>
+#include <glrt/toolkit/geometry.h>
 
 namespace glrt {
 namespace scene {
@@ -152,12 +153,34 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   }
 
 
+  metaData.meshScaleFactor = scale / uniformScaleFactor;
   CoordFrame offsetLocalSpace(-meshBoundingBoxMin);
   CoordFrame scaleWorldToVoxel(glm::vec3(0), glm::quat::IDENTITY, uniformScaleFactor);
-  CoordFrame offsetVoxelSpace(glm::vec3(extend, extend, extend));
+  CoordFrame offsetVoxelSpace(extend / metaData.meshScaleFactor);
 
-  metaData.meshScaleFactor = scale / uniformScaleFactor;
   metaData.localToVoxelSpace = offsetVoxelSpace * scaleWorldToVoxel * offsetLocalSpace;
+
+#ifdef QT_DEBUG
+  {
+    VoxelData data;
+    data.localToVoxelSpace = metaData.localToVoxelSpace;
+    data.meshScaleFactor = metaData.meshScaleFactor;
+    data.voxelCount = metaData.gridSize;
+    glm::mat4 _localToVoxelSpace = data.worldToVoxelSpaceMatrix(CoordFrame());
+
+    glm::vec3 p_min = transform_point(_localToVoxelSpace, meshBoundingBoxMin);
+    glm::vec3 p_max = transform_point(_localToVoxelSpace, meshBoundingBoxMax);
+    glm::vec3 p[2] = {p_min, p_max};
+    float epsilon = 1.e-4f;
+    for(int i=0; i<2; ++i)
+    {
+      Q_ASSERT(glm::all(glm::greaterThanEqual(p[i], glm::vec3(extend-epsilon))));
+      Q_ASSERT(glm::all(glm::lessThanEqual(p[i], glm::vec3(voxels)-extend+epsilon)));
+    }
+  }
+#endif
+
+
   return metaData;
 }
 
