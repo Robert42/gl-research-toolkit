@@ -140,6 +140,11 @@ inline vec3 __intersects_aabb_intersection_with_common_point(in Ray ray, in vec3
   return distances;
 }
 
+inline bool aabb_contains(in vec3 pos, in vec3 aabbMin, in vec3 aabbMax)
+{
+  return all(lessThanEqual(aabbMin, pos)) && all(lessThan(pos, aabbMax));
+}
+
 // --
 
 inline bool intersects_aabb(in Ray ray, in vec3 aabbMin, in vec3 aabbMax)
@@ -186,10 +191,10 @@ inline bool intersects_aabb_twice(in Ray ray, in vec3 aabbMin, in vec3 aabbMax, 
   intersection_distance_front = distances_front[i_front];
   intersection_distance_back = distances_back[i_back];
 
-  bool within_aabb = aabb_contains(ray.origin, in vec3 aabbMin, in vec3 aabbMax);
+  bool within_aabb = aabb_contains(ray.origin, aabbMin, aabbMax);
 
   // #TODO: test, whether this is necessary
-  intersection_distance_front = mix(intersection_distance_front, ray.origin, float(within_aabb));
+  intersection_distance_front = mix(intersection_distance_front, 0.f, float(within_aabb));
     
   return (within_aabb || any(intersects_front)) && any(intersects_back);
 }

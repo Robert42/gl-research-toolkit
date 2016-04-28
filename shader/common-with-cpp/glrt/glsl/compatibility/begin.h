@@ -24,6 +24,7 @@ using glm::dot;
 using glm::max;
 using glm::min;
 using glm::clamp;
+using glm::mix;
 using glm::cos;
 using glm::sin;
 using glm::acos;
