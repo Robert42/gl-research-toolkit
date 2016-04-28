@@ -180,7 +180,7 @@ HighlightVoxelGrids::HighlightVoxelGrids(bool depthTest)
 
 
 CubicVoxelRaymarch::CubicVoxelRaymarch(bool depthTest)
-  : SingleShader("highlight-voxel-bounding-rect", depthTest)
+  : SingleShader("show-distancefield-as-cubic-voxel", depthTest)
 {
 }
 

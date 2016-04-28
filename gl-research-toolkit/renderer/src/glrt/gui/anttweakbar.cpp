@@ -131,7 +131,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   togglePosteffectVisualization_Light.TwAddVarCB(tweakBar, "Enable Lighting in Debug", "group='Debug Shader'");
   togglePosteffectVisualization_Normals.TwAddVarCB(tweakBar, "Show Normals in Debug", "group='Debug Shader'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
-//  renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
+  renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
 
   gui::Toolbar::registerTweakBar(tweakBar, true);
 

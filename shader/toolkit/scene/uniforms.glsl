@@ -51,3 +51,9 @@ void get_distance_field_data(out uint32_t num_distance_fields, out VoxelData_AAB
   num_distance_fields = scene.voxelHeader.num_distance_fields;
   distance_field_data_aabb = (VoxelData_AABB*)scene.voxelHeader.distance_field_aabbs_array_address;
 }
+
+void get_distance_field_data(out uint32_t num_distance_fields, out VoxelData_AABB* distance_field_data_aabb, out sampler3D* distance_field_data_textures)
+{
+  get_distance_field_data(num_distance_fields, distance_field_data_aabb);
+  distance_field_data_textures = (sampler3D*)scene.voxelHeader.distance_field_textures_array_address;
+}
