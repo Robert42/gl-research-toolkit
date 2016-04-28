@@ -152,7 +152,6 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
     uniformScaleFactor = 1.f;
   }
 
-
   metaData.meshScaleFactor = scale / uniformScaleFactor;
   CoordFrame offsetLocalSpace(-meshBoundingBoxMin);
   CoordFrame scaleWorldToVoxel(glm::vec3(0), glm::quat::IDENTITY, uniformScaleFactor);
@@ -162,6 +161,10 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
 
 #ifdef QT_DEBUG
   {
+    float epsilon = 1.e-4f;
+    glm::vec3 vec3_extend(extend);
+    glm::vec3 vec3_epsilon(epsilon);
+
     VoxelData data;
     data.localToVoxelSpace = metaData.localToVoxelSpace;
     data.meshScaleFactor = metaData.meshScaleFactor;
@@ -170,8 +173,11 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
 
     glm::vec3 p_min = transform_point(_localToVoxelSpace, meshBoundingBoxMin);
     glm::vec3 p_max = transform_point(_localToVoxelSpace, meshBoundingBoxMax);
+
+    Q_ASSERT(glm::all(glm::lessThanEqual(glm::abs(p_min - vec3_extend), vec3_epsilon)));
+    Q_ASSERT(glm::all(glm::lessThanEqual(glm::abs(p_max - glm::vec3(voxels) + vec3_extend), vec3_epsilon)));
+
     glm::vec3 p[2] = {p_min, p_max};
-    float epsilon = 1.e-4f;
     for(int i=0; i<2; ++i)
     {
       Q_ASSERT(glm::all(glm::greaterThanEqual(p[i], glm::vec3(extend-epsilon))));
