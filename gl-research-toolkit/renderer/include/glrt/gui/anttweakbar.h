@@ -303,7 +303,8 @@ private:
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
 
-  TweakBarShaderToggle togglePosteffectVisualization;
+  TweakBarShaderToggle togglePosteffectVisualization_Light;
+  TweakBarShaderToggle togglePosteffectVisualization_Normals;
 
   enum class MouseCaptureState : int
   {

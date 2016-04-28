@@ -18,7 +18,7 @@ float FragCoord_z_toFragDepth(float z)
   return (0.5 * z + 0.5) * gl_DepthRange.diff + gl_DepthRange.near;
 }
 
-void rayMarch(in Ray ray, out vec4 color, out vec3 world_pos, out vec3 world_normal);
+void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_normal);
 
 out vec4 fragment_color;
 void main()
@@ -29,8 +29,13 @@ void main()
   
   vec3 world_pos, world_normal;
   
+  fragment_color = vec4(1, 0.5, 0, 1);
+  
   rayMarch(ray, fragment_color,  world_pos, world_normal);
   
+#ifdef POSTEFFECT_VISUALIZATION_SHADER_SHOW_NORMALS
+  fragment_color.rgb = encode_signed_normalized_vector_as_color(world_normal);
+#endif
 #ifdef POSTEFFECT_VISUALIZATION_SHADER_LIGHTED
   BaseMaterial material;
   material.normal = world_normal;

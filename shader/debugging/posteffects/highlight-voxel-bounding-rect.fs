@@ -3,10 +3,8 @@
 
 #include <voxels/raymarching-cubic-voxels.glsl>
 
-void rayMarch(in Ray ray, out vec4 color, out vec3 world_pos, out vec3 world_normal)
+void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_normal)
 {
-  color = vec4(0.5, 0.25, 0, 1);
-  
   uint32_t num_distance_fields;
   VoxelData_AABB* distance_field_data_aabb;
   get_distance_field_data(num_distance_fields, distance_field_data_aabb);
@@ -31,7 +29,6 @@ void rayMarch(in Ray ray, out vec4 color, out vec3 world_pos, out vec3 world_nor
         nearest_distance = current_distance;
         world_pos = p_worldspace;
         world_normal = cubic_voxel_surface_normal(r, intersection_dimension);
-        color.rgb = encode_signed_normalized_vector_as_color(world_normal);
       }
     }
   }
