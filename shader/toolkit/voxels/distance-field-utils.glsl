@@ -7,7 +7,4 @@ float distancefield_distance(vec3 voxelCoord, in WorldVoxelUvwSpaceFactor spaceF
   return voxel_value;
 }
 
-vec3 distancefield_normal(vec3 voxelCoord, in WorldVoxelUvwSpaceFactor spaceFactor, sampler3D texture, float epsilon)
-{
-  return vec3(0,0,1);
-}
+#include <distance-fields/debugging.glsl>

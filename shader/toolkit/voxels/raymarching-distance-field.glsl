@@ -29,7 +29,7 @@ bool raymarch_distancefield(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMat
     if(d <= voxelgrid_epsilon)
     {
       ray_hit_distance_worldspace = spaceFactor.voxelToWorldSpace * t;
-      intersection_normal_worldspace = transform_direction(inverse(worldToVoxelSpace), distancefield_normal(p, spaceFactor, texture, voxelgrid_epsilon));
+      intersection_normal_worldspace = transform_direction(inverse(worldToVoxelSpace), distancefield_normal(p, spaceFactor, texture));
       return true;
     }
     
