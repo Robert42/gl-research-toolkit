@@ -26,6 +26,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
     visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
+    visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
     voxelUniformBuffer(this->scene),
@@ -45,6 +46,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
 
   setAdjustRoughness(true);
 }

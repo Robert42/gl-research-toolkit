@@ -24,6 +24,7 @@ using glm::dot;
 using glm::max;
 using glm::min;
 using glm::clamp;
+using glm::mix;
 using glm::cos;
 using glm::sin;
 using glm::acos;
@@ -63,6 +64,12 @@ inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 #define yy yy()
 #define yyy yyy()
 #define yyyy yyyy()
+#define zz zz()
+#define zzz zzz()
+#define zzzz zzzz()
+#define ww ww()
+#define www www()
+#define wwww wwww()
 #define yzw yzw()
 #define yzx yzx()
 #define zxy zxy()

@@ -13,7 +13,7 @@ inline vec3 transform_direction(in mat4 t, in vec3 relative)
 
   vector = t * vector;
 
-  return vector.xyz;
+  return normalize(vector.xyz);
 }
 
 inline Ray transform_ray(in mat4 t, in Ray ray)

@@ -12,18 +12,26 @@ class VoxelDataComponent : public glrt::scene::Node::Component
 public:
   typedef resources::VoxelData Data;
 
-  struct AABB
+  struct GridSize
   {
-    glm::mat4 worldToVoxelSpace = glm::mat4(1);
-    glm::ivec3 voxelCount = glm::ivec3(1);
+    glm::ivec3 voxelCount;
     padding<int, 1> _padding;
   };
+
+  struct WorldVoxelUvwSpaceFactor
+  {
+    glm::vec3 voxelToUvwSpace;
+    float voxelToWorldSpace;
+  };
+
 
   Data data;
 
   VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data=Data());
 
-  AABB globalAabbData() const;
+  glm::mat4 globalWorldToVoxelMatrix() const;
+  GridSize gridSize() const;
+  WorldVoxelUvwSpaceFactor spaceFactor() const;
   quint64 textureData() const;
 };
 

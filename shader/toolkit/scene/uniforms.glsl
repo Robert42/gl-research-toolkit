@@ -12,7 +12,9 @@ struct SceneLightData
 
 struct SceneVoxelHeader
 {
-  uint64_t distance_field_aabbs_array_address;
+  uint64_t distance_field_worldtovoxelMat_array_address;
+  uint64_t distance_field_voxelcount_array_address;
+  uint64_t distance_field_spacefactor_array_address;
   uint64_t distance_field_textures_array_address;
   uint32_t num_distance_fields;
   padding3(uint32_t, _padding);
@@ -46,14 +48,28 @@ void get_rect_lights(out uint32_t num_rect_lights, out RectAreaLight* rect_light
   rect_lights = (RectAreaLight*)scene.lights.rect_arealights_address;
 }
 
-void get_distance_field_data(out uint32_t num_distance_fields, out VoxelData_AABB* distance_field_data_aabb)
+uint32_t distance_fields_num()
 {
-  num_distance_fields = scene.voxelHeader.num_distance_fields;
-  distance_field_data_aabb = (VoxelData_AABB*)scene.voxelHeader.distance_field_aabbs_array_address;
+  return scene.voxelHeader.num_distance_fields;
 }
 
-void get_distance_field_data(out uint32_t num_distance_fields, out VoxelData_AABB* distance_field_data_aabb, out sampler3D* distance_field_data_textures)
+mat4* distance_fields_worldToVoxelSpace()
 {
-  get_distance_field_data(num_distance_fields, distance_field_data_aabb);
-  distance_field_data_textures = (sampler3D*)scene.voxelHeader.distance_field_textures_array_address;
+  return (mat4*)scene.voxelHeader.distance_field_worldtovoxelMat_array_address;
 }
+
+ivec3* distance_fields_voxelCount()
+{
+  return (ivec3*)scene.voxelHeader.distance_field_voxelcount_array_address;
+}
+
+WorldVoxelUvwSpaceFactor* distance_fields_spaceFactor()
+{
+  return (WorldVoxelUvwSpaceFactor*)scene.voxelHeader.distance_field_spacefactor_array_address;
+}
+
+sampler3D* distance_fields_texture()
+{
+  return (sampler3D*)scene.voxelHeader.distance_field_textures_array_address;
+}
+

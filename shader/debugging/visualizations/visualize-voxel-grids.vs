@@ -8,7 +8,7 @@
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
 uniform PositionBlock
 {
-  VoxelData_AABB voxelData;
+  VoxelBoundingBox voxelData;
 };
 
 

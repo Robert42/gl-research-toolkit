@@ -8,8 +8,19 @@
 
 namespace glrt {
 namespace scene {
+
+class VoxelDataComponent;
+
 namespace resources {
 
+struct VoxelBoundingBox
+{
+  glm::mat4 worldToVoxelSpace = glm::mat4(1);
+  glm::ivec3 voxelCount = glm::ivec3(0);
+
+  VoxelBoundingBox(){}
+  VoxelBoundingBox(const VoxelDataComponent& c);
+};
 
 struct VoxelData
 {

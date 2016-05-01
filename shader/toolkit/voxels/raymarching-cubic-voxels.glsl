@@ -9,55 +9,55 @@ vec3 cubic_voxel_surface_normal(in Ray ray, int hit_dimension)
   return normal;
 }
 
-Ray ray_world_to_voxelspace(in Ray ray, in VoxelData_AABB aabb)
+Ray ray_world_to_voxelspace(in Ray ray, in mat4 worldToVoxelSpace)
 {
-    return transform_ray(aabb.worldToVoxelSpace, ray);
+    return transform_ray(worldToVoxelSpace, ray);
 }
 
-vec3 point_voxel_to_worldspace(in vec3 p, in VoxelData_AABB aabb)
+vec3 point_voxel_to_worldspace(in vec3 p, in mat4 worldToVoxelSpace)
 {
-    return transform_point(inverse(aabb.worldToVoxelSpace), p);
+    return transform_point(inverse(worldToVoxelSpace), p);
 }
 
-vec3 direction_voxel_to_worldspace_slow(in vec3 d, in VoxelData_AABB aabb)
+vec3 direction_voxel_to_worldspace_slow(in vec3 d, in mat4 worldToVoxelSpace)
 {
-    return normalize(transform_direction(inverse(aabb.worldToVoxelSpace), d));
+    return normalize(transform_direction(inverse(worldToVoxelSpace), d));
 }
 
-bool is_within_voxel_grid(in VoxelData_AABB aabb, in vec3 pos_voxelspace)
+bool is_within_voxel_grid(in ivec3 voxelCount, in vec3 pos_voxelspace)
 {
   bvec3 notTooSmall = greaterThanEqual(pos_voxelspace, vec3(0));
-  bvec3 notTooLarge = lessThan(pos_voxelspace, vec3(aabb.voxelCount));
+  bvec3 notTooLarge = lessThan(pos_voxelspace, vec3(voxelCount));
   
   return all(notTooSmall && notTooLarge);
 }
 
-bool is_valid_voxel_index(in VoxelData_AABB aabb, in ivec3 voxel_index)
+bool is_valid_voxel_index(in ivec3 voxelCount, in ivec3 voxel_index)
 {
   bvec3 notTooSmall = greaterThanEqual(voxel_index, ivec3(0));
-  bvec3 notTooLarge = lessThan(voxel_index, aabb.voxelCount);
+  bvec3 notTooLarge = lessThan(voxel_index, voxelCount);
   
   return all(notTooSmall && notTooLarge);
 }
 
-bool enter_cubic_voxel_grid_voxelspace(inout Ray ray_voxelspace, in VoxelData_AABB aabb, out int dimension)
+bool enter_cubic_voxel_grid_voxelspace(inout Ray ray_voxelspace, in ivec3 voxelCount, out int dimension)
 {
   const float epsilon = voxelgrid_epsilon;
   
   float intersection_distance;
-  bool valid_intersection = intersects_aabb(ray_voxelspace, vec3(0), vec3(aabb.voxelCount), intersection_distance, dimension);
+  bool valid_intersection = intersects_aabb(ray_voxelspace, vec3(0), vec3(voxelCount), intersection_distance, dimension);
   
   vec3 p_voxelspace = get_point(ray_voxelspace, intersection_distance);
-  ray_voxelspace.origin = clamp(p_voxelspace, vec3(0), vec3(aabb.voxelCount)-epsilon);
+  ray_voxelspace.origin = clamp(p_voxelspace, vec3(0), vec3(voxelCount)-epsilon);
   
   return valid_intersection;
 }
 
-void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marchingStep, in VoxelData_AABB aabb, inout ivec3 voxelCoord, out int dimension)
+void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marchingStep, in ivec3 voxelCount, inout ivec3 voxelCoord, out int dimension)
 {
   const float epsilon = voxelgrid_epsilon;
   
-  vec3 distances = intersection_distance_to_grid(ray_voxelspace, vec3(0), vec3(aabb.voxelCount));
+  vec3 distances = intersection_distance_to_grid(ray_voxelspace, vec3(0), vec3(voxelCount));
   
   bvec3 valid_direction = not_(equal(vec3(0), ray_voxelspace.direction));
     
@@ -71,14 +71,15 @@ void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marching
   dimension = i;
 }
 
-bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sampler3D* voxelTextures, uint32_t index, float treshold, out vec3 intersection_point, out vec3 intersection_normal)
+bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t index, float treshold, out vec3 intersection_point, out vec3 intersection_normal)
 {
   int hit_dimension;
-  VoxelData_AABB aabb = voxelData[index];
+  mat4 worldToVoxelSpace = worldToVoxelSpaces[index];
+  ivec3 voxelCount = voxelCounts[index];
   
-  Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, aabb);
-
-  if(!enter_cubic_voxel_grid_voxelspace(ray_voxelspace, aabb, hit_dimension))
+  Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, worldToVoxelSpace);
+  
+  if(!enter_cubic_voxel_grid_voxelspace(ray_voxelspace, voxelCount, hit_dimension))
     return false;
     
   sampler3D voxelTexture = voxelTextures[index];
@@ -87,7 +88,7 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sam
   ivec3 voxelCoord = ivec3(floor(ray_voxelspace.origin));
 
   int max_num_loops = 65536;
-  while(is_valid_voxel_index(aabb, voxelCoord) && 0<=max_num_loops--)
+  while(is_valid_voxel_index(voxelCount, voxelCoord) && 0<=max_num_loops--)
   {
      float voxel_value = texelFetch(voxelTexture, voxelCoord, 0).r;
      
@@ -98,18 +99,18 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelData_AABB* voxelData, sam
        intersection_point = ray_voxelspace.origin;
        intersection_normal = cubic_voxel_surface_normal(ray_voxelspace, hit_dimension);
        
-       intersection_point = point_voxel_to_worldspace(intersection_point, aabb);
-       intersection_normal = direction_voxel_to_worldspace_slow(intersection_normal, aabb);
+       intersection_point = point_voxel_to_worldspace(intersection_point, worldToVoxelSpace);
+       intersection_normal = direction_voxel_to_worldspace_slow(intersection_normal, worldToVoxelSpace);
        return true;
      }
      
-     next_cubic_grid_cell_voxelspace(ray_voxelspace, marchingStep, aabb, voxelCoord, hit_dimension);
+     next_cubic_grid_cell_voxelspace(ray_voxelspace, marchingStep, voxelCount, voxelCoord, hit_dimension);
   }
   
   return false;
 }
 
-bool raymarch_voxelgrids(in Ray ray_worldspace, VoxelData_AABB* voxelData, sampler3D* voxelTextures, uint32_t num_voxels, float treshold, out vec3 intersection_point, out vec3 intersection_normal)
+bool raymarch_voxelgrids(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t num_voxels, float treshold, out vec3 intersection_point, out vec3 intersection_normal)
 {
   float nearest_distance = inf;
   
@@ -118,7 +119,7 @@ bool raymarch_voxelgrids(in Ray ray_worldspace, VoxelData_AABB* voxelData, sampl
     vec3 intersection_point_tmp;
     vec3 intersection_normal_tmp;
     
-    bool got_hit = raymarch_voxelgrid(ray_worldspace, voxelData, voxelTextures, i, treshold, intersection_point_tmp, intersection_normal_tmp);
+    bool got_hit = raymarch_voxelgrid(ray_worldspace, worldToVoxelSpaces, voxelCounts, voxelTextures, i, treshold, intersection_point_tmp, intersection_normal_tmp);
 
     float current_distance = sq_distance(intersection_point_tmp, ray_worldspace.origin);
     
