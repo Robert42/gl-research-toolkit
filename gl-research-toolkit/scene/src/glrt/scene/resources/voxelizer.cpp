@@ -208,12 +208,14 @@ void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize, const gl
     for(int x=0; x<gridSize.x; ++x)
       for(int y=0; y<gridSize.y; ++y)
         for(int z=0; z<gridSize.z; ++z)
-          data[x + gridSize.x * (y + gridSize.y * z)] = distance(glm::vec3(x,y,z), origin) - radius;
+          data[x + gridSize.x * (y + gridSize.y * z)] = distance(glm::vec3(x,y,z)+0.5f, origin) - radius;
 }
 
 void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize)
 {
-  voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, glm::min(gridSize.x, glm::min(gridSize.y, gridSize.z))*0.5f);
+  float radius = glm::min(gridSize.x, glm::min(gridSize.y, gridSize.z))*0.5f - 1.f;
+
+  voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, radius);
 }
 
 VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, const Voxelizer::Hints& hints)
