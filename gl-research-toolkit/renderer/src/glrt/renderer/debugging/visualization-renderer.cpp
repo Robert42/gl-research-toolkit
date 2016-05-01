@@ -43,11 +43,11 @@ DebugRenderer VisualizationRenderer::debugRectAreaLights(scene::Scene* scene)
 DebugRenderer VisualizationRenderer::debugVoxelGrids(scene::Scene* scene)
 {
   return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
-    QHash<QString, scene::VoxelDataComponent::AABB> voxelGrids = scene::collectNamedVoxelAabbs(scene);
-    if(voxelGrids.isEmpty())
+    QHash<QString, scene::VoxelBoundingBox> voxelBoundingBoxes = scene::collectNamedVoxelGridSize(scene);
+    if(voxelBoundingBoxes.isEmpty())
       return nullptr;
     else
-      return debugging::DebugLineVisualisation::drawVoxelGrids(voxelGrids.values());
+      return debugging::DebugLineVisualisation::drawVoxelGrids(voxelBoundingBoxes.values());
   });
 }
 

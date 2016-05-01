@@ -201,14 +201,14 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
 }
 
 
-DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<scene::VoxelDataComponent::AABB>& voxelData)
+DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes)
 {
   DebugMesh::Painter painter;
 
   glm::ivec3 maxGridSize(0);
 
-  for(const scene::VoxelDataComponent::AABB& data : voxelData)
-    maxGridSize = glm::max(maxGridSize, data.voxelCount);
+  for(const VoxelBoundingBox& bb : gridSizes)
+    maxGridSize = glm::max(maxGridSize, bb.voxelCount);
 
   for(int dimension = 0; dimension<3; ++dimension)
   {
@@ -231,7 +231,7 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
   }
 
   DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
-                                                                                  voxelData.toVector(),
+                                                                                  gridSizes.toVector(),
                                                                                   std::move(ShaderCompiler::createShaderFromFiles("visualize-voxel-grids",
                                                                                                                                   QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
   v->use_dephtest = true;

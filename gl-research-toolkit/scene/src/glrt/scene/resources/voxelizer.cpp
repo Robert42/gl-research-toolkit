@@ -69,6 +69,17 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
   VoxelFile voxelFile;
   voxelFile.load(voxelFileName, staticMeshUuid);
 
+  TextureSampler textureSampler;
+  textureSampler.description.maxLod = 0;
+  textureSampler.description.minLod = 0;
+  textureSampler.description.maxAnisotropy = 1;
+  textureSampler.description.magFilter = gl::SamplerObject::Filter::LINEAR;
+  textureSampler.description.minFilter = gl::SamplerObject::Filter::LINEAR;
+  textureSampler.description.mipFilter = gl::SamplerObject::Filter::LINEAR;
+  textureSampler.description.borderHandlingU = gl::SamplerObject::Border::CLAMP;
+  textureSampler.description.borderHandlingV = gl::SamplerObject::Border::CLAMP;
+  textureSampler.description.borderHandlingW = gl::SamplerObject::Border::CLAMP;
+
   for(auto i=voxelFile.textureFiles.begin(); i!=voxelFile.textureFiles.end(); ++i)
   {
     Uuid<Texture> textureUuid = Uuid<Texture>::create();
@@ -81,7 +92,6 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
     voxelIndex.texture3D = textureUuid;
     voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
 
-    TextureSampler textureSampler;
     resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
 
     resourceIndex->registerVoxelizedMesh(voxelUuid, staticMeshUuid, i.value().fieldType, voxelIndex);

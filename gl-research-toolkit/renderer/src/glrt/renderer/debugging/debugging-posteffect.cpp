@@ -144,11 +144,16 @@ public:
   HighlightVoxelGrids(bool depthTest);
 };
 
-
 class CubicVoxelRaymarch : public SingleShader
 {
 public:
   CubicVoxelRaymarch(bool depthTest);
+};
+
+class DistanceFieldRaymarch : public SingleShader
+{
+public:
+  DistanceFieldRaymarch(bool depthTest);
 };
 
 
@@ -189,6 +194,12 @@ CubicVoxelRaymarch::CubicVoxelRaymarch(bool depthTest)
 }
 
 
+DistanceFieldRaymarch::DistanceFieldRaymarch(bool depthTest)
+  : SingleShader("raymarch-distancefield", depthTest)
+{
+}
+
+
 DebugRenderer DebuggingPosteffect::orangeSphere(const glm::vec3& origin, float radius, bool depthTest)
 {
   padding<byte, 3> padding;
@@ -205,6 +216,12 @@ DebugRenderer DebuggingPosteffect::voxelGridCubicRaymarch(bool mixWithScene)
 {
   padding<byte, 3> padding;
   return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new CubicVoxelRaymarch(mixWithScene);});
+}
+
+DebugRenderer DebuggingPosteffect::distanceFieldRaymarch(bool mixWithScene)
+{
+  padding<byte, 3> padding;
+  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new DistanceFieldRaymarch(mixWithScene);});
 }
 
 QSharedPointer<DebuggingPosteffect::SharedRenderingData> DebuggingPosteffect::renderingData;

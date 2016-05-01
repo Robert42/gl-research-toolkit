@@ -24,6 +24,7 @@ class Scene;
 namespace renderer {
 namespace debugging {
 
+using scene::resources::VoxelBoundingBox;
 
 struct Arrow
 {
@@ -52,7 +53,7 @@ public:
   static DebugRenderer::Implementation* drawPositions(const QVector<glm::vec3>& positions);
   static DebugRenderer::Implementation* drawArrows(const QVector<Arrow>& arrows);
   static DebugRenderer::Implementation* drawWorldGrid();
-  static DebugRenderer::Implementation* drawVoxelGrids(const QList<scene::VoxelDataComponent::AABB>& voxelData);
+  static DebugRenderer::Implementation* drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes);
 
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;

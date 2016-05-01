@@ -13,14 +13,28 @@ VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, cons
 }
 
 
-VoxelDataComponent::AABB VoxelDataComponent::globalAabbData() const
+glm::mat4 VoxelDataComponent::globalWorldToVoxelMatrix() const
 {
-  AABB aabb;
+  return data.worldToVoxelSpaceMatrix(globalCoordFrame());
+}
 
-  aabb.worldToVoxelSpace = data.worldToVoxelSpaceMatrix(globalCoordFrame());
-  aabb.voxelCount = data.voxelCount;
+VoxelDataComponent::GridSize VoxelDataComponent::gridSize() const
+{
+  GridSize gridSize;
 
-  return aabb;
+  gridSize.voxelCount = data.voxelCount;
+
+  return gridSize;
+}
+
+VoxelDataComponent::WorldVoxelUvwSpaceFactor VoxelDataComponent::spaceFactor() const
+{
+  WorldVoxelUvwSpaceFactor factor;
+
+  factor.voxelToUvwSpace = 1.f / glm::vec3(data.voxelCount);
+  factor.voxelToWorldSpace = globalCoordFrame().scaleFactor / data.localToVoxelSpace.scaleFactor;
+
+  return factor;
 }
 
 quint64 VoxelDataComponent::textureData() const

@@ -1,7 +1,11 @@
-struct VoxelData_AABB
+struct VoxelBoundingBox
 {
   mat4 worldToVoxelSpace;
   ivec3 voxelCount;
-  
-  uint32_t _padding;
+};
+
+struct WorldVoxelUvwSpaceFactor
+{
+  vec3 voxelToUvwSpace;
+  float voxelToWorldSpace;
 };
