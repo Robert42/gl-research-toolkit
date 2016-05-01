@@ -170,7 +170,9 @@ void System::verifyGLFeatures()
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl shader storage buffers."));
   if(PRINT_GL_INTEGER(GL_MAX_COMPUTE_WORK_GROUP_COUNT) < 2)
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl compute shader workign groups."));
-
+  if(PRINT_GL_INTEGER(GL_MAX_COMPUTE_WORK_GROUP_SIZE) < 2)
+    throw GLRT_EXCEPTION(QString("Unsupported size of opengl compute shader workign groups."));
+/*
   glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_COUNT, &maxComputeWorkGroupCount);
 
   Q_UNUSED(suppressLog);
