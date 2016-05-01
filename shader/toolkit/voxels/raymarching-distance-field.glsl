@@ -19,12 +19,12 @@ bool raymarch_distancefield(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMat
     
   float t = intersection_distance_front;
   
-  while(t < intersection_distance_back)
+  int max_num_loops = 65536;
+  while(t < intersection_distance_back && 0<=max_num_loops--)
   {
     vec3 p = get_point(ray_voxelspace, t);
     
     float d = distancefield_distance(p, spaceFactor, texture);
-    PRINT_VALUE(d);
     
     if(d <= voxelgrid_epsilon)
     {
