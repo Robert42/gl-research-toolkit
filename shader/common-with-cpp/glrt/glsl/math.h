@@ -163,6 +163,41 @@ inline float max_component(vec4 vector)
   return max4(vector.x, vector.y, vector.z, vector.w);
 }
 
+inline vec3 _mask_out_for_(vec3 values, bvec3 mask)
+{
+  values = abs(values);
+  return (values.xxx+values.yyy+values.zzz) * vec3(not_(mask));
+}
+
+inline vec4 _mask_out_for_(vec4 values, bvec4 mask)
+{
+  values = abs(values);
+  return (values.xxxx+values.yyyy+values.zzzz+values.wwww) * vec4(not_(mask));
+}
+
+inline vec3 mask_out_for_min(vec3 values, bvec3 mask)
+{
+  // preventing  the components, where mask is false to be the smallest one
+  return values + _mask_out_for_(values, mask);
+}
+
+inline vec3 mask_out_for_max(vec3 values, bvec3 mask)
+{
+  // preventing  the components, where mask is false to be the largest one
+  return values - _mask_out_for_(values, mask);
+}
+
+inline vec4 mask_out_for_min(vec4 values, bvec4 mask)
+{
+  // preventing  the components, where mask is false to be the smallest one
+  return values + _mask_out_for_(values, mask);
+}
+
+inline vec4 mask_out_for_max(vec4 values, bvec4 mask)
+{
+  // preventing  the components, where mask is false to be the largest one
+  return values - _mask_out_for_(values, mask);
+}
 
 
 inline int index_of_min_component(vec3 vector)
@@ -172,8 +207,7 @@ inline int index_of_min_component(vec3 vector)
 
 inline int index_of_min_component_masked(vec3 vector, bvec3 mask)
 {
-  // preventing  the components, where mask is false to be the smallest one
-  vector += 10.f*max_component(abs(vector)) * vec3(not_(mask));
+  vector = mask_out_for_min(vector, mask);
   
   return index_of_first_true(is_smallest(vector));
 }
@@ -185,10 +219,29 @@ inline int index_of_min_component(vec4 vector)
 
 inline int index_of_min_component_masked(vec4 vector, bvec4 mask)
 {
-  // preventing  the components, where mask is false to be the smallest one
-  vector += 10.f*max_component(abs(vector)) * vec4(not_(mask));
+  vector = mask_out_for_min(vector, mask);
   
   return index_of_first_true(is_smallest(vector) && mask);
+}
+
+inline float min_component_masked(vec3 vector, bvec3 mask)
+{
+  return min_component(mask_out_for_min(vector, mask));
+}
+
+inline float min_component_masked(vec4 vector, bvec4 mask)
+{
+  return min_component(mask_out_for_min(vector, mask));
+}
+
+inline float max_component_masked(vec3 vector, bvec3 mask)
+{
+  return max_component(mask_out_for_max(vector, mask));
+}
+
+inline float max_component_masked(vec4 vector, bvec4 mask)
+{
+  return max_component(mask_out_for_max(vector, mask));
 }
 
 // blending
