@@ -5,11 +5,14 @@
 #include <glrt/scene/resources/texture-file.h>
 #include <glrt/toolkit/geometry.h>
 
+#include "cpuvoxelizerimplementation.h"
+
 namespace glrt {
 namespace scene {
 namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
+
 
 Voxelizer::Implementation* Voxelizer::Implementation::singleton = nullptr;
 
@@ -56,10 +59,8 @@ void Voxelizer::registerAngelScriptAPI()
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid)
 {
   if(Implementation::singleton == nullptr)
-  {
     qWarning() << "No voxelizer implementation found.";
-    return;
-  }
+  CpuVoxelizerImplementation fallbackVoxelizationImplementation;
 
   // There should be no way to create a voxelizer without valid ResourceIndex
   Q_ASSERT(resourceIndex != nullptr);
@@ -213,39 +214,6 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   return metaData;
 }
 
-class SphereImplementation : public Voxelizer::Implementation
-{
-public:
-  void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize, const glm::vec3& origin, float radius)
-  {
-  #pragma omp parallel for
-      for(int x=0; x<gridSize.x; ++x)
-        for(int y=0; y<gridSize.y; ++y)
-          for(int z=0; z<gridSize.z; ++z)
-            data[x + gridSize.x * (y + gridSize.y * z)] = distance(glm::vec3(x,y,z)+0.5f, origin) - radius;
-  }
-
-  void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize)
-  {
-    float radius = glm::min(gridSize.x, glm::min(gridSize.y, gridSize.z))*0.5f - 1.f;
-
-    voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, radius);
-  }
-
-  utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material) override
-  {
-    utilities::GlTexture texture;
-
-    utilities::GlTexture::TextureAsFloats asFloats(gridSize);
-
-//    asFloats.data = ;
-
-    texture.fromFloats(asFloats);
-
-    return texture;
-  }
-};
-
 VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, const Voxelizer::Hints& hints)
 {
   AABB aabb = staticMesh.boundingBox();
@@ -256,7 +224,6 @@ VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const Q
   TextureFile textureFile;
   QVector<float> data;
 
-  SphereImplementation sphereImplementation; // #TODO do the voxelization itself
   Material dummyMaterial; // #FIXME
   switch(type)
   {
@@ -284,14 +251,14 @@ uint qHash(glrt::scene::resources::Voxelizer::FieldType type)
 
 Voxelizer::Implementation::Implementation()
 {
-  Q_ASSERT(singleton == nullptr);
-  singleton = this;
+  if(singleton == nullptr)
+    singleton = this;
 }
 
 Voxelizer::Implementation::~Implementation()
 {
-  Q_ASSERT(singleton == this);
-  singleton = nullptr;
+  if(singleton == this)
+    singleton = nullptr;
 }
 
 

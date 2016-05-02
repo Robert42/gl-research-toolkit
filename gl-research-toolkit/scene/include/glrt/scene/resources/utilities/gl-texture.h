@@ -126,8 +126,8 @@ struct GlTexture::TextureAsFloats
 
   TextureAsFloats() = delete;
 
-  TextureAsFloats(quint32 width, quint32 height, quint32 depth=1);
-  TextureAsFloats(const glm::ivec3& size);
+  TextureAsFloats(quint32 width, quint32 height, quint32 depth=1, quint32 numComponents=4);
+  TextureAsFloats(const glm::ivec3& size, quint32 numComponents);
 
   TextureAsFloats(const QImage& qImage);
 
