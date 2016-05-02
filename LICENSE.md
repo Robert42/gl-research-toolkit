@@ -36,6 +36,7 @@ For the assets (found in the submodules in `/external/assets`), please check eac
 - [glew](http://glew.sourceforge.net/) (BSDL License)
 - [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
 - [glm](glm.g-truc.net) (Modified MIT License)
+- [OpenVDB](http://www.openvdb.org/) Mozilla Public License
 - [Qt](http://www.qt.io/) (LGPL License)
 - [SDL](http://libsdl.org) (zlib license)
 
