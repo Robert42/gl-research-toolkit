@@ -3,7 +3,9 @@
 
 #include <glrt/toolkit/uuid.h>
 #include <glrt/scene/resources/static-mesh.h>
-#include <glrt/scene/resources/texture-file.h>
+#include <glrt/scene/resources/material.h>
+#include <glrt/scene/resources/utilities/gl-texture.h>
+#include <glrt/scene/coord-frame.h>
 
 namespace glrt {
 namespace scene {
@@ -14,6 +16,8 @@ class ResourceIndex;
 class Voxelizer final
 {
 public:
+  class Implementation;
+
   enum class FieldType : quint32
   {
     SIGNED_DISTANCE_FIELD,
@@ -23,7 +27,7 @@ public:
 
   struct Hints
   {
-    TextureFile::Type voxelType = TextureFile::Type::FLOAT16;
+    utilities::GlTexture::Type voxelType = utilities::GlTexture::Type::FLOAT16;
     float extend = 2.f;
     int minSize = 4;
     int maxSize = 128;
@@ -46,6 +50,18 @@ private:
 };
 
 uint qHash(glrt::scene::resources::Voxelizer::FieldType type);
+
+
+class Voxelizer::Implementation : public QObject
+{
+public:
+  static Voxelizer::Implementation* singleton;
+
+  Implementation();
+  ~Implementation();
+
+  virtual utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material) = 0;
+};
 
 
 } // namespace resources

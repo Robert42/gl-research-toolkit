@@ -122,11 +122,12 @@ struct GlTexture::TextureAsFloats
   UncompressedImage image;
   QVector<byte> textureData;
   byte* data = nullptr;
-  quint32 w = 0, w_float=0, h = 0;
+  quint32 width = 0, components_per_row=0, height = 0, depth = 0, rowCount=0;
 
   TextureAsFloats() = delete;
 
-  TextureAsFloats(quint32 width, quint32 height);
+  TextureAsFloats(quint32 width, quint32 height, quint32 depth=1);
+  TextureAsFloats(const glm::ivec3& size);
 
   TextureAsFloats(const QImage& qImage);
 

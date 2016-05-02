@@ -154,25 +154,27 @@ GLenum GlTexture::ImportSettings::internalFormat(Format format, Type type, bool*
 
 
 
-GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height)
+GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height, quint32 depth)
 {
-  w = width;
-  h = height;
-  w_float = w * 4;
+  this->width = width;
+  this->height = height;
+  this->depth = depth;
+  this->components_per_row = width*4;
+  this->rowCount = height*depth;
 
   image.type = Type::FLOAT32;
   image.format = Format::RGBA;
   // format and type must be set before calling calcRowStride!
 
-  image.width = w;
+  image.width = this->width;
   image.rowStride = image.calcRowStride();
-  image.height = h;
-  image.depth = 1;
+  image.height = this->height;
+  image.depth = this->depth;
   image.mipmap = 0;
-  image.target = Target::TEXTURE_2D;
+  image.target = image.depth==1 ? Target::TEXTURE_2D : Target::TEXTURE_3D;
   image.rawDataLength = image.rowStride * image.height;
 
-  textureData.resize(int(this->image.rowStride * h));
+  textureData.resize(int(this->image.rowStride * rowCount));
   data = reinterpret_cast<byte*>(textureData.data());
 }
 
@@ -187,19 +189,26 @@ GlTexture::TextureAsFloats::TextureAsFloats(const QPair<UncompressedImage, QVect
   image = importedTexture.first;
   textureData = importedTexture.second;
   data = reinterpret_cast<byte*>(textureData.data());
-  w = image.width;
-  w_float = w*4;
-  h = image.height*image.depth;
+  width = image.width;
+  components_per_row = width*4;
+  height = image.height;
+  depth = image.depth;
+  rowCount = height * depth;
+}
+
+GlTexture::TextureAsFloats::TextureAsFloats(const glm::ivec3& size)
+  : TextureAsFloats(size.x, size.y, size.z)
+{
 }
 
 
 void GlTexture::TextureAsFloats::remapSourceAsSigned()
 {
   #pragma omp parallel for
-  for(quint32 y=0; y<h; ++y)
+  for(quint32 y=0; y<rowCount; ++y)
   {
     float* line = this->lineData_As<float>(y);
-    for(quint32 x=0; x<w_float; ++x)
+    for(quint32 x=0; x<components_per_row; ++x)
       line[x] = line[x]*2.f - 1.f;
   }
 }
@@ -207,10 +216,10 @@ void GlTexture::TextureAsFloats::remapSourceAsSigned()
 void GlTexture::TextureAsFloats::remapSourceAsUnsigned()
 {
   #pragma omp parallel for
-  for(quint32 y=0; y<h; ++y)
+  for(quint32 y=0; y<rowCount; ++y)
   {
     float* line = this->lineData_As<float>(y);
-    for(quint32 x=0; x<w_float; ++x)
+    for(quint32 x=0; x<components_per_row; ++x)
       line[x] = line[x]*.5f + 0.5f;
   }
 }
@@ -218,10 +227,10 @@ void GlTexture::TextureAsFloats::remapSourceAsUnsigned()
 void GlTexture::TextureAsFloats::remap(glm::vec4 offset, glm::vec4 factor)
 {
   #pragma omp parallel for
-  for(quint32 y=0; y<h; ++y)
+  for(quint32 y=0; y<rowCount; ++y)
   {
     glm::vec4* line = this->lineData_As<glm::vec4>(y);
-    for(quint32 x=0; x<w; ++x)
+    for(quint32 x=0; x<width; ++x)
       line[x] = line[x]*factor + offset;
   }
 }
@@ -234,53 +243,53 @@ void GlTexture::TextureAsFloats::mergeWith_as_grey(const TextureAsFloats* red, c
 
   if(red)
   {
-    Q_ASSERT(red->w == this->w);
-    Q_ASSERT(red->h == this->h);
+    Q_ASSERT(red->width == this->width);
+    Q_ASSERT(red->rowCount == this->rowCount);
 #pragma omp parallel for
-    for(quint32 y=0; y<h; ++y)
+    for(quint32 y=0; y<rowCount; ++y)
     {
       glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
       const glm::vec4* redLine = red->lineData_As<glm::vec4>(y);
-      for(quint32 x=0; x<w; ++x)
+      for(quint32 x=0; x<rowCount; ++x)
         targetLine[x].r = grey(redLine[x].rgb());
     }
   }
   if(green)
   {
-    Q_ASSERT(green->w == this->w);
-    Q_ASSERT(green->h == this->h);
+    Q_ASSERT(green->width == this->width);
+    Q_ASSERT(green->rowCount == this->rowCount);
 #pragma omp parallel for
-    for(quint32 y=0; y<h; ++y)
+    for(quint32 y=0; y<rowCount; ++y)
     {
       glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
       const glm::vec4* greenLine = green->lineData_As<glm::vec4>(y);
-      for(quint32 x=0; x<w; ++x)
+      for(quint32 x=0; x<width; ++x)
         targetLine[x].g = grey(greenLine[x].rgb());
     }
   }
   if(blue)
   {
-    Q_ASSERT(blue->w == this->w);
-    Q_ASSERT(blue->h == this->h);
+    Q_ASSERT(blue->width == this->width);
+    Q_ASSERT(blue->rowCount == this->rowCount);
 #pragma omp parallel for
-    for(quint32 y=0; y<h; ++y)
+    for(quint32 y=0; y<rowCount; ++y)
     {
       glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
       const glm::vec4* blueLine = blue->lineData_As<glm::vec4>(y);
-      for(quint32 x=0; x<w; ++x)
+      for(quint32 x=0; x<width; ++x)
         targetLine[x].b = grey(blueLine[x].rgb());
     }
   }
   if(alpha)
   {
-    Q_ASSERT(alpha->w == this->w);
-    Q_ASSERT(alpha->h == this->h);
+    Q_ASSERT(alpha->width == this->width);
+    Q_ASSERT(alpha->rowCount == this->rowCount);
 #pragma omp parallel for
-    for(quint32 y=0; y<h; ++y)
+    for(quint32 y=0; y<rowCount; ++y)
     {
       glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
       const glm::vec4* alphaLine = alpha->lineData_As<glm::vec4>(y);
-      for(quint32 x=0; x<w; ++x)
+      for(quint32 x=0; x<width; ++x)
         targetLine[x].a = grey(alphaLine[x].rgb());
     }
   }
@@ -291,14 +300,14 @@ void GlTexture::TextureAsFloats::mergeWith_channelwise(const TextureAsFloats* re
   if(!red && !green && !blue && !alpha)
     return;
 
-  Q_ASSERT(red->w == this->w);
-  Q_ASSERT(red->h == this->h);
-  Q_ASSERT(green->w == this->w);
-  Q_ASSERT(green->h == this->h);
-  Q_ASSERT(blue->w == this->w);
-  Q_ASSERT(blue->h == this->h);
-  Q_ASSERT(alpha->w == this->w);
-  Q_ASSERT(alpha->h == this->h);
+  Q_ASSERT(red->width == this->width);
+  Q_ASSERT(red->rowCount == this->rowCount);
+  Q_ASSERT(green->width == this->width);
+  Q_ASSERT(green->rowCount == this->rowCount);
+  Q_ASSERT(blue->width == this->width);
+  Q_ASSERT(blue->rowCount == this->rowCount);
+  Q_ASSERT(alpha->width == this->width);
+  Q_ASSERT(alpha->rowCount == this->rowCount);
 
   if(!red)
     red = this;
@@ -310,14 +319,14 @@ void GlTexture::TextureAsFloats::mergeWith_channelwise(const TextureAsFloats* re
     alpha = this;
 
   #pragma omp parallel for
-  for(quint32 y=0; y<h; ++y)
+  for(quint32 y=0; y<rowCount; ++y)
   {
     glm::vec4* targetLine = this->lineData_As<glm::vec4>(y);
     const glm::vec4* redLine = red->lineData_As<glm::vec4>(y);
     const glm::vec4* greenLine = green->lineData_As<glm::vec4>(y);
     const glm::vec4* blueLine = blue->lineData_As<glm::vec4>(y);
     const glm::vec4* alphaLine = alpha->lineData_As<glm::vec4>(y);
-    for(quint32 x=0; x<w; ++x)
+    for(quint32 x=0; x<width; ++x)
     {
       targetLine[x].r = redLine[x].r;
       targetLine[x].g = greenLine[x].g;
@@ -346,14 +355,14 @@ void GlTexture::TextureAsFloats::mergeWith(const TextureAsFloats* red, const Tex
 
 void GlTexture::TextureAsFloats::flipY()
 {
-  quint32 half_h = h/2;
+  quint32 half_h = rowCount/2;
 
 #pragma omp parallel for
   for(quint32 y=0; y<half_h; ++y)
   {
     float* srcLine = this->lineData_As<float>(y);
-    float* targetLine = this->lineData_As<float>(h-1-y);
-    for(quint32 x=0; x<w_float; ++x)
+    float* targetLine = this->lineData_As<float>(rowCount-1-y);
+    for(quint32 x=0; x<components_per_row; ++x)
     {
       std::swap(srcLine[x], targetLine[x]);
     }
@@ -364,33 +373,34 @@ void GlTexture::TextureAsFloats::fromQImage(QImage image)
 {
   image = image.convertToFormat(QImage::Format_RGBA8888);
 
-  Q_ASSERT(image.width() == int(w));
-  Q_ASSERT(image.height() == int(h));
+  Q_ASSERT(image.width() == int(width));
+  Q_ASSERT(image.height() == int(height));
+  Q_ASSERT(1 == int(depth));
 
   const quint8* srcData = reinterpret_cast<quint8*>(image.bits());
 
 #pragma omp parallel for
-  for(int y=0; y<int(h); ++y)
+  for(int y=0; y<int(rowCount); ++y)
   {
     float* targetLine = this->lineData_As<float>(quint32(y));
     const quint8* srcLine = srcData + y*image.bytesPerLine();
-    for(int x=0; x<int(w_float); ++x)
+    for(int x=0; x<int(components_per_row); ++x)
       targetLine[x] = srcLine[x] / 255.f;
   }
 }
 
 QImage GlTexture::TextureAsFloats::asQImage() const
 {
-  QImage image(int(w), int(h), QImage::Format_RGBA8888);
+  QImage image(int(width), int(height), QImage::Format_RGBA8888);
 
   quint8* targetData = reinterpret_cast<quint8*>(image.bits());
 
 #pragma omp parallel for
-  for(int y=0; y<int(h); ++y)
+  for(int y=0; y<int(height); ++y)
   {
     const float* srcLine = this->lineData_As<float>(quint32(y));
     quint8* targetLine = targetData + y*image.bytesPerLine();
-    for(int x=0; x<int(w_float); ++x)
+    for(int x=0; x<int(components_per_row); ++x)
       targetLine[x] = static_cast<quint8>(glm::clamp<float>(srcLine[x] * 255.f, 0.f, 255.f));
   }
 
@@ -399,16 +409,16 @@ QImage GlTexture::TextureAsFloats::asQImage() const
 
 QImage GlTexture::TextureAsFloats::asChannelQImage(int channel) const
 {
-  QImage image(int(w), int(h), QImage::Format_RGBA8888);
+  QImage image(int(width), int(height), QImage::Format_RGBA8888);
 
   quint8* targetData = reinterpret_cast<quint8*>(image.bits());
 
 #pragma omp parallel for
-  for(int y=0; y<int(h); ++y)
+  for(int y=0; y<int(height); ++y)
   {
     const glm::vec4* srcLine = this->lineData_As<glm::vec4>(quint32(y));
     glm::tvec4<quint8>* targetLine = reinterpret_cast<glm::tvec4<quint8>*>(targetData + y*image.bytesPerLine());
-    for(int x=0; x<int(w); ++x)
+    for(int x=0; x<int(width); ++x)
     {
       quint8 v = static_cast<quint8>(glm::clamp<float>(srcLine[x][channel] * 255.f, 0.f, 255.f));
 
