@@ -16,12 +16,16 @@ class TextureFile : public QObject
 {
   Q_OBJECT
 public:
-  typedef utilities::GlTexture::Target Target;
-  typedef utilities::GlTexture::Type Type;
-  typedef utilities::GlTexture::Format Format;
-  typedef utilities::GlTexture::Compression Compression;
+  typedef utilities::GlTexture GlTexture;
+  typedef GlTexture::Target Target;
+  typedef GlTexture::Type Type;
+  typedef GlTexture::Format Format;
+  typedef GlTexture::Compression Compression;
+  typedef GlTexture::TextureAsFloats TextureAsFloats;
+  typedef GlTexture::UncompressedImage UncompressedImage;
+  typedef GlTexture::CompressedImage CompressedImage;
 
-  struct ImportSettings : public utilities::GlTexture::ImportSettings
+  struct ImportSettings : public GlTexture::ImportSettings
   {
     Target target = Target::TEXTURE_2D;
     Type type = Type::UINT8;
@@ -84,6 +88,8 @@ public:
 
   TextureFile();
 
+  void appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData);
+  void appendUncompressedImage(const GlTexture& texture, Type type = Type::UINT8, Format format = Format::RGBA);
   void appendImage(const QVector<float>& data, const glm::ivec3& size, Target target = Target::TEXTURE_2D, Type type = Type::UINT8, Format format = Format::RGBA);
 
   void import(const QFileInfo& srcFile, ImportSettings importSettings);
@@ -91,10 +97,6 @@ public:
   static GLuint loadFromFile(const QFileInfo& textureFile);
 
 private:
-  typedef utilities::GlTexture ImportedGlTexture;
-  typedef utilities::GlTexture::TextureAsFloats TextureAsFloats;
-  typedef utilities::GlTexture::UncompressedImage UncompressedImage;
-  typedef utilities::GlTexture::CompressedImage CompressedImage;
 
   struct Header
   {
@@ -111,7 +113,6 @@ private:
   QVector<UncompressedImage> uncompressedImages;
   QVector<QVector<byte>> rawData;
 
-  void appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData);
 
   quint32 appendRawData(const QVector<byte>& rawData);
   int expectedFileSize() const;

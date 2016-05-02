@@ -28,7 +28,7 @@ void TextureFile::appendImage(const QVector<float>& data, const glm::ivec3& size
 
   Q_ASSERT(quint32(data.length()) == nChannels*quint32(size.x*size.y*size.z));
 
-  ImportedGlTexture glTex;
+  GlTexture glTex;
 
   UncompressedImage inputImage;
 
@@ -58,12 +58,12 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 
   const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
-  ImportedGlTexture textureInformation(srcFile, importSettings);
+  GlTexture textureInformation(srcFile, importSettings);
 
-  ImportedGlTexture* red_texture = nullptr;
-  ImportedGlTexture* green_texture = nullptr;
-  ImportedGlTexture* blue_texture = nullptr;
-  ImportedGlTexture* alpha_texture = nullptr;
+  GlTexture* red_texture = nullptr;
+  GlTexture* green_texture = nullptr;
+  GlTexture* blue_texture = nullptr;
+  GlTexture* alpha_texture = nullptr;
 
   const int firstMipMap = 0;
   const int lastMipMap = textureInformation.maxLevel();
@@ -71,13 +71,13 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
   if(importSettings.need_merging())
   {
     auto createChannelTextureInfo = [importSettings,&srcFile,&textureInformation](const std::string& suffix) {
-      ImportedGlTexture* tex = nullptr;
+      GlTexture* tex = nullptr;
       if(!suffix.empty())
       {
         QFileInfo newFile = QDir(srcFile.path()).filePath(srcFile.baseName().replace(QRegularExpression("[-_][^-_]+$"), QString::fromStdString(suffix)));
         if(!newFile.exists())
           throw GLRT_EXCEPTION(QString("The file %0 doesn't exist.").arg(newFile.filePath()));
-        tex = new ImportedGlTexture(newFile, importSettings);
+        tex = new GlTexture(newFile, importSettings);
         if(tex->width(0) != textureInformation.width(0) || tex->height(0) != textureInformation.height(0))
           throw GLRT_EXCEPTION(QString("Merged Texture import: mismatched texture size between %0 and %1. (the channel texture has the size %2x%3 and the original tetxure has the size %4x%5)").arg(srcFile.filePath()).arg(newFile.filePath()).arg(tex->width(0)).arg(tex->height(0)).arg(textureInformation.width(0)).arg(textureInformation.height(0)));
       }
@@ -243,7 +243,7 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
     throw GLRT_EXCEPTION(QString("Can't read texture file <%0>").arg(textureFile.absoluteFilePath()));
 
 
-  ImportedGlTexture importedTexture;
+  GlTexture importedTexture;
 
   quint64 offsetCheck = 0;
 
