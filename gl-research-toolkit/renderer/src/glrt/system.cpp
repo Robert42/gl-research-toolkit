@@ -179,10 +179,6 @@ void System::verifyGLFeatures()
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl uniform blocks."));
   if(PRINT_GL_INTEGER(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS) < EXPECTED_GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS)
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl shader storage buffers."));
-  if(PRINT_GL_INTEGER(GL_MAX_COMPUTE_WORK_GROUP_COUNT) < 2)
-    throw GLRT_EXCEPTION(QString("Unsupported number of opengl compute shader workign groups."));
-  if(PRINT_GL_INTEGER(GL_MAX_COMPUTE_WORK_GROUP_SIZE) < 2)
-    throw GLRT_EXCEPTION(QString("Unsupported size of opengl compute shader workign groups."));
 
   maxComputeWorkGroupCount = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_COUNT);
   maxComputeWorkGroupSize = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_SIZE);
