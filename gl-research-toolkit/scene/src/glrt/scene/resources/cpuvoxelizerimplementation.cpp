@@ -25,7 +25,7 @@ utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3&
 {
   utilities::GlTexture texture;
 
-  utilities::GlTexture::TextureAsFloats asFloats(gridSize);
+  utilities::GlTexture::TextureAsFloats asFloats(gridSize, 1);
 
   voxelizeToSphere(asFloats.textureData, gridSize);
 
