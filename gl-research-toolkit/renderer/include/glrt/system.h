@@ -44,8 +44,8 @@ public:
     }
   };
 
-  static GLint maxComputeWorkGroupCount;
-  static GLint maxComputeWorkGroupSize;
+  static glm::ivec3 maxComputeWorkGroupCount;
+  static glm::ivec3 maxComputeWorkGroupSize;
 
   SDL_Window* sdlWindow;
   SDL_GLContext sdlGlContext;

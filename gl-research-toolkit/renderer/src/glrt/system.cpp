@@ -32,8 +32,8 @@
 namespace glrt {
 
 glm::ivec2 System::_windowSize;
-GLint System::maxComputeWorkGroupCount = 2;
-GLint System::maxComputeWorkGroupSize = 2;
+glm::ivec3 System::maxComputeWorkGroupCount = glm::ivec3(-1);
+glm::ivec3 System::maxComputeWorkGroupSize = glm::ivec3(-1);
 
 System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
@@ -129,9 +129,18 @@ void System::initGLEW(const Settings& settings)
 
 inline GLint print_gl_integer(GLenum variable, const char* variableName)
 {
-  GLint value;
+  GLint value = -1;
   glGetIntegerv(variable, &value);
-  qDebug() << "OpenGL Capability: " << variableName << " = " << value;
+  qDebug() << "OpenGL Variable: " << variableName << " = " << value;
+  return value;
+}
+
+inline glm::ivec3 print_gl_integer_vec3(GLenum variable, const char* variableName)
+{
+  glm::ivec3 value(-1);
+  for(int i=0; i<3; ++i)
+    glGetIntegeri_v(variable, GLuint(i), &value[i]);
+  qDebug() << "OpenGL Variable: " << variableName << " = " << value;
   return value;
 }
 
@@ -150,6 +159,7 @@ void System::initNVCommandlist(const Settings& settings)
 }
 
 #define PRINT_GL_INTEGER(x) print_gl_integer(x, #x)
+#define PRINT_GL_INTEGER_VEC3(x) print_gl_integer_vec3(x, #x)
 
 void System::verifyGLFeatures()
 {
@@ -174,8 +184,8 @@ void System::verifyGLFeatures()
   if(PRINT_GL_INTEGER(GL_MAX_COMPUTE_WORK_GROUP_SIZE) < 2)
     throw GLRT_EXCEPTION(QString("Unsupported size of opengl compute shader workign groups."));
 
-  glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_COUNT, &maxComputeWorkGroupCount);
-  glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_SIZE, &maxComputeWorkGroupSize);
+  maxComputeWorkGroupCount = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_COUNT);
+  maxComputeWorkGroupSize = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_SIZE);
 
   Q_UNUSED(suppressLog);
 }
