@@ -8,9 +8,9 @@ namespace resources {
 void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize, const glm::vec3& origin, float radius)
 {
 #pragma omp parallel for
-    for(int x=0; x<gridSize.x; ++x)
-      for(int y=0; y<gridSize.y; ++y)
-        for(int z=0; z<gridSize.z; ++z)
+  for(int z=0; z<gridSize.z; ++z)
+    for(int y=0; y<gridSize.y; ++y)
+      for(int x=0; x<gridSize.x; ++x)
           data[x + gridSize.x * (y + gridSize.y * z)] = distance(glm::vec3(x,y,z)+0.5f, origin) - radius;
 }
 
