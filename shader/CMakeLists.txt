@@ -17,6 +17,8 @@ add_custom_target(
   debugging/posteffects/orange-sphere.vs
   debugging/posteffects/posteffect.fs.glsl
   debugging/posteffects/posteffect.vs.glsl
+  debugging/posteffects/raymarch-distancefield.fs
+  debugging/posteffects/raymarch-distancefield.vs
   debugging/posteffects/show-distancefield-as-cubic-voxel.fs
   debugging/posteffects/show-distancefield-as-cubic-voxel.vs
   debugging/visualizations/common-debug-line-visualization.fs.glsl
@@ -54,6 +56,8 @@ add_custom_target(
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
   toolkit/scene/uniforms.glsl
+  toolkit/voxels/distance-field-utils.glsl
   toolkit/voxels/raymarching-cubic-voxels.glsl
+  toolkit/voxels/raymarching-distance-field.glsl
   toolkit/voxels/voxel-structs.glsl
 )
