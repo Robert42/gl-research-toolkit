@@ -33,6 +33,7 @@ namespace glrt {
 
 glm::ivec2 System::_windowSize;
 GLint System::maxComputeWorkGroupCount = 2;
+GLint System::maxComputeWorkGroupSize = 2;
 
 System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
@@ -172,8 +173,9 @@ void System::verifyGLFeatures()
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl compute shader workign groups."));
   if(PRINT_GL_INTEGER(GL_MAX_COMPUTE_WORK_GROUP_SIZE) < 2)
     throw GLRT_EXCEPTION(QString("Unsupported size of opengl compute shader workign groups."));
-/*
+
   glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_COUNT, &maxComputeWorkGroupCount);
+  glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_SIZE, &maxComputeWorkGroupSize);
 
   Q_UNUSED(suppressLog);
 }

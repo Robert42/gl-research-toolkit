@@ -45,6 +45,7 @@ public:
   };
 
   static GLint maxComputeWorkGroupCount;
+  static GLint maxComputeWorkGroupSize;
 
   SDL_Window* sdlWindow;
   SDL_GLContext sdlGlContext;
