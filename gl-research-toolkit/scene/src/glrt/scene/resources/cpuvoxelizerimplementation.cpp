@@ -1,5 +1,7 @@
 #include "cpuvoxelizerimplementation.h"
 
+#include <openvdb/triangle-distance.h>
+
 namespace glrt {
 namespace scene {
 namespace resources {
@@ -27,7 +29,21 @@ utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3&
 
   utilities::GlTexture::TextureAsFloats asFloats(gridSize, 1);
 
-  voxelizeToSphere(asFloats.textureData, gridSize);
+  if(staticMesh.isIndexed())
+  {
+#pragma omp parallel for
+  for(int z=0; z<gridSize.z; ++z)
+    for(int y=0; y<gridSize.y; ++y)
+      for(int x=0; x<gridSize.x; ++x)
+        for(quint16 i=0; i<staticMesh.indices.length(); i+=3)
+        {
+          const glm::vec3& v0 = staticMesh.vertices[i].position;
+          const glm::vec3& v1 = staticMesh.vertices[i+1].position;
+          const glm::vec3& v2 = staticMesh.vertices[i+2].position;
+
+
+        }
+  }
 
   texture.fromFloats(asFloats);
 
