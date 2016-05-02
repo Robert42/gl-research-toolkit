@@ -174,7 +174,7 @@ GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height, quint
   image.target = image.depth==1 ? Target::TEXTURE_2D : Target::TEXTURE_3D;
   image.rawDataLength = image.rowStride * image.height;
 
-  textureData.resize(int(this->image.rowStride * rowCount));
+  textureData.resize(int(this->components_per_row * rowCount));
   data = reinterpret_cast<byte*>(textureData.data());
 }
 
@@ -187,7 +187,8 @@ GlTexture::TextureAsFloats::TextureAsFloats(const QImage& qImage)
 GlTexture::TextureAsFloats::TextureAsFloats(const QPair<UncompressedImage, QVector<byte>>& importedTexture)
 {
   image = importedTexture.first;
-  textureData = importedTexture.second;
+  textureData.resize((importedTexture.second.length()+sizeof(float)-1)/sizeof(float));
+  std::memcpy(textureData.data(), importedTexture.second.data(), importedTexture.second.length());
   data = reinterpret_cast<byte*>(textureData.data());
   width = image.width;
   components_per_row = width*4;
