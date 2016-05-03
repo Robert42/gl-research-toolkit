@@ -12,6 +12,7 @@ class CpuVoxelizerImplementation : public Voxelizer::Implementation
 public:
   static void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize, const glm::vec3& origin, float radius);
   static void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize);
+  static void voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material);
   utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material) override;
 };
 

@@ -28,19 +28,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#include "Proximity.h"
+#include <openvdb/triangle-distance.h>
 
 namespace openvdb {
-OPENVDB_USE_VERSION_NAMESPACE
-namespace OPENVDB_VERSION_NAME {
 namespace math {
 
+const Vec3d::value_type epsilon = 1.e-5f;
 
-OPENVDB_API Vec3d
+inline bool isApproxEqual(const Vec3d& a, const Vec3d& b)
+{
+  return all(lessThan(abs(a-b), Vec3d(epsilon)));
+}
+
+inline Vec3d
 closestPointOnTriangleToPoint(
     const Vec3d& a, const Vec3d& b, const Vec3d& c, const Vec3d& p, Vec3d& uvw)
 {
-    uvw.setZero();
+    uvw = Vec3d(0);
 
     // degenerate triangle, singular
     if ((isApproxEqual(a, b) && isApproxEqual(a, c))) {
@@ -49,12 +53,12 @@ closestPointOnTriangleToPoint(
     }
 
     Vec3d ab = b - a, ac = c - a, ap = p - a;
-    double d1 = ab.dot(ap), d2 = ac.dot(ap);
+    Vec3d::value_type d1 = dot(ab, ap), d2 = dot(ac, ap);
 
     // degenerate triangle edges
     if (isApproxEqual(a, b)) {
 
-        double t = 0.0;
+        Vec3d::value_type t = 0.0;
         Vec3d cp = closestPointOnSegmentToPoint(a, c, p, t);
 
         uvw[0] = 1.0 - t;
@@ -64,7 +68,7 @@ closestPointOnTriangleToPoint(
 
     } else if (isApproxEqual(a, c) || isApproxEqual(b, c)) {
 
-        double t = 0.0;
+        Vec3d::value_type t = 0.0;
         Vec3d cp = closestPointOnSegmentToPoint(a, b, p, t);
         uvw[0] = 1.0 - t;
         uvw[1] = t;
@@ -78,14 +82,14 @@ closestPointOnTriangleToPoint(
 
     // Check if P in vertex region outside B
     Vec3d bp = p - b;
-    double d3 = ab.dot(bp), d4 = ac.dot(bp);
+    Vec3d::value_type d3 = dot(ab, bp), d4 = dot(ac, bp);
     if (d3 >= 0.0 && d4 <= d3) {
         uvw[1] = 1.0;
         return b; // barycentric coordinates (0,1,0)
     }
 
     // Check if P in edge region of AB, if so return projection of P onto AB
-    double vc = d1 * d4 - d3 * d2;
+    Vec3d::value_type vc = d1 * d4 - d3 * d2;
     if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0) {
         uvw[1] = d1 / (d1 - d3);
         uvw[0] = 1.0 - uvw[1];
@@ -94,14 +98,14 @@ closestPointOnTriangleToPoint(
 
     // Check if P in vertex region outside C
     Vec3d cp = p - c;
-    double d5 = ab.dot(cp), d6 = ac.dot(cp);
+    Vec3d::value_type d5 = dot(ab, cp), d6 = dot(ac, cp);
     if (d6 >= 0.0 && d5 <= d6) {
         uvw[2] = 1.0;
         return c; // barycentric coordinates (0,0,1)
     }
 
     // Check if P in edge region of AC, if so return projection of P onto AC
-    double vb = d5 * d2 - d1 * d6;
+    Vec3d::value_type vb = d5 * d2 - d1 * d6;
     if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0) {
         uvw[2] = d2 / (d2 - d6);
         uvw[0] = 1.0 - uvw[2];
@@ -109,7 +113,7 @@ closestPointOnTriangleToPoint(
     }
 
     // Check if P in edge region of BC, if so return projection of P onto BC
-    double va = d3*d6 - d5*d4;
+    Vec3d::value_type va = d3*d6 - d5*d4;
     if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0) {
         uvw[2] = (d4 - d3) / ((d4 - d3) + (d5 - d6));
         uvw[1] = 1.0 - uvw[2];
@@ -117,7 +121,7 @@ closestPointOnTriangleToPoint(
     }
 
     // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
-    double denom = 1.0 / (va + vb + vc);
+    Vec3d::value_type denom = 1.0 / (va + vb + vc);
     uvw[2] = vc * denom;
     uvw[1] = vb * denom;
     uvw[0] = 1.0 - uvw[1] - uvw[2];
@@ -127,10 +131,10 @@ closestPointOnTriangleToPoint(
 
 
 OPENVDB_API Vec3d
-closestPointOnSegmentToPoint(const Vec3d& a, const Vec3d& b, const Vec3d& p, double& t)
+inline closestPointOnSegmentToPoint(const Vec3d& a, const Vec3d& b, const Vec3d& p, Vec3d::value_type& t)
 {
     Vec3d ab = b - a;
-    t = (p - a).dot(ab);
+    t = dot(p - a, ab);
 
     if (t <= 0.0) {
         // c projects outside the [a,b] interval, on the a side.
@@ -139,7 +143,7 @@ closestPointOnSegmentToPoint(const Vec3d& a, const Vec3d& b, const Vec3d& p, dou
     } else {
 
         // always nonnegative since denom = ||ab||^2
-        double denom = ab.dot(ab);
+        Vec3d::value_type denom = dot(ab, ab);
 
         if (t >= denom) {
             // c projects outside the [a,b] interval, on the b side.
@@ -154,7 +158,6 @@ closestPointOnSegmentToPoint(const Vec3d& a, const Vec3d& b, const Vec3d& p, dou
 }
 
 } // namespace math
-} // namespace OPENVDB_VERSION_NAME
 } // namespace openvdb
 
 // Copyright (c) 2012-2016 DreamWorks Animation LLC

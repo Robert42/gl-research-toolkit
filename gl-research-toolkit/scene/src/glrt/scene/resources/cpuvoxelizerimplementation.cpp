@@ -7,13 +7,23 @@ namespace scene {
 namespace resources {
 
 
+inline int coordToIndex(int x, int y, int z, const glm::ivec3& gridSize)
+{
+  return x + gridSize.x * (y + gridSize.y * z);
+}
+
+inline glm::vec3 centerPointOfVoxel(int x, int y, int z)
+{
+  return glm::vec3(x,y,z)+0.5f;
+}
+
 void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize, const glm::vec3& origin, float radius)
 {
 #pragma omp parallel for
   for(int z=0; z<gridSize.z; ++z)
     for(int y=0; y<gridSize.y; ++y)
       for(int x=0; x<gridSize.x; ++x)
-          data[x + gridSize.x * (y + gridSize.y * z)] = distance(glm::vec3(x,y,z)+0.5f, origin) - radius;
+          data[coordToIndex(x, y, z, gridSize)] = distance(centerPointOfVoxel(x,y,z), origin) - radius;
 }
 
 void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize)
@@ -23,27 +33,82 @@ void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const gl
   voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, radius);
 }
 
+void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material)
+{
+  // #TODO
+  bool twoSided = false;
+  Q_UNUSED(material);
+
+  QVector<glm::vec3> vertices_array;
+  glm::vec3* vertices = nullptr;
+
+  if(staticMesh.isIndexed())
+  {
+    const int n = staticMesh.indices.length();
+    vertices_array.resize(n);
+    vertices = vertices_array.data();
+
+#pragma omp parallel for
+    for(int i=0; i<n; i++)
+      vertices[i] = localToVoxelSpace.transform_point(staticMesh.vertices[staticMesh.indices[i]].position);
+  }else
+  {
+    const int n = staticMesh.vertices.length();
+    vertices_array.resize(n);
+    vertices = vertices_array.data();
+
+#pragma omp parallel for
+    for(int i=0; i<n; i++)
+      vertices[i] = localToVoxelSpace.transform_point(staticMesh.vertices[i].position);
+  }
+
+  const int num_vertices = vertices_array.length();
+
+#pragma omp parallel for
+  for(int z=0; z<gridSize.z; ++z)
+    for(int y=0; y<gridSize.y; ++y)
+      for(int x=0; x<gridSize.x; ++x)
+      {
+        float best_d = INFINITY;
+        float best_d_abs = INFINITY;
+
+        for(int i=0; i<num_vertices; i+=3)
+        {
+          Q_ASSERT(i+2<num_vertices);
+
+          const glm::vec3 p = centerPointOfVoxel(x,y,z);
+          const glm::vec3& v0 = vertices[i];
+          const glm::vec3& v1 = vertices[i+1];
+          const glm::vec3& v2 = vertices[i+2];
+
+          glm::vec3 uvw;
+          glm::vec3 closestPoint = openvdb::math::closestPointOnTriangleToPoint(v0, v1, v2, p, uvw);
+
+          float d_abs = distance(closestPoint, p);
+          float d = glm::faceforward(glm::vec3(d_abs,0,0), glm::cross(v1-v0, v2-v0), p-closestPoint).x;
+
+          if(Q_UNLIKELY(best_d_abs > d_abs))
+          {
+            best_d = d;
+            best_d_abs = best_d;
+          }
+        }
+        if(Q_UNLIKELY(twoSided))
+          best_d = best_d_abs;
+        data[coordToIndex(x, y, z, gridSize)] = best_d;
+      }
+}
+
 utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material)
 {
   utilities::GlTexture texture;
 
   utilities::GlTexture::TextureAsFloats asFloats(gridSize, 1);
 
-  if(staticMesh.isIndexed())
-  {
-#pragma omp parallel for
-  for(int z=0; z<gridSize.z; ++z)
-    for(int y=0; y<gridSize.y; ++y)
-      for(int x=0; x<gridSize.x; ++x)
-        for(quint16 i=0; i<staticMesh.indices.length(); i+=3)
-        {
-          const glm::vec3& v0 = staticMesh.vertices[i].position;
-          const glm::vec3& v1 = staticMesh.vertices[i+1].position;
-          const glm::vec3& v2 = staticMesh.vertices[i+2].position;
+  QVector<float>& data = asFloats.textureData;
 
-
-        }
-  }
+//  voxelizeToSphere(data, gridSize);
+  voxeliseMesh(data, gridSize, localToVoxelSpace, staticMesh, material);
 
   texture.fromFloats(asFloats);
 
