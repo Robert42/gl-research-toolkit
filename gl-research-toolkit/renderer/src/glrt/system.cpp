@@ -32,6 +32,8 @@
 namespace glrt {
 
 glm::ivec2 System::_windowSize;
+glm::ivec3 System::maxComputeWorkGroupCount = glm::ivec3(-1);
+glm::ivec3 System::maxComputeWorkGroupSize = glm::ivec3(-1);
 
 System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
@@ -127,9 +129,18 @@ void System::initGLEW(const Settings& settings)
 
 inline GLint print_gl_integer(GLenum variable, const char* variableName)
 {
-  GLint value;
+  GLint value = -1;
   glGetIntegerv(variable, &value);
-  qDebug() << "OpenGL Capability: " << variableName << " = " << value;
+  qDebug() << "OpenGL Variable: " << variableName << " = " << value;
+  return value;
+}
+
+inline glm::ivec3 print_gl_integer_vec3(GLenum variable, const char* variableName)
+{
+  glm::ivec3 value(-1);
+  for(int i=0; i<3; ++i)
+    glGetIntegeri_v(variable, GLuint(i), &value[i]);
+  qDebug() << "OpenGL Variable: " << variableName << " = " << value;
   return value;
 }
 
@@ -148,6 +159,7 @@ void System::initNVCommandlist(const Settings& settings)
 }
 
 #define PRINT_GL_INTEGER(x) print_gl_integer(x, #x)
+#define PRINT_GL_INTEGER_VEC3(x) print_gl_integer_vec3(x, #x)
 
 void System::verifyGLFeatures()
 {
@@ -167,6 +179,9 @@ void System::verifyGLFeatures()
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl uniform blocks."));
   if(PRINT_GL_INTEGER(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS) < EXPECTED_GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS)
     throw GLRT_EXCEPTION(QString("Unsupported number of opengl shader storage buffers."));
+
+  maxComputeWorkGroupCount = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_COUNT);
+  maxComputeWorkGroupSize = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_SIZE);
 
   Q_UNUSED(suppressLog);
 }

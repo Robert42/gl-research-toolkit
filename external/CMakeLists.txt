@@ -45,3 +45,6 @@ add_subdirectory(angelscript-integration)
 
 ######## Nvidia ################################################################
 add_subdirectory(nvcommandlist)
+
+######## OpenVDB ###############################################################
+add_subdirectory(openvdb)

@@ -35,6 +35,7 @@ set(SOURCE_FILES
   include/glrt/scene/resources/texture.h
   include/glrt/scene/resources/texture-manager.h
   include/glrt/scene/resources/texture-sampler.h
+  include/glrt/scene/resources/utilities/gl-texture.h
   include/glrt/scene/resources/voxel-data.h
   include/glrt/scene/resources/voxel-file.h
   include/glrt/scene/resources/voxelizer.h
@@ -56,6 +57,8 @@ set(SOURCE_FILES
   src/glrt/scene/light-component.cpp
   src/glrt/scene/node.cpp
   src/glrt/scene/resources/asset-converter.cpp
+  src/glrt/scene/resources/cpuvoxelizerimplementation.cpp
+  src/glrt/scene/resources/cpuvoxelizerimplementation.h
   src/glrt/scene/resources/light-source.cpp
   src/glrt/scene/resources/material.cpp
   src/glrt/scene/resources/resource-index.cpp
@@ -67,6 +70,7 @@ set(SOURCE_FILES
   src/glrt/scene/resources/texture-file.cpp
   src/glrt/scene/resources/texture-manager.cpp
   src/glrt/scene/resources/texture-sampler.cpp
+  src/glrt/scene/resources/utilities/gl-texture.cpp
   src/glrt/scene/resources/voxel-data.cpp
   src/glrt/scene/resources/voxel-file.cpp
   src/glrt/scene/resources/voxelizer.cpp

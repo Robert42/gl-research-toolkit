@@ -36,6 +36,7 @@ For the assets (found in the submodules in `/external/assets`), please check eac
 - [glew](http://glew.sourceforge.net/) (BSDL License)
 - [glhelper](https://github.com/Wumpf/glhelper) (MIT License)
 - [glm](glm.g-truc.net) (Modified MIT License)
+- [OpenVDB](http://www.openvdb.org/) Mozilla Public License
 - [Qt](http://www.qt.io/) (LGPL License)
 - [SDL](http://libsdl.org) (zlib license)
 
@@ -43,3 +44,4 @@ For the assets (found in the submodules in `/external/assets`), please check eac
 
 - Shader Code snippets from the Siggraph 2014 course [Moving Frostbite to PBR](http://www.frostbite.com/2014/11/moving-frostbite-to-pbr/).
 - [Header](https://github.com/nvpro-samples/gl_cadscene_rendertechniques/blob/b47350a949e94dce368f14e968faa1672ef6ac42/nvcommandlist.h) and [source](https://github.com/nvpro-samples/gl_cadscene_rendertechniques/blob/b47350a949e94dce368f14e968faa1672ef6ac42/nvcommandlist.cpp) files used the NV_command_list extension for OpenGl. Both source files are published under a BSD-like license.
+- The code snippets in external/shaders/distance-fields are based on formulas presented in the presentation http://iquilezles.org/www/material/nvscene2008/rwwtt.pdf (see also http://iquilezles.org/www/material/nvscene2008/nvscene2008.htm)

@@ -11,6 +11,7 @@ target_link_libraries(glrt-scene
   glrt-core
   glhelper
   Qt5::Widgets
+  openvdb
 )
 
 target_include_directories(
