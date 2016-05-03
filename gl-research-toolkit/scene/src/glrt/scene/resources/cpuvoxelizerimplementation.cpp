@@ -85,12 +85,12 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
           glm::vec3 closestPoint = openvdb::math::closestPointOnTriangleToPoint(v0, v1, v2, p, uvw);
 
           float d_abs = distance(closestPoint, p);
-          float d = glm::faceforward(glm::vec3(d_abs,0,0), glm::cross(v1-v0, v2-v0), p-closestPoint).x;
+          float d = -glm::faceforward(glm::vec3(d_abs,0,0), glm::cross(v1-v0, v2-v0), p-closestPoint).x;
 
           if(Q_UNLIKELY(best_d_abs > d_abs))
           {
             best_d = d;
-            best_d_abs = best_d;
+            best_d_abs = d_abs;
           }
         }
         if(Q_UNLIKELY(twoSided))
