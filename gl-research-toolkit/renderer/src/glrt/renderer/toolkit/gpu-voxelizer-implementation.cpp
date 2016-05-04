@@ -47,10 +47,11 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
   GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R32F);
   GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
 
+  int numVertices = preprocessVertices(localToVoxelSpace, staticMesh);
 
   VoxelizeMetaData& header = *reinterpret_cast<VoxelizeMetaData*>(metaData.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   header.two_sided = material.type.testFlag(scene::resources::Material::TypeFlag::TWO_SIDED);
-  header.numVertices = preprocessVertices(localToVoxelSpace, staticMesh);
+  header.numVertices = numVertices;
   header.vertices = preprocessedVertices.gpuBufferAddress();
   header.targetTexture = imageHandle;
   header.offset = 0.f;
