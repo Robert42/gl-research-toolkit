@@ -33,13 +33,17 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
                                                     const scene::resources::Material& material)
 {
   GlTexture texture;
+  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), /*dummyValues.data()*/nullptr);
+
+  // Make the texture complete
+  GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_BASE_LEVEL, 0);
+  GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_MAX_LEVEL, 0);
 
   GLuint textureId = texture.textureId;
 
-  GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
-  GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
+  GLuint64 textureHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_FALSE, 0, GL_R32F);
+  GL_CALL(glMakeImageHandleResidentNV, textureHandle, GL_WRITE_ONLY);
 
-  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), nullptr);
 
   VoxelizeMetaData& header = *reinterpret_cast<VoxelizeMetaData*>(metaData.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   header.two_sided = material.type.testFlag(scene::resources::Material::TypeFlag::TWO_SIDED);
@@ -52,7 +56,7 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 
   voxelizeMeshComputeShader.execute(gridSize);
 
-  GL_CALL(glMakeTextureHandleNonResidentNV, textureHandle);
+  GL_CALL(glMakeImageHandleNonResidentNV, textureHandle);
 
   return texture;
 }
