@@ -78,25 +78,23 @@ int GpuVoxelizerImplementation::preprocessVertices(const scene::CoordFrame& loca
   if(preprocessedVertices.GetSize() < necessarySpace)
     preprocessedVertices = std::move(gl::Buffer(necessarySpace, gl::Buffer::UsageFlag::MAP_WRITE));
 
-  byte* buffer = reinterpret_cast<byte*>(preprocessedVertices.Map(0, necessarySpace, gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+  byte* const buffer = reinterpret_cast<byte*>(preprocessedVertices.Map(0, necessarySpace, gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
   if(staticMesh.isIndexed())
   {
 #pragma omp parallel for
     for(int i=0; i<num_vertices; i++)
     {
-      glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer);
+      glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer + i*stride);
       vertex = localToVoxelSpace.transform_point(staticMesh.vertices[staticMesh.indices[i]].position);
-      buffer += stride;
     }
   }else
   {
 #pragma omp parallel for
     for(int i=0; i<num_vertices; i++)
     {
-      glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer);
+      glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer + i*stride);
       vertex = localToVoxelSpace.transform_point(staticMesh.vertices[i].position);
-      buffer += stride;
     }
   }
 
