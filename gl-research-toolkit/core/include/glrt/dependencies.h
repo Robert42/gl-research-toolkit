@@ -14,6 +14,21 @@
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>
+#include <QHashFunctions>
+
+template<typename T, glm::precision P>
+inline unsigned int qHash(const glm::tvec3<T, P>& v, unsigned int seed = 0)
+{
+  return qHash(v.x, qHash(v.y, qHash(v.z, seed)));
+}
+
+#include <QPointer>
+
+template<typename T>
+inline int qHash(const QPointer<T>& ptr, int seed = 0)
+{
+  return qHash(ptr.data(), seed);
+}
 
 #include <QDebug>
 #include <QString>
@@ -24,7 +39,6 @@
 #include <QStack>
 #include <QUuid>
 #include <QQueue>
-#include <QPointer>
 #include <QMutexLocker>
 #include <QMutex>
 #include <QReadWriteLock>
@@ -43,12 +57,6 @@
 #include <SDL2/SDL.h>
 
 typedef quint8 byte;
-
-template<typename T>
-inline int qHash(const QPointer<T>& ptr, int seed = 0)
-{
-  return qHash(ptr.data(), seed);
-}
 
 
 QDebug operator<<(QDebug d, const glm::bvec2& v);

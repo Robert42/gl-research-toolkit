@@ -34,6 +34,7 @@ namespace glrt {
 glm::ivec2 System::_windowSize;
 glm::ivec3 System::maxComputeWorkGroupCount = glm::ivec3(-1);
 glm::ivec3 System::maxComputeWorkGroupSize = glm::ivec3(-1);
+int System::maxComputeWorkGroupInvocations = -1;
 
 System::System(int& argc, char** argv, const Settings& settings)
   : application(argc, argv)
@@ -182,6 +183,7 @@ void System::verifyGLFeatures()
 
   maxComputeWorkGroupCount = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_COUNT);
   maxComputeWorkGroupSize = PRINT_GL_INTEGER_VEC3(GL_MAX_COMPUTE_WORK_GROUP_SIZE);
+  maxComputeWorkGroupInvocations = PRINT_GL_INTEGER(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS);
 
   Q_UNUSED(suppressLog);
 }

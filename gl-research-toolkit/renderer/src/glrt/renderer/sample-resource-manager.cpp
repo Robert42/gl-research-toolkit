@@ -1,4 +1,5 @@
 #include <glrt/renderer/sample-resource-manager.h>
+#include <glrt/renderer/toolkit/gpu-voxelizer-implementation.h>
 
 namespace glrt {
 namespace renderer {
@@ -8,7 +9,9 @@ SampleResourceManager::SampleResourceManager()
   : ResourceManager(staticMeshBufferManager = new StaticMeshBufferManager(this), glTextureManager = new GlTextureManager(this)),
     index(glrt::Uuid<glrt::scene::resources::ResourceIndex>("{cf685c44-8d67-4531-b4f2-964acef0ec10}"))
 {
+  GpuVoxelizerImplementation gpuImplementation;
   index.loadIndexedDirectory(GLRT_ASSET_DIR);
+  Q_UNUSED(gpuImplementation);
 }
 
 SampleResourceManager::~SampleResourceManager()

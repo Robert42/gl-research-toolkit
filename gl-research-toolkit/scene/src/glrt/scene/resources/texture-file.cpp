@@ -360,12 +360,8 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
     GLint maxMipmapLevel = i.value();
     GLint minMipmapLevel = minMipMap[target];
 
-    GL_CALL(glBindTexture, target, textureHandle);
-
-    GL_CALL(glTexParameteri, target, GL_TEXTURE_BASE_LEVEL, minMipmapLevel);
-    GL_CALL(glTexParameteri, target, GL_TEXTURE_MAX_LEVEL, maxMipmapLevel);
-
-    GL_CALL(glBindTexture, target, 0);
+    GL_CALL(glTextureParameteri, textureHandle, GL_TEXTURE_BASE_LEVEL, minMipmapLevel);
+    GL_CALL(glTextureParameteri, textureHandle, GL_TEXTURE_MAX_LEVEL, maxMipmapLevel);
   }
 
   return textureHandle;
