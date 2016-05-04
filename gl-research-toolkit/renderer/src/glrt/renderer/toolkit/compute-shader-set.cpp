@@ -19,7 +19,14 @@ ComputeShaderSet::~ComputeShaderSet()
 void ComputeShaderSet::execute(const glm::ivec3& workAmount)
 {
   glm::ivec3 groupSize = mapTotalSizeToWorkerGroupSize(workAmount);
+
   groupSize = min(groupSize, System::maxComputeWorkGroupSize);
+
+  while(groupSize.x*groupSize.y*groupSize.z > System::maxComputeWorkGroupInvocations && groupSize.z>1)
+    groupSize.z--;
+  while(groupSize.x*groupSize.y*groupSize.z > System::maxComputeWorkGroupInvocations && groupSize.y>1)
+    groupSize.y--;
+
   glm::ivec3 numCalls = (workAmount + groupSize - 1) / groupSize;
 
   QSharedPointer<gl::ShaderObject> shader = shaders.value(groupSize);
@@ -30,8 +37,8 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
     shader->AddShaderFromFile(gl::ShaderObject::ShaderType::COMPUTE,
                               shaderFileName.toStdString(),
                               QString("#define GROUPS_SIZE_X %0\n"
-                                      "#define GROUPS_SIZE_Y %0\n"
-                                      "#define GROUPS_SIZE_Z %0\n")
+                                      "#define GROUPS_SIZE_Y %1\n"
+                                      "#define GROUPS_SIZE_Z %2\n")
                               .arg(groupSize.x)
                               .arg(groupSize.y)
                               .arg(groupSize.z).toStdString());
