@@ -1,4 +1,5 @@
 #include <glrt/renderer/toolkit/compute-shader-set.h>
+#include <glrt/system.h>
 
 namespace glrt {
 namespace renderer {
@@ -18,6 +19,7 @@ ComputeShaderSet::~ComputeShaderSet()
 void ComputeShaderSet::execute(const glm::ivec3& workAmount)
 {
   glm::ivec3 groupSize = mapTotalSizeToWorkerGroupSize(workAmount);
+  groupSize = min(groupSize, System::maxComputeWorkGroupSize);
   glm::ivec3 numCalls = (workAmount + groupSize - 1) / groupSize;
 
   QSharedPointer<gl::ShaderObject> shader = shaders.value(groupSize);

@@ -154,13 +154,9 @@ GLenum GlTexture::ImportSettings::internalFormat(Format format, Type type, bool*
 
 
 
-GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height, quint32 depth, quint32 numComponents)
+GlTexture::UncompressedImage GlTexture::TextureAsFloats::format(quint32 width, quint32 height, quint32 depth, quint32 numComponents)
 {
-  this->width = width;
-  this->height = height;
-  this->depth = depth;
-  this->components_per_row = width*numComponents;
-  this->rowCount = height*depth;
+  UncompressedImage image;
 
   switch(numComponents)
   {
@@ -182,13 +178,33 @@ GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height, quint
   image.type = Type::FLOAT32;
   // format and type must be set before calling calcRowStride!
 
-  image.width = this->width;
+  quint32 rowCount = height * depth;
+
+  image.width = width;
   image.rowStride = image.calcRowStride();
-  image.height = this->height;
-  image.depth = this->depth;
+  image.height = height;
+  image.depth = depth;
   image.mipmap = 0;
   image.target = image.depth==1 ? Target::TEXTURE_2D : Target::TEXTURE_3D;
   image.rawDataLength = image.rowStride * rowCount;
+
+  return image;
+}
+
+GlTexture::UncompressedImage GlTexture::TextureAsFloats::format(const glm::ivec3& textureSize, quint32 numComponents)
+{
+  return format(textureSize.x, textureSize.y, textureSize.z, numComponents);
+}
+
+GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height, quint32 depth, quint32 numComponents)
+{
+  this->width = width;
+  this->height = height;
+  this->depth = depth;
+  this->components_per_row = width*numComponents;
+  this->rowCount = height*depth;
+
+  this->image = format(width, height, depth);
 
   textureData.resize(int(this->components_per_row * rowCount));
   data = reinterpret_cast<byte*>(textureData.data());

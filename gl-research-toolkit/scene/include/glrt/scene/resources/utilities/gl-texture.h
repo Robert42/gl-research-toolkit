@@ -124,6 +124,9 @@ struct GlTexture::TextureAsFloats
   byte* data = nullptr;
   quint32 width = 0, components_per_row=0, height = 0, depth = 0, rowCount=0;
 
+  static UncompressedImage format(quint32 width, quint32 height, quint32 depth=1, quint32 numComponents=4);
+  static UncompressedImage format(const glm::ivec3& textureSize, quint32 numComponents=4);
+
   TextureAsFloats() = delete;
 
   TextureAsFloats(quint32 width, quint32 height, quint32 depth=1, quint32 numComponents=4);

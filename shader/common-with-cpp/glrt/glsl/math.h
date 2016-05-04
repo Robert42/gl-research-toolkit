@@ -266,6 +266,13 @@ inline vec4 blend_screen(vec4 x, vec4 y)
   return vec4(1)-(vec4(1)-x)*(vec4(1)-y);
 }
 
+// voxels
+
+inline vec3 centerPointOfVoxel(in ivec3 voxelIndex)
+{
+  return vec3(voxelIndex) + 0.5f;
+}
+
 
 #include <glrt/glsl/geometry/raytracing.h>
 #include <glrt/glsl/geometry/transform.h>

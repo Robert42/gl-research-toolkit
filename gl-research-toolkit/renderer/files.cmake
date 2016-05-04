@@ -37,6 +37,7 @@ set(SOURCE_FILES
   include/glrt/renderer/synced-fragmented-component-array.inl
   include/glrt/renderer/toolkit/aligned-vector.h
   include/glrt/renderer/toolkit/compute-shader-set.h
+  include/glrt/renderer/toolkit/gpu-voxelizer-implementation.h
   include/glrt/renderer/toolkit/managed-gl-buffer.h
   include/glrt/renderer/toolkit/managed-gl-buffer.inl
   include/glrt/renderer/toolkit/reloadable-shader.h
@@ -72,6 +73,7 @@ set(SOURCE_FILES
   src/glrt/renderer/static-mesh-buffer-manager.cpp
   src/glrt/renderer/static-mesh-renderer.cpp
   src/glrt/renderer/toolkit/compute-shader-set.cpp
+  src/glrt/renderer/toolkit/gpu-voxelizer-implementation.cpp
   src/glrt/renderer/toolkit/reloadable-shader.cpp
   src/glrt/renderer/toolkit/shader-compiler.cpp
   src/glrt/renderer/transformation-buffer.cpp
