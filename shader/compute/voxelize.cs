@@ -4,6 +4,10 @@
 #include <glrt/glsl/math.h>
 #include <openvdb/triangle-distance.glsl>
 
+
+
+#define SPHERE_ONLY 1
+
 layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
 struct VoxelizeMetaData
@@ -36,6 +40,13 @@ void main()
   const ivec3 voxelCoord = voxelIndexFromScalarIndex(int(gl_GlobalInvocationID.x), textureSize);
   const vec3 p = centerPointOfVoxel(voxelCoord);
     
+#if SPHERE_ONLY
+  vec3 origin = vec3(textureSize)*.5f;
+  float radius = min_component(textureSize)*0.5f - 1.f;
+  
+  best_d = distance(p, origin) - radius;
+  best_d_abs = abs(best_d);
+#else
   for(int i=0; i<num_vertices; i+=3)
   {
     const vec3 v0 = vertices[i];
@@ -57,6 +68,7 @@ void main()
   
   if(two_sided)
     best_d = best_d_abs;
+#endif
   
   if(all(lessThan(voxelCoord, textureSize)))
     imageStore(metaData.targetTexture, voxelCoord, vec4(best_d));
