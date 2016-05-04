@@ -14,6 +14,7 @@ struct GpuVoxelizerImplementation::VoxelizeMetaData
   float offset = 0.f;
   float factor = 1.f;
   GLuint64 targetTexture;
+  padding<GLuint64, 1> _padding;
   GLuint64 vertices;
 };
 
