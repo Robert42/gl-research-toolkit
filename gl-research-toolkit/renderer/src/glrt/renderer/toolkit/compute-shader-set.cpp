@@ -26,8 +26,13 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
     groupSize.z--;
   while(groupSize.x*groupSize.y*groupSize.z > System::maxComputeWorkGroupInvocations && groupSize.y>1)
     groupSize.y--;
+  while(groupSize.x*groupSize.y*groupSize.z > System::maxComputeWorkGroupInvocations && groupSize.x>1)
+    groupSize.x--;
 
   glm::ivec3 numCalls = (workAmount + groupSize - 1) / groupSize;
+
+  if(any(greaterThan(numCalls, System::maxComputeWorkGroupCount)))
+    throw GLRT_EXCEPTION(QString("ComputeShaderSet::execute: maxComputeWorkGroupCount exceeded"));
 
   QSharedPointer<gl::ShaderObject> shader = shaders.value(groupSize);
 
