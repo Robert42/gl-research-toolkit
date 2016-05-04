@@ -6,7 +6,7 @@
 
 
 
-#define SPHERE_ONLY 1
+#define SPHERE_ONLY 0
 
 layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
