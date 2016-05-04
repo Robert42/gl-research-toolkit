@@ -2,7 +2,9 @@
 #include <extensions/common.glsl>
 
 #include <glrt/glsl/math.h>
-#include <opencv/triangle-distance.glsl>
+#include <openvdb/triangle-distance.glsl>
+
+layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
 struct VoxelizeMetaData
 {
@@ -11,7 +13,7 @@ struct VoxelizeMetaData
   float offset;
   float factor;
   uint64_t vertices;
-  image3D targetTexture;
+  layout(r32f) image3D targetTexture;
 };
 
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
@@ -29,7 +31,7 @@ void main()
   float best_d = inf;
   float best_d_abs = inf;
   
-  const ivec3 voxelCoord = gl_GlobalInvocationID;
+  const ivec3 voxelCoord = ivec3(gl_GlobalInvocationID);
   const vec3 p = centerPointOfVoxel(voxelCoord);
     
   for(int i=0; i<num_vertices; i+=3)
@@ -39,10 +41,10 @@ void main()
     const vec3 v2 = vertices[i+2];
 
     vec3 uvw;
-    vec3 closestPoint = openvdb::math::closestPointOnTriangleToPoint(v0, v1, v2, p, uvw);
+    vec3 closestPoint = closestPointOnTriangleToPoint(v0, v1, v2, p, uvw);
 
     float d_abs = distance(closestPoint, p);
-    float d = -faceforward(vec3(d_abs,0,0), glm::cross(v1-v0, v2-v0), p-closestPoint).x;
+    float d = -faceforward(vec3(d_abs,0,0), cross(v1-v0, v2-v0), p-closestPoint).x;
 
     if(best_d_abs > d_abs)
     {
