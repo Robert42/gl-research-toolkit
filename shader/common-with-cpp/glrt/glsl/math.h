@@ -273,6 +273,16 @@ inline vec3 centerPointOfVoxel(in ivec3 voxelIndex)
   return vec3(voxelIndex) + 0.5f;
 }
 
+inline ivec3 voxelIndexFromScalarIndex(int index, ivec3 voxelCount)
+{
+  ivec3 voxelCoord;
+  
+  voxelCoord.x = index % voxelCount.x;
+  voxelCoord.y = (index/voxelCount.x) % voxelCount.y;
+  voxelCoord.z = index/(voxelCount.x*voxelCount.y);
+  return voxelCoord;
+}
+
 
 #include <glrt/glsl/geometry/raytracing.h>
 #include <glrt/glsl/geometry/transform.h>

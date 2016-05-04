@@ -54,7 +54,7 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 
   metaData.BindUniformBuffer(0);
 
-  voxelizeMeshComputeShader.execute(gridSize);
+  voxelizeMeshComputeShader.execute(glm::ivec3(gridSize.x*gridSize.y*gridSize.z, 1, 1));
 
   GL_CALL(glMakeImageHandleNonResidentNV, textureHandle);
 

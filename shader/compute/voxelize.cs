@@ -31,7 +31,9 @@ void main()
   float best_d = inf;
   float best_d_abs = inf;
   
-  const ivec3 voxelCoord = ivec3(gl_GlobalInvocationID);
+  ivec3 textureSize = imageSize(metaData.targetTexture);
+  
+  const ivec3 voxelCoord = voxelIndexFromScalarIndex(int(gl_GlobalInvocationID.x), textureSize);
   const vec3 p = centerPointOfVoxel(voxelCoord);
     
   for(int i=0; i<num_vertices; i+=3)
@@ -55,8 +57,6 @@ void main()
   
   if(two_sided)
     best_d = best_d_abs;
-    
-  ivec3 textureSize = imageSize(metaData.targetTexture);
   
   if(all(lessThan(voxelCoord, textureSize)))
     imageStore(metaData.targetTexture, voxelCoord, vec4(best_d));
