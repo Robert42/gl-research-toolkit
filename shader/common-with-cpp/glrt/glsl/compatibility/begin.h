@@ -43,6 +43,8 @@ using glm::lessThan;
 using glm::greaterThanEqual;
 using glm::greaterThan;
 
+using glm::isnan;
+
 #ifndef in
 #define in
 #endif
