@@ -34,13 +34,8 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 {
   int totalNumVoxels = gridSize.x*gridSize.y*gridSize.z;
 
-  QVector<float> dummyValues;
-  dummyValues.resize(totalNumVoxels);
-  for(float& voxel : dummyValues)
-    voxel = -0.1f;
-
   GlTexture texture;
-  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), dummyValues.data());
+  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), nullptr);
 
   // Make the texture complete
   GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_BASE_LEVEL, 0);
