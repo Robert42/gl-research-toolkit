@@ -13,8 +13,8 @@ struct GpuVoxelizerImplementation::VoxelizeMetaData
   int two_sided = 0;
   float offset = 0.f;
   float factor = 1.f;
-  GLuint64 vertices;
   GLuint64 targetTexture;
+  GLuint64 vertices;
 };
 
 
@@ -48,7 +48,7 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 
   GLuint textureId = texture.textureId;
 
-  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_FALSE, 0, GL_R32F);
+  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R32F);
   GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
 
 
@@ -57,6 +57,8 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
   header.numVertices = preprocessVertices(localToVoxelSpace, staticMesh);
   header.vertices = preprocessedVertices.gpuBufferAddress();
   header.targetTexture = imageHandle;
+  header.offset = 0.f;
+  header.factor = 1.f;
   metaData.Unmap();
 
   metaData.BindUniformBuffer(0);

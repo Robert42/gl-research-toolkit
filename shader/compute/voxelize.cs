@@ -16,11 +16,11 @@ struct VoxelizeMetaData
   bool two_sided;
   float offset;
   float factor;
-  uint64_t vertices;
   layout(r32f) image3D targetTexture;
+  uint64_t vertices;
 };
 
-layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
+layout(binding=0, std140)
 uniform VoxelizeMetaDataBlock
 {
   VoxelizeMetaData metaData;
