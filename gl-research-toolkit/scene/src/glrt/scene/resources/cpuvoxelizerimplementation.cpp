@@ -35,9 +35,7 @@ void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const gl
 
 void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material)
 {
-  // #TODO
-  bool twoSided = false;
-  Q_UNUSED(material);
+  bool twoSided = material.type.testFlag(Material::TypeFlag::TWO_SIDED);
 
   QVector<glm::vec3> vertices_array;
   glm::vec3* vertices = nullptr;
