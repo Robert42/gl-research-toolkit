@@ -32,8 +32,15 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
                                                     const scene::resources::StaticMesh& staticMesh,
                                                     const scene::resources::Material& material)
 {
+  int totalNumVoxels = gridSize.x*gridSize.y*gridSize.z;
+
+  QVector<float> dummyValues;
+  dummyValues.resize(totalNumVoxels);
+  for(float& voxel : dummyValues)
+    voxel = -0.1f;
+
   GlTexture texture;
-  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), /*dummyValues.data()*/nullptr);
+  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), dummyValues.data());
 
   // Make the texture complete
   GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_BASE_LEVEL, 0);
@@ -41,22 +48,22 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 
   GLuint textureId = texture.textureId;
 
-  GLuint64 textureHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_FALSE, 0, GL_R32F);
-  GL_CALL(glMakeImageHandleResidentNV, textureHandle, GL_WRITE_ONLY);
+  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_FALSE, 0, GL_R32F);
+  GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
 
 
   VoxelizeMetaData& header = *reinterpret_cast<VoxelizeMetaData*>(metaData.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   header.two_sided = material.type.testFlag(scene::resources::Material::TypeFlag::TWO_SIDED);
   header.numVertices = preprocessVertices(localToVoxelSpace, staticMesh);
   header.vertices = preprocessedVertices.gpuBufferAddress();
-  header.targetTexture = textureHandle;
+  header.targetTexture = imageHandle;
   metaData.Unmap();
 
   metaData.BindUniformBuffer(0);
 
-  voxelizeMeshComputeShader.execute(glm::ivec3(gridSize.x*gridSize.y*gridSize.z, 1, 1));
+  voxelizeMeshComputeShader.execute(glm::ivec3(totalNumVoxels, 1, 1));
 
-  GL_CALL(glMakeImageHandleNonResidentNV, textureHandle);
+  GL_CALL(glMakeImageHandleNonResidentNV, imageHandle);
 
   return texture;
 }
