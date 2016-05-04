@@ -19,7 +19,7 @@ public:
   scene::resources::utilities::GlTexture distanceField(const glm::ivec3& gridSize,
                                                        const scene::CoordFrame& localToVoxelSpace,
                                                        const scene::resources::StaticMesh& staticMesh,
-                                                       const scene::resources::Material& material) override;
+                                                       MeshType meshType) override;
 
 private:
   gl::Buffer metaData;
