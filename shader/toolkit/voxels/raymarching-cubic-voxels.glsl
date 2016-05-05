@@ -71,7 +71,7 @@ void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marching
   dimension = i;
 }
 
-bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t index, float treshold, out vec3 intersection_point, out vec3 intersection_normal)
+bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t index, float treshold, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
 {
   int hit_dimension;
   mat4 worldToVoxelSpace = worldToVoxelSpaces[index];
@@ -90,6 +90,8 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in i
   int max_num_loops = 65536;
   while(is_valid_voxel_index(voxelCount, voxelCoord) && 0<=max_num_loops--)
   {
+     stepCount++;
+    
      float voxel_value = texelFetch(voxelTexture, voxelCoord, 0).r;
      
      voxel_value += posteffect_param.distancefield_offset;
@@ -110,16 +112,18 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in i
   return false;
 }
 
-bool raymarch_voxelgrids(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t num_voxels, float treshold, out vec3 intersection_point, out vec3 intersection_normal)
+bool raymarch_voxelgrids(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t num_voxels, float treshold, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
 {
   float nearest_distance = inf;
   
   for(uint32_t i=0; i<num_voxels; ++i)
   {
+    stepCount++;
+  
     vec3 intersection_point_tmp;
     vec3 intersection_normal_tmp;
     
-    bool got_hit = raymarch_voxelgrid(ray_worldspace, worldToVoxelSpaces, voxelCounts, voxelTextures, i, treshold, intersection_point_tmp, intersection_normal_tmp);
+    bool got_hit = raymarch_voxelgrid(ray_worldspace, worldToVoxelSpaces, voxelCounts, voxelTextures, i, treshold, intersection_point_tmp, intersection_normal_tmp, stepCount);
 
     float current_distance = sq_distance(intersection_point_tmp, ray_worldspace.origin);
     

@@ -14,7 +14,8 @@ struct PosteffectVisualizationDataBlock
   float distanceFieldOffset = 0;
   quint32 showNormals = false;
   quint32 useLighting = false;
-  // #TODO: quint16 stepCountAsWhite; //  Allow showing the number of steps in a false image
+  quint32 showNumSteps = false;
+  quint32 stepCountAsWhite = 1024;
 };
 
 class DebugRenderer final : public QObject

@@ -13,8 +13,13 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   : application(application),
     visible(settings.showByDefault),
     toggleHelp(settings.toggleHelp),
-    toggleGui(settings.toggleGui)
+    toggleGui(settings.toggleGui),
+    toggleLogHeatVision("LOG_HEATVISION"),
+    toggleLogHeatVisionColors("HEATVISION_COLORS")
 {
+  toggleLogHeatVision.setter(true);
+  toggleLogHeatVisionColors.setter(true);
+
   Q_ASSERT(application != nullptr);
 
   TwInit(TW_OPENGL_CORE, NULL);
@@ -114,24 +119,34 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, scene.resourceManager.allRegisteredScenes());
   sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
-  cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
-  cameraSwitcher->valueChanged = [&scene](const QPointer<scene::CameraComponent>& otherCamera){switchDebugCameraTo(&scene, otherCamera);};
-  TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene::FpsDebugInputHandler::locked, "group=Camera");
-
-  renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group='Debug Scene'");
-  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
-  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
-  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
-  renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
+  renderer->visualizePosteffect_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Distance-Field Ray-March", "group='Debug Voxels'");
+  renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
+  renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
 
   TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
   renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Enable Lighting in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.useLighting, "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Show Normals in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNormals, "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Distance-Field Offset", TW_TYPE_FLOAT, &renderer->debugPosteffect.distanceFieldOffset, "group='Debug Shader' precision=3 min=-32 max=32 step=0.001");
-  renderer->visualizePosteffect_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Distance-Field Ray-March", "group='Debug Voxels'");
-  renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
-  renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
+  TwAddVarRW(tweakBar, "Show", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNumSteps, "group='Debug Shader/Show Step-Count'");
+  TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsWhite, "group='Debug Shader/Show Step-Count' min=1 max=2147483647");
+  toggleLogHeatVision.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
+  toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug Shader/Show Step-Count'");
+  TwSetParam(tweakBar, "Debug Shader/Show Step-Count", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  //-------- Camera ------------------------------------------------------------
+  cameraSwitcher = CameraEnumeration::Ptr(new CameraEnumeration("CurrentCameraEnum", tweakBar, "Current Camera", "group=Camera"));
+  cameraSwitcher->valueChanged = [&scene](const QPointer<scene::CameraComponent>& otherCamera){switchDebugCameraTo(&scene, otherCamera);};
+  TwAddVarRW(tweakBar, "Lock Camera", TW_TYPE_BOOLCPP, &scene::FpsDebugInputHandler::locked, "group=Camera");
+  TwSetParam(tweakBar, "Camera", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  //-------- Debug Scene -------------------------------------------------------
+  renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group='Debug Scene'");
+  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
+  renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
+  renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
+  renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
+  TwSetParam(tweakBar, "Debug Scene", "opened", TW_PARAM_CSTRING, 1, "false");
 
   gui::Toolbar::registerTweakBar(tweakBar, true);
 

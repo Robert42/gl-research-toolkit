@@ -33,11 +33,9 @@ void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const gl
   voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, radius);
 }
 
-void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material)
+void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
 {
-  // #TODO
-  bool twoSided = false;
-  Q_UNUSED(material);
+  bool twoSided = meshType == MeshType::TWO_SIDED;
 
   QVector<glm::vec3> vertices_array;
   glm::vec3* vertices = nullptr;
@@ -99,7 +97,7 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
       }
 }
 
-utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material)
+utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
 {
   utilities::GlTexture texture;
 
@@ -108,7 +106,7 @@ utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3&
   QVector<float>& data = asFloats.textureData;
 
 //  voxelizeToSphere(data, gridSize);
-  voxeliseMesh(data, gridSize, localToVoxelSpace, staticMesh, material);
+  voxeliseMesh(data, gridSize, localToVoxelSpace, staticMesh, meshType);
 
   texture.fromFloats(asFloats);
 

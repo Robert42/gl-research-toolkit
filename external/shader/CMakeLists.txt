@@ -5,6 +5,7 @@ add_custom_target(
   SOURCES
   distance-fields/debugging.glsl
   mrp/mrp.glsl
+  openvdb/triangle-distance.glsl
   pbs/brdf.glsl
   pbs/camera.glsl
   pbs/light.glsl

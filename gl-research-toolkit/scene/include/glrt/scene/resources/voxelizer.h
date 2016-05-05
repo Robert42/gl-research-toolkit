@@ -23,6 +23,12 @@ public:
     SIGNED_DISTANCE_FIELD,
   };
 
+  enum class MeshType : quint32
+  {
+    DEFAULT,
+    TWO_SIDED
+  };
+
   ResourceIndex* resourceIndex = nullptr;
 
   struct Hints
@@ -43,10 +49,10 @@ public:
 
   static void registerAngelScriptAPI();
 
-  void voxelize(const Uuid<StaticMesh>& staticMeshUuid);
+  void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
 
 private:
-  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName);
+  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType);
 };
 
 uint qHash(glrt::scene::resources::Voxelizer::FieldType type);
@@ -55,12 +61,14 @@ uint qHash(glrt::scene::resources::Voxelizer::FieldType type);
 class Voxelizer::Implementation : public QObject
 {
 public:
+  typedef Voxelizer::MeshType MeshType;
+
   static Voxelizer::Implementation* singleton;
 
   Implementation();
   ~Implementation();
 
-  virtual utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, const Material& material) = 0;
+  virtual utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType) = 0;
 };
 
 

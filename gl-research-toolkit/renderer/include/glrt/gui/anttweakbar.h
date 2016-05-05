@@ -317,6 +317,9 @@ private:
   CameraEnumeration::Ptr cameraSwitcher;
   VisualizationEnumeration::Ptr visualizationSwitcher;
 
+  TweakBarShaderToggle toggleLogHeatVision;
+  TweakBarShaderToggle toggleLogHeatVisionColors;
+
   void updateAntTweakBarWindowSize();
 
   void handeledEvent(const SDL_Event& event);
