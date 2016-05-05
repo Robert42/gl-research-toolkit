@@ -48,6 +48,7 @@ add_custom_target(
   materials/material.fs
   materials/material.vs
   toolkit/alignment.glsl
+  toolkit/debugging/heat-vision.glsl
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
   toolkit/extensions/command_list.glsl

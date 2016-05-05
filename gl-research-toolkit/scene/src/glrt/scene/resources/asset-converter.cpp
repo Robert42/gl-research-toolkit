@@ -23,7 +23,7 @@ namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
 
-inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile)
+bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile)
 {
   QDir targetDir = targetFile.path();
   if(targetDir.exists("FORCE-REIMPORT"))
@@ -43,7 +43,6 @@ inline bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFi
 
 #ifdef QT_DEBUG
   // If the cpp files responsible for converting the source files is newer than the target file, we probably need a reconversion, as the conversion code changed
-  QSet<QString> converterSourceFile = {QString(__FILE__)};
   for(QFileInfo cppFile : converterSourceFile)
     if(cppFile.exists() && cppFile.lastModified() > targetFile.lastModified())
       return true;
@@ -104,7 +103,7 @@ void convertStaticMesh(const QString& meshFilename, const QString& sourceFilenam
   QFileInfo meshFile(meshFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  if(shouldConvert(meshFile, sourceFile))
+  if(SHOULD_CONVERT(meshFile, sourceFile))
   {
     SPLASHSCREEN_MESSAGE(QString("Import static mesh <%0>").arg(sourceFile.fileName()));
     if(sourceFile.suffix().toLower() == "blend")
@@ -119,7 +118,7 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   QFileInfo sceneGraphFile(sceneGraphFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  if(shouldConvert(sceneGraphFile, sourceFile))
+  if(SHOULD_CONVERT(sceneGraphFile, sourceFile))
   {
     SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
@@ -132,7 +131,7 @@ void convertTexture(const QString& textureFilename, const QString& sourceFilenam
   QFileInfo textureFile(textureFilename);
   QFileInfo sourceFile(sourceFilename);
 
-  if(shouldConvert(textureFilename, sourceFile))
+  if(SHOULD_CONVERT(textureFilename, sourceFile))
   {
     SPLASHSCREEN_MESSAGE(QString("Import texture <%0>").arg(sourceFile.fileName()));
     qDebug() << "convertTexture("<<textureFile.fileName()<<", "<<sourceFile.fileName()<<")";
