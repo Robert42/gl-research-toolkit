@@ -51,7 +51,7 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectProperty(nameHints, "float extend", asOFFSET(Hints,extend)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameHints, "int minSize", asOFFSET(Hints,minSize)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameHints, "int maxSize", asOFFSET(Hints,maxSize)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(nameHints, "float voxelsPerMeter", asOFFSET(Hints,voxelsPerMeter)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(nameHints, "float scaleFactor", asOFFSET(Hints,scaleFactor)); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectType(nameVoxelizer, sizeof(Voxelizer), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f(ResourceIndex@ index)", AngelScript::asFUNCTION((&AngelScriptIntegration::wrap_constructor<Voxelizer, ResourceIndex*>)), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
@@ -136,13 +136,15 @@ void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QSt
 
 
 
-VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints& hints)
+VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Voxelizer::Hints& hints)
 {
   const glm::vec3& meshBoundingBoxMin = meshBoundingBox.minPoint;
   const glm::vec3& meshBoundingBoxMax = meshBoundingBox.maxPoint;
 
-  float voxelsPerMeter = hints.voxelsPerMeter;
-  float extend = hints.extend;
+  const glm::vec3 meshSize = meshBoundingBoxMax-meshBoundingBoxMin;
+
+  const float voxelsPerMeter = baseSize / glm::min(meshSize.x, glm::min(meshSize.y, meshSize.z));
+  const float extend = hints.extend;
   int minSize = hints.minSize;
   int maxSize = hints.maxSize;
 
@@ -154,8 +156,6 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   Q_ASSERT(minSize > 1);
   Q_ASSERT(maxSize >= minSize);
   Q_ASSERT(glm::all(glm::lessThanEqual(meshBoundingBoxMin, meshBoundingBoxMax)));
-
-  glm::vec3 meshSize = meshBoundingBoxMax-meshBoundingBoxMin;
 
   glm::ivec3 voxels = glm::ceil(voxelsPerMeter * meshSize + extend*2.f);
   voxels = glm::ceilPowerOfTwo(voxels);
@@ -221,25 +221,59 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   return metaData;
 }
 
+
+VoxelFile::MetaData findBestSize(size_t meshDataSize, size_t bytesPerVoxel, const AABB& meshBoundingBox, const Voxelizer::Hints& hints)
+{
+  int i;
+
+  Voxelizer::Hints temp_hints = hints;
+  temp_hints.scaleFactor = 1.f;
+
+  for(i=hints.minSize; i<=hints.maxSize; ++i)
+  {
+    VoxelFile::MetaData metaData = initSize(meshBoundingBox, i, temp_hints);
+
+    if(meshDataSize < metaData.rawDataSize(bytesPerVoxel))
+    {
+      i = glm::max(i-1, hints.minSize);
+      break;
+    }
+  }
+
+  VoxelFile::MetaData metaData = initSize(meshBoundingBox, i, hints);
+
+  qDebug() << "Creating DistanceField " << metaData.gridSize << " with " << metaData.rawDataSize(bytesPerVoxel) << "bytes raw data size for a mesh with " << meshDataSize  << "bytes raw data size using a scale-factor of " << hints.scaleFactor;
+
+  return metaData;
+}
+
 VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints)
 {
-  AABB aabb = staticMesh.boundingBox();
-
-  VoxelFile::MetaData metaData = initSize(aabb, hints);
-  metaData.fieldType = type;
+  const AABB aabb = staticMesh.boundingBox();
+  const size_t meshDataSize = staticMesh.rawDataSize();
 
   TextureFile textureFile;
+
+  VoxelFile::MetaData metaData;
 
   switch(type)
   {
   case Voxelizer::FieldType::SIGNED_DISTANCE_FIELD:
+  {
+    const TextureFile::Type voxelType = GlTexture::Type::FLOAT16;
+    const TextureFile::Format voxelFormat = GlTexture::Format::RED;
+    const size_t bytesPerVoxel = size_t(GlTexture::bytesPerPixelForFormatType(voxelFormat, voxelType));
+
+    metaData = findBestSize(meshDataSize, bytesPerVoxel, aabb, hints);
+    metaData.fieldType = type;
 
     utilities::GlTexture texture = Voxelizer::Implementation::singleton->distanceField(metaData.gridSize, metaData.localToVoxelSpace, staticMesh, meshType);
 
     Q_ASSERT(TextureFile::Target::TEXTURE_3D == texture.target());
 
-    textureFile.appendImage(texture, TextureFile::Type::FLOAT16, TextureFile::Format::RED);
+    textureFile.appendImage(texture, voxelType, voxelFormat);
     break;
+  }
   }
 
   textureFile.save(targetTextureFileName);

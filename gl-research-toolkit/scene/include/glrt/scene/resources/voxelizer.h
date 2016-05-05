@@ -37,7 +37,7 @@ public:
     float extend = 2.f;
     int minSize = 4;
     int maxSize = 128;
-    float voxelsPerMeter = 8;
+    float scaleFactor = 1.f;
     bool enabled = true;
   };
 
