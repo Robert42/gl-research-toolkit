@@ -85,11 +85,6 @@ void main()
   }
 }
 
-vec4 heatvision_log(uint32_t value)
-{
-  return heatvision_log(value, posteffect_param.stepCountAsWhite);
-}
-
 vec4 heatvision(uint32_t value)
 {
   return heatvision(value, posteffect_param.stepCountAsWhite);

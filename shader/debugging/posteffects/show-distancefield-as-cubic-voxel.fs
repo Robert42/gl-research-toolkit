@@ -25,7 +25,7 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
       world_pos = near_plane_world_pos;
     else
       world_pos = far_plane_world_pos;
-    color = heatvision_log(stepCount);
+    color = heatvision(stepCount);
     return;
   }
   
