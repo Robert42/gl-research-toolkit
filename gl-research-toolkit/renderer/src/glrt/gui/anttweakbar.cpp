@@ -14,9 +14,11 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     visible(settings.showByDefault),
     toggleHelp(settings.toggleHelp),
     toggleGui(settings.toggleGui),
-    toggleLogHeatVision("LOG_HEATVISION")
+    toggleLogHeatVision("LOG_HEATVISION"),
+    toggleLogHeatVisionColors("HEATVISION_COLORS")
 {
   toggleLogHeatVision.setter(true);
+  toggleLogHeatVisionColors.setter(true);
 
   Q_ASSERT(application != nullptr);
 
@@ -127,8 +129,9 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwAddVarRW(tweakBar, "Show Normals in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNormals, "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Distance-Field Offset", TW_TYPE_FLOAT, &renderer->debugPosteffect.distanceFieldOffset, "group='Debug Shader' precision=3 min=-32 max=32 step=0.001");
   TwAddVarRW(tweakBar, "Show", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNumSteps, "group='Debug Shader/Show Step-Count'");
-  TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsWhite, "group='Debug Shader/Show Step-Count'");
+  TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsWhite, "group='Debug Shader/Show Step-Count' min=1 max=2147483647");
   toggleLogHeatVision.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
+  toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug Shader/Show Step-Count'");
   TwSetParam(tweakBar, "Debug Shader/Show Step-Count", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Camera ------------------------------------------------------------

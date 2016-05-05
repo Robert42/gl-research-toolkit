@@ -318,6 +318,7 @@ private:
   VisualizationEnumeration::Ptr visualizationSwitcher;
 
   TweakBarShaderToggle toggleLogHeatVision;
+  TweakBarShaderToggle toggleLogHeatVisionColors;
 
   void updateAntTweakBarWindowSize();
 
