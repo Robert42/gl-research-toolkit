@@ -16,6 +16,20 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
   WorldVoxelUvwSpaceFactor* spaceFactors = distance_fields_spaceFactor();
   sampler3D* distance_field_textures = distance_fields_texture();
   
-  if(!raymarch_distancefields(ray, worldToVoxelSpaces, spaceFactors, voxelCounts, distance_field_textures, num_distance_fields, treshold, world_pos, world_normal))
+  uint32_t stepCount = 0;
+  
+  bool hit = raymarch_distancefields(ray, worldToVoxelSpaces, spaceFactors, voxelCounts, distance_field_textures, num_distance_fields, treshold, world_pos, world_normal, stepCount);
+    
+  if(posteffect_param.showNumSteps)
+  {
+    if(hit)
+      world_pos = near_plane_world_pos;
+    else
+      world_pos = far_plane_world_pos;
+    color = heatvision(stepCount);
+    return;
+  }
+  
+  if(!hit)
     discard;
 }
