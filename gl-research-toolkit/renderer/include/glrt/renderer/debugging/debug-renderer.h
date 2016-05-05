@@ -15,7 +15,7 @@ struct PosteffectVisualizationDataBlock
   quint32 showNormals = false;
   quint32 useLighting = false;
   quint32 showNumSteps = false;
-  quint32 stepCountAsWhite;
+  quint32 stepCountAsWhite = 1024;
 };
 
 class DebugRenderer final : public QObject
