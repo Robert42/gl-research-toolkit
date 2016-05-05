@@ -13,6 +13,7 @@ namespace scene {
 namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
+using utilities::GlTexture;
 
 
 Voxelizer::Implementation* Voxelizer::Implementation::singleton = nullptr;

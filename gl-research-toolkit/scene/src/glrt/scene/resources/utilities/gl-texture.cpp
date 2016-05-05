@@ -9,7 +9,7 @@ namespace resources {
 namespace utilities {
 
 
-int GlTexture::ImportSettings::channelsPerPixelForFormat(Format format)
+int GlTexture::channelsPerPixelForFormat(Format format)
 {
   switch(format)
   {
@@ -25,7 +25,7 @@ int GlTexture::ImportSettings::channelsPerPixelForFormat(Format format)
   Q_UNREACHABLE();
 }
 
-int GlTexture::ImportSettings::bytesPerPixelForType(Type type)
+int GlTexture::bytesPerPixelForType(Type type)
 {
   switch(type)
   {
@@ -42,7 +42,7 @@ int GlTexture::ImportSettings::bytesPerPixelForType(Type type)
   Q_UNREACHABLE();
 }
 
-int GlTexture::ImportSettings::bytesPerPixelForFormatType(Format format, Type type)
+int GlTexture::bytesPerPixelForFormatType(Format format, Type type)
 {
   return channelsPerPixelForFormat(format) * bytesPerPixelForType(type);
 }
@@ -52,12 +52,12 @@ quint32 GlTexture::UncompressedImage::calcRowStride() const
   GLint packAlignment;
   glGetIntegerv(GL_PACK_ALIGNMENT, &packAlignment);
 
-  quint32 bytesPerPixel = quint32(ImportSettings::bytesPerPixelForFormatType(format, type));
+  quint32 bytesPerPixel = quint32(bytesPerPixelForFormatType(format, type));
 
   return quint32(glm::ceilMultiple<quint32>(width * bytesPerPixel, quint32(packAlignment)));
 }
 
-GLenum GlTexture::ImportSettings::internalFormat(Format format, Type type, bool* supported)
+GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
 {
   bool dummy=false;
 
@@ -613,7 +613,7 @@ QPair<GlTexture::UncompressedImage, QVector<byte>> GlTexture::uncompressed2DImag
   image.rawDataLength = image.rowStride * image.height * image.depth;
 
   bool supportedFormat;
-  ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
+  internalFormat(image.format, image.type, &supportedFormat);
   Q_ASSERT(supportedFormat);
 
   QVector<byte> rawData;
@@ -634,7 +634,7 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
   Q_ASSERT(image.rawDataLength <= std::numeric_limits<int>::max());
 
   bool supportedFormat;
-  GLenum internalFormat = ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
+  GLenum internalFormat = GlTexture::internalFormat(image.format, image.type, &supportedFormat);
   Q_ASSERT(supportedFormat);
 
   GL_CALL(glBindTexture, static_cast<GLenum>(image.target), this->textureId);
