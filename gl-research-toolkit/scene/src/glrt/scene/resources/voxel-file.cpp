@@ -139,6 +139,12 @@ void VoxelFile::save(const QFileInfo& fileInfo)
 }
 
 
+size_t VoxelFile::MetaData::rawDataSize(size_t bytesPerVoxel) const
+{
+  return bytesPerVoxel * size_t(gridSize.x) * size_t(gridSize.y) * size_t(gridSize.z);
+}
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt

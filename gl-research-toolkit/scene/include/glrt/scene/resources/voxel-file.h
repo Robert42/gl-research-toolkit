@@ -33,6 +33,8 @@ public:
     glm::ivec3 gridSize = glm::vec3(0);
     quint32 _padding2 = 0;
     CoordFrame localToVoxelSpace;
+
+    size_t rawDataSize(size_t bytesPerVoxel) const;
   };
 
   static quint64 magicNumber();
