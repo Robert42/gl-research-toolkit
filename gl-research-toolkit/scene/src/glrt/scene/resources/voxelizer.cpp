@@ -1,5 +1,6 @@
 #include <glrt/scene/resources/voxelizer.h>
 #include <glrt/scene/resources/voxel-file.h>
+#include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/resources/static-mesh-file.h>
 #include <glrt/scene/resources/texture-file.h>
@@ -75,8 +76,7 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
   QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
   QString voxelFileName = staticMeshFileName + ".voxel-metadata";
 
-  // #TODO: wenn die voxel metafile bereits existiert die laden und verwendenn anstattalles nochmal neu zu importieren
-  bool shouldRevoxelizeMesh = true;
+  bool shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
   if(shouldRevoxelizeMesh)
     revoxelizeMesh(staticMeshUuid, staticMeshFileName, voxelFileName, meshType);
 
@@ -115,6 +115,8 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
 void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType)
 {
   SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(staticMeshFileName).fileName()));
+
+  qInfo() << "Voxelizing" << staticMeshFileName;
 
   StaticMeshFile staticMeshFile;
   staticMeshFile.load(staticMeshFileName);

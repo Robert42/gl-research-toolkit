@@ -57,6 +57,10 @@ void convertSceneGraph(const QString& sceneGraphFilename,
                        const SceneGraphImportSettings& settings,
                        const QString& groupToImport);
 
+bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile);
+
+#define SHOULD_CONVERT(targetFile, sourceFile) ::glrt::scene::resources::shouldConvert(targetFile, sourceFile, {QString(__FILE__)})
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt
