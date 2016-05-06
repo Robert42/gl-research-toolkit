@@ -24,13 +24,17 @@ void convertSceneGraph_wrapper(const std::string& sceneGraphFilename,
                                const std::string& sourceFilename,
                                SceneGraphImportSettings::AngelScriptInterface* settings,
                                const std::string& groupToImport,
-                               const ResourceIndex* resourceIndex)
+                               ResourceIndex* resourceIndex)
 {
   convertSceneGraph(QString::fromStdString(sceneGraphFilename),
                     QString::fromStdString(sourceFilename),
                     resourceIndex->uuid,
                     settings,
                     QString::fromStdString(groupToImport));
+
+  QFileInfo sceneGraphAssetIndexFile(QString::fromStdString(sceneGraphFilename) + ".asset-index");
+  if(sceneGraphAssetIndexFile.exists())
+    resourceIndex->loadIndex(sceneGraphAssetIndexFile.absoluteFilePath().toStdString());
 }
 
 void convertStaticMesh_wrapper(const std::string& meshFile,
