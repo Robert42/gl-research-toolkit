@@ -487,19 +487,13 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
   QFileInfo assetIndexFileInfo(sceneGraphFile.filePath()+".asset-index");
 
-  QFile assetIndex_file(assetIndexFileInfo.absoluteFilePath());
   QFile sceneGraph_file(sceneGraphFile.absoluteFilePath());
 
   if(!sceneGraph_file.open(QFile::WriteOnly))
     throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
 
-  if(!assetIndex_file.open(QFile::WriteOnly))
-    throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(assetIndexFileInfo.absoluteFilePath()));
-
-  QTextStream assetIndex_outputStream(&assetIndex_file);
   QTextStream sceneGraph_outputStream(&sceneGraph_file);
 
-  assetIndex_outputStream << "void main(ResourceIndex@ index)\n{\n";
 
   sceneGraph_outputStream << "void main(SceneLayer@ sceneLayer)\n{\n";
   sceneGraph_outputStream << "\n";
@@ -513,44 +507,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     sceneGraph_outputStream << "  Uuid<LightSource> fallbackLight = Uuid<LightSource>(\""<<QUuid(uuids::fallbackLight).toString()<<"\");\n";
   if(fallbackMaterialIsUsed)
     sceneGraph_outputStream << "  Uuid<Material> fallbackMaterial = Uuid<Material>(\""<<QUuid(uuids::fallbackMaterial).toString()<<"\");\n";
-
-  if(!allMeshesToImport.isEmpty())
-  {
-    sceneGraph_outputStream << "\n";
-
-    Voxelizer::Hints distancefieldVoxelizeHints;
-
-    assetIndex_outputStream << "  Voxelizer voxelizer = index.defaultVoxelizer;\n";
-
-    for(uint32_t i : allMeshesToImport.values())
-    {
-      const Uuid<StaticMesh>& uuid = assets.meshes[i];
-      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid.toString());
-      filename = QFileInfo(filename).absoluteFilePath();
-      assetIndex_outputStream << QString("  index.registerStaticMesh(uuid: Uuid<StaticMesh>(\"%0\"), file: \"%1\");\n").arg(uuid.toString()).arg(filename);
-      StaticMeshFile meshFile;
-      meshFile.staticMesh = assets.meshData[i];
-      meshFile.save(filename);
-
-      // #TODO
-      bool voxelizeMesh = true;
-
-      if(voxelizeMesh)
-      {
-        if(twoSidedMeshes.contains(uuid) && singleSidedMeshes.contains(uuid))
-          throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
-
-        Voxelizer::MeshType meshType = twoSidedMeshes.contains(uuid) ? Voxelizer::MeshType::TWO_SIDED : Voxelizer::MeshType::DEFAULT;
-
-        // #TODO: pick the right scale factor
-        distancefieldVoxelizeHints.scaleFactor = 1.f;
-        assetIndex_outputStream << QString("  voxelizer.voxelize(staticMeshUuid: Uuid<StaticMesh>(\"%0\"), meshType: VoxelMeshType::%1);\n").arg(uuid.toString()).arg(meshType==Voxelizer::MeshType::TWO_SIDED ? "TWO_SIDED" : "DEFAULT");
-      }
-    }
-  }else if(assetIndexFileInfo.exists())
-  {
-    QFile::remove(assetIndexFileInfo.absoluteFilePath());
-  }
 
   for(aiNode* assimp_node : allNodesToImport.values())
   {
@@ -651,7 +607,52 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     }
   }
   sceneGraph_outputStream << "}";
-  assetIndex_outputStream << "}";
+  sceneGraph_file.close();
+
+  if(!allMeshesToImport.isEmpty())
+  {
+    QFile assetIndex_file(assetIndexFileInfo.absoluteFilePath());
+    if(!assetIndex_file.open(QFile::WriteOnly))
+      throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(assetIndexFileInfo.absoluteFilePath()));
+
+    QTextStream assetIndex_outputStream(&assetIndex_file);
+    assetIndex_outputStream << "void main(ResourceIndex@ index)\n{\n";
+    sceneGraph_outputStream << "\n";
+
+    Voxelizer::Hints distancefieldVoxelizeHints;
+
+    assetIndex_outputStream << "  Voxelizer voxelizer = index.defaultVoxelizer;\n";
+
+    for(uint32_t i : allMeshesToImport.values())
+    {
+      const Uuid<StaticMesh>& uuid = assets.meshes[i];
+      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid.toString());
+      filename = QFileInfo(filename).absoluteFilePath();
+      assetIndex_outputStream << QString("  index.registerStaticMesh(uuid: Uuid<StaticMesh>(\"%0\"), file: \"%1\");\n").arg(uuid.toString()).arg(filename);
+      StaticMeshFile meshFile;
+      meshFile.staticMesh = assets.meshData[i];
+      meshFile.save(filename);
+
+      // #TODO
+      bool voxelizeMesh = true;
+
+      if(voxelizeMesh)
+      {
+        if(twoSidedMeshes.contains(uuid) && singleSidedMeshes.contains(uuid))
+          throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
+
+        Voxelizer::MeshType meshType = twoSidedMeshes.contains(uuid) ? Voxelizer::MeshType::TWO_SIDED : Voxelizer::MeshType::DEFAULT;
+
+        // #TODO: pick the right scale factor
+        distancefieldVoxelizeHints.scaleFactor = 1.f;
+        assetIndex_outputStream << QString("  voxelizer.voxelize(staticMeshUuid: Uuid<StaticMesh>(\"%0\"), meshType: VoxelMeshType::%1);\n").arg(uuid.toString()).arg(meshType==Voxelizer::MeshType::TWO_SIDED ? "TWO_SIDED" : "DEFAULT");
+      }
+    }
+    assetIndex_outputStream << "}";
+  }else if(assetIndexFileInfo.exists())
+  {
+    QFile::remove(assetIndexFileInfo.absoluteFilePath());
+  }
 }
 
 StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
