@@ -69,6 +69,9 @@ void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& bl
 QString python_exportSceneAsObjMesh(const QString& objFile, const QString& groupToImport);
 QString python_exportSceneAsColladaSceneGraph(const QString& objFile, const QString& groupToImport);
 
+bool hasMatch(const QString& name, const QSet<QString>& patternsToImport);
+bool hasMatch(const aiString& name, const QSet<QString>& patternsToImport);
+
 void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& blenderFile, const QString& groupToImport, bool indexed)
 {
   QTemporaryDir temporaryDir;
@@ -340,6 +343,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
    // use a QMap to sort the meshes by uuid to get a better consistency when working with git
   QMap<QUuid, aiNode*> allNodesToImport;
   QMap<QUuid, uint32_t> allMeshesToImport;
+  QSet<Uuid<StaticMesh>> meshesToVoxelize;
   QSet<Uuid<StaticMesh>> twoSidedMeshes;
   QSet<Uuid<StaticMesh>> singleSidedMeshes;
 
@@ -549,11 +553,21 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           if(!ResourceManager::instance()->isRegistered(materialUuid))
             throw GLRT_EXCEPTION(QString("Using not registered material in imported scene-graph-file %0").arg(sceneGraphFile.absoluteFilePath()));
           Material::Type materialType = ResourceManager::instance()->materialForUuid(materialUuid).type;
-          bool twoSided = materialType.testFlag(Material::TypeFlag::TWO_SIDED);
-          if(twoSided)
-            twoSidedMeshes.insert(meshUuid);
-          else
-            singleSidedMeshes.insert(meshUuid);
+          if(hasMatch(QString::fromStdString(mesh->mName.C_Str()), settings.meshesToVoxelize))
+          {
+            meshesToVoxelize.insert(meshUuid);
+            if(hasMatch(QString::fromStdString(mesh->mName.C_Str()), settings.meshesToVoxelizeTwoSided))
+            {
+              twoSidedMeshes.insert(meshUuid);
+            }else
+            {
+              bool twoSided = materialType.testFlag(Material::TypeFlag::TWO_SIDED);
+              if(twoSided)
+                twoSidedMeshes.insert(meshUuid);
+              else
+                singleSidedMeshes.insert(meshUuid);
+            }
+          }
           sceneGraph_outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           sceneGraph_outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
           if(materialUuid == uuids::fallbackMaterial)
@@ -633,10 +647,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       meshFile.staticMesh = assets.meshData[i];
       meshFile.save(filename);
 
-      // #TODO
-      bool voxelizeMesh = true;
-
-      if(voxelizeMesh)
+      if(meshesToVoxelize.contains(uuid))
       {
         if(twoSidedMeshes.contains(uuid) && singleSidedMeshes.contains(uuid))
           throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
@@ -828,20 +839,20 @@ SceneGraphImportSettings::AngelScriptInterface* SceneGraphImportSettings::AngelS
 
 bool SceneGraphImportSettings::shouldImportMesh(const QString& name) const
 {
-  return shouldImport(name, meshesToImport) || shouldImport(name+"-mesh", meshesToImport);
+  return hasMatch(name, meshesToImport) || hasMatch(name+"-mesh", meshesToImport);
 }
 
 bool SceneGraphImportSettings::shouldImportCamera(const QString& name) const
 {
-  return shouldImport(name, camerasToImport) || shouldImport(name+"-camera", camerasToImport);
+  return hasMatch(name, camerasToImport) || hasMatch(name+"-camera", camerasToImport);
 }
 
 bool SceneGraphImportSettings::shouldImportNode(const QString& name) const
 {
-  return shouldImport(name, nodesToImport) || shouldImport(name+"-node", nodesToImport);
+  return hasMatch(name, nodesToImport) || hasMatch(name+"-node", nodesToImport);
 }
 
-bool SceneGraphImportSettings::shouldImport(const QString& name, const QSet<QString>& patternsToImport)
+bool hasMatch(const QString& name, const QSet<QString>& patternsToImport)
 {
   for(const QString& pattern : patternsToImport)
   {
@@ -852,6 +863,11 @@ bool SceneGraphImportSettings::shouldImport(const QString& name, const QSet<QStr
   }
 
   return false;
+}
+
+bool hasMatch(const aiString& name, const QSet<QString>& patternsToImport)
+{
+  return hasMatch(QString(name.C_Str()), patternsToImport);
 }
 
 SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interface)
@@ -892,8 +908,8 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToImport", asOFFSET(AngelScriptInterface, as_meshesToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ camerasToImport", asOFFSET(AngelScriptInterface,as_camerasToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ nodesToImport", asOFFSET(AngelScriptInterface,as_nodesToImport)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelize", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelizeTwoSided", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelize", asOFFSET(AngelScriptInterface,as_meshesToVoxelize)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelizeTwoSided", asOFFSET(AngelScriptInterface,as_meshesToVoxelizeTwoSided)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToMergeWhenVoxelizing", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ meshUuids", asOFFSET(AngelScriptInterface,as_meshUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ materialUuids", asOFFSET(AngelScriptInterface,as_materialUuids)); AngelScriptCheck(r);

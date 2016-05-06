@@ -20,7 +20,7 @@ struct SceneGraphImportSettings final
   QSet<QString> nodesToImport;
   QSet<QString> meshesToVoxelize;
   QSet<QString> meshesToVoxelizeTwoSided;
-  QSet<QString> meshesToMergeWhenVoxelizing;
+  QSet<QString> meshesToMergeWhenVoxelizing; // #TODO
   // #TODO allow passing a scale factor
 
   QHash<QString, Uuid<StaticMesh>> meshUuids;
@@ -36,9 +36,6 @@ struct SceneGraphImportSettings final
   static void registerType();
 
   SceneGraphImportSettings(AngelScriptInterface* interface);
-
-private:
-  static bool shouldImport(const QString& name, const QSet<QString>& patternsToImport);
 };
 
 struct MeshImportSettings final
