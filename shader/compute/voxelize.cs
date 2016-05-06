@@ -58,8 +58,12 @@ void main()
 
     float d_abs = distance(closestPoint, p);
     float d = -faceforward(vec3(d_abs,0,0), cross(v1-v0, v2-v0), p-closestPoint).x;
+    
+    // Add a bias, to prefer faces with positive values
+    // This way, if there are two polygons (backfaced and frontfaced) with the same distance, the positive is preferred
+    float sign_bias = max(0, sign(d)) * 1.e-5f;
 
-    if(best_d_abs > d_abs)
+    if(best_d_abs + sign_bias > d_abs)
     {
       best_d = d;
       best_d_abs = d_abs;

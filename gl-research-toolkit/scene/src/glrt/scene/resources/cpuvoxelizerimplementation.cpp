@@ -85,7 +85,11 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
           float d_abs = distance(closestPoint, p);
           float d = -glm::faceforward(glm::vec3(d_abs,0,0), glm::cross(v1-v0, v2-v0), p-closestPoint).x;
 
-          if(Q_UNLIKELY(best_d_abs > d_abs))
+          // Add a bias, to prefer faces with positive values
+          // This way, if there are two polygons (backfaced and frontfaced) with the same distance, the positive is preferred
+          float sign_bias = d > 0 ? 1.e-5f : 0.f;
+
+          if(Q_UNLIKELY(best_d_abs + sign_bias > d_abs))
           {
             best_d = d;
             best_d_abs = d_abs;
