@@ -1,6 +1,7 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/static-mesh.h>
 #include <glrt/scene/resources/resource-index.h>
+#include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/resources/static-mesh-file.h>
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/coord-frame.h>
@@ -312,6 +313,8 @@ struct SceneGraphImportAssets
 
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
 {
+  qDebug() << "convertSceneGraph_assimpToSceneGraph(" << sceneGraphFile.absoluteFilePath() << "," << sourceFile.absoluteFilePath() << ")";
+
   bool fallbackMaterialIsUsed = false;
   bool fallbackLightIsUsed = false;
 
@@ -562,6 +565,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
             continue;
           aiMesh* mesh = scene->mMeshes[i];
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
+          Q_ASSERT_X(glrt::scene::resources::ResourceManager::instance()->isRegistered(materialUuid), "asset-converter.cpp: convertSceneGraph_assimpToSceneGraph", "Using not registered material");
           outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
           if(materialUuid == uuids::fallbackMaterial)
@@ -721,6 +725,9 @@ struct SceneGraphImportSettings::AngelScriptInterface final : public AngelScript
   AngelScript::CScriptArray* as_meshesToImport;
   AngelScript::CScriptArray* as_camerasToImport;
   AngelScript::CScriptArray* as_nodesToImport;
+  AngelScript::CScriptArray* as_meshesToMergeWhenVoxelizing;
+  AngelScript::CScriptArray* as_meshesToVoxelize;
+  AngelScript::CScriptArray* as_meshesToVoxelizeTwoSided;
 
   AngelScript::CScriptDictionary* as_meshUuids;
   AngelScript::CScriptDictionary* as_materialUuids;
@@ -753,6 +760,9 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   as_meshesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_camerasToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_nodesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
+  as_meshesToVoxelize = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
+  as_meshesToMergeWhenVoxelizing = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
+  as_meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
 
   as_meshUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMesh>>(), meshUuidTypeId, angelScriptEngine);
   as_materialUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Material>>(), materialUuidTypeId, angelScriptEngine);
@@ -766,6 +776,9 @@ SceneGraphImportSettings::AngelScriptInterface::~AngelScriptInterface()
   as_meshesToImport->Release();
   as_camerasToImport->Release();
   as_nodesToImport->Release();
+  as_meshesToVoxelize->Release();
+  as_meshesToMergeWhenVoxelizing->Release();
+  as_meshesToVoxelizeTwoSided->Release();
 
   as_meshUuids->Release();
   as_materialUuids->Release();
@@ -819,6 +832,9 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   meshesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToImport);
   camerasToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_camerasToImport);
   nodesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_nodesToImport);
+  meshesToVoxelize = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelize);
+  meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelizeTwoSided);
+  meshesToMergeWhenVoxelizing = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToMergeWhenVoxelizing);
 
   meshUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMesh>>(interface->as_meshUuids, {uuidTypeId, staticMeshUuidTypeId});
   materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Material>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
@@ -842,6 +858,9 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToImport", asOFFSET(AngelScriptInterface, as_meshesToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ camerasToImport", asOFFSET(AngelScriptInterface,as_camerasToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ nodesToImport", asOFFSET(AngelScriptInterface,as_nodesToImport)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelize", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelizeTwoSided", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToMergeWhenVoxelizing", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ meshUuids", asOFFSET(AngelScriptInterface,as_meshUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ materialUuids", asOFFSET(AngelScriptInterface,as_materialUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ lightUuids", asOFFSET(AngelScriptInterface,as_lightUuids)); AngelScriptCheck(r);
