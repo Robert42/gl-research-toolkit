@@ -107,6 +107,11 @@ QString ResourceManager::sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, con
   return indexForResourceUuid(uuid)->sceneLayerFiles.value(uuid, fallback);
 }
 
+bool ResourceManager::isRegistered(const QUuid& uuid) const
+{
+  return indexForResourceUuid(uuid, nullptr) != nullptr;
+}
+
 void ResourceManager::foreachIndex(const std::function<bool(const Index* index)>& lambda) const
 {
   if(foreachIndexImpl(lambda))

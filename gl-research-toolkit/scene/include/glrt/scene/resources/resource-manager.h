@@ -54,6 +54,8 @@ public:
   QString sceneFileForUuid(const Uuid<Scene>& uuid, const QString& fallback=QString()) const;
   QString sceneLayerFileForUuid(const Uuid<SceneLayer>& uuid, const QString& fallback=QString()) const;
 
+  bool isRegistered(const QUuid& uuid) const;
+
   void foreachIndex(const std::function<bool(const Index* index)>& lambda) const;
   QList<const Index*> allIndices() const;
   const Index* indexForResourceUuid(const QUuid& uuid, const Index* fallback=&Index::fallback) const;

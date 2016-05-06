@@ -340,6 +340,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
    // use a QMap to sort the meshes by uuid to get a better consistency when working with git
   QMap<QUuid, aiNode*> allNodesToImport;
   QMap<QUuid, uint32_t> allMeshesToImport;
+  QSet<Uuid<StaticMesh>> twoSidedMeshes;
+  QSet<Uuid<StaticMesh>> singleSidedMeshes;
 
   assets.materials.resize(scene->mNumMaterials);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
@@ -513,6 +515,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     for(uint32_t i : allMeshesToImport.values())
     {
+      // #TODO: voxelize here
+      // #TODO: register the voxel metadata here
+
       QString uuid = QUuid(assets.meshes[i]).toString();
       QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid);
       outputStream << QString("  resourceManager.staticMeshLoader.loadStaticMesh(Uuid<StaticMesh>(\"%0\"), \"%1\");\n").arg(uuid).arg(filename);
@@ -565,7 +570,13 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
             continue;
           aiMesh* mesh = scene->mMeshes[i];
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
-          Q_ASSERT_X(glrt::scene::resources::ResourceManager::instance()->isRegistered(materialUuid), "asset-converter.cpp: convertSceneGraph_assimpToSceneGraph", "Using not registered material");
+          Q_ASSERT_X(ResourceManager::instance()->isRegistered(materialUuid), "asset-converter.cpp: convertSceneGraph_assimpToSceneGraph", "Using not registered material");
+          Material::Type materialType = ResourceManager::instance()->materialForUuid(materialUuid).type;
+          bool twoSided = materialType.testFlag(Material::TypeFlag::TWO_SIDED);
+          if(twoSided)
+            twoSidedMeshes.insert(meshUuid);
+          else
+            singleSidedMeshes.insert(meshUuid);
           outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
           outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
           if(materialUuid == uuids::fallbackMaterial)
