@@ -39,6 +39,10 @@ public:
     int maxSize = 128;
     float scaleFactor = 1.f;
     bool enabled = true;
+
+    Hints()
+    {
+    }
   };
 
   Hints signedDistanceField;
@@ -51,8 +55,7 @@ public:
 
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
 
-private:
-  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType);
+  static void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField = Hints());
 };
 
 uint qHash(glrt::scene::resources::Voxelizer::FieldType type);

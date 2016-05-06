@@ -79,7 +79,7 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
 
   bool shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
   if(shouldRevoxelizeMesh)
-    revoxelizeMesh(staticMeshUuid, staticMeshFileName, voxelFileName, meshType);
+    revoxelizeMesh(staticMeshUuid, staticMeshFileName, voxelFileName, meshType, signedDistanceField);
 
   VoxelFile voxelFile;
   voxelFile.load(voxelFileName, staticMeshUuid);
@@ -113,7 +113,7 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
   }
 }
 
-void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType)
+void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField)
 {
   SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(staticMeshFileName).fileName()));
 
