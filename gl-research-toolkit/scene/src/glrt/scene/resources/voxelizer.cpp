@@ -74,8 +74,8 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
   if(!resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
-  QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
-  QString voxelFileName = staticMeshFileName + ".voxel-metadata";
+  const QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
+  const QString voxelFileName = voxelMetaDataFilenameForMesh(staticMeshFileName);
 
   bool shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
   if(shouldRevoxelizeMesh)
@@ -135,6 +135,14 @@ void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QSt
 }
 
 
+QString Voxelizer::voxelMetaDataFilenameForMesh(const QString& staticMeshFileName)
+{
+  Q_ASSERT(!staticMeshFileName.endsWith("/"));
+  Q_ASSERT(!staticMeshFileName.endsWith("\\"));
+  return staticMeshFileName + ".voxel-metadata";
+}
+
+
 
 VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Voxelizer::Hints& hints)
 {
@@ -143,10 +151,12 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Vo
 
   const glm::vec3 meshSize = meshBoundingBoxMax-meshBoundingBoxMin;
 
-  const float voxelsPerMeter = baseSize / glm::min(meshSize.x, glm::min(meshSize.y, meshSize.z));
+  const float voxelsPerMeter = hints.scaleFactor * baseSize / glm::max(meshSize.x, glm::max(meshSize.y, meshSize.z));
   const float extend = hints.extend;
   int minSize = hints.minSize;
   int maxSize = hints.maxSize;
+
+  Q_ASSERT(!glm::isinf(voxelsPerMeter));
 
   VoxelFile::MetaData metaData;
 

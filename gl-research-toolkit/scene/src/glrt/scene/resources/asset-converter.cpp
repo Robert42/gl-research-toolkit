@@ -513,17 +513,37 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   {
     outputStream << "\n";
 
+    Voxelizer::Hints distancefieldVoxelizeHints;
+
     for(uint32_t i : allMeshesToImport.values())
     {
-      // #TODO: voxelize here
-      // #TODO: register the voxel metadata here
+      // #TODO: pick the right scale factor
+      distancefieldVoxelizeHints.scaleFactor = 1.f;
 
-      QString uuid = QUuid(assets.meshes[i]).toString();
-      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid);
-      outputStream << QString("  resourceManager.staticMeshLoader.loadStaticMesh(Uuid<StaticMesh>(\"%0\"), \"%1\");\n").arg(uuid).arg(filename);
+      const Uuid<StaticMesh>& uuid = assets.meshes[i];
+      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid.toString());
+      filename = QFileInfo(filename).absoluteFilePath();
+      outputStream << QString("  resourceManager.staticMeshLoader.loadStaticMesh(Uuid<StaticMesh>(\"%0\"), \"%1\");\n").arg(uuid.toString()).arg(filename);
       StaticMeshFile meshFile;
       meshFile.staticMesh = assets.meshData[i];
       meshFile.save(filename);
+
+      // #TODO
+      bool voxelizeMesh = true;
+
+      if(voxelizeMesh)
+      {
+        if(twoSidedMeshes.contains(uuid) && singleSidedMeshes.contains(uuid))
+          throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
+
+        Voxelizer::MeshType meshType = twoSidedMeshes.contains(uuid) ? Voxelizer::MeshType::TWO_SIDED : Voxelizer::MeshType::DEFAULT;
+
+        QString voxelizedFilename = Voxelizer::voxelMetaDataFilenameForMesh(filename);
+
+        Voxelizer::revoxelizeMesh(uuid, filename, voxelizedFilename, meshType, distancefieldVoxelizeHints);
+
+        //outputStream << QString("  voxelizer.loadVoxels(%0);\n").arg(voxelizedFilename); // #TODO
+      }
     }
     outputStream << "\n";
     outputStream << "\n";
@@ -570,7 +590,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
             continue;
           aiMesh* mesh = scene->mMeshes[i];
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
-          Q_ASSERT_X(ResourceManager::instance()->isRegistered(materialUuid), "asset-converter.cpp: convertSceneGraph_assimpToSceneGraph", "Using not registered material");
+          if(!ResourceManager::instance()->isRegistered(materialUuid))
+            throw GLRT_EXCEPTION(QString("Using not registered material in imported scene-graph-file %0").arg(sceneGraphFile.absoluteFilePath()));
           Material::Type materialType = ResourceManager::instance()->materialForUuid(materialUuid).type;
           bool twoSided = materialType.testFlag(Material::TypeFlag::TWO_SIDED);
           if(twoSided)
