@@ -13,6 +13,7 @@ namespace scene {
 namespace resources {
 
 using AngelScriptIntegration::AngelScriptCheck;
+using utilities::GlTexture;
 
 
 Voxelizer::Implementation* Voxelizer::Implementation::singleton = nullptr;
@@ -50,22 +51,21 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectProperty(nameHints, "float extend", asOFFSET(Hints,extend)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameHints, "int minSize", asOFFSET(Hints,minSize)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameHints, "int maxSize", asOFFSET(Hints,maxSize)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(nameHints, "float voxelsPerMeter", asOFFSET(Hints,voxelsPerMeter)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(nameHints, "float scaleFactor", asOFFSET(Hints,scaleFactor)); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectType(nameVoxelizer, sizeof(Voxelizer), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f(ResourceIndex@ index)", AngelScript::asFUNCTION((&AngelScriptIntegration::wrap_constructor<Voxelizer, ResourceIndex*>)), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in, VoxelMeshType meshType=VoxelMeshType::DEFAULT)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::DEFAULT)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType)
 {
-  if(Implementation::singleton == nullptr)
-    qWarning() << "Using the CPU voxelizer implementation";
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
+  Q_UNUSED(fallbackVoxelizationImplementation);
 
   // There should be no way to create a voxelizer without valid ResourceIndex
   Q_ASSERT(resourceIndex != nullptr);
@@ -73,12 +73,12 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
   if(!resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
-  QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
-  QString voxelFileName = staticMeshFileName + ".voxel-metadata";
+  const QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
+  const QString voxelFileName = voxelMetaDataFilenameForMesh(staticMeshFileName);
 
   bool shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
   if(shouldRevoxelizeMesh)
-    revoxelizeMesh(staticMeshUuid, staticMeshFileName, voxelFileName, meshType);
+    revoxelizeMesh(staticMeshUuid, staticMeshFileName, voxelFileName, meshType, signedDistanceField);
 
   VoxelFile voxelFile;
   voxelFile.load(voxelFileName, staticMeshUuid);
@@ -112,7 +112,7 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
   }
 }
 
-void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType)
+void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField)
 {
   SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(staticMeshFileName).fileName()));
 
@@ -134,16 +134,30 @@ void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QSt
 }
 
 
-
-VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints& hints)
+QString Voxelizer::voxelMetaDataFilenameForMesh(const QString& staticMeshFileName)
 {
+  Q_ASSERT(!staticMeshFileName.endsWith("/"));
+  Q_ASSERT(!staticMeshFileName.endsWith("\\"));
+  return staticMeshFileName + ".voxel-metadata";
+}
+
+
+
+VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Voxelizer::Hints& hints)
+{
+#define FORCE_POWER_OF_TWO 0
+
   const glm::vec3& meshBoundingBoxMin = meshBoundingBox.minPoint;
   const glm::vec3& meshBoundingBoxMax = meshBoundingBox.maxPoint;
 
-  float voxelsPerMeter = hints.voxelsPerMeter;
-  float extend = hints.extend;
+  const glm::vec3 meshSize = meshBoundingBoxMax-meshBoundingBoxMin;
+
+  const float voxelsPerMeter = hints.scaleFactor * baseSize / glm::max(meshSize.x, glm::max(meshSize.y, meshSize.z));
+  const float extend = hints.extend;
   int minSize = hints.minSize;
   int maxSize = hints.maxSize;
+
+  Q_ASSERT(!glm::isinf(voxelsPerMeter));
 
   VoxelFile::MetaData metaData;
 
@@ -154,10 +168,10 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   Q_ASSERT(maxSize >= minSize);
   Q_ASSERT(glm::all(glm::lessThanEqual(meshBoundingBoxMin, meshBoundingBoxMax)));
 
-  glm::vec3 meshSize = meshBoundingBoxMax-meshBoundingBoxMin;
-
   glm::ivec3 voxels = glm::ceil(voxelsPerMeter * meshSize + extend*2.f);
+#if FORCE_POWER_OF_TWO
   voxels = glm::ceilPowerOfTwo(voxels);
+#endif
   voxels = glm::clamp(voxels, glm::ivec3(minSize), glm::ivec3(maxSize));
   metaData.gridSize = glm::ivec3(voxels);
 
@@ -220,25 +234,59 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, const Voxelizer::Hints
   return metaData;
 }
 
+
+VoxelFile::MetaData findBestSize(size_t meshDataSize, size_t bytesPerVoxel, const AABB& meshBoundingBox, const Voxelizer::Hints& hints)
+{
+  int i;
+
+  Voxelizer::Hints temp_hints = hints;
+  temp_hints.scaleFactor = 1.f;
+
+  for(i=hints.minSize; i<=hints.maxSize; ++i)
+  {
+    VoxelFile::MetaData metaData = initSize(meshBoundingBox, i, temp_hints);
+
+    if(meshDataSize < metaData.rawDataSize(bytesPerVoxel))
+    {
+      i = glm::max(i-1, hints.minSize);
+      break;
+    }
+  }
+
+  VoxelFile::MetaData metaData = initSize(meshBoundingBox, i, hints);
+
+  qDebug() << "Creating DistanceField " << metaData.gridSize << " with " << metaData.rawDataSize(bytesPerVoxel) << "bytes raw data size for a mesh with " << meshDataSize  << "bytes raw data size using a scale-factor of " << hints.scaleFactor;
+
+  return metaData;
+}
+
 VoxelFile::MetaData voxelizeImplementation(const StaticMesh& staticMesh, const QFileInfo& targetTextureFileName, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints)
 {
-  AABB aabb = staticMesh.boundingBox();
-
-  VoxelFile::MetaData metaData = initSize(aabb, hints);
-  metaData.fieldType = type;
+  const AABB aabb = staticMesh.boundingBox();
+  const size_t meshDataSize = staticMesh.rawDataSize();
 
   TextureFile textureFile;
+
+  VoxelFile::MetaData metaData;
 
   switch(type)
   {
   case Voxelizer::FieldType::SIGNED_DISTANCE_FIELD:
+  {
+    const TextureFile::Type voxelType = GlTexture::Type::FLOAT16;
+    const TextureFile::Format voxelFormat = GlTexture::Format::RED;
+    const size_t bytesPerVoxel = size_t(GlTexture::bytesPerPixelForFormatType(voxelFormat, voxelType));
+
+    metaData = findBestSize(meshDataSize, bytesPerVoxel, aabb, hints);
+    metaData.fieldType = type;
 
     utilities::GlTexture texture = Voxelizer::Implementation::singleton->distanceField(metaData.gridSize, metaData.localToVoxelSpace, staticMesh, meshType);
 
     Q_ASSERT(TextureFile::Target::TEXTURE_3D == texture.target());
 
-    textureFile.appendImage(texture, TextureFile::Type::FLOAT16, TextureFile::Format::RED);
+    textureFile.appendImage(texture, voxelType, voxelFormat);
     break;
+  }
   }
 
   textureFile.save(targetTextureFileName);

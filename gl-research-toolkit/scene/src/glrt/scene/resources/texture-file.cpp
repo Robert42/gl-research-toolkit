@@ -310,7 +310,7 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
     offsetCheck+=image.rawDataLength;
 
     bool supportedFormat;
-    ImportSettings::internalFormat(image.format, image.type, &supportedFormat);
+    GlTexture::internalFormat(image.format, image.type, &supportedFormat);
     if(!supportedFormat)
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid format type combination of %1 and %2.").arg(textureFile.fileName()).arg(formatKey).arg(typeKey));
 

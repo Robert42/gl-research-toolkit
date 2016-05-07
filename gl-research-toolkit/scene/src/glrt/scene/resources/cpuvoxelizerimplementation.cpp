@@ -33,6 +33,17 @@ void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const gl
   voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, radius);
 }
 
+void CpuVoxelizerImplementation::voxelizeGradient(QVector<float>& data, const glm::ivec3& gridSize, float value_for_min_z, float value_for_max_z)
+{
+  const float factor = (value_for_max_z - value_for_min_z) / float(glm::max(1, gridSize.z - 1));
+
+#pragma omp parallel for
+  for(int z=0; z<gridSize.z; ++z)
+    for(int y=0; y<gridSize.y; ++y)
+      for(int x=0; x<gridSize.x; ++x)
+        data[coordToIndex(x, y, z, gridSize)] = z * factor + value_for_min_z;
+}
+
 void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
 {
   bool twoSided = meshType == MeshType::TWO_SIDED;
@@ -67,7 +78,8 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
     for(int y=0; y<gridSize.y; ++y)
       for(int x=0; x<gridSize.x; ++x)
       {
-        float best_d = INFINITY;
+        float best_positive_d = INFINITY;
+        float best_negative_d = -INFINITY;
         float best_d_abs = INFINITY;
 
         for(int i=0; i<num_vertices; i+=3)
@@ -85,26 +97,39 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
           float d_abs = distance(closestPoint, p);
           float d = -glm::faceforward(glm::vec3(d_abs,0,0), glm::cross(v1-v0, v2-v0), p-closestPoint).x;
 
-          if(Q_UNLIKELY(best_d_abs > d_abs))
-          {
-            best_d = d;
-            best_d_abs = d_abs;
-          }
+          best_d_abs = glm::min(d_abs, best_d_abs);
+          best_positive_d = d >= 0 ? glm::min(d, best_positive_d) : best_positive_d;
+          best_negative_d = d <= 0 ? glm::max(d, best_negative_d) : best_negative_d;
         }
-        if(Q_UNLIKELY(twoSided))
+
+        float best_d;
+
+        if(twoSided)
+        {
           best_d = best_d_abs;
+        }else
+        {
+          if(glm::abs(best_negative_d) + 1.e-5f < best_positive_d)
+            best_d = best_negative_d;
+          else
+            best_d = best_positive_d;
+        }
+
         data[coordToIndex(x, y, z, gridSize)] = best_d;
       }
 }
 
 utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
 {
+  qWarning() << "Using the CPU voxelizer implementation";
+
   utilities::GlTexture texture;
 
   utilities::GlTexture::TextureAsFloats asFloats(gridSize, 1);
 
   QVector<float>& data = asFloats.textureData;
 
+//  voxelizeGradient(data, gridSize, -1.f, 1.f);
 //  voxelizeToSphere(data, gridSize);
   voxeliseMesh(data, gridSize, localToVoxelSpace, staticMesh, meshType);
 

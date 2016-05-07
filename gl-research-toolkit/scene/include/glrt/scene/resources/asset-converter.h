@@ -18,6 +18,10 @@ struct SceneGraphImportSettings final
   QSet<QString> meshesToImport;
   QSet<QString> camerasToImport;
   QSet<QString> nodesToImport;
+  QSet<QString> meshesToVoxelize;
+  QSet<QString> meshesToVoxelizeTwoSided;
+  QSet<QString> meshesToMergeWhenVoxelizing; // #TODO
+  // #TODO allow passing a scale factor
 
   QHash<QString, Uuid<StaticMesh>> meshUuids;
   QHash<QString, Uuid<Material>> materialUuids;
@@ -32,9 +36,6 @@ struct SceneGraphImportSettings final
   static void registerType();
 
   SceneGraphImportSettings(AngelScriptInterface* interface);
-
-private:
-  static bool shouldImport(const QString& name, const QSet<QString>& patternsToImport);
 };
 
 struct MeshImportSettings final
@@ -58,6 +59,8 @@ void convertSceneGraph(const QString& sceneGraphFilename,
                        const QString& groupToImport);
 
 bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile);
+
+extern bool forceReimport_Assets;
 
 #define SHOULD_CONVERT(targetFile, sourceFile) ::glrt::scene::resources::shouldConvert(targetFile, sourceFile, {QString(__FILE__)})
 

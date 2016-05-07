@@ -15,6 +15,7 @@ struct PosteffectVisualizationData
   bool useLighting;
   bool showNumSteps;
   uint32_t stepCountAsWhite;
+  uint32_t stepCountAsBlack;
 };
 
 layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform PosteffectVisualizationDataBlock
@@ -87,5 +88,10 @@ void main()
 
 vec4 heatvision(uint32_t value)
 {
-  return heatvision(value, posteffect_param.stepCountAsWhite);
+  uint32_t whiteLevel = posteffect_param.stepCountAsWhite;
+  uint32_t blackLevel = posteffect_param.stepCountAsBlack;
+  blackLevel = min(whiteLevel, blackLevel);
+  value = max(value, blackLevel);
+  
+  return heatvision(value-blackLevel, whiteLevel-blackLevel);
 }

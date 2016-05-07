@@ -59,6 +59,8 @@ public:
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
+  void unloadUnusedResources();
+
 signals:
   void sceneCleared();
   void sceneLoadedExt(scene::Scene* scene, bool success);
@@ -88,8 +90,6 @@ private:
   QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
 
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
-
-  void unloadUnusedResources();
 };
 
 

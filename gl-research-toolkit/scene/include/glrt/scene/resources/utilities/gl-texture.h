@@ -59,13 +59,13 @@ public:
 
   struct TextureAsFloats;
 
+  static int channelsPerPixelForFormat(Format format);
+  static int bytesPerPixelForType(Type type);
+  static int bytesPerPixelForFormatType(Format format, Type type);
+  static GLenum internalFormat(Format format, Type type, bool* supported=nullptr);
+
   struct ImportSettings
   {
-    static int channelsPerPixelForFormat(Format format);
-    static int bytesPerPixelForType(Type type);
-    static int bytesPerPixelForFormatType(Format format, Type type);
-    static GLenum internalFormat(Format format, Type type, bool* supported=nullptr);
-
     bool generateMipmaps = true;
     bool scaleDownToPowerOfTwo = true;
   };

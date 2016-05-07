@@ -34,11 +34,15 @@ public:
   struct Hints
   {
     utilities::GlTexture::Type voxelType = utilities::GlTexture::Type::FLOAT16;
-    float extend = 2.f;
+    float extend = 1.f;
     int minSize = 4;
-    int maxSize = 128;
-    float voxelsPerMeter = 8;
+    int maxSize = 64; // #FIXME: why doesn't 128 work for sponza?
+    float scaleFactor = 1.f;
     bool enabled = true;
+
+    Hints()
+    {
+    }
   };
 
   Hints signedDistanceField;
@@ -52,7 +56,8 @@ public:
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
 
 private:
-  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType);
+  static void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField = Hints());
+  static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
 };
 
 uint qHash(glrt::scene::resources::Voxelizer::FieldType type);

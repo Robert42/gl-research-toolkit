@@ -24,7 +24,7 @@ public:
     int samplerId = 0;
   };
 
-  virtual void removeUnusedTextures(QSet<Uuid<Texture>> usedTextures) = 0;
+  virtual void removeUnusedTextures(QSet<Uuid<Texture>> usedTextures = QSet<Uuid<Texture>>()) = 0;
   virtual Uuid<Texture> textureUuidForHandle(const TextureHandle& handle) = 0;
   virtual Uuid<Texture> textureUuidForGpuPtr(quint64 handle) = 0;
 

@@ -101,6 +101,11 @@ AABB StaticMesh::boundingBox() const
   return aabb;
 }
 
+size_t StaticMesh::rawDataSize() const
+{
+  return size_t(indices.length()) * sizeof(index_type) + size_t(vertices.length()) * sizeof(Vertex);
+}
+
 
 } // namespace resources
 } // namespace scene

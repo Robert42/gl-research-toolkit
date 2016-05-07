@@ -34,6 +34,7 @@ struct StaticMesh
   QVector<Vertex> vertices;
 
   AABB boundingBox() const;
+  size_t rawDataSize() const;
 
   bool isIndexed() const;
   bool operator==(const StaticMesh& other) const;

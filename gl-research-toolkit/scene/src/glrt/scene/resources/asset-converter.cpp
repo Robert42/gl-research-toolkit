@@ -1,6 +1,7 @@
 #include <glrt/scene/resources/asset-converter.h>
 #include <glrt/scene/resources/static-mesh.h>
 #include <glrt/scene/resources/resource-index.h>
+#include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/resources/static-mesh-file.h>
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/coord-frame.h>
@@ -21,14 +22,21 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+bool forceReimport_Assets = false;
+
 using AngelScriptIntegration::AngelScriptCheck;
 
 bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile)
 {
+  if(forceReimport_Assets)
+    return true;
+
   QDir targetDir = targetFile.path();
   if(targetDir.exists("FORCE-REIMPORT"))
     return true;
   if(targetDir.exists(targetFile.baseName()+".FORCE-REIMPORT"))
+    return true;
+  if(sourceFile.exists(targetFile.baseName()+".FORCE-REIMPORT"))
     return true;
 
   // No conversion possible if the source file doesn't exist
@@ -67,6 +75,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& meshFile, const QFile
 void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& blenderFile);
 QString python_exportSceneAsObjMesh(const QString& objFile, const QString& groupToImport);
 QString python_exportSceneAsColladaSceneGraph(const QString& objFile, const QString& groupToImport);
+
+bool hasMatch(const QString& name, const QSet<QString>& patternsToImport);
+bool hasMatch(const aiString& name, const QSet<QString>& patternsToImport);
 
 void convertStaticMesh_BlenderToObj(const QFileInfo& meshFile, const QFileInfo& blenderFile, const QString& groupToImport, bool indexed)
 {
@@ -312,6 +323,8 @@ struct SceneGraphImportAssets
 
 void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const QFileInfo& sourceFile, const Uuid<ResourceIndex>& resourceIndexUuid, const SceneGraphImportSettings &settings)
 {
+  qDebug() << "convertSceneGraph_assimpToSceneGraph(" << sceneGraphFile.absoluteFilePath() << "," << sourceFile.absoluteFilePath() << ")";
+
   bool fallbackMaterialIsUsed = false;
   bool fallbackLightIsUsed = false;
 
@@ -337,6 +350,9 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
    // use a QMap to sort the meshes by uuid to get a better consistency when working with git
   QMap<QUuid, aiNode*> allNodesToImport;
   QMap<QUuid, uint32_t> allMeshesToImport;
+  QSet<Uuid<StaticMesh>> meshesToVoxelize;
+  QSet<Uuid<StaticMesh>> twoSidedMeshes;
+  QSet<Uuid<StaticMesh>> singleSidedMeshes;
 
   assets.materials.resize(scene->mNumMaterials);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
@@ -480,49 +496,28 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       allNodesToImport[nodeUuid] = node;
   }
 
-  QFileInfo meshesFile(sceneGraphFile.filePath()+".mesh");
+  QFileInfo assetIndexFileInfo(sceneGraphFile.filePath()+".asset-index");
 
-  QFile file(sceneGraphFile.absoluteFilePath());
+  QFile sceneGraph_file(sceneGraphFile.absoluteFilePath());
 
-  if(!file.open(QFile::WriteOnly))
+  if(!sceneGraph_file.open(QFile::WriteOnly))
     throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
 
-  QTextStream outputStream(&file);
+  QTextStream sceneGraph_outputStream(&sceneGraph_file);
 
-  outputStream << "void main(SceneLayer@ sceneLayer)\n{\n";
-  outputStream << "\n";
-  outputStream << "  ResourceManager@ resourceManager = sceneLayer.scene.resourceManager;\n";
-  outputStream << "\n";
-  outputStream << "  Node@ node;\n";
-  outputStream << "  Uuid<Node> nodeUuid;\n";
-  outputStream << "  Uuid<LightSource> lightUuid;\n";
-  outputStream << "  Uuid<StaticMesh> meshUuid;\n";
-  outputStream << "  Uuid<CameraComponent> cameraComponentUuid;\n";
-  outputStream << "  Uuid<Material> materialUuid;\n";
+
+  sceneGraph_outputStream << "void main(SceneLayer@ sceneLayer)\n{\n";
+  sceneGraph_outputStream << "\n";
+  sceneGraph_outputStream << "  Node@ node;\n";
+  sceneGraph_outputStream << "  Uuid<Node> nodeUuid;\n";
+  sceneGraph_outputStream << "  Uuid<LightSource> lightUuid;\n";
+  sceneGraph_outputStream << "  Uuid<StaticMesh> meshUuid;\n";
+  sceneGraph_outputStream << "  Uuid<CameraComponent> cameraComponentUuid;\n";
+  sceneGraph_outputStream << "  Uuid<Material> materialUuid;\n";
   if(fallbackLightIsUsed)
-    outputStream << "  Uuid<LightSource> fallbackLight = Uuid<LightSource>(\""<<QUuid(uuids::fallbackLight).toString()<<"\");\n";
+    sceneGraph_outputStream << "  Uuid<LightSource> fallbackLight = Uuid<LightSource>(\""<<QUuid(uuids::fallbackLight).toString()<<"\");\n";
   if(fallbackMaterialIsUsed)
-    outputStream << "  Uuid<Material> fallbackMaterial = Uuid<Material>(\""<<QUuid(uuids::fallbackMaterial).toString()<<"\");\n";
-
-  if(!allMeshesToImport.isEmpty())
-  {
-    outputStream << "\n";
-
-    for(uint32_t i : allMeshesToImport.values())
-    {
-      QString uuid = QUuid(assets.meshes[i]).toString();
-      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid);
-      outputStream << QString("  resourceManager.staticMeshLoader.loadStaticMesh(Uuid<StaticMesh>(\"%0\"), \"%1\");\n").arg(uuid).arg(filename);
-      StaticMeshFile meshFile;
-      meshFile.staticMesh = assets.meshData[i];
-      meshFile.save(filename);
-    }
-    outputStream << "\n";
-    outputStream << "\n";
-  }else if(meshesFile.exists())
-  {
-    QFile::remove(meshesFile.absoluteFilePath());
-  }
+    sceneGraph_outputStream << "  Uuid<Material> fallbackMaterial = Uuid<Material>(\""<<QUuid(uuids::fallbackMaterial).toString()<<"\");\n";
 
   for(aiNode* assimp_node : allNodesToImport.values())
   {
@@ -538,12 +533,12 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     if(isImportingNode)
     {
-      outputStream << "\n";
-      outputStream << "// ======== Node \"" << n << "\" ========\n";
-      outputStream << "  nodeUuid = Uuid<Node>(\"" << QUuid(nodeUuid).toString() << "\");\n";
+      sceneGraph_outputStream << "\n";
+      sceneGraph_outputStream << "// ======== Node \"" << n << "\" ========\n";
+      sceneGraph_outputStream << "  nodeUuid = Uuid<Node>(\"" << QUuid(nodeUuid).toString() << "\");\n";
       if(assets.labels.contains(nodeUuid))
-        outputStream << "  sceneLayer.index.label[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
-      outputStream << "  @node = sceneLayer.newNode(uuid: nodeUuid);\n";
+        sceneGraph_outputStream << "  sceneLayer.index.label[nodeUuid] = \"" << escape_angelscript_string(assets.labels[nodeUuid]) << "\";\n";
+      sceneGraph_outputStream << "  @node = sceneLayer.newNode(uuid: nodeUuid);\n";
 
       if(isUsingMesh)
       {
@@ -562,15 +557,33 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
             continue;
           aiMesh* mesh = scene->mMeshes[i];
           Uuid<Material> materialUuid = assets.materials[mesh->mMaterialIndex];
-          outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
-          outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
+          if(!ResourceManager::instance()->isRegistered(materialUuid))
+            throw GLRT_EXCEPTION(QString("Using not registered material in imported scene-graph-file %0").arg(sceneGraphFile.absoluteFilePath()));
+          Material::Type materialType = ResourceManager::instance()->materialForUuid(materialUuid).type;
+          if(hasMatch(QString::fromStdString(mesh->mName.C_Str()), settings.meshesToVoxelize))
+          {
+            meshesToVoxelize.insert(meshUuid);
+            if(hasMatch(QString::fromStdString(mesh->mName.C_Str()), settings.meshesToVoxelizeTwoSided))
+            {
+              twoSidedMeshes.insert(meshUuid);
+            }else
+            {
+              bool twoSided = materialType.testFlag(Material::TypeFlag::TWO_SIDED);
+              if(twoSided)
+                twoSidedMeshes.insert(meshUuid);
+              else
+                singleSidedMeshes.insert(meshUuid);
+            }
+          }
+          sceneGraph_outputStream << "  // StaticMesh \""<<mesh->mName.C_Str()<<"\" -- (assimp index "<<i<<")\n";
+          sceneGraph_outputStream << "  meshUuid = Uuid<StaticMesh>(\"" << QUuid(meshUuid).toString() << "\");\n";
           if(materialUuid == uuids::fallbackMaterial)
-            outputStream << "  materialUuid = fallbackMaterial;\n";
+            sceneGraph_outputStream << "  materialUuid = fallbackMaterial;\n";
           else
-            outputStream << "  materialUuid = Uuid<Material>(\"" << QUuid(materialUuid).toString() << "\");\n";
+            sceneGraph_outputStream << "  materialUuid = Uuid<Material>(\"" << QUuid(materialUuid).toString() << "\");\n";
           if(assets.labels.contains(meshUuid))
-            outputStream << "  sceneLayer.index.label[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
-          outputStream << "  new_StaticMeshComponent(node: @node, uuid: Uuid<StaticMeshComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(meshUuid).toString()), QString("StaticMeshComponent[%0]").arg(i)).toString() << "\"), "
+            sceneGraph_outputStream << "  sceneLayer.index.label[meshUuid] = \"" << escape_angelscript_string(assets.labels[meshUuid]) << "\";\n";
+          sceneGraph_outputStream << "  new_StaticMeshComponent(node: @node, uuid: Uuid<StaticMeshComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(meshUuid).toString()), QString("StaticMeshComponent[%0]").arg(i)).toString() << "\"), "
                        << "meshUuid: meshUuid, materialUuid: materialUuid);\n";
           isUsingComponent = true;
         }
@@ -579,42 +592,85 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       {
         const CameraParameter& camera = assets.cameras[n];
         Uuid<CameraParameter> cameraUuid = assets.cameraUuids[n];
-        outputStream << "  // Camera \"" << n << "\"\n";
-        outputStream << "  cameraComponentUuid = Uuid<CameraComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(cameraUuid).toString()), QString("CameraComponent[%0]").arg(0)).toString() << "\");\n";
+        sceneGraph_outputStream << "  // Camera \"" << n << "\"\n";
+        sceneGraph_outputStream << "  cameraComponentUuid = Uuid<CameraComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(cameraUuid).toString()), QString("CameraComponent[%0]").arg(0)).toString() << "\");\n";
         if(assets.labels.contains(cameraUuid))
-          outputStream << "  sceneLayer.index.label[cameraComponentUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
-        outputStream << "  new_CameraComponent(node: @node, uuid: cameraComponentUuid, "
+          sceneGraph_outputStream << "  sceneLayer.index.label[cameraComponentUuid] = \"" << escape_angelscript_string(assets.labels[cameraUuid]) << "\";\n";
+        sceneGraph_outputStream << "  new_CameraComponent(node: @node, uuid: cameraComponentUuid, "
                      << "aspect: " << camera.aspect << ", clipFar: " << camera.clipFar << ", clipNear: " << camera.clipNear << ", horizontal_fov: " << camera.horizontal_fov << ", lookAt: " << format_angelscript_vec3(camera.lookAt) << ", upVector: " << format_angelscript_vec3(camera.upVector) << ", position: " << format_angelscript_vec3(camera.position) << ");\n";
         isUsingComponent = true;
       }
       if(isUsingLight)
       {
         Uuid<LightSource> lightUuid = assets.lightUuids[n];
-        outputStream << "  // Light \"" << n << "\"\n";
+        sceneGraph_outputStream << "  // Light \"" << n << "\"\n";
         if(lightUuid == uuids::fallbackLight)
-          outputStream << "  lightUuid = fallbackLight;\n";
+          sceneGraph_outputStream << "  lightUuid = fallbackLight;\n";
         else
-          outputStream << "  lightUuid = Uuid<LightSource>(\"" << QUuid(lightUuid).toString() << "\");\n";
+          sceneGraph_outputStream << "  lightUuid = Uuid<LightSource>(\"" << QUuid(lightUuid).toString() << "\");\n";
         if(assets.labels.contains(lightUuid))
-          outputStream << "  sceneLayer.index.label[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
-        outputStream << "  new_LightComponent(node: @node, uuid: Uuid<LightComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(lightUuid).toString()), QString("LightComponent[%0]").arg(0)).toString() << "\"), "
+          sceneGraph_outputStream << "  sceneLayer.index.label[lightUuid] = \"" << escape_angelscript_string(assets.labels[lightUuid]) << "\";\n";
+        sceneGraph_outputStream << "  new_LightComponent(node: @node, uuid: Uuid<LightComponent>(\"" << QUuid::createUuidV5(QUuid::createUuidV5(nodeUuid, QUuid(lightUuid).toString()), QString("LightComponent[%0]").arg(0)).toString() << "\"), "
                      << "lightSourceUuid: lightUuid);\n";
         isUsingComponent = true;
       }
       if(!isUsingComponent)
       {
-        outputStream << "  new_EmptyComponent(node: @node, uuid: Uuid<NodeComponent>(\"" << QUuid::createUuidV5(nodeUuid, QString("missing-root-node-for-transformation")).toString() << "\"));\n";
+        sceneGraph_outputStream << "  new_EmptyComponent(node: @node, uuid: Uuid<NodeComponent>(\"" << QUuid::createUuidV5(nodeUuid, QString("missing-root-node-for-transformation")).toString() << "\"));\n";
         isUsingComponent = true;
       }
 
       if(isUsingComponent)
       {
         CoordFrame frame(assimp_global_transformation(assimp_node, scene));
-        outputStream << "  node.rootComponent.localTransformation = "<< frame.as_angelscript_fast() <<";\n";
+        sceneGraph_outputStream << "  node.rootComponent.localTransformation = "<< frame.as_angelscript_fast() <<";\n";
       }
     }
   }
-  outputStream << "}";
+  sceneGraph_outputStream << "}";
+  sceneGraph_file.close();
+
+  if(!allMeshesToImport.isEmpty())
+  {
+    QFile assetIndex_file(assetIndexFileInfo.absoluteFilePath());
+    if(!assetIndex_file.open(QFile::WriteOnly))
+      throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(assetIndexFileInfo.absoluteFilePath()));
+
+    QTextStream assetIndex_outputStream(&assetIndex_file);
+    assetIndex_outputStream << "void main(ResourceIndex@ index)\n{\n";
+    sceneGraph_outputStream << "\n";
+
+    Voxelizer::Hints distancefieldVoxelizeHints;
+
+    assetIndex_outputStream << "  Voxelizer voxelizer = index.defaultVoxelizer;\n";
+
+    for(uint32_t i : allMeshesToImport.values())
+    {
+      const Uuid<StaticMesh>& uuid = assets.meshes[i];
+      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid.toString());
+      filename = QFileInfo(filename).absoluteFilePath();
+      assetIndex_outputStream << QString("  index.registerStaticMesh(uuid: Uuid<StaticMesh>(\"%0\"), file: \"%1\");\n").arg(uuid.toString()).arg(filename);
+      StaticMeshFile meshFile;
+      meshFile.staticMesh = assets.meshData[i];
+      meshFile.save(filename);
+
+      if(meshesToVoxelize.contains(uuid))
+      {
+        if(twoSidedMeshes.contains(uuid) && singleSidedMeshes.contains(uuid))
+          throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
+
+        Voxelizer::MeshType meshType = twoSidedMeshes.contains(uuid) ? Voxelizer::MeshType::TWO_SIDED : Voxelizer::MeshType::DEFAULT;
+
+        // #TODO: pick the right scale factor
+        distancefieldVoxelizeHints.scaleFactor = 1.f;
+        assetIndex_outputStream << QString("  voxelizer.voxelize(staticMeshUuid: Uuid<StaticMesh>(\"%0\"), meshType: VoxelMeshType::%1);\n").arg(uuid.toString()).arg(meshType==Voxelizer::MeshType::TWO_SIDED ? "TWO_SIDED" : "DEFAULT");
+      }
+    }
+    assetIndex_outputStream << "}";
+  }else if(assetIndexFileInfo.exists())
+  {
+    QFile::remove(assetIndexFileInfo.absoluteFilePath());
+  }
 }
 
 StaticMesh loadMeshFromAssimp(aiMesh** meshes, quint32 nMeshes, const glm::mat3& transform, const QString& context, bool indexed)
@@ -721,6 +777,9 @@ struct SceneGraphImportSettings::AngelScriptInterface final : public AngelScript
   AngelScript::CScriptArray* as_meshesToImport;
   AngelScript::CScriptArray* as_camerasToImport;
   AngelScript::CScriptArray* as_nodesToImport;
+  AngelScript::CScriptArray* as_meshesToMergeWhenVoxelizing;
+  AngelScript::CScriptArray* as_meshesToVoxelize;
+  AngelScript::CScriptArray* as_meshesToVoxelizeTwoSided;
 
   AngelScript::CScriptDictionary* as_meshUuids;
   AngelScript::CScriptDictionary* as_materialUuids;
@@ -753,6 +812,9 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   as_meshesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_camerasToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_nodesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
+  as_meshesToVoxelize = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
+  as_meshesToMergeWhenVoxelizing = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
+  as_meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
 
   as_meshUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMesh>>(), meshUuidTypeId, angelScriptEngine);
   as_materialUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Material>>(), materialUuidTypeId, angelScriptEngine);
@@ -766,6 +828,9 @@ SceneGraphImportSettings::AngelScriptInterface::~AngelScriptInterface()
   as_meshesToImport->Release();
   as_camerasToImport->Release();
   as_nodesToImport->Release();
+  as_meshesToVoxelize->Release();
+  as_meshesToMergeWhenVoxelizing->Release();
+  as_meshesToVoxelizeTwoSided->Release();
 
   as_meshUuids->Release();
   as_materialUuids->Release();
@@ -781,20 +846,20 @@ SceneGraphImportSettings::AngelScriptInterface* SceneGraphImportSettings::AngelS
 
 bool SceneGraphImportSettings::shouldImportMesh(const QString& name) const
 {
-  return shouldImport(name, meshesToImport) || shouldImport(name+"-mesh", meshesToImport);
+  return hasMatch(name, meshesToImport) || hasMatch(name+"-mesh", meshesToImport);
 }
 
 bool SceneGraphImportSettings::shouldImportCamera(const QString& name) const
 {
-  return shouldImport(name, camerasToImport) || shouldImport(name+"-camera", camerasToImport);
+  return hasMatch(name, camerasToImport) || hasMatch(name+"-camera", camerasToImport);
 }
 
 bool SceneGraphImportSettings::shouldImportNode(const QString& name) const
 {
-  return shouldImport(name, nodesToImport) || shouldImport(name+"-node", nodesToImport);
+  return hasMatch(name, nodesToImport) || hasMatch(name+"-node", nodesToImport);
 }
 
-bool SceneGraphImportSettings::shouldImport(const QString& name, const QSet<QString>& patternsToImport)
+bool hasMatch(const QString& name, const QSet<QString>& patternsToImport)
 {
   for(const QString& pattern : patternsToImport)
   {
@@ -805,6 +870,11 @@ bool SceneGraphImportSettings::shouldImport(const QString& name, const QSet<QStr
   }
 
   return false;
+}
+
+bool hasMatch(const aiString& name, const QSet<QString>& patternsToImport)
+{
+  return hasMatch(QString(name.C_Str()), patternsToImport);
 }
 
 SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interface)
@@ -819,6 +889,9 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   meshesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToImport);
   camerasToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_camerasToImport);
   nodesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_nodesToImport);
+  meshesToVoxelize = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelize);
+  meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelizeTwoSided);
+  meshesToMergeWhenVoxelizing = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToMergeWhenVoxelizing);
 
   meshUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMesh>>(interface->as_meshUuids, {uuidTypeId, staticMeshUuidTypeId});
   materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Material>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
@@ -842,11 +915,16 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToImport", asOFFSET(AngelScriptInterface, as_meshesToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ camerasToImport", asOFFSET(AngelScriptInterface,as_camerasToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ nodesToImport", asOFFSET(AngelScriptInterface,as_nodesToImport)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelize", asOFFSET(AngelScriptInterface,as_meshesToVoxelize)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelizeTwoSided", asOFFSET(AngelScriptInterface,as_meshesToVoxelizeTwoSided)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToMergeWhenVoxelizing", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ meshUuids", asOFFSET(AngelScriptInterface,as_meshUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ materialUuids", asOFFSET(AngelScriptInterface,as_materialUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ lightUuids", asOFFSET(AngelScriptInterface,as_lightUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ nodeUuids", asOFFSET(AngelScriptInterface,as_nodeUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ cameraUuids", asOFFSET(AngelScriptInterface,as_cameraUuids)); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterGlobalProperty("bool forceReimport", &forceReimport_Assets); AngelScriptCheck(r);
 }
 
 

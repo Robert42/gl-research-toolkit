@@ -129,6 +129,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwAddVarRW(tweakBar, "Show Normals in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNormals, "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Distance-Field Offset", TW_TYPE_FLOAT, &renderer->debugPosteffect.distanceFieldOffset, "group='Debug Shader' precision=3 min=-32 max=32 step=0.001");
   TwAddVarRW(tweakBar, "Show", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNumSteps, "group='Debug Shader/Show Step-Count'");
+  TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsBlack, "group='Debug Shader/Show Step-Count' min=0 max=2147483647");
   TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsWhite, "group='Debug Shader/Show Step-Count' min=1 max=2147483647");
   toggleLogHeatVision.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
   toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug Shader/Show Step-Count'");
