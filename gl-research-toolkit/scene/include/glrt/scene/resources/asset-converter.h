@@ -60,6 +60,8 @@ void convertSceneGraph(const QString& sceneGraphFilename,
 
 bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile);
 
+extern bool forceReimport_Assets;
+
 #define SHOULD_CONVERT(targetFile, sourceFile) ::glrt::scene::resources::shouldConvert(targetFile, sourceFile, {QString(__FILE__)})
 
 } // namespace resources

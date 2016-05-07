@@ -22,14 +22,21 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+bool forceReimport_Assets = false;
+
 using AngelScriptIntegration::AngelScriptCheck;
 
 bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile)
 {
+  if(forceReimport_Assets)
+    return true;
+
   QDir targetDir = targetFile.path();
   if(targetDir.exists("FORCE-REIMPORT"))
     return true;
   if(targetDir.exists(targetFile.baseName()+".FORCE-REIMPORT"))
+    return true;
+  if(sourceFile.exists(targetFile.baseName()+".FORCE-REIMPORT"))
     return true;
 
   // No conversion possible if the source file doesn't exist
@@ -916,6 +923,8 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ lightUuids", asOFFSET(AngelScriptInterface,as_lightUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ nodeUuids", asOFFSET(AngelScriptInterface,as_nodeUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ cameraUuids", asOFFSET(AngelScriptInterface,as_cameraUuids)); AngelScriptCheck(r);
+
+  r = angelScriptEngine->RegisterGlobalProperty("bool forceReimport", &forceReimport_Assets); AngelScriptCheck(r);
 }
 
 
