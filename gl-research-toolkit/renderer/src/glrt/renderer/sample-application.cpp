@@ -22,6 +22,7 @@ SampleApplication::SampleApplication(int& argc, char** argv,
   // #FIXME: reproducible crash if uncommenting the following two lines, while having the cornellBoxSuzanneScene() as the default scene (see sampleApplicationSettings.sceneToLoad)
   qApp->processEvents();
   scene.unloadUnusedResources();
+  // #TODO::::: why is not revoxelizing having the right result right away?
 
   scene.load(sampleApplicationSettings.sceneToLoad);
 }
