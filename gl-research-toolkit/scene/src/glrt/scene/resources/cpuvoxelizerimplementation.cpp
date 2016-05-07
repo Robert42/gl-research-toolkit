@@ -78,7 +78,8 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
     for(int y=0; y<gridSize.y; ++y)
       for(int x=0; x<gridSize.x; ++x)
       {
-        float best_d = INFINITY;
+        float best_positive_d = INFINITY;
+        float best_negative_d = -INFINITY;
         float best_d_abs = INFINITY;
 
         for(int i=0; i<num_vertices; i+=3)
@@ -96,18 +97,24 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
           float d_abs = distance(closestPoint, p);
           float d = -glm::faceforward(glm::vec3(d_abs,0,0), glm::cross(v1-v0, v2-v0), p-closestPoint).x;
 
-          // Add a bias, to prefer faces with positive values
-          // This way, if there are two polygons (backfaced and frontfaced) with the same distance, the positive is preferred
-          float sign_bias = d > 0 ? 1.e-5f : 0.f;
-
-          if(Q_UNLIKELY(best_d_abs + sign_bias > d_abs))
-          {
-            best_d = d;
-            best_d_abs = d_abs;
-          }
+          best_d_abs = glm::min(d_abs, best_d_abs);
+          best_positive_d = d >= 0 ? glm::min(d, best_positive_d) : best_positive_d;
+          best_negative_d = d <= 0 ? glm::max(d, best_negative_d) : best_negative_d;
         }
-        if(Q_UNLIKELY(twoSided))
+
+        float best_d;
+
+        if(twoSided)
+        {
           best_d = best_d_abs;
+        }else
+        {
+          if(glm::abs(best_negative_d) + 1.e-5f < best_positive_d)
+            best_d = best_negative_d;
+          else
+            best_d = best_positive_d;
+        }
+
         data[coordToIndex(x, y, z, gridSize)] = best_d;
       }
 }

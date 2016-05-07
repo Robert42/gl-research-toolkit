@@ -34,8 +34,7 @@ public:
   struct Hints
   {
     utilities::GlTexture::Type voxelType = utilities::GlTexture::Type::FLOAT16;
-    // #TODO: test with extend=1
-    float extend = 2.f;
+    float extend = 1.f;
     int minSize = 4;
     int maxSize = 64; // #FIXME: why doesn't 128 work for sponza?
     float scaleFactor = 1.f;

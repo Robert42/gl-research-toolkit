@@ -6,7 +6,6 @@
 
 
 
-#define SPHERE_ONLY 0
 
 layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
@@ -32,21 +31,15 @@ void main()
   vec3* vertices = vec3*(metaData.vertices);
   bool two_sided = metaData.two_sided;
   
-  float best_d = inf;
+  float best_positive_d = inf;
+  float best_negative_d = -inf;
   float best_d_abs = inf;
   
   ivec3 textureSize = imageSize(metaData.targetTexture);
   
   const ivec3 voxelCoord = voxelIndexFromScalarIndex(int(gl_GlobalInvocationID.x), textureSize);
   const vec3 p = centerPointOfVoxel(voxelCoord);
-    
-#if SPHERE_ONLY
-  vec3 origin = vec3(textureSize)*.5f;
-  float radius = min_component(textureSize)*0.5f - 1.f;
-  
-  best_d = distance(p, origin) - radius;
-  best_d_abs = abs(best_d);
-#else
+
   for(int i=0; i<num_vertices; i+=3)
   {
     const vec3 v0 = vertices[i];
@@ -59,20 +52,23 @@ void main()
     float d_abs = distance(closestPoint, p);
     float d = -faceforward(vec3(d_abs,0,0), cross(v1-v0, v2-v0), p-closestPoint).x;
     
-    // Add a bias, to prefer faces with positive values
-    // This way, if there are two polygons (backfaced and frontfaced) with the same distance, the positive is preferred
-    float sign_bias = max(0, sign(d)) * 1.e-5f;
-
-    if(best_d_abs + sign_bias > d_abs)
-    {
-      best_d = d;
-      best_d_abs = d_abs;
-    }
+    best_d_abs = min(d_abs, best_d_abs);
+    best_positive_d = d >= 0 ? min(d, best_positive_d) : best_positive_d;
+    best_negative_d = d <= 0 ? max(d, best_negative_d) : best_negative_d;
   }
   
+  float best_d;
+  
   if(two_sided)
+  {
     best_d = best_d_abs;
-#endif
+  }else
+  {
+    if(abs(best_negative_d) + 1.e-5f < best_positive_d)
+      best_d = best_negative_d;
+    else
+      best_d = best_positive_d;
+  }
   
   if(all(lessThan(voxelCoord, textureSize)))
     imageStore(metaData.targetTexture, voxelCoord, vec4(best_d));
