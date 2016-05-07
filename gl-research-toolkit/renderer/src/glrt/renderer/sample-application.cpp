@@ -19,6 +19,10 @@ SampleApplication::SampleApplication(int& argc, char** argv,
   if(sampleApplicationSettings.loadDistanceField)
     voxelizedScene.enabledSignedDistanceFields();
 
+  // #FIXME: reproducible crash if uncommenting the following two lines, while having the cornellBoxSuzanneScene() as the default scene (see sampleApplicationSettings.sceneToLoad)
+  qApp->processEvents();
+  scene.unloadUnusedResources();
+
   scene.load(sampleApplicationSettings.sceneToLoad);
 }
 
