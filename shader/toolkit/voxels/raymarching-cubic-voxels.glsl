@@ -42,6 +42,12 @@ bool is_valid_voxel_index(in ivec3 voxelCount, in ivec3 voxel_index)
 
 bool enter_cubic_voxel_grid_voxelspace(inout Ray ray_voxelspace, in ivec3 voxelCount, out int dimension)
 {
+  if(is_within_voxel_grid(voxelCount, ray_voxelspace.origin))
+  {
+    dimension = index_of_min_component(abs(ray_voxelspace.direction));
+    return true;
+  }
+
   const float epsilon = voxelgrid_epsilon;
   
   float intersection_distance;
