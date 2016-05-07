@@ -204,7 +204,7 @@ GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height, quint
   this->components_per_row = width*numComponents;
   this->rowCount = height*depth;
 
-  this->image = format(width, height, depth);
+  this->image = format(width, height, depth, numComponents);
 
   textureData.resize(int(this->components_per_row * rowCount));
   data = reinterpret_cast<byte*>(textureData.data());
