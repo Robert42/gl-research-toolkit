@@ -33,6 +33,17 @@ void CpuVoxelizerImplementation::voxelizeToSphere(QVector<float>& data, const gl
   voxelizeToSphere(data, gridSize, glm::vec3(gridSize)*.5f, radius);
 }
 
+void CpuVoxelizerImplementation::voxelizeGradient(QVector<float>& data, const glm::ivec3& gridSize, float value_for_min_z, float value_for_max_z)
+{
+  const float factor = (value_for_max_z - value_for_min_z) / float(glm::max(1, gridSize.z - 1));
+
+#pragma omp parallel for
+  for(int z=0; z<gridSize.z; ++z)
+    for(int y=0; y<gridSize.y; ++y)
+      for(int x=0; x<gridSize.x; ++x)
+        data[coordToIndex(x, y, z, gridSize)] = z * factor + value_for_min_z;
+}
+
 void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
 {
   bool twoSided = meshType == MeshType::TWO_SIDED;
@@ -111,6 +122,7 @@ utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3&
 
   QVector<float>& data = asFloats.textureData;
 
+//  voxelizeGradient(data, gridSize, -1.f, 1.f);
 //  voxelizeToSphere(data, gridSize);
   voxeliseMesh(data, gridSize, localToVoxelSpace, staticMesh, meshType);
 
