@@ -145,6 +145,8 @@ QString Voxelizer::voxelMetaDataFilenameForMesh(const QString& staticMeshFileNam
 
 VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Voxelizer::Hints& hints)
 {
+#define FORCE_POWER_OF_TWO 0
+
   const glm::vec3& meshBoundingBoxMin = meshBoundingBox.minPoint;
   const glm::vec3& meshBoundingBoxMax = meshBoundingBox.maxPoint;
 
@@ -167,7 +169,9 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Vo
   Q_ASSERT(glm::all(glm::lessThanEqual(meshBoundingBoxMin, meshBoundingBoxMax)));
 
   glm::ivec3 voxels = glm::ceil(voxelsPerMeter * meshSize + extend*2.f);
+#if FORCE_POWER_OF_TWO
   voxels = glm::ceilPowerOfTwo(voxels);
+#endif
   voxels = glm::clamp(voxels, glm::ivec3(minSize), glm::ivec3(maxSize));
   metaData.gridSize = glm::ivec3(voxels);
 
