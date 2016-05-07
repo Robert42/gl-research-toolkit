@@ -50,7 +50,7 @@ bool enter_cubic_voxel_grid_voxelspace(inout Ray ray_voxelspace, in ivec3 voxelC
   vec3 p_voxelspace = get_point(ray_voxelspace, intersection_distance);
   ray_voxelspace.origin = clamp(p_voxelspace, vec3(0), vec3(voxelCount)-epsilon);
   
-  return valid_intersection;
+  return valid_intersection && intersection_distance>=0.f;
 }
 
 void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marchingStep, in ivec3 voxelCount, inout ivec3 voxelCoord, out int dimension)
