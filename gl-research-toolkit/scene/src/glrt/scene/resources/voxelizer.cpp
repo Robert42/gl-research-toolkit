@@ -64,9 +64,8 @@ void Voxelizer::registerAngelScriptAPI()
 
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType)
 {
-  if(Implementation::singleton == nullptr)
-    qWarning() << "Using the CPU voxelizer implementation";
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
+  Q_UNUSED(fallbackVoxelizationImplementation);
 
   // There should be no way to create a voxelizer without valid ResourceIndex
   Q_ASSERT(resourceIndex != nullptr);

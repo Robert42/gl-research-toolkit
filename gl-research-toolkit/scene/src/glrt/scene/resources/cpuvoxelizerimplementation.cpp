@@ -103,6 +103,8 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
 
 utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
 {
+  qWarning() << "Using the CPU voxelizer implementation";
+
   utilities::GlTexture texture;
 
   utilities::GlTexture::TextureAsFloats asFloats(gridSize, 1);
