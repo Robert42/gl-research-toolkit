@@ -34,11 +34,14 @@ private:
     QHash<FileId, QString> files;
     QHash<FileId, ProgramId> programForFile;
     QHash<ProgramId, QSet<FileId>> filesForProgram;
+    QHash<FileId, QSet<FileId>> fileIncludes;
+    QHash<FileId, QSet<FileId>> fileIncludedBy;
 
     FileId registerShaderFile(const QFileInfo& fileInfo);
     FileId idForShaderFile(const QFileInfo& fileInfo) const;
 
     ProgramId addFileToProgram(ProgramId program, FileId fileId);
+    void updateIncludeGraph(FileId fileId);
   };
 
   ShaderFileIndex shaderFileIndex;
