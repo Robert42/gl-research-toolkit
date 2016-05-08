@@ -12,7 +12,7 @@ ManagedShader::ManagedShader()
 
 ManagedShader::~ManagedShader()
 {
-  GL_CALL(glDeleteProgram, 1, &_shaderObject);
+  GL_CALL(glDeleteProgram, _shaderObject);
 }
 
 ManagedShader::ManagedShader(ManagedShader&& other)

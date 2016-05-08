@@ -93,17 +93,20 @@ namespace gl
         getIncludeDirs().append(dir);
       }
 
-      static std::string expandGlobalInclude(const std::string& include_std_string)
+      static QString expandGlobalInclude(const QString& include_file)
       {
-        QString include_file = QString::fromStdString(include_std_string);
-
         for(const QDir& dir : getIncludeDirs())
         {
           if(dir.exists(include_file))
-            return dir.absoluteFilePath(include_file).toStdString();
+            return dir.absoluteFilePath(include_file);
         }
 
-        return std::string();
+        return QString();
+      }
+
+      static std::string expandGlobalInclude(const std::string& include_std_string)
+      {
+        return expandGlobalInclude(QString::fromStdString(include_std_string)).toStdString();
       }
 
     private:

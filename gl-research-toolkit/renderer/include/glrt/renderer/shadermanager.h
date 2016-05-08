@@ -10,12 +10,12 @@ class ShaderManager : QObject
 {
   Q_OBJECT
 public:
-  QList<QDir> shaderIncludeDirs; // directories used by #include from within the shaders
-  QList<QDir> shaderSourceDirs; // directories, where to look for sahders with the extensions shaderExtensions
-  QStringList shaderExtensions = {".cs", ".fs", ".vs"};
-
   ShaderManager();
   ~ShaderManager();
+
+private:
+  QList<QDir> shaderSourceDirs; // directories, where to look for shaders with the extensions shaderExtensions
+  QStringList shaderExtensions = {".cs", ".fs", ".vs"};
 };
 
 } // namespace renderer
