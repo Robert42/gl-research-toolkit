@@ -5,7 +5,10 @@ namespace renderer {
 
 ShaderManager::ShaderManager()
 {
+}
 
+ShaderManager::~ShaderManager()
+{
 }
 
 } // namespace renderer
