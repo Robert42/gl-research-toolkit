@@ -13,6 +13,11 @@ class ShaderManager : QObject
 {
   Q_OBJECT
 public:
+  enum class MacroId : quint32
+  {
+    NONE=0,
+  };
+
   ShaderManager();
   ~ShaderManager();
 
@@ -28,10 +33,6 @@ private:
   {
     NONE=0,
   };
-  enum class MacroId : quint32
-  {
-    NONE=0,
-  };
 
   struct ShaderFileIndex
   {
@@ -41,6 +42,12 @@ private:
     QHash<ProgramId, QSet<FileId>> filesForProgram;
     QHash<FileId, QSet<FileId>> fileIncludes;
     QHash<FileId, QSet<FileId>> fileIncludedBy;
+
+    QHash<FileId, QSet<MacroId>> macrosInFiles;
+    QHash<QString, MacroId> macroIds;
+    QHash<MacroId, QString> macros;
+    QSet<MacroId> existanceBasedMacros;
+    QSet<MacroId> valueBasedMacros;
 
     MacroId registerExistenceBasedMacro(FileId fileId, const QString& macroName);
     MacroId registerValueBasedMacro(FileId fileId, const QString& macroName);
@@ -52,6 +59,9 @@ private:
     void updateProprocessorData(FileId fileId);
     void updateUsedMacros(FileId fileId);
     void updateIncludeGraph(FileId fileId);
+
+  private:
+    MacroId registerMacro(FileId fileId, const QString& name);
   };
 
   ShaderFileIndex shaderFileIndex;
@@ -62,6 +72,7 @@ private:
 
   friend uint qHash(FileId f){return ::qHash(quint32(f));}
   friend uint qHash(ProgramId p){return ::qHash(quint32(p));}
+  friend uint qHash(MacroId m){return ::qHash(quint32(m));}
 
   bool recompileProgramNow(ProgramId program);
   void recompileProgramLater(ProgramId program);

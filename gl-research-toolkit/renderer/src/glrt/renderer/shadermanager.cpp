@@ -106,9 +106,14 @@ ShaderManager::MacroId ShaderManager::ShaderFileIndex::registerExistenceBasedMac
   if(suppressedMacro(macroName))
     return MacroId::NONE;
 
-  // #TODO::::::::
-  qInfo() << "registerExistenceBasedMacro" << macroName;
-  return MacroId::NONE;
+  MacroId m = registerMacro(fileId, macroName);
+
+  existanceBasedMacros.insert(m);
+
+  if(valueBasedMacros.contains(m))
+    qWarning() << "ShaderManager: the macro"<<macroName<<"is used as both, value and existacne based macro";
+
+  return m;
 }
 
 ShaderManager::MacroId ShaderManager::ShaderFileIndex::registerValueBasedMacro(FileId fileId, const QString& macroName)
@@ -116,9 +121,29 @@ ShaderManager::MacroId ShaderManager::ShaderFileIndex::registerValueBasedMacro(F
   if(suppressedMacro(macroName))
     return MacroId::NONE;
 
-  // #TODO::::::::
-  qInfo() << "registerValueBasedMacro" << macroName;
-  return MacroId::NONE;
+  MacroId m = registerMacro(fileId, macroName);
+
+  valueBasedMacros.insert(m);
+
+  if(existanceBasedMacros.contains(m))
+    qWarning() << "ShaderManager: the macro"<<macroName<<"is used as both, value and existacne based macro";
+
+  return m;
+}
+
+ShaderManager::MacroId ShaderManager::ShaderFileIndex::registerMacro(FileId fileId, const QString& macroName)
+{
+  if(macroIds.contains(macroName))
+    return macroIds.value(macroName);
+
+  MacroId m = MacroId(macros.size()+1);
+
+  macros.insert(m, macroName);
+  macroIds.insert(macroName, m);
+
+  macrosInFiles[fileId].insert(m);
+
+  return m;
 }
 
 ShaderManager::FileId ShaderManager::ShaderFileIndex::registerShaderFile(const QFileInfo& fileInfo)
@@ -190,10 +215,12 @@ void ShaderManager::ShaderFileIndex::updateUsedMacros(FileId fileId)
   QFileInfo fileInfo = files.value(fileId);
   QFile file(fileInfo.absoluteFilePath());
 
+  macrosInFiles[fileId].clear();
+
   if(file.exists() && file.open(QFile::ReadOnly))
   {
     static QRegularExpression ifRegex(R"([\n^]\s*\#(if\S*)\s+([^\n$]+)\s*[\n$])");
-    static QRegularExpression macro_name("[_a-zA-Z][_a-zA-Z0-9]*");
+    static QRegularExpression macro_name("(defined\\()?([_a-zA-Z][_a-zA-Z0-9]*)");
 
     QString fileContent = QString::fromUtf8(file.readAll());
 
@@ -214,7 +241,10 @@ void ShaderManager::ShaderFileIndex::updateUsedMacros(FileId fileId)
         while(matchIterator.hasNext())
         {
           QRegularExpressionMatch match = matchIterator.next();
-          registerValueBasedMacro(fileId, match.captured(0));
+          if(match.captured(1).isEmpty())
+            registerValueBasedMacro(fileId, match.captured(2));
+          else
+            registerExistenceBasedMacro(fileId, match.captured(2));
         }
       }else
         qWarning() << "Invalid #if expression " << match.captured(0);
