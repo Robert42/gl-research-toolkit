@@ -142,6 +142,7 @@ ShaderManager::MacroId ShaderManager::ShaderFileIndex::registerMacro(FileId file
   macroIds.insert(macroName, m);
 
   macrosInFiles[fileId].insert(m);
+  filesUsingMacro[m].insert(fileId);
 
   return m;
 }
@@ -215,6 +216,8 @@ void ShaderManager::ShaderFileIndex::updateUsedMacros(FileId fileId)
   QFileInfo fileInfo = files.value(fileId);
   QFile file(fileInfo.absoluteFilePath());
 
+  for(MacroId m : macrosInFiles[fileId])
+    filesUsingMacro[m].remove(fileId);
   macrosInFiles[fileId].clear();
 
   if(file.exists() && file.open(QFile::ReadOnly))

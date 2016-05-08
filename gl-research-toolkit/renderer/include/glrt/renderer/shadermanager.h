@@ -44,6 +44,7 @@ private:
     QHash<FileId, QSet<FileId>> fileIncludedBy;
 
     QHash<FileId, QSet<MacroId>> macrosInFiles;
+    QHash<MacroId, QSet<FileId>> filesUsingMacro;
     QHash<QString, MacroId> macroIds;
     QHash<MacroId, QString> macros;
     QSet<MacroId> existanceBasedMacros;
