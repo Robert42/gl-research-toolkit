@@ -14,6 +14,7 @@ set(SOURCE_FILES
   include/glrt/renderer/forward-renderer.h
   include/glrt/renderer/gl/command-list.h
   include/glrt/renderer/gl/command-list-recorder.h
+  include/glrt/renderer/gl/program.h
   include/glrt/renderer/gl/status-capture.h
   include/glrt/renderer/gl-texture-manager.h
   include/glrt/renderer/implementation/fragmented-component-array.h
@@ -61,6 +62,7 @@ set(SOURCE_FILES
   src/glrt/renderer/forward-renderer.cpp
   src/glrt/renderer/gl/command-list.cpp
   src/glrt/renderer/gl/command-list-recorder.cpp
+  src/glrt/renderer/gl/program.cpp
   src/glrt/renderer/gl/status-capture.cpp
   src/glrt/renderer/gl-texture-manager.cpp
   src/glrt/renderer/light-buffer.cpp
