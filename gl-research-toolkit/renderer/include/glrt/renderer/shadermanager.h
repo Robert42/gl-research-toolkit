@@ -4,6 +4,7 @@
 #include "managed-shader.h"
 
 #include <QFileSystemWatcher>
+#include <QBitArray>
 
 namespace glrt {
 namespace renderer {
@@ -18,10 +19,37 @@ public:
   void addShaderSourceDir(const QDir& shaderDir);
 
 private:
+  enum class FileId : quint32
+  {
+    NONE=0,
+  };
+  enum class ProgramId : quint32
+  {
+    NONE=0,
+  };
+
+  struct ShaderFileIndex
+  {
+    QHash<QString, FileId> fileIds;
+    QHash<FileId, QString> files;
+    QHash<FileId, ProgramId> programForFile;
+    QHash<ProgramId, QSet<FileId>> filesForProgram;
+
+    FileId registerShaderFile(const QFileInfo& fileInfo);
+    FileId idForShaderFile(const QFileInfo& fileInfo) const;
+
+    ProgramId addFileToProgram(ProgramId program, FileId fileId);
+  };
+
+  ShaderFileIndex shaderFileIndex;
   QFileSystemWatcher fileSystemWatcher;
 
   QList<QDir> shaderSourceDirs; // directories, where to look for shaders with the extensions shaderExtensions
-  QStringList shaderExtensions = {".cs", ".fs", ".vs"};
+
+
+  friend uint qHash(FileId f){return ::qHash(quint32(f));}
+  friend uint qHash(ProgramId p){return ::qHash(quint32(p));}
+
 };
 
 } // namespace renderer

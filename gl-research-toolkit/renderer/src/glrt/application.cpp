@@ -24,6 +24,8 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
   initAngelScript();
   initAssimp();
 
+  shaderManager.addShaderSourceDir(QDir(GLRT_SHADER_DIR));
+
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_EXTERNAL_SHADER_DIR).absolutePath());

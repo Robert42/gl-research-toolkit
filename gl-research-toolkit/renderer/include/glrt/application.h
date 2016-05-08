@@ -4,6 +4,7 @@
 #include <glrt/toolkit/profiler.h>
 #include <glrt/scene/fps-debug-controller.h>
 #include <glrt/system.h>
+#include <glrt/renderer/shadermanager.h>
 
 namespace glrt {
 
@@ -25,6 +26,7 @@ public:
   };
 
   System system;
+  renderer::ShaderManager shaderManager;
   Settings settings;
   SDL_Window* const sdlWindow;
   AngelScript::asIScriptEngine* scriptEngine;
