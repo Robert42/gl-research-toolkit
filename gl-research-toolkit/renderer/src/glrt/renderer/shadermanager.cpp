@@ -59,6 +59,26 @@ void ShaderManager::recompileProgramsNow()
   }
 }
 
+void ShaderManager::setMacroEnabled(MacroId macro, bool enabled)
+{
+  if(Q_LIKELY(isMacroEnabled(macro) == enabled))
+    return;
+
+  if(enabled)
+    enabledMacros.insert(macro);
+  else
+    enabledMacros.remove(macro);
+
+  for(FileId f : shaderFileIndex.macrosInFiles[macro])
+    recompileProgramsUsingFile(f);
+}
+
+bool ShaderManager::isMacroEnabled(MacroId macro) const
+{
+  return enabledMacros.contains(macro);
+}
+
+
 bool ShaderManager::recompileProgramNow(ProgramId program)
 {
   qInfo() << "wouldRecompile";
@@ -76,6 +96,11 @@ void ShaderManager::handleChangedFile(const QString& filepath)
   FileId fileId = shaderFileIndex.idForShaderFile(filepath);
   shaderFileIndex.updateProprocessorData(fileId);
 
+  recompileProgramsUsingFile(fileId);
+}
+
+void ShaderManager::recompileProgramsUsingFile(FileId fileId)
+{
   QSet<FileId> alreadyChecked;
 
   QLinkedList<FileId> filesToCheck;

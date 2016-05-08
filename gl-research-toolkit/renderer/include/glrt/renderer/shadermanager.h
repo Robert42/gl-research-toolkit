@@ -24,6 +24,9 @@ public:
   void addShaderSourceDirs(const QList<QDir>& shaderDirs);
   void recompileProgramsNow();
 
+  void setMacroEnabled(MacroId macro, bool enabled);
+  bool isMacroEnabled(MacroId macro) const;
+
 private:
   enum class FileId : quint32
   {
@@ -65,6 +68,8 @@ private:
     MacroId registerMacro(FileId fileId, const QString& name);
   };
 
+  QSet<MacroId> enabledMacros;
+
   ShaderFileIndex shaderFileIndex;
   QFileSystemWatcher fileSystemWatcher;
 
@@ -77,6 +82,8 @@ private:
 
   bool recompileProgramNow(ProgramId program);
   void recompileProgramLater(ProgramId program);
+
+  void recompileProgramsUsingFile(FileId fileId);
 
 private slots:
   void handleChangedFile(const QString& filepath);
