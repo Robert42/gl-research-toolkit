@@ -42,6 +42,8 @@ private:
     FileId idForShaderFile(const QFileInfo& fileInfo) const;
 
     ProgramId addFileToProgram(ProgramId program, FileId fileId);
+    void updateProprocessorData(FileId fileId);
+    void updateUsedMacros(FileId fileId);
     void updateIncludeGraph(FileId fileId);
   };
 

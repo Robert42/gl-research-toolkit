@@ -73,7 +73,7 @@ void ShaderManager::recompileProgramLater(ProgramId program)
 void ShaderManager::handleChangedFile(const QString& filepath)
 {
   FileId fileId = shaderFileIndex.idForShaderFile(filepath);
-  shaderFileIndex.updateIncludeGraph(fileId);
+  shaderFileIndex.updateProprocessorData(fileId);
 
   QSet<FileId> alreadyChecked;
 
@@ -130,7 +130,7 @@ ShaderManager::FileId ShaderManager::ShaderFileIndex::registerShaderFile(const Q
     addFileToProgram(program, fileId);
   }
 
-  updateIncludeGraph(fileId);
+  updateProprocessorData(fileId);
 
   return fileId;
 }
@@ -149,6 +149,16 @@ ShaderManager::ProgramId ShaderManager::ShaderFileIndex::addFileToProgram(Progra
   filesForProgram[program].insert(fileId);
 
   return program;
+}
+
+void ShaderManager::ShaderFileIndex::updateProprocessorData(FileId fileId)
+{
+  updateUsedMacros(fileId);
+  updateIncludeGraph(fileId);
+}
+
+void ShaderManager::ShaderFileIndex::updateUsedMacros(FileId fileId)
+{
 }
 
 void ShaderManager::ShaderFileIndex::updateIncludeGraph(FileId fileId)
