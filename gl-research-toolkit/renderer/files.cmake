@@ -27,6 +27,7 @@ set(SOURCE_FILES
   include/glrt/renderer/material-state.h
   include/glrt/renderer/sample-resource-manager.h
   include/glrt/renderer/scene-renderer.h
+  include/glrt/renderer/shadermanager.h
   include/glrt/renderer/simple-shader-storage-buffer.h
   include/glrt/renderer/simple-shader-storage-buffer.inl
   include/glrt/renderer/static-mesh-buffer.h
@@ -69,6 +70,7 @@ set(SOURCE_FILES
   src/glrt/renderer/sample-application.cpp
   src/glrt/renderer/sample-resource-manager.cpp
   src/glrt/renderer/scene-renderer.cpp
+  src/glrt/renderer/shadermanager.cpp
   src/glrt/renderer/static-mesh-buffer.cpp
   src/glrt/renderer/static-mesh-buffer-manager.cpp
   src/glrt/renderer/static-mesh-renderer.cpp
