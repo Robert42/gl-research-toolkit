@@ -6,13 +6,14 @@ void recursiveDirEntryInfoList(const QDir& directory,
                                QFileInfoList& directories,
                                QFileInfoList& filteredFiles,
                                QDir::Filter filter,
+                               const QStringList& nameFilters,
                                bool followSymlinks,
                                int maxRecursiveDepth)
 {
   if(!directory.exists())
     return;
 
-  filteredFiles += directory.entryInfoList(filter, QDir::Name);
+  filteredFiles += directory.entryInfoList(nameFilters, filter, QDir::Name);
 
   if(maxRecursiveDepth == 0)
     return;
@@ -35,6 +36,7 @@ void recursiveDirEntryInfoList(const QDir& directory,
                               directories,
                               filteredFiles,
                               filter,
+                              nameFilters,
                               followSymlinks,
                               maxRecursiveDepth-1);
   }

@@ -9,6 +9,7 @@ void recursiveDirEntryInfoList(const QDir& directory,
                                QFileInfoList& directories,
                                QFileInfoList& filteredFiles,
                                QDir::Filter filter,
+                               const QStringList& nameFilters = QStringList(),
                                bool followSymlinks=true,
                                int maxRecursiveDepth = 1024);
 
