@@ -11,5 +11,9 @@ ShaderManager::~ShaderManager()
 {
 }
 
+void ShaderManager::addShaderSourceDir(const QDir& shaderDir)
+{
+}
+
 } // namespace renderer
 } // namespace glrt
