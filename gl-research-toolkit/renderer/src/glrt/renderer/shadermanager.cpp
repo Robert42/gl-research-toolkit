@@ -4,6 +4,9 @@
 
 #include <glhelper/gl.hpp>
 
+#include <QLinkedList>
+#include <QCoreApplication>
+
 namespace glrt {
 namespace renderer {
 
@@ -17,17 +20,77 @@ ShaderManager::~ShaderManager()
 {
 }
 
-void ShaderManager::addShaderSourceDir(const QDir& shaderDir)
+void ShaderManager::addShaderSourceDirs(const QList<QDir>& shaderDirs)
 {
-  SPLASHSCREEN_MESSAGE(QString("Scanning directory <%0> for shaders").arg(shaderDir.dirName()));
+  // This function should be called only once
+  Q_ASSERT(shaderSourceDirs.isEmpty());
+  Q_ASSERT(shaderFileIndex.fileIds.isEmpty());
+  Q_ASSERT(shaderFileIndex.files.isEmpty());
+
+  this->shaderSourceDirs = shaderDirs;
+
+  SPLASHSCREEN_MESSAGE(QString("Scanning directories for shaders"));
 
   QFileInfoList dirs;
   QFileInfoList files;
 
-  recursiveDirEntryInfoList(shaderDir, dirs, files, QDir::Files, stringFileExtensions);
+  for(const QDir& shaderDir : shaderDirs)
+    recursiveDirEntryInfoList(shaderDir, dirs, files, QDir::Files, stringFileExtensions);
 
   for(const QFileInfo& f : files)
     shaderFileIndex.registerShaderFile(f);
+
+  for(const QString& filePath : shaderFileIndex.fileIds.keys())
+    fileSystemWatcher.addPath(filePath);
+}
+
+void ShaderManager::recompileProgramsNow()
+{
+  if(Q_UNLIKELY(!programsToRecompile.isEmpty()))
+  {
+    while(!programsToRecompile.isEmpty())
+    {
+      ProgramId program = programsToRecompile.first();
+
+      if(recompileProgramNow(program))
+        programsToRecompile.removeFirst();
+      qApp->processEvents();
+    }
+  }
+}
+
+bool ShaderManager::recompileProgramNow(ProgramId program)
+{
+  qInfo() << "wouldRecompile";
+  return true;
+}
+
+void ShaderManager::recompileProgramLater(ProgramId program)
+{
+  programsToRecompile.append(program);
+}
+
+void ShaderManager::handleChangedFile(const QString& filepath)
+{
+  FileId fileId = shaderFileIndex.idForShaderFile(filepath);
+  shaderFileIndex.updateIncludeGraph(fileId);
+
+  QSet<FileId> alreadyChecked;
+
+  QLinkedList<FileId> filesToCheck;
+  filesToCheck.append(fileId);
+  while(!filesToCheck.isEmpty())
+  {
+    FileId fileToCheck = filesToCheck.first();
+    filesToCheck.removeFirst();
+
+    ProgramId program = shaderFileIndex.programForFile.value(fileToCheck, ProgramId::NONE);
+    recompileProgramLater(program);
+
+    alreadyChecked.insert(fileToCheck);
+    for(FileId f : shaderFileIndex.fileIncludedBy.value(fileToCheck) - alreadyChecked)
+      filesToCheck.append(f);
+  }
 }
 
 ShaderManager::FileId ShaderManager::ShaderFileIndex::registerShaderFile(const QFileInfo& fileInfo)

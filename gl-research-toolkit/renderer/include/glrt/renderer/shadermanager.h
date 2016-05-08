@@ -16,7 +16,8 @@ public:
   ShaderManager();
   ~ShaderManager();
 
-  void addShaderSourceDir(const QDir& shaderDir);
+  void addShaderSourceDirs(const QList<QDir>& shaderDirs);
+  void recompileProgramsNow();
 
 private:
   enum class FileId : quint32
@@ -48,11 +49,16 @@ private:
   QFileSystemWatcher fileSystemWatcher;
 
   QList<QDir> shaderSourceDirs; // directories, where to look for shaders with the extensions shaderExtensions
-
+  QList<ProgramId> programsToRecompile;
 
   friend uint qHash(FileId f){return ::qHash(quint32(f));}
   friend uint qHash(ProgramId p){return ::qHash(quint32(p));}
 
+  bool recompileProgramNow(ProgramId program);
+  void recompileProgramLater(ProgramId program);
+
+private slots:
+  void handleChangedFile(const QString& filepath);
 };
 
 } // namespace renderer

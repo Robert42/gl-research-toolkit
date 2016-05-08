@@ -28,7 +28,7 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_EXTERNAL_SHADER_DIR).absolutePath());
 
-  shaderManager.addShaderSourceDir(QDir(GLRT_SHADER_DIR));
+  shaderManager.addShaderSourceDirs({QDir(GLRT_SHADER_DIR)});
 }
 
 
@@ -59,6 +59,7 @@ bool Application::pollEvent(SDL_Event* e)
 float Application::update()
 {
   qApp->processEvents();
+  shaderManager.recompileProgramsNow();
   float frameDuration = profiler.update();
   return frameDuration;
 }
