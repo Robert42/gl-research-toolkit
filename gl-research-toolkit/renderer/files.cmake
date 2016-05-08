@@ -23,6 +23,8 @@ set(SOURCE_FILES
   include/glrt/renderer/implementation/fragmented-static-mesh-component-array.h
   include/glrt/renderer/implementation/fragmented-static-mesh-component-array.inl
   include/glrt/renderer/light-buffer.h
+  include/glrt/renderer/managed-shader.cpp
+  include/glrt/renderer/managed-shader.h
   include/glrt/renderer/material-buffer.h
   include/glrt/renderer/material-state.h
   include/glrt/renderer/sample-resource-manager.h
