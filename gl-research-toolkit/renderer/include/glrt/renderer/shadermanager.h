@@ -28,6 +28,10 @@ private:
   {
     NONE=0,
   };
+  enum class MacroId : quint32
+  {
+    NONE=0,
+  };
 
   struct ShaderFileIndex
   {
@@ -37,6 +41,9 @@ private:
     QHash<ProgramId, QSet<FileId>> filesForProgram;
     QHash<FileId, QSet<FileId>> fileIncludes;
     QHash<FileId, QSet<FileId>> fileIncludedBy;
+
+    MacroId registerExistenceBasedMacro(FileId fileId, const QString& macroName);
+    MacroId registerValueBasedMacro(FileId fileId, const QString& macroName);
 
     FileId registerShaderFile(const QFileInfo& fileInfo);
     FileId idForShaderFile(const QFileInfo& fileInfo) const;

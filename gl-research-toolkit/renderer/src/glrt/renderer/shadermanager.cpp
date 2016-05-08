@@ -67,7 +67,8 @@ bool ShaderManager::recompileProgramNow(ProgramId program)
 
 void ShaderManager::recompileProgramLater(ProgramId program)
 {
-  programsToRecompile.append(program);
+  if(!programsToRecompile.contains(program))
+    programsToRecompile.append(program);
 }
 
 void ShaderManager::handleChangedFile(const QString& filepath)
@@ -91,6 +92,33 @@ void ShaderManager::handleChangedFile(const QString& filepath)
     for(FileId f : shaderFileIndex.fileIncludedBy.value(fileToCheck) - alreadyChecked)
       filesToCheck.append(f);
   }
+}
+
+inline bool suppressedMacro(const QString& macroName)
+{
+  static QSet<QString> not_macros({"in", "out", "inout", "defined", "__GNUC__"});
+
+  return not_macros.contains(macroName);
+}
+
+ShaderManager::MacroId ShaderManager::ShaderFileIndex::registerExistenceBasedMacro(FileId fileId, const QString& macroName)
+{
+  if(suppressedMacro(macroName))
+    return MacroId::NONE;
+
+  // #TODO::::::::
+  qInfo() << "registerExistenceBasedMacro" << macroName;
+  return MacroId::NONE;
+}
+
+ShaderManager::MacroId ShaderManager::ShaderFileIndex::registerValueBasedMacro(FileId fileId, const QString& macroName)
+{
+  if(suppressedMacro(macroName))
+    return MacroId::NONE;
+
+  // #TODO::::::::
+  qInfo() << "registerValueBasedMacro" << macroName;
+  return MacroId::NONE;
 }
 
 ShaderManager::FileId ShaderManager::ShaderFileIndex::registerShaderFile(const QFileInfo& fileInfo)
@@ -153,12 +181,45 @@ ShaderManager::ProgramId ShaderManager::ShaderFileIndex::addFileToProgram(Progra
 
 void ShaderManager::ShaderFileIndex::updateProprocessorData(FileId fileId)
 {
-  updateUsedMacros(fileId);
   updateIncludeGraph(fileId);
+  updateUsedMacros(fileId);
 }
 
 void ShaderManager::ShaderFileIndex::updateUsedMacros(FileId fileId)
 {
+  QFileInfo fileInfo = files.value(fileId);
+  QFile file(fileInfo.absoluteFilePath());
+
+  if(file.exists() && file.open(QFile::ReadOnly))
+  {
+    static QRegularExpression ifRegex(R"([\n^]\s*\#(if\S*)\s+([^\n$]+)\s*[\n$])");
+    static QRegularExpression macro_name("[_a-zA-Z][_a-zA-Z0-9]*");
+
+    QString fileContent = QString::fromUtf8(file.readAll());
+
+    QRegularExpressionMatchIterator matchIterator = ifRegex.globalMatch(fileContent);
+
+    while(matchIterator.hasNext())
+    {
+      QRegularExpressionMatch match = matchIterator.next();
+
+      QString ifType = match.captured(1);
+      QString ifContent = match.captured(2).trimmed();
+
+      if(ifType == "ifdef" || ifType == "ifndef")
+        registerExistenceBasedMacro(fileId, ifContent);
+      else if(ifType == "if")
+      {
+        QRegularExpressionMatchIterator matchIterator = macro_name.globalMatch(ifContent);
+        while(matchIterator.hasNext())
+        {
+          QRegularExpressionMatch match = matchIterator.next();
+          registerValueBasedMacro(fileId, match.captured(0));
+        }
+      }else
+        qWarning() << "Invalid #if expression " << match.captured(0);
+    }
+  }
 }
 
 void ShaderManager::ShaderFileIndex::updateIncludeGraph(FileId fileId)
