@@ -69,7 +69,7 @@ void ShaderManager::setMacroEnabled(MacroId macro, bool enabled)
   else
     enabledMacros.remove(macro);
 
-  for(FileId f : shaderFileIndex.macrosInFiles[macro])
+  for(FileId f : shaderFileIndex.filesUsingMacro[macro])
     recompileProgramsUsingFile(f);
 }
 
