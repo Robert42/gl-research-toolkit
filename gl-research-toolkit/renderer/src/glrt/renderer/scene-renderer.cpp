@@ -196,12 +196,12 @@ void Renderer::captureStates()
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
-    shader.shaderObject.Activate();
+    shader.glProgram.use();
     materialState.activateStateForFlags();
     materialState.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
     materialState.deactivateStateForFlags();
     framebuffer.BindBackBuffer();
-    gl::ShaderObject::Deactivate();
+    gl::Program::useNone();
     StaticMeshBuffer::disableVertexArrays();
   }
 }

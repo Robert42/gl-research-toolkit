@@ -4,6 +4,7 @@
 #include <set>
 
 #include <QRegularExpression>
+#include <QTemporaryDir>
 
 namespace glrt {
 namespace renderer {
@@ -150,6 +151,32 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 bool ShaderCompiler::recompile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
 {
   return compile(shaderObject, shaderDir);
+}
+
+
+gl::Program ShaderCompiler::compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
+{
+  QTemporaryDir tempDir;
+
+  if(!tempDir.isValid())
+    throw GLRT_EXCEPTION(QString("Couldn't create").arg(name));
+
+  QString binaryProgramFile = QDir(tempDir.path()).absoluteFilePath("binary-gl-program-file");
+
+  compileProgramFromFiles_SaveBinary(binaryProgramFile, name, shaderDir, preprocessorBlock);
+
+  gl::Program program;
+  program.loadFromFile(binaryProgramFile);
+
+  return program;
+}
+
+
+void ShaderCompiler::compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
+{
+  gl::ShaderObject shaderObject = createShaderFromFiles(name, shaderDir, preprocessorBlock);
+
+  gl::Program::saveShaderObjectToFile(targetBinaryFile, &shaderObject);
 }
 
 

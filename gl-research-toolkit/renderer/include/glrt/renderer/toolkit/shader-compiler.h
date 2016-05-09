@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 
 #include <glhelper/shaderobject.hpp>
+#include <glrt/renderer/gl/program.h>
 #include <glrt/renderer/gl/shader-type.h>
 
 namespace glrt {
@@ -19,6 +20,9 @@ public:
   bool compile(gl::ShaderObject* shaderObject, const QDir& shaderDir);
   bool recompile(gl::ShaderObject* shaderObject, const QDir& shaderDir);
 
+  static gl::Program compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+
+  static void compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
   static gl::ShaderObject createShaderFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
 
 private:

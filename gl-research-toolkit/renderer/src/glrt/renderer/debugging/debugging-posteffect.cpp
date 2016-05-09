@@ -73,7 +73,7 @@ void DebuggingPosteffect::Renderer::recordCommandList()
     GL_CALL(glDisable, GL_DEPTH_TEST);
   statusCapture = gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES);
   framebuffer.BindBackBuffer();
-  gl::ShaderObject::Deactivate();
+  gl::Program::useNone();
   GL_CALL(glDisable, GL_DEPTH_TEST);
   GL_CALL(glDisableVertexAttribArray, bindingIndex);
 
@@ -167,7 +167,7 @@ SingleShader::SingleShader(const QString& name, bool depthTest)
 
 void SingleShader::activateShader()
 {
-  shader.shaderObject.Activate();
+  shader.glProgram.use();
 }
 
 
