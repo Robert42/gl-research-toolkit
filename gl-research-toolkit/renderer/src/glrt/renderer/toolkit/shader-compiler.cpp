@@ -196,6 +196,7 @@ const QMap<QString, gl::ShaderType>& ShaderCompiler::shaderTypes()
 
   if(shaderTypes.isEmpty())
   {
+    shaderTypes[".cs"] = gl::ShaderType::COMPUTE;
     shaderTypes[".vs"] = gl::ShaderType::VERTEX;
     shaderTypes[".fs"] = gl::ShaderType::FRAGMENT;
   }
