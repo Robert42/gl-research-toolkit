@@ -83,19 +83,38 @@ void Program::loadFromFile(const QString& filename)
 
 void Program::saveToFile(const QString& filename)
 {
+  QByteArray binary;
+  GLenum binaryFormat;
+
+  saveToBinary(binary, binaryFormat);
+  saveBinaryDataToFile(filename, binary, binaryFormat);
+}
+
+void Program::saveBinaryDataToFile(const QString& filename, const QByteArray& binary, GLenum binaryFormat)
+{
   QFile file(filename);
 
   if(!file.open(QFile::WriteOnly))
     throw GLRT_EXCEPTION(QString("Couldn't open the files <%0> for writing a binary shader.").arg(filename));
 
-  QByteArray binary;
-  GLenum binaryFormat;
-
-  saveToBinary(binary, binaryFormat);
-
   writeValue(file, magicNumber());
   writeValue(file, binaryFormat);
   file.write(binary);
+}
+
+void Program::saveShaderObjectToFile(const QString& filename, gl::ShaderObject* shaderObject)
+{
+  QByteArray binary;
+  GLenum binaryFormat;
+
+  std::vector<char> tmpData = shaderObject->GetProgramBinary(binaryFormat);
+  int dataLength = int(tmpData.size());
+
+  Q_ASSERT(tmpData.size() < std::numeric_limits<int>::max());
+
+  binary.append(tmpData.data(), dataLength);
+
+  saveBinaryDataToFile(filename, binary, binaryFormat);
 }
 
 quint64 Program::magicNumber()
