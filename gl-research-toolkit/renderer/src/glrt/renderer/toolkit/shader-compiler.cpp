@@ -159,7 +159,13 @@ gl::Program ShaderCompiler::compileProgramFromFiles(const QString& name, const Q
 
   QString binaryProgramFile = QDir(tempDir.path()).absoluteFilePath("binary-gl-program-file");
 
-  compileProgramFromFiles_SaveBinary(binaryProgramFile, name, shaderDir, preprocessorBlock);
+  CompileSettings settings;
+  settings.targetBinaryFile = binaryProgramFile;
+  settings.name = name;
+  settings.shaderDir = shaderDir;
+  settings.preprocessorBlock = preprocessorBlock;
+  Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
+  compileProgramFromFiles_SaveBinary(settings);
 
   gl::Program program;
   program.loadFromFile(binaryProgramFile);
@@ -173,6 +179,12 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary(const QString& targetBin
   gl::ShaderObject shaderObject = createShaderFromFiles(name, shaderDir, preprocessorBlock);
 
   gl::Program::saveShaderObjectToFile(targetBinaryFile, &shaderObject);
+}
+
+
+void ShaderCompiler::compileProgramFromFiles_SaveBinary(const CompileSettings& settings)
+{
+  compileProgramFromFiles_SaveBinary(settings.targetBinaryFile, settings.name, settings.shaderDir, settings.preprocessorBlock);
 }
 
 
@@ -202,6 +214,46 @@ const QMap<QString, gl::ShaderType>& ShaderCompiler::shaderTypes()
   }
 
   return shaderTypes;
+}
+
+
+bool ShaderCompiler::CompileSettings::operator==(const ShaderCompiler::CompileSettings& other) const
+{
+  return this->targetBinaryFile == other.targetBinaryFile
+      && this->name == other.name
+      && this->shaderDir == other.shaderDir
+      && this->preprocessorBlock == other.preprocessorBlock;
+}
+
+QString ShaderCompiler::CompileSettings::toString() const
+{
+  QStringList values;
+  values << this->name;
+  values << this->shaderDir.absolutePath();
+  values << this->targetBinaryFile;
+  values << this->preprocessorBlock;
+
+  return values.join("\n");
+}
+
+ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromString(const QString& encodedString)
+{
+  ShaderCompiler::CompileSettings settings;
+
+  QStringList list = encodedString.split('\n');
+
+  settings.name = list.first();
+  list.removeFirst();
+
+  settings.shaderDir = list.first();
+  list.removeFirst();
+
+  settings.targetBinaryFile = list.first();
+  list.removeFirst();
+
+  settings.preprocessorBlock = list;
+
+  return settings;
 }
 
 
