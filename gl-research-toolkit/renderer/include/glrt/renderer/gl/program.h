@@ -10,14 +10,24 @@ class Program
 {
   Q_DISABLE_COPY(Program)
 public:
+  GLuint programId = 0;
+
   Program();
   ~Program();
 
   Program(Program&& program);
   void operator=(Program&& program);
 
+  void use();
+  static void useNone();
+
+  void loadFromBinary(const QByteArray& binary, GLenum binaryFormat);
+  void saveToBinary(QByteArray& binary, GLenum& binaryFormat);
+  void loadFromFile(const QString& file);
+  static void saveToFile(const QString& file);
+
 private:
-  GLuint programId = 0;
+  void create();
 };
 
 } // namespace gl
