@@ -180,7 +180,17 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const Compile
   qInfo() << "Compiling Shader" << settings.name;
 
   Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
-  QProcess::execute(QString(GLRT_SHADER_COMPILER_PATH), QStringList({settings.toString()}));
+
+  QFileInfo newShaderFile(settings.targetBinaryFile);
+
+  quint32 i=256;
+  while(!newShaderFile.exists())
+  {
+    if(i==0)
+      throw GLRT_EXCEPTION("Compiling failed");
+    QProcess::execute(QString(GLRT_SHADER_COMPILER_PATH), QStringList({settings.toString()}));
+    i--;
+  }
 }
 
 
