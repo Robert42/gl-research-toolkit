@@ -252,7 +252,7 @@ void ShaderDebugPrinter::end()
 
 void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)
 {
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_VALUE_PRINTER, gl::ShaderObject::ShaderType::FRAGMENT, headerBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_VALUE_PRINTER, gl::ShaderType::FRAGMENT, headerBuffer.gpuBufferAddress());
 }
 
 void ShaderDebugPrinter::draw()

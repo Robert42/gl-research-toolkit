@@ -1,5 +1,6 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
+#include <glrt/renderer/gl/shader-type.h>
 #include <gtest/gtest.h>
 
 #include <glhelper/screenalignedtriangle.hpp>
@@ -20,7 +21,7 @@ TEST(shader_includes, shader_includes)
   gl::ScreenAlignedTriangle screenAlignedTriangle;
 
   gl::ShaderObject shader("test-shader");
-  shader.AddShaderFromFile(gl::ShaderObject::ShaderType::FRAGMENT, shaderDir.absoluteFilePath("test-shader.fs").toStdString());
+  shader.AddShaderFromFile(gl::ShaderType::FRAGMENT, shaderDir.absoluteFilePath("test-shader.fs").toStdString());
   shader.CreateProgram();
   shader.Activate();
 }

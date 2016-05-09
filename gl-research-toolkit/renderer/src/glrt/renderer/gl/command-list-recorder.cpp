@@ -151,7 +151,7 @@ void CommandListRecorder::append_token_AttributeAddress(GLuint index, GLuint64 g
   append_token(&token, GL_ATTRIBUTE_ADDRESS_COMMAND_NV);
 }
 
-void CommandListRecorder::append_token_UniformAddress(GLushort index, gl::ShaderObject::ShaderType shaderType, GLuint64 gpuAddress)
+void CommandListRecorder::append_token_UniformAddress(GLushort index, gl::ShaderType shaderType, GLuint64 gpuAddress)
 {
   UniformAddressCommandNV token;
   token.index = index;

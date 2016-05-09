@@ -5,6 +5,7 @@
 #include "status-capture.h"
 
 #include <glhelper/shaderobject.hpp>
+#include <glrt/renderer/gl/shader-type.h>
 
 
 namespace gl {
@@ -63,7 +64,7 @@ public:
   void append_token_DrawArraysInstanced(GLuint mode, GLuint count, GLuint instanceCount, GLuint first, GLuint baseInstance);
   void append_token_ElementAddress(GLuint64 gpuAddress, GLuint typeSizeInByte);
   void append_token_AttributeAddress(GLuint index, GLuint64 gpuAddress);
-  void append_token_UniformAddress(GLushort index, gl::ShaderObject::ShaderType shaderType, GLuint64 gpuAddress);
+  void append_token_UniformAddress(GLushort index, gl::ShaderType shaderType, GLuint64 gpuAddress);
   void append_token_BlendColor(const glm::vec4& color);
   void append_token_StencilRef(GLuint front, GLuint back);
   void append_token_LineWidth(float lineWidth);

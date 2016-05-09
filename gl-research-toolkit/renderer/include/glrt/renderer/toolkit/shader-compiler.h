@@ -4,6 +4,7 @@
 #include <glrt/dependencies.h>
 
 #include <glhelper/shaderobject.hpp>
+#include <glrt/renderer/gl/shader-type.h>
 
 namespace glrt {
 namespace renderer {
@@ -21,7 +22,7 @@ public:
   static gl::ShaderObject createShaderFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
 
 private:
-  static const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes();
+  static const QMap<QString, gl::ShaderType>& shaderTypes();
 };
 
 } // namespace renderer

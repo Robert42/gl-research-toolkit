@@ -2,6 +2,7 @@
 #include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/system.h>
 #include <glrt/glsl/math.h>
+#include <glrt/renderer/gl/shader-type.h>
 #include <QTimer>
 
 namespace glrt {
@@ -83,12 +84,12 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.beginTokenList();
   segment.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
   segment.append_token_AttributeAddress(bindingIndex, renderingData->vertexBuffer.gpuBufferAddress());
-  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, renderer.sceneUniformAddress());
-  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderer.sceneUniformAddress());
-  segment.append_token_UniformAddress(UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, renderingData->uniformBuffer.gpuBufferAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderType::VERTEX, renderer.sceneUniformAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderType::FRAGMENT, renderer.sceneUniformAddress());
+  segment.append_token_UniformAddress(UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, gl::ShaderType::FRAGMENT, renderingData->uniformBuffer.gpuBufferAddress());
   renderer.debugPrinter.recordBinding(segment);
   if(fragmentUniformBuffer.GetSize() != 0)
-    segment.append_token_UniformAddress(UNIFORM_BINDING_DEBUG_POSTEFFECT_FRAGMENT, gl::ShaderObject::ShaderType::FRAGMENT, fragmentUniformBuffer.gpuBufferAddress());
+    segment.append_token_UniformAddress(UNIFORM_BINDING_DEBUG_POSTEFFECT_FRAGMENT, gl::ShaderType::FRAGMENT, fragmentUniformBuffer.gpuBufferAddress());
   segment.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
   tokenRange = segment.endTokenList();
 

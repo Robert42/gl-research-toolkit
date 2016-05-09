@@ -114,11 +114,11 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
   ShaderErrorDialog errorDialog;
 
-  const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes = ShaderCompiler::shaderTypes();
+  const QMap<QString, gl::ShaderType>& shaderTypes = ShaderCompiler::shaderTypes();
 
   std::string prefixCode = preprocessorBlock.join("\n").toStdString();
 
-  std::set<gl::ShaderObject::ShaderType> usedTypes;
+  std::set<gl::ShaderType> usedTypes;
 
   QString shaderName = QString::fromStdString(shaderObject->GetName());
 
@@ -129,7 +129,7 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
     if(!file.exists())
       continue;
 
-    gl::ShaderObject::ShaderType type = shaderTypes[extension];
+    gl::ShaderType type = shaderTypes[extension];
 
     shaderObject->AddShaderFromFile(type, file.absoluteFilePath().toStdString(), prefixCode);
 
@@ -167,14 +167,14 @@ gl::ShaderObject ShaderCompiler::createShaderFromFiles(const QString &name, cons
 }
 
 
-const QMap<QString, gl::ShaderObject::ShaderType>& ShaderCompiler::shaderTypes()
+const QMap<QString, gl::ShaderType>& ShaderCompiler::shaderTypes()
 {
-  static QMap<QString, gl::ShaderObject::ShaderType> shaderTypes;
+  static QMap<QString, gl::ShaderType> shaderTypes;
 
   if(shaderTypes.isEmpty())
   {
-    shaderTypes[".vs"] = gl::ShaderObject::ShaderType::VERTEX;
-    shaderTypes[".fs"] = gl::ShaderObject::ShaderType::FRAGMENT;
+    shaderTypes[".vs"] = gl::ShaderType::VERTEX;
+    shaderTypes[".fs"] = gl::ShaderType::FRAGMENT;
   }
 
   return shaderTypes;

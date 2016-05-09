@@ -3,6 +3,7 @@
 
 #include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/renderer/gl/shader-type.h>
 
 namespace glrt {
 namespace renderer {
@@ -67,9 +68,9 @@ void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
   Q_ASSERT(materialGpuAddresses.contains(material)); // if the material is not known, the mateiral wasn't initialized correctly
 
   if(currentMaterialType.testFlag(Material::TypeFlag::FRAGMENT_SHADER_UNIFORM))
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
   else if(currentMaterialType.testFlag(Material::TypeFlag::VERTEX_SHADER_UNIFORM))
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, materialGpuAddresses.value(material));
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderType::VERTEX, materialGpuAddresses.value(material));
   else
     Q_UNREACHABLE();
 
@@ -106,7 +107,7 @@ void StaticMeshRecorder::drawInstances(int begin, int end)
   staticMesh->recordBind(recorder);
   for(int i=begin; i<end; ++i)
   {
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, transformationBuffer.gpuAddressForInstance(i));
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderType::VERTEX, transformationBuffer.gpuAddressForInstance(i));
     staticMesh->recordDraw(recorder);
   }
 }

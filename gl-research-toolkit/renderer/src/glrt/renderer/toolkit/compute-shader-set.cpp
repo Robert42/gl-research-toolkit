@@ -1,4 +1,5 @@
 #include <glrt/renderer/toolkit/compute-shader-set.h>
+#include <glrt/renderer/gl/shader-type.h>
 #include <glrt/system.h>
 
 namespace glrt {
@@ -39,7 +40,7 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
   if(shader.isNull())
   {
     shader = QSharedPointer<gl::ShaderObject>(new gl::ShaderObject(QString("%0 [%1,%2,%3]").arg(name).arg(groupSize.x).arg(groupSize.y).arg(groupSize.z).toStdString()));
-    shader->AddShaderFromFile(gl::ShaderObject::ShaderType::COMPUTE,
+    shader->AddShaderFromFile(gl::ShaderType::COMPUTE,
                               shaderFileName.toStdString(),
                               QString("#define GROUPS_SIZE_X %0\n"
                                       "#define GROUPS_SIZE_Y %1\n"

@@ -15,6 +15,7 @@ set(SOURCE_FILES
   include/glrt/renderer/gl/command-list.h
   include/glrt/renderer/gl/command-list-recorder.h
   include/glrt/renderer/gl/program.h
+  include/glrt/renderer/gl/shader-type.h
   include/glrt/renderer/gl/status-capture.h
   include/glrt/renderer/gl-texture-manager.h
   include/glrt/renderer/implementation/fragmented-component-array.h
