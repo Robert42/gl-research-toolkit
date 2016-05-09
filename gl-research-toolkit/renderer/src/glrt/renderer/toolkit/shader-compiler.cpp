@@ -1,6 +1,8 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/toolkit/logger.h>
 
+#include <glhelper/shaderobject.hpp>
+
 #include <set>
 
 #include <QRegularExpression>
@@ -145,12 +147,6 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
   shaderObject->CreateProgram();
 
   return !errorDialog.thereWereErrors();
-}
-
-
-bool ShaderCompiler::recompile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
-{
-  return compile(shaderObject, shaderDir);
 }
 
 
