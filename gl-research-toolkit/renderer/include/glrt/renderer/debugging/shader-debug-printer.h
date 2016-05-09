@@ -4,10 +4,10 @@
 #include <glrt/dependencies.h>
 
 #include <glhelper/buffer.hpp>
-#include <glhelper/shaderobject.hpp>
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
+#include <glrt/renderer/gl/program.h>
 
 namespace glrt {
 namespace renderer {
@@ -40,7 +40,7 @@ private:
   bool active = false;
   bool mouse_is_pressed = false;
   glm::ivec2 mouseCoordinate;
-  gl::ShaderObject shader;
+  gl::Program glProgram;
   gl::Buffer headerBuffer;
   gl::Buffer chunkBuffer;
 
