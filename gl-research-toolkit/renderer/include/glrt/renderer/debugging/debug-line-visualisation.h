@@ -5,10 +5,10 @@
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/voxel-data-component.h>
 #include <glrt/renderer/toolkit/aligned-vector.h>
+#include <glrt/renderer/gl/program.h>
 
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
-#include <glhelper/shaderobject.hpp>
 
 #include "debug-mesh.h"
 
@@ -38,14 +38,14 @@ struct Arrow
 class DebugLineVisualisation final : public DebugRenderer::Implementation
 {
 public:
-  DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, gl::ShaderObject&& shaderObject, int numDrawCalls, int uniformBufferOffset, int uniformBufferElementSize);
+  DebugLineVisualisation(DebugMesh&& debugMesh, gl::Buffer&& uniformBuffer, gl::Program&& glProgram, int numDrawCalls, int uniformBufferOffset, int uniformBufferElementSize);
   DebugLineVisualisation(DebugLineVisualisation&&);
   ~DebugLineVisualisation();
 
   template<typename UniformType>
-  static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData, gl::ShaderObject&& shaderObject);
+  static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData, gl::Program&& glProgram);
   template<typename UniformType>
-  static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData, gl::ShaderObject&& shaderObject);
+  static DebugLineVisualisation debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData, gl::Program&& glProgram);
 
   static DebugRenderer::Implementation* drawCameras(const QList<scene::CameraParameter>& sceneCameras);
   static DebugRenderer::Implementation* drawSphereAreaLights(const QList<scene::SphereAreaLightComponent::Data>& sphereAreaLights);
@@ -66,7 +66,7 @@ private:
   gl::VertexArrayObject vertexArrayObject;
   DebugMesh debugMesh;
   gl::Buffer uniformBuffer;
-  gl::ShaderObject shaderObject;
+  gl::Program glProgram;
   int numDrawCalls;
   int uniformBufferOffset;
   int uniformBufferElementSize;
@@ -74,22 +74,22 @@ private:
 };
 
 template<typename UniformType>
-DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData, gl::ShaderObject&& shaderObject)
+DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::Painter& painter, const QVector<UniformType>& uniformData, gl::Program&& glProgram)
 {
   aligned_vector<UniformType> aligned_data(aligned_vector<UniformType>::Alignment::UniformBufferOffsetAlignment);
   aligned_data.reserve(uniformData.length());
   for(const UniformType& data : uniformData)
     aligned_data.push_back(data);
 
-  return std::move(debugRendering(painter, aligned_data, std::move(shaderObject)));
+  return std::move(debugRendering(painter, aligned_data, std::move(glProgram)));
 }
 
 template<typename UniformType>
-DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData, gl::ShaderObject&& shaderObject)
+DebugLineVisualisation DebugLineVisualisation::debugRendering(const DebugMesh::Painter& painter, const aligned_vector<UniformType>& uniformData, gl::Program&& glProgram)
 {
   return DebugLineVisualisation(std::move(painter.toMesh()),
                                 gl::Buffer(uniformData.size_in_bytes(), gl::Buffer::UsageFlag::IMMUTABLE, uniformData.data()),
-                                std::move(shaderObject),
+                                std::move(glProgram),
                                 uniformData.size(),
                                 uniformData.alignment(),
                                 sizeof(UniformType));
