@@ -24,10 +24,11 @@ public:
   void loadFromBinary(const QByteArray& binary, GLenum binaryFormat);
   void saveToBinary(QByteArray& binary, GLenum& binaryFormat);
   void loadFromFile(const QString& file);
-  static void saveToFile(const QString& file);
+  void saveToFile(const QString& filename);
 
 private:
   void create();
+  static quint64 magicNumber();
 };
 
 } // namespace gl
