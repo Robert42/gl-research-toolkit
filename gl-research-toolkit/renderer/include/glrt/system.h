@@ -20,6 +20,7 @@ public:
     SplashscreenStyle* splashscreenStyle = nullptr;
     int minOpenglVersion = 450;
     bool VSync = true;
+    bool onlyOpenGLContext = false;
 
     static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))
     {
@@ -32,6 +33,13 @@ public:
     static Settings addVSync(Settings settings)
     {
       settings.VSync = true;
+      return settings;
+    }
+
+    static Settings needOnlyOpenGLContext()
+    {
+      Settings settings;
+      settings.onlyOpenGLContext = true;
       return settings;
     }
 

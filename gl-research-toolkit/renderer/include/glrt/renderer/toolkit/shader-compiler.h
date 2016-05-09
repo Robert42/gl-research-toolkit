@@ -33,6 +33,7 @@ public:
 
   static void compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
   static void compileProgramFromFiles_SaveBinary(const CompileSettings& settings);
+  static void compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings);
 
 private:
   bool compile(gl::ShaderObject* shaderObject, const QDir& shaderDir);

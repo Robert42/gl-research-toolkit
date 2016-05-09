@@ -74,6 +74,9 @@ void System::showWindow()
 
 void System::initSplashscreen(const Settings& settings)
 {
+  if(Q_UNLIKELY(settings.onlyOpenGLContext))
+    return;
+
   SplashscreenStyle* splashscreenStyle = settings.splashscreenStyle;
 
   if(splashscreenStyle == nullptr)

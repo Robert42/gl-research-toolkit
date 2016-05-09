@@ -7,6 +7,7 @@
 
 #include <QRegularExpression>
 #include <QTemporaryDir>
+#include <QProcess>
 
 namespace glrt {
 namespace renderer {
@@ -164,13 +165,22 @@ gl::Program ShaderCompiler::compileProgramFromFiles(const QString& name, const Q
   settings.name = name;
   settings.shaderDir = shaderDir;
   settings.preprocessorBlock = preprocessorBlock;
-  Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
-  compileProgramFromFiles_SaveBinary(settings);
+  compileProgramFromFiles_SaveBinary_SubProcess(settings);
 
   gl::Program program;
   program.loadFromFile(binaryProgramFile);
 
   return program;
+}
+
+
+void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings)
+{
+  SPLASHSCREEN_MESSAGE(QString("Compiling Shader %0").arg(settings.name));
+  qInfo() << "Compiling Shader" << settings.name;
+
+  Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
+  QProcess::execute(QString(GLRT_SHADER_COMPILER_PATH), QStringList({settings.toString()}));
 }
 
 
