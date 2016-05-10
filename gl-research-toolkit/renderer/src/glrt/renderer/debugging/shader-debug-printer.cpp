@@ -150,7 +150,7 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 
 
 ShaderDebugPrinter::ShaderDebugPrinter()
-  : glProgram(std::move(ShaderCompiler::compileProgramFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
+  : glProgram(std::move(ShaderCompiler::singleton().compileProgramFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
     headerBuffer(sizeof(Header), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     chunkBuffer(sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS, gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),

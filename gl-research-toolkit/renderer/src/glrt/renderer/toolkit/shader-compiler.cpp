@@ -8,12 +8,12 @@
 #include <QRegularExpression>
 #include <QTemporaryDir>
 #include <QThread>
+#include <QSharedMemory>
 
 namespace glrt {
 namespace renderer {
 
-
-QProcess ShaderCompiler::compileProcess;
+ShaderCompiler* ShaderCompiler::_singleton = nullptr;
 
 class ShaderErrorDialog final
 {
@@ -111,10 +111,29 @@ private:
 
 ShaderCompiler::ShaderCompiler()
 {
+  Q_ASSERT(_singleton == nullptr);
+  _singleton = this;
+
+  QObject::connect(&compileProcessAliveTimer, &QTimer::timeout, this, &glrt::renderer::ShaderCompiler::keepCompileProcessAlive);
+  compileProcessAliveTimer.setSingleShot(false);
+  compileProcessAliveTimer.start(1000);
+}
+
+ShaderCompiler::~ShaderCompiler()
+{
+  Q_ASSERT(_singleton == this);
+  _singleton = nullptr;
 }
 
 
-bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
+ShaderCompiler& ShaderCompiler::singleton()
+{
+  Q_ASSERT(_singleton != nullptr);
+  return *_singleton;
+}
+
+
+bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {
   SPLASHSCREEN_MESSAGE("compile Shader");
 
@@ -251,11 +270,9 @@ gl::ShaderObject ShaderCompiler::createShaderFromFiles(const QString &name, cons
 {
   gl::ShaderObject shaderObject(name.toStdString());
 
-  ShaderCompiler compiler;
+  ShaderCompiler& compiler = ShaderCompiler::singleton();
 
-  compiler.preprocessorBlock = preprocessorBlock;
-
-  while(!compiler.compile(&shaderObject, shaderDir));
+  while(!compiler.compile(&shaderObject, shaderDir, preprocessorBlock));
 
   return std::move(shaderObject);
 }

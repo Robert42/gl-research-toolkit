@@ -28,10 +28,6 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
   gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_EXTERNAL_SHADER_DIR).absolutePath());
-
-  QObject::connect(&compileProcessAliveTimer, &QTimer::timeout, &glrt::renderer::ShaderCompiler::keepCompileProcessAlive);
-  compileProcessAliveTimer.setSingleShot(false);
-  compileProcessAliveTimer.start(1000);
 }
 
 

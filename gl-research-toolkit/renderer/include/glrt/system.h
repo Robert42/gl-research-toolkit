@@ -9,6 +9,9 @@
 #include <QSplashScreen>
 
 namespace glrt {
+namespace renderer {
+  class ShaderCompiler;
+} // namespace renderer
 
 class System final
 {
@@ -70,6 +73,7 @@ public:
 private:
   QApplication application;
   QSplashScreen* splashscreen = nullptr;
+  renderer::ShaderCompiler* shaderCompiler = nullptr;
   Logger logger;
 
   static glm::ivec2 _windowSize;

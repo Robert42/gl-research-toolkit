@@ -64,7 +64,7 @@ void Compiler::compile()
     if(ShaderCompiler::CompileSettings::fromStringList(settings, receivedCommands))
     {
       debugMessage("ShaderCompiler::CompileSettings::fromStringList", settings.toString());
-      ShaderCompiler::compileProgramFromFiles_SaveBinary(settings);
+      ShaderCompiler::singleton().compileProgramFromFiles_SaveBinary(settings);
     }else if(receivedCommands.first() == "QUIT")
     {
       debugMessage("Quit!","RECEIVED QUIT");

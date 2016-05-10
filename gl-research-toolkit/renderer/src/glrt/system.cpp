@@ -43,6 +43,9 @@ System::System(int& argc, char** argv, const Settings& settings)
 {
   initSplashscreen(settings);
 
+  if(!settings.onlyOpenGLContext)
+    shaderCompiler = new renderer::ShaderCompiler;
+
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]
   std::locale::global(std::locale("C"));
 
@@ -58,7 +61,7 @@ System::System(int& argc, char** argv, const Settings& settings)
 
 System::~System()
 {
-  glrt::renderer::ShaderCompiler::endCompileProcess();
+  delete shaderCompiler;
 
   SDL_GL_DeleteContext(sdlGlContext);
   SDL_DestroyWindow(sdlWindow);

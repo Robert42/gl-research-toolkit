@@ -82,10 +82,11 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawCameras(const QList<s
   painter.nextAttribute.parameter1 = 1.f;
   painter.addCube(glm::vec3(-1, -1, -1), glm::vec3(1, 1, 1));
 
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   return new DebugLineVisualisation(std::move(debugRendering(painter,
                                                              cachedCameras,
-                                                             std::move(ShaderCompiler::compileProgramFromFiles("visualize-scene-camera",
-                                                                                                               QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+                                                             std::move(shaderCompiler.compileProgramFromFiles("visualize-scene-camera",
+                                                                                                              QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
 }
 
 
@@ -96,10 +97,11 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawSphereAreaLights(cons
 
   painter.addSphere(1, 16);
 
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   return new DebugLineVisualisation(std::move(debugRendering(painter,
                                                              sphereAreaLights.toVector(),
-                                                             std::move(ShaderCompiler::compileProgramFromFiles("visualize-sphere-area-light",
-                                                                                                               QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+                                                             std::move(shaderCompiler.compileProgramFromFiles("visualize-sphere-area-light",
+                                                                                                              QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
 }
 
 
@@ -110,10 +112,11 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawRectAreaLights(const 
   painter.addRect(glm::vec2(-1), glm::vec2(1));
   painter.addArrow(1.f, 0.1f);
 
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   return new DebugLineVisualisation(std::move(debugRendering(painter,
                                                              rectAreaLights.toVector(),
-                                                             std::move(ShaderCompiler::compileProgramFromFiles("visualize-rect-area-light",
-                                                                                                               QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+                                                             std::move(shaderCompiler.compileProgramFromFiles("visualize-rect-area-light",
+                                                                                                              QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
 }
 
 DebugRenderer::Implementation* DebugLineVisualisation::drawPositions(const QVector<glm::vec3>& positions)
@@ -132,10 +135,11 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawPositions(const QVect
     painter.addVertex(b);
   }
 
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   return new DebugLineVisualisation(std::move(debugRendering(painter,
                                                              positions,
-                                                             std::move(ShaderCompiler::compileProgramFromFiles("visualize-position",
-                                                                                                               QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+                                                             std::move(shaderCompiler.compileProgramFromFiles("visualize-position",
+                                                                                                              QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
 }
 
 DebugRenderer::Implementation* DebugLineVisualisation::drawArrows(const QVector<Arrow>& arrows)
@@ -144,10 +148,11 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawArrows(const QVector<
 
   painter.addArrow(1.f, 0.1f);
 
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   return new DebugLineVisualisation(std::move(debugRendering(painter,
                                                              arrows,
-                                                             std::move(ShaderCompiler::compileProgramFromFiles("visualize-arrow",
-                                                                                                               QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+                                                             std::move(shaderCompiler.compileProgramFromFiles("visualize-arrow",
+                                                                                                              QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
 }
 
 
@@ -193,10 +198,11 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
   painter.addArrow(1.f, 0.1f);
   painter.popMatrix();
 
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
                                                                                   vector,
-                                                                                  std::move(ShaderCompiler::compileProgramFromFiles("visualize-position",
-                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-position",
+                                                                                                                                   QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
   return v;
 }
 
@@ -230,9 +236,10 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
     painter.popMatrix();
   }
 
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
                                                                                   gridSizes.toVector(),
-                                                                                  std::move(ShaderCompiler::compileProgramFromFiles("visualize-voxel-grids",
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-voxel-grids",
                                                                                                                                     QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
   v->use_dephtest = true;
   return v;

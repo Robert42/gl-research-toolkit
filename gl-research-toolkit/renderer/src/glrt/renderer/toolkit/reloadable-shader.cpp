@@ -36,7 +36,7 @@ void ReloadableShader::defineMacro(const QString& macro, bool defined, bool auto
 ReloadableShader::ReloadableShader(const QString& name, const QDir& shaderDir, const QSet<QString>& preprocessorBlock)
   : preprocessorBlock(preprocessorBlock),
     name(name),
-    glProgram(std::move(ShaderCompiler::compileProgramFromFiles(name, shaderDir, wholeProprocessorBlock()))),
+    glProgram(std::move(ShaderCompiler::singleton().compileProgramFromFiles(name, shaderDir, wholeProprocessorBlock()))),
     shaderDir(shaderDir)
 {
   allReloadableShader().insert(this);
@@ -86,10 +86,8 @@ QSet<ReloadableShader::Listener*>& ReloadableShader::allListeners()
 
 bool ReloadableShader::reload()
 {
-  ShaderCompiler compiler;
-  compiler.preprocessorBlock = wholeProprocessorBlock();
-
-  gl::Program program = ShaderCompiler::compileProgramFromFiles(name, shaderDir, wholeProprocessorBlock());
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  gl::Program program = shaderCompiler.compileProgramFromFiles(name, shaderDir, wholeProprocessorBlock());
 
   if(program.programId == 0)
     return false;
