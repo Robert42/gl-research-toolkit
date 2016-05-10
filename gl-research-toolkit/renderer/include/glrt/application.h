@@ -4,6 +4,7 @@
 #include <glrt/toolkit/profiler.h>
 #include <glrt/scene/fps-debug-controller.h>
 #include <glrt/system.h>
+#include <QTimer>
 
 namespace glrt {
 
@@ -47,6 +48,8 @@ public:
   void swapWindow();
 
 private:
+  QTimer compileProcessAliveTimer;
+
   bool handleEvent(const SDL_Event& event);
   bool handleWindowEvent(const SDL_WindowEvent& event);
   bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);

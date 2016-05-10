@@ -6,6 +6,8 @@
 #include <glrt/renderer/gl/program.h>
 #include <glrt/renderer/gl/shader-type.h>
 
+#include <QProcess>
+
 namespace glrt {
 namespace renderer {
 
@@ -21,6 +23,8 @@ public:
 
     bool operator==(const CompileSettings& other) const;
 
+    QStringList toStringList() const;
+    static bool fromStringList(CompileSettings& settings, QStringList& encodedStringList);
     QString toString() const;
     static CompileSettings fromString(const QString& encodedString);
   };
@@ -35,7 +39,13 @@ public:
   static void compileProgramFromFiles_SaveBinary(const CompileSettings& settings);
   static void compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings);
 
+  static void startCompileProcess();
+  static void keepCompileProcessAlive();
+  static void endCompileProcess();
+
 private:
+  static QProcess compileProcess;
+
   bool compile(gl::ShaderObject* shaderObject, const QDir& shaderDir);
   static gl::ShaderObject createShaderFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
 

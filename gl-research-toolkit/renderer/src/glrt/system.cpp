@@ -2,6 +2,8 @@
 #include <glrt/scene/fps-debug-controller.h>
 
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
+
 
 #include <assimp/version.h>
 
@@ -56,6 +58,8 @@ System::System(int& argc, char** argv, const Settings& settings)
 
 System::~System()
 {
+  glrt::renderer::ShaderCompiler::endCompileProcess();
+
   SDL_GL_DeleteContext(sdlGlContext);
   SDL_DestroyWindow(sdlWindow);
   SDL_Quit();

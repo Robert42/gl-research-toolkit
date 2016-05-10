@@ -1,24 +1,24 @@
 #include <glrt/application.h>
-#include <glrt/gui/toolbar.h>
-#include <glrt/renderer/toolkit/shader-compiler.h>
 
-#include <glhelper/gl.hpp>
+#include "compiler.h"
 
-#include <QTextStream>
+#include "debugmessage.h"
 
-typedef glrt::renderer::ShaderCompiler ShaderCompiler;
+bool isRunning = true;
 
 int main(int argc, char** argv)
 {
   glrt::Application app(argc, argv, glrt::System::Settings::needOnlyOpenGLContext());
 
-  if(argc != 2)
-    throw glrt::GLRT_EXCEPTION("Expected exactly one attribute");
-  QString settingsArgument = argv[1];
+  Compiler compiler;
+  Q_UNUSED(compiler);
 
-  ShaderCompiler::CompileSettings settings = ShaderCompiler::CompileSettings::fromString(settingsArgument);
+  int result = qApp->exec();
 
-  ShaderCompiler::compileProgramFromFiles_SaveBinary(settings);
+  while(isRunning)
+    qApp->processEvents(QEventLoop::WaitForMoreEvents);
 
-  return 0;
+  debugMessage("main()", "exit");
+
+  return result;
 }
