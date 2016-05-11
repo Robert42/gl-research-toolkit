@@ -10,6 +10,7 @@
 #include <QThread>
 #include <QSharedMemory>
 #include <QTcpSocket>
+#include <QElapsedTimer>
 
 namespace glrt {
 namespace renderer {
@@ -213,6 +214,9 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const Compile
   tcpConnection->write(command);
   tcpConnection->flush();
 
+  QElapsedTimer timer;
+  timer.start();
+
   while(!newShaderFile.exists())
   {
     if(!compilerProcessIsRunning())
@@ -222,13 +226,19 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const Compile
       tcpConnection->flush();
     }
 
+    if(timer.elapsed() > 1000)
+    {
+      endCompileProcess();
+      timer.restart();
+    }
+
     QThread::msleep(1);
   }
 }
 
 bool ShaderCompiler::compilerProcessIsRunning() const
 {
-  return compileProcess.state() == QProcess::Running && tcpConnection!=nullptr && tcpConnection->isOpen();;
+  return compileProcess.state() == QProcess::Running && tcpConnection!=nullptr && tcpConnection->isOpen();
 }
 
 void ShaderCompiler::startCompileProcess()
@@ -272,6 +282,7 @@ void ShaderCompiler::endCompileProcess()
   {
     delete this->tcpConnection;
     tcpServer.close();
+    tcpConnection = nullptr;
   }
   if(compileProcess.state() == QProcess::Running)
   {
