@@ -57,6 +57,7 @@ set(SOURCE_FILES
   src/glrt/scene/light-component.cpp
   src/glrt/scene/node.cpp
   src/glrt/scene/resources/asset-converter.cpp
+  src/glrt/scene/resources/asset-converter-should-reimport.cpp
   src/glrt/scene/resources/cpuvoxelizerimplementation.cpp
   src/glrt/scene/resources/cpuvoxelizerimplementation.h
   src/glrt/scene/resources/light-source.cpp

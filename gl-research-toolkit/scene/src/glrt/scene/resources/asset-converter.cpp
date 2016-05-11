@@ -22,43 +22,8 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
-bool forceReimport_Assets = false;
 
 using AngelScriptIntegration::AngelScriptCheck;
-
-bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile)
-{
-  if(forceReimport_Assets)
-    return true;
-
-  QDir targetDir = targetFile.path();
-  if(targetDir.exists("FORCE-REIMPORT"))
-    return true;
-  if(targetDir.exists(targetFile.baseName()+".FORCE-REIMPORT"))
-    return true;
-  if(sourceFile.exists(targetFile.baseName()+".FORCE-REIMPORT"))
-    return true;
-
-  // No conversion possible if the source file doesn't exist
-  if(!sourceFile.exists())
-  {
-    // If the target file also doesn't exist, print a warning
-    if(!targetFile.exists())
-      qWarning() << "Couldn't locate the asset file " << targetFile.filePath() << " (and neither the source file "<<sourceFile.filePath()<<" to automatically convert it)";
-
-    return false;
-  }
-
-#ifdef QT_DEBUG
-  // If the cpp files responsible for converting the source files is newer than the target file, we probably need a reconversion, as the conversion code changed
-  for(QFileInfo cppFile : converterSourceFile)
-    if(cppFile.exists() && cppFile.lastModified() > targetFile.lastModified())
-      return true;
-#endif
-
-  // automatically convert, if the target doesn't exist or the source file is newer
-  return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
-}
 
 inline CoordFrame assimp_global_transformation(const aiNode* node, const aiScene* scene)
 {
