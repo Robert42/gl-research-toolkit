@@ -29,6 +29,8 @@ public:
     }
   };
 
+  Uuid<glrt::scene::Scene> firstSceneToLoad;
+
   glrt::renderer::SampleResourceManager resourceManager;
   glrt::scene::Scene scene;
   glrt::renderer::VoxelizedScene voxelizedScene;

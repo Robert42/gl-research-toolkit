@@ -26,6 +26,11 @@ bool SampleResourceManager::foreachIndexImpl(const std::function<bool(const Inde
 }
 
 
+Uuid<scene::Scene> SampleResourceManager::emptyScene()
+{
+  return Uuid<scene::Scene>("{d5167e9c-3758-48ad-bca4-fe5333809cb4}");
+}
+
 Uuid<scene::Scene> SampleResourceManager::cornellBoxScene()
 {
   return Uuid<scene::Scene>("{158da3d3-ef79-4895-add4-f2fe22c0dbff}");
