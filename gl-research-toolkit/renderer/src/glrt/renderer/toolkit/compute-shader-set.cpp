@@ -54,6 +54,9 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
   }
 
   glProgram->use();
+  Q_ASSERT(numCalls.x * groupSize.x >= workAmount.x);
+  Q_ASSERT(numCalls.y * groupSize.y >= workAmount.y);
+  Q_ASSERT(numCalls.z * groupSize.z >= workAmount.z);
   GL_CALL(glDispatchCompute, GLuint(numCalls.x), GLuint(numCalls.y), GLuint(numCalls.z));
   gl::Program::useNone();
 }
