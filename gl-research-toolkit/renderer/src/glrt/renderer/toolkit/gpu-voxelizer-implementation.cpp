@@ -11,10 +11,10 @@ struct GpuVoxelizerImplementation::VoxelizeMetaData
 {
   int numVertices = 0;
   int two_sided = 0;
-  float offset = 0.f;
-  float factor = 1.f;
+  int indexOffset;
+  padding<int, 1> _padding1;
   GLuint64 targetTexture;
-  padding<GLuint64, 1> _padding;
+  padding<GLuint64, 1> _padding2;
   GLuint64 vertices;
 };
 
@@ -54,8 +54,7 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
   header.numVertices = numVertices;
   header.vertices = preprocessedVertices.gpuBufferAddress();
   header.targetTexture = imageHandle;
-  header.offset = 0.f;
-  header.factor = 1.f;
+  header.indexOffset = 0;
   metaData.Unmap();
 
   metaData.BindUniformBuffer(0);
