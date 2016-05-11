@@ -288,6 +288,8 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): invalid type for the format %1.").arg(textureFile.fileName()).arg(int(image.type)));
     if(image.rawDataLength == 0)
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): rawDataLength is not allowed to be 0.").arg(textureFile.fileName()));
+    if(image.alignment != 1 && image.alignment != 2 && image.alignment != 4 && image.alignment != 8)
+      throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): alignemnt must be a power of two and <= 8.").arg(textureFile.fileName()));
     if(image.width == 0)
       throw GLRT_EXCEPTION(QString("TextureFile::loadFromFile(%0): width is not allowed to be 0.").arg(textureFile.fileName()));
     if(image.height == 0)

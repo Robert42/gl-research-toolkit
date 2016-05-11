@@ -73,7 +73,7 @@ public:
 
   struct UncompressedImage
   {
-    quint32 rowStride, width, height, depth, mipmap;
+    quint32 alignment, rowStride, width, height, depth, mipmap;
     Target target;
     Format format;
     Type type;

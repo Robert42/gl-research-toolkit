@@ -49,12 +49,11 @@ int GlTexture::bytesPerPixelForFormatType(Format format, Type type)
 
 quint32 GlTexture::UncompressedImage::calcRowStride() const
 {
-  GLint packAlignment;
-  glGetIntegerv(GL_PACK_ALIGNMENT, &packAlignment);
+  Q_ASSERT(alignment==1 || alignment==2 || alignment==4 || alignment==8);
 
   quint32 bytesPerPixel = quint32(bytesPerPixelForFormatType(format, type));
 
-  return quint32(glm::ceilMultiple<quint32>(width * bytesPerPixel, quint32(packAlignment)));
+  return quint32(glm::ceilMultiple<quint32>(width * bytesPerPixel, alignment));
 }
 
 GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
@@ -181,6 +180,7 @@ GlTexture::UncompressedImage GlTexture::TextureAsFloats::format(quint32 width, q
   quint32 rowCount = height * depth;
 
   image.width = width;
+  image.alignment = 1;
   image.rowStride = image.calcRowStride();
   image.height = height;
   image.depth = depth;
@@ -602,9 +602,10 @@ QPair<GlTexture::UncompressedImage, QVector<byte>> GlTexture::uncompressed2DImag
 
   image.type = type;
   image.format = format;
-  // format and type must be set before calling calcRowStride!
-
+  image.alignment = 1;
   image.width = quint32(this->width(level));
+  // format, type, width and alignment must be set before calling calcRowStride!
+
   image.rowStride = image.calcRowStride();
   image.height = quint32(this->height(level));
   image.depth = quint32(this->depth(level));
@@ -618,6 +619,8 @@ QPair<GlTexture::UncompressedImage, QVector<byte>> GlTexture::uncompressed2DImag
 
   QVector<byte> rawData;
   rawData.resize(int(image.rawDataLength));
+
+  GL_CALL(glPixelStorei, GL_PACK_ALIGNMENT, image.alignment);
 
   GL_CALL(glGetTextureImage, textureId, level, GLenum(format), GLenum(type), rawData.length(), rawData.data());
 
@@ -638,6 +641,8 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
   Q_ASSERT(supportedFormat);
 
   GL_CALL(glBindTexture, static_cast<GLenum>(image.target), this->textureId);
+
+  GL_CALL(glPixelStorei, GL_UNPACK_ALIGNMENT, image.alignment);
 
   switch(image.target)
   {
