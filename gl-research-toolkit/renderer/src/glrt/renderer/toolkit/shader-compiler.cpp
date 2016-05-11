@@ -228,6 +228,7 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const Compile
 
     if(timer.elapsed() > 1000)
     {
+      // #FIXME: add error dialog, if a compile error occured
       endCompileProcess();
       timer.restart();
     }

@@ -45,15 +45,18 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
     ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
     gl::Program temp = shaderCompiler.compileProgramFromFiles(shaderFileBasename,
                                                               shaderFileDir,
-                                                              QStringList({QString("#define GROUPS_SIZE_X %0\n").arg(groupSize.x),
-                                                                           QString("#define GROUPS_SIZE_Y %1\n").arg(groupSize.y),
-                                                                           QString("#define GROUPS_SIZE_Z %2\n").arg(groupSize.z)}));
+                                                              QStringList({QString("#define GROUPS_SIZE_X %0").arg(groupSize.x),
+                                                                           QString("#define GROUPS_SIZE_Y %1").arg(groupSize.y),
+                                                                           QString("#define GROUPS_SIZE_Z %2").arg(groupSize.z)}));
 
     glProgram = QSharedPointer<gl::Program>(new gl::Program(std::move(temp)));
     glPrograms[groupSize] = glProgram;
   }
 
   glProgram->use();
+  Q_ASSERT(numCalls.x * groupSize.x >= workAmount.x);
+  Q_ASSERT(numCalls.y * groupSize.y >= workAmount.y);
+  Q_ASSERT(numCalls.z * groupSize.z >= workAmount.z);
   GL_CALL(glDispatchCompute, GLuint(numCalls.x), GLuint(numCalls.y), GLuint(numCalls.z));
   gl::Program::useNone();
 }

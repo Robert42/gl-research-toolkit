@@ -1,4 +1,7 @@
 #include <glrt/renderer/toolkit/gpu-voxelizer-implementation.h>
+#include <glrt/system.h>
+#include <QThread>
+#include <QElapsedTimer>
 
 namespace glrt {
 namespace renderer {
@@ -11,10 +14,10 @@ struct GpuVoxelizerImplementation::VoxelizeMetaData
 {
   int numVertices = 0;
   int two_sided = 0;
-  float offset = 0.f;
-  float factor = 1.f;
+  int indexOffset = 0;
+  padding<int, 1> _padding1;
   GLuint64 targetTexture;
-  padding<GLuint64, 1> _padding;
+  padding<GLuint64, 1> _padding2;
   GLuint64 vertices;
 };
 
@@ -49,18 +52,27 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 
   int numVertices = preprocessVertices(localToVoxelSpace, staticMesh);
 
-  VoxelizeMetaData& header = *reinterpret_cast<VoxelizeMetaData*>(metaData.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  header.two_sided = meshType == MeshType::TWO_SIDED;
-  header.numVertices = numVertices;
-  header.vertices = preprocessedVertices.gpuBufferAddress();
-  header.targetTexture = imageHandle;
-  header.offset = 0.f;
-  header.factor = 1.f;
-  metaData.Unmap();
+  QElapsedTimer timer;
+  timer.start();
 
-  metaData.BindUniformBuffer(0);
+  int dispatchSize = glm::min(totalNumVoxels, 64*64*64);
+  for(int i=0; i<totalNumVoxels; i+=dispatchSize)
+  {
+    if(timer.elapsed() > 1000)
+      qDebug() << "  Voxelization-progress:" << 100.*double(i) / double(totalNumVoxels) << "%";
+    VoxelizeMetaData& header = *reinterpret_cast<VoxelizeMetaData*>(metaData.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+    header.two_sided = meshType == MeshType::TWO_SIDED;
+    header.numVertices = numVertices;
+    header.vertices = preprocessedVertices.gpuBufferAddress();
+    header.targetTexture = imageHandle;
+    header.indexOffset = i;
+    metaData.Unmap();
 
-  voxelizeMeshComputeShader.execute(glm::ivec3(totalNumVoxels, 1, 1));
+    metaData.BindUniformBuffer(0);
+
+    voxelizeMeshComputeShader.execute(glm::ivec3(dispatchSize, 1, 1));
+    QThread::msleep(1);
+  }
 
   GL_CALL(glMakeImageHandleNonResidentNV, imageHandle);
 

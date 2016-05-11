@@ -13,8 +13,7 @@ struct VoxelizeMetaData
 {
   int numVertices;
   bool two_sided;
-  float offset;
-  float factor;
+  int indexOffset;
   layout(r32f) image3D targetTexture;
   uint64_t vertices;
 };
@@ -37,7 +36,7 @@ void main()
   
   ivec3 textureSize = imageSize(metaData.targetTexture);
   
-  const ivec3 voxelCoord = voxelIndexFromScalarIndex(int(gl_GlobalInvocationID.x), textureSize);
+  const ivec3 voxelCoord = voxelIndexFromScalarIndex(int(gl_GlobalInvocationID.x)+metaData.indexOffset, textureSize);
   const vec3 p = centerPointOfVoxel(voxelCoord);
 
   for(int i=0; i<num_vertices; i+=3)

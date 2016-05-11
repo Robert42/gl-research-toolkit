@@ -56,6 +56,16 @@ Uuid<scene::Scene> SampleResourceManager::sponzaSceneWithoutFoliage()
   return Uuid<scene::Scene>("{b5b3c0be-99b2-43b9-983a-6cb8bb3c7dd3}");
 }
 
+Uuid<scene::Scene> SampleResourceManager::multiple_textured_objects()
+{
+  return Uuid<scene::Scene>("{07474473-2712-4239-83f7-1fb2b35011bd}");
+}
+
+Uuid<scene::Scene> SampleResourceManager::defaultScene()
+{
+  return multiple_textured_objects();
+}
+
 Uuid<scene::resources::StaticMesh> SampleResourceManager::suzanneLowPoly()
 {
   return Uuid<scene::resources::StaticMesh>("{0ecdf00b-f8fe-4988-aa4a-cda5c2644c83}");
@@ -65,6 +75,7 @@ Uuid<scene::resources::StaticMesh> SampleResourceManager::suzanneSmooth()
 {
   return Uuid<scene::resources::StaticMesh>("{7eed8ff5-ba25-424d-aa2a-7a737ee3ce4d}");
 }
+
 
 
 } // namespace renderer
