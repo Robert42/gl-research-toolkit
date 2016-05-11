@@ -9,6 +9,23 @@ using glm::vec3;
 using glm::vec4;
 
 
+TEST(shader_library, voxelIndexFromScalarIndex)
+{
+  glm::ivec3 size(256);
+  for(int x=0; x<size.x; ++x)
+    for(int y=0; y<size.y; ++y)
+      for(int z=0; z<size.z; ++z)
+        EXPECT_EQ(voxelIndexFromScalarIndex(x + y*size.x + z*size.x*size.y, size), glm::ivec3(x, y, z));
+
+  size = glm::ivec3(125, 23, 7);
+  for(int x=0; x<size.x; ++x)
+    for(int y=0; y<size.y; ++y)
+      for(int z=0; z<size.z; ++z)
+        EXPECT_EQ(voxelIndexFromScalarIndex(x + y*size.x + z*size.x*size.y, size), glm::ivec3(x, y, z));
+}
+
+
+
 TEST(shader_library, plane_distance)
 {
   Plane plane;
