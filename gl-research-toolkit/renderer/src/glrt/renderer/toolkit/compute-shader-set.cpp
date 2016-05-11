@@ -45,9 +45,9 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
     ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
     gl::Program temp = shaderCompiler.compileProgramFromFiles(shaderFileBasename,
                                                               shaderFileDir,
-                                                              QStringList({QString("#define GROUPS_SIZE_X %0\n").arg(groupSize.x),
-                                                                           QString("#define GROUPS_SIZE_Y %1\n").arg(groupSize.y),
-                                                                           QString("#define GROUPS_SIZE_Z %2\n").arg(groupSize.z)}));
+                                                              QStringList({QString("#define GROUPS_SIZE_X %0").arg(groupSize.x),
+                                                                           QString("#define GROUPS_SIZE_Y %1").arg(groupSize.y),
+                                                                           QString("#define GROUPS_SIZE_Z %2").arg(groupSize.z)}));
 
     glProgram = QSharedPointer<gl::Program>(new gl::Program(std::move(temp)));
     glPrograms[groupSize] = glProgram;
