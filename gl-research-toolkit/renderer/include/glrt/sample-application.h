@@ -20,7 +20,7 @@ class SampleApplication : public glrt::Application
 public:
   struct Settings final
   {
-    Uuid<scene::Scene> sceneToLoad = glrt::renderer::SampleResourceManager::sponzaScene();
+    Uuid<scene::Scene> sceneToLoad = glrt::renderer::SampleResourceManager::defaultScene();
     bool loadDistanceField = true;
 
     static Settings techDemo()
