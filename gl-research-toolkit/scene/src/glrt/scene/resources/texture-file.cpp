@@ -124,16 +124,16 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
       TextureAsFloats _asFloats = textureInformation.asFloats(1);
       glm::vec4 smallestValue = glm::vec4(INFINITY);
       glm::vec4 largestValue = glm::vec4(-INFINITY);
-      for(quint32 y=0; y<_asFloats.h; ++y)
+      for(quint32 y=0; y<_asFloats.height; ++y)
       {
         glm::vec4* line = _asFloats.lineData_As<glm::vec4>(y);
-        for(quint32 x=0; x<_asFloats.w; ++x)
+        for(quint32 x=0; x<_asFloats.width; ++x)
         {
           smallestValue = glm::min(line[x], smallestValue);
           largestValue = glm::max(line[x], largestValue);
         }
       }
-      QImage debugImage = _asFloats.asChannelQImage(3);
+      QImage debugImage = _asFloats.asChannelQImage(0);
       //            QImage debugImage = _asFloats.asQImage();
       QDialog texturePreview;
       QVBoxLayout vbox(&texturePreview);
