@@ -82,9 +82,6 @@ void SampleApplication::shaderRecompileWorkaround()
   const float deltaTime = 1.f / 60.f;
   scene.update(deltaTime);
 
-  qApp->processEvents();
-  scene.unloadUnusedResources();
-
   drawScene();
 
   glrt::renderer::ReloadableShader::reloadAll();
