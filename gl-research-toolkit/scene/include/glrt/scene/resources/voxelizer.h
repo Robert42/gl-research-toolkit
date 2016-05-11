@@ -36,7 +36,7 @@ public:
     utilities::GlTexture::Type voxelType = utilities::GlTexture::Type::FLOAT16;
     float extend = 1.f;
     int minSize = 4;
-    int maxSize = 64; // #FIXME: why doesn't 128 work for sponza?
+    int maxSize = 128; // #FIXME: why doesn't 128 work for sponza?
     float scaleFactor = 1.f;
     bool enabled = true;
 
