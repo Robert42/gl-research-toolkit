@@ -2,6 +2,8 @@
 #include <glrt/scene/fps-debug-controller.h>
 
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
+
 
 #include <assimp/version.h>
 
@@ -41,6 +43,8 @@ System::System(int& argc, char** argv, const Settings& settings)
 {
   initSplashscreen(settings);
 
+  shaderCompiler = new renderer::ShaderCompiler(!settings.onlyOpenGLContext);
+
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]
   std::locale::global(std::locale("C"));
 
@@ -56,6 +60,8 @@ System::System(int& argc, char** argv, const Settings& settings)
 
 System::~System()
 {
+  delete shaderCompiler;
+
   SDL_GL_DeleteContext(sdlGlContext);
   SDL_DestroyWindow(sdlWindow);
   SDL_Quit();
@@ -74,6 +80,9 @@ void System::showWindow()
 
 void System::initSplashscreen(const Settings& settings)
 {
+  if(Q_UNLIKELY(settings.onlyOpenGLContext))
+    return;
+
   SplashscreenStyle* splashscreenStyle = settings.splashscreenStyle;
 
   if(splashscreenStyle == nullptr)

@@ -9,6 +9,9 @@
 #include <QSplashScreen>
 
 namespace glrt {
+namespace renderer {
+  class ShaderCompiler;
+} // namespace renderer
 
 class System final
 {
@@ -20,6 +23,7 @@ public:
     SplashscreenStyle* splashscreenStyle = nullptr;
     int minOpenglVersion = 450;
     bool VSync = true;
+    bool onlyOpenGLContext = false;
 
     static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))
     {
@@ -32,6 +36,13 @@ public:
     static Settings addVSync(Settings settings)
     {
       settings.VSync = true;
+      return settings;
+    }
+
+    static Settings needOnlyOpenGLContext()
+    {
+      Settings settings;
+      settings.onlyOpenGLContext = true;
       return settings;
     }
 
@@ -62,6 +73,7 @@ public:
 private:
   QApplication application;
   QSplashScreen* splashscreen = nullptr;
+  renderer::ShaderCompiler* shaderCompiler = nullptr;
   Logger logger;
 
   static glm::ivec2 _windowSize;

@@ -1,6 +1,7 @@
 #include <glrt/application.h>
 #include <glrt/gui/toolbar.h>
 #include <glrt/renderer/static-mesh-buffer.h>
+#include <glrt/renderer/gl/shader-type.h>
 #include <glrt/gui/anttweakbar.h>
 #include <glrt/scene/fps-debug-controller.h>
 
@@ -85,8 +86,8 @@ int main(int argc, char** argv)
   // ======== Setup the Shader ========
   // load and compile the shader
   gl::ShaderObject shaderObject("plain-color");
-  shaderObject.AddShaderFromFile(gl::ShaderObject::ShaderType::VERTEX, shaderDir.absoluteFilePath("plain-color.vs").toStdString());
-  shaderObject.AddShaderFromFile(gl::ShaderObject::ShaderType::FRAGMENT, shaderDir.absoluteFilePath("plain-color.fs").toStdString());
+  shaderObject.AddShaderFromFile(gl::ShaderType::VERTEX, shaderDir.absoluteFilePath("plain-color.vs").toStdString());
+  shaderObject.AddShaderFromFile(gl::ShaderType::FRAGMENT, shaderDir.absoluteFilePath("plain-color.fs").toStdString());
   shaderObject.CreateProgram();
 
   // initialize the uniform block with meaningful values

@@ -3,25 +3,65 @@
 
 #include <glrt/dependencies.h>
 
-#include <glhelper/shaderobject.hpp>
+#include <glrt/renderer/gl/program.h>
+#include <glrt/renderer/gl/shader-type.h>
+
+#include <QProcess>
+#include <QTimer>
+#include <QTcpServer>
 
 namespace glrt {
 namespace renderer {
 
-class ShaderCompiler
+class ShaderCompiler : public QObject
 {
+  Q_OBJECT
 public:
-  QStringList preprocessorBlock;
+  struct CompileSettings
+  {
+    QString targetBinaryFile;
+    QString name;
+    QDir shaderDir;
+    QStringList preprocessorBlock;
 
-  ShaderCompiler();
+    bool operator==(const CompileSettings& other) const;
 
-  bool compile(gl::ShaderObject* shaderObject, const QDir& shaderDir);
-  bool recompile(gl::ShaderObject* shaderObject, const QDir& shaderDir);
+    QStringList toStringList() const;
+    QString toString() const;
+    static bool fromStringList(CompileSettings& settings, QStringList& encodedStringList);
+    static CompileSettings fromStringList(QStringList encodedStringList);
+    static CompileSettings fromString(const QString& encodedString);
+  };
 
-  static gl::ShaderObject createShaderFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+  ShaderCompiler(bool startServer);
+  ~ShaderCompiler();
+
+  static ShaderCompiler& singleton();
+
+  gl::Program compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+
+  void compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+  void compileProgramFromFiles_SaveBinary(const CompileSettings& settings);
+  void compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings);
 
 private:
-  static const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes();
+  static ShaderCompiler* _singleton;
+
+  int nProcessStarted = 0;
+  QProcess compileProcess;
+  QTcpServer tcpServer;
+  QTcpSocket* tcpConnection = nullptr;
+
+  bool compile(gl::ShaderObject* shaderObject, const QDir& shaderDir, const QStringList& preprocessorBlock);
+  static gl::ShaderObject createShaderFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+
+  static const QMap<QString, gl::ShaderType>& shaderTypes();
+
+  bool compilerProcessIsRunning() const;
+
+private slots:
+  void startCompileProcess();
+  void endCompileProcess();
 };
 
 } // namespace renderer

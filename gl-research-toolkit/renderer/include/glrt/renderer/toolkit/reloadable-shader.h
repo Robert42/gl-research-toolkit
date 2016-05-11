@@ -3,8 +3,7 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/toolkit/array.h>
-
-#include <glhelper/shaderobject.hpp>
+#include <glrt/renderer/gl/program.h>
 
 namespace glrt {
 namespace renderer {
@@ -19,7 +18,8 @@ public:
   static void defineMacro(const QString& macro, bool defined, bool autoReloadShaders=true);
   QSet<QString> preprocessorBlock;
 
-  gl::ShaderObject shaderObject;
+  QString name;
+  gl::Program glProgram;
 
   ReloadableShader(const QString& name, const QDir& shaderDir, const QSet<QString>& preprocessorBlock=QSet<QString>());
   ReloadableShader(ReloadableShader&& other);

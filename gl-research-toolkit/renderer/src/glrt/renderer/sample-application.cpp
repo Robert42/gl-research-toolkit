@@ -9,6 +9,7 @@ SampleApplication::SampleApplication(int& argc, char** argv,
                                      const Application::Settings& applicationSettings,
                                      const System::Settings& systemSettings)
   : Application(argc, argv, systemSettings, applicationSettings),
+    firstSceneToLoad(sampleApplicationSettings.sceneToLoad),
     scene(&resourceManager),
     voxelizedScene(scene),
     renderer(systemSettings.windowSize, &scene, &resourceManager, &shaderDebugPrinter),
@@ -19,12 +20,7 @@ SampleApplication::SampleApplication(int& argc, char** argv,
   if(sampleApplicationSettings.loadDistanceField)
     voxelizedScene.enabledSignedDistanceFields();
 
-  // #FIXME: reproducible crash if uncommenting the following two lines, while having the cornellBoxSuzanneScene() as the default scene (see sampleApplicationSettings.sceneToLoad)
-  qApp->processEvents();
-  scene.unloadUnusedResources();
-  // #TODO::::: why is not revoxelizing having the right result right away?
-
-  scene.load(sampleApplicationSettings.sceneToLoad);
+  scene.load(glrt::renderer::SampleResourceManager::emptyScene());
 }
 
 SampleApplication::~SampleApplication()
@@ -89,6 +85,8 @@ void SampleApplication::shaderRecompileWorkaround()
   drawScene();
 
   glrt::renderer::ReloadableShader::reloadAll();
+
+  scene.load(firstSceneToLoad);
 }
 
 

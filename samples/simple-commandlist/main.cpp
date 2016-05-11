@@ -7,6 +7,7 @@
 #include <glhelper/texture2d.hpp>
 #include <glhelper/framebufferobject.hpp>
 
+#include <glrt/renderer/gl/shader-type.h>
 #include <glrt/renderer/gl/command-list.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
 
@@ -35,7 +36,7 @@ int main(int argc, char** argv)
 
   gl::ShaderObject orangeShader("orange-shader");
   const int bindingIndex = 0;
-  orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
+  orangeShader.AddShaderFromSource(gl::ShaderType::VERTEX,
                                    "#version 450 core\n"
                                    "in layout(location=0) vec2 position;\n"
                                    "void main()\n"
@@ -43,7 +44,7 @@ int main(int argc, char** argv)
                                    "gl_Position = vec4(position.x, position.y, 0, 1);"
                                    "}\n",
                                    "main.cpp (orange vertex)");
-  orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
+  orangeShader.AddShaderFromSource(gl::ShaderType::FRAGMENT,
                                    "#version 450 core\n"
                                    "out vec4 color;\n"
                                    "void main()\n"

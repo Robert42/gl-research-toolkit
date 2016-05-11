@@ -150,7 +150,7 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 
 
 ShaderDebugPrinter::ShaderDebugPrinter()
-  : shader(std::move(ShaderCompiler::createShaderFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
+  : glProgram(std::move(ShaderCompiler::singleton().compileProgramFromFiles("visualize-debug-printing-fragment", QDir(GLRT_SHADER_DIR"/debugging/visualizations")))),
     headerBuffer(sizeof(Header), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     chunkBuffer(sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS, gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
@@ -252,7 +252,7 @@ void ShaderDebugPrinter::end()
 
 void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)
 {
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_VALUE_PRINTER, gl::ShaderObject::ShaderType::FRAGMENT, headerBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_VALUE_PRINTER, gl::ShaderType::FRAGMENT, headerBuffer.gpuBufferAddress());
 }
 
 void ShaderDebugPrinter::draw()
@@ -268,11 +268,12 @@ void ShaderDebugPrinter::draw()
   if(!mouse_is_pressed)
     return;
 
-  shader.Activate();
+  glProgram.use();
   headerBuffer.BindShaderStorageBuffer(UNIFORM_BINDING_VALUE_PRINTER);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL_RECTANGLE_NV);
   GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 3);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  gl::Program::useNone();
 }
 
 bool ShaderDebugPrinter::handleEvents(const SDL_Event& event)

@@ -4,6 +4,7 @@
 #include <glhelper/buffer.hpp>
 #include <glhelper/vertexarrayobject.hpp>
 #include <glhelper/shaderobject.hpp>
+#include <glrt/renderer/gl/shader-type.h>
 
 
 
@@ -23,7 +24,7 @@ int main(int argc, char** argv)
   gl::VertexArrayObject vertexArray({gl::VertexArrayObject::Attribute(gl::VertexArrayObject::Attribute::Type::FLOAT, 2, bindingIndex)});
 
   gl::ShaderObject orangeShader("orange-shader");
-  orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::VERTEX,
+  orangeShader.AddShaderFromSource(gl::ShaderType::VERTEX,
                                    "#version 450 core\n"
                                    "in vec2 position;\n"
                                    "void main()\n"
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
                                    "gl_Position = vec4(position.x, position.y, 0, 1);"
                                    "}\n",
                                    "main.cpp (orange vertex)");
-  orangeShader.AddShaderFromSource(gl::ShaderObject::ShaderType::FRAGMENT,
+  orangeShader.AddShaderFromSource(gl::ShaderType::FRAGMENT,
                                    "#version 450 core\n"
                                    "out vec4 color;\n"
                                    "void main()\n"

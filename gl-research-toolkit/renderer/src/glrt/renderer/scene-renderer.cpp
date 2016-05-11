@@ -196,12 +196,12 @@ void Renderer::captureStates()
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
-    shader.shaderObject.Activate();
+    shader.glProgram.use();
     materialState.activateStateForFlags();
     materialState.stateCapture = std::move(gl::StatusCapture::capture(gl::StatusCapture::Mode::TRIANGLES));
     materialState.deactivateStateForFlags();
     framebuffer.BindBackBuffer();
-    gl::ShaderObject::Deactivate();
+    gl::Program::useNone();
     StaticMeshBuffer::disableVertexArrays();
   }
 }
@@ -251,8 +251,8 @@ void Renderer::recordCommandlist()
   recorder.beginTokenList();
   debugPrinter.recordBinding(recorder);
   recorder.append_token_Viewport(glm::uvec2(0), glm::uvec2(videoResolution));
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::VERTEX, sceneUniformBuffer.gpuBufferAddress());
-  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderObject::ShaderType::FRAGMENT, sceneUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderType::VERTEX, sceneUniformBuffer.gpuBufferAddress());
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_SCENE_BLOCK, gl::ShaderType::FRAGMENT, sceneUniformBuffer.gpuBufferAddress());
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);

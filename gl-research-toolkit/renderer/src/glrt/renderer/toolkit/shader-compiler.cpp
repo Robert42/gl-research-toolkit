@@ -1,13 +1,21 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/toolkit/logger.h>
 
+#include <glhelper/shaderobject.hpp>
+
 #include <set>
 
 #include <QRegularExpression>
+#include <QTemporaryDir>
+#include <QThread>
+#include <QSharedMemory>
+#include <QTcpSocket>
+#include <QElapsedTimer>
 
 namespace glrt {
 namespace renderer {
 
+ShaderCompiler* ShaderCompiler::_singleton = nullptr;
 
 class ShaderErrorDialog final
 {
@@ -103,22 +111,42 @@ private:
 };
 
 
-ShaderCompiler::ShaderCompiler()
+ShaderCompiler::ShaderCompiler(bool startServer)
 {
+  Q_ASSERT(_singleton == nullptr);
+  _singleton = this;
+
+  if(startServer)
+    startCompileProcess();
+}
+
+ShaderCompiler::~ShaderCompiler()
+{
+  endCompileProcess();
+
+  Q_ASSERT(_singleton == this);
+  _singleton = nullptr;
 }
 
 
-bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
+ShaderCompiler& ShaderCompiler::singleton()
+{
+  Q_ASSERT(_singleton != nullptr);
+  return *_singleton;
+}
+
+
+bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {
   SPLASHSCREEN_MESSAGE("compile Shader");
 
   ShaderErrorDialog errorDialog;
 
-  const QMap<QString, gl::ShaderObject::ShaderType>& shaderTypes = ShaderCompiler::shaderTypes();
+  const QMap<QString, gl::ShaderType>& shaderTypes = ShaderCompiler::shaderTypes();
 
   std::string prefixCode = preprocessorBlock.join("\n").toStdString();
 
-  std::set<gl::ShaderObject::ShaderType> usedTypes;
+  std::set<gl::ShaderType> usedTypes;
 
   QString shaderName = QString::fromStdString(shaderObject->GetName());
 
@@ -129,7 +157,7 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
     if(!file.exists())
       continue;
 
-    gl::ShaderObject::ShaderType type = shaderTypes[extension];
+    gl::ShaderType type = shaderTypes[extension];
 
     shaderObject->AddShaderFromFile(type, file.absoluteFilePath().toStdString(), prefixCode);
 
@@ -147,9 +175,134 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 }
 
 
-bool ShaderCompiler::recompile(gl::ShaderObject* shaderObject, const QDir& shaderDir)
+gl::Program ShaderCompiler::compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {
-  return compile(shaderObject, shaderDir);
+  QTemporaryDir tempDir;
+
+  if(!tempDir.isValid())
+    throw GLRT_EXCEPTION(QString("Couldn't create").arg(name));
+
+  QString binaryProgramFile = QDir(tempDir.path()).absoluteFilePath("binary-gl-program-file");
+
+  CompileSettings settings;
+  settings.targetBinaryFile = binaryProgramFile;
+  settings.name = name;
+  settings.shaderDir = shaderDir;
+  settings.preprocessorBlock = preprocessorBlock;
+  compileProgramFromFiles_SaveBinary_SubProcess(settings);
+
+  gl::Program program;
+  program.loadFromFile(binaryProgramFile);
+
+  return program;
+}
+
+
+void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings)
+{
+  SPLASHSCREEN_MESSAGE(QString("Compiling Shader %0").arg(settings.name));
+  qInfo() << "Compiling Shader" << settings.name;
+
+  Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
+  Q_ASSERT(CompileSettings::fromStringList(settings.toStringList()) == settings);
+
+  QFileInfo newShaderFile(settings.targetBinaryFile);
+
+  QByteArray command = settings.toStringList().join('\n').toUtf8();
+
+  startCompileProcess();
+  tcpConnection->write(command);
+  tcpConnection->flush();
+
+  QElapsedTimer timer;
+  timer.start();
+
+  while(!newShaderFile.exists())
+  {
+    if(!compilerProcessIsRunning())
+    {
+      startCompileProcess();
+      tcpConnection->write(command);
+      tcpConnection->flush();
+    }
+
+    if(timer.elapsed() > 1000)
+    {
+      endCompileProcess();
+      timer.restart();
+    }
+
+    QThread::msleep(1);
+  }
+}
+
+bool ShaderCompiler::compilerProcessIsRunning() const
+{
+  return compileProcess.state() == QProcess::Running && tcpConnection!=nullptr && tcpConnection->isOpen();
+}
+
+void ShaderCompiler::startCompileProcess()
+{
+  if(!compilerProcessIsRunning())
+  {
+    if(nProcessStarted != 0)
+      qWarning() << "Compile process didn't respond, creating a new compile process";
+    ++nProcessStarted;
+
+    endCompileProcess();
+
+    tcpServer.listen(QHostAddress::LocalHost, GLRT_SHADER_COMPILER_PORT);
+
+    compileProcess.start(QString(GLRT_SHADER_COMPILER_PATH), QIODevice::NotOpen);
+    compileProcess.setReadChannel(QProcess::StandardOutput);
+
+    if(!compileProcess.waitForStarted())
+      throw GLRT_EXCEPTION("Couldn't start compiler process");
+
+    if(!tcpServer.waitForNewConnection(30000))
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x6254)");
+
+    if(!tcpServer.hasPendingConnections())
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x3514)");
+
+    delete this->tcpConnection;
+    this->tcpConnection = tcpServer.nextPendingConnection();
+
+    if(tcpServer.hasPendingConnections())
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x6817)");
+
+    if(!compilerProcessIsRunning())
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x57475)");
+  }
+}
+
+void ShaderCompiler::endCompileProcess()
+{
+  if(tcpConnection)
+  {
+    delete this->tcpConnection;
+    tcpServer.close();
+    tcpConnection = nullptr;
+  }
+  if(compileProcess.state() == QProcess::Running)
+  {
+    compileProcess.waitForFinished(30000);
+    compileProcess.terminate();
+    compileProcess.close();
+  }
+}
+
+void ShaderCompiler::compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
+{
+  gl::ShaderObject shaderObject = createShaderFromFiles(name, shaderDir, preprocessorBlock);
+
+  gl::Program::saveShaderObjectToFile(targetBinaryFile, &shaderObject);
+}
+
+
+void ShaderCompiler::compileProgramFromFiles_SaveBinary(const CompileSettings& settings)
+{
+  compileProgramFromFiles_SaveBinary(settings.targetBinaryFile, settings.name, settings.shaderDir, settings.preprocessorBlock);
 }
 
 
@@ -157,27 +310,122 @@ gl::ShaderObject ShaderCompiler::createShaderFromFiles(const QString &name, cons
 {
   gl::ShaderObject shaderObject(name.toStdString());
 
-  ShaderCompiler compiler;
+  ShaderCompiler& compiler = ShaderCompiler::singleton();
 
-  compiler.preprocessorBlock = preprocessorBlock;
-
-  while(!compiler.compile(&shaderObject, shaderDir));
+  while(!compiler.compile(&shaderObject, shaderDir, preprocessorBlock));
 
   return std::move(shaderObject);
 }
 
 
-const QMap<QString, gl::ShaderObject::ShaderType>& ShaderCompiler::shaderTypes()
+const QMap<QString, gl::ShaderType>& ShaderCompiler::shaderTypes()
 {
-  static QMap<QString, gl::ShaderObject::ShaderType> shaderTypes;
+  static QMap<QString, gl::ShaderType> shaderTypes;
 
   if(shaderTypes.isEmpty())
   {
-    shaderTypes[".vs"] = gl::ShaderObject::ShaderType::VERTEX;
-    shaderTypes[".fs"] = gl::ShaderObject::ShaderType::FRAGMENT;
+    shaderTypes[".cs"] = gl::ShaderType::COMPUTE;
+    shaderTypes[".vs"] = gl::ShaderType::VERTEX;
+    shaderTypes[".fs"] = gl::ShaderType::FRAGMENT;
   }
 
   return shaderTypes;
+}
+
+
+bool ShaderCompiler::CompileSettings::operator==(const ShaderCompiler::CompileSettings& other) const
+{
+  return this->targetBinaryFile == other.targetBinaryFile
+      && this->name == other.name
+      && this->shaderDir == other.shaderDir
+      && this->preprocessorBlock == other.preprocessorBlock;
+}
+
+QString ShaderCompiler::CompileSettings::toString() const
+{
+  QStringList values;
+  values << this->name;
+  values << this->shaderDir.absolutePath();
+  values << this->targetBinaryFile;
+  values << this->preprocessorBlock;
+
+  return values.join("\n");
+}
+
+ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromString(const QString& encodedString)
+{
+  ShaderCompiler::CompileSettings settings;
+
+  QStringList list = encodedString.split('\n');
+
+  settings.name = list.first();
+  list.removeFirst();
+
+  settings.shaderDir = list.first();
+  list.removeFirst();
+
+  settings.targetBinaryFile = list.first();
+  list.removeFirst();
+
+  settings.preprocessorBlock = list;
+
+  return settings;
+}
+
+QStringList ShaderCompiler::CompileSettings::toStringList() const
+{
+  QStringList values;
+  values << this->name;
+  values << this->shaderDir.absolutePath();
+  values << this->targetBinaryFile;
+  values << this->preprocessorBlock;
+  values << QString();
+
+  values.prepend(QString("ShaderCompiler::CompileSettings-%0").arg(values.length()));
+
+  return values;
+}
+
+ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromStringList(QStringList encodedStringList)
+{
+  CompileSettings settings;
+  bool success = fromStringList(settings, encodedStringList);
+  Q_ASSERT(success);
+
+  return settings;
+}
+
+bool ShaderCompiler::CompileSettings::fromStringList(ShaderCompiler::CompileSettings& settings, QStringList& encodedStringList)
+{
+  if(encodedStringList.isEmpty())
+    return false;
+  if(!encodedStringList.first().startsWith("ShaderCompiler::CompileSettings-"))
+    return false;
+  const int n = encodedStringList.first().split('-').last().toInt();
+
+  if(n>encodedStringList.length())
+    return false;
+
+  encodedStringList.removeFirst();
+
+  QStringList list;
+  for(int i=1; i<n; ++i)
+  {
+    list << encodedStringList.first();
+    encodedStringList.removeFirst();
+  }
+
+  settings.name = list.first();
+  list.removeFirst();
+
+  settings.shaderDir = list.first();
+  list.removeFirst();
+
+  settings.targetBinaryFile = list.first();
+  list.removeFirst();
+
+  settings.preprocessorBlock = list;
+  return true;
 }
 
 

@@ -1,4 +1,5 @@
 #include <glrt/renderer/toolkit/compute-shader-set.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/system.h>
 
 namespace glrt {
@@ -7,9 +8,12 @@ namespace renderer {
 
 ComputeShaderSet::ComputeShaderSet(const QString& name, const QString& shaderFileName, const T_MapSize& mapTotalSizeToWorkerGroupSize)
   : name(name),
-    shaderFileName(shaderFileName),
     mapTotalSizeToWorkerGroupSize(mapTotalSizeToWorkerGroupSize)
 {
+  QFileInfo fileInfo(shaderFileName);
+
+  shaderFileDir = fileInfo.absoluteDir();
+  shaderFileBasename = fileInfo.baseName();
 }
 
 ComputeShaderSet::~ComputeShaderSet()
@@ -34,26 +38,24 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
   if(any(greaterThan(numCalls, System::maxComputeWorkGroupCount)))
     throw GLRT_EXCEPTION(QString("ComputeShaderSet::execute: maxComputeWorkGroupCount exceeded"));
 
-  QSharedPointer<gl::ShaderObject> shader = shaders.value(groupSize);
+  QSharedPointer<gl::Program> glProgram = glPrograms.value(groupSize);
 
-  if(shader.isNull())
+  if(glProgram.isNull())
   {
-    shader = QSharedPointer<gl::ShaderObject>(new gl::ShaderObject(QString("%0 [%1,%2,%3]").arg(name).arg(groupSize.x).arg(groupSize.y).arg(groupSize.z).toStdString()));
-    shader->AddShaderFromFile(gl::ShaderObject::ShaderType::COMPUTE,
-                              shaderFileName.toStdString(),
-                              QString("#define GROUPS_SIZE_X %0\n"
-                                      "#define GROUPS_SIZE_Y %1\n"
-                                      "#define GROUPS_SIZE_Z %2\n")
-                              .arg(groupSize.x)
-                              .arg(groupSize.y)
-                              .arg(groupSize.z).toStdString());
-    shader->CreateProgram();
-    shaders[groupSize] = shader;
+    ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+    gl::Program temp = shaderCompiler.compileProgramFromFiles(shaderFileBasename,
+                                                              shaderFileDir,
+                                                              QStringList({QString("#define GROUPS_SIZE_X %0\n").arg(groupSize.x),
+                                                                           QString("#define GROUPS_SIZE_Y %1\n").arg(groupSize.y),
+                                                                           QString("#define GROUPS_SIZE_Z %2\n").arg(groupSize.z)}));
+
+    glProgram = QSharedPointer<gl::Program>(new gl::Program(std::move(temp)));
+    glPrograms[groupSize] = glProgram;
   }
 
-  shader->Activate();
+  glProgram->use();
   GL_CALL(glDispatchCompute, GLuint(numCalls.x), GLuint(numCalls.y), GLuint(numCalls.z));
-  gl::ShaderObject::Deactivate();
+  gl::Program::useNone();
 }
 
 

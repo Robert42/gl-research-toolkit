@@ -20,3 +20,9 @@ target_link_libraries(glrt
   nvcommandlist
   Qt5::Widgets
 )
+
+target_compile_definitions(
+  glrt
+  PRIVATE
+  GLRT_SHADER_COMPILER_PATH=\"${GLRT_SHADER_COMPILER_PATH}\"
+)

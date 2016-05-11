@@ -35,7 +35,8 @@ void ReloadableShader::defineMacro(const QString& macro, bool defined, bool auto
 
 ReloadableShader::ReloadableShader(const QString& name, const QDir& shaderDir, const QSet<QString>& preprocessorBlock)
   : preprocessorBlock(preprocessorBlock),
-    shaderObject(std::move(ShaderCompiler::createShaderFromFiles(name, shaderDir, wholeProprocessorBlock()))),
+    name(name),
+    glProgram(std::move(ShaderCompiler::singleton().compileProgramFromFiles(name, shaderDir, wholeProprocessorBlock()))),
     shaderDir(shaderDir)
 {
   allReloadableShader().insert(this);
@@ -44,7 +45,8 @@ ReloadableShader::ReloadableShader(const QString& name, const QDir& shaderDir, c
 
 ReloadableShader::ReloadableShader(ReloadableShader&& other)
   : preprocessorBlock(std::move(other.preprocessorBlock)),
-    shaderObject(std::move(other.shaderObject)),
+    name(std::move(other.name)),
+    glProgram(std::move(other.glProgram)),
     shaderDir(other.shaderDir)
 {
   allReloadableShader().insert(this);
@@ -54,7 +56,8 @@ ReloadableShader::ReloadableShader(ReloadableShader&& other)
 ReloadableShader& ReloadableShader::operator=(ReloadableShader&& other)
 {
   preprocessorBlock = std::move(other.preprocessorBlock);
-  shaderObject = std::move(other.shaderObject);
+  glProgram = std::move(other.glProgram);
+  name = std::move(other.name);
   shaderDir = std::move(other.shaderDir);
   return *this;
 }
@@ -83,10 +86,15 @@ QSet<ReloadableShader::Listener*>& ReloadableShader::allListeners()
 
 bool ReloadableShader::reload()
 {
-  ShaderCompiler compiler;
-  compiler.preprocessorBlock = wholeProprocessorBlock();
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  gl::Program program = shaderCompiler.compileProgramFromFiles(name, shaderDir, wholeProprocessorBlock());
 
-  return compiler.recompile(&this->shaderObject, shaderDir);
+  if(program.programId == 0)
+    return false;
+
+  std::swap(program, this->glProgram);
+
+  return true;
 }
 
 

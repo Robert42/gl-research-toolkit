@@ -16,6 +16,7 @@ public:
   StaticMeshBufferManager* staticMeshBufferManager;
   GlTextureManager* glTextureManager;
 
+  static Uuid<scene::Scene> emptyScene();
   static Uuid<scene::Scene> cornellBoxScene();
   static Uuid<scene::Scene> cornellBoxRoughnessScene();
   static Uuid<scene::Scene> cornellBoxSuzanneScene();

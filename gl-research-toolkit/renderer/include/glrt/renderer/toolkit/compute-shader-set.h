@@ -2,7 +2,7 @@
 #define GLRT_RENDERER_COMPUTESHADERSET_H
 
 #include <glrt/renderer/dependencies.h>
-#include <glhelper/shaderobject.hpp>
+#include <glrt/renderer/gl/program.h>
 
 namespace glrt {
 namespace renderer {
@@ -21,12 +21,13 @@ public:
 
 private:
   QString name;
-  QString shaderFileName;
+  QDir shaderFileDir;
+  QString shaderFileBasename;
   T_MapSize mapTotalSizeToWorkerGroupSize;
 
-  QHash<glm::ivec3, QSharedPointer<gl::ShaderObject>> shaders;
+  QHash<glm::ivec3, QSharedPointer<gl::Program>> glPrograms;
 
-  QSharedPointer<gl::ShaderObject> createShaderObject(const glm::ivec3& groupSize);
+  QSharedPointer<gl::Program> createShaderObject(const glm::ivec3& groupSize);
 };
 
 } // namespace renderer
