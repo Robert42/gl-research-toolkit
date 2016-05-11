@@ -9,6 +9,7 @@
 #include <QTemporaryDir>
 #include <QThread>
 #include <QSharedMemory>
+#include <QTcpSocket>
 
 namespace glrt {
 namespace renderer {
@@ -109,18 +110,19 @@ private:
 };
 
 
-ShaderCompiler::ShaderCompiler()
+ShaderCompiler::ShaderCompiler(bool startServer)
 {
   Q_ASSERT(_singleton == nullptr);
   _singleton = this;
 
-  QObject::connect(&compileProcessAliveTimer, &QTimer::timeout, this, &glrt::renderer::ShaderCompiler::keepCompileProcessAlive);
-  compileProcessAliveTimer.setSingleShot(false);
-  compileProcessAliveTimer.start(1000);
+  if(startServer)
+    startCompileProcess();
 }
 
 ShaderCompiler::~ShaderCompiler()
 {
+  endCompileProcess();
+
   Q_ASSERT(_singleton == this);
   _singleton = nullptr;
 }
@@ -201,52 +203,79 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const Compile
   qInfo() << "Compiling Shader" << settings.name;
 
   Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
+  Q_ASSERT(CompileSettings::fromStringList(settings.toStringList()) == settings);
 
   QFileInfo newShaderFile(settings.targetBinaryFile);
 
   QByteArray command = settings.toStringList().join('\n').toUtf8();
 
-  if(compileProcess.state() == QProcess::Running)
-    compileProcess.write(command);
+  startCompileProcess();
+  tcpConnection->write(command);
+  tcpConnection->flush();
 
   while(!newShaderFile.exists())
   {
-    if(compileProcess.state() != QProcess::Running)
+    if(!compilerProcessIsRunning())
     {
       startCompileProcess();
-      compileProcess.write(settings.toStringList().join('\n').toUtf8());
+      tcpConnection->write(command);
+      tcpConnection->flush();
     }
 
     QThread::msleep(1);
   }
 }
 
-void ShaderCompiler::startCompileProcess()
+bool ShaderCompiler::compilerProcessIsRunning() const
 {
-  if(compileProcess.state() != QProcess::Running)
-  {
-    endCompileProcess();
-    compileProcess.start(QString(GLRT_SHADER_COMPILER_PATH));
-    compileProcess.setReadChannel(QProcess::StandardOutput);
-    if(!compileProcess.waitForStarted())
-      throw GLRT_EXCEPTION("Couldn't start compiler process");
-  }
+  return compileProcess.state() == QProcess::Running && tcpConnection!=nullptr && tcpConnection->isOpen();;
 }
 
-void ShaderCompiler::keepCompileProcessAlive()
+void ShaderCompiler::startCompileProcess()
 {
-  if(compileProcess.state() == QProcess::Running)
+  if(!compilerProcessIsRunning())
   {
-    compileProcess.write(QString("ALIVE\n").toUtf8());
+    if(nProcessStarted != 0)
+      qWarning() << "Compile process didn't respond, creating a new compile process";
+    ++nProcessStarted;
+
+    endCompileProcess();
+
+    tcpServer.listen(QHostAddress::LocalHost, GLRT_SHADER_COMPILER_PORT);
+
+    compileProcess.start(QString(GLRT_SHADER_COMPILER_PATH), QIODevice::NotOpen);
+    compileProcess.setReadChannel(QProcess::StandardOutput);
+
+    if(!compileProcess.waitForStarted())
+      throw GLRT_EXCEPTION("Couldn't start compiler process");
+
+    if(!tcpServer.waitForNewConnection(30000))
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x6254)");
+
+    if(!tcpServer.hasPendingConnections())
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x3514)");
+
+    delete this->tcpConnection;
+    this->tcpConnection = tcpServer.nextPendingConnection();
+
+    if(tcpServer.hasPendingConnections())
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x6817)");
+
+    if(!compilerProcessIsRunning())
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x57475)");
   }
 }
 
 void ShaderCompiler::endCompileProcess()
 {
-  if(compileProcess.state() != QProcess::NotRunning)
+  if(tcpConnection)
   {
-    compileProcess.write(QString("QUIT\n").toUtf8());
-    compileProcess.waitForFinished(10000);
+    delete this->tcpConnection;
+    tcpServer.close();
+  }
+  if(compileProcess.state() == QProcess::Running)
+  {
+    compileProcess.waitForFinished(30000);
     compileProcess.terminate();
     compileProcess.close();
   }
@@ -346,6 +375,15 @@ QStringList ShaderCompiler::CompileSettings::toStringList() const
   return values;
 }
 
+ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromStringList(QStringList encodedStringList)
+{
+  CompileSettings settings;
+  bool success = fromStringList(settings, encodedStringList);
+  Q_ASSERT(success);
+
+  return settings;
+}
+
 bool ShaderCompiler::CompileSettings::fromStringList(ShaderCompiler::CompileSettings& settings, QStringList& encodedStringList)
 {
   if(encodedStringList.isEmpty())
@@ -354,13 +392,13 @@ bool ShaderCompiler::CompileSettings::fromStringList(ShaderCompiler::CompileSett
     return false;
   const int n = encodedStringList.first().split('-').last().toInt();
 
-  if(n+1<encodedStringList.length())
+  if(n>encodedStringList.length())
     return false;
 
   encodedStringList.removeFirst();
 
   QStringList list;
-  for(int i=0; i<n; ++i)
+  for(int i=1; i<n; ++i)
   {
     list << encodedStringList.first();
     encodedStringList.removeFirst();

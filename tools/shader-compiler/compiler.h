@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
-#include <QElapsedTimer>
+#include <QTcpSocket>
 
 
 class Compiler final : public QObject
@@ -17,12 +17,14 @@ protected:
   void timerEvent(QTimerEvent* event) override;
 
 private:
-  QElapsedTimer stillAlive;
-  int timerId = 0;
+  QTcpSocket tcpSocket;
+
   QStringList receivedCommands;
   QString currentCommand;
 
+private slots:
   void compile();
+  void disconnected();
 };
 
 

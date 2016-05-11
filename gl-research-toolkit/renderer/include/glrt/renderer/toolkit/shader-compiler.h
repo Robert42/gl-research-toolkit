@@ -27,12 +27,13 @@ public:
     bool operator==(const CompileSettings& other) const;
 
     QStringList toStringList() const;
-    static bool fromStringList(CompileSettings& settings, QStringList& encodedStringList);
     QString toString() const;
+    static bool fromStringList(CompileSettings& settings, QStringList& encodedStringList);
+    static CompileSettings fromStringList(QStringList encodedStringList);
     static CompileSettings fromString(const QString& encodedString);
   };
 
-  ShaderCompiler();
+  ShaderCompiler(bool startServer);
   ~ShaderCompiler();
 
   static ShaderCompiler& singleton();
@@ -46,18 +47,20 @@ public:
 private:
   static ShaderCompiler* _singleton;
 
+  int nProcessStarted = 0;
   QProcess compileProcess;
   QTcpServer tcpServer;
-  QTimer compileProcessAliveTimer;
+  QTcpSocket* tcpConnection = nullptr;
 
   bool compile(gl::ShaderObject* shaderObject, const QDir& shaderDir, const QStringList& preprocessorBlock);
   static gl::ShaderObject createShaderFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
 
   static const QMap<QString, gl::ShaderType>& shaderTypes();
 
+  bool compilerProcessIsRunning() const;
+
 private slots:
   void startCompileProcess();
-  void keepCompileProcessAlive();
   void endCompileProcess();
 };
 

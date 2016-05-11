@@ -5,4 +5,6 @@
 
 void debugMessage(const QString& title, const QString& message);
 
+bool isCurrentlyDialogShown();
+
 #endif // DEBUGMESSAGE_H
