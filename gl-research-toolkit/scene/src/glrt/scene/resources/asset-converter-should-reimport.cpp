@@ -23,8 +23,11 @@ bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, con
     return true;
   if(targetDir.exists(targetFile.baseName()+".FORCE-REIMPORT"))
     return true;
-  PRINT_VALUE(sourceFile.baseName()+".FORCE-REIMPORT");
   if(sourceDir.exists(sourceFile.baseName()+".FORCE-REIMPORT"))
+    return true;
+  if(targetDir.exists(targetFile.fileName()+".FORCE-REIMPORT"))
+    return true;
+  if(sourceDir.exists(sourceFile.fileName()+".FORCE-REIMPORT"))
     return true;
 
   // No conversion possible if the source file doesn't exist
