@@ -28,7 +28,7 @@ bool TcpMessages::waitForReadyRead(int msecs)
   QElapsedTimer timer;
   timer.start();
 
-  while(timer.elapsed() >= msecs)
+  while(timer.elapsed() <= msecs)
   {
     if(messageAvialable())
       return true;
