@@ -63,6 +63,8 @@ bool TcpMessages::messageAvialable()
 
 TcpMessages::Message TcpMessages::readMessage()
 {
+  Q_ASSERT(connection != nullptr);
+
   const qint64 headerSize = qint64(sizeof(Header));
   Header header;
   TcpMessages::Message message;
