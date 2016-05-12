@@ -5,9 +5,10 @@ namespace glrt {
 namespace scene {
 
 
-VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data)
+VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data, bool voxelizedAsScenery)
   : Component(node, parent, uuid),
-    data(data)
+    data(data),
+    voxelizedAsScenery(voxelizedAsScenery)
 {
   scene().VoxelDataComponentAdded(this);
 }
