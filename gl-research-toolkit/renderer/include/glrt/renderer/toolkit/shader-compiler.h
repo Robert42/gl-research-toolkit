@@ -23,6 +23,7 @@ public:
   static const TcpMessages::Id glslBytecode = TcpMessages::Id(0x100);
   static const TcpMessages::Id startedWaitingForUserInput = TcpMessages::Id(0x101);
   static const TcpMessages::Id finishedWaitingForUserInput = TcpMessages::Id(0x102);
+  static const TcpMessages::Id exitApplication = TcpMessages::Id(0x103);
 
   struct CompileSettings
   {
@@ -46,6 +47,14 @@ public:
   QByteArray compileProgramFromFiles_GetBinary(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
   QByteArray compileProgramFromFiles_GetBinary(const CompileSettings& settings);
   gl::Program compileProgramFromFiles_SubProcess(const CompileSettings& settings);
+
+  enum class DialogAction
+  {
+    Show,
+    Hide,
+    ExitApp,
+  };
+  static std::function<void(DialogAction)> shaderDialogVisible;
 
 private:
   static ShaderCompiler* _singleton;

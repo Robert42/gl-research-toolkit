@@ -14,6 +14,7 @@ extern bool isRunning;
 
 Compiler::Compiler()
 {
+  ShaderCompiler::shaderDialogVisible = std::bind(&Compiler::shaderDialogVisible, this, std::placeholders::_1);
   tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_SHADER_COMPILER_PORT);
   connect(&tcpSocket, &QTcpSocket::readyRead, this, &Compiler::compile, Qt::QueuedConnection);
   connect(&tcpSocket, &QTcpSocket::disconnected, this, &Compiler::disconnected);
@@ -21,6 +22,7 @@ Compiler::Compiler()
 
 Compiler::~Compiler()
 {
+  ShaderCompiler::shaderDialogVisible = [](ShaderCompiler::DialogAction){};
   tcpSocket.disconnectFromHost();
 }
 
@@ -78,4 +80,25 @@ void Compiler::sendData(glrt::TcpMessages::Id id, const QByteArray& byteArray)
   msg.byteArray = byteArray;
 
   messages.sendMessage(msg);
+}
+
+void Compiler::shaderDialogVisible(ShaderCompiler::DialogAction action)
+{
+  if(action == ShaderCompiler::DialogAction::Show)
+  {
+    if(dialogVisible)
+      return;
+    dialogVisible = true;
+    sendData(ShaderCompiler::startedWaitingForUserInput, QByteArray());
+  }else if(action == ShaderCompiler::DialogAction::Hide)
+  {
+    if(!dialogVisible)
+      return;
+    dialogVisible = false;
+    sendData(ShaderCompiler::finishedWaitingForUserInput, QByteArray());
+  }else if(action == ShaderCompiler::DialogAction::ExitApp)
+  {
+    sendData(ShaderCompiler::exitApplication, QByteArray());
+  }
+
 }

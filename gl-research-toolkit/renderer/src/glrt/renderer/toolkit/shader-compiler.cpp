@@ -17,6 +17,8 @@ namespace renderer {
 
 ShaderCompiler* ShaderCompiler::_singleton = nullptr;
 
+std::function<void(ShaderCompiler::DialogAction)> ShaderCompiler::shaderDialogVisible = [](ShaderCompiler::DialogAction){};
+
 class ShaderErrorDialog final
 {
 public:
@@ -70,7 +72,10 @@ public:
     SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", std.c_str(), SDL_arraysize(buttons), buttons, nullptr};
 
     int result;
-    if(SDL_ShowMessageBox(&msgBoxData, &result) < 0)
+    ShaderCompiler::shaderDialogVisible(ShaderCompiler::DialogAction::Show);
+    bool dialogError = SDL_ShowMessageBox(&msgBoxData, &result) < 0;
+    ShaderCompiler::shaderDialogVisible(ShaderCompiler::DialogAction::Hide);
+    if(dialogError)
     {
       std::cerr << "Displayng SHader Compile Error Dialog failed"<<std::endl;
       std::exit(-1);
@@ -78,6 +83,7 @@ public:
 
     if(result == EXIT)
     {
+      ShaderCompiler::shaderDialogVisible(ShaderCompiler::DialogAction::ExitApp);
       std::cout << "Aborted by user"<<std::endl;
       std::exit(-1);
     }
@@ -205,6 +211,7 @@ gl::Program ShaderCompiler::compileProgramFromFiles_SubProcess(const CompileSett
   QElapsedTimer timer;
   timer.start();
 
+  bool currentlyWaitingForUser = false;
   while(true)
   {
     if(!compilerProcessIsRunning())
@@ -213,9 +220,8 @@ gl::Program ShaderCompiler::compileProgramFromFiles_SubProcess(const CompileSett
       messages.sendMessage(msgCompile);
     }
 
-    if(!messages.waitForReadyRead(1000))
+    if(!messages.waitForReadyRead(1000) && !currentlyWaitingForUser)
     {
-      // #FIXME: add error dialog, if a compile error occured
       endCompileProcess();
       timer.restart();
     }
@@ -229,6 +235,16 @@ gl::Program ShaderCompiler::compileProgramFromFiles_SubProcess(const CompileSett
         program.loadFromBinary(msg.byteArray);
 
         return program;
+      }else if(msg.id == startedWaitingForUserInput)
+      {
+        currentlyWaitingForUser = true;
+      }else if(msg.id == finishedWaitingForUserInput)
+      {
+        currentlyWaitingForUser = false;
+      }else if(msg.id == exitApplication)
+      {
+        qInfo() << "Aborted by user";
+        std::exit(0);
       }
     }
   }
