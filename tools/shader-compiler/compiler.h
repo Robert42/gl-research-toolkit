@@ -5,6 +5,8 @@
 #include <QStringList>
 #include <QTcpSocket>
 
+#include <glrt/renderer/toolkit/shader-compiler.h>
+
 
 class Compiler final : public QObject
 {
@@ -19,12 +21,17 @@ protected:
 private:
   QTcpSocket tcpSocket;
 
-  QStringList receivedCommands;
-  QString currentCommand;
-
 private slots:
   void compile();
   void disconnected();
+
+private:
+  bool dialogVisible = false;
+
+  void sendCompiledProgram(const QByteArray& byteArray);
+  void sendData(glrt::TcpMessages::Id id, const QByteArray& byteArray);
+
+  void shaderDialogVisible(glrt::renderer::ShaderCompiler::DialogAction action);
 };
 
 

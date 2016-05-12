@@ -5,6 +5,7 @@
 
 #include <glrt/renderer/gl/program.h>
 #include <glrt/renderer/gl/shader-type.h>
+#include <glrt/toolkit/tcp-messages.h>
 
 #include <QProcess>
 #include <QTimer>
@@ -17,19 +18,22 @@ class ShaderCompiler : public QObject
 {
   Q_OBJECT
 public:
+  static const TcpMessages::Id shaderCompileCommand = TcpMessages::Id(0x1);
+
+  static const TcpMessages::Id glslBytecode = TcpMessages::Id(0x100);
+  static const TcpMessages::Id startedWaitingForUserInput = TcpMessages::Id(0x101);
+  static const TcpMessages::Id finishedWaitingForUserInput = TcpMessages::Id(0x102);
+  static const TcpMessages::Id exitApplication = TcpMessages::Id(0x103);
+
   struct CompileSettings
   {
-    QString targetBinaryFile;
     QString name;
     QDir shaderDir;
     QStringList preprocessorBlock;
 
     bool operator==(const CompileSettings& other) const;
 
-    QStringList toStringList() const;
     QString toString() const;
-    static bool fromStringList(CompileSettings& settings, QStringList& encodedStringList);
-    static CompileSettings fromStringList(QStringList encodedStringList);
     static CompileSettings fromString(const QString& encodedString);
   };
 
@@ -40,9 +44,17 @@ public:
 
   gl::Program compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
 
-  void compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
-  void compileProgramFromFiles_SaveBinary(const CompileSettings& settings);
-  void compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings);
+  QByteArray compileProgramFromFiles_GetBinary(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+  QByteArray compileProgramFromFiles_GetBinary(const CompileSettings& settings);
+  gl::Program compileProgramFromFiles_SubProcess(const CompileSettings& settings);
+
+  enum class DialogAction
+  {
+    Show,
+    Hide,
+    ExitApp,
+  };
+  static std::function<void(DialogAction)> shaderDialogVisible;
 
 private:
   static ShaderCompiler* _singleton;

@@ -44,6 +44,7 @@ inline int qHash(const QPointer<T>& ptr, int seed = 0)
 #include <QReadWriteLock>
 #include <QReadLocker>
 #include <QWriteLocker>
+#include <QByteArray>
 
 #include <iostream>
 #include <memory>

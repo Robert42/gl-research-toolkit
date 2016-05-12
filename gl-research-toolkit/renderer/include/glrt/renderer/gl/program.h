@@ -24,9 +24,11 @@ public:
   static void useNone();
 
   void loadFromBinary(const QByteArray& binary, GLenum binaryFormat);
+  void loadFromBinary(const QByteArray& binary);
   void saveToBinary(QByteArray& binary, GLenum& binaryFormat);
   void loadFromFile(const QString& file);
   void saveToFile(const QString& filename);
+  static QByteArray saveShaderObjectToByteArray(ShaderObject* shaderObject);
   static void saveShaderObjectToFile(const QString& filename, ShaderObject* shaderObject);
   static void saveBinaryDataToFile(const QString& filename, const QByteArray& binary, GLenum binaryFormat);
 
