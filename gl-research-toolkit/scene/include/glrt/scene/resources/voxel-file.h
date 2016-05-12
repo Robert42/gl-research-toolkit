@@ -29,7 +29,7 @@ public:
     enum class Flag : quint32
     {
       None,
-      Scene
+      Scenery
     };
 
     Q_DECLARE_FLAGS(Flags, Flag)

@@ -106,6 +106,7 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
     voxelIndex.gridSize = i.value().gridSize;
     voxelIndex.texture3D = textureUuid;
     voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
+    voxelIndex.voxelizedAsScenery = i.value().flags.testFlag(VoxelFile::MetaData::Flag::Scenery);
 
     resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
 
@@ -131,7 +132,7 @@ void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QSt
   if(signedDistanceField.enabled)
   {
     VoxelFile::MetaData metaData = voxelizeImplementation(staticMesh, signedDistanceFieldFileName, FieldType::SIGNED_DISTANCE_FIELD, meshType, signedDistanceField);
-    metaData.flags = this->voxelizing_scene ? VoxelFile::MetaData::Flag::Scene : VoxelFile::MetaData::Flag::None;
+    metaData.flags = this->voxelizing_scene ? VoxelFile::MetaData::Flag::Scenery : VoxelFile::MetaData::Flag::None;
 
     voxelFile.textureFiles[signedDistanceFieldFileName] = metaData;
 
