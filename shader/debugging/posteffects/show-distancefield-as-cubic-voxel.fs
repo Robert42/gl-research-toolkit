@@ -8,7 +8,7 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
   world_pos = vec3(0);
   world_normal = vec3(0);
     
-  float treshold = 0.5f;
+  float treshold = 0.f;
   
   uint32_t num_distance_fields = distance_fields_num();
   mat4* worldToVoxelSpaces = distance_fields_worldToVoxelSpace();
