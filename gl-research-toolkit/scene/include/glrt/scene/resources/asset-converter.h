@@ -21,7 +21,6 @@ struct SceneGraphImportSettings final
   QSet<QString> meshesToVoxelize;
   QSet<QString> meshesToVoxelizeTwoSided;
   QSet<QString> meshesToMergeWhenVoxelizing; // #TODO
-  // #TODO allow passing a scale factor
 
   QHash<QString, Uuid<StaticMesh>> meshUuids;
   QHash<QString, Uuid<Material>> materialUuids;

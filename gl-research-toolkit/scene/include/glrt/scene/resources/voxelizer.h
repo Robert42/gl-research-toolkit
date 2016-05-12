@@ -30,6 +30,7 @@ public:
   };
 
   ResourceIndex* resourceIndex = nullptr;
+  bool voxelizing_scene = false;
 
   struct Hints
   {
@@ -56,7 +57,7 @@ public:
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
 
 private:
-  static void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField = Hints());
+  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField = Hints());
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
 };
 

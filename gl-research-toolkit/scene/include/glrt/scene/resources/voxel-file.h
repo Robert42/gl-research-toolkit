@@ -26,12 +26,21 @@ public:
 
   struct MetaData
   {
+    enum class Flag : quint32
+    {
+      None,
+      Scenery
+    };
+
+    Q_DECLARE_FLAGS(Flags, Flag)
+    static_assert(sizeof(Flags)==sizeof(Flag), "size mismatch");
+
     Voxelizer::FieldType fieldType = Voxelizer::FieldType::SIGNED_DISTANCE_FIELD;
     float factor = 1.f; // reserved for future usage (in case uint8 is used for signed distacne fields -- currently unused and must be 1)
     float offset = 0.f; // reserved for future usage (in case uint8 is used for signed distacne fields -- currently unused and must be 0)
     quint32 _padding[2] = {0,0};
     glm::ivec3 gridSize = glm::vec3(0);
-    quint32 _padding2 = 0;
+    Flags flags = Flag::None;
     CoordFrame localToVoxelSpace;
 
     size_t rawDataSize(size_t bytesPerVoxel) const;
@@ -45,6 +54,8 @@ public:
   void load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid);
   void save(const QFileInfo& fileInfo);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(VoxelFile::MetaData::Flags)
 
 } // namespace resources
 } // namespace scene

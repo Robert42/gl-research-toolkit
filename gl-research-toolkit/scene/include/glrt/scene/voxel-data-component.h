@@ -26,8 +26,9 @@ public:
 
 
   Data data;
+  bool voxelizedAsScenery = false;
 
-  VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data=Data());
+  VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data=Data(), bool voxelizedAsScenery=false);
 
   glm::mat4 globalWorldToVoxelMatrix() const;
   GridSize gridSize() const;

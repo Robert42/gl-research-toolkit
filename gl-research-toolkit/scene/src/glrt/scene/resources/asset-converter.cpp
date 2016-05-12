@@ -605,9 +605,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assetIndex_outputStream << "void main(ResourceIndex@ index)\n{\n";
     sceneGraph_outputStream << "\n";
 
-    Voxelizer::Hints distancefieldVoxelizeHints;
-
-    assetIndex_outputStream << "  Voxelizer voxelizer = index.defaultVoxelizer;\n";
+    assetIndex_outputStream << "  Voxelizer voxelizer = index.sceneVoxelizer;\n";
 
     for(uint32_t i : allMeshesToImport.values())
     {
@@ -626,8 +624,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
         Voxelizer::MeshType meshType = twoSidedMeshes.contains(uuid) ? Voxelizer::MeshType::TWO_SIDED : Voxelizer::MeshType::DEFAULT;
 
-        // #TODO: pick the right scale factor
-        distancefieldVoxelizeHints.scaleFactor = 1.f;
         assetIndex_outputStream << QString("  voxelizer.voxelize(staticMeshUuid: Uuid<StaticMesh>(\"%0\"), meshType: VoxelMeshType::%1);\n").arg(uuid.toString()).arg(meshType==Voxelizer::MeshType::TWO_SIDED ? "TWO_SIDED" : "DEFAULT");
       }
     }
