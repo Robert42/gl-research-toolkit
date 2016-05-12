@@ -5,6 +5,7 @@
 
 #include <glrt/renderer/gl/program.h>
 #include <glrt/renderer/gl/shader-type.h>
+#include <glrt/toolkit/tcp-messages.h>
 
 #include <QProcess>
 #include <QTimer>
@@ -17,6 +18,12 @@ class ShaderCompiler : public QObject
 {
   Q_OBJECT
 public:
+  static const TcpMessages::Id shaderCompileCommand = TcpMessages::Id(0x1);
+
+  static const TcpMessages::Id glslBytecode = TcpMessages::Id(0x100);
+  static const TcpMessages::Id startedWaitingForUserInput = TcpMessages::Id(0x101);
+  static const TcpMessages::Id finishedWaitingForUserInput = TcpMessages::Id(0x102);
+
   struct CompileSettings
   {
     QString targetBinaryFile;
