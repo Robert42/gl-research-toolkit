@@ -30,6 +30,7 @@ public:
   };
 
   ResourceIndex* resourceIndex = nullptr;
+  bool voxelizing_scene = false;
 
   struct Hints
   {

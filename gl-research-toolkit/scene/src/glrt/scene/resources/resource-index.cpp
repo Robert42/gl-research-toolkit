@@ -76,6 +76,13 @@ inline Voxelizer get_default_voxelizer(ResourceIndex* index)
   return Voxelizer(index);
 }
 
+inline Voxelizer get_scene_voxelizer(ResourceIndex* index)
+{
+  Voxelizer v(index);
+  v.voxelizing_scene = true;
+  return v;
+}
+
 // --------------
 
 const ResourceIndex ResourceIndex::fallback(uuids::fallbackIndex);
@@ -140,6 +147,7 @@ void ResourceIndex::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "string get_label(const BaseUuid &in uuid)", AngelScript::asFUNCTION(get_label), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "Voxelizer get_defaultVoxelizer()", AngelScript::asFUNCTION(get_default_voxelizer), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("ResourceIndex", "Voxelizer get_sceneVoxelizer()", AngelScript::asFUNCTION(get_scene_voxelizer), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }

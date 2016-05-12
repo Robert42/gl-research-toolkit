@@ -605,7 +605,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assetIndex_outputStream << "void main(ResourceIndex@ index)\n{\n";
     sceneGraph_outputStream << "\n";
 
-    assetIndex_outputStream << "  Voxelizer voxelizer = index.defaultVoxelizer;\n";
+    assetIndex_outputStream << "  Voxelizer voxelizer = index.sceneVoxelizer;\n";
 
     for(uint32_t i : allMeshesToImport.values())
     {
