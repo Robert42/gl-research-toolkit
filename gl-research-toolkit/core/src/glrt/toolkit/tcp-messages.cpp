@@ -40,7 +40,7 @@ bool TcpMessages::waitForReadyRead(int msecs)
       return false;
   }
 
-  return false;
+  return messageAvialable();
 }
 
 bool TcpMessages::messageAvialable()
