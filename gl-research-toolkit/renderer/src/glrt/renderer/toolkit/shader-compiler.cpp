@@ -177,65 +177,60 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
 gl::Program ShaderCompiler::compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {
-  QTemporaryDir tempDir;
-
-  if(!tempDir.isValid())
-    throw GLRT_EXCEPTION(QString("Couldn't create").arg(name));
-
-  QString binaryProgramFile = QDir(tempDir.path()).absoluteFilePath("binary-gl-program-file");
-
   CompileSettings settings;
-  settings.targetBinaryFile = binaryProgramFile;
   settings.name = name;
   settings.shaderDir = shaderDir;
   settings.preprocessorBlock = preprocessorBlock;
-  compileProgramFromFiles_SaveBinary_SubProcess(settings);
-
-  gl::Program program;
-  program.loadFromFile(binaryProgramFile);
-
-  return program;
+  return compileProgramFromFiles_SubProcess(settings);
 }
 
 
-void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings)
+gl::Program ShaderCompiler::compileProgramFromFiles_SubProcess(const CompileSettings& settings)
 {
   SPLASHSCREEN_MESSAGE(QString("Compiling Shader %0").arg(settings.name));
   qInfo() << "Compiling Shader" << settings.name;
 
   Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
 
-  QFileInfo newShaderFile(settings.targetBinaryFile);
-
   glrt::TcpMessages messages;
   messages.connection = tcpConnection;
 
-  TcpMessages::Message msg;
-  msg.id = shaderCompileCommand;
-  msg.byteArray = settings.toString().toUtf8();
+  TcpMessages::Message msgCompile;
+  msgCompile.id = shaderCompileCommand;
+  msgCompile.byteArray = settings.toString().toUtf8();
 
   startCompileProcess();
-  messages.sendMessage(msg);
+  messages.sendMessage(msgCompile);
 
   QElapsedTimer timer;
   timer.start();
 
-  while(!newShaderFile.exists())
+  while(true)
   {
     if(!compilerProcessIsRunning())
     {
       startCompileProcess();
-      messages.sendMessage(msg);
+      messages.sendMessage(msgCompile);
     }
 
-    if(timer.elapsed() > 1000)
+    if(!messages.waitForReadyRead(1000))
     {
       // #FIXME: add error dialog, if a compile error occured
       endCompileProcess();
       timer.restart();
     }
 
-    QThread::msleep(1);
+    if(messages.messageAvialable())
+    {
+      TcpMessages::Message msg = messages.readMessage();
+      if(msg.id == glslBytecode)
+      {
+        gl::Program program;
+        program.loadFromBinary(msg.byteArray);
+
+        return program;
+      }
+    }
   }
 }
 
@@ -295,17 +290,17 @@ void ShaderCompiler::endCompileProcess()
   }
 }
 
-void ShaderCompiler::compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
+QByteArray ShaderCompiler::compileProgramFromFiles_GetBinary(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {
   gl::ShaderObject shaderObject = createShaderFromFiles(name, shaderDir, preprocessorBlock);
 
-  gl::Program::saveShaderObjectToFile(targetBinaryFile, &shaderObject);
+  return gl::Program::saveShaderObjectToByteArray(&shaderObject);
 }
 
 
-void ShaderCompiler::compileProgramFromFiles_SaveBinary(const CompileSettings& settings)
+QByteArray ShaderCompiler::compileProgramFromFiles_GetBinary(const CompileSettings& settings)
 {
-  compileProgramFromFiles_SaveBinary(settings.targetBinaryFile, settings.name, settings.shaderDir, settings.preprocessorBlock);
+  return compileProgramFromFiles_GetBinary(settings.name, settings.shaderDir, settings.preprocessorBlock);
 }
 
 
@@ -338,8 +333,7 @@ const QMap<QString, gl::ShaderType>& ShaderCompiler::shaderTypes()
 
 bool ShaderCompiler::CompileSettings::operator==(const ShaderCompiler::CompileSettings& other) const
 {
-  return this->targetBinaryFile == other.targetBinaryFile
-      && this->name == other.name
+  return this->name == other.name
       && this->shaderDir == other.shaderDir
       && this->preprocessorBlock == other.preprocessorBlock;
 }
@@ -349,7 +343,6 @@ QString ShaderCompiler::CompileSettings::toString() const
   QStringList values;
   values << this->name;
   values << this->shaderDir.absolutePath();
-  values << this->targetBinaryFile;
   values << this->preprocessorBlock;
 
   return values.join("\n");
@@ -365,9 +358,6 @@ ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromString(cons
   list.removeFirst();
 
   settings.shaderDir = list.first();
-  list.removeFirst();
-
-  settings.targetBinaryFile = list.first();
   list.removeFirst();
 
   settings.preprocessorBlock = list;

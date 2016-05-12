@@ -5,6 +5,8 @@
 #include <QStringList>
 #include <QTcpSocket>
 
+#include <glrt/toolkit/tcp-messages.h>
+
 
 class Compiler final : public QObject
 {
@@ -22,6 +24,10 @@ private:
 private slots:
   void compile();
   void disconnected();
+
+private:
+  void sendCompiledProgram(const QByteArray& byteArray);
+  void sendData(glrt::TcpMessages::Id id, const QByteArray& byteArray);
 };
 
 

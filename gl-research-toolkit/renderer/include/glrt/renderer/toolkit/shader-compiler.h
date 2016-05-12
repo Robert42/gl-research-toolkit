@@ -26,7 +26,6 @@ public:
 
   struct CompileSettings
   {
-    QString targetBinaryFile;
     QString name;
     QDir shaderDir;
     QStringList preprocessorBlock;
@@ -44,9 +43,9 @@ public:
 
   gl::Program compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
 
-  void compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
-  void compileProgramFromFiles_SaveBinary(const CompileSettings& settings);
-  void compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings);
+  QByteArray compileProgramFromFiles_GetBinary(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+  QByteArray compileProgramFromFiles_GetBinary(const CompileSettings& settings);
+  gl::Program compileProgramFromFiles_SubProcess(const CompileSettings& settings);
 
 private:
   static ShaderCompiler* _singleton;

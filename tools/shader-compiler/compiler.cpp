@@ -5,7 +5,6 @@
 #include <QCoreApplication>
 
 #include <glrt/renderer/toolkit/shader-compiler.h>
-#include <glrt/toolkit/tcp-messages.h>
 
 #include "debugmessage.h"
 
@@ -46,7 +45,7 @@ void Compiler::compile()
     if(msg.id ==  ShaderCompiler::shaderCompileCommand)
     {
       ShaderCompiler::CompileSettings settings = ShaderCompiler::CompileSettings::fromString(QString::fromUtf8(msg.byteArray));
-      ShaderCompiler::singleton().compileProgramFromFiles_SaveBinary(settings);
+      sendCompiledProgram(ShaderCompiler::singleton().compileProgramFromFiles_GetBinary(settings));
       break;
     }else
     {
@@ -62,4 +61,21 @@ void Compiler::disconnected()
   debugMessage("Quit!","RECEIVED QUIT");
   qApp->quit();
   isRunning = false;
+}
+
+void Compiler::sendCompiledProgram(const QByteArray& byteArray)
+{
+  sendData(ShaderCompiler::glslBytecode, byteArray);
+}
+
+void Compiler::sendData(glrt::TcpMessages::Id id, const QByteArray& byteArray)
+{
+  glrt::TcpMessages messages;
+  messages.connection = &tcpSocket;
+
+  glrt::TcpMessages::Message msg;
+  msg.id = id;
+  msg.byteArray = byteArray;
+
+  messages.sendMessage(msg);
 }
