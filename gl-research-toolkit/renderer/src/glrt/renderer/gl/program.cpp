@@ -36,6 +36,19 @@ void Program::useNone()
   GL_CALL(glUseProgram, 0);
 }
 
+void Program::loadFromBinary(const QByteArray& binary)
+{
+  create();
+
+  Q_ASSERT(programId != 0);
+
+  GLenum binaryFormat = *reinterpret_cast<const GLenum*>(binary.data());
+  const void* data = binary.data() + sizeof(GLenum);
+  int numBytes = binary.length() - int(sizeof(GLenum));
+
+  GL_CALL(glProgramBinary, programId, binaryFormat, data, numBytes);
+}
+
 void Program::loadFromBinary(const QByteArray& binary, GLenum binaryFormat)
 {
   create();
@@ -100,6 +113,22 @@ void Program::saveBinaryDataToFile(const QString& filename, const QByteArray& bi
   writeValue(file, magicNumber());
   writeValue(file, binaryFormat);
   file.write(binary);
+}
+
+QByteArray Program::saveShaderObjectToByteArray(gl::ShaderObject* shaderObject)
+{
+  QByteArray binary;
+  GLenum binaryFormat;
+
+  std::vector<char> tmpData = shaderObject->GetProgramBinary(binaryFormat);
+  int dataLength = int(tmpData.size());
+
+  Q_ASSERT(tmpData.size() < std::numeric_limits<int>::max());
+
+  binary.append(reinterpret_cast<char*>(&binaryFormat), int(sizeof(binaryFormat)));
+  binary.append(tmpData.data(), dataLength);
+
+  return binary;
 }
 
 void Program::saveShaderObjectToFile(const QString& filename, gl::ShaderObject* shaderObject)

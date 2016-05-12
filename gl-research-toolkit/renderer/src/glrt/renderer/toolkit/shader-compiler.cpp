@@ -17,6 +17,8 @@ namespace renderer {
 
 ShaderCompiler* ShaderCompiler::_singleton = nullptr;
 
+std::function<void(ShaderCompiler::DialogAction)> ShaderCompiler::shaderDialogVisible = [](ShaderCompiler::DialogAction){};
+
 class ShaderErrorDialog final
 {
 public:
@@ -70,7 +72,10 @@ public:
     SDL_MessageBoxData msgBoxData = {SDL_MESSAGEBOX_ERROR, nullptr, "Shader Compile Error", std.c_str(), SDL_arraysize(buttons), buttons, nullptr};
 
     int result;
-    if(SDL_ShowMessageBox(&msgBoxData, &result) < 0)
+    ShaderCompiler::shaderDialogVisible(ShaderCompiler::DialogAction::Show);
+    bool dialogError = SDL_ShowMessageBox(&msgBoxData, &result) < 0;
+    ShaderCompiler::shaderDialogVisible(ShaderCompiler::DialogAction::Hide);
+    if(dialogError)
     {
       std::cerr << "Displayng SHader Compile Error Dialog failed"<<std::endl;
       std::exit(-1);
@@ -78,6 +83,7 @@ public:
 
     if(result == EXIT)
     {
+      ShaderCompiler::shaderDialogVisible(ShaderCompiler::DialogAction::ExitApp);
       std::cout << "Aborted by user"<<std::endl;
       std::exit(-1);
     }
@@ -177,63 +183,70 @@ bool ShaderCompiler::compile(gl::ShaderObject* shaderObject, const QDir& shaderD
 
 gl::Program ShaderCompiler::compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {
-  QTemporaryDir tempDir;
-
-  if(!tempDir.isValid())
-    throw GLRT_EXCEPTION(QString("Couldn't create").arg(name));
-
-  QString binaryProgramFile = QDir(tempDir.path()).absoluteFilePath("binary-gl-program-file");
-
   CompileSettings settings;
-  settings.targetBinaryFile = binaryProgramFile;
   settings.name = name;
   settings.shaderDir = shaderDir;
   settings.preprocessorBlock = preprocessorBlock;
-  compileProgramFromFiles_SaveBinary_SubProcess(settings);
-
-  gl::Program program;
-  program.loadFromFile(binaryProgramFile);
-
-  return program;
+  return compileProgramFromFiles_SubProcess(settings);
 }
 
 
-void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const CompileSettings& settings)
+gl::Program ShaderCompiler::compileProgramFromFiles_SubProcess(const CompileSettings& settings)
 {
   SPLASHSCREEN_MESSAGE(QString("Compiling Shader %0").arg(settings.name));
   qInfo() << "Compiling Shader" << settings.name;
 
   Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
-  Q_ASSERT(CompileSettings::fromStringList(settings.toStringList()) == settings);
 
-  QFileInfo newShaderFile(settings.targetBinaryFile);
+  glrt::TcpMessages messages;
+  messages.connection = tcpConnection;
 
-  QByteArray command = settings.toStringList().join('\n').toUtf8();
+  TcpMessages::Message msgCompile;
+  msgCompile.id = shaderCompileCommand;
+  msgCompile.byteArray = settings.toString().toUtf8();
 
   startCompileProcess();
-  tcpConnection->write(command);
-  tcpConnection->flush();
+  messages.sendMessage(msgCompile);
 
   QElapsedTimer timer;
   timer.start();
 
-  while(!newShaderFile.exists())
+  bool currentlyWaitingForUser = false;
+  while(true)
   {
     if(!compilerProcessIsRunning())
     {
       startCompileProcess();
-      tcpConnection->write(command);
-      tcpConnection->flush();
+      messages.sendMessage(msgCompile);
     }
 
-    if(timer.elapsed() > 1000)
+    if(!messages.waitForReadyRead(1000) && !currentlyWaitingForUser)
     {
-      // #FIXME: add error dialog, if a compile error occured
       endCompileProcess();
       timer.restart();
     }
 
-    QThread::msleep(1);
+    if(messages.messageAvialable())
+    {
+      TcpMessages::Message msg = messages.readMessage();
+      if(msg.id == glslBytecode)
+      {
+        gl::Program program;
+        program.loadFromBinary(msg.byteArray);
+
+        return program;
+      }else if(msg.id == startedWaitingForUserInput)
+      {
+        currentlyWaitingForUser = true;
+      }else if(msg.id == finishedWaitingForUserInput)
+      {
+        currentlyWaitingForUser = false;
+      }else if(msg.id == exitApplication)
+      {
+        qInfo() << "Aborted by user";
+        std::exit(0);
+      }
+    }
   }
 }
 
@@ -293,17 +306,17 @@ void ShaderCompiler::endCompileProcess()
   }
 }
 
-void ShaderCompiler::compileProgramFromFiles_SaveBinary(const QString& targetBinaryFile, const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
+QByteArray ShaderCompiler::compileProgramFromFiles_GetBinary(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {
   gl::ShaderObject shaderObject = createShaderFromFiles(name, shaderDir, preprocessorBlock);
 
-  gl::Program::saveShaderObjectToFile(targetBinaryFile, &shaderObject);
+  return gl::Program::saveShaderObjectToByteArray(&shaderObject);
 }
 
 
-void ShaderCompiler::compileProgramFromFiles_SaveBinary(const CompileSettings& settings)
+QByteArray ShaderCompiler::compileProgramFromFiles_GetBinary(const CompileSettings& settings)
 {
-  compileProgramFromFiles_SaveBinary(settings.targetBinaryFile, settings.name, settings.shaderDir, settings.preprocessorBlock);
+  return compileProgramFromFiles_GetBinary(settings.name, settings.shaderDir, settings.preprocessorBlock);
 }
 
 
@@ -336,8 +349,7 @@ const QMap<QString, gl::ShaderType>& ShaderCompiler::shaderTypes()
 
 bool ShaderCompiler::CompileSettings::operator==(const ShaderCompiler::CompileSettings& other) const
 {
-  return this->targetBinaryFile == other.targetBinaryFile
-      && this->name == other.name
+  return this->name == other.name
       && this->shaderDir == other.shaderDir
       && this->preprocessorBlock == other.preprocessorBlock;
 }
@@ -347,7 +359,6 @@ QString ShaderCompiler::CompileSettings::toString() const
   QStringList values;
   values << this->name;
   values << this->shaderDir.absolutePath();
-  values << this->targetBinaryFile;
   values << this->preprocessorBlock;
 
   return values.join("\n");
@@ -365,68 +376,9 @@ ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromString(cons
   settings.shaderDir = list.first();
   list.removeFirst();
 
-  settings.targetBinaryFile = list.first();
-  list.removeFirst();
-
   settings.preprocessorBlock = list;
 
   return settings;
-}
-
-QStringList ShaderCompiler::CompileSettings::toStringList() const
-{
-  QStringList values;
-  values << this->name;
-  values << this->shaderDir.absolutePath();
-  values << this->targetBinaryFile;
-  values << this->preprocessorBlock;
-  values << QString();
-
-  values.prepend(QString("ShaderCompiler::CompileSettings-%0").arg(values.length()));
-
-  return values;
-}
-
-ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromStringList(QStringList encodedStringList)
-{
-  CompileSettings settings;
-  bool success = fromStringList(settings, encodedStringList);
-  Q_ASSERT(success);
-
-  return settings;
-}
-
-bool ShaderCompiler::CompileSettings::fromStringList(ShaderCompiler::CompileSettings& settings, QStringList& encodedStringList)
-{
-  if(encodedStringList.isEmpty())
-    return false;
-  if(!encodedStringList.first().startsWith("ShaderCompiler::CompileSettings-"))
-    return false;
-  const int n = encodedStringList.first().split('-').last().toInt();
-
-  if(n>encodedStringList.length())
-    return false;
-
-  encodedStringList.removeFirst();
-
-  QStringList list;
-  for(int i=1; i<n; ++i)
-  {
-    list << encodedStringList.first();
-    encodedStringList.removeFirst();
-  }
-
-  settings.name = list.first();
-  list.removeFirst();
-
-  settings.shaderDir = list.first();
-  list.removeFirst();
-
-  settings.targetBinaryFile = list.first();
-  list.removeFirst();
-
-  settings.preprocessorBlock = list;
-  return true;
 }
 
 

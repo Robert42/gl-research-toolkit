@@ -14,6 +14,7 @@ extern bool isRunning;
 
 Compiler::Compiler()
 {
+  ShaderCompiler::shaderDialogVisible = std::bind(&Compiler::shaderDialogVisible, this, std::placeholders::_1);
   tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_SHADER_COMPILER_PORT);
   connect(&tcpSocket, &QTcpSocket::readyRead, this, &Compiler::compile, Qt::QueuedConnection);
   connect(&tcpSocket, &QTcpSocket::disconnected, this, &Compiler::disconnected);
@@ -21,6 +22,7 @@ Compiler::Compiler()
 
 Compiler::~Compiler()
 {
+  ShaderCompiler::shaderDialogVisible = [](ShaderCompiler::DialogAction){};
   tcpSocket.disconnectFromHost();
 }
 
@@ -32,31 +34,26 @@ void Compiler::timerEvent(QTimerEvent*)
 
 void Compiler::compile()
 {
-  currentCommand += QString::fromUtf8(tcpSocket.readAll());
-  //debugMessage("currentCommand", currentCommand);
-
-  receivedCommands << currentCommand.split('\n', QString::KeepEmptyParts);
-  currentCommand = receivedCommands.last();
-  receivedCommands.removeLast();
+  glrt::TcpMessages messages;
+  messages.connection = &tcpSocket;
 
   if(isCurrentlyDialogShown())
     return;
 
-  bool handlingCommands = !receivedCommands.isEmpty();
-  while(handlingCommands)
+  while(messages.waitForReadyRead(250))
   {
-    debugMessage("receivedCommands", "\""+receivedCommands.join("\"\n\"")+"\"");
+    glrt::TcpMessages::Message msg = messages.readMessage();
 
-    ShaderCompiler::CompileSettings settings;
-    if(ShaderCompiler::CompileSettings::fromStringList(settings, receivedCommands))
+    if(msg.id ==  ShaderCompiler::shaderCompileCommand)
     {
-      debugMessage("compiling"
-                   "", settings.toString());
-      ShaderCompiler::singleton().compileProgramFromFiles_SaveBinary(settings);
-      debugMessage("compiled", settings.toString());
+      ShaderCompiler::CompileSettings settings = ShaderCompiler::CompileSettings::fromString(QString::fromUtf8(msg.byteArray));
+      sendCompiledProgram(ShaderCompiler::singleton().compileProgramFromFiles_GetBinary(settings));
+      break;
     }else
     {
-      handlingCommands = false;
+      debugMessage("Unknown Command", QString("Unknown Command %0").arg(quint32(msg.id)));
+      qWarning() << "Unknown Command" << quint32(msg.id);
+      std::exit(0);
     }
   }
 }
@@ -66,4 +63,42 @@ void Compiler::disconnected()
   debugMessage("Quit!","RECEIVED QUIT");
   qApp->quit();
   isRunning = false;
+}
+
+void Compiler::sendCompiledProgram(const QByteArray& byteArray)
+{
+  sendData(ShaderCompiler::glslBytecode, byteArray);
+}
+
+void Compiler::sendData(glrt::TcpMessages::Id id, const QByteArray& byteArray)
+{
+  glrt::TcpMessages messages;
+  messages.connection = &tcpSocket;
+
+  glrt::TcpMessages::Message msg;
+  msg.id = id;
+  msg.byteArray = byteArray;
+
+  messages.sendMessage(msg);
+}
+
+void Compiler::shaderDialogVisible(ShaderCompiler::DialogAction action)
+{
+  if(action == ShaderCompiler::DialogAction::Show)
+  {
+    if(dialogVisible)
+      return;
+    dialogVisible = true;
+    sendData(ShaderCompiler::startedWaitingForUserInput, QByteArray());
+  }else if(action == ShaderCompiler::DialogAction::Hide)
+  {
+    if(!dialogVisible)
+      return;
+    dialogVisible = false;
+    sendData(ShaderCompiler::finishedWaitingForUserInput, QByteArray());
+  }else if(action == ShaderCompiler::DialogAction::ExitApp)
+  {
+    sendData(ShaderCompiler::exitApplication, QByteArray());
+  }
+
 }
