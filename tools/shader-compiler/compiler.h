@@ -19,9 +19,6 @@ protected:
 private:
   QTcpSocket tcpSocket;
 
-  QStringList receivedCommands;
-  QString currentCommand;
-
 private slots:
   void compile();
   void disconnected();

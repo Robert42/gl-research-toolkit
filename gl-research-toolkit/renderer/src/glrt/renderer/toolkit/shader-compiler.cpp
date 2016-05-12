@@ -204,15 +204,18 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const Compile
   qInfo() << "Compiling Shader" << settings.name;
 
   Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
-  Q_ASSERT(CompileSettings::fromStringList(settings.toStringList()) == settings);
 
   QFileInfo newShaderFile(settings.targetBinaryFile);
 
-  QByteArray command = settings.toStringList().join('\n').toUtf8();
+  glrt::TcpMessages messages;
+  messages.connection = tcpConnection;
+
+  TcpMessages::Message msg;
+  msg.id = shaderCompileCommand;
+  msg.byteArray = settings.toString().toUtf8();
 
   startCompileProcess();
-  tcpConnection->write(command);
-  tcpConnection->flush();
+  messages.sendMessage(msg);
 
   QElapsedTimer timer;
   timer.start();
@@ -222,8 +225,7 @@ void ShaderCompiler::compileProgramFromFiles_SaveBinary_SubProcess(const Compile
     if(!compilerProcessIsRunning())
     {
       startCompileProcess();
-      tcpConnection->write(command);
-      tcpConnection->flush();
+      messages.sendMessage(msg);
     }
 
     if(timer.elapsed() > 1000)
@@ -371,62 +373,6 @@ ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromString(cons
   settings.preprocessorBlock = list;
 
   return settings;
-}
-
-QStringList ShaderCompiler::CompileSettings::toStringList() const
-{
-  QStringList values;
-  values << this->name;
-  values << this->shaderDir.absolutePath();
-  values << this->targetBinaryFile;
-  values << this->preprocessorBlock;
-  values << QString();
-
-  values.prepend(QString("ShaderCompiler::CompileSettings-%0").arg(values.length()));
-
-  return values;
-}
-
-ShaderCompiler::CompileSettings ShaderCompiler::CompileSettings::fromStringList(QStringList encodedStringList)
-{
-  CompileSettings settings;
-  bool success = fromStringList(settings, encodedStringList);
-  Q_ASSERT(success);
-
-  return settings;
-}
-
-bool ShaderCompiler::CompileSettings::fromStringList(ShaderCompiler::CompileSettings& settings, QStringList& encodedStringList)
-{
-  if(encodedStringList.isEmpty())
-    return false;
-  if(!encodedStringList.first().startsWith("ShaderCompiler::CompileSettings-"))
-    return false;
-  const int n = encodedStringList.first().split('-').last().toInt();
-
-  if(n>encodedStringList.length())
-    return false;
-
-  encodedStringList.removeFirst();
-
-  QStringList list;
-  for(int i=1; i<n; ++i)
-  {
-    list << encodedStringList.first();
-    encodedStringList.removeFirst();
-  }
-
-  settings.name = list.first();
-  list.removeFirst();
-
-  settings.shaderDir = list.first();
-  list.removeFirst();
-
-  settings.targetBinaryFile = list.first();
-  list.removeFirst();
-
-  settings.preprocessorBlock = list;
-  return true;
 }
 
 

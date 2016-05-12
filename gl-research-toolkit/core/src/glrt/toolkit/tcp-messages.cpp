@@ -19,6 +19,7 @@ void TcpMessages::sendMessage(const Message& message)
 
   connection->write(reinterpret_cast<char*>(&header), qint64(sizeof(header)));
   connection->write(message.byteArray);
+  connection->flush();
 }
 
 bool TcpMessages::waitForReadyRead(int msecs)

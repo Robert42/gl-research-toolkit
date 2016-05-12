@@ -33,10 +33,7 @@ public:
 
     bool operator==(const CompileSettings& other) const;
 
-    QStringList toStringList() const;
     QString toString() const;
-    static bool fromStringList(CompileSettings& settings, QStringList& encodedStringList);
-    static CompileSettings fromStringList(QStringList encodedStringList);
     static CompileSettings fromString(const QString& encodedString);
   };
 

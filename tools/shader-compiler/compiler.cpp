@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 
 #include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/toolkit/tcp-messages.h>
 
 #include "debugmessage.h"
 
@@ -32,31 +33,26 @@ void Compiler::timerEvent(QTimerEvent*)
 
 void Compiler::compile()
 {
-  currentCommand += QString::fromUtf8(tcpSocket.readAll());
-  //debugMessage("currentCommand", currentCommand);
-
-  receivedCommands << currentCommand.split('\n', QString::KeepEmptyParts);
-  currentCommand = receivedCommands.last();
-  receivedCommands.removeLast();
+  glrt::TcpMessages messages;
+  messages.connection = &tcpSocket;
 
   if(isCurrentlyDialogShown())
     return;
 
-  bool handlingCommands = !receivedCommands.isEmpty();
-  while(handlingCommands)
+  while(messages.waitForReadyRead(250))
   {
-    debugMessage("receivedCommands", "\""+receivedCommands.join("\"\n\"")+"\"");
+    glrt::TcpMessages::Message msg = messages.readMessage();
 
-    ShaderCompiler::CompileSettings settings;
-    if(ShaderCompiler::CompileSettings::fromStringList(settings, receivedCommands))
+    if(msg.id ==  ShaderCompiler::shaderCompileCommand)
     {
-      debugMessage("compiling"
-                   "", settings.toString());
+      ShaderCompiler::CompileSettings settings = ShaderCompiler::CompileSettings::fromString(QString::fromUtf8(msg.byteArray));
       ShaderCompiler::singleton().compileProgramFromFiles_SaveBinary(settings);
-      debugMessage("compiled", settings.toString());
+      break;
     }else
     {
-      handlingCommands = false;
+      debugMessage("Unknown Command", QString("Unknown Command %0").arg(quint32(msg.id)));
+      qWarning() << "Unknown Command" << quint32(msg.id);
+      std::exit(0);
     }
   }
 }
