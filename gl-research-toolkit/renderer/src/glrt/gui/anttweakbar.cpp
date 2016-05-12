@@ -142,6 +142,21 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwSetParam(tweakBar, "Camera", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Debug Scene -------------------------------------------------------
+  renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
+
+  disableSceneryVoxels.setter = [renderer,this,&scene](bool v){
+    this->_disableSceneryVoxels=v;
+    Array<scene::VoxelDataComponent*> voxelComponents = scene::collectAllComponentsWithType<scene::VoxelDataComponent>(&scene,
+                                                                                                                       [](scene::VoxelDataComponent* c){
+                                                        return c->voxelizedAsScenery;
+    });
+
+    for(scene::VoxelDataComponent* c : voxelComponents)
+      c->setVisible(!v);
+  };
+  disableSceneryVoxels.getter = [this]() -> bool {return _disableSceneryVoxels;};
+  disableSceneryVoxels.TwAddVarCB(tweakBar, "DisableSceneryVoxels", "group='Debug Scene'");
+
   renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group='Debug Scene'");
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
@@ -229,6 +244,9 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
       cameraSwitcher->setCurrentValue(cameraComponent);
 
   }
+
+  if(_disableSceneryVoxels && disableSceneryVoxels.setter)
+    disableSceneryVoxels.setter(true);
 }
 
 

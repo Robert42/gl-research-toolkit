@@ -302,6 +302,9 @@ private:
 
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
+  gui::TweakBarCBVar<bool> disableSceneryVoxels;
+
+  bool _disableSceneryVoxels = false;
 
   enum class MouseCaptureState : int
   {
