@@ -86,8 +86,6 @@ void VoxelFile::load(const QFileInfo& fileInfo, const Uuid<StaticMesh>& meshUuid
       throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0105").arg(file.fileName()));
     if(glm::isnan(metaData[i].localToVoxelSpace.scaleFactor))
       throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0106").arg(file.fileName()));
-    if(metaData[i]._padding2 != 0)
-      throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0107").arg(file.fileName()));
     if(metaData[i].gridSize[0] <= 0)
       throw GLRT_EXCEPTION(QString("VoxelFile::loadFromFile(%0):0x0108").arg(file.fileName()));
     if(metaData[i].gridSize[1] <= 0)
