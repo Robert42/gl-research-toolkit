@@ -393,8 +393,6 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.meshData[i] = data;
     assets.meshInstances[n].insert(useIndex);
 
-    // #TODO USE meshesToJoin
-
     Uuid<StaticMesh> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("static-mesh[%0]").arg(useIndex)), n));
 
     if(settings.meshUuids.contains(n))
@@ -416,9 +414,19 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       }
     }
 
+
+    for(int i=0; i<settings.meshesToMergeWhenVoxelizing.length(); ++i)
+    {
+      const QSet<QString>& set = settings.meshesToMergeWhenVoxelizing[i];
+      if(hasMatch(n, set))
+        meshesToJoin[i].insert(meshUuid);
+    }
+
     assets.meshes[i] = meshUuid;
     assets.labels[meshUuid] = n;
   }
+
+  // #TODO handle using different materials in the same mesh (add the submeshes to the meshesToJoin variable)
 
   for(quint32 i=0; i<scene->mNumLights; ++i)
   {
