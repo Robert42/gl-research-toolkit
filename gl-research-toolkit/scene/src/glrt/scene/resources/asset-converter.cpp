@@ -318,6 +318,10 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   QSet<Uuid<StaticMesh>> meshesToVoxelize;
   QSet<Uuid<StaticMesh>> twoSidedMeshes;
   QSet<Uuid<StaticMesh>> singleSidedMeshes;
+  QList<QSet<Uuid<StaticMesh>>> meshesToJoin;
+
+  for(int i=0; i<settings.meshesToMergeWhenVoxelizing.length(); ++i)
+    meshesToJoin.append(QSet<Uuid<StaticMesh>>());
 
   assets.materials.resize(scene->mNumMaterials);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
@@ -388,6 +392,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     assets.meshData[i] = data;
     assets.meshInstances[n].insert(useIndex);
+
+    // #TODO USE meshesToJoin
 
     Uuid<StaticMesh> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("static-mesh[%0]").arg(useIndex)), n));
 
@@ -852,7 +858,8 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   nodesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_nodesToImport);
   meshesToVoxelize = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelize);
   meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelizeTwoSided);
-  meshesToMergeWhenVoxelizing = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToMergeWhenVoxelizing);
+  for(const QString& s : AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToMergeWhenVoxelizing).toList())
+    meshesToMergeWhenVoxelizing.append(s.split("\n").toSet());
 
   meshUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMesh>>(interface->as_meshUuids, {uuidTypeId, staticMeshUuidTypeId});
   materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Material>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
