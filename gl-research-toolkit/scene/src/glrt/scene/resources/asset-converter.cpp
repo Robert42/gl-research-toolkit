@@ -377,6 +377,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     if(n.isEmpty())
       continue;
 
+    Q_ASSERT(quint32(std::numeric_limits<int>::max()) >= i);
+
     StaticMesh data = loadMeshFromAssimp(scene->mMeshes+i, 1, glm::mat3(1), QString(" while converting %0 to %1 (occured on mesh %2 (assimp index %3))").arg(sceneGraphFile.filePath()).arg(sceneGraphFile.fileName()).arg(n).arg(i), assets.indexed);;;
 
     // Is the same instance already used (with a different material?)
@@ -426,7 +428,25 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.labels[meshUuid] = n;
   }
 
-  // #TODO handle using different materials in the same mesh (add the submeshes to the meshesToJoin variable)
+  // If Assimp imports multiple meshes with the same name, this means, it has split them because of one mesh using multiple materials.
+  // This has no relevance for voxelizing, so mark meshes with multiple materials into the same set within meshesToJoin
+  for(QSet<quint32> meshesWithSameName_Indices : assets.meshInstances)
+  {
+    QSet<Uuid<StaticMesh>> meshesWithSameName;
+    for(quint32 i : meshesWithSameName_Indices)
+      meshesWithSameName.insert(assets.meshes[i]);
+
+    int bucket;
+    for(bucket=0; bucket<meshesToJoin.length(); ++bucket)
+    {
+      if(meshesToJoin[bucket].contains(meshesWithSameName))
+        break;
+    }
+    if(bucket>=meshesToJoin.length())
+      meshesToJoin.append(meshesWithSameName);
+    else
+      meshesToJoin[bucket] = meshesWithSameName;
+  }
 
   for(quint32 i=0; i<scene->mNumLights; ++i)
   {
