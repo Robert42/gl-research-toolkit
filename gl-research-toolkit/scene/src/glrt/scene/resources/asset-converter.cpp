@@ -319,6 +319,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   QSet<Uuid<StaticMesh>> twoSidedMeshes;
   QSet<Uuid<StaticMesh>> singleSidedMeshes;
   QList<QSet<Uuid<StaticMesh>>> meshesToJoin;
+  QHash<Uuid<StaticMesh>, CoordFrame> meshesToJoin_Transformations;
 
   for(int i=0; i<settings.meshesToMergeWhenVoxelizing.length(); ++i)
     meshesToJoin.append(QSet<Uuid<StaticMesh>>());
