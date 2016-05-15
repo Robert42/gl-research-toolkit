@@ -58,6 +58,9 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::DEFAULT)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void beginGroup()", AngelScript::asMETHOD(Voxelizer,beginJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false)", AngelScript::asMETHOD(Voxelizer,addToGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelizeGroup()", AngelScript::asMETHOD(Voxelizer,voxelizeJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -112,6 +115,18 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
 
     resourceIndex->registerVoxelizedMesh(voxelUuid, staticMeshUuid, i.value().fieldType, voxelIndex);
   }
+}
+
+void Voxelizer::beginJoinedGroup()
+{
+}
+
+void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided)
+{
+}
+
+void Voxelizer::voxelizeJoinedGroup()
+{
 }
 
 void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField)

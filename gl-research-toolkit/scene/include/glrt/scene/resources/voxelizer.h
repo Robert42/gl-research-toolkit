@@ -56,6 +56,10 @@ public:
 
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
 
+  void beginJoinedGroup();
+  void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided);
+  void voxelizeJoinedGroup();
+
 private:
   void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField = Hints());
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
