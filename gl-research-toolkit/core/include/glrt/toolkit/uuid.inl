@@ -63,6 +63,13 @@ QString Uuid<T>::toString() const
 
 
 template<class T>
+bool Uuid<T>::isNull() const
+{
+  return this->index() == UuidIndex::null_index();
+}
+
+
+template<class T>
 template<class T_target>
 Uuid<T_target> Uuid<T>::cast() const
 {
