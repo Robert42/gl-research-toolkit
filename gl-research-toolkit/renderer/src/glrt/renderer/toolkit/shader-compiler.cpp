@@ -135,6 +135,14 @@ ShaderCompiler::~ShaderCompiler()
 }
 
 
+void ShaderCompiler::registerGlrtShaderIncludeDirectories()
+{
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_EXTERNAL_SHADER_DIR).absolutePath());
+}
+
+
 ShaderCompiler& ShaderCompiler::singleton()
 {
   Q_ASSERT(_singleton != nullptr);
