@@ -12,6 +12,15 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+namespace Voxelizer_Private {
+
+QHash<Uuid<StaticMesh>, QVector<CoordFrame>> staticMeshesToVoxelize_SingleSided;
+QHash<Uuid<StaticMesh>, QVector<CoordFrame>> staticMeshesToVoxelize_TwoSided;
+
+} // namespace Voxelizer_Private
+
+using namespace Voxelizer_Private;
+
 using AngelScriptIntegration::AngelScriptCheck;
 using utilities::GlTexture;
 
@@ -60,9 +69,23 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::DEFAULT)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void beginGroup()", AngelScript::asMETHOD(Voxelizer,beginJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false)", AngelScript::asMETHOD(Voxelizer,addToGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelizeGroup()", AngelScript::asMETHOD(Voxelizer,voxelizeJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelizeGroup(VoxelMeshType meshType=VoxelMeshType::DEFAULT)", AngelScript::asMETHOD(Voxelizer,voxelizeJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
+}
+
+Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid)
+{
+  // There should be no way to create a voxelizer without valid ResourceIndex
+  Q_ASSERT(resourceIndex != nullptr);
+
+  if(!resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
+    throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
+
+  staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
+  voxelFileName = voxelMetaDataFilenameForMesh(staticMeshFileName);
+
+  shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
 }
 
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType)
@@ -70,22 +93,18 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
 
-  // There should be no way to create a voxelizer without valid ResourceIndex
-  Q_ASSERT(resourceIndex != nullptr);
+  FileNames fileNames(this->resourceIndex, staticMeshUuid);
 
-  if(!resourceIndex->staticMeshAssetsFiles.contains(staticMeshUuid))
-    throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
+  if(fileNames.shouldRevoxelizeMesh)
+    revoxelizeMesh(staticMeshUuid, fileNames, meshType, signedDistanceField);
 
-  const QString staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
-  const QString voxelFileName = voxelMetaDataFilenameForMesh(staticMeshFileName);
+  registerToIndex(staticMeshUuid, fileNames);
+}
 
-
-  bool shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
-  if(shouldRevoxelizeMesh)
-    revoxelizeMesh(staticMeshUuid, staticMeshFileName, voxelFileName, meshType, signedDistanceField);
-
+void Voxelizer::registerToIndex(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& fileNames)
+{
   VoxelFile voxelFile;
-  voxelFile.load(voxelFileName, staticMeshUuid);
+  voxelFile.load(fileNames.voxelFileName, staticMeshUuid);
 
   TextureSampler textureSampler;
   textureSampler.description.maxLod = 0;
@@ -119,30 +138,41 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
 
 void Voxelizer::beginJoinedGroup()
 {
+  staticMeshesToVoxelize_TwoSided.clear();
+  staticMeshesToVoxelize_SingleSided.clear();
 }
 
 void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided)
 {
+  QHash<Uuid<StaticMesh>, QVector<CoordFrame>>& map = two_sided ? staticMeshesToVoxelize_TwoSided : staticMeshesToVoxelize_SingleSided;
+
+  map[meshUuid] << frame;
 }
 
-void Voxelizer::voxelizeJoinedGroup()
+void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 {
+  CpuVoxelizerImplementation fallbackVoxelizationImplementation;
+  Q_UNUSED(fallbackVoxelizationImplementation);
+
+  StaticMesh staticMesh;
+
+  // #TODO
 }
 
-void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField)
+void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
 {
-  SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(staticMeshFileName).fileName()));
+  SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(filenames.staticMeshFileName).fileName()));
 
-  qInfo() << "Voxelizing" << staticMeshFileName;
+  qInfo() << "Voxelizing" << filenames.staticMeshFileName;
 
   StaticMeshFile staticMeshFile;
-  staticMeshFile.load(staticMeshFileName);
+  staticMeshFile.load(filenames.staticMeshFileName);
   const StaticMesh& staticMesh = staticMeshFile.staticMesh;
 
   VoxelFile voxelFile;
   voxelFile.meshUuid = staticMeshUuid;
 
-  QString signedDistanceFieldFileName = staticMeshFileName + ".signed-distance-field.texture";
+  QString signedDistanceFieldFileName = filenames.staticMeshFileName + ".signed-distance-field.texture";
 
   if(signedDistanceField.enabled)
   {
@@ -153,7 +183,7 @@ void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QSt
 
   }
 
-  voxelFile.save(voxelFileName);
+  voxelFile.save(filenames.voxelFileName);
 }
 
 

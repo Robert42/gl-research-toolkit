@@ -58,10 +58,22 @@ public:
 
   void beginJoinedGroup();
   void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided);
-  void voxelizeJoinedGroup();
+  void voxelizeJoinedGroup(MeshType meshType);
 
 private:
-  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField = Hints());
+  struct FileNames
+  {
+    ResourceIndex* resourceIndex;
+    QString staticMeshFileName;
+    QString voxelFileName;
+    bool shouldRevoxelizeMesh;
+
+    FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid);
+  };
+
+  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
+  void registerToIndex(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& filenames);
+
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
 };
 
