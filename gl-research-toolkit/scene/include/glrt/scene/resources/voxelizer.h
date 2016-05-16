@@ -70,9 +70,11 @@ private:
     bool shouldRevoxelizeMesh;
 
     FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid);
+    FileNames(ResourceIndex* resourceIndex, const QList<Uuid<StaticMesh>>& staticMeshUuids);
   };
 
   void revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
+  void revoxelizeMesh(const TriangleArray<>& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
   void registerToIndex(const FileNames& filenames);
 
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
