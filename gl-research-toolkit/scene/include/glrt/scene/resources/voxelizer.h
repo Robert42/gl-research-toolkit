@@ -64,6 +64,7 @@ private:
   struct FileNames
   {
     ResourceIndex* resourceIndex;
+    Uuid<StaticMesh> staticMeshUuid;
     QString staticMeshFileName;
     QString voxelFileName;
     bool shouldRevoxelizeMesh;
@@ -71,8 +72,8 @@ private:
     FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid);
   };
 
-  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
-  void registerToIndex(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& filenames);
+  void revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
+  void registerToIndex(const FileNames& filenames);
 
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
 };

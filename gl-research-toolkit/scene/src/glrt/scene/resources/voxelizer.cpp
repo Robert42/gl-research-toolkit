@@ -75,6 +75,7 @@ void Voxelizer::registerAngelScriptAPI()
 }
 
 Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid)
+  : staticMeshUuid(staticMeshUuid)
 {
   // There should be no way to create a voxelizer without valid ResourceIndex
   Q_ASSERT(resourceIndex != nullptr);
@@ -96,15 +97,15 @@ void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshTy
   FileNames fileNames(this->resourceIndex, staticMeshUuid);
 
   if(fileNames.shouldRevoxelizeMesh)
-    revoxelizeMesh(staticMeshUuid, fileNames, meshType, signedDistanceField);
+    revoxelizeMesh(fileNames, meshType, signedDistanceField);
 
-  registerToIndex(staticMeshUuid, fileNames);
+  registerToIndex(fileNames);
 }
 
-void Voxelizer::registerToIndex(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& fileNames)
+void Voxelizer::registerToIndex(const FileNames& fileNames)
 {
   VoxelFile voxelFile;
-  voxelFile.load(fileNames.voxelFileName, staticMeshUuid);
+  voxelFile.load(fileNames.voxelFileName, fileNames.staticMeshUuid);
 
   TextureSampler textureSampler;
   textureSampler.description.maxLod = 0;
@@ -132,7 +133,7 @@ void Voxelizer::registerToIndex(const Uuid<StaticMesh>& staticMeshUuid, const Fi
 
     resourceIndex->registerTexture(textureUuid, i.key(), textureSampler);
 
-    resourceIndex->registerVoxelizedMesh(voxelUuid, staticMeshUuid, i.value().fieldType, voxelIndex);
+    resourceIndex->registerVoxelizedMesh(voxelUuid, fileNames.staticMeshUuid, i.value().fieldType, voxelIndex);
   }
 }
 
@@ -159,7 +160,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
   // #TODO
 }
 
-void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
+void Voxelizer::revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
 {
   SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(filenames.staticMeshFileName).fileName()));
 
@@ -170,7 +171,7 @@ void Voxelizer::revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const Fil
   const StaticMesh& staticMesh = staticMeshFile.staticMesh;
 
   VoxelFile voxelFile;
-  voxelFile.meshUuid = staticMeshUuid;
+  voxelFile.meshUuid = filenames.staticMeshUuid;
 
   QString signedDistanceFieldFileName = filenames.staticMeshFileName + ".signed-distance-field.texture";
 
