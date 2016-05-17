@@ -443,7 +443,11 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       if(hasMatch(n, set))
       {
         for(int i : assets.meshInstances.value(n))
-          _meshUuidSet.insert(assets.meshes[i]);
+        {
+          Uuid<StaticMesh> meshUuid = assets.meshes[i];
+          _meshUuidSet.insert(meshUuid);
+          meshesToVoxelizeJoined.insert(meshUuid);
+        }
       }
     }
 
@@ -468,6 +472,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
       Uuid<StaticMesh> meshUuid = assets.meshes[i];
 
       meshesWithSameName.insert(meshUuid);
+      meshesToVoxelizeJoined.insert(meshUuid);
     }
 
     instancedMeshesToJoin.insert(meshesWithSameName);
