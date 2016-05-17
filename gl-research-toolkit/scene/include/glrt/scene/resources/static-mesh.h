@@ -2,6 +2,7 @@
 #define GLRT_SCENE_RESOURCES_STATICMESH_H
 
 #include <glrt/dependencies.h>
+#include <glrt/scene/coord-frame.h>
 
 namespace glrt {
 namespace scene {
@@ -12,6 +13,9 @@ struct AABB
   glm::vec3 minPoint;
   glm::vec3 maxPoint;
 };
+
+struct TriangleArray;
+
 
 struct StaticMesh
 {
@@ -36,6 +40,8 @@ struct StaticMesh
   AABB boundingBox() const;
   size_t rawDataSize() const;
 
+  TriangleArray getTriangleArray() const;
+
   bool isIndexed() const;
   bool operator==(const StaticMesh& other) const;
   bool operator!=(const StaticMesh& other) const;
@@ -44,9 +50,28 @@ struct StaticMesh
 };
 
 
+struct TriangleArray
+{
+  std::vector<glm::vec3> vertices;
+
+  void applyTransformation(const CoordFrame& frame);
+  void invertNormals();
+
+  AABB boundingBox() const;
+
+  void operator+=(const TriangleArray& other);
+
+  glm::vec3& operator[](size_t i);
+  const glm::vec3& operator[](size_t i) const;
+
+private:
+};
+
 
 } // namespace resources
 } // namespace scene
 } // namespace glrt
+
+#include "static-mesh.inl"
 
 #endif // GLRT_SCENE_RESOURCES_STATICMESH_H

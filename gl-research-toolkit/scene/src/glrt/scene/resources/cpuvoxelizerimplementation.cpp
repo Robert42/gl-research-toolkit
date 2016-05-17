@@ -44,34 +44,15 @@ void CpuVoxelizerImplementation::voxelizeGradient(QVector<float>& data, const gl
         data[coordToIndex(x, y, z, gridSize)] = z * factor + value_for_min_z;
 }
 
-void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
+void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, TriangleArray staticMesh, MeshType meshType)
 {
   bool twoSided = meshType == MeshType::TWO_SIDED;
 
-  QVector<glm::vec3> vertices_array;
-  glm::vec3* vertices = nullptr;
-
-  if(staticMesh.isIndexed())
-  {
-    const int n = staticMesh.indices.length();
-    vertices_array.resize(n);
-    vertices = vertices_array.data();
+  const size_t num_vertices = staticMesh.vertices.size();
 
 #pragma omp parallel for
-    for(int i=0; i<n; i++)
-      vertices[i] = localToVoxelSpace.transform_point(staticMesh.vertices[staticMesh.indices[i]].position);
-  }else
-  {
-    const int n = staticMesh.vertices.length();
-    vertices_array.resize(n);
-    vertices = vertices_array.data();
-
-#pragma omp parallel for
-    for(int i=0; i<n; i++)
-      vertices[i] = localToVoxelSpace.transform_point(staticMesh.vertices[i].position);
-  }
-
-  const int num_vertices = vertices_array.length();
+  for(size_t i=0; i<num_vertices; i++)
+    staticMesh[i] = localToVoxelSpace.transform_point(staticMesh[i]);
 
 #pragma omp parallel for
   for(int z=0; z<gridSize.z; ++z)
@@ -82,14 +63,14 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
         float best_negative_d = -INFINITY;
         float best_d_abs = INFINITY;
 
-        for(int i=0; i<num_vertices; i+=3)
+        for(size_t i=0; i<num_vertices; i+=3)
         {
           Q_ASSERT(i+2<num_vertices);
 
           const glm::vec3 p = centerPointOfVoxel(x,y,z);
-          const glm::vec3& v0 = vertices[i];
-          const glm::vec3& v1 = vertices[i+1];
-          const glm::vec3& v2 = vertices[i+2];
+          const glm::vec3& v0 = staticMesh[i];
+          const glm::vec3& v1 = staticMesh[i+1];
+          const glm::vec3& v2 = staticMesh[i+2];
 
           glm::vec3 uvw;
           glm::vec3 closestPoint = openvdb::math::closestPointOnTriangleToPoint(v0, v1, v2, p, uvw);
@@ -119,7 +100,7 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
       }
 }
 
-utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType)
+utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const TriangleArray& staticMesh, MeshType meshType)
 {
   qWarning() << "Using the CPU voxelizer implementation";
 

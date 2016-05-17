@@ -40,6 +40,8 @@ public:
   ShaderCompiler(bool startServer);
   ~ShaderCompiler();
 
+  static void registerGlrtShaderIncludeDirectories();
+
   static ShaderCompiler& singleton();
 
   gl::Program compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());

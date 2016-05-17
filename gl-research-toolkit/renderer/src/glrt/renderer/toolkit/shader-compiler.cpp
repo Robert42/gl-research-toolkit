@@ -135,6 +135,14 @@ ShaderCompiler::~ShaderCompiler()
 }
 
 
+void ShaderCompiler::registerGlrtShaderIncludeDirectories()
+{
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("toolkit"));
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_SHADER_DIR).absoluteFilePath("common-with-cpp"));
+  gl::Details::ShaderIncludeDirManager::addIncludeDirs(QDir(GLRT_EXTERNAL_SHADER_DIR).absolutePath());
+}
+
+
 ShaderCompiler& ShaderCompiler::singleton()
 {
   Q_ASSERT(_singleton != nullptr);
@@ -267,14 +275,16 @@ void ShaderCompiler::startCompileProcess()
 
     tcpServer.listen(QHostAddress::LocalHost, GLRT_SHADER_COMPILER_PORT);
 
-    compileProcess.start(QString(GLRT_SHADER_COMPILER_PATH), QIODevice::NotOpen);
-    compileProcess.setReadChannel(QProcess::StandardOutput);
+    QFileInfo subProcessFile = QString(GLRT_SHADER_COMPILER_PATH);
+    if(!subProcessFile.exists())
+      throw GLRT_EXCEPTION("Couldn't find the shader-compiler executable");
+    compileProcess.start(subProcessFile.absoluteFilePath(), QIODevice::NotOpen);
 
     if(!compileProcess.waitForStarted())
       throw GLRT_EXCEPTION("Couldn't start compiler process");
 
     if(!tcpServer.waitForNewConnection(30000))
-      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x6254)");
+      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (waited for connection unsuccessfully)");
 
     if(!tcpServer.hasPendingConnections())
       throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x3514)");

@@ -1,4 +1,4 @@
-#include <glrt/application.h>
+#include <glrt/system.h>
 
 #include "compiler.h"
 
@@ -8,10 +8,10 @@ bool isRunning = true;
 
 int main(int argc, char** argv)
 {
-  glrt::Application app(argc, argv, glrt::System::Settings::needOnlyOpenGLContext());
+  glrt::System system(argc, argv, glrt::System::Settings::needOnlyOpenGLContext());
+  glrt::renderer::ShaderCompiler::registerGlrtShaderIncludeDirectories();
 
   Compiler compiler;
-  Q_UNUSED(compiler);
 
   int result = qApp->exec();
 
@@ -20,5 +20,7 @@ int main(int argc, char** argv)
 
   debugMessage("main()", "exit");
 
+  Q_UNUSED(system);
+  Q_UNUSED(compiler);
   return result;
 }

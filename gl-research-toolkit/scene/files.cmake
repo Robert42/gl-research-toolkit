@@ -30,6 +30,7 @@ set(SOURCE_FILES
   include/glrt/scene/resources/resource-manager.inl
   include/glrt/scene/resources/static-mesh-file.h
   include/glrt/scene/resources/static-mesh.h
+  include/glrt/scene/resources/static-mesh.inl
   include/glrt/scene/resources/static-mesh-loader.h
   include/glrt/scene/resources/texture-file.h
   include/glrt/scene/resources/texture.h

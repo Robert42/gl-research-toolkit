@@ -111,7 +111,7 @@ void CoordFrame::registerAngelScriptAPIDeclarations()
 
   int r;
   r = angelScriptEngine->RegisterObjectType("CoordFrame",
-                                            sizeof(glm::quat),
+                                            sizeof(CoordFrame),
                                             AngelScript::asOBJ_VALUE |
                                             AngelScript::asOBJ_POD |
                                             AngelScript::asOBJ_APP_CLASS |
@@ -133,6 +133,12 @@ void CoordFrame::registerAngelScriptAPI()
                                                  AngelScript::asBEHAVE_CONSTRUCT,
                                                  "void f(const vec3 &in position, const quat &in orientation, float scaleFactor)",
                                                  AngelScript::asFUNCTION(create_CoordFrame),
+                                                 AngelScript::asCALL_CDECL_OBJFIRST);
+  AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectBehaviour("CoordFrame",
+                                                 AngelScript::asBEHAVE_CONSTRUCT,
+                                                 "void f()",
+                                                 AngelScript::asFUNCTION(AngelScriptIntegration::wrap_constructor<CoordFrame>),
                                                  AngelScript::asCALL_CDECL_OBJFIRST);
   AngelScriptCheck(r);
 

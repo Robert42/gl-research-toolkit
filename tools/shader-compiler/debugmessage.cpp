@@ -33,6 +33,8 @@ bool isCurrentlyDialogShown()
 
 void debugMessage(const QString& title, const QString& message)
 {
+  Q_UNUSED(title);
+  Q_UNUSED(message);
 #if USE_MESSAGEBOX
   _isCurrentlyDialogShown++;
   QMessageBox::information(nullptr, title, message);

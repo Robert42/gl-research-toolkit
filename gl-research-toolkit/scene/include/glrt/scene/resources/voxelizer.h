@@ -56,8 +56,27 @@ public:
 
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
 
+  void beginJoinedGroup();
+  void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided);
+  void voxelizeJoinedGroup(MeshType meshType);
+
 private:
-  void revoxelizeMesh(const Uuid<StaticMesh>& staticMeshUuid, const QString& staticMeshFileName, const QString& voxelFileName, MeshType meshType, Hints signedDistanceField = Hints());
+  struct FileNames
+  {
+    ResourceIndex* resourceIndex;
+    Uuid<StaticMesh> staticMeshUuid;
+    QString staticMeshFileName;
+    QString voxelFileName;
+    bool shouldRevoxelizeMesh;
+
+    FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid);
+    FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<StaticMesh> >& staticMeshUuids, const Uuid<StaticMesh>& instanceAnchor);
+  };
+
+  void revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
+  void revoxelizeMesh(const TriangleArray& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
+  void registerToIndex(const FileNames& filenames);
+
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
 };
 
@@ -74,7 +93,7 @@ public:
   Implementation();
   ~Implementation();
 
-  virtual utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType) = 0;
+  virtual utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const TriangleArray& staticMesh, MeshType meshType) = 0;
 };
 
 

@@ -33,7 +33,7 @@ GpuVoxelizerImplementation::GpuVoxelizerImplementation()
 
 GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
                                                     const scene::CoordFrame& localToVoxelSpace,
-                                                    const scene::resources::StaticMesh& staticMesh,
+                                                    const scene::resources::TriangleArray& staticMesh,
                                                     MeshType meshType)
 {
   int totalNumVoxels = gridSize.x*gridSize.y*gridSize.z;
@@ -79,12 +79,14 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
   return texture;
 }
 
-int GpuVoxelizerImplementation::preprocessVertices(const scene::CoordFrame& localToVoxelSpace, const scene::resources::StaticMesh& staticMesh)
+int GpuVoxelizerImplementation::preprocessVertices(const scene::CoordFrame& localToVoxelSpace, const scene::resources::TriangleArray& staticMesh)
 {
-  const bool indexed = staticMesh.isIndexed();
-  const int num_vertices = indexed ? staticMesh.indices.length() : staticMesh.vertices.length();
+  if(staticMesh.vertices.size() > std::numeric_limits<int>::max())
+    throw GLRT_EXCEPTION(QString("Mesh is too large to voxelize with %0 vertices").arg(staticMesh.vertices.size()));
 
-  int stride = int(sizeof(glm::vec3) + sizeof(float));
+  const int num_vertices = quint32(staticMesh.vertices.size());
+
+  int stride = quint32(sizeof(glm::vec3) + sizeof(float));
   GLsizeiptr necessarySpace = GLsizeiptr(num_vertices) * GLsizeiptr(stride);
 
   if(preprocessedVertices.GetSize() < necessarySpace)
@@ -92,22 +94,12 @@ int GpuVoxelizerImplementation::preprocessVertices(const scene::CoordFrame& loca
 
   byte* const buffer = reinterpret_cast<byte*>(preprocessedVertices.Map(0, necessarySpace, gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
-  if(staticMesh.isIndexed())
-  {
+
 #pragma omp parallel for
-    for(int i=0; i<num_vertices; i++)
-    {
-      glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer + i*stride);
-      vertex = localToVoxelSpace.transform_point(staticMesh.vertices[staticMesh.indices[i]].position);
-    }
-  }else
+  for(int i=0; i<num_vertices; i++)
   {
-#pragma omp parallel for
-    for(int i=0; i<num_vertices; i++)
-    {
-      glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer + i*stride);
-      vertex = localToVoxelSpace.transform_point(staticMesh.vertices[i].position);
-    }
+    glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer + i*stride);
+    vertex = localToVoxelSpace.transform_point(staticMesh[i]);
   }
 
   preprocessedVertices.Unmap();

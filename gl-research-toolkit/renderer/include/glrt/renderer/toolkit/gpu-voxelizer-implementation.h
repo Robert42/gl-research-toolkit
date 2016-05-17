@@ -18,7 +18,7 @@ public:
 
   scene::resources::utilities::GlTexture distanceField(const glm::ivec3& gridSize,
                                                        const scene::CoordFrame& localToVoxelSpace,
-                                                       const scene::resources::StaticMesh& staticMesh,
+                                                       const scene::resources::TriangleArray& staticMesh,
                                                        MeshType meshType) override;
 
 private:
@@ -26,7 +26,7 @@ private:
   gl::Buffer preprocessedVertices;
   ComputeShaderSet voxelizeMeshComputeShader;
 
-  int preprocessVertices(const scene::CoordFrame& localToVoxelSpace, const scene::resources::StaticMesh& staticMesh);
+  int preprocessVertices(const scene::CoordFrame& localToVoxelSpace, const scene::resources::TriangleArray& staticMesh);
 };
 
 } // namespace renderer
