@@ -55,8 +55,6 @@ struct StaticMesh
 template<int n_Components=3>
 struct TriangleArray
 {
-  static const int stride = sizeof(float) * n_Components;
-
   void applyTransformation(const CoordFrame& frame);
   void invertNormals();
 

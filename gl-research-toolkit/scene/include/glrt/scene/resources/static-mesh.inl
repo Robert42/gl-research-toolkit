@@ -60,7 +60,6 @@ void TriangleArray<n_Components>::invertNormals()
 
   Q_ASSERT(num_vertices%3 == 0);
 
-
 #pragma omp parallel for
   for(int i=0; i<num_vertices; i+=3)
   {
@@ -132,7 +131,7 @@ template<int n_Components>
 glm::vec3& TriangleArray<n_Components>::vertex(int i)
 {
   byte* const buffer = reinterpret_cast<byte*>(positions.data());
-  glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer + i*n_Components);
+  glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(buffer + i*n_Components*sizeof(float));
 
   return vertex;
 }
@@ -141,7 +140,7 @@ template<int n_Components>
 const glm::vec3& TriangleArray<n_Components>::vertex(int i) const
 {
   const byte* const buffer = reinterpret_cast<const byte*>(positions.data());
-  const glm::vec3& vertex = *reinterpret_cast<const glm::vec3*>(buffer + i*n_Components);
+  const glm::vec3& vertex = *reinterpret_cast<const glm::vec3*>(buffer + i*n_Components*sizeof(float));
 
   return vertex;
 }
