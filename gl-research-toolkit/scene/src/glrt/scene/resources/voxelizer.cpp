@@ -94,8 +94,6 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const QList<Uuid<S
   if(staticMeshUuids.isEmpty())
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
-  this->resourceIndex = resourceIndex;
-
   for(const Uuid<StaticMesh>& staticMeshUuid : staticMeshUuids)
   {
     FileNames f(resourceIndex, staticMeshUuid);
@@ -214,15 +212,16 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 
       StaticMesh staticMesh = StaticMesh::loadFromFile(f.staticMeshFileName);
       rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).length());
+      TriangleArray staticMeshTriangles = staticMesh.getTriangleArray();
       for(CoordFrame frame : staticMeshesToVoxelize_SingleSided.value(staticMeshUuid))
       {
-        TriangleArray v = staticMesh.getTriangleArray();
+        TriangleArray v = staticMeshTriangles;
         v.applyTransformation(frame);
-        triangles.vertices += v.vertices;
+        triangles += v;
       }
     }
 
-    if(triangles.vertices.length() == 0)
+    if(triangles.vertices.size() == 0)
       throw GLRT_EXCEPTION(QString("Voxelizer::voxelizeJoinedGroup: No vertices found!"));
     revoxelizeMesh(triangles, rawDataSize, fileNames, meshType, signedDistanceField);
   }

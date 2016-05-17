@@ -65,7 +65,7 @@ QString Uuid<T>::toString() const
 template<class T>
 bool Uuid<T>::isNull() const
 {
-  return this->index() == UuidIndex::null_index();
+  return this->toQUuid().isNull();
 }
 
 
