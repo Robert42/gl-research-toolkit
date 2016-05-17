@@ -70,7 +70,7 @@ private:
     bool shouldRevoxelizeMesh;
 
     FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid);
-    FileNames(ResourceIndex* resourceIndex, const QList<Uuid<StaticMesh>>& staticMeshUuids);
+    FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<StaticMesh> >& staticMeshUuids, const Uuid<StaticMesh>& instanceAnchor);
   };
 
   void revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());

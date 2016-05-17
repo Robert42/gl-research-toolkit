@@ -89,18 +89,11 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticM
   shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
 }
 
-Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const QList<Uuid<StaticMesh>>& staticMeshUuids)
+Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<StaticMesh>>& staticMeshUuids, const Uuid<StaticMesh>& instanceAnchor)
+  : FileNames(resourceIndex, instanceAnchor)
 {
   if(staticMeshUuids.isEmpty())
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
-
-  for(const Uuid<StaticMesh>& staticMeshUuid : staticMeshUuids)
-  {
-    FileNames f(resourceIndex, staticMeshUuid);
-
-    if(this->staticMeshUuid.isNull() || staticMeshUuid < this->staticMeshUuid)
-      *this = f;
-  }
 
   for(const Uuid<StaticMesh>& staticMeshUuid : staticMeshUuids)
   {
@@ -176,7 +169,33 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
 
-  FileNames fileNames(this->resourceIndex, staticMeshesToVoxelize_TwoSided.keys() + staticMeshesToVoxelize_SingleSided.keys());
+  Uuid<StaticMesh> instanceAnchor;
+  CoordFrame anchorFrame;
+  QSet<Uuid<StaticMesh>> allStaticMeshes = staticMeshesToVoxelize_TwoSided.keys().toSet() | staticMeshesToVoxelize_SingleSided.keys().toSet();
+
+  for(const Uuid<StaticMesh>& staticMeshUuid : allStaticMeshes)
+  {
+    if(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).length() + staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).length() > 1)
+      continue;
+
+    if(instanceAnchor.isNull() || staticMeshUuid < instanceAnchor)
+    {
+      instanceAnchor = staticMeshUuid;
+      if(staticMeshesToVoxelize_TwoSided.contains(staticMeshUuid))
+      {
+        Q_ASSERT(!staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).isEmpty());
+        anchorFrame = staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).first();
+      }else
+      {
+        Q_ASSERT(!staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).isEmpty());
+        anchorFrame = staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).first();
+      }
+    }
+  }
+
+  CoordFrame invAnchorFrame = anchorFrame.inverse();
+
+  FileNames fileNames(this->resourceIndex, allStaticMeshes, instanceAnchor);
 
   size_t rawDataSize = 0;
 
@@ -195,7 +214,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
       for(CoordFrame frame : staticMeshesToVoxelize_TwoSided.value(staticMeshUuid))
       {
         TriangleArray v = staticMeshTriangles;
-        v.applyTransformation(frame);
+        v.applyTransformation(invAnchorFrame * frame);
         triangles += v;
         if(meshType != MeshType::TWO_SIDED)
         {
@@ -215,7 +234,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
       for(CoordFrame frame : staticMeshesToVoxelize_SingleSided.value(staticMeshUuid))
       {
         TriangleArray v = staticMeshTriangles;
-        v.applyTransformation(frame);
+        v.applyTransformation(invAnchorFrame * frame);
         triangles += v;
       }
     }
