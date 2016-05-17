@@ -74,7 +74,7 @@ private:
   };
 
   void revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
-  void revoxelizeMesh(const TriangleArray<>& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
+  void revoxelizeMesh(const TriangleArray& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
   void registerToIndex(const FileNames& filenames);
 
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
@@ -93,7 +93,7 @@ public:
   Implementation();
   ~Implementation();
 
-  virtual utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const StaticMesh& staticMesh, MeshType meshType) = 0;
+  virtual utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const TriangleArray& staticMesh, MeshType meshType) = 0;
 };
 
 

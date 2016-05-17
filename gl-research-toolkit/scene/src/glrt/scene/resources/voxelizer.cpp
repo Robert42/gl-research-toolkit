@@ -27,7 +27,7 @@ using utilities::GlTexture;
 
 Voxelizer::Implementation* Voxelizer::Implementation::singleton = nullptr;
 
-VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileName, const TriangleArray<>& staticMesh, size_t meshDataSize, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints);
+VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileName, const TriangleArray& staticMesh, size_t meshDataSize, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints);
 
 
 Voxelizer::Voxelizer(ResourceIndex* resourceIndex)
@@ -185,7 +185,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 
   if(fileNames.shouldRevoxelizeMesh)
   {
-    TriangleArray<> vertices;
+    TriangleArray triangles;
 
     for(const Uuid<StaticMesh>& staticMeshUuid : staticMeshesToVoxelize_TwoSided.keys())
     {
@@ -193,16 +193,16 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 
       StaticMesh staticMesh;
       staticMesh.loadFromFile(f.staticMeshFileName);
-      rawDataSize += staticMesh.rawDataSize();
-      for(const CoordFrame& frame : staticMeshesToVoxelize_TwoSided.value(staticMeshUuid))
+      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).length());
+      for(CoordFrame frame : staticMeshesToVoxelize_TwoSided.value(staticMeshUuid))
       {
-        TriangleArray<> v = staticMesh.getTriangleArray<>();
+        TriangleArray v = staticMesh.getTriangleArray();
         v.applyTransformation(frame);
-        vertices += v;
+        triangles.vertices += v.vertices;
         if(meshType != MeshType::TWO_SIDED)
         {
           v.invertNormals();
-          vertices += v;
+          triangles.vertices += v.vertices;
         }
       }
     }
@@ -211,20 +211,19 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
     {
       FileNames f(resourceIndex, staticMeshUuid);
 
-      StaticMesh staticMesh;
-      staticMesh.loadFromFile(f.staticMeshFileName);
-      rawDataSize += staticMesh.rawDataSize();
-      for(const CoordFrame& frame : staticMeshesToVoxelize_SingleSided.value(staticMeshUuid))
+      StaticMesh staticMesh = StaticMesh::loadFromFile(f.staticMeshFileName);
+      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).length());
+      for(CoordFrame frame : staticMeshesToVoxelize_SingleSided.value(staticMeshUuid))
       {
-        TriangleArray<> v = staticMesh.getTriangleArray<>();
+        TriangleArray v = staticMesh.getTriangleArray();
         v.applyTransformation(frame);
-        vertices += v;
+        triangles.vertices += v.vertices;
       }
     }
 
-    if(vertices.length() == 0)
+    if(triangles.vertices.length() == 0)
       throw GLRT_EXCEPTION(QString("Voxelizer::voxelizeJoinedGroup: No vertices found!"));
-    revoxelizeMesh(vertices, rawDataSize, fileNames, meshType, signedDistanceField);
+    revoxelizeMesh(triangles, rawDataSize, fileNames, meshType, signedDistanceField);
   }
 
   registerToIndex(fileNames);
@@ -240,7 +239,7 @@ void Voxelizer::revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hi
   revoxelizeMesh(staticMesh.getTriangleArray(), staticMesh.rawDataSize(), filenames, meshType, signedDistanceField);
 }
 
-void Voxelizer::revoxelizeMesh(const TriangleArray<>& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
+void Voxelizer::revoxelizeMesh(const TriangleArray& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
 {
   SPLASHSCREEN_MESSAGE(QString("Voxelizing <%0>").arg(QFileInfo(filenames.staticMeshFileName).fileName()));
 
@@ -390,7 +389,7 @@ VoxelFile::MetaData findBestSize(size_t meshDataSize, size_t bytesPerVoxel, cons
   return metaData;
 }
 
-VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileName, const TriangleArray<>& staticMesh, size_t meshDataSize, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints)
+VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileName, const TriangleArray& staticMesh, size_t meshDataSize, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints)
 {
   const AABB aabb = staticMesh.boundingBox();
 

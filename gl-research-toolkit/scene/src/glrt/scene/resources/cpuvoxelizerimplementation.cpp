@@ -44,17 +44,15 @@ void CpuVoxelizerImplementation::voxelizeGradient(QVector<float>& data, const gl
         data[coordToIndex(x, y, z, gridSize)] = z * factor + value_for_min_z;
 }
 
-void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, TriangleArray<> staticMesh, MeshType meshType)
+void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, TriangleArray staticMesh, MeshType meshType)
 {
   bool twoSided = meshType == MeshType::TWO_SIDED;
 
-  QVector<glm::vec3> vertices_array;
-
-  const int num_vertices = staticMesh.length();
+  const int num_vertices = staticMesh.vertices.length();
 
 #pragma omp parallel for
-    for(int i=0; i<num_vertices; i++)
-      staticMesh[i] = localToVoxelSpace.transform_point(staticMesh[i]);
+  for(int i=0; i<num_vertices; i++)
+    staticMesh[i] = localToVoxelSpace.transform_point(staticMesh[i]);
 
 #pragma omp parallel for
   for(int z=0; z<gridSize.z; ++z)
@@ -102,7 +100,7 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
       }
 }
 
-utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const TriangleArray<>& staticMesh, MeshType meshType)
+utilities::GlTexture CpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const TriangleArray& staticMesh, MeshType meshType)
 {
   qWarning() << "Using the CPU voxelizer implementation";
 

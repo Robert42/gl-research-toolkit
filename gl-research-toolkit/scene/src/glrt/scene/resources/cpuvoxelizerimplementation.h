@@ -13,8 +13,8 @@ public:
   static void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize, const glm::vec3& origin, float radius);
   static void voxelizeToSphere(QVector<float>& data, const glm::ivec3& gridSize);
   static void voxelizeGradient(QVector<float>& data, const glm::ivec3& gridSize, float value_for_min_z, float value_for_max_z);
-  static void voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, TriangleArray<> staticMesh, MeshType meshType);
-  utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const TriangleArray<>& staticMesh, MeshType meshType) override;
+  static void voxeliseMesh(QVector<float>& data, const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, TriangleArray staticMesh, MeshType meshType);
+  utilities::GlTexture distanceField(const glm::ivec3& gridSize, const CoordFrame& localToVoxelSpace, const TriangleArray& staticMesh, MeshType meshType) override;
 };
 
 } // namespace resources

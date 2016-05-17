@@ -14,7 +14,6 @@ struct AABB
   glm::vec3 maxPoint;
 };
 
-template<int stride>
 struct TriangleArray;
 
 
@@ -41,8 +40,7 @@ struct StaticMesh
   AABB boundingBox() const;
   size_t rawDataSize() const;
 
-  template<int n_Components=3>
-  TriangleArray<n_Components> getTriangleArray() const;
+  TriangleArray getTriangleArray() const;
 
   bool isIndexed() const;
   bool operator==(const StaticMesh& other) const;
@@ -52,20 +50,14 @@ struct StaticMesh
 };
 
 
-template<int n_Components=3>
 struct TriangleArray
 {
+  QVector<glm::vec3> vertices;
+
   void applyTransformation(const CoordFrame& frame);
   void invertNormals();
 
   AABB boundingBox() const;
-
-  void resize(int l);
-  int length() const;
-
-  template<int other_stride>
-  void operator = (const TriangleArray<other_stride>& other);
-  void operator += (const TriangleArray& other);
 
   glm::vec3& vertex(int i);
   const glm::vec3& vertex(int i) const;
@@ -73,7 +65,6 @@ struct TriangleArray
   const glm::vec3& operator[](int i) const;
 
 private:
-  QVector<padding<float, n_Components>> positions;
 };
 
 

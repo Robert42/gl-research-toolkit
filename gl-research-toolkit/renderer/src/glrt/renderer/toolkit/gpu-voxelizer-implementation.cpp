@@ -33,7 +33,7 @@ GpuVoxelizerImplementation::GpuVoxelizerImplementation()
 
 GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
                                                     const scene::CoordFrame& localToVoxelSpace,
-                                                    const scene::resources::TriangleArray<>& staticMesh,
+                                                    const scene::resources::TriangleArray& staticMesh,
                                                     MeshType meshType)
 {
   int totalNumVoxels = gridSize.x*gridSize.y*gridSize.z;
@@ -79,9 +79,9 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
   return texture;
 }
 
-int GpuVoxelizerImplementation::preprocessVertices(const scene::CoordFrame& localToVoxelSpace, const scene::resources::TriangleArray<>& staticMesh)
+int GpuVoxelizerImplementation::preprocessVertices(const scene::CoordFrame& localToVoxelSpace, const scene::resources::TriangleArray& staticMesh)
 {
-  const int num_vertices = staticMesh.length();
+  const int num_vertices = staticMesh.vertices.length();
 
   int stride = int(sizeof(glm::vec3) + sizeof(float));
   GLsizeiptr necessarySpace = GLsizeiptr(num_vertices) * GLsizeiptr(stride);
