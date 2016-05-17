@@ -48,10 +48,10 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
 {
   bool twoSided = meshType == MeshType::TWO_SIDED;
 
-  const int num_vertices = staticMesh.vertices.length();
+  const size_t num_vertices = staticMesh.vertices.size();
 
 #pragma omp parallel for
-  for(int i=0; i<num_vertices; i++)
+  for(size_t i=0; i<num_vertices; i++)
     staticMesh[i] = localToVoxelSpace.transform_point(staticMesh[i]);
 
 #pragma omp parallel for
@@ -63,7 +63,7 @@ void CpuVoxelizerImplementation::voxeliseMesh(QVector<float>& data, const glm::i
         float best_negative_d = -INFINITY;
         float best_d_abs = INFINITY;
 
-        for(int i=0; i<num_vertices; i+=3)
+        for(size_t i=0; i<num_vertices; i+=3)
         {
           Q_ASSERT(i+2<num_vertices);
 

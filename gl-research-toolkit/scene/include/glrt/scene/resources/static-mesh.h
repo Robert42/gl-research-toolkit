@@ -52,17 +52,17 @@ struct StaticMesh
 
 struct TriangleArray
 {
-  QVector<glm::vec3> vertices;
+  std::vector<glm::vec3> vertices;
 
   void applyTransformation(const CoordFrame& frame);
   void invertNormals();
 
   AABB boundingBox() const;
 
-  glm::vec3& vertex(int i);
-  const glm::vec3& vertex(int i) const;
-  glm::vec3& operator[](int i);
-  const glm::vec3& operator[](int i) const;
+  void operator+=(const TriangleArray& other);
+
+  glm::vec3& operator[](size_t i);
+  const glm::vec3& operator[](size_t i) const;
 
 private:
 };

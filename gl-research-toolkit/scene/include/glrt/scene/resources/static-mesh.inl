@@ -14,7 +14,7 @@ inline TriangleArray StaticMesh::getTriangleArray() const
 
   const bool indexed = this->isIndexed();
   const int num_vertices = indexed ? this->indices.length() : this->vertices.length();
-  result.vertices.resize(num_vertices);
+  result.vertices.resize(size_t(num_vertices));
 
   Q_ASSERT(num_vertices%3 == 0);
 
@@ -23,7 +23,7 @@ inline TriangleArray StaticMesh::getTriangleArray() const
 #pragma omp parallel for
     for(int i=0; i<num_vertices; i++)
     {
-      glm::vec3& vertex = result.vertices[i];
+      glm::vec3& vertex = result.vertices[size_t(i)];
       vertex = this->vertices[this->indices[i]].position;
     }
   }else
@@ -31,7 +31,7 @@ inline TriangleArray StaticMesh::getTriangleArray() const
 #pragma omp parallel for
     for(int i=0; i<num_vertices; i++)
     {
-      glm::vec3& vertex = result.vertices[i];
+      glm::vec3& vertex = result.vertices[size_t(i)];
       vertex = this->vertices[i].position;
     }
   }
@@ -41,10 +41,10 @@ inline TriangleArray StaticMesh::getTriangleArray() const
 
 inline void TriangleArray::applyTransformation(const CoordFrame& frame)
 {
-  const int num_vertices = this->vertices.length();
+  const size_t num_vertices = this->vertices.size();
 
 #pragma omp parallel for
-  for(int i=0; i<num_vertices; i++)
+  for(size_t i=0; i<num_vertices; i++)
   {
     glm::vec3& vertex = this->vertices[i];
     vertex = frame.transform_point(vertex);
@@ -53,12 +53,12 @@ inline void TriangleArray::applyTransformation(const CoordFrame& frame)
 
 inline void TriangleArray::invertNormals()
 {
-  const int num_vertices = this->vertices.length();
+  const size_t num_vertices = this->vertices.size();
 
   Q_ASSERT(num_vertices%3 == 0);
 
 #pragma omp parallel for
-  for(int i=0; i<num_vertices; i+=3)
+  for(size_t i=0; i<num_vertices; i+=3)
   {
     glm::vec3& vertexA = this->vertices[i];
     glm::vec3& vertexB = this->vertices[i+2];
@@ -72,9 +72,9 @@ inline AABB TriangleArray::boundingBox() const
   aabb.minPoint = glm::vec3(INFINITY);
   aabb.maxPoint = glm::vec3(-INFINITY);
 
-  const int num_vertices = this->vertices.length();
+  const size_t num_vertices = this->vertices.size();
 
-  for(int i=0; i<num_vertices; i++)
+  for(size_t i=0; i<num_vertices; i++)
   {
     const glm::vec3& vertex = this->vertices[i];
     aabb.minPoint = glm::min(aabb.minPoint, vertex);
@@ -84,12 +84,17 @@ inline AABB TriangleArray::boundingBox() const
   return aabb;
 }
 
-inline glm::vec3& TriangleArray::operator[](int i)
+inline void TriangleArray::operator+=(const TriangleArray& other)
+{
+  this->vertices.insert(this->vertices.end(), other.vertices.begin(), other.vertices.end());
+}
+
+inline glm::vec3& TriangleArray::operator[](size_t i)
 {
   return vertices[i];
 }
 
-inline const glm::vec3& TriangleArray::operator[](int i) const
+inline const glm::vec3& TriangleArray::operator[](size_t i) const
 {
   return vertices[i];
 }

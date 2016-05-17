@@ -194,15 +194,16 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
       StaticMesh staticMesh;
       staticMesh.loadFromFile(f.staticMeshFileName);
       rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).length());
+      TriangleArray staticMeshTriangles = staticMesh.getTriangleArray();
       for(CoordFrame frame : staticMeshesToVoxelize_TwoSided.value(staticMeshUuid))
       {
-        TriangleArray v = staticMesh.getTriangleArray();
+        TriangleArray v = staticMeshTriangles;
         v.applyTransformation(frame);
-        triangles.vertices += v.vertices;
+        triangles += v;
         if(meshType != MeshType::TWO_SIDED)
         {
           v.invertNormals();
-          triangles.vertices += v.vertices;
+          triangles += v;
         }
       }
     }
