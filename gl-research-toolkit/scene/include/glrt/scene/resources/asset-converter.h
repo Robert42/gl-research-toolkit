@@ -23,6 +23,7 @@ struct SceneGraphImportSettings final
   QList<QSet<QString>> meshesToMergeWhenVoxelizing;
   QList<QSet<QString>> meshesToMergeWhenVoxelizingInstanced;
 
+  QHash<QString, float> meshVoxelizeScaleFactors;
   QHash<QString, Uuid<StaticMesh>> meshUuids;
   QHash<QString, Uuid<Material>> materialUuids;
   QHash<QString, Uuid<LightSource>> lightUuids;
@@ -32,6 +33,7 @@ struct SceneGraphImportSettings final
   bool shouldImportMesh(const QString& name) const;
   bool shouldImportCamera(const QString& name) const;
   bool shouldImportNode(const QString& name) const;
+  float meshVoxelizeScaleFactorForMeshName(const QString& name) const;
 
   static void registerType();
 
