@@ -173,7 +173,6 @@ void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& f
 
 void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 {
-  /*
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
 
@@ -227,7 +226,6 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
   }
 
   registerToIndex(fileNames);
-  */
 }
 
 void Voxelizer::revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
