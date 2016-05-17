@@ -48,7 +48,7 @@ void TriangleArray<n_Components>::applyTransformation(const CoordFrame& frame)
 #pragma omp parallel for
   for(int i=0; i<num_vertices; i++)
   {
-    glm::vec3& vertex = *reinterpret_cast<glm::vec3*>(i);
+    glm::vec3& vertex = this->vertex(i);
     vertex = frame.transform_point(vertex);
   }
 }
