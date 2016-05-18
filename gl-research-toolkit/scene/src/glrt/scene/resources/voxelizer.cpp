@@ -30,6 +30,25 @@ Voxelizer::Implementation* Voxelizer::Implementation::singleton = nullptr;
 VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileName, const TriangleArray& staticMesh, size_t meshDataSize, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints);
 
 
+QString Voxelizer::toString(MeshType meshType)
+{
+  switch(meshType)
+  {
+  case MeshType::TWO_SIDED:
+    return "TWO_SIDED";
+  case MeshType::FACE_SIDE:
+    return "FACE_SIDE";
+  case MeshType::MANIFOLD_RAY_CHECK:
+  default:
+    return "MANIFOLD_RAY_CHECK";
+  }
+}
+
+QString Voxelizer::toAngelScript(MeshType meshType)
+{
+  return QString("VoxelMeshType::%0").arg(toString(meshType));
+}
+
 Voxelizer::Voxelizer(ResourceIndex* resourceIndex)
   : resourceIndex(resourceIndex)
 {
@@ -51,7 +70,8 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterEnumValue("VoxelFieldType", "SIGNED_DISTANCE_FIELD", int(FieldType::SIGNED_DISTANCE_FIELD)); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterEnum("VoxelMeshType");
-  r = angelScriptEngine->RegisterEnumValue("VoxelMeshType", "DEFAULT", int(MeshType::DEFAULT)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("VoxelMeshType", "FACE_SIDE", int(MeshType::FACE_SIDE)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("VoxelMeshType", "MANIFOLD_RAY_CHECK", int(MeshType::MANIFOLD_RAY_CHECK)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("VoxelMeshType", "TWO_SIDED", int(MeshType::TWO_SIDED)); AngelScriptCheck(r);
 
   r = angelScriptEngine->RegisterObjectType(nameHints, sizeof(Hints), AngelScript::asOBJ_VALUE|AngelScript::asOBJ_POD|AngelScript::asOBJ_APP_CLASS_CDAK); AngelScriptCheck(r);
@@ -66,10 +86,10 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f(ResourceIndex@ index)", AngelScript::asFUNCTION((&AngelScriptIntegration::wrap_constructor<Voxelizer, ResourceIndex*>)), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::DEFAULT)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void beginGroup()", AngelScript::asMETHOD(Voxelizer,beginJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false)", AngelScript::asMETHOD(Voxelizer,addToGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelizeGroup(VoxelMeshType meshType=VoxelMeshType::DEFAULT)", AngelScript::asMETHOD(Voxelizer,voxelizeJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelizeGroup(VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHOD(Voxelizer,voxelizeJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
