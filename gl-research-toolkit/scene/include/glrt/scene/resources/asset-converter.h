@@ -19,7 +19,7 @@ struct SceneGraphImportSettings final
   QSet<QString> camerasToImport;
   QSet<QString> nodesToImport;
   QSet<QString> meshesToVoxelize;
-  QSet<QString> meshesNoToToVoxelize;
+  QSet<QString> meshesNoToVoxelize;
   QSet<QString> meshesToVoxelizeTwoSided;
   QSet<QString> meshesToVoxelizeWithManifold;
   QList<QSet<QString>> meshesToMergeWhenVoxelizing;

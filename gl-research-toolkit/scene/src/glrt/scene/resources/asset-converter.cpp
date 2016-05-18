@@ -597,7 +597,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           if(!ResourceManager::instance()->isRegistered(materialUuid))
             throw GLRT_EXCEPTION(QString("Using not registered material in imported scene-graph-file %0").arg(sceneGraphFile.absoluteFilePath()));
           Material::Type materialType = ResourceManager::instance()->materialForUuid(materialUuid).type;
-          if(hasMatch(mesh->mName, settings.meshesToVoxelize) && !hasMatch(mesh->mName, settings.meshesNoToToVoxelize))
+          if(hasMatch(mesh->mName, settings.meshesToVoxelize) && !hasMatch(mesh->mName, settings.meshesNoToVoxelize))
           {
             meshesToVoxelize.insert(meshUuid);
             if(hasMatch(mesh->mName, settings.meshesToVoxelizeTwoSided))
@@ -882,7 +882,6 @@ struct SceneGraphImportSettings::AngelScriptInterface final : public AngelScript
   AngelScript::CScriptArray* as_meshesToMergeWhenVoxelizing;
   AngelScript::CScriptArray* as_meshesToMergeWhenVoxelizingInstanced;
   AngelScript::CScriptArray* as_meshesToVoxelize;
-  AngelScript::CScriptArray* as_meshesNoToToVoxelize;
   AngelScript::CScriptArray* as_meshesNotToVoxelize;
   AngelScript::CScriptArray* as_meshesToVoxelizeTwoSided;
   AngelScript::CScriptArray* as_meshesToVoxelizeWithManifold;
@@ -921,7 +920,7 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   as_camerasToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_nodesToImport = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
   as_meshesToVoxelize = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({".*"}), angelScriptEngine);
-  as_meshesNoToToVoxelize = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
+  as_meshesNotToVoxelize = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
   as_meshesToMergeWhenVoxelizing = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
   as_meshesToMergeWhenVoxelizingInstanced = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
   as_meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
@@ -941,7 +940,7 @@ SceneGraphImportSettings::AngelScriptInterface::~AngelScriptInterface()
   as_camerasToImport->Release();
   as_nodesToImport->Release();
   as_meshesToVoxelize->Release();
-  as_meshesNoToToVoxelize->Release();
+  as_meshesNotToVoxelize->Release();
   as_meshesToMergeWhenVoxelizing->Release();
   as_meshesToMergeWhenVoxelizingInstanced->Release();
   as_meshesToVoxelizeTwoSided->Release();
@@ -1020,7 +1019,7 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   camerasToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_camerasToImport);
   nodesToImport = AngelScriptIntegration::scriptArrayToStringSet(interface->as_nodesToImport);
   meshesToVoxelize = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelize);
-  meshesNoToToVoxelize = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesNoToToVoxelize);
+  meshesNoToVoxelize = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesNotToVoxelize);
   meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelizeTwoSided);
   meshesToVoxelizeWithManifold = AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToVoxelizeWithManifold);
   for(const QString& s : AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToMergeWhenVoxelizing).toList())
@@ -1052,7 +1051,7 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ camerasToImport", asOFFSET(AngelScriptInterface,as_camerasToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ nodesToImport", asOFFSET(AngelScriptInterface,as_nodesToImport)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelize", asOFFSET(AngelScriptInterface,as_meshesToVoxelize)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesNotToToVoxelize", asOFFSET(AngelScriptInterface,as_meshesNotToVoxelize)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesNotToVoxelize", asOFFSET(AngelScriptInterface,as_meshesNotToVoxelize)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelizeTwoSided", asOFFSET(AngelScriptInterface,as_meshesToVoxelizeTwoSided)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelizeWithManifold", asOFFSET(AngelScriptInterface,as_meshesToVoxelizeWithManifold)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToMergeWhenVoxelizing", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
