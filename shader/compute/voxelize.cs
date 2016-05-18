@@ -1,8 +1,7 @@
 #version 450 core
 #include <extensions/common.glsl>
 
-#include <glrt/glsl/math.h>
-#include <openvdb/triangle-distance.glsl>
+#include <glrt/glsl/math-glsl.h>
 
 
 

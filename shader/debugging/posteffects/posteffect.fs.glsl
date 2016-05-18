@@ -1,6 +1,6 @@
 #include <extensions/command_list.glsl>
 
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-glsl.h>
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
 #include <debugging/heat-vision.glsl>

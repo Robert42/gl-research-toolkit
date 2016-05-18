@@ -1,4 +1,4 @@
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-glsl.h>
 
 vec3 F_Schlick(in vec3 f0, in float f90, in float u)
 {

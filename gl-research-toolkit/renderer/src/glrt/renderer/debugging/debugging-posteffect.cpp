@@ -1,7 +1,7 @@
 #include <glrt/renderer/debugging/debugging-posteffect.h>
 #include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/system.h>
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-cpp.h>
 #include <glrt/renderer/gl/shader-type.h>
 #include <QTimer>
 

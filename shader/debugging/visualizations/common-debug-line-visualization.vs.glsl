@@ -1,6 +1,6 @@
 #include <extensions/common.glsl>
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-glsl.h>
 
 layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_POSITION) in vec3 vertex_position;
 layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_PARAMETER1) in float vertex_parameter1;

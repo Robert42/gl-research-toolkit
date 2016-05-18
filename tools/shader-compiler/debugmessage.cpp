@@ -3,10 +3,10 @@
 #include <QMessageBox>
 #include <QDebug>
 
-#define USE_MESSAGEBOX 0
+#define USE_QT_DIALOG 0
 #define USE_SIMULATE_CRASH 0
 
-#if USE_MESSAGEBOX
+#if USE_QT_DIALOG
 int _isCurrentlyDialogShown = 0;
 #endif
 
@@ -24,20 +24,9 @@ bool isCurrentlyDialogShown()
   }
 #endif
 
-#if USE_MESSAGEBOX
+#if USE_QT_DIALOG
   return _isCurrentlyDialogShown > 0;
 #else
   return false;
-#endif
-}
-
-void debugMessage(const QString& title, const QString& message)
-{
-  Q_UNUSED(title);
-  Q_UNUSED(message);
-#if USE_MESSAGEBOX
-  _isCurrentlyDialogShown++;
-  QMessageBox::information(nullptr, title, message);
-  _isCurrentlyDialogShown--;
 #endif
 }
