@@ -1,5 +1,5 @@
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-glsl.h>
 #include "light-structs.glsl"
 
 #include <pbs/pbs.glsl>

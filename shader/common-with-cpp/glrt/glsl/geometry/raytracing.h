@@ -393,3 +393,19 @@ inline bool intersects_unclamped(in Rect rect, in Ray ray)
   return intersection_point_unclamped(plane, ray, p) && contains_mapped_point(rect, p);
 }
 
+
+// ======== Triangles =============================================================
+
+// returns 0 for no intersection, 1 for an intersection from the frontside and -1 for intersecting from the backside
+inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, float treshold=1.e-8f)
+{
+  Plane plane = plane_from_three_points(v0, v1, v2);
+  vec3 p;
+  
+  bool intersectsPlane = intersection_point_unclamped(plane, ray, p);
+  
+  vec3 uvw;
+  vec3 closestPoint = closestPointOnTriangleToPoint(v0, v1, v2, p, uvw);
+  
+  return intersectsPlane && sq_distance(closestPoint, p)<=treshold;
+}

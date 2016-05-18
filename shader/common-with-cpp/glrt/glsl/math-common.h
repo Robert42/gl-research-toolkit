@@ -1,8 +1,6 @@
 #ifndef _GLRT_GLSL_MATH_H_
 #define _GLRT_GLSL_MATH_H_
 
-#include <glrt/glsl/compatibility/begin.h>
-
 const float pi = 3.1415926535897;
 
 const float inf = 1./0.;
@@ -287,7 +285,5 @@ inline ivec3 voxelIndexFromScalarIndex(int index, ivec3 voxelCount)
 #include <glrt/glsl/geometry/raytracing.h>
 #include <glrt/glsl/geometry/transform.h>
 
-
-#include <glrt/glsl/compatibility/end.h>
 
 #endif // #define _GLRT_GLSL_MATH_H_

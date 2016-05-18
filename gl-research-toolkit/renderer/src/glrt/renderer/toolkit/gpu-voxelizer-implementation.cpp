@@ -13,9 +13,8 @@ using scene::resources::utilities::GlTexture;
 struct GpuVoxelizerImplementation::VoxelizeMetaData
 {
   int numVertices = 0;
-  int two_sided = 0;
   int indexOffset = 0;
-  padding<int, 1> _padding1;
+  padding<int, 2> _padding1;
   GLuint64 targetTexture;
   padding<GLuint64, 1> _padding2;
   GLuint64 vertices;
@@ -55,13 +54,22 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
   QElapsedTimer timer;
   timer.start();
 
+  QSet<QString> proprocessorBlock;
+  if(meshType == MeshType::MANIFOLD_RAY_CHECK)
+    proprocessorBlock.insert("#define MANIFOLD_RAY_CHECK");
+  else if(meshType == MeshType::TWO_SIDED)
+    proprocessorBlock.insert("#define TWO_SIDED");
+  else if(meshType == MeshType::FACE_SIDE)
+    proprocessorBlock.insert("#define FACE_SIDE");
+  else
+    Q_UNREACHABLE();
+
   int dispatchSize = glm::min(totalNumVoxels, 64*64*64);
   for(int i=0; i<totalNumVoxels; i+=dispatchSize)
   {
     if(timer.elapsed() > 1000)
       qDebug() << "  Voxelization-progress:" << 100.*double(i) / double(totalNumVoxels) << "%";
     VoxelizeMetaData& header = *reinterpret_cast<VoxelizeMetaData*>(metaData.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-    header.two_sided = meshType == MeshType::TWO_SIDED;
     header.numVertices = numVertices;
     header.vertices = preprocessedVertices.gpuBufferAddress();
     header.targetTexture = imageHandle;
@@ -70,7 +78,7 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 
     metaData.BindUniformBuffer(0);
 
-    voxelizeMeshComputeShader.execute(glm::ivec3(dispatchSize, 1, 1));
+    voxelizeMeshComputeShader.execute(glm::ivec3(dispatchSize, 1, 1), proprocessorBlock);
     QThread::msleep(1);
   }
 

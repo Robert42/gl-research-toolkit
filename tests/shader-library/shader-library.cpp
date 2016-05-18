@@ -1,5 +1,5 @@
 #include <glrt/dependencies.h>
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-cpp.h>
 #include <gtest/gtest.h>
 #include <test-vectors.h>
 
@@ -22,6 +22,24 @@ TEST(shader_library, voxelIndexFromScalarIndex)
     for(int y=0; y<size.y; ++y)
       for(int z=0; z<size.z; ++z)
         EXPECT_EQ(voxelIndexFromScalarIndex(x + y*size.x + z*size.x*size.y, size), glm::ivec3(x, y, z));
+}
+
+
+
+TEST(shader_library, triangle_ray_intersection_unclamped)
+{
+  Ray ray;
+  ray.origin = vec3(0);
+  ray.direction = vec3(0, 0, 1);
+
+  for(float z : {-42.f, -10.f, -1.f, 0.f, 1.f, 10.f, 42.f})
+  {
+    vec3 triangle_with_hit[3] = {vec3(-1.5, -1, z), vec3(0.5, 1, z), vec3(0.5, -1, z)};
+    vec3 triangle_without_hit[3] = {vec3(1, -1, z), vec3(2, 1, z), vec3(2, -1, z)};
+
+    EXPECT_TRUE(triangle_ray_intersection_unclamped(ray, triangle_with_hit[0], triangle_with_hit[1], triangle_with_hit[2], 1.e-5f));
+    EXPECT_FALSE(triangle_ray_intersection_unclamped(ray, triangle_without_hit[0], triangle_without_hit[1], triangle_without_hit[2], 1.e-5f));
+  }
 }
 
 
