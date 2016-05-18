@@ -222,16 +222,18 @@ gl::Program ShaderCompiler::compileProgramFromFiles_SubProcess(const CompileSett
   bool currentlyWaitingForUser = false;
   while(true)
   {
-    if(!compilerProcessIsRunning())
-    {
-      startCompileProcess();
-      messages.sendMessage(msgCompile);
-    }
-
     if(!messages.waitForReadyRead(1000) && !currentlyWaitingForUser)
     {
       endCompileProcess();
+      messages.connection = tcpConnection;
       timer.restart();
+    }
+
+    if(!compilerProcessIsRunning())
+    {
+      startCompileProcess();
+      messages.connection = tcpConnection;
+      messages.sendMessage(msgCompile);
     }
 
     if(messages.messageAvialable())
