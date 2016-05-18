@@ -20,7 +20,7 @@ ComputeShaderSet::~ComputeShaderSet()
 {
 }
 
-void ComputeShaderSet::execute(const glm::ivec3& workAmount)
+void ComputeShaderSet::execute(const glm::ivec3& workAmount, const QSet<QString>& preprocessorBlock)
 {
   glm::ivec3 groupSize = mapTotalSizeToWorkerGroupSize(workAmount);
 
@@ -38,7 +38,7 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
   if(any(greaterThan(numCalls, System::maxComputeWorkGroupCount)))
     throw GLRT_EXCEPTION(QString("ComputeShaderSet::execute: maxComputeWorkGroupCount exceeded"));
 
-  QSharedPointer<gl::Program> glProgram = glPrograms.value(groupSize);
+  QSharedPointer<gl::Program>& glProgram = glPrograms[preprocessorBlock][groupSize];
 
   if(glProgram.isNull())
   {
@@ -47,10 +47,10 @@ void ComputeShaderSet::execute(const glm::ivec3& workAmount)
                                                               shaderFileDir,
                                                               QStringList({QString("#define GROUPS_SIZE_X %0").arg(groupSize.x),
                                                                            QString("#define GROUPS_SIZE_Y %1").arg(groupSize.y),
-                                                                           QString("#define GROUPS_SIZE_Z %2").arg(groupSize.z)}));
+                                                                           QString("#define GROUPS_SIZE_Z %2").arg(groupSize.z)})
+                                                              + preprocessorBlock.toList());
 
     glProgram = QSharedPointer<gl::Program>(new gl::Program(std::move(temp)));
-    glPrograms[groupSize] = glProgram;
   }
 
   glProgram->use();

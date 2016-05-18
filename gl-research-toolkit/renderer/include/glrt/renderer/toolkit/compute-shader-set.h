@@ -17,7 +17,7 @@ public:
   ComputeShaderSet(const QString& name, const QString& shaderFileName, const T_MapSize& mapTotalSizeToWorkerGroupSize);
   ~ComputeShaderSet();
 
-  void execute(const glm::ivec3& workAmount);
+  void execute(const glm::ivec3& workAmount, const QSet<QString>& preprocessorBlock=QSet<QString>());
 
 private:
   QString name;
@@ -25,7 +25,7 @@ private:
   QString shaderFileBasename;
   T_MapSize mapTotalSizeToWorkerGroupSize;
 
-  QHash<glm::ivec3, QSharedPointer<gl::Program>> glPrograms;
+  QHash<QSet<QString>, QHash<glm::ivec3, QSharedPointer<gl::Program>>> glPrograms;
 
   QSharedPointer<gl::Program> createShaderObject(const glm::ivec3& groupSize);
 };

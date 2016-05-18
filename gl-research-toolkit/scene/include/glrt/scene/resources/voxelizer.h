@@ -25,9 +25,13 @@ public:
 
   enum class MeshType : quint32
   {
-    DEFAULT,
+    FACE_SIDE,
+    MANIFOLD_RAY_CHECK,
     TWO_SIDED
   };
+
+  static QString toString(MeshType meshType);
+  static QString toAngelScript(MeshType meshType);
 
   ResourceIndex* resourceIndex = nullptr;
   bool voxelizing_scene = false;
