@@ -397,7 +397,7 @@ inline bool intersects_unclamped(in Rect rect, in Ray ray)
 // ======== Triangles =============================================================
 
 // returns 0 for no intersection, 1 for an intersection from the frontside and -1 for intersecting from the backside
-inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, float treshold=1.e-8f)
+inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, float treshold=1.e-9f)
 {
   Plane plane = plane_from_three_points(v0, v1, v2);
   vec3 p;

@@ -705,7 +705,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
         if(twoSidedMeshes.contains(uuid) && singleSidedMeshes.contains(uuid))
           throw GLRT_EXCEPTION(QString("Couldn't open file <%0> for writing.").arg(sceneGraphFile.absoluteFilePath()));
 
-        Voxelizer::MeshType meshType = twoSidedMeshes.contains(uuid) ? Voxelizer::MeshType::TWO_SIDED : Voxelizer::MeshType::FACE_SIDE;
+        Voxelizer::MeshType meshType = twoSidedMeshes.contains(uuid) ? Voxelizer::MeshType::TWO_SIDED : meshesToVoxelizeWithManifold.contains(uuid) ? Voxelizer::MeshType::MANIFOLD_RAY_CHECK : Voxelizer::MeshType::FACE_SIDE;
 
         const float currentScaleFactor = meshVoxelizeScaleFactors[uuid];
         if(scaleFactor != currentScaleFactor)
