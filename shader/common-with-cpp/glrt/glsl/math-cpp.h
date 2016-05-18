@@ -1,8 +1,16 @@
-// ======== C++ ================================================================
-#if defined(__GNUC__)
+#ifndef _GLRT_GLSL_MATH_CPP_H_
+#define _GLRT_GLSL_MATH_CPP_H_
+
+#ifndef __GNUC__
+#error Please, never include the math-cpp.h header from a shader!
+#endif
+
+#include <openvdb/triangle-distance.h>
 
 namespace glrt {
 namespace glsl {
+
+using openvdb::math::closestPointOnTriangleToPoint;
 
 using glm::bvec2;
 using glm::bvec3;
@@ -89,23 +97,43 @@ inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 #define zwxy zwxy()
 #define wxyz wxyz()
 
-// ======== GLSL ===============================================================
-#else
+#include "math-common.h"
 
-#ifndef inline
-#define inline
+
+#ifdef out
+#undef out
 #endif
 
-#define not_ not
-
-#ifndef out
-#define out(t) out t
+#ifdef in
+#undef in
 #endif
 
-#ifndef inout
-#define inout(t) inout t
+#ifdef inout
+#undef inout
 #endif
 
-#include <debugging/print.glsl>
+#undef xyz
+#undef xyxy
+#undef xx
+#undef xxx
+#undef xxxx
+#undef yy
+#undef yyy
+#undef yyyy
+#undef yzw
+#undef yzx
+#undef zxy
+#undef xz
+#undef yw
+#undef yz
+#undef xy
+#undef zw
+#undef xyzw
+#undef yzwx
+#undef zwxy
+#undef wxyz
 
-#endif
+} // namespace glsl
+} // namespace glrt
+
+#endif // _GLRT_GLSL_MATH_CPP_H_

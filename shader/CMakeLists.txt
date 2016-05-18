@@ -3,14 +3,14 @@ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 add_custom_target(
   gl-research-toolkit-shader
   SOURCES
-  common-with-cpp/glrt/glsl/compatibility/begin.h
-  common-with-cpp/glrt/glsl/compatibility/end.h
   common-with-cpp/glrt/glsl/debugging/printer-types.h
   common-with-cpp/glrt/glsl/geometry/raytracing.h
   common-with-cpp/glrt/glsl/geometry/structs.h
   common-with-cpp/glrt/glsl/geometry/transform.h
   common-with-cpp/glrt/glsl/layout-constants.h
-  common-with-cpp/glrt/glsl/math.h
+  common-with-cpp/glrt/glsl/math-common.h
+  common-with-cpp/glrt/glsl/math-cpp.h
+  common-with-cpp/glrt/glsl/math-glsl.h
   debugging/posteffects/highlight-voxel-bounding-rect.fs
   debugging/posteffects/highlight-voxel-bounding-rect.vs
   debugging/posteffects/orange-sphere.fs

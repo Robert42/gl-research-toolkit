@@ -1,7 +1,7 @@
 #include "output-block.vs.glsl"
 
 #include <glrt/glsl/layout-constants.h>
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-glsl.h>
 
 #include <scene/uniforms.glsl>
 

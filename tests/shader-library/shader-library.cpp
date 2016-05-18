@@ -1,5 +1,5 @@
 #include <glrt/dependencies.h>
-#include <glrt/glsl/math.h>
+#include <glrt/glsl/math-cpp.h>
 #include <gtest/gtest.h>
 #include <test-vectors.h>
 
