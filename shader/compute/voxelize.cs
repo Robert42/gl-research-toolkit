@@ -71,7 +71,7 @@ void main()
     
     best_d_abs = min(d_abs, best_d_abs);
     
-#ifndef TWO_SIDED
+#if defined(MANIFOLD_RAY_CHECK) || defined(FACE_SIDE)
     best_positive_d = d >= 0 ? min(d, best_positive_d) : best_positive_d;
     best_negative_d = d <= 0 ? max(d, best_negative_d) : best_negative_d;
 #endif
@@ -79,7 +79,7 @@ void main()
   
   float best_d;
   
-#if defined(MANIFOLD_RAY_CHECK) || defined(TWO_SIDED)
+#if defined(TWO_SIDED)
   best_d = best_d_abs;
 #elif defined(MANIFOLD_RAY_CHECK)
   if(intersection_sign_sum >= 0)
@@ -91,6 +91,8 @@ void main()
     best_d = best_negative_d;
   else
     best_d = best_positive_d;
+#else
+#error Mode not recognized
 #endif
   
   if(all(lessThan(voxelCoord, textureSize)))
