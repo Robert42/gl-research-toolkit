@@ -18,8 +18,6 @@ int main(int argc, char** argv)
   while(isRunning)
     qApp->processEvents(QEventLoop::WaitForMoreEvents);
 
-  debugMessage("main()", "exit");
-
   Q_UNUSED(system);
   Q_UNUSED(compiler);
   return result;

@@ -122,6 +122,8 @@ ShaderCompiler::ShaderCompiler(bool startServer)
   Q_ASSERT(_singleton == nullptr);
   _singleton = this;
 
+  compileProcess.setProcessChannelMode(QProcess::ForwardedChannels);
+
   if(startServer)
     startCompileProcess();
 }

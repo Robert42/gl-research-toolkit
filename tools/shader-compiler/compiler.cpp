@@ -51,7 +51,6 @@ void Compiler::compile()
       break;
     }else
     {
-      debugMessage("Unknown Command", QString("Unknown Command %0").arg(quint32(msg.id)));
       qWarning() << "Unknown Command" << quint32(msg.id);
       std::exit(0);
     }
@@ -60,7 +59,6 @@ void Compiler::compile()
 
 void Compiler::disconnected()
 {
-  debugMessage("Quit!","RECEIVED QUIT");
   qApp->quit();
   isRunning = false;
 }
