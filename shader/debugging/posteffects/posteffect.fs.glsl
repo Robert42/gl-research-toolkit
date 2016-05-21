@@ -96,3 +96,13 @@ vec4 heatvision(uint32_t value)
   
   return heatvision(value-blackLevel, whiteLevel-blackLevel);
 }
+
+vec3 highlightColor()
+{
+  float t = posteffect_param.totalTime;
+  
+  if(mod(t, 0.2f) <  0.15)
+    discard;
+  
+  return vec3(step(mod(t, 0.4f),  0.2));
+}
