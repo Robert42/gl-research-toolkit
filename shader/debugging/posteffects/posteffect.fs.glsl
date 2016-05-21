@@ -16,6 +16,7 @@ struct PosteffectVisualizationData
   bool showNumSteps;
   uint32_t stepCountAsWhite;
   uint32_t stepCountAsBlack;
+  float totalTime;
 };
 
 layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform PosteffectVisualizationDataBlock

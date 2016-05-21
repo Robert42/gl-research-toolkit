@@ -75,6 +75,11 @@ void Renderer::render()
   debugDrawList_Backbuffer.render();
 }
 
+void Renderer::update(float deltaTime)
+{
+  debugPosteffect.totalTime += deltaTime;
+}
+
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
 {
   int flagEnabled = 0;

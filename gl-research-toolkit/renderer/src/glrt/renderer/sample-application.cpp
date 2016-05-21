@@ -43,6 +43,7 @@ float SampleApplication::update()
   const float deltaTime = Application::update();
   scene.update(deltaTime);
   antweakbar.update(deltaTime);
+  renderer.update(deltaTime);
   return deltaTime;
 }
 

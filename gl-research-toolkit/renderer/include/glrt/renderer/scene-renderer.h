@@ -64,6 +64,7 @@ public:
   virtual ~Renderer();
 
   void render();
+  void update(float deltaTime);
 
   GLuint64 sceneUniformAddress() const;
 

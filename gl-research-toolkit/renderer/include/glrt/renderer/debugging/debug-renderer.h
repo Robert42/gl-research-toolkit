@@ -17,6 +17,7 @@ struct PosteffectVisualizationDataBlock
   quint32 showNumSteps = false;
   quint32 stepCountAsWhite = 1024;
   quint32 stepCountAsBlack = 0;
+  float totalTime = 0;
 };
 
 class DebugRenderer final : public QObject
