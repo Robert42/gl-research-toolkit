@@ -45,6 +45,7 @@ public:
   debugging::DebugRenderer visualizeVoxelGrids;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
+  debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;
   debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
   debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_raymarch;

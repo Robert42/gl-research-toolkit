@@ -122,6 +122,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizePosteffect_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
+  renderer->visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances.guiToggle.TwAddVarCB(tweakBar, "Highlight Unconveiled Negative Distances", "group='Debug Voxels'");
 
   TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
   renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");

@@ -139,6 +139,12 @@ public:
 };
 
 
+class HighlightUnconveiledNegativeDistances : public SingleShader
+{
+public:
+  HighlightUnconveiledNegativeDistances(bool depthTest);
+};
+
 class HighlightVoxelGrids : public SingleShader
 {
 public:
@@ -189,6 +195,12 @@ HighlightVoxelGrids::HighlightVoxelGrids(bool depthTest)
 }
 
 
+HighlightUnconveiledNegativeDistances::HighlightUnconveiledNegativeDistances(bool depthTest)
+  : SingleShader("highlight-unconceiled-negative-distance", depthTest)
+{
+}
+
+
 CubicVoxelRaymarch::CubicVoxelRaymarch(bool depthTest)
   : SingleShader("show-distancefield-as-cubic-voxel", depthTest)
 {
@@ -205,6 +217,12 @@ DebugRenderer DebuggingPosteffect::orangeSphere(const glm::vec3& origin, float r
 {
   padding<byte, 3> padding;
   return DebugRenderer::ImplementationFactory([origin, radius, depthTest, padding](){return new OrangeSphere(origin, radius, depthTest);});
+}
+
+DebugRenderer DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances(bool depthTest)
+{
+  padding<byte, 3> padding;
+  return DebugRenderer::ImplementationFactory([depthTest, padding](){return new HighlightUnconveiledNegativeDistances(depthTest);});
 }
 
 DebugRenderer DebuggingPosteffect::voxelGridBoundingBox(bool depthTest)

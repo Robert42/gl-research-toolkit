@@ -23,6 +23,7 @@ public:
   static void deinit();
 
   static DebugRenderer orangeSphere(const glm::vec3& origin=glm::vec3(0), float radius = 1.f, bool depthTest=true);
+  static DebugRenderer voxelGridHighlightUnconveiledNegativeDistances(bool depthTest=true);
   static DebugRenderer voxelGridBoundingBox(bool depthTest=true);
   static DebugRenderer voxelGridCubicRaymarch(bool depthTest = true);
   static DebugRenderer distanceFieldRaymarch(bool depthTest = true);

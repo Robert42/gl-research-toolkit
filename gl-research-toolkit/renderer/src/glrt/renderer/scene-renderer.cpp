@@ -25,6 +25,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
+    visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
     visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     videoResolution(videoResolution),
@@ -44,6 +45,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
