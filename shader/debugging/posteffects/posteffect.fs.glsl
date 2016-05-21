@@ -101,8 +101,8 @@ vec3 highlightColor()
 {
   float t = posteffect_param.totalTime;
   
-  if(mod(t, 0.2f) <  0.15)
-    discard;
+  if(mod(t, 0.2f) <  0.1)
+    return vec3(1, 0, 1);
   
   return vec3(step(mod(t, 0.4f),  0.2));
 }
