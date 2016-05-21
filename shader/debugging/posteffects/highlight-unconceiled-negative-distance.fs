@@ -14,9 +14,6 @@ bool is_unconceiled_negative_distance_singlegrid(in Ray ray_worldspace, in mat4*
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, worldToVoxelSpace);
   
-  if(!aabb_contains(ray_voxelspace.origin, vec3(0), vec3(voxelCount)))
-    max_num_loops = 0;
-  
   if(!enter_cubic_voxel_grid_voxelspace(ray_voxelspace, voxelCount, hit_dimension))
     return false;
     
