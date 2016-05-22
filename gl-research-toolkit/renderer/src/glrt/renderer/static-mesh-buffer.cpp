@@ -90,7 +90,7 @@ StaticMeshBuffer StaticMeshBuffer::_createAsArray(const index_type* indices, int
 
   for(int i=0; i<numIndices; ++i)
   {
-    Q_ASSERT(indices[i] < numVertices);
+    Q_ASSERT(indices[i] < quint32(numVertices));
 
     newVertices.push_back(vertices[indices[i]]);
   }
