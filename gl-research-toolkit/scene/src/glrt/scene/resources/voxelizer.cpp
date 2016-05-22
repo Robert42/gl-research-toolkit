@@ -14,8 +14,11 @@ namespace resources {
 
 namespace Voxelizer_Private {
 
-QHash<Uuid<StaticMesh>, QVector<CoordFrame>> staticMeshesToVoxelize_SingleSided;
-QHash<Uuid<StaticMesh>, QVector<CoordFrame>> staticMeshesToVoxelize_TwoSided;
+QHash<Uuid<StaticMesh>, QSet<CoordFrame>> staticMeshesToVoxelize_SingleSided;
+QHash<Uuid<StaticMesh>, QSet<CoordFrame>> staticMeshesToVoxelize_TwoSided;
+QSet<Uuid<StaticMesh>> staticMeshesToVoxelize_all;
+Uuid<StaticMesh> staticMeshesToVoxelize_anchorMesh;
+CoordFrame staticMeshesToVoxelize_anchorFrame;
 
 } // namespace Voxelizer_Private
 
@@ -175,13 +178,26 @@ void Voxelizer::beginJoinedGroup()
 {
   staticMeshesToVoxelize_TwoSided.clear();
   staticMeshesToVoxelize_SingleSided.clear();
+  staticMeshesToVoxelize_all.clear();
+
+  staticMeshesToVoxelize_anchorMesh = Uuid<StaticMesh>();
+  staticMeshesToVoxelize_anchorFrame = CoordFrame();
 }
 
 void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh)
 {
-  QHash<Uuid<StaticMesh>, QVector<CoordFrame>>& map = two_sided ? staticMeshesToVoxelize_TwoSided : staticMeshesToVoxelize_SingleSided;
+  Q_ASSERT(!meshUuid.isNull());
+
+  QHash<Uuid<StaticMesh>, QSet<CoordFrame>>& map = two_sided ? staticMeshesToVoxelize_TwoSided : staticMeshesToVoxelize_SingleSided;
 
   map[meshUuid] << frame;
+  staticMeshesToVoxelize_all.insert(meshUuid);
+
+  if(staticMeshesToVoxelize_anchorMesh.isNull() || meshUuid < staticMeshesToVoxelize_anchorMesh)
+  {
+    staticMeshesToVoxelize_anchorMesh = meshUuid;
+    staticMeshesToVoxelize_anchorFrame = frame;
+  }
 }
 
 void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
@@ -189,29 +205,9 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
 
-  Uuid<StaticMesh> instanceAnchor;
-  CoordFrame anchorFrame;
-  QSet<Uuid<StaticMesh>> allStaticMeshes = staticMeshesToVoxelize_TwoSided.keys().toSet() | staticMeshesToVoxelize_SingleSided.keys().toSet();
-
-  for(const Uuid<StaticMesh>& staticMeshUuid : allStaticMeshes)
-  {
-    if(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).length() + staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).length() > 1)
-      continue;
-
-    if(instanceAnchor.isNull() || staticMeshUuid < instanceAnchor)
-    {
-      instanceAnchor = staticMeshUuid;
-      if(staticMeshesToVoxelize_TwoSided.contains(staticMeshUuid))
-      {
-        Q_ASSERT(!staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).isEmpty());
-        anchorFrame = staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).first();
-      }else
-      {
-        Q_ASSERT(!staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).isEmpty());
-        anchorFrame = staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).first();
-      }
-    }
-  }
+  const Uuid<StaticMesh> instanceAnchor = staticMeshesToVoxelize_anchorMesh;
+  const CoordFrame anchorFrame = staticMeshesToVoxelize_anchorFrame;
+  const QSet<Uuid<StaticMesh>>& allStaticMeshes = staticMeshesToVoxelize_all;
 
   CoordFrame invAnchorFrame = anchorFrame.inverse();
 
@@ -229,7 +225,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 
       StaticMesh staticMesh;
       staticMesh.loadFromFile(f.staticMeshFileName);
-      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).length());
+      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).size());
       TriangleArray staticMeshTriangles = staticMesh.getTriangleArray();
       for(CoordFrame frame : staticMeshesToVoxelize_TwoSided.value(staticMeshUuid))
       {
@@ -249,7 +245,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
       FileNames f(resourceIndex, staticMeshUuid);
 
       StaticMesh staticMesh = StaticMesh::loadFromFile(f.staticMeshFileName);
-      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).length());
+      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).size());
       TriangleArray staticMeshTriangles = staticMesh.getTriangleArray();
       for(CoordFrame frame : staticMeshesToVoxelize_SingleSided.value(staticMeshUuid))
       {
