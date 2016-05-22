@@ -98,7 +98,7 @@ void convertSceneGraph(const QString& sceneGraphFilename, const QString& sourceF
   if(SHOULD_CONVERT(sceneGraphFile, sourceFile))
   {
     SPLASHSCREEN_MESSAGE(QString("Import scene graph <%0>").arg(sourceFile.fileName()));
-    qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<")";
+    qDebug() << "convertSceneGraph("<<sceneGraphFile.fileName()<<", "<<sourceFile.fileName()<<", group: " << groupToImport << ")";
     convertSceneGraph_BlenderToCollada(sceneGraphFile, sourceFile, uuid, settings, groupToImport);
   }
 }
@@ -128,6 +128,9 @@ void runBlenderWithPythonScript(const QString& pythonScript, const QFileInfo& bl
 
   QStringList arguments = {"--background", blenderFile.absoluteFilePath(), "--python-expr", pythonScript};
 
+  qDebug() << "Opening the Blender scene '"<<blenderFile.absoluteFilePath()<<"' and executing the following script:";
+  qDebug() << pythonScript.toStdString().c_str();
+
   if(QProcess::execute(blenderProgram, arguments) !=0)
     throw GLRT_EXCEPTION("Executing Blender failed");
 }
@@ -145,18 +148,23 @@ QString python_select_group_only(const QString& groupToImport)
   {
     pythonScript += "# The selection is used to control, which objects are to be exported.\n";
     pythonScript += "# To controll the selection of objects, we need to be in the object mode\n";
-    pythonScript += "bpy.ops.object.mode_set(mode='OBJECT')\n";
-    pythonScript += "# Only objects in visible layers are exported so make sure that all layers containing objects of the group are visible.\n"
-                    "# To be on the safe side, just show all layers ;)\n";
-    pythonScript += "for i in range(0, 20):\n";
-    pythonScript += "    bpy.context.scene.layers[i] = True";
+    pythonScript += "if bpy.context.scene.objects.active is not None:\n";
+    pythonScript += "    bpy.ops.object.mode_set(mode='OBJECT')\n";
     pythonScript += "# all selected objects are exported. So make sure no objects outside of the group are selected\n";
     pythonScript += "bpy.ops.object.select_all(action='DESELECT')\n";
-    pythonScript += QString("for object in bpy.data.groups['%0'].objects:\n").arg(groupToImport);
+    pythonScript += QString("groupName = '%0'\n").arg(groupToImport);
+    pythonScript += "if not groupName in bpy.data.groups:\n";
+    pythonScript += "    raise ValueError(\"ERROR: couldn't find the group {0}\".format(groupName))\n";
+    pythonScript += "group = bpy.data.groups[groupName]\n";
+    pythonScript += "for object in group.objects:\n";
     pythonScript += "    # only visible objects are exported. So make sure all objects of the group are visible\n";
     pythonScript += "    object.hide = False\n"; // This should be optional in a future implementation
     pythonScript += "    # only selected objects are exported. So make sure all objects of the group are selected\n";
     pythonScript += "    object.select = True\n";
+    pythonScript += "    # Only objects in visible layers are exported so make sure that all layers containing objects of the group are visible.\n";
+    pythonScript += "    for i in range(0, 20):\n";
+    pythonScript += "        if object.layers[i]:\n";
+    pythonScript += "            bpy.context.scene.layers[i] = True\n";
   }
 
   return pythonScript;
