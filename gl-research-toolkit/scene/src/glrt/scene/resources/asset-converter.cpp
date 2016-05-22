@@ -707,7 +707,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     for(uint32_t i : allMeshesToImport.values())
     {
       const Uuid<StaticMesh>& uuid = assets.meshes[i];
-      QString filename = QString("%0%1.mesh").arg(assets.labels[assets.meshes[i]]).arg(uuid.toString());
+      const QString label = assets.labels[uuid];
+      QString filename = QString("%0%1.mesh").arg(label).arg(uuid.toString());
       filename = QFileInfo(filename).absoluteFilePath();
       assetIndex_outputStream << QString("  index.registerStaticMesh(uuid: Uuid<StaticMesh>(\"%0\"), file: \"%1\");\n").arg(uuid.toString()).arg(filename);
       StaticMeshFile meshFile;
@@ -728,7 +729,11 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
           assetIndex_outputStream << QString("  voxelizer.signedDistanceField.scaleFactor = %0;\n").arg(scaleFactor);
         }
 
-        assetIndex_outputStream << QString("  voxelizer.voxelize(staticMeshUuid: Uuid<StaticMesh>(\"%0\"), meshType: %1);\n").arg(uuid.toString()).arg(Voxelizer::toAngelScript(meshType));
+        QString proxyMesh;
+        if(settings.meshVoxelizeProxies.contains(label))
+          proxyMesh = QString(", proxyStaticMesh: Uuid<StaticMesh>(\"%0\")").arg(settings.meshVoxelizeProxies.value(label, uuid).toString());
+        QString voxelizationCommand = QString("  voxelizer.voxelize(staticMeshUuid: Uuid<StaticMesh>(\"%0\"), meshType: %1%2);\n").arg(uuid.toString()).arg(Voxelizer::toAngelScript(meshType)).arg(proxyMesh);
+        assetIndex_outputStream << voxelizationCommand;
       }
     }
 
