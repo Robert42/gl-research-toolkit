@@ -90,7 +90,8 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f(ResourceIndex@ index)", AngelScript::asFUNCTION((&AngelScriptIntegration::wrap_constructor<Voxelizer, ResourceIndex*>)), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHODPR(Voxelizer,voxelize,(const Uuid<StaticMesh>&, MeshType),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType, const Uuid<StaticMesh> &in)", AngelScript::asMETHODPR(Voxelizer,voxelize,(const Uuid<StaticMesh>&, MeshType,const Uuid<StaticMesh>&),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void beginGroup()", AngelScript::asMETHOD(Voxelizer,beginJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false)", AngelScript::asMETHODPR(Voxelizer,addToGroup,(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame, bool two_sided, const Uuid<StaticMesh> &in proxyMeshUuid)", AngelScript::asMETHODPR(Voxelizer,addToGroup,(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
@@ -99,7 +100,7 @@ void Voxelizer::registerAngelScriptAPI()
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid)
+Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid, const Uuid<StaticMesh>& proxyStaticMeshUuid)
   : staticMeshUuid(staticMeshUuid)
 {
   // There should be no way to create a voxelizer without valid ResourceIndex
@@ -109,6 +110,7 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticM
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
   staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
+  proxyStaticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(proxyStaticMeshUuid.isNull() ? proxyStaticMeshUuid : staticMeshUuid);
   voxelFileName = voxelMetaDataFilenameForMesh(staticMeshFileName);
 
   shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
@@ -130,10 +132,15 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<St
 
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType)
 {
+  voxelize(staticMeshUuid, meshType, staticMeshUuid);
+}
+
+void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType, const Uuid<StaticMesh>& proxyMeshUuid)
+{
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
 
-  FileNames fileNames(this->resourceIndex, staticMeshUuid);
+  FileNames fileNames(this->resourceIndex, staticMeshUuid, proxyMeshUuid);
 
   if(fileNames.shouldRevoxelizeMesh)
     revoxelizeMesh(fileNames, meshType, signedDistanceField);
@@ -281,7 +288,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 void Voxelizer::revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
 {
   StaticMeshFile staticMeshFile;
-  staticMeshFile.load(filenames.staticMeshFileName);
+  staticMeshFile.load(filenames.proxyStaticMeshFileName);
   const StaticMesh& staticMesh = staticMeshFile.staticMesh;
 
   revoxelizeMesh(staticMesh.getTriangleArray(), staticMesh.rawDataSize(), filenames, meshType, signedDistanceField);

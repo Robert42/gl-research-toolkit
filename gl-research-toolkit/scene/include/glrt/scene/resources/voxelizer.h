@@ -59,6 +59,7 @@ public:
   static void registerAngelScriptAPI();
 
   void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
+  void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType, const Uuid<StaticMesh>& proxyMeshUuid);
 
   void beginJoinedGroup();
   void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh);
@@ -70,16 +71,17 @@ private:
   {
     ResourceIndex* resourceIndex;
     Uuid<StaticMesh> staticMeshUuid;
+    QString proxyStaticMeshFileName;
     QString staticMeshFileName;
     QString voxelFileName;
     bool shouldRevoxelizeMesh;
 
-    FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid);
+    FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid, const Uuid<StaticMesh>& proxyStaticMeshUuid=Uuid<StaticMesh>());
     FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<StaticMesh> >& staticMeshUuids, const Uuid<StaticMesh>& instanceAnchor);
   };
 
-  void revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
-  void revoxelizeMesh(const TriangleArray& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField = Hints());
+  void revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField);
+  void revoxelizeMesh(const TriangleArray& vertices, size_t rawMeshDataSize, const FileNames& filenames, MeshType meshType, Hints signedDistanceField);
   void registerToIndex(const FileNames& filenames);
 
   static QString voxelMetaDataFilenameForMesh(const QString& staticMeshFileName);
