@@ -58,10 +58,10 @@ public:
 
   static void registerAngelScriptAPI();
 
-  void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType);
+  void voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType, const Uuid<StaticMesh>& proxyMesh = Uuid<StaticMesh>());
 
   void beginJoinedGroup();
-  void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided);
+  void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh = Uuid<StaticMesh>());
   void voxelizeJoinedGroup(MeshType meshType);
 
 private:

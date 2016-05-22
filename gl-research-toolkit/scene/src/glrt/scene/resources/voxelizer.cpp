@@ -86,9 +86,9 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f(ResourceIndex@ index)", AngelScript::asFUNCTION((&AngelScriptIntegration::wrap_constructor<Voxelizer, ResourceIndex*>)), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::FACE_SIDE, const Uuid<StaticMesh> &in proxyMeshUuid = Uuid<StaticMesh>())", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void beginGroup()", AngelScript::asMETHOD(Voxelizer,beginJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false)", AngelScript::asMETHOD(Voxelizer,addToGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false, const Uuid<StaticMesh> &in proxyMeshUuid = Uuid<StaticMesh>())", AngelScript::asMETHOD(Voxelizer,addToGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelizeGroup(VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHOD(Voxelizer,voxelizeJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
@@ -123,7 +123,7 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<St
   }
 }
 
-void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType)
+void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType, const Uuid<StaticMesh>& proxyMesh)
 {
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
@@ -177,7 +177,7 @@ void Voxelizer::beginJoinedGroup()
   staticMeshesToVoxelize_SingleSided.clear();
 }
 
-void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided)
+void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh)
 {
   QHash<Uuid<StaticMesh>, QVector<CoordFrame>>& map = two_sided ? staticMeshesToVoxelize_TwoSided : staticMeshesToVoxelize_SingleSided;
 

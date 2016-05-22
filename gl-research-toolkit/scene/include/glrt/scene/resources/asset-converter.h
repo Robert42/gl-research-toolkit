@@ -25,6 +25,7 @@ struct SceneGraphImportSettings final
   QList<QSet<QString>> meshesToMergeWhenVoxelizing;
   QList<QSet<QString>> meshesToMergeWhenVoxelizingInstanced;
 
+  QHash<QString, Uuid<StaticMesh>> meshVoxelizeProxies;
   QHash<QString, float> meshVoxelizeScaleFactors;
   QHash<QString, Uuid<StaticMesh>> meshUuids;
   QHash<QString, Uuid<Material>> materialUuids;

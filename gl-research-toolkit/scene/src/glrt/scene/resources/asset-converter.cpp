@@ -900,6 +900,7 @@ struct SceneGraphImportSettings::AngelScriptInterface final : public AngelScript
   AngelScript::CScriptArray* as_meshesToVoxelizeTwoSided;
   AngelScript::CScriptArray* as_meshesToVoxelizeWithManifold;
 
+  AngelScript::CScriptDictionary* as_meshVoxelizeProxies;
   AngelScript::CScriptDictionary* as_meshVoxelizeScaleFactors;
   AngelScript::CScriptDictionary* as_meshUuids;
   AngelScript::CScriptDictionary* as_materialUuids;
@@ -940,6 +941,7 @@ SceneGraphImportSettings::AngelScriptInterface::AngelScriptInterface()
   as_meshesToVoxelizeTwoSided = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
   as_meshesToVoxelizeWithManifold = AngelScriptIntegration::scriptArrayFromStringSet(QSet<QString>({}), angelScriptEngine);
 
+  as_meshVoxelizeProxies = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMesh>>(), meshUuidTypeId, angelScriptEngine);
   as_meshVoxelizeScaleFactors = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMesh>>(), floatTypeId, angelScriptEngine);
   as_meshUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<StaticMesh>>(), meshUuidTypeId, angelScriptEngine);
   as_materialUuids = AngelScriptIntegration::scriptDictionaryFromHash(QHash<QString, Uuid<Material>>(), materialUuidTypeId, angelScriptEngine);
@@ -960,6 +962,7 @@ SceneGraphImportSettings::AngelScriptInterface::~AngelScriptInterface()
   as_meshesToVoxelizeTwoSided->Release();
   as_meshesToVoxelizeWithManifold->Release();
 
+  as_meshVoxelizeProxies->Release();
   as_meshVoxelizeScaleFactors->Release();
   as_meshUuids->Release();
   as_materialUuids->Release();
@@ -1041,6 +1044,7 @@ SceneGraphImportSettings::SceneGraphImportSettings(AngelScriptInterface* interfa
   for(const QString& s : AngelScriptIntegration::scriptArrayToStringSet(interface->as_meshesToMergeWhenVoxelizingInstanced).toList())
     meshesToMergeWhenVoxelizingInstanced.append(s.split("\n").toSet());
 
+  meshVoxelizeProxies = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMesh>>(interface->as_meshVoxelizeProxies, {uuidTypeId, staticMeshUuidTypeId});
   meshVoxelizeScaleFactors = AngelScriptIntegration::scriptDictionaryToFloatHash<float>(interface->as_meshVoxelizeScaleFactors);
   meshUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<StaticMesh>>(interface->as_meshUuids, {uuidTypeId, staticMeshUuidTypeId});
   materialUuids = AngelScriptIntegration::scriptDictionaryToHash<Uuid<Material>>(interface->as_materialUuids, {uuidTypeId, materialUuidTypeId});
@@ -1070,6 +1074,7 @@ void SceneGraphImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToVoxelizeWithManifold", asOFFSET(AngelScriptInterface,as_meshesToVoxelizeWithManifold)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToMergeWhenVoxelizing", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizing)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "array<string>@ meshesToMergeWhenVoxelizingInstanced", asOFFSET(AngelScriptInterface,as_meshesToMergeWhenVoxelizingInstanced)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ meshVoxelizeProxies", asOFFSET(AngelScriptInterface,as_meshVoxelizeProxies)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ meshVoxelizeScaleFactors", asOFFSET(AngelScriptInterface,as_meshVoxelizeScaleFactors)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ meshUuids", asOFFSET(AngelScriptInterface,as_meshUuids)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "dictionary@ materialUuids", asOFFSET(AngelScriptInterface,as_materialUuids)); AngelScriptCheck(r);
