@@ -14,8 +14,12 @@ namespace resources {
 
 namespace Voxelizer_Private {
 
-QHash<Uuid<StaticMesh>, QVector<CoordFrame>> staticMeshesToVoxelize_SingleSided;
-QHash<Uuid<StaticMesh>, QVector<CoordFrame>> staticMeshesToVoxelize_TwoSided;
+QHash<Uuid<StaticMesh>, QSet<CoordFrame>> staticMeshesToVoxelize_SingleSided;
+QHash<Uuid<StaticMesh>, QSet<CoordFrame>> staticMeshesToVoxelize_TwoSided;
+QHash<Uuid<StaticMesh>, Uuid<StaticMesh>> staticMeshesToVoxelize_Proxies;
+QSet<Uuid<StaticMesh>> staticMeshesToVoxelize_all;
+Uuid<StaticMesh> staticMeshesToVoxelize_anchorMesh;
+CoordFrame staticMeshesToVoxelize_anchorFrame;
 
 } // namespace Voxelizer_Private
 
@@ -86,15 +90,17 @@ void Voxelizer::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectBehaviour(nameVoxelizer, AngelScript::asBEHAVE_CONSTRUCT, "void f(ResourceIndex@ index)", AngelScript::asFUNCTION((&AngelScriptIntegration::wrap_constructor<Voxelizer, ResourceIndex*>)), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "ResourceIndex@ resourceIndex", asOFFSET(Voxelizer,resourceIndex)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(nameVoxelizer, "VoxelizerHints signedDistanceField", asOFFSET(Voxelizer,signedDistanceField)); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHOD(Voxelizer,voxelize), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHODPR(Voxelizer,voxelize,(const Uuid<StaticMesh>&, MeshType),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelize(const Uuid<StaticMesh> &in staticMeshUuid, VoxelMeshType meshType, const Uuid<StaticMesh> &in proxyStaticMesh)", AngelScript::asMETHODPR(Voxelizer,voxelize,(const Uuid<StaticMesh>&, MeshType,const Uuid<StaticMesh>&),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void beginGroup()", AngelScript::asMETHOD(Voxelizer,beginJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false)", AngelScript::asMETHOD(Voxelizer,addToGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame=CoordFrame(), bool two_sided=false)", AngelScript::asMETHODPR(Voxelizer,addToGroup,(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void addToGroup(const Uuid<StaticMesh> &in staticMeshUuid, const CoordFrame &in coordFrame, bool two_sided, const Uuid<StaticMesh> &in proxyMeshUuid)", AngelScript::asMETHODPR(Voxelizer,addToGroup,(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh),void), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod(nameVoxelizer, "void voxelizeGroup(VoxelMeshType meshType=VoxelMeshType::FACE_SIDE)", AngelScript::asMETHOD(Voxelizer,voxelizeJoinedGroup), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
 
-Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid)
+Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticMesh>& staticMeshUuid, const Uuid<StaticMesh>& proxyStaticMeshUuid)
   : staticMeshUuid(staticMeshUuid)
 {
   // There should be no way to create a voxelizer without valid ResourceIndex
@@ -104,6 +110,7 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticM
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
   staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
+  proxyStaticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(proxyStaticMeshUuid.isNull() ? proxyStaticMeshUuid : staticMeshUuid);
   voxelFileName = voxelMetaDataFilenameForMesh(staticMeshFileName);
 
   shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
@@ -125,10 +132,15 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<St
 
 void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType)
 {
+  voxelize(staticMeshUuid, meshType, staticMeshUuid);
+}
+
+void Voxelizer::voxelize(const Uuid<StaticMesh>& staticMeshUuid, MeshType meshType, const Uuid<StaticMesh>& proxyMeshUuid)
+{
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
 
-  FileNames fileNames(this->resourceIndex, staticMeshUuid);
+  FileNames fileNames(this->resourceIndex, staticMeshUuid, proxyMeshUuid);
 
   if(fileNames.shouldRevoxelizeMesh)
     revoxelizeMesh(fileNames, meshType, signedDistanceField);
@@ -175,13 +187,35 @@ void Voxelizer::beginJoinedGroup()
 {
   staticMeshesToVoxelize_TwoSided.clear();
   staticMeshesToVoxelize_SingleSided.clear();
+  staticMeshesToVoxelize_all.clear();
+  staticMeshesToVoxelize_Proxies.clear();
+
+  staticMeshesToVoxelize_anchorMesh = Uuid<StaticMesh>();
+  staticMeshesToVoxelize_anchorFrame = CoordFrame();
+}
+
+void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh)
+{
+  Q_ASSERT(!meshUuid.isNull());
+
+  QHash<Uuid<StaticMesh>, QSet<CoordFrame>>& map = two_sided ? staticMeshesToVoxelize_TwoSided : staticMeshesToVoxelize_SingleSided;
+
+  if(meshUuid != proxyMesh && !proxyMesh.isNull())
+    staticMeshesToVoxelize_Proxies[meshUuid] = proxyMesh;
+
+  map[meshUuid] << frame;
+  staticMeshesToVoxelize_all.insert(meshUuid);
+
+  if(staticMeshesToVoxelize_anchorMesh.isNull() || meshUuid < staticMeshesToVoxelize_anchorMesh)
+  {
+    staticMeshesToVoxelize_anchorMesh = meshUuid;
+    staticMeshesToVoxelize_anchorFrame = frame;
+  }
 }
 
 void Voxelizer::addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided)
 {
-  QHash<Uuid<StaticMesh>, QVector<CoordFrame>>& map = two_sided ? staticMeshesToVoxelize_TwoSided : staticMeshesToVoxelize_SingleSided;
-
-  map[meshUuid] << frame;
+  addToGroup(meshUuid, frame, two_sided, Uuid<StaticMesh>());
 }
 
 void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
@@ -189,29 +223,9 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
   CpuVoxelizerImplementation fallbackVoxelizationImplementation;
   Q_UNUSED(fallbackVoxelizationImplementation);
 
-  Uuid<StaticMesh> instanceAnchor;
-  CoordFrame anchorFrame;
-  QSet<Uuid<StaticMesh>> allStaticMeshes = staticMeshesToVoxelize_TwoSided.keys().toSet() | staticMeshesToVoxelize_SingleSided.keys().toSet();
-
-  for(const Uuid<StaticMesh>& staticMeshUuid : allStaticMeshes)
-  {
-    if(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).length() + staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).length() > 1)
-      continue;
-
-    if(instanceAnchor.isNull() || staticMeshUuid < instanceAnchor)
-    {
-      instanceAnchor = staticMeshUuid;
-      if(staticMeshesToVoxelize_TwoSided.contains(staticMeshUuid))
-      {
-        Q_ASSERT(!staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).isEmpty());
-        anchorFrame = staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).first();
-      }else
-      {
-        Q_ASSERT(!staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).isEmpty());
-        anchorFrame = staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).first();
-      }
-    }
-  }
+  const Uuid<StaticMesh> instanceAnchor = staticMeshesToVoxelize_anchorMesh;
+  const CoordFrame anchorFrame = staticMeshesToVoxelize_anchorFrame;
+  const QSet<Uuid<StaticMesh>>& allStaticMeshes = staticMeshesToVoxelize_all;
 
   CoordFrame invAnchorFrame = anchorFrame.inverse();
 
@@ -225,13 +239,15 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 
     for(const Uuid<StaticMesh>& staticMeshUuid : staticMeshesToVoxelize_TwoSided.keys())
     {
-      FileNames f(resourceIndex, staticMeshUuid);
+      const Uuid<StaticMesh> uuid = staticMeshesToVoxelize_Proxies.value(staticMeshUuid, staticMeshUuid);
+
+      FileNames f(resourceIndex, uuid);
 
       StaticMesh staticMesh;
       staticMesh.loadFromFile(f.staticMeshFileName);
-      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_TwoSided.value(staticMeshUuid).length());
+      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_TwoSided.value(uuid).size());
       TriangleArray staticMeshTriangles = staticMesh.getTriangleArray();
-      for(CoordFrame frame : staticMeshesToVoxelize_TwoSided.value(staticMeshUuid))
+      for(CoordFrame frame : staticMeshesToVoxelize_TwoSided.value(uuid))
       {
         TriangleArray v = staticMeshTriangles;
         v.applyTransformation(invAnchorFrame * frame);
@@ -246,12 +262,14 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 
     for(const Uuid<StaticMesh>& staticMeshUuid : staticMeshesToVoxelize_SingleSided.keys())
     {
-      FileNames f(resourceIndex, staticMeshUuid);
+      const Uuid<StaticMesh> uuid = staticMeshesToVoxelize_Proxies.value(staticMeshUuid, staticMeshUuid);
+
+      FileNames f(resourceIndex, uuid);
 
       StaticMesh staticMesh = StaticMesh::loadFromFile(f.staticMeshFileName);
-      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_SingleSided.value(staticMeshUuid).length());
+      rawDataSize += staticMesh.rawDataSize()*size_t(staticMeshesToVoxelize_SingleSided.value(uuid).size());
       TriangleArray staticMeshTriangles = staticMesh.getTriangleArray();
-      for(CoordFrame frame : staticMeshesToVoxelize_SingleSided.value(staticMeshUuid))
+      for(CoordFrame frame : staticMeshesToVoxelize_SingleSided.value(uuid))
       {
         TriangleArray v = staticMeshTriangles;
         v.applyTransformation(invAnchorFrame * frame);
@@ -270,7 +288,7 @@ void Voxelizer::voxelizeJoinedGroup(MeshType meshType)
 void Voxelizer::revoxelizeMesh(const FileNames& filenames, MeshType meshType, Hints signedDistanceField)
 {
   StaticMeshFile staticMeshFile;
-  staticMeshFile.load(filenames.staticMeshFileName);
+  staticMeshFile.load(filenames.proxyStaticMeshFileName);
   const StaticMesh& staticMesh = staticMeshFile.staticMesh;
 
   revoxelizeMesh(staticMesh.getTriangleArray(), staticMesh.rawDataSize(), filenames, meshType, signedDistanceField);

@@ -16,6 +16,7 @@ struct PosteffectVisualizationData
   bool showNumSteps;
   uint32_t stepCountAsWhite;
   uint32_t stepCountAsBlack;
+  float totalTime;
 };
 
 layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform PosteffectVisualizationDataBlock
@@ -94,4 +95,14 @@ vec4 heatvision(uint32_t value)
   value = max(value, blackLevel);
   
   return heatvision(value-blackLevel, whiteLevel-blackLevel);
+}
+
+vec3 highlightColor()
+{
+  float t = posteffect_param.totalTime;
+  
+  if(mod(t, 0.2f) <  0.1)
+    return vec3(1, 0, 1);
+  
+  return vec3(step(mod(t, 0.4f),  0.2));
 }

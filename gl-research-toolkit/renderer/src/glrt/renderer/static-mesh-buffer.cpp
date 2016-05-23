@@ -90,7 +90,7 @@ StaticMeshBuffer StaticMeshBuffer::_createAsArray(const index_type* indices, int
 
   for(int i=0; i<numIndices; ++i)
   {
-    Q_ASSERT(indices[i] < numVertices);
+    Q_ASSERT(indices[i] < quint32(numVertices));
 
     newVertices.push_back(vertices[indices[i]]);
   }
@@ -186,9 +186,16 @@ void StaticMeshBuffer::bind(const gl::VertexArrayObject& vertexArrayObject)
 
 void StaticMeshBuffer::draw(GLenum mode) const
 {
-  Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type
+  GLenum gl_index_type;
+  if(sizeof(index_type) == 2)
+    gl_index_type = GL_UNSIGNED_SHORT;
+  else if(sizeof(index_type) == 4)
+    gl_index_type = GL_UNSIGNED_INT;
+  else
+    Q_UNREACHABLE();
+
   if(indexBuffer != nullptr)
-    GL_CALL(glDrawElements, mode, numberIndices, GL_UNSIGNED_SHORT, nullptr);
+    GL_CALL(glDrawElements, mode, numberIndices, gl_index_type, nullptr);
   else
     GL_CALL(glDrawArrays, mode, 0, numberVertices);
 }
@@ -216,8 +223,6 @@ void StaticMeshBuffer::recordDraw(gl::CommandListRecorder& recorder) const
 
 void StaticMeshBuffer::recordBind(gl::CommandListRecorder& recorder) const
 {
-  Q_ASSERT(sizeof(index_type) == 2); // assert, that GL_UNSIGNED_SHORT is the right type
-
   GLuint64 offset = 0;
   recorder.append_token_AttributeAddress(VERTEX_ATTRIBUTE_LOCATION_POSITION, vertexBuffer->gpuBufferAddress()+offset);
   offset += 3 * sizeof(float);

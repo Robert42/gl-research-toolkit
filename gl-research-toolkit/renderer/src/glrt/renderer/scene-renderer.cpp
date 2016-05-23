@@ -24,6 +24,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
+    visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
     visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
@@ -44,6 +45,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
@@ -73,6 +75,11 @@ void Renderer::render()
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Backbuffer.render();
+}
+
+void Renderer::update(float deltaTime)
+{
+  debugPosteffect.totalTime += deltaTime;
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)

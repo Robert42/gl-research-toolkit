@@ -32,7 +32,7 @@ struct StaticMesh
 
     void cleanUp();
   };
-  typedef quint16 index_type;
+  typedef quint32 index_type;
 
   QVector<index_type> indices;
   QVector<Vertex> vertices;

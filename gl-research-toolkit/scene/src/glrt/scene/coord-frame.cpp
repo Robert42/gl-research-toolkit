@@ -48,6 +48,18 @@ glm::vec3 CoordFrame::operator *(const glm::vec3& point) const
   return this->transform_point(point);
 }
 
+bool CoordFrame::operator==(const CoordFrame& frame) const
+{
+  return this->position == frame.position
+      && this->orientation == frame.orientation
+      && this->scaleFactor == frame.scaleFactor;
+}
+
+bool CoordFrame::operator!=(const CoordFrame& frame) const
+{
+  return !(*this == frame);
+}
+
 glm::vec3 CoordFrame::transform_point(const glm::vec3& point) const
 {
   glm::vec3 transformed_point;

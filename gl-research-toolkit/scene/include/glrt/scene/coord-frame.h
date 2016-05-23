@@ -26,6 +26,9 @@ struct CoordFrame final
   CoordFrame operator *(const CoordFrame& other) const;
   glm::vec3 operator *(const glm::vec3& point) const;
 
+  bool operator==(const CoordFrame& frame) const;
+  bool operator!=(const CoordFrame& frame) const;
+
   glm::vec3 transform_point(const glm::vec3& point) const;
   glm::vec3 transform_direction(const glm::vec3& point) const;
 
@@ -56,6 +59,11 @@ struct CoordFrame final
 
 QDebug operator<<(QDebug debug, const CoordFrame& coordFrame);
 std::ostream& operator<<(std::ostream& stream, const CoordFrame& coordFrame);
+
+inline uint qHash(const CoordFrame& frame, uint seed=0)
+{
+  return ::qHash(frame.position, ::qHash(frame.scaleFactor, ::qHash(frame.orientation, seed)));
+}
 
 } // namespace scene
 } // namespace glrt
