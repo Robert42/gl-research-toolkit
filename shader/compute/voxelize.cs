@@ -87,7 +87,7 @@ void main()
   else
     best_d = best_negative_d;
 #elif defined(FACE_SIDE)
-  if(abs(best_negative_d) + 1.e-5f < best_positive_d)
+  if(abs(best_negative_d) + 1.e-4f < best_positive_d)
     best_d = best_negative_d;
   else
     best_d = best_positive_d;

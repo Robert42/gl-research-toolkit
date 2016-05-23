@@ -11,6 +11,8 @@ add_custom_target(
   common-with-cpp/glrt/glsl/math-common.h
   common-with-cpp/glrt/glsl/math-cpp.h
   common-with-cpp/glrt/glsl/math-glsl.h
+  debugging/posteffects/highlight-unconceiled-negative-distance.fs
+  debugging/posteffects/highlight-unconceiled-negative-distance.vs
   debugging/posteffects/highlight-voxel-bounding-rect.fs
   debugging/posteffects/highlight-voxel-bounding-rect.vs
   debugging/posteffects/orange-sphere.fs

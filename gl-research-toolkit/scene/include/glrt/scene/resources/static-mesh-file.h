@@ -26,9 +26,10 @@ private:
     quint16 headerLength = sizeof(Header);
     quint16 vertexSize = sizeof(StaticMesh::Vertex);
     quint16 indexedMeshSize = sizeof(StaticMesh::index_type);
-    quint16 numVertices = 0;
+    padding<quint16,1> _padding1;
+    quint32 numVertices = 0;
     quint32 numIndices = 0;
-    padding<quint32,3> _padding;
+    padding<quint32,2> _padding2;
   };
 
   static quint64 magicNumber();

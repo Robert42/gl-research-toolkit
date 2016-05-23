@@ -110,10 +110,13 @@ Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const Uuid<StaticM
     throw GLRT_EXCEPTION(QString("Can't voxelize the not registered static mesh %0").arg(staticMeshUuid.toString()));
 
   staticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(staticMeshUuid);
-  proxyStaticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(proxyStaticMeshUuid.isNull() ? proxyStaticMeshUuid : staticMeshUuid);
+  proxyStaticMeshFileName = resourceIndex->staticMeshAssetsFiles.value(proxyStaticMeshUuid.isNull() ? staticMeshUuid : proxyStaticMeshUuid);
   voxelFileName = voxelMetaDataFilenameForMesh(staticMeshFileName);
 
-  shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, staticMeshFileName);
+  shouldRevoxelizeMesh = SHOULD_CONVERT(voxelFileName, proxyStaticMeshFileName);
+
+  if(proxyStaticMeshFileName != staticMeshFileName)
+    qDebug() << "Voxelizer: using proxy Mesh " << QFileInfo(proxyStaticMeshFileName).fileName() << "instead of the mesh" << QFileInfo(staticMeshFileName).fileName();
 }
 
 Voxelizer::FileNames::FileNames(ResourceIndex* resourceIndex, const QSet<Uuid<StaticMesh>>& staticMeshUuids, const Uuid<StaticMesh>& instanceAnchor)
