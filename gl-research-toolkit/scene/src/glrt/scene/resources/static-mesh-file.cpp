@@ -17,13 +17,14 @@ void StaticMeshFile::save(const QFileInfo& filename)
     throw GLRT_EXCEPTION(QString("Couldn't write mesh to file %0").arg(filename.filePath()));
 
   Header header;
-  header._padding.clear();
+  header._padding1.clear();
+  header._padding2.clear();
 
   if(staticMesh.vertices.length() > std::numeric_limits<StaticMesh::index_type>::max())
     throw GLRT_EXCEPTION(QString("Couldn't write mesh with more than 65535 vertices to file %0").arg(filename.filePath()));
   if(staticMesh.vertices.length() == 0)
     throw GLRT_EXCEPTION(QString("Couldn't write mesh with zero vertices to file %0").arg(filename.filePath()));
-  header.numVertices = quint16(staticMesh.vertices.length());
+  header.numVertices = quint32(staticMesh.vertices.length());
   header.numIndices = quint32(staticMesh.indices.length());
   writeValue(file, header);
 
@@ -34,6 +35,9 @@ void StaticMeshFile::save(const QFileInfo& filename)
 void StaticMeshFile::load(const QFileInfo& filename)
 {
   QFile file(filename.filePath());
+
+  if(!file.exists())
+    throw GLRT_EXCEPTION(QString("Trying to open a not existing file %0").arg(filename.filePath()));
 
   if(size_t(file.size()) < sizeof(Header))
     throw GLRT_EXCEPTION(QString("Mesh file too small %0 with bytes").arg(filename.filePath()).arg(file.size()));
@@ -59,7 +63,15 @@ void StaticMeshFile::load(const QFileInfo& filename)
     throw GLRT_EXCEPTION(QString("Too many indicesin file  %0").arg(filename.filePath()));
 
   if(file.size() != qint64(sizeof(Header)) + qint64(sizeof(StaticMesh::Vertex))*qint64(header.numVertices) + qint64(sizeof(StaticMesh::index_type))*qint64(header.numIndices))
-    throw GLRT_EXCEPTION(QString("Filesize of %0 doesn't match with the content").arg(filename.filePath()));
+    throw GLRT_EXCEPTION(QString("Filesize %1 of %0 doesn't match with the content "
+                                 "(%2 bytes headersize, %3 vertices - each %4 bytes, %5 indices - each %6 bytes)")
+                         .arg(filename.filePath())
+                         .arg(file.size())
+                         .arg(qint64(sizeof(Header)))
+                         .arg(qint64(header.numVertices))
+                         .arg(qint64(sizeof(StaticMesh::Vertex)))
+                         .arg(qint64(header.numIndices))
+                         .arg(qint64(sizeof(StaticMesh::index_type))));
 
   staticMesh.vertices.resize(header.numVertices);
   staticMesh.indices.resize(header.numIndices);
