@@ -78,7 +78,7 @@ bool raymarch(const in GlobalDistanceField globalDistanceField, in Ray ray, out 
 vec3 distancefield_normal(const in GlobalDistanceField globalDistanceField, vec3 location_ws, inout uint32_t stepCount, float epsilon=0.01f)
 {
   vec3 x1, x2, y1, y2, z1, z2;
-  distancefield_normal_samplepoints(location_ws, x1, x2, y1, y2, z1, z2, epsilon=0.001f);
+  distancefield_normal_samplepoints(location_ws, x1, x2, y1, y2, z1, z2, epsilon=0.02f);
   
   return distancefield_normal(distance_to_location(globalDistanceField, x1, stepCount),
                               distance_to_location(globalDistanceField, x2, stepCount),
