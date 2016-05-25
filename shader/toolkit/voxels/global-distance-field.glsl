@@ -27,13 +27,16 @@ float distance_to_location(const in GlobalDistanceField globalDistanceField, vec
   for(uint32_t i=0; i<globalDistanceField.num_distance_fields; ++i)
   {
     const vec3 location_voxelspace = transform_point(globalDistanceField.worldToVoxelSpaces[i], location_ws);
-    
     const vec3 clamped_location_voxelspace = clamp(location_voxelspace, vec3(0.5), vec3(globalDistanceField.voxelCounts[i])-0.5f); // TODO: is it faster to use the texture size of distance_field_textures?
     
-    const float distance_within_voxel = distancefield_distance(location_voxelspace, globalDistanceField.spaceFactors[i], globalDistanceField.distance_field_textures[i]);
-    const float distance_to_voxel = globalDistanceField.spaceFactors[i].voxelToWorldSpace * distance(location_voxelspace, clamped_location_voxelspace);
+    WorldVoxelUvwSpaceFactor spaceFactor = globalDistanceField.spaceFactors[i];
+    const float distance_within_voxel = distancefield_distance(location_voxelspace, spaceFactor, globalDistanceField.distance_field_textures[i]);
+    const float distance_to_voxelgrid = spaceFactor.voxelToWorldSpace * distance(location_voxelspace, clamped_location_voxelspace);
     
-    d = min(d, distance_within_voxel+distance_to_voxel);
+    float voxelSpaceDistance = distance_within_voxel + distance_to_voxelgrid;
+    float worldSpaceDistance = spaceFactor.voxelToWorldSpace * voxelSpaceDistance;
+    
+    d = min(d, worldSpaceDistance);
     stepCount++;
   }
   
@@ -72,7 +75,7 @@ bool raymarch(const in GlobalDistanceField globalDistanceField, in Ray ray, out 
   }
 }
 
-vec3 distancefield_normal(const in GlobalDistanceField globalDistanceField, vec3 location_ws, inout uint32_t stepCount, float epsilon=0.001f)
+vec3 distancefield_normal(const in GlobalDistanceField globalDistanceField, vec3 location_ws, inout uint32_t stepCount, float epsilon=0.01f)
 {
   vec3 x1, x2, y1, y2, z1, z2;
   distancefield_normal_samplepoints(location_ws, x1, x2, y1, y2, z1, z2, epsilon=0.001f);
