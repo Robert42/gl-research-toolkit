@@ -64,8 +64,9 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
+  uint32_t stepCount;
   GlobalDistanceField global_distance_field = init_global_distance_field();
-  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, surface.normal);
+  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, surface.normal, stepCount);
   fragment_color = vec4(vec3(ao), 1);
   return; 
 #endif

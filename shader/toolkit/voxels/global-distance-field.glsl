@@ -90,7 +90,7 @@ vec3 distancefield_normal(const in GlobalDistanceField globalDistanceField, vec3
                               distance_to_location(globalDistanceField, z2, stepCount));
 }
 
-float distancefield_ambientocclusion(const in GlobalDistanceField globalDistanceField, vec3 location_ws, vec3 normal_ws)
+float distancefield_ambientocclusion(const in GlobalDistanceField globalDistanceField, vec3 location_ws, vec3 normal_ws, inout uint32_t stepCount)
 {
   return 1.f;
 }
