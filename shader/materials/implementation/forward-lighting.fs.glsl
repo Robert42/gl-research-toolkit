@@ -6,6 +6,7 @@
 #include <glrt/glsl/layout-constants.h>
 
 #include <scene/uniforms.glsl>
+#include <voxels/global-distance-field.glsl>
 
 out vec4 fragment_color;
 
@@ -60,6 +61,14 @@ return;
 #elif defined(MESH_BITANGENTS_WS)
   fragment_color = vec4(encode_direction_as_color(fragment.bitangent), 1);
   return;
+#endif
+
+#if defined(DISTANCEFIELD_AO)
+  uint32_t stepCount = 0;
+  GlobalDistanceField global_distance_field = init_global_distance_field();
+  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, material.normal, stepCount);
+  fragment_color = vec4(vec3(ao), 1);
+  return; 
 #endif
 
   vec3 incoming_luminance = light_material(material, surface.position, scene.camera_position);

@@ -39,7 +39,7 @@ public:
   struct Hints
   {
     utilities::GlTexture::Type voxelType = utilities::GlTexture::Type::FLOAT16;
-    float extend = 1.f;
+    float extend = 2.f;
     int minSize = 4;
     int maxSize = 256;
     float scaleFactor = 1.f;

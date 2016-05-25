@@ -1,7 +1,7 @@
 #include "raymarching-cubic-voxels.glsl"
 #include "distance-field-utils.glsl"
 
-bool raymarch_distancefield(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMatrices, in WorldVoxelUvwSpaceFactor* spaceFactors, in ivec3* voxelSizes, sampler3D* voxelTextures, uint32_t index, float treshold, out float ray_hit_distance_worldspace, out vec3 intersection_normal_worldspace, inout uint32_t stepCount)
+bool raymarch_distancefield(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMatrices, in WorldVoxelUvwSpaceFactor* spaceFactors, in ivec3* voxelSizes, sampler3D* voxelTextures, uint32_t index, out float ray_hit_distance_worldspace, out vec3 intersection_normal_worldspace, inout uint32_t stepCount)
 {
   mat4 worldToVoxelSpace = worldToVoxelSpaceMatrices[index];
   ivec3 voxelSize = voxelSizes[index];
@@ -40,7 +40,7 @@ bool raymarch_distancefield(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMat
   return false;
 }
 
-bool raymarch_distancefields(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMatrices, in WorldVoxelUvwSpaceFactor* spaceFactors, in ivec3* voxelSizes, sampler3D* voxelTextures, uint32_t num_voxels, float treshold, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
+bool raymarch_distancefields(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMatrices, in WorldVoxelUvwSpaceFactor* spaceFactors, in ivec3* voxelSizes, sampler3D* voxelTextures, uint32_t num_voxels, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
 {
   float nearest_distance = inf;
   
@@ -51,7 +51,7 @@ bool raymarch_distancefields(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMa
     float intersection_ray_distance_worldspace;
     vec3 intersection_normal_worldspace;
     
-    bool got_hit = raymarch_distancefield(ray_worldspace, worldToVoxelSpaceMatrices, spaceFactors, voxelSizes, voxelTextures, i, treshold, intersection_ray_distance_worldspace, intersection_normal_worldspace, stepCount);
+    bool got_hit = raymarch_distancefield(ray_worldspace, worldToVoxelSpaceMatrices, spaceFactors, voxelSizes, voxelTextures, i, intersection_ray_distance_worldspace, intersection_normal_worldspace, stepCount);
 
     float current_distance = intersection_ray_distance_worldspace;
     

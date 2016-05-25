@@ -163,6 +163,12 @@ public:
   DistanceFieldRaymarch(bool depthTest);
 };
 
+class GlobalDistanceFieldRaymarch : public SingleShader
+{
+public:
+  GlobalDistanceFieldRaymarch(bool depthTest);
+};
+
 
 SingleShader::SingleShader(const QString& name, bool depthTest)
   : Renderer(depthTest),
@@ -212,6 +218,11 @@ DistanceFieldRaymarch::DistanceFieldRaymarch(bool depthTest)
 {
 }
 
+GlobalDistanceFieldRaymarch::GlobalDistanceFieldRaymarch(bool depthTest)
+  : SingleShader("raymarch-global-distancefield", depthTest)
+{
+}
+
 
 DebugRenderer DebuggingPosteffect::orangeSphere(const glm::vec3& origin, float radius, bool depthTest)
 {
@@ -241,6 +252,12 @@ DebugRenderer DebuggingPosteffect::distanceFieldRaymarch(bool mixWithScene)
 {
   padding<byte, 3> padding;
   return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new DistanceFieldRaymarch(mixWithScene);});
+}
+
+DebugRenderer DebuggingPosteffect::globalDistanceFieldRaymarch(bool mixWithScene)
+{
+  padding<byte, 3> padding;
+  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new GlobalDistanceFieldRaymarch(mixWithScene);});
 }
 
 QSharedPointer<DebuggingPosteffect::SharedRenderingData> DebuggingPosteffect::renderingData;

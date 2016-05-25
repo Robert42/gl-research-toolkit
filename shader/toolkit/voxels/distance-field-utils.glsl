@@ -2,7 +2,9 @@ float distancefield_distance(vec3 voxelCoord, in WorldVoxelUvwSpaceFactor spaceF
 {
   float voxel_value = texture(voxelTexture, spaceFactor.voxelToUvwSpace * voxelCoord).r;
   
-  voxel_value += posteffect_param.distancefield_offset;;
+#ifdef POSTEFFECT_VISUALIZATION
+  voxel_value += posteffect_param.distancefield_offset;
+#endif 
   
   return voxel_value;
 }

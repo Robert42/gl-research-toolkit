@@ -119,6 +119,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, scene.resourceManager.allRegisteredScenes());
   sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
+  renderer->visualizePosteffect_GlobalDistancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Global-Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");

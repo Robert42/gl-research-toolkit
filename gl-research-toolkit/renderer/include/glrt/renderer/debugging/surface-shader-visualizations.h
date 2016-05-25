@@ -10,6 +10,7 @@ namespace renderer {
 enum class SurfaceShaderVisualization
 {
   NONE,
+  DISTANCEFIELD_AO,
   LIGHTING_FLAT,
   LIGHTING_ONLY,
   LIGHTING_ONLY_DIFFUSE,
