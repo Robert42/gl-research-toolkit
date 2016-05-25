@@ -7,8 +7,6 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
 {
   world_pos = vec3(0);
     world_normal = vec3(0);
-    
-  float treshold = 0.5f;
   
   uint32_t num_distance_fields = distance_fields_num();
   mat4* worldToVoxelSpaces = distance_fields_worldToVoxelSpace();
@@ -18,7 +16,7 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
   
   uint32_t stepCount = 0;
   
-  bool hit = raymarch_distancefields(ray, worldToVoxelSpaces, spaceFactors, voxelCounts, distance_field_textures, num_distance_fields, treshold, world_pos, world_normal, stepCount);
+  bool hit = raymarch_distancefields(ray, worldToVoxelSpaces, spaceFactors, voxelCounts, distance_field_textures, num_distance_fields, world_pos, world_normal, stepCount);
     
   if(posteffect_param.showNumSteps)
   {
