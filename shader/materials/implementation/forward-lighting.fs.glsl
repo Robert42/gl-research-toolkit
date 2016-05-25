@@ -62,6 +62,11 @@ return;
   return;
 #endif
 
+#if defined(DISTANCEFIELD_AO)
+  fragment_color = vec4(vec3(1), 1);
+  return; 
+#endif
+
   vec3 incoming_luminance = light_material(material, surface.position, scene.camera_position);
   
   float exposure = 1.f; // Only dummy value, to be corrected
