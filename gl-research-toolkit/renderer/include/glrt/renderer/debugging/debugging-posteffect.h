@@ -27,6 +27,7 @@ public:
   static DebugRenderer voxelGridBoundingBox(bool depthTest=true);
   static DebugRenderer voxelGridCubicRaymarch(bool depthTest = true);
   static DebugRenderer distanceFieldRaymarch(bool depthTest = true);
+  static DebugRenderer globalDistanceFieldRaymarch(bool depthTest=true);
 
 private:
   struct SharedRenderingData
