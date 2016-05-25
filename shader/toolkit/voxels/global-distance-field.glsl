@@ -92,8 +92,8 @@ vec3 distancefield_normal(const in GlobalDistanceField globalDistanceField, vec3
 
 float distancefield_ambientocclusion(const in GlobalDistanceField globalDistanceField, vec3 location_ws, vec3 normal_ws, inout uint32_t stepCount)
 {
-  float offset = -min(0, distance_to_location(globalDistanceField, location_ws, stepCount)) + 1.e-4f;
-  float delta = 0.8f;
+  float offset = 0;//-min(0, distance_to_location(globalDistanceField, location_ws, stepCount)) + 1.e-4f;
+  float delta = 0.2f;
   
   float attenuation = 1;
   
@@ -111,7 +111,7 @@ float distancefield_ambientocclusion(const in GlobalDistanceField globalDistance
     attenuation *= 0.5f;
   }
   
-  float strength = 1.f / maxDiff;
+  float strength = 4.f / maxDiff;
   
   float ao = 1.f - occlusion * strength;
   
