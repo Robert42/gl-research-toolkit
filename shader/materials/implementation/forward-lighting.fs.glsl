@@ -6,6 +6,7 @@
 #include <glrt/glsl/layout-constants.h>
 
 #include <scene/uniforms.glsl>
+#include <voxels/global-distance-field.glsl>
 
 out vec4 fragment_color;
 
@@ -63,7 +64,9 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
-  fragment_color = vec4(vec3(1), 1);
+  GlobalDistanceField global_distance_field = init_global_distance_field();
+  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, surface.normal);
+  fragment_color = vec4(vec3(ao), 1);
   return; 
 #endif
 
