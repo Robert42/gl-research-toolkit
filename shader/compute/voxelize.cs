@@ -94,6 +94,11 @@ void main()
 #else
 #error Mode not recognized
 #endif
+
+  // Make sure, that voxels at the padding are never negative
+  bool isPadding = any(equal(voxelCoord, vec3(0))) || any(equal(voxelCoord, vec3(textureSize-1)));
+
+  best_d = isPadding ? max(0, best_d) : best_d;
   
   if(all(lessThan(voxelCoord, textureSize)))
     imageStore(metaData.targetTexture, voxelCoord, vec4(best_d));

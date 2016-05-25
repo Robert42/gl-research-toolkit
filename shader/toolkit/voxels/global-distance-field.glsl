@@ -33,11 +33,7 @@ float distance_to_location(const in GlobalDistanceField globalDistanceField, vec
     const float distance_within_voxel = distancefield_distance(location_voxelspace, spaceFactor, globalDistanceField.distance_field_textures[i]);
     const float distance_to_voxelgrid = spaceFactor.voxelToWorldSpace * distance(location_voxelspace, clamped_location_voxelspace);
     
-    // The following lines contains the following workaround:
-    // if distance_to_voxelgrid>0, the location_ws is outside the bounding box. So clamp distance_within_voxel to [0,inf) (in case the shape is not closed, like the columns. Not clamping will result in the algorithm thinking, the whole area below and above the column is below the surface, as it's negative)
-    // Otherwise, just use the distance_within_voxel
-    float voxelSpaceDistance = distance_to_voxelgrid > 1.e-4f ? max(0,distance_within_voxel) + distance_to_voxelgrid : distance_within_voxel;
-    
+    float voxelSpaceDistance = distance_within_voxel + distance_to_voxelgrid;
     float worldSpaceDistance = spaceFactor.voxelToWorldSpace * voxelSpaceDistance;
     
     d = min(d, worldSpaceDistance);
