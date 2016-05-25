@@ -24,6 +24,8 @@ layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform Po
   PosteffectVisualizationData posteffect_param;
 };
 
+#define POSTEFFECT_VISUALIZATION
+
 in FragmentBlock
 {
   flat mat4 view_projection;
