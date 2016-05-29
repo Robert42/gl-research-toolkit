@@ -96,7 +96,8 @@ void main()
 #endif
 
   // Make sure, that voxels at the padding are never negative
-  bool isPadding = any(equal(voxelCoord, vec3(0))) || any(equal(voxelCoord, vec3(textureSize-1)));
+  const int paddingWidth = 1;
+  const bool isPadding = any(lessThan(voxelCoord, vec3(paddingWidth))) || any(greaterThanEqual(voxelCoord, vec3(textureSize-paddingWidth)));
 
   best_d = isPadding ? max(0, best_d) : best_d;
   
