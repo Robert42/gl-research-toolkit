@@ -48,7 +48,7 @@ quint64 VoxelDataComponent::textureData() const
 
 BoundingSphere VoxelDataComponent::boundingSphere() const
 {
-  return data.boundingSphere;
+  return data.worldSpaceBoundignSphere(globalCoordFrame());
 }
 
 
