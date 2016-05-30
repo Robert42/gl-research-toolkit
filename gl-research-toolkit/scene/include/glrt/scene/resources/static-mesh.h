@@ -14,6 +14,12 @@ struct AABB
   glm::vec3 maxPoint;
 };
 
+struct BoundingSphere
+{
+  glm::vec3 center;
+  float radius;
+};
+
 struct TriangleArray;
 
 
@@ -38,6 +44,7 @@ struct StaticMesh
   QVector<Vertex> vertices;
 
   AABB boundingBox() const;
+  BoundingSphere boundingSphere() const;
   size_t rawDataSize() const;
 
   TriangleArray getTriangleArray() const;
