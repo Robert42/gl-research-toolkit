@@ -98,7 +98,7 @@ float distancefield_ambientocclusion(const in GlobalDistanceField globalDistance
   const float offset = 0;
   const float ao_radius = 3.5;
   const float max_query_radius = ao_radius * 0.5f;
-  const int nQueries = 5;
+  const int nQueries = 4;
   
   float samplingDistance = max_query_radius / 16.f;
   float delta = max_query_radius / nQueries;
