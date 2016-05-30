@@ -25,6 +25,7 @@ namespace renderer {
 namespace debugging {
 
 using scene::resources::VoxelBoundingBox;
+using scene::resources::BoundingSphere;
 
 struct Arrow
 {
@@ -54,6 +55,7 @@ public:
   static DebugRenderer::Implementation* drawArrows(const QVector<Arrow>& arrows);
   static DebugRenderer::Implementation* drawWorldGrid();
   static DebugRenderer::Implementation* drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes);
+  static DebugRenderer::Implementation* drawSpheres(const QList<BoundingSphere>& spheres);
 
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;

@@ -245,6 +245,21 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QLis
   return v;
 }
 
+DebugRenderer::Implementation* DebugLineVisualisation::drawSpheres(const QList<BoundingSphere>& spheres)
+{
+  DebugMesh::Painter painter;
+
+  painter.addSphere(1.f, 96);
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  spheres.toVector(),
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-spheres",
+                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  v->use_dephtest = true;
+  return v;
+}
+
 
 void DebugLineVisualisation::render()
 {

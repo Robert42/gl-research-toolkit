@@ -11,6 +11,7 @@ namespace glrt {
 namespace scene {
 
 using resources::VoxelBoundingBox;
+using resources::BoundingSphere;
 
 template<typename T_component>
 Array<T_component*> collectAllComponentsWithType(Scene* scene, const std::function<bool(T_component*)>& filter=always_return_true<T_component*>);
@@ -45,6 +46,9 @@ QHash<QString, RectAreaLightComponent::Data> collectNamedRectAreaLights(Scene* s
 
 QVector<VoxelBoundingBox> collectVoxelGridSize(Scene* scene);
 QHash<QString, VoxelBoundingBox> collectNamedVoxelGridSize(Scene* scene);
+
+QVector<BoundingSphere> collectVoxelBoundingSphere(Scene* scene);
+QHash<QString, BoundingSphere> collectNamedVoxelBoundingSphere(Scene* scene);
 
 
 } // namespace scene

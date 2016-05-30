@@ -43,6 +43,7 @@ public:
   debugging::DebugRenderer visualizeRectAreaLights;
   debugging::DebugRenderer visualizeWorldGrid;
   debugging::DebugRenderer visualizeVoxelGrids;
+  debugging::DebugRenderer visualizeVoxelBoundingSpheres;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;

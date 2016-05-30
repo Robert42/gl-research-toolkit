@@ -23,6 +23,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
+    visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
@@ -44,6 +45,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
+  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);

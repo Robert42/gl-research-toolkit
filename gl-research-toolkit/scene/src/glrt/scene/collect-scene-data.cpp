@@ -69,6 +69,16 @@ QHash<QString, VoxelBoundingBox> collectNamedVoxelGridSize(Scene* scene)
   return collectNamedData<VoxelDataComponent,VoxelBoundingBox>(scene, [](VoxelDataComponent* c) -> VoxelBoundingBox{return VoxelBoundingBox(*c);});
 }
 
+QVector<BoundingSphere> collectVoxelBoundingSphere(Scene* scene)
+{
+  return collectData<VoxelDataComponent,BoundingSphere>(scene, [](VoxelDataComponent* c) -> BoundingSphere{return c->boundingSphere();});
+}
+
+QHash<QString, BoundingSphere> collectNamedVoxelBoundingSphere(Scene* scene)
+{
+  return collectNamedData<VoxelDataComponent,BoundingSphere>(scene, [](VoxelDataComponent* c) -> BoundingSphere{return c->boundingSphere();});
+}
+
 
 } // namespace scene
 } // namespace glrt
