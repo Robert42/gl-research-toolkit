@@ -344,6 +344,8 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
   for(int i=0; i<settings.meshesToMergeWhenVoxelizing.length(); ++i)
     meshesToJoin.append(QSet<Uuid<StaticMesh>>());
 
+  QUuid baseUuid = QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, sceneGraphFile.fileName()), sourceFile.fileName());
+
   assets.materials.resize(scene->mNumMaterials);
   for(quint32 i=0; i<scene->mNumMaterials; ++i)
   {
@@ -381,7 +383,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     assets.cameras[n] = CameraParameter::fromAssimp(*scene->mCameras[i]);
 
-    Uuid<CameraParameter> cameraUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("camera[%0]").arg(i)), n));
+    Uuid<CameraParameter> cameraUuid(QUuid::createUuidV5(QUuid::createUuidV5(baseUuid, QString("camera[%0]").arg(i)), n));
 
     if(settings.cameraUuids.contains(n))
       cameraUuid = settings.cameraUuids[n];
@@ -416,7 +418,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
     assets.meshData[i] = data;
     assets.meshInstances[n].insert(useIndex);
 
-    Uuid<StaticMesh> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("static-mesh[%0]").arg(useIndex)), n));
+    Uuid<StaticMesh> meshUuid(QUuid::createUuidV5(QUuid::createUuidV5(baseUuid, QString("static-mesh[%0]").arg(useIndex)), n));
 
     if(settings.meshUuids.contains(n))
     {
@@ -532,7 +534,7 @@ void convertSceneGraph_assimpToSceneGraph(const QFileInfo& sceneGraphFile, const
 
     QString n = node->mName.C_Str();
 
-    Uuid<Node> nodeUuid = Uuid<Node>(QUuid::createUuidV5(QUuid::createUuidV5(resourceIndexUuid, QString("node")), n));
+    Uuid<Node> nodeUuid = Uuid<Node>(QUuid::createUuidV5(QUuid::createUuidV5(baseUuid, QString("node")), n));
 
     if(settings.nodeUuids.contains(n))
       nodeUuid = settings.nodeUuids[n];
