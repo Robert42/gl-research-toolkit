@@ -18,6 +18,7 @@ public:
 
   static Uuid<scene::Scene> emptyScene();
   static Uuid<scene::Scene> cornellBoxScene();
+  static Uuid<scene::Scene> cornellBoxMergedScene();
   static Uuid<scene::Scene> cornellBoxRoughnessScene();
   static Uuid<scene::Scene> cornellBoxSuzanneScene();
   static Uuid<scene::Scene> sponzaScene();

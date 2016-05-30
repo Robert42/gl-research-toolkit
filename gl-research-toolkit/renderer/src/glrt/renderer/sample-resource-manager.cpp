@@ -36,6 +36,11 @@ Uuid<scene::Scene> SampleResourceManager::cornellBoxScene()
   return Uuid<scene::Scene>("{158da3d3-ef79-4895-add4-f2fe22c0dbff}");
 }
 
+Uuid<scene::Scene> SampleResourceManager::cornellBoxMergedScene()
+{
+  return Uuid<scene::Scene>("{7e0e5bbe-e667-42a6-95b4-edb28576f9f6}");
+}
+
 Uuid<scene::Scene> SampleResourceManager::cornellBoxRoughnessScene()
 {
   return Uuid<scene::Scene>("{297e2f65-220b-42d7-ae10-1b9b45a75f7c}");
@@ -63,7 +68,7 @@ Uuid<scene::Scene> SampleResourceManager::multiple_textured_objects()
 
 Uuid<scene::Scene> SampleResourceManager::defaultScene()
 {
-  return multiple_textured_objects();
+  return cornellBoxMergedScene();
 }
 
 Uuid<scene::resources::StaticMesh> SampleResourceManager::suzanneLowPoly()
