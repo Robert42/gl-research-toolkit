@@ -97,14 +97,14 @@ inline BoundingSphere TriangleArray::boundingSphere() const
 inline void TriangleArray::boundingShapes(BoundingSphere& sphere, AABB& aabb) const
 {
   aabb = boundingBox();
-  sphere = BoundingSphere{(aabb.maxPoint+aabb.minPoint)*0.5f, INFINITY};
+  sphere = BoundingSphere{(aabb.maxPoint+aabb.minPoint)*0.5f, 0};
 
   const size_t num_vertices = this->vertices.size();
 
   for(size_t i=0; i<num_vertices; i++)
   {
     const glm::vec3& vertex = this->vertices[i];
-    sphere.radius = glm::min(sphere.radius, distance(vertex, sphere.center));
+    sphere.radius = glm::max(sphere.radius, distance(vertex, sphere.center));
   }
 }
 

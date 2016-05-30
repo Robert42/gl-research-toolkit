@@ -114,11 +114,11 @@ BoundingSphere StaticMesh::boundingSphere() const
 void StaticMesh::boundingShapes(BoundingSphere& sphere, AABB& aabb) const
 {
   aabb = boundingBox();
-  sphere = BoundingSphere{(aabb.maxPoint+aabb.minPoint)*0.5f, INFINITY};
+  sphere = BoundingSphere{(aabb.maxPoint+aabb.minPoint)*0.5f, 0};
 
   for(const Vertex& vertex : vertices)
   {
-    sphere.radius = glm::min(sphere.radius, distance(vertex.position, sphere.center));
+    sphere.radius = glm::max(sphere.radius, distance(vertex.position, sphere.center));
   }
 }
 
