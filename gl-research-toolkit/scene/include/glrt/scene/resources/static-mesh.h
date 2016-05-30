@@ -18,6 +18,14 @@ struct BoundingSphere
 {
   glm::vec3 center;
   float radius;
+
+  friend BoundingSphere operator*(const CoordFrame& frame, const BoundingSphere& sphere)
+  {
+    BoundingSphere s;
+    s.center = frame.transform_point(sphere.center);
+    s.radius = frame.scaleFactor * sphere.radius;
+    return s;
+  }
 };
 
 struct TriangleArray;

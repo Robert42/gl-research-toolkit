@@ -5,6 +5,9 @@ namespace glrt {
 namespace scene {
 
 
+using resources::BoundingSphere;
+
+
 VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data, bool voxelizedAsScenery)
   : Component(node, parent, uuid),
     data(data),
@@ -41,6 +44,11 @@ VoxelDataComponent::WorldVoxelUvwSpaceFactor VoxelDataComponent::spaceFactor() c
 quint64 VoxelDataComponent::textureData() const
 {
   return data.gpuTextureHandle;
+}
+
+BoundingSphere VoxelDataComponent::boundingSphere() const
+{
+  return data.boundingSphere;
 }
 
 

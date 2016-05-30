@@ -18,8 +18,10 @@ public:
     GLuint64 distanceFieldGridSizes;
     GLuint64 distanceFieldSpaceFactors;
     GLuint64 distanceFieldTextures;
+    GLuint64 distanceFieldBoundingSpheres;
+    padding<GLuint64, 1> _padding1;
     quint32 numDistanceFields;
-    padding<quint32, 3> _padding;
+    padding<quint32, 3> _padding2;
   };
 
   VoxelBuffer(scene::Scene& scene);
@@ -32,6 +34,7 @@ private:
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::GridSize, &scene::VoxelDataComponent::gridSize>> distanceFieldGridSizesStorageBuffer;
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::WorldVoxelUvwSpaceFactor, &scene::VoxelDataComponent::spaceFactor>> distanceFieldSpaceFactorStorageBuffer;
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, quint64, &scene::VoxelDataComponent::textureData>> distanceFieldTextureHandleStorageBuffer;
+  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::resources::BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
 
   VoxelHeader _voxelHeader;
 

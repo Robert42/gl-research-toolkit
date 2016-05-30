@@ -30,6 +30,7 @@ struct VoxelData
   quint64 gpuTextureHandle = 0;
 
   glm::mat4 worldToVoxelSpaceMatrix(const CoordFrame& localToWorldSpace) const;
+  BoundingSphere worldSpaceBoundignSphere(const CoordFrame& localToWorldSpace) const;
 };
 
 struct VoxelIndex

@@ -16,8 +16,10 @@ struct SceneVoxelHeader
   uint64_t distance_field_voxelcount_array_address;
   uint64_t distance_field_spacefactor_array_address;
   uint64_t distance_field_textures_array_address;
+  uint64_t distance_field_boundingsphere_array_address;
+  padding1(uint64_t, _padding1);
   uint32_t num_distance_fields;
-  padding3(uint32_t, _padding);
+  padding3(uint32_t, _padding2);
 };
 
 struct SceneData

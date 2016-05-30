@@ -20,6 +20,10 @@ glm::mat4 VoxelData::worldToVoxelSpaceMatrix(const CoordFrame& localToWorldSpace
   return (localToVoxelSpace * localToWorldSpace.inverse()).toMat4();
 }
 
+BoundingSphere VoxelData::worldSpaceBoundignSphere(const CoordFrame& localToWorldSpace) const
+{
+  return localToWorldSpace * this->boundingSphere;
+}
 
 VoxelData VoxelIndex::toData(ResourceManager& resourceManager) const
 {
