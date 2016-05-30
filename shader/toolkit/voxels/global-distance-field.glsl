@@ -115,7 +115,7 @@ float distancefield_ambientocclusion(const in GlobalDistanceField globalDistance
     attenuation *= 0.5f;
   }
   
-  float strength = 1.f / maxDiff;
+  float strength = 4 / maxDiff;
   
   float ao = 1.f - occlusion * strength;
   
