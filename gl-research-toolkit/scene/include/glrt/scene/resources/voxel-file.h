@@ -42,6 +42,7 @@ public:
     glm::ivec3 gridSize = glm::vec3(0);
     Flags flags = Flag::None;
     CoordFrame localToVoxelSpace;
+    BoundingSphere boundingSphere;
 
     size_t rawDataSize(size_t bytesPerVoxel) const;
   };

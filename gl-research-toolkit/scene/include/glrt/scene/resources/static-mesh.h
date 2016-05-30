@@ -66,6 +66,8 @@ struct TriangleArray
   void invertNormals();
 
   AABB boundingBox() const;
+  BoundingSphere boundingSphere() const;
+  void boundingShapes(BoundingSphere& boundignSphere, AABB& boundingBox) const;
 
   void operator+=(const TriangleArray& other);
 

@@ -84,6 +84,30 @@ inline AABB TriangleArray::boundingBox() const
   return aabb;
 }
 
+inline BoundingSphere TriangleArray::boundingSphere() const
+{
+  AABB aabb;
+  BoundingSphere boundingSphere;
+
+  boundingShapes(boundingSphere, aabb);
+
+  return boundingSphere;
+}
+
+inline void TriangleArray::boundingShapes(BoundingSphere& sphere, AABB& aabb) const
+{
+  aabb = boundingBox();
+  sphere = BoundingSphere{(aabb.maxPoint+aabb.minPoint)*0.5f, INFINITY};
+
+  const size_t num_vertices = this->vertices.size();
+
+  for(size_t i=0; i<num_vertices; i++)
+  {
+    const glm::vec3& vertex = this->vertices[i];
+    sphere.radius = glm::min(sphere.radius, distance(vertex, sphere.center));
+  }
+}
+
 inline void TriangleArray::operator+=(const TriangleArray& other)
 {
   this->vertices.insert(this->vertices.end(), other.vertices.begin(), other.vertices.end());
