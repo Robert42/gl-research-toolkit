@@ -45,6 +45,7 @@ struct StaticMesh
 
   AABB boundingBox() const;
   BoundingSphere boundingSphere() const;
+  void boundingShapes(BoundingSphere& boundignSphere, AABB& boundingBox) const;
   size_t rawDataSize() const;
 
   TriangleArray getTriangleArray() const;
