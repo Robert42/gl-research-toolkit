@@ -64,9 +64,11 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
+  vec3 meshNormal = fragment.normal;
+  vec3 bumpMappedNormal = material.normal;
   uint32_t stepCount = 0;
   GlobalDistanceField global_distance_field = init_global_distance_field();
-  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, material.normal, stepCount);
+  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, meshNormal, stepCount);
   fragment_color = vec4(vec3(ao), 1);
   return; 
 #endif
