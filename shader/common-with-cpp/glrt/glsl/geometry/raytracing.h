@@ -413,27 +413,45 @@ inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 
 
 // ======== Cone ===============================================================
 
-inline Cone cone_from_ray(in Ray ray, float half_cone_angle)
+inline Cone cone_from_ray_angle(in vec3 origin, in vec3 direction, float half_cone_angle)
 {
   Cone cone;
-  cone.origin = ray.origin;
-  cone.direction = ray.direction;
+  cone.origin = origin;
+  cone.direction = direction;
   cone.half_angle = half_cone_angle;
+  cone.radius_for_distance = tan(half_cone_angle);
   return cone;
+}
+
+inline Cone cone_from_ray_angle(in Ray ray, float half_cone_angle)
+{
+  return cone_from_ray_angle(ray.origin, ray.direction, half_cone_angle);
+}
+
+inline Ray ray_from_cone(in Cone cone)
+{
+  Ray ray;
+  ray.origin = cone.origin;
+  ray.origin = cone.origin;
+  return ray;
 }
 
 inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_sin = 1)
 {
-  Cone cone;
-  cone.origin = origin;
-  cone.direction = sphere.origin - origin;
+  vec3 direction = sphere.origin - origin;
   
-  const float inv_distance = 1.f / length(cone.direction);
-  cone.direction *= inv_distance;
+  const float inv_distance = 1.f / length(direction);
+  direction *= inv_distance;
 
   const float sin_of_angle = inv_distance * sphere.radius;
+  const float half_angle = asin(min(max_sin, sin_of_angle));
   
-  cone.half_angle = asin(min(max_sin, sin_of_angle));
-  
-  return cone;
+  return cone_from_ray_angle(origin, direction, half_angle);
+}
+
+inline bool cone_intersects_sphere(in Cone cone, Sphere sphere)
+{
+  // #TODO: performance critical optimization possible here? (unnecessry cast from Cone to ray? use a reinterpret_cast? make ray a memeber of Cone?)
+  Ray ray = ray_from_cone(cone);
+  return sq_distance_to(ray, sphere.origin) < sq(sphere.radius); // #TODO unnecessary sq here? Create a  struct BoundignSphere storing the square radius?
 }
