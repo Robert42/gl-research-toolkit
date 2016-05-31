@@ -163,6 +163,12 @@ public:
   DistanceFieldRaymarch(bool depthTest);
 };
 
+class RaymarchBoundingSpheresAsDistanceField : public SingleShader
+{
+public:
+  RaymarchBoundingSpheresAsDistanceField(bool depthTest);
+};
+
 class GlobalDistanceFieldRaymarch : public SingleShader
 {
 public:
@@ -218,6 +224,13 @@ DistanceFieldRaymarch::DistanceFieldRaymarch(bool depthTest)
 {
 }
 
+
+RaymarchBoundingSpheresAsDistanceField::RaymarchBoundingSpheresAsDistanceField(bool depthTest)
+  : SingleShader("show-bounding-spheres-as-distancefield", depthTest)
+{
+}
+
+
 GlobalDistanceFieldRaymarch::GlobalDistanceFieldRaymarch(bool depthTest)
   : SingleShader("raymarch-global-distancefield", depthTest)
 {
@@ -252,6 +265,12 @@ DebugRenderer DebuggingPosteffect::distanceFieldRaymarch(bool mixWithScene)
 {
   padding<byte, 3> padding;
   return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new DistanceFieldRaymarch(mixWithScene);});
+}
+
+DebugRenderer DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(bool mixWithScene)
+{
+  padding<byte, 3> padding;
+  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new RaymarchBoundingSpheresAsDistanceField(mixWithScene);});
 }
 
 DebugRenderer DebuggingPosteffect::globalDistanceFieldRaymarch(bool mixWithScene)

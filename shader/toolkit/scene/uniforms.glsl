@@ -1,6 +1,7 @@
 #include <lighting/light-structs.glsl>
 #include <voxels/voxel-structs.glsl>
 #include <alignment.glsl>
+#include <glrt/glsl/math-glsl.h>
 
 struct SceneLightData
 {
@@ -73,5 +74,10 @@ WorldVoxelUvwSpaceFactor* distance_fields_spaceFactor()
 sampler3D* distance_fields_texture()
 {
   return (sampler3D*)scene.voxelHeader.distance_field_textures_array_address;
+}
+
+Sphere* distance_fields_bounding_spheres()
+{
+  return (Sphere*)scene.voxelHeader.distance_field_boundingsphere_array_address;
 }
 

@@ -29,6 +29,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
     visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
+    visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     visualizePosteffect_GlobalDistancefield_raymarch(debugging::DebuggingPosteffect::globalDistanceFieldRaymarch()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
@@ -52,6 +53,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_GlobalDistancefield_raymarch);
 
   setAdjustRoughness(true);
