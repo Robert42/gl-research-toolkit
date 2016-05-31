@@ -14,19 +14,27 @@ bool raymarch_boundingsphere_as_distancefield(in Ray ray_worldspace,
   mat4 worldToVoxelSpace = worldToVoxelSpaceMatrices[index];
   ivec3 voxelSize = voxelSizes[index];
   
-  Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, worldToVoxelSpace);
+  Sphere sphere = spheres[index];
   
   float intersection_distance_front;
   float intersection_distance_back;
+  
+#if 0
+  Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, worldToVoxelSpace);
   
   if(!intersects_aabb_twice(ray_voxelspace, vec3(0), vec3(voxelSize), intersection_distance_front, intersection_distance_back))
     return false;
     
   WorldVoxelUvwSpaceFactor spaceFactor = spaceFactors[index];
-  Sphere sphere = spheres[index];
   
   intersection_distance_front = spaceFactor.voxelToWorldSpace * intersection_distance_front;
   intersection_distance_back = spaceFactor.voxelToWorldSpace * intersection_distance_back;
+#else
+  vec3 aabb_min = sphere.origin - vec3(sphere.radius * 2);
+  vec3 aabb_max = sphere.origin + vec3(sphere.radius * 2);
+  if(!intersects_aabb_twice(ray_worldspace, aabb_min, aabb_max, intersection_distance_front, intersection_distance_back))
+    return false;
+#endif
     
   float t = intersection_distance_front;
   
