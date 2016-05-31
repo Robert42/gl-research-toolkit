@@ -451,7 +451,10 @@ inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_s
 
 inline bool cone_intersects_sphere(in Cone cone, Sphere sphere)
 {
-  // #TODO: performance critical optimization possible here? (unnecessry cast from Cone to ray? use a reinterpret_cast? make ray a memeber of Cone?)
-  Ray ray = ray_from_cone(cone);
-  return sq_distance_to(ray, sphere.origin) < sq(sphere.radius); // #TODO unnecessary sq here? Create a  struct BoundignSphere storing the square radius?
+  float t = dot(cone.direction, sphere.origin-cone.origin);
+  t = max(0.f, t);
+  
+  vec3 p = cone.origin + cone.direction * t;
+    
+  return distance(p, sphere.origin) > sphere.radius + cone.radius_for_distance * t;
 }
