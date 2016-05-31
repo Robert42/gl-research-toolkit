@@ -409,3 +409,29 @@ inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 
   
   return intersectsPlane && sq_distance(closestPoint, p)<=treshold;
 }
+
+
+// ======== Cone ===============================================================
+
+inline Cone cone_from_ray(in Ray ray, float half_cone_angle)
+{
+  Cone cone;
+  cone.origin = ray.origin;
+  cone.direction = ray.direction;
+  cone.half_angle = half_cone_angle;
+  return cone;
+}
+
+inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_sin = 1)
+{
+  Cone cone;
+  cone.origin = origin;
+  cone.direction = sphere.origin - origin;
+  
+  float inv_distance = 1.f / length(cone.direction);
+  cone.direction *= inv_distance;
+  
+  cone.half_angle = asin(min(max_sin, inv_distance * sphere.radius));
+  
+  return cone;
+}

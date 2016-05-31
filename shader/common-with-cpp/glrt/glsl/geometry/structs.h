@@ -44,4 +44,11 @@ struct Ray
   vec3 direction;
 };
 
+struct Cone
+{
+  vec3 origin;
+  float half_angle;
+  vec3 direction;
+};
+
 #endif // _GLRT_GLSL_GEOMETRY_STRUCTS_H_
