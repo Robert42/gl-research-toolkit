@@ -473,9 +473,13 @@ inline bool cone_intersects_sphere(in Cone cone, Sphere sphere)
   const vec3 p = cone.origin + cone.direction * clamped_t;
 
   // see doc/cone_intersects_sphere.svg
+  // for t>0: the nearest point on the center ray of the cone to the sphere
+  // origin is not the nearest point on the cone to the sphere. use inv_cos_half_angle for correction (see doc/cone_intersects_sphere.svg)
   const float corrected_min_distance_to_sphere_origin = sphere.radius * cone.inv_cos_half_angle + cone.tan_half_angle * clamped_t;
+  // For t <=0 just check, that the sphere center is close eneough to the cone origin
   const float clamped_min_distance_to_sphere_origin = sphere.radius;
 
+  // equivalent to t<0.f ? clamped_min_distance_to_sphere_origin : corrected_min_distance_to_sphere_origin
   const float min_distance_to_sphere_origin = mix(clamped_min_distance_to_sphere_origin, corrected_min_distance_to_sphere_origin, step(0.f, t));
 
   const float d = distance(p, sphere.origin);
