@@ -428,10 +428,12 @@ inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_s
   cone.origin = origin;
   cone.direction = sphere.origin - origin;
   
-  float inv_distance = 1.f / length(cone.direction);
+  const float inv_distance = 1.f / length(cone.direction);
   cone.direction *= inv_distance;
+
+  const float sin_of_angle = inv_distance * sphere.radius;
   
-  cone.half_angle = asin(min(max_sin, inv_distance * sphere.radius));
+  cone.half_angle = asin(min(max_sin, sin_of_angle));
   
   return cone;
 }

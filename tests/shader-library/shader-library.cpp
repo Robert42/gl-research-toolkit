@@ -9,6 +9,26 @@ using glm::vec3;
 using glm::vec4;
 
 
+TEST(shader_library, cone_from_point_to_sphere)
+{
+  const float epsilon = 1.e-4f;
+  Sphere sphere;
+
+  sphere.origin = vec3(10, 42, -5);
+  sphere.radius = 5;
+
+  Cone cone = cone_from_point_to_sphere(vec3(0, 42, -5), sphere);
+  EXPECT_VEC_NEAR(cone.direction, vec3(1, 0, 0), epsilon);
+  EXPECT_VEC_NEAR(cone.origin, vec3(0, 42, -5), epsilon);
+  EXPECT_NEAR(cone.half_angle, glm::radians(30.f), epsilon);
+
+  cone = cone_from_point_to_sphere(vec3(9, 42, -5), sphere);
+  EXPECT_VEC_NEAR(cone.direction, vec3(1, 0, 0), epsilon);
+  EXPECT_VEC_NEAR(cone.origin, vec3(9, 42, -5), epsilon);
+  EXPECT_NEAR(cone.half_angle, glm::radians(90.f), epsilon);
+}
+
+
 TEST(shader_library, voxelIndexFromScalarIndex)
 {
   glm::ivec3 size(256);
