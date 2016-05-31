@@ -419,7 +419,17 @@ inline Cone cone_from_ray_angle(in vec3 origin, in vec3 direction, float half_co
   cone.origin = origin;
   cone.direction = direction;
   cone.half_angle = half_cone_angle;
-  cone.radius_for_distance = tan(half_cone_angle);
+  cone.tan_half_angle = tan(half_cone_angle);
+  return cone;
+}
+
+inline Cone cone_from_ray_tan_angle(in vec3 origin, in vec3 direction, float tan_half_cone_angle)
+{
+  Cone cone;
+  cone.origin = origin;
+  cone.direction = direction;
+  cone.half_angle = atan(tan_half_cone_angle);
+  cone.tan_half_angle = tan_half_cone_angle;
   return cone;
 }
 
@@ -454,7 +464,7 @@ inline bool cone_intersects_sphere(in Cone cone, Sphere sphere)
   float t = dot(cone.direction, sphere.origin-cone.origin);
   t = max(0.f, t);
   
-  vec3 p = cone.origin + cone.direction * t;
-    
-  return distance(p, sphere.origin) > sphere.radius + cone.radius_for_distance * t;
+  const vec3 p = cone.origin + cone.direction * t;
+
+  return distance(p, sphere.origin) <= sphere.radius + cone.tan_half_angle * t;
 }

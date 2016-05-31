@@ -49,7 +49,7 @@ struct Cone
   vec3 origin;
   float half_angle;
   vec3 direction;
-  float radius_for_distance;
+  float tan_half_angle;
 };
 
 #endif // _GLRT_GLSL_GEOMETRY_STRUCTS_H_
