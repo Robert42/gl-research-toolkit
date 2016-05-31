@@ -47,7 +47,7 @@ struct Ray
 struct Cone
 {
   vec3 origin;
-  float half_angle;
+  float inv_cos_half_angle;
   vec3 direction;
   float tan_half_angle;
 };

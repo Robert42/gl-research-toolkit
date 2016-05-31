@@ -418,7 +418,7 @@ inline Cone cone_from_ray_angle(in vec3 origin, in vec3 direction, float half_co
   Cone cone;
   cone.origin = origin;
   cone.direction = direction;
-  cone.half_angle = half_cone_angle;
+  cone.inv_cos_half_angle = 1.f / cos(half_cone_angle);
   cone.tan_half_angle = tan(half_cone_angle);
   return cone;
 }
@@ -428,7 +428,7 @@ inline Cone cone_from_ray_tan_angle(in vec3 origin, in vec3 direction, float tan
   Cone cone;
   cone.origin = origin;
   cone.direction = direction;
-  cone.half_angle = atan(tan_half_cone_angle);
+  cone.inv_cos_half_angle = 1.f / cos(atan(tan_half_cone_angle));
   cone.tan_half_angle = tan_half_cone_angle;
   return cone;
 }
@@ -442,11 +442,17 @@ inline Ray ray_from_cone(in Cone cone)
 {
   Ray ray;
   ray.origin = cone.origin;
-  ray.origin = cone.origin;
+  ray.direction = cone.direction;
   return ray;
 }
 
-inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_sin = 1)
+inline float cone_half_angle(in Cone cone)
+{
+  return atan(cone.tan_half_angle);
+}
+
+// cos(radians(89.f)) \equiv 0.99985f
+inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_sin = 0.99985f)
 {
   vec3 direction = sphere.origin - origin;
   
@@ -461,10 +467,18 @@ inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_s
 
 inline bool cone_intersects_sphere(in Cone cone, Sphere sphere)
 {
-  float t = dot(cone.direction, sphere.origin-cone.origin);
-  t = max(0.f, t);
+  const float t = dot(cone.direction, sphere.origin-cone.origin);
+  const float clamped_t = max(0.f, t);
   
-  const vec3 p = cone.origin + cone.direction * t;
+  const vec3 p = cone.origin + cone.direction * clamped_t;
 
-  return distance(p, sphere.origin) <= sphere.radius + cone.tan_half_angle * t;
+  // see doc/cone_intersects_sphere.svg
+  const float corrected_min_distance_to_sphere_origin = sphere.radius * cone.inv_cos_half_angle + cone.tan_half_angle * clamped_t;
+  const float clamped_min_distance_to_sphere_origin = sphere.radius;
+
+  const float min_distance_to_sphere_origin = mix(clamped_min_distance_to_sphere_origin, corrected_min_distance_to_sphere_origin, step(0.f, t));
+
+  const float d = distance(p, sphere.origin);
+
+  return d <= min_distance_to_sphere_origin;
 }
