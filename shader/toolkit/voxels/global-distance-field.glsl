@@ -7,6 +7,7 @@ struct GlobalDistanceField
   ivec3* voxelCounts;
   WorldVoxelUvwSpaceFactor* spaceFactors;
   sampler3D* distance_field_textures;
+  Sphere* bounding_spheres;
 };
 
 GlobalDistanceField init_global_distance_field()
@@ -17,6 +18,7 @@ GlobalDistanceField init_global_distance_field()
   gdf.voxelCounts = distance_fields_voxelCount();
   gdf.spaceFactors = distance_fields_spaceFactor();
   gdf.distance_field_textures = distance_fields_texture();
+  gdf.bounding_spheres = distance_fields_bounding_spheres();
   return gdf;
 }
 
