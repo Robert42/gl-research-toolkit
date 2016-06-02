@@ -36,6 +36,8 @@ function cone(openingAngle, matrix=eye(4))
   halfAngle = radians(openingAngle * 0.5);
   disp("---- next-cone ----")
   disp("half_angle: "),disp(halfAngle);
+  disp("tan(half_angle): "),disp(tan(halfAngle));
+  disp("1/cos(half_angle): "),disp(1/cos(halfAngle));
   disp("direction: "),disp(matrix(1:3,3));
 end
 
@@ -58,7 +60,7 @@ for i = [0:5]
 end
 
 angle = 45;
-for i = [0:5]
+for i = [0:2]
   m = rotationMatrixZ(120*i) * rotationMatrixX(angle/2);
   cone(angle, m);
 end
