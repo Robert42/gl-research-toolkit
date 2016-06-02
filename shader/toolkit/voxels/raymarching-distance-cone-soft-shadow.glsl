@@ -75,6 +75,7 @@ float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field,
   occlusion = max(0, occlusion);
   
   occlusion = sq(occlusion);
+  occlusion = smoothstep(0, 1, occlusion);
   
   return occlusion;
 }
