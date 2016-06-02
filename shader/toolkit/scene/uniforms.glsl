@@ -1,3 +1,6 @@
+#ifndef SCENE_UNIFORMS_GLSL
+#define SCENE_UNIFORMS_GLSL
+
 #include <lighting/light-structs.glsl>
 #include <voxels/voxel-structs.glsl>
 #include <alignment.glsl>
@@ -81,3 +84,4 @@ Sphere* distance_fields_bounding_spheres()
   return (Sphere*)scene.voxelHeader.distance_field_boundingsphere_array_address;
 }
 
+#endif // SCENE_UNIFORMS_GLSL

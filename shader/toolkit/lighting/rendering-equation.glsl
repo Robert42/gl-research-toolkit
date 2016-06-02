@@ -1,5 +1,6 @@
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/glsl/math-glsl.h>
+#include <voxels/raymarching-distance-cone-soft-shadow.glsl>
 #include "light-structs.glsl"
 
 #include <pbs/pbs.glsl>

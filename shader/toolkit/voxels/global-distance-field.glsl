@@ -1,4 +1,8 @@
-#include "distance-field-utils.glsl"
+#ifndef VOXELS_GLOBAL_DISTANCEFIELD_GLSL
+#define VOXELS_GLOBAL_DISTANCEFIELD_GLSL
+
+#include <voxels/distance-field-utils.glsl>
+#include <scene/uniforms.glsl>
 
 struct GlobalDistanceField
 {
@@ -132,3 +136,5 @@ float distancefield_ambientocclusion(const in GlobalDistanceField globalDistance
   
   return ao;
 }
+
+#endif // VOXELS_GLOBAL_DISTANCEFIELD_GLSL

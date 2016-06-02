@@ -1,9 +1,10 @@
-#include "raymarching-cubic-voxels.glsl"
-#include "distance-field-utils.glsl"
+#include "global-distance-field.glsl"
+
+#include <cone-tracing/cone-occlusion.glsl>
 
 float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global_distance_field, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
-  mat4 worldToVoxelSpace = global_distance_field.worldToVoxelSpaceMatrices[index];
+  mat4 worldToVoxelSpace = global_distance_field.worldToVoxelSpaces[index];
   ivec3 voxelSize = global_distance_field.voxelCounts[index];
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_from_cone(cone), worldToVoxelSpace);
@@ -18,8 +19,8 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   }
   */
   
-  WorldVoxelUvwSpaceFactor spaceFactor = spaceFactors[index];
-  worldToVoxelSpace_Factor = 1.f / spaceFactor.voxelToWorldSpace
+  WorldVoxelUvwSpaceFactor spaceFactor = global_distance_field.spaceFactors[index];
+  float worldToVoxelSpace_Factor = 1.f / spaceFactor.voxelToWorldSpace;
   
   intersection_distance_front = max(intersection_distance_front, 0) * worldToVoxelSpace_Factor;
   intersection_distance_back = min(intersection_distance_back, cone_length) * worldToVoxelSpace_Factor;
@@ -33,7 +34,6 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   int max_num_loops = 65536;
   while(t < intersection_distance_back && 0<=max_num_loops--)
   {
-    ++stepCount;
     vec3 p = get_point(ray_voxelspace, t);
     
     float d = distancefield_distance(p, spaceFactor, texture);
