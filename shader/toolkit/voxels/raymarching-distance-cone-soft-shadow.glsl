@@ -31,7 +31,7 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   
   float minVisibility = 1.f;
   
-  int max_num_loops = 65536;
+  int max_num_loops = 1024;
   while(t < intersection_distance_back && 0<=max_num_loops--)
   {
     vec3 p = get_point(ray_voxelspace, t);
