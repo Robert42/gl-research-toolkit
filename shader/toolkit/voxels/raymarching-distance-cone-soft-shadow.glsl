@@ -32,13 +32,16 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   float t = intersection_distance_front;
   
   float minVisibility = 1.f;
+  vec3 clamp_Range = vec3(voxelSize)-0.5f;
   
   int max_num_loops = 1024;
   while(t < intersection_distance_back && 0<=max_num_loops--)
   {
     vec3 p = get_point(ray_voxelspace, t);
     
-    float d = distancefield_distance(p, spaceFactor, texture);
+    vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
+    
+    float d = distancefield_distance(clamped_p, spaceFactor, texture) + distance(clamped_p, p);
     
     minVisibility = min(minVisibility, coneOcclusionHeuristic(cone, t, d));
     
