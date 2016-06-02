@@ -121,13 +121,12 @@ inline void ShaderDebugPrinter::printCone(const glm::vec3& origin, const glm::ve
   qDebug() << "Cone(origin="<< origin <<",   direction="<<direction<<",   tan_half_angle="<<tan_half_angle<<"(=> full cone-angle: "<<glm::degrees(2.f*glm::atan(tan_half_angle))<<"°))";
   if(visualize)
   {
-    positionsToDebug.append(origin);
+    Cone cone;
+    cone.origin = origin;
+    cone.direction = direction;
+    cone.tan_half_angle = tan_half_angle;
 
-    Arrow arrow;
-    arrow.from = origin;
-    arrow.to = origin+direction;
-
-    directionsToDebug.append(arrow);
+    conesToDebug.append(cone);
   }
 }
 
@@ -171,12 +170,14 @@ ShaderDebugPrinter::ShaderDebugPrinter()
     headerBuffer(sizeof(Header), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     chunkBuffer(sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS, gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
-    directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug))
+    directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug)),
+    coneVisualization(VisualizationRenderer::debugCones(&conesToDebug))
 {
   clearScene = false;
 
   renderList.connectTo(&positionVisualization);
   renderList.connectTo(&directionVisualization);
+  renderList.connectTo(&coneVisualization);
 
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
@@ -187,11 +188,13 @@ ShaderDebugPrinter::ShaderDebugPrinter()
       ReloadableShader::globalPreprocessorBlock.insert(preprocessorBlock);
       positionVisualization.setEnabled(true);
       directionVisualization.setEnabled(true);
+      coneVisualization.setEnabled(true);
     }else
     {
       ReloadableShader::globalPreprocessorBlock.remove(preprocessorBlock);
       positionVisualization.setEnabled(false);
       directionVisualization.setEnabled(false);
+      coneVisualization.setEnabled(false);
     }
     ReloadableShader::reloadAll();
   };
@@ -252,6 +255,7 @@ void ShaderDebugPrinter::end()
 
   positionsToDebug.clear();
   directionsToDebug.clear();
+  conesToDebug.clear();
 
   for(int i=0; i<GLSL_DEBUGGING_MAX_NUM_CHUNKS; ++i)
   {
@@ -265,6 +269,7 @@ void ShaderDebugPrinter::end()
 
   positionVisualization.reinit();
   directionVisualization.reinit();
+  coneVisualization.reinit();
 }
 
 void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)

@@ -35,6 +35,14 @@ struct Arrow
   padding<float> _p2;
 };
 
+struct Cone
+{
+  glm::vec3 origin;
+  float tan_half_angle;
+  glm::vec3 direction;
+  float _padding;
+};
+
 
 class DebugLineVisualisation final : public DebugRenderer::Implementation
 {
@@ -53,6 +61,7 @@ public:
   static DebugRenderer::Implementation* drawRectAreaLights(const QList<scene::RectAreaLightComponent::Data>& rectAreaLights);
   static DebugRenderer::Implementation* drawPositions(const QVector<glm::vec3>& positions);
   static DebugRenderer::Implementation* drawArrows(const QVector<Arrow>& arrows);
+  static DebugRenderer::Implementation* drawCones(const QVector<Cone>& cones);
   static DebugRenderer::Implementation* drawWorldGrid();
   static DebugRenderer::Implementation* drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes);
   static DebugRenderer::Implementation* drawSpheres(const QList<BoundingSphere>& spheres);

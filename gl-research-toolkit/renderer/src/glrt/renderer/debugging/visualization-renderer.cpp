@@ -82,6 +82,16 @@ DebugRenderer VisualizationRenderer::debugArrows(QVector<Arrow>* arrows)
   });
 }
 
+DebugRenderer VisualizationRenderer::debugCones(QVector<Cone>* cones)
+{
+  return DebugRenderer([cones]() -> DebugRenderer::Implementation* {
+    if(cones->isEmpty())
+      return nullptr;
+    else
+      return debugging::DebugLineVisualisation::drawCones(*cones);
+  });
+}
+
 DebugRenderer VisualizationRenderer::showWorldGrid()
 {
   return DebugRenderer([]() -> DebugRenderer::Implementation* {

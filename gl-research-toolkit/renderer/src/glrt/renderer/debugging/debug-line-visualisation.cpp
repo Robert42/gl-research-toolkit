@@ -155,6 +155,29 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawArrows(const QVector<
                                                                                                               QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
 }
 
+DebugRenderer::Implementation* DebugLineVisualisation::drawCones(const QVector<Cone>& cones)
+{
+  DebugMesh::Painter painter;
+
+  painter.pushMatrix(glm::vec3(0, 0, 1));
+  painter.addCircle(1.f, 96);
+  painter.popMatrix();
+  painter.addVertex(-1, 0, 1);
+  painter.addVertex( 0, 0, 0);
+  painter.addVertex( 1, 0, 1);
+  painter.addVertex( 0, 0, 0);
+  painter.addVertex( 0,-1, 1);
+  painter.addVertex( 0, 0, 0);
+  painter.addVertex( 0, 1, 1);
+  painter.addVertex( 0, 0, 0);
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  return new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                             cones,
+                                                             std::move(shaderCompiler.compileProgramFromFiles("visualize-cone",
+                                                                                                              QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+}
+
 
 DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
 {

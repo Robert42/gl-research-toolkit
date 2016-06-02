@@ -46,9 +46,11 @@ private:
 
   QVector<glm::vec3> positionsToDebug;
   QVector<Arrow> directionsToDebug;
+  QVector<Cone> conesToDebug;
 
   DebugRenderer positionVisualization;
   DebugRenderer directionVisualization;
+  DebugRenderer coneVisualization;
   DebugRenderer::List renderList;
 
   void setMouseCoordinate(const glm::ivec2& mouseCoordinate, Uint32 windowId);
