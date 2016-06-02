@@ -64,13 +64,10 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
-  vec3 meshNormal = fragment.normal;
-  vec3 bumpMappedNormal = material.normal;
-  uint32_t stepCount = 0;
-  GlobalDistanceField global_distance_field = init_global_distance_field();
-  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, meshNormal, stepCount);
+  mat4 tangent_to_worldspace = mat4(1);
+  float ao = distancefield_ao(tangent_to_worldspace);
   fragment_color = vec4(vec3(ao), 1);
-  return; 
+  return;
 #endif
 
   vec3 incoming_luminance = light_material(material, surface.position, scene.camera_position);

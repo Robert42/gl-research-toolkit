@@ -1,5 +1,4 @@
 #include "global-distance-field.glsl"
-#include "ambient-occlusion-cones.glsl"
 
 #include <cone-tracing/cone-occlusion.glsl>
 
