@@ -1,3 +1,6 @@
+#ifndef RAYMARCHING_DISTANCEFIELD_CONE_SOFTSHADOW_GLSL
+#define RAYMARCHING_DISTANCEFIELD_CONE_SOFTSHADOW_GLSL
+
 #include "global-distance-field.glsl"
 
 #include <cone-tracing/cone-occlusion.glsl>
@@ -84,3 +87,5 @@ float coneSoftShadow(in Cone cone, float cone_length=inf)
 {
   return coneSoftShadow(cone, init_global_distance_field(), cone_length);
 }
+
+#endif // RAYMARCHING_DISTANCEFIELD_CONE_SOFTSHADOW_GLSL
