@@ -15,6 +15,11 @@ enum class CameraSlot
   MAIN_CAMERA
 };
 
+enum class LightSlot
+{
+  MAIN_SUN
+};
+
 class CameraParameter;
 
 class Scene;
