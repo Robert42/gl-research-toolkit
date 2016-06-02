@@ -65,7 +65,8 @@ return;
 
 #if defined(DISTANCEFIELD_AO)
   mat4 tangent_to_worldspace = mat4(1);
-  float ao = distancefield_ao(tangent_to_worldspace);
+  init_cone_bouquet(tangent_to_worldspace);
+  float ao = distancefield_ao();
   fragment_color = vec4(vec3(ao), 1);
   return;
 #endif

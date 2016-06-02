@@ -4,7 +4,7 @@
 
 Cone cone_bouquet[N_GI_CONES];
 
-void init_cone_bouquet()
+void init_cone_bouquet(in mat4 tangent_to_worldspace)
 {
   const float tan_half_angle_of_60 = 0.577350269189626;
   const float tan_half_angle_of_45 = 0.414213562373095;
@@ -49,17 +49,17 @@ void init_cone_bouquet()
   
 #elif N_GI_CONES == 9
   cone_bouquet[6].origin = vec3(0);
-  cone_bouquet[6].direction = vec3(, , 0.923879532511287);
+  cone_bouquet[6].direction = vec3(0, -0.382683432365090, 0.923879532511287);
   cone_bouquet[6].tan_half_angle = tan_half_angle_of_45;
   cone_bouquet[6].inv_cos_half_angle = inv_cos_half_angle_of_45;
   
   cone_bouquet[7].origin = vec3(0);
-  cone_bouquet[7].direction = vec3(, , 0.923879532511287);
+  cone_bouquet[7].direction = vec3(0.331413574035592, 0.191341716182545, 0.923879532511287);
   cone_bouquet[7].tan_half_angle = tan_half_angle_of_45;
   cone_bouquet[7].inv_cos_half_angle = inv_cos_half_angle_of_45;
   
   cone_bouquet[8].origin = vec3(0);
-  cone_bouquet[8].direction = vec3(, , 0.923879532511287);
+  cone_bouquet[8].direction = vec3(-0.331413574035592, 0.191341716182545, 0.923879532511287);
   cone_bouquet[8].tan_half_angle = tan_half_angle_of_45;
   cone_bouquet[8].inv_cos_half_angle = inv_cos_half_angle_of_45;
 #else
@@ -68,7 +68,7 @@ void init_cone_bouquet()
 
 }
 
-float distancefield_ao(in mat4 tangent_to_worldspace, in GlobalDistanceField global_distance_field, float radius=3.5)
+float distancefield_ao(in GlobalDistanceField global_distance_field, float radius=3.5)
 {
   for(int i=0; i<N_GI_CONES; ++i)
     SHOW_VALUE(cone_bouquet[i]);
@@ -76,7 +76,7 @@ float distancefield_ao(in mat4 tangent_to_worldspace, in GlobalDistanceField glo
   return 1;
 }
 
-float distancefield_ao(in mat4 tangent_to_worldspace, float radius=3.5)
+float distancefield_ao(float radius=3.5)
 {
-  return distancefield_ao(tangent_to_worldspace, init_global_distance_field(), radius);
+  return distancefield_ao(init_global_distance_field(), radius);
 }
