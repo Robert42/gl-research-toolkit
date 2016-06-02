@@ -43,14 +43,14 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
     t += abs(d);
   }
   
-  return 1.f - minVisibility;
+  return minVisibility;
 }
 
 float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field, float cone_length=inf)
 {
   uint32_t num_distance_fields = global_distance_field.num_distance_fields;
   
-  float occlusion = 0.f;
+  float occlusion = 1.f;
   
   Sphere* bounding_spheres = global_distance_field.bounding_spheres;
   
@@ -63,11 +63,15 @@ float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field,
     {
       float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
       float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-      occlusion = max(occlusion, coneSoftShadow(cone, i, global_distance_field, intersection_distance_front, intersection_distance_back, cone_length));
+      occlusion = min(occlusion, coneSoftShadow(cone, i, global_distance_field, intersection_distance_front, intersection_distance_back, cone_length));
     }
   }
   
-  return clamp(occlusion, 0, 1);
+  occlusion = max(0, occlusion);
+  
+  occlusion = sq(occlusion);
+  
+  return occlusion;
 }
 
 float coneSoftShadow(in Cone cone, float cone_length=inf)
