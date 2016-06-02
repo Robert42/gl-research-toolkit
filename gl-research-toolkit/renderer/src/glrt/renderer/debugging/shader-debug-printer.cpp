@@ -116,6 +116,21 @@ inline void ShaderDebugPrinter::printRay(const glm::vec3& origin, const glm::vec
   }
 }
 
+inline void ShaderDebugPrinter::printCone(const glm::vec3& origin, const glm::vec3& direction, float tan_half_angle, bool visualize)
+{
+  qDebug() << "Cone(origin="<< origin <<",   direction="<<direction<<",   tan_half_angle="<<tan_half_angle<<"(=> full cone-angle: "<<glm::degrees(2.f*glm::atan(tan_half_angle))<<"°))";
+  if(visualize)
+  {
+    positionsToDebug.append(origin);
+
+    Arrow arrow;
+    arrow.from = origin;
+    arrow.to = origin+direction;
+
+    directionsToDebug.append(arrow);
+  }
+}
+
 
 inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 {
@@ -142,6 +157,8 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
     printPlane(chunk.floatValues[0].xyz(), chunk.floatValues[0].w);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RAY[0])
     printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.integerValues[0]);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_CONE[0])
+    printCone(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.floatValues[2].x, chunk.integerValues[0]);
   else if(chunk.type == glm::GLSL_DEBUGGING_TYPE_NONE)
     qDebug() << "ShaderDebugPrinter: Warning["<<warningId<<"]: trying to read chunk of type GLSL_DEBUGGING_TYPE_NONE";
   else

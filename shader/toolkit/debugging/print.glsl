@@ -228,3 +228,17 @@ void SHOW_VALUE(in Ray r)
 {
   PRINT_VALUE(r, true);
 }
+
+void PRINT_VALUE(in Cone cone, bool visualize=false)
+{
+  mat4 value;
+  value[0] = vec4(cone.origin, 1);
+  value[1] = vec4(cone.direction, 0);
+  value[2] = vec4(cone.tan_half_angle, 0, 0, 0);
+  implement_print_value(GLSL_DEBUGGING_TYPE_CONE, value, visualize);
+}
+
+void SHOW_VALUE(in Cone cone)
+{
+  PRINT_VALUE(cone, true);
+}
