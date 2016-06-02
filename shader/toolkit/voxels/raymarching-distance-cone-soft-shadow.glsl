@@ -22,7 +22,9 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   WorldVoxelUvwSpaceFactor spaceFactor = global_distance_field.spaceFactors[index];
   float worldToVoxelSpace_Factor = 1.f / spaceFactor.voxelToWorldSpace;
   
-  intersection_distance_front = max(intersection_distance_front, 0) * worldToVoxelSpace_Factor;
+  float self_shadow_avoidance = 0.9f; // TODO: use the distancefield itself to get the best offset?
+  
+  intersection_distance_front = max(intersection_distance_front*worldToVoxelSpace_Factor, self_shadow_avoidance);
   intersection_distance_back = min(intersection_distance_back, cone_length) * worldToVoxelSpace_Factor;
   
   sampler3D texture = global_distance_field.distance_field_textures[index];
