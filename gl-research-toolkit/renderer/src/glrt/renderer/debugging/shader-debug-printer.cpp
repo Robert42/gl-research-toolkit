@@ -81,6 +81,7 @@ inline void printMatrixChunk(glm::ivec2 dimensions, const char* matrixPrefix, co
     default:
       Q_UNREACHABLE();
     }
+    break;
   default:
     Q_UNREACHABLE();
   }
