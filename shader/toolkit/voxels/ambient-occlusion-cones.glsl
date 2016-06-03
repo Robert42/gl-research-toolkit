@@ -1,6 +1,6 @@
 #include <voxels/raymarching-distance-cone-soft-shadow.glsl>
 
-#define N_GI_CONES 7
+#define N_GI_CONES 9
 
 Cone cone_bouquet[N_GI_CONES];
 
@@ -75,7 +75,7 @@ float distancefield_ao(in GlobalDistanceField global_distance_field, float radiu
   float V = N_GI_CONES;
   for(int i=0; i<N_GI_CONES; ++i)
   {
-    V -= coneSoftShadow(cone_bouquet[i], global_distance_field, radius);
+    V -= coneSoftShadow(cone_bouquet[i], global_distance_field, radius, 1.f);
   }
     
   return 1.f - V / N_GI_CONES;
