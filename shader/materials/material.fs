@@ -99,10 +99,6 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
     return;
   #endif
   
-  vec3 fragment_normal = normalize(fragment.normal);
-  vec3 fragment_tangent = normalize(fragment.tangent);
-  vec3 fragment_bitangent = normalize(fragment.bitangent);
-  mat3 tanget_to_world_space = mat3(fragment_tangent, fragment_bitangent, fragment_normal);
   float normal_length = length(normal);
   normal = normalize(tanget_to_world_space * normal);
   
@@ -143,6 +139,11 @@ void main()
   return;
 #endif
 #endif
+
+  vec3 fragment_normal = normalize(fragment.normal);
+  vec3 fragment_tangent = normalize(fragment.tangent);
+  vec3 fragment_bitangent = normalize(fragment.bitangent);
+  tanget_to_world_space = mat3(fragment_tangent, fragment_bitangent, fragment_normal);
 
   BaseMaterial material;
   SurfaceData surface;

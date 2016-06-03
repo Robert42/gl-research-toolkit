@@ -10,6 +10,8 @@
 
 out vec4 fragment_color;
 
+mat3 tanget_to_world_space = mat3(1);
+
 #include "highlight-numeric-issues.glsl"
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
@@ -64,8 +66,7 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
-  mat4 tangent_to_worldspace = mat4(1);
-  init_cone_bouquet(tangent_to_worldspace);
+  init_cone_bouquet(tanget_to_world_space, surface.position);
   float ao = distancefield_ao();
   fragment_color = vec4(vec3(ao), 1);
   return;
