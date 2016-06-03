@@ -5,7 +5,7 @@
 
 #include <cone-tracing/cone-occlusion.glsl>
 
-float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global_distance_field, float intersection_distance_front, float intersection_distance_back, float cone_length, float ao)
+float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global_distance_field, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
   mat4 worldToVoxelSpace = global_distance_field.worldToVoxelSpaces[index];
   ivec3 voxelSize = global_distance_field.voxelCounts[index];
@@ -49,7 +49,7 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
     
     float d = distancefield_distance(clamped_p, spaceFactor, texture) + distance(clamped_p, p);
     
-    minVisibility = min(minVisibility, coneOcclusionHeuristic(cone, t, d, ao*(1.f-t*inv_cone_length_voxelspace)));
+    minVisibility = min(minVisibility, coneOcclusionHeuristic(cone, t, d));
     
     t += abs(d);
   }
@@ -57,7 +57,7 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   return minVisibility;
 }
 
-float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field, float cone_length=inf, float ao=0.f)
+float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field, float cone_length=inf)
 {
   uint32_t num_distance_fields = global_distance_field.num_distance_fields;
   
@@ -74,7 +74,7 @@ float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field,
     {
       float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
       float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-      occlusion = min(occlusion, coneSoftShadow(cone, i, global_distance_field, intersection_distance_front, intersection_distance_back, cone_length, ao));
+      occlusion = min(occlusion, coneSoftShadow(cone, i, global_distance_field, intersection_distance_front, intersection_distance_back, cone_length));
     }
   }
   
@@ -86,9 +86,9 @@ float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field,
   return occlusion;
 }
 
-float coneSoftShadow(in Cone cone, float cone_length=inf, float ao=0.f)
+float coneSoftShadow(in Cone cone, float cone_length=inf)
 {
-  return coneSoftShadow(cone, init_global_distance_field(), cone_length, ao);
+  return coneSoftShadow(cone, init_global_distance_field(), cone_length);
 }
 
 #endif // RAYMARCHING_DISTANCEFIELD_CONE_SOFTSHADOW_GLSL
