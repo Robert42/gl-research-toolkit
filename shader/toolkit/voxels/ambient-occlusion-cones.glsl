@@ -72,10 +72,14 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 
 float distancefield_ao(in GlobalDistanceField global_distance_field, float radius=3.5)
 {
+  float V = N_GI_CONES;
   for(int i=0; i<N_GI_CONES; ++i)
+  {
     SHOW_VALUE(cone_bouquet[i]);
+    V -= coneSoftShadow(cone_bouquet[i], global_distance_field, radius);
+  }
     
-  return 1;
+  return 1.f - V / N_GI_CONES;
 }
 
 float distancefield_ao(float radius=3.5)
