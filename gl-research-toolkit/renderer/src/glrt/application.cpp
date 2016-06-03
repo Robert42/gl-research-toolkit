@@ -56,7 +56,9 @@ bool Application::pollEvent(SDL_Event* e)
 float Application::update()
 {
   qApp->processEvents();
-  float frameDuration = profiler.update();
+  frameDuration = profiler.update();
+  frameDurationMS = frameDuration * 1000.f;
+  frameRate = 1.f / frameDuration;
   return frameDuration;
 }
 

@@ -5,12 +5,16 @@
 
 
 namespace glrt {
+
+class Application;
+
 namespace gui {
 
 class Toolbar final
 {
 public:
   TwBar* tweakBar;
+  float fps;
 
   Toolbar();
   ~Toolbar();
@@ -18,7 +22,7 @@ public:
   static void registerTweakBar(TwBar* tweakBar, bool hideNow=false);
   static void unregisterTweakBar(TwBar* tweakBar);
 
-  void init();
+  void init(Application* application);
   void deinit();
 
 private:

@@ -31,7 +31,7 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   if(!settings.globalDescription.isEmpty())
     TwSetParam(nullptr, nullptr, "help", TW_PARAM_CSTRING, 1, settings.globalDescription.toStdString().c_str());
 
-  toolbar.init();
+  toolbar.init(application);
 }
 
 

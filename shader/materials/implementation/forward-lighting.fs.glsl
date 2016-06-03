@@ -69,8 +69,8 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
-  float ao = distancefield_ao();
-  fragment_color = vec4(vec3(ao), 1);
+  float ao_distancefield = distancefield_ao();
+  fragment_color = vec4(vec3(ao_distancefield), 1);
   return;
 #endif
 

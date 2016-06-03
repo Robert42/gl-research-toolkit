@@ -28,6 +28,9 @@ public:
   Settings settings;
   SDL_Window* const sdlWindow;
   AngelScript::asIScriptEngine* scriptEngine;
+  float frameRate;
+  float frameDurationMS;
+  float frameDuration;
 
   Profiler profiler;
 

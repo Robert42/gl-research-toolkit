@@ -1,4 +1,5 @@
 #include <glrt/gui/toolbar.h>
+#include <glrt/application.h>
 
 
 namespace glrt {
@@ -19,15 +20,21 @@ Toolbar::~Toolbar()
   Q_ASSERT_X(tweakBar == nullptr, "glrt::gui::Toolbar::~Toolbar()", "You forgot to call Toolbar::deinit()");
 }
 
-void Toolbar::init()
+void Toolbar::init(Application* application)
 {
   glm::ivec2 pos(4096);
-  glm::ivec2 size(200, 96);
+  glm::ivec2 size(200, 128);
+
+  float reshreshRate = 0.25f;
 
   tweakBar = TwNewBar(toolbarTitle);
   TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Toggles the visibilty of other tweak bars");
   TwSetParam(tweakBar, nullptr, "position", TW_PARAM_INT32, 2, &pos);
   TwSetParam(tweakBar, nullptr, "size", TW_PARAM_INT32, 2, &size);
+  TwSetParam(tweakBar, nullptr, "refresh", TW_PARAM_FLOAT, 2, &reshreshRate);
+
+  TwAddVarRO(tweakBar, "FPS", TW_TYPE_FLOAT, &application->frameRate, "readonly=true help='the framerate of the application'");
+  TwAddVarRO(tweakBar, "ms", TW_TYPE_FLOAT, &application->frameDurationMS, "readonly=true help='the frameduration of the application in milliseconds'");
 }
 
 void Toolbar::deinit()
