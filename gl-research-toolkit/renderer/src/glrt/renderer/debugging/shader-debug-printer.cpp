@@ -82,6 +82,16 @@ inline void printMatrixChunk(glm::ivec2 dimensions, const char* matrixPrefix, co
       Q_UNREACHABLE();
     }
     break;
+  case 3:
+    switch(dimensions.y)
+    {
+    case 3:
+      qDebug() << matrixPrefix  << glm::tmat3x3<T>(input[0].xyz(), input[1].xyz(), input[2].xyz());
+      break;
+    default:
+      Q_UNREACHABLE();
+    }
+    break;
   default:
     Q_UNREACHABLE();
   }

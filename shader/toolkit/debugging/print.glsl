@@ -193,6 +193,15 @@ void PRINT_VALUE(in mat4 value)
   implement_print_value(GLSL_DEBUGGING_TYPE_MAT(4,4), value);
 }
 
+void PRINT_VALUE(in mat3 value)
+{
+  mat4 m = mat4(1);
+  m[0].xyz = value[0];
+  m[1].xyz = value[1];
+  m[2].xyz = value[2];
+  implement_print_value(GLSL_DEBUGGING_TYPE_MAT(3,3), m);
+}
+
 void PRINT_VALUE(in Sphere s)
 {
   mat4 value;
