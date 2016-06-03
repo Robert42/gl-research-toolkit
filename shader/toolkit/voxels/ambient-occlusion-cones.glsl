@@ -75,7 +75,6 @@ float distancefield_ao(in GlobalDistanceField global_distance_field, float radiu
   float V = N_GI_CONES;
   for(int i=0; i<N_GI_CONES; ++i)
   {
-    SHOW_VALUE(cone_bouquet[i]);
     V -= coneSoftShadow(cone_bouquet[i], global_distance_field, radius);
   }
     
@@ -85,4 +84,10 @@ float distancefield_ao(in GlobalDistanceField global_distance_field, float radiu
 float distancefield_ao(float radius=3.5)
 {
   return distancefield_ao(init_global_distance_field(), radius);
+}
+
+void SHOW_CONES()
+{
+  for(int i=0; i<N_GI_CONES; ++i)
+    SHOW_VALUE(cone_bouquet[i]);
 }

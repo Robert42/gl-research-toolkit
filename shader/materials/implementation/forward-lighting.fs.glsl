@@ -17,6 +17,8 @@ void calc_tangent_to_worldspace();
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
+  init_cone_bouquet(tangent_to_worldspace, surface.position);
+  
 #ifdef MASKED
   alpha = step(MASK_THRESHOLD, alpha);
 #endif
@@ -67,7 +69,6 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
-  init_cone_bouquet(tangent_to_worldspace, surface.position);
   float ao = distancefield_ao();
   fragment_color = vec4(vec3(ao), 1);
   return;
