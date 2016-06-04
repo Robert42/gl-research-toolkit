@@ -31,7 +31,7 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   if(!settings.globalDescription.isEmpty())
     TwSetParam(nullptr, nullptr, "help", TW_PARAM_CSTRING, 1, settings.globalDescription.toStdString().c_str());
 
-  toolbar.init();
+  toolbar.init(application);
 }
 
 
@@ -119,7 +119,8 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   sceneSwitcher->initWithUuids<Scene>(scene.resourceManager, scene.resourceManager.allRegisteredScenes());
   sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
-  renderer->visualizePosteffect_GlobalDistancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Global-Distance-Field Ray-March", "group='Debug Voxels'");
+  renderer->visualizePosteffect_Distancefield_boundingSpheres_raymarch.guiToggle.TwAddVarCB(tweakBar, "SDF B-Spheres", "group='Debug Voxels' help='Show the Bounding Spheres of the Distancefield Components as if they would define the distance field'");
+//  renderer->visualizePosteffect_GlobalDistancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Global-Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
@@ -144,7 +145,6 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwSetParam(tweakBar, "Camera", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Debug Scene -------------------------------------------------------
-  renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
 
   disableSceneryVoxels.setter = [renderer,this,&scene](bool v){
     this->_disableSceneryVoxels=v;
@@ -159,11 +159,13 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   disableSceneryVoxels.getter = [this]() -> bool {return _disableSceneryVoxels;};
   disableSceneryVoxels.TwAddVarCB(tweakBar, "DisableSceneryVoxels", "group='Debug Scene'");
 
+  renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
+  renderer->visualizeVoxelBoundingSpheres.guiToggle.TwAddVarCB(tweakBar, "Show SDF B-Spheres", "group='Debug Scene' help='Show the Bounding Spheres of the Distancefield Components'");
+
   renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group='Debug Scene'");
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
-  renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
   TwSetParam(tweakBar, "Debug Scene", "opened", TW_PARAM_CSTRING, 1, "false");
 
   gui::Toolbar::registerTweakBar(tweakBar, true);

@@ -10,10 +10,15 @@
 
 out vec4 fragment_color;
 
+mat3 tangent_to_worldspace;
+void calc_tangent_to_worldspace();
+
 #include "highlight-numeric-issues.glsl"
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
+  init_cone_bouquet(tangent_to_worldspace, surface.position);
+  
 #ifdef MASKED
   alpha = step(MASK_THRESHOLD, alpha);
 #endif
@@ -64,11 +69,9 @@ return;
 #endif
 
 #if defined(DISTANCEFIELD_AO)
-  uint32_t stepCount = 0;
-  GlobalDistanceField global_distance_field = init_global_distance_field();
-  float ao = distancefield_ambientocclusion(global_distance_field, surface.position, material.normal, stepCount);
-  fragment_color = vec4(vec3(ao), 1);
-  return; 
+  float ao_distancefield = distancefield_ao();
+  fragment_color = vec4(vec3(ao_distancefield), 1);
+  return;
 #endif
 
   vec3 incoming_luminance = light_material(material, surface.position, scene.camera_position);

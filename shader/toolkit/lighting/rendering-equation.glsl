@@ -1,10 +1,14 @@
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/glsl/math-glsl.h>
+#include <voxels/raymarching-distance-cone-soft-shadow.glsl>
+#include <voxels/ambient-occlusion-cones.glsl>
 #include "light-structs.glsl"
 
 #include <pbs/pbs.glsl>
 
 #include "light-direction.glsl"
+
+#define CONETRACED_SHADOW 1
 
 struct LightData
 {
@@ -59,6 +63,8 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
   vec3 outgoing_luminance = vec3(0);
 
 #ifndef NO_LIGHTING
+
+  GlobalDistanceField global_distance_field = init_global_distance_field();
   
   uint32_t num_sphere_lights;
   SphereAreaLight* sphere_lights;
@@ -80,7 +86,16 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     light_data.direction_to_light_specular = getDirectionToLight(light_data.specularEnergyFactor, light_data.distance_to_light_specular, sphere, surface, surface.dominant_specular_dir);
     light_data.direction_to_light_diffuse  = getDirectionToLight(dummy, light_data.distance_to_light_diffuse,  sphere, surface, surface.dominant_diffuse_dir);
     
-    outgoing_luminance += do_the_lighting(light_data, brdf_g, surface);
+    float occlusion = 1.f;
+    
+#if CONETRACED_SHADOW
+    float cone_length = distance(worldPosition, sphere.origin);
+    Cone cone = cone_from_point_to_sphere(worldPosition, sphere);
+    occlusion = coneSoftShadow(cone, global_distance_field, cone_length);
+    // TODO: Also other light sources should occlude this ligth source?
+#endif
+
+    outgoing_luminance += occlusion * do_the_lighting(light_data, brdf_g, surface);
   }
   
   uint32_t num_rect_lights;

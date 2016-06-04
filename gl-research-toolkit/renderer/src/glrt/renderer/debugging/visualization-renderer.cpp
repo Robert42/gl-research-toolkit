@@ -51,6 +51,17 @@ DebugRenderer VisualizationRenderer::debugVoxelGrids(scene::Scene* scene)
   });
 }
 
+DebugRenderer VisualizationRenderer::debugVoxelBoundingSpheres(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    QHash<QString, BoundingSphere> voxelBoundingSpheres = scene::collectNamedVoxelBoundingSphere(scene);
+    if(voxelBoundingSpheres.isEmpty())
+      return nullptr;
+    else
+      return debugging::DebugLineVisualisation::drawSpheres(voxelBoundingSpheres.values());
+  });
+}
+
 DebugRenderer VisualizationRenderer::debugPoints(QVector<glm::vec3>* points)
 {
   return DebugRenderer([points]() -> DebugRenderer::Implementation* {
@@ -68,6 +79,16 @@ DebugRenderer VisualizationRenderer::debugArrows(QVector<Arrow>* arrows)
       return nullptr;
     else
       return debugging::DebugLineVisualisation::drawArrows(*arrows);
+  });
+}
+
+DebugRenderer VisualizationRenderer::debugCones(QVector<Cone>* cones)
+{
+  return DebugRenderer([cones]() -> DebugRenderer::Implementation* {
+    if(cones->isEmpty())
+      return nullptr;
+    else
+      return debugging::DebugLineVisualisation::drawCones(*cones);
   });
 }
 

@@ -81,6 +81,17 @@ inline void printMatrixChunk(glm::ivec2 dimensions, const char* matrixPrefix, co
     default:
       Q_UNREACHABLE();
     }
+    break;
+  case 3:
+    switch(dimensions.y)
+    {
+    case 3:
+      qDebug() << matrixPrefix  << glm::tmat3x3<T>(input[0].xyz(), input[1].xyz(), input[2].xyz());
+      break;
+    default:
+      Q_UNREACHABLE();
+    }
+    break;
   default:
     Q_UNREACHABLE();
   }
@@ -116,6 +127,20 @@ inline void ShaderDebugPrinter::printRay(const glm::vec3& origin, const glm::vec
   }
 }
 
+inline void ShaderDebugPrinter::printCone(const glm::vec3& origin, const glm::vec3& direction, float tan_half_angle, bool visualize)
+{
+  qDebug() << "Cone(origin="<< origin <<",   direction="<<direction<<",   tan_half_angle="<<tan_half_angle<<"(=> full cone-angle: "<<glm::degrees(2.f*glm::atan(tan_half_angle))<<"°))";
+  if(visualize)
+  {
+    Cone cone;
+    cone.origin = origin;
+    cone.direction = direction;
+    cone.tan_half_angle = tan_half_angle;
+
+    conesToDebug.append(cone);
+  }
+}
+
 
 inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
 {
@@ -142,6 +167,8 @@ inline void ShaderDebugPrinter::printChunk(const Chunk& chunk)
     printPlane(chunk.floatValues[0].xyz(), chunk.floatValues[0].w);
   else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_RAY[0])
     printRay(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.integerValues[0]);
+  else if(chunk.type[0] == glm::GLSL_DEBUGGING_TYPE_CONE[0])
+    printCone(chunk.floatValues[0].xyz(), chunk.floatValues[1].xyz(), chunk.floatValues[2].x, chunk.integerValues[0]);
   else if(chunk.type == glm::GLSL_DEBUGGING_TYPE_NONE)
     qDebug() << "ShaderDebugPrinter: Warning["<<warningId<<"]: trying to read chunk of type GLSL_DEBUGGING_TYPE_NONE";
   else
@@ -154,12 +181,14 @@ ShaderDebugPrinter::ShaderDebugPrinter()
     headerBuffer(sizeof(Header), gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     chunkBuffer(sizeof(Chunk)*GLSL_DEBUGGING_MAX_NUM_CHUNKS, gl::Buffer::UsageFlag(gl::Buffer::UsageFlag::MAP_READ | gl::Buffer::UsageFlag::MAP_WRITE), nullptr),
     positionVisualization(VisualizationRenderer::debugPoints(&positionsToDebug)),
-    directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug))
+    directionVisualization(VisualizationRenderer::debugArrows(&directionsToDebug)),
+    coneVisualization(VisualizationRenderer::debugCones(&conesToDebug))
 {
   clearScene = false;
 
   renderList.connectTo(&positionVisualization);
   renderList.connectTo(&directionVisualization);
+  renderList.connectTo(&coneVisualization);
 
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
@@ -170,11 +199,13 @@ ShaderDebugPrinter::ShaderDebugPrinter()
       ReloadableShader::globalPreprocessorBlock.insert(preprocessorBlock);
       positionVisualization.setEnabled(true);
       directionVisualization.setEnabled(true);
+      coneVisualization.setEnabled(true);
     }else
     {
       ReloadableShader::globalPreprocessorBlock.remove(preprocessorBlock);
       positionVisualization.setEnabled(false);
       directionVisualization.setEnabled(false);
+      coneVisualization.setEnabled(false);
     }
     ReloadableShader::reloadAll();
   };
@@ -235,6 +266,7 @@ void ShaderDebugPrinter::end()
 
   positionsToDebug.clear();
   directionsToDebug.clear();
+  conesToDebug.clear();
 
   for(int i=0; i<GLSL_DEBUGGING_MAX_NUM_CHUNKS; ++i)
   {
@@ -248,6 +280,7 @@ void ShaderDebugPrinter::end()
 
   positionVisualization.reinit();
   directionVisualization.reinit();
+  coneVisualization.reinit();
 }
 
 void ShaderDebugPrinter::recordBinding(gl::CommandListRecorder& recorder)

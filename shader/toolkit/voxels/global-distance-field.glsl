@@ -1,4 +1,8 @@
-#include "distance-field-utils.glsl"
+#ifndef VOXELS_GLOBAL_DISTANCEFIELD_GLSL
+#define VOXELS_GLOBAL_DISTANCEFIELD_GLSL
+
+#include <voxels/distance-field-utils.glsl>
+#include <scene/uniforms.glsl>
 
 struct GlobalDistanceField
 {
@@ -7,6 +11,7 @@ struct GlobalDistanceField
   ivec3* voxelCounts;
   WorldVoxelUvwSpaceFactor* spaceFactors;
   sampler3D* distance_field_textures;
+  Sphere* bounding_spheres;
 };
 
 GlobalDistanceField init_global_distance_field()
@@ -17,6 +22,7 @@ GlobalDistanceField init_global_distance_field()
   gdf.voxelCounts = distance_fields_voxelCount();
   gdf.spaceFactors = distance_fields_spaceFactor();
   gdf.distance_field_textures = distance_fields_texture();
+  gdf.bounding_spheres = distance_fields_bounding_spheres();
   return gdf;
 }
 
@@ -90,30 +96,45 @@ vec3 distancefield_normal(const in GlobalDistanceField globalDistanceField, vec3
                               distance_to_location(globalDistanceField, z2, stepCount));
 }
 
+#define LINEAR_AO_STEPS 0
+
+// Based on http://iquilezles.org/www/material/nvscene2008/rwwtt.pdf page 53
 float distancefield_ambientocclusion(const in GlobalDistanceField globalDistanceField, vec3 location_ws, vec3 normal_ws, inout uint32_t stepCount)
 {
-  float offset = 0;//-min(0, distance_to_location(globalDistanceField, location_ws, stepCount)) + 1.e-4f;
-  float delta = 0.2f;
+  const float offset = 0;
+  const float ao_radius = 3.5;
+  const float max_query_radius = ao_radius * 0.5f;
+  const int nQueries = 4;
   
-  float attenuation = 1;
+  float samplingDistance = max_query_radius / 16.f;
+  float delta = max_query_radius / nQueries;
+  
+  float attenuation = 0.5;
   
   float occlusion = 0.f;
   float maxDiff = 0.f;
-  
-  for(int i=0; i<5; ++i)
+    
+  for(int i=1; i<=nQueries; ++i)
   {
+#if LINEAR_AO_STEPS
     float expected_distance = offset + i * delta;
+#else
+    float expected_distance = offset + samplingDistance;
+#endif
     float real_distance = distance_to_location(globalDistanceField, location_ws + normal_ws*expected_distance, stepCount);
     
     occlusion += attenuation * (expected_distance - real_distance);
     maxDiff += expected_distance;
     
+    samplingDistance *= 2.f;
     attenuation *= 0.5f;
   }
   
-  float strength = 4.f / maxDiff;
+  float strength = 4 / maxDiff;
   
   float ao = 1.f - occlusion * strength;
   
   return ao;
 }
+
+#endif // VOXELS_GLOBAL_DISTANCEFIELD_GLSL

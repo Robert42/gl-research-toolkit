@@ -101,6 +101,27 @@ AABB StaticMesh::boundingBox() const
   return aabb;
 }
 
+BoundingSphere StaticMesh::boundingSphere() const
+{
+  AABB aabb;
+  BoundingSphere boundingSphere;
+
+  boundingShapes(boundingSphere, aabb);
+
+  return boundingSphere;
+}
+
+void StaticMesh::boundingShapes(BoundingSphere& sphere, AABB& aabb) const
+{
+  aabb = boundingBox();
+  sphere = BoundingSphere{(aabb.maxPoint+aabb.minPoint)*0.5f, 0};
+
+  for(const Vertex& vertex : vertices)
+  {
+    sphere.radius = glm::max(sphere.radius, distance(vertex.position, sphere.center));
+  }
+}
+
 size_t StaticMesh::rawDataSize() const
 {
   return size_t(indices.length()) * sizeof(index_type) + size_t(vertices.length()) * sizeof(Vertex);

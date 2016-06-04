@@ -32,6 +32,8 @@ void main()
   fragment_color = checkerboard();
   return;
 #endif
+
+  calc_tangent_to_worldspace();
   
   SurfaceData surface;
   surface.position = fragment.position;
@@ -99,12 +101,8 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
     return;
   #endif
   
-  vec3 fragment_normal = normalize(fragment.normal);
-  vec3 fragment_tangent = normalize(fragment.tangent);
-  vec3 fragment_bitangent = normalize(fragment.bitangent);
-  mat3 tanget_to_world_space = mat3(fragment_tangent, fragment_bitangent, fragment_normal);
   float normal_length = length(normal);
-  normal = normalize(tanget_to_world_space * normal);
+  normal = normalize(tangent_to_worldspace * normal);
   
   srmo = mix(material_instance.srmo_range_0, material_instance.srmo_range_1, srmo);
   
@@ -144,6 +142,8 @@ void main()
 #endif
 #endif
 
+  calc_tangent_to_worldspace();
+
   BaseMaterial material;
   SurfaceData surface;
   float alpha;
@@ -169,3 +169,12 @@ void main()
 #error No valid main function found for the material.fs
 
 #endif
+
+
+void calc_tangent_to_worldspace()
+{
+  vec3 fragment_normal = normalize(fragment.normal);
+  vec3 fragment_tangent = normalize(fragment.tangent);
+  vec3 fragment_bitangent = normalize(fragment.bitangent);
+  tangent_to_worldspace = mat3(fragment_tangent, fragment_bitangent, fragment_normal);
+}

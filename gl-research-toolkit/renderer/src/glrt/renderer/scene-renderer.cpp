@@ -23,11 +23,13 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
+    visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
     visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
+    visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     visualizePosteffect_GlobalDistancefield_raymarch(debugging::DebuggingPosteffect::globalDistanceFieldRaymarch()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
@@ -44,12 +46,14 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
+  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
+  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_GlobalDistancefield_raymarch);
 
   setAdjustRoughness(true);

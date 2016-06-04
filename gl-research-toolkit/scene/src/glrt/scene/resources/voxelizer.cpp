@@ -177,6 +177,7 @@ void Voxelizer::registerToIndex(const FileNames& fileNames)
     voxelIndex.offset = i.value().offset;
     voxelIndex.gridSize = i.value().gridSize;
     voxelIndex.texture3D = textureUuid;
+    voxelIndex.boundingSphere = i.value().boundingSphere;
     voxelIndex.localToVoxelSpace = i.value().localToVoxelSpace;
     voxelIndex.voxelizedAsScenery = i.value().flags.testFlag(VoxelFile::MetaData::Flag::Scenery);
 
@@ -449,7 +450,10 @@ VoxelFile::MetaData findBestSize(size_t meshDataSize, size_t bytesPerVoxel, cons
 
 VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileName, const TriangleArray& staticMesh, size_t meshDataSize, Voxelizer::FieldType type, Voxelizer::MeshType meshType, const Voxelizer::Hints& hints)
 {
-  const AABB aabb = staticMesh.boundingBox();
+  BoundingSphere boundingSphere;
+  AABB aabb;
+
+  staticMesh.boundingShapes(boundingSphere, aabb);
 
   TextureFile textureFile;
 
@@ -464,6 +468,7 @@ VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileNam
     const size_t bytesPerVoxel = size_t(GlTexture::bytesPerPixelForFormatType(voxelFormat, voxelType));
 
     metaData = findBestSize(meshDataSize, bytesPerVoxel, aabb, hints);
+    metaData.boundingSphere = boundingSphere;
     metaData.fieldType = type;
 
     utilities::GlTexture texture = Voxelizer::Implementation::singleton->distanceField(metaData.gridSize, metaData.localToVoxelSpace, staticMesh, meshType);

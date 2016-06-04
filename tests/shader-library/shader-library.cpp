@@ -9,6 +9,46 @@ using glm::vec3;
 using glm::vec4;
 
 
+TEST(shader_library, cone_intersects_sphere)
+{
+  Cone cone = cone_from_ray_tan_angle(vec3(0), normalize(vec3(1, 1, 0)), 1.f);
+
+  Sphere sphere;
+  sphere.origin = vec3(10, -3, 0);
+  sphere.radius = 3;
+  EXPECT_TRUE(cone_intersects_sphere(cone, sphere));
+
+  sphere.radius = 2.999f;
+  EXPECT_FALSE(cone_intersects_sphere(cone, sphere));
+
+  sphere.radius = 4;
+  EXPECT_TRUE(cone_intersects_sphere(cone, sphere));
+
+  sphere.origin = vec3(-4.1, 0, 0);
+  EXPECT_FALSE(cone_intersects_sphere(cone, sphere));
+}
+
+
+TEST(shader_library, cone_from_point_to_sphere)
+{
+  const float epsilon = 2.e-4f;
+  Sphere sphere;
+
+  sphere.origin = vec3(10, 42, -5);
+  sphere.radius = 5;
+
+  Cone cone = cone_from_point_to_sphere(vec3(0, 42, -5), sphere);
+  EXPECT_VEC_NEAR(cone.direction, vec3(1, 0, 0), epsilon);
+  EXPECT_VEC_NEAR(cone.origin, vec3(0, 42, -5), epsilon);
+  EXPECT_NEAR(cone_half_angle(cone), glm::radians(30.f), epsilon);
+
+  cone = cone_from_point_to_sphere(vec3(9, 42, -5), sphere);
+  EXPECT_VEC_NEAR(cone.direction, vec3(1, 0, 0), epsilon);
+  EXPECT_VEC_NEAR(cone.origin, vec3(9, 42, -5), epsilon);
+  EXPECT_NEAR(cone_half_angle(cone), glm::radians(89.f), epsilon);
+}
+
+
 TEST(shader_library, voxelIndexFromScalarIndex)
 {
   glm::ivec3 size(256);

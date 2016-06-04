@@ -5,18 +5,16 @@
 #include <lighting/light-structs.glsl>
 
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
-uniform DirectionBlock
+uniform SphereBlock
 {
-  vec3 from;
-  vec3 to;
+  vec3 origin;
+  float radius;
 };
 
 
 void main()
 {
-  mat4 t = matrixForDirection(normalize(to-from), from);
-  
-  vec3 ws_position = (t * vec4(vertex_position, 1)).xyz;
+  vec3 ws_position = vertex_position * radius + origin;
 
   pass_attributes_to_fragment_shader(ws_position, vertex_color);
 }

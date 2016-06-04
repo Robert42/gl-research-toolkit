@@ -409,3 +409,86 @@ inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 
   
   return intersectsPlane && sq_distance(closestPoint, p)<=treshold;
 }
+
+
+// ======== Cone ===============================================================
+
+inline Cone cone_from_ray_angle(in vec3 origin, in vec3 direction, float half_cone_angle)
+{
+  Cone cone;
+  cone.origin = origin;
+  cone.direction = direction;
+  cone.inv_cos_half_angle = 1.f / cos(half_cone_angle);
+  cone.tan_half_angle = tan(half_cone_angle);
+  return cone;
+}
+
+inline Cone cone_from_ray_tan_angle(in vec3 origin, in vec3 direction, float tan_half_cone_angle)
+{
+  Cone cone;
+  cone.origin = origin;
+  cone.direction = direction;
+  cone.inv_cos_half_angle = 1.f / cos(atan(tan_half_cone_angle));
+  cone.tan_half_angle = tan_half_cone_angle;
+  return cone;
+}
+
+inline Cone cone_from_ray_angle(in Ray ray, float half_cone_angle)
+{
+  return cone_from_ray_angle(ray.origin, ray.direction, half_cone_angle);
+}
+
+inline Ray ray_from_cone(in Cone cone)
+{
+  Ray ray;
+  ray.origin = cone.origin;
+  ray.direction = cone.direction;
+  return ray;
+}
+
+inline float cone_half_angle(in Cone cone)
+{
+  return atan(cone.tan_half_angle);
+}
+
+// cos(radians(89.f)) \equiv 0.99985f
+inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_sin = 0.99985f)
+{
+  vec3 direction = sphere.origin - origin;
+  
+  const float inv_distance = 1.f / length(direction);
+  direction *= inv_distance;
+
+  const float sin_of_angle = inv_distance * sphere.radius;
+  const float half_angle = asin(min(max_sin, sin_of_angle));
+  
+  return cone_from_ray_angle(origin, direction, half_angle);
+}
+
+inline bool cone_intersects_sphere(in Cone cone, Sphere sphere, out(float) t)
+{
+  t = dot(cone.direction, sphere.origin-cone.origin);
+  const float clamped_t = max(0.f, t);
+  
+  const vec3 p = cone.origin + cone.direction * clamped_t;
+
+  // see doc/cone_intersects_sphere.svg
+  // for t>0: the nearest point on the center ray of the cone to the sphere
+  // origin is not the nearest point on the cone to the sphere. use inv_cos_half_angle for correction (see doc/cone_intersects_sphere.svg)
+  const float corrected_min_distance_to_sphere_origin = sphere.radius * cone.inv_cos_half_angle + cone.tan_half_angle * clamped_t;
+  // For t <=0 just check, that the sphere center is close eneough to the cone origin
+  const float clamped_min_distance_to_sphere_origin = sphere.radius;
+
+  // equivalent to t<0.f ? clamped_min_distance_to_sphere_origin : corrected_min_distance_to_sphere_origin
+  const float min_distance_to_sphere_origin = mix(clamped_min_distance_to_sphere_origin, corrected_min_distance_to_sphere_origin, step(0.f, t));
+
+  const float d = distance(p, sphere.origin);
+
+  return d <= min_distance_to_sphere_origin;
+}
+
+inline bool cone_intersects_sphere(in Cone cone, Sphere sphere)
+{
+  float t;
+  return cone_intersects_sphere(cone, sphere, t);
+}

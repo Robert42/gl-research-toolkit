@@ -5,7 +5,6 @@ bool raymarch_distancefield(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMat
 {
   mat4 worldToVoxelSpace = worldToVoxelSpaceMatrices[index];
   ivec3 voxelSize = voxelSizes[index];
-  WorldVoxelUvwSpaceFactor spaceFactor = spaceFactors[index];
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, worldToVoxelSpace);
   
@@ -15,6 +14,7 @@ bool raymarch_distancefield(in Ray ray_worldspace, in mat4* worldToVoxelSpaceMat
   if(!intersects_aabb_twice(ray_voxelspace, vec3(0), vec3(voxelSize), intersection_distance_front, intersection_distance_back))
     return false;
     
+  WorldVoxelUvwSpaceFactor spaceFactor = spaceFactors[index];
   sampler3D texture = voxelTextures[index];
     
   float t = intersection_distance_front;

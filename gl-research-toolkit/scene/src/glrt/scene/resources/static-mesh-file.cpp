@@ -20,7 +20,7 @@ void StaticMeshFile::save(const QFileInfo& filename)
   header._padding1.clear();
   header._padding2.clear();
 
-  if(staticMesh.vertices.length() > std::numeric_limits<StaticMesh::index_type>::max())
+  if(quint32(staticMesh.vertices.length()) > std::numeric_limits<StaticMesh::index_type>::max())
     throw GLRT_EXCEPTION(QString("Couldn't write mesh with more than 65535 vertices to file %0").arg(filename.filePath()));
   if(staticMesh.vertices.length() == 0)
     throw GLRT_EXCEPTION(QString("Couldn't write mesh with zero vertices to file %0").arg(filename.filePath()));

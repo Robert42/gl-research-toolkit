@@ -9,29 +9,6 @@ vec3 cubic_voxel_surface_normal(in Ray ray, int hit_dimension)
   return normal;
 }
 
-Ray ray_world_to_voxelspace(in Ray ray, in mat4 worldToVoxelSpace)
-{
-    return transform_ray(worldToVoxelSpace, ray);
-}
-
-vec3 point_voxel_to_worldspace(in vec3 p, in mat4 worldToVoxelSpace)
-{
-    return transform_point(inverse(worldToVoxelSpace), p);
-}
-
-vec3 direction_voxel_to_worldspace_slow(in vec3 d, in mat4 worldToVoxelSpace)
-{
-    return normalize(transform_direction(inverse(worldToVoxelSpace), d));
-}
-
-bool is_within_voxel_grid(in ivec3 voxelCount, in vec3 pos_voxelspace)
-{
-  bvec3 notTooSmall = greaterThanEqual(pos_voxelspace, vec3(0));
-  bvec3 notTooLarge = lessThan(pos_voxelspace, vec3(voxelCount));
-  
-  return all(notTooSmall && notTooLarge);
-}
-
 bool is_valid_voxel_index(in ivec3 voxelCount, in ivec3 voxel_index)
 {
   bvec3 notTooSmall = greaterThanEqual(voxel_index, ivec3(0));
@@ -100,7 +77,9 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in i
     
      float voxel_value = texelFetch(voxelTexture, voxelCoord, 0).r;
      
+#ifdef POSTEFFECT_VISUALIZATION
      voxel_value += posteffect_param.distancefield_offset;
+#endif
      
      if(voxel_value <= treshold)
      {

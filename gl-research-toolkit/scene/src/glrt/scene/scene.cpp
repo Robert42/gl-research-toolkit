@@ -58,6 +58,7 @@ void Scene::clear()
     delete l;
 
   _cameras.clear();
+  _lights.clear();
 
   sceneCleared();
 }
@@ -150,6 +151,17 @@ Uuid<CameraComponent> Scene::camera(CameraSlot slot) const
   return _cameras[slot];
 }
 
+
+void Scene::set_light(LightSlot slot, const Uuid<resources::LightSource>& uuid)
+{
+  _lights[slot] = uuid;
+}
+
+Uuid<resources::LightSource> Scene::light(LightSlot slot) const
+{
+  return _lights[slot];
+}
+
 void Scene::registerAngelScriptAPIDeclarations()
 {
   int r;
@@ -170,8 +182,13 @@ void Scene::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterEnum("CameraSlot"); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterEnumValue("CameraSlot", "MAIN_CAMERA", static_cast<int>(CameraSlot::MAIN_CAMERA)); AngelScriptCheck(r);
 
+  r = angelScriptEngine->RegisterEnum("LightSlot"); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterEnumValue("LightSlot", "MAIN_SUN", static_cast<int>(LightSlot::MAIN_SUN)); AngelScriptCheck(r);
+
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void set_camera(CameraSlot slot, const Uuid<CameraComponent> &in uuid)", AngelScript::asMETHOD(Scene,set_camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "Uuid<CameraComponent> get_camera(CameraSlot slot)", AngelScript::asMETHOD(Scene,camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "void set_light(LightSlot slot, const Uuid<LightSource> &in uuid)", AngelScript::asMETHOD(Scene,set_camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "Uuid<LightSource> get_light(LightSlot slot)", AngelScript::asMETHOD(Scene,camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void loadSceneLayer(const Uuid<SceneLayer> &in uuid)", AngelScript::asMETHOD(Scene,loadSceneLayer), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void addSceneLayer_debugCamera()", AngelScript::asMETHOD(Scene,addSceneLayer_debugCamera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "ResourceManager@ get_resourceManager()", AngelScript::asFUNCTION(get_resourceManager), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);

@@ -34,6 +34,7 @@ public:
   GridSize gridSize() const;
   WorldVoxelUvwSpaceFactor spaceFactor() const;
   quint64 textureData() const;
+  resources::BoundingSphere boundingSphere() const;
 };
 
 } // namespace scene

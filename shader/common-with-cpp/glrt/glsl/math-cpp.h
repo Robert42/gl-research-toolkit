@@ -7,6 +7,14 @@
 
 #include <openvdb/triangle-distance.h>
 
+namespace glm
+{
+  inline float step(float edge, float x)
+  {
+    return step(vec3(edge), vec3(x)).x;
+  }
+}
+
 namespace glrt {
 namespace glsl {
 
@@ -36,6 +44,7 @@ using glm::dot;
 using glm::max;
 using glm::min;
 using glm::clamp;
+using glm::step;
 using glm::mix;
 using glm::cos;
 using glm::sin;

@@ -43,12 +43,14 @@ public:
   debugging::DebugRenderer visualizeRectAreaLights;
   debugging::DebugRenderer visualizeWorldGrid;
   debugging::DebugRenderer visualizeVoxelGrids;
+  debugging::DebugRenderer visualizeVoxelBoundingSpheres;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;
   debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
   debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_raymarch;
+  debugging::DebugRenderer visualizePosteffect_Distancefield_boundingSpheres_raymarch;
   debugging::DebugRenderer visualizePosteffect_GlobalDistancefield_raymarch;
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;

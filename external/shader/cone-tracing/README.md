@@ -1,0 +1,1 @@
+Source: http://advances.realtimerendering.com/s2015/DynamicOcclusionWithSignedDistanceFields.pdf  page 33 & page 34

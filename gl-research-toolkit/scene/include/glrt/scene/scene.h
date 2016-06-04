@@ -56,6 +56,9 @@ public:
   void set_camera(CameraSlot slot, const Uuid<CameraComponent>& uuid);
   Uuid<CameraComponent> camera(CameraSlot slot) const;
 
+  void set_light(LightSlot slot, const Uuid<resources::LightSource>& uuid);
+  Uuid<resources::LightSource> light(LightSlot slot) const;
+
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
@@ -90,6 +93,7 @@ private:
   QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
 
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
+  QMap<LightSlot, Uuid<resources::LightSource>> _lights;
 };
 
 

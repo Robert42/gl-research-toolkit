@@ -25,10 +25,12 @@ struct VoxelBoundingBox
 struct VoxelData
 {
   CoordFrame localToVoxelSpace;
+  BoundingSphere boundingSphere;
   glm::ivec3 voxelCount = glm::ivec3(1);
   quint64 gpuTextureHandle = 0;
 
   glm::mat4 worldToVoxelSpaceMatrix(const CoordFrame& localToWorldSpace) const;
+  BoundingSphere worldSpaceBoundignSphere(const CoordFrame& localToWorldSpace) const;
 };
 
 struct VoxelIndex
@@ -39,6 +41,7 @@ struct VoxelIndex
   float factor = 1.f; // reserved for future usage (in case uint8 is used for signed distacne fields -- currently unused and must be 1)
   float offset = 0.f; // reserved for future usage (in case uint8 is used for signed distacne fields -- currently unused and must be 0)
   bool voxelizedAsScenery;
+  BoundingSphere boundingSphere;
 
   VoxelData toData(ResourceManager& resourceManager) const;
 };

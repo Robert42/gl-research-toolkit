@@ -46,9 +46,11 @@ private:
 
   QVector<glm::vec3> positionsToDebug;
   QVector<Arrow> directionsToDebug;
+  QVector<Cone> conesToDebug;
 
   DebugRenderer positionVisualization;
   DebugRenderer directionVisualization;
+  DebugRenderer coneVisualization;
   DebugRenderer::List renderList;
 
   void setMouseCoordinate(const glm::ivec2& mouseCoordinate, Uint32 windowId);
@@ -57,6 +59,7 @@ private:
   void printVectorChunk(int dimension, const char* scalarName, const char* vectorPrefix, const glm::tvec4<T_in>& input, bool visualize=false);
   void printUint64(const glm::ivec4& input);
   void printRay(const glm::vec3& origin, const glm::vec3& direction, bool visualize);
+  void printCone(const glm::vec3& origin, const glm::vec3& direction, float tan_half_angle, bool visualize);
   void printChunk(const Chunk& chunk);
 };
 

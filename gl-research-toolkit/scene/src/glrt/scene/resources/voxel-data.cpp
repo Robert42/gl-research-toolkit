@@ -20,6 +20,10 @@ glm::mat4 VoxelData::worldToVoxelSpaceMatrix(const CoordFrame& localToWorldSpace
   return (localToVoxelSpace * localToWorldSpace.inverse()).toMat4();
 }
 
+BoundingSphere VoxelData::worldSpaceBoundignSphere(const CoordFrame& localToWorldSpace) const
+{
+  return localToWorldSpace * this->boundingSphere;
+}
 
 VoxelData VoxelIndex::toData(ResourceManager& resourceManager) const
 {
@@ -28,6 +32,7 @@ VoxelData VoxelIndex::toData(ResourceManager& resourceManager) const
   data.gpuTextureHandle = resourceManager.textureManager.gpuHandle(resourceManager.textureManager.handleFor(this->texture3D));
   data.voxelCount = this->gridSize;
   data.localToVoxelSpace = this->localToVoxelSpace;
+  data.boundingSphere = this->boundingSphere;
 
   return data;
 }

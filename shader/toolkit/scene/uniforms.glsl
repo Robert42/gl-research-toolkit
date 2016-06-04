@@ -1,6 +1,10 @@
+#ifndef SCENE_UNIFORMS_GLSL
+#define SCENE_UNIFORMS_GLSL
+
 #include <lighting/light-structs.glsl>
 #include <voxels/voxel-structs.glsl>
 #include <alignment.glsl>
+#include <glrt/glsl/math-glsl.h>
 
 struct SceneLightData
 {
@@ -16,8 +20,10 @@ struct SceneVoxelHeader
   uint64_t distance_field_voxelcount_array_address;
   uint64_t distance_field_spacefactor_array_address;
   uint64_t distance_field_textures_array_address;
+  uint64_t distance_field_boundingsphere_array_address;
+  padding1(uint64_t, _padding1);
   uint32_t num_distance_fields;
-  padding3(uint32_t, _padding);
+  padding3(uint32_t, _padding2);
 };
 
 struct SceneData
@@ -73,3 +79,9 @@ sampler3D* distance_fields_texture()
   return (sampler3D*)scene.voxelHeader.distance_field_textures_array_address;
 }
 
+Sphere* distance_fields_bounding_spheres()
+{
+  return (Sphere*)scene.voxelHeader.distance_field_boundingsphere_array_address;
+}
+
+#endif // SCENE_UNIFORMS_GLSL

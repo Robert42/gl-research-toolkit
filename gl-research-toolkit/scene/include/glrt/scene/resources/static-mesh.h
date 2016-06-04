@@ -14,6 +14,20 @@ struct AABB
   glm::vec3 maxPoint;
 };
 
+struct BoundingSphere
+{
+  glm::vec3 center;
+  float radius;
+
+  friend BoundingSphere operator*(const CoordFrame& frame, const BoundingSphere& sphere)
+  {
+    BoundingSphere s;
+    s.center = frame.transform_point(sphere.center);
+    s.radius = frame.scaleFactor * sphere.radius;
+    return s;
+  }
+};
+
 struct TriangleArray;
 
 
@@ -38,6 +52,8 @@ struct StaticMesh
   QVector<Vertex> vertices;
 
   AABB boundingBox() const;
+  BoundingSphere boundingSphere() const;
+  void boundingShapes(BoundingSphere& boundignSphere, AABB& boundingBox) const;
   size_t rawDataSize() const;
 
   TriangleArray getTriangleArray() const;
@@ -58,6 +74,8 @@ struct TriangleArray
   void invertNormals();
 
   AABB boundingBox() const;
+  BoundingSphere boundingSphere() const;
+  void boundingShapes(BoundingSphere& boundignSphere, AABB& boundingBox) const;
 
   void operator+=(const TriangleArray& other);
 
