@@ -9,6 +9,8 @@ add_custom_target(
   openvdb/triangle-distance.glsl
   pbs/brdf.glsl
   pbs/camera.glsl
+  pbs/image-based-lighting.glsl
+  pbs/image-based-lighting-precalculation.glsl
   pbs/light.glsl
   pbs/luminance-for-luminous-power.glsl
   pbs/material.glsl
