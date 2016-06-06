@@ -93,7 +93,7 @@ Sphere* distance_fields_bounding_spheres()
   return (Sphere*)scene.voxelHeader.distance_field_boundingsphere_array_address;
 }
 
-#ifndef POSTEFFECT_VISUALIZATION
+#ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)
 {
   uint32_t blackLevel = scene.costsHeatvisionBlackLevel;
@@ -103,6 +103,7 @@ vec4 heatvision(uint32_t value)
   
   return heatvision(value-blackLevel, whiteLevel-blackLevel);
 }
+#define highlightColor_DEFINED
 #endif
 
 #endif // SCENE_UNIFORMS_GLSL

@@ -1,16 +1,18 @@
 #include <extensions/command_list.glsl>
 
-#define POSTEFFECT_VISUALIZATION
-
 #ifdef LOG_HEATVISION_DEBUG_POSTEFFECT
 #define LOG_HEATVISION
 #endif
+
+#define highlightColor_DEFINED
 
 #include <glrt/glsl/math-glsl.h>
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
 
 #include <lighting/rendering-equation.glsl>
+
+#define POSTEFFECT_VISUALIZATION
 
 
 struct PosteffectVisualizationData
