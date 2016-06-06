@@ -16,6 +16,7 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
 
   map[" - "] = SurfaceShaderVisualization::NONE;
 
+  VALUE(AMBIENT_OCCLUSION);
   VALUE(DISTANCEFIELD_AO);
   VALUE(LIGHTING_FLAT);
   VALUE(LIGHTING_ONLY);
