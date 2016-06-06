@@ -111,6 +111,28 @@ float ao_coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_fie
   return occlusion;
 }
 
+float distancefield_ao(in GlobalDistanceField global_distance_field, float radius=3.5)
+{
+  float V = N_GI_CONES;
+  for(int i=0; i<N_GI_CONES; ++i)
+  {
+    V -= ao_coneSoftShadow(cone_bouquet[i], global_distance_field, radius);
+  }
+    
+  return 1.f - V / N_GI_CONES;
+}
+
+float distancefield_ao(float radius=3.5)
+{
+  return distancefield_ao(init_global_distance_field(), radius);
+}
+
+void SHOW_CONES()
+{
+  for(int i=0; i<N_GI_CONES; ++i)
+    SHOW_VALUE(cone_bouquet[i]);
+}
+
 void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 {
   const float tan_half_angle_of_60 = 0.577350269189626;
@@ -175,26 +197,4 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 
   for(int i=0; i<N_GI_CONES; ++i)
     cone_bouquet[i].direction = tangent_to_worldspace * cone_bouquet[i].direction;
-}
-
-float distancefield_ao(in GlobalDistanceField global_distance_field, float radius=3.5)
-{
-  float V = N_GI_CONES;
-  for(int i=0; i<N_GI_CONES; ++i)
-  {
-    V -= ao_coneSoftShadow(cone_bouquet[i], global_distance_field, radius);
-  }
-    
-  return 1.f - V / N_GI_CONES;
-}
-
-float distancefield_ao(float radius=3.5)
-{
-  return distancefield_ao(init_global_distance_field(), radius);
-}
-
-void SHOW_CONES()
-{
-  for(int i=0; i<N_GI_CONES; ++i)
-    SHOW_VALUE(cone_bouquet[i]);
 }
