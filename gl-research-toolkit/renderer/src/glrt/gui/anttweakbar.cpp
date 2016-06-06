@@ -14,10 +14,12 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     visible(settings.showByDefault),
     toggleHelp(settings.toggleHelp),
     toggleGui(settings.toggleGui),
-    toggleLogHeatVision("LOG_HEATVISION"),
+    toggleLogHeatVision_debugPosteffect("LOG_HEATVISION_DEBUG_POSTEFFECT"),
+    toggleLogHeatVision_costs("LOG_HEATVISION_DEBUG_COSTS"),
     toggleLogHeatVisionColors("HEATVISION_COLORS")
 {
-  toggleLogHeatVision.setter(false);
+  toggleLogHeatVision_debugPosteffect.setter(true);
+  toggleLogHeatVision_costs.setter(false);
   toggleLogHeatVisionColors.setter(true);
 
   Q_ASSERT(application != nullptr);
@@ -134,7 +136,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwAddVarRW(tweakBar, "Show", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNumSteps, "group='Debug Shader/Show Step-Count'");
   TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsBlack, "group='Debug Shader/Show Step-Count' min=0 max=2147483647");
   TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsWhite, "group='Debug Shader/Show Step-Count' min=1 max=2147483647");
-  toggleLogHeatVision.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
+  toggleLogHeatVision_debugPosteffect.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
   toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug Shader/Show Step-Count'");
   TwSetParam(tweakBar, "Debug Shader/Show Step-Count", "opened", TW_PARAM_CSTRING, 1, "false");
 
@@ -207,7 +209,7 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
 
   TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->costsHeatvisionBlackLevel, "group='Debug/Show Costs' min=0 max=2147483647");
   TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->costsHeatvisionWhiteLevel, "group='Debug/Show Costs' min=1 max=2147483647");
-  toggleLogHeatVision.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
+  toggleLogHeatVision_costs.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
   toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug/Show Costs'");
   TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
 

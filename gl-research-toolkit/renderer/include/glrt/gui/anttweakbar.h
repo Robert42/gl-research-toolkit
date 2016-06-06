@@ -321,7 +321,8 @@ private:
   CameraEnumeration::Ptr cameraSwitcher;
   VisualizationEnumeration::Ptr visualizationSwitcher;
 
-  TweakBarShaderToggle toggleLogHeatVision;
+  TweakBarShaderToggle toggleLogHeatVision_debugPosteffect;
+  TweakBarShaderToggle toggleLogHeatVision_costs;
   TweakBarShaderToggle toggleLogHeatVisionColors;
 
   void updateAntTweakBarWindowSize();

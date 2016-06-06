@@ -6,6 +6,10 @@
 #include <alignment.glsl>
 #include <glrt/glsl/math-glsl.h>
 
+
+#ifdef LOG_HEATVISION_DEBUG_COSTS
+#define LOG_HEATVISION
+#endif
 #include <debugging/heat-vision.glsl>
 
 struct SceneLightData

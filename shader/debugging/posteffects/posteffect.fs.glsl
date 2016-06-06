@@ -2,6 +2,10 @@
 
 #define POSTEFFECT_VISUALIZATION
 
+#ifdef LOG_HEATVISION_DEBUG_POSTEFFECT
+#define LOG_HEATVISION
+#endif
+
 #include <glrt/glsl/math-glsl.h>
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
