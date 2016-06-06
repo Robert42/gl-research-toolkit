@@ -59,6 +59,9 @@ public:
 
   glm::ivec2 videoResolution;
 
+  quint32 costsHeatvisionBlackLevel = 0;
+  quint32 costsHeatvisionWhiteLevel = 1024;
+
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
   Renderer& operator=(const Renderer&) = delete;
@@ -89,9 +92,12 @@ private:
   {
     glm::mat4 view_projection_matrix;
     glm::vec3 camera_position;
-    padding<float> _padding;
+    float totalTime;
     LightBuffer::LightData lightData;
     VoxelBuffer::VoxelHeader voxelHeader;
+    quint32 costsHeatvisionBlackLevel;
+    quint32 costsHeatvisionWhiteLevel;
+    padding<quint32, 2> _padding2;
   };
 
   LightBuffer lightUniformBuffer;

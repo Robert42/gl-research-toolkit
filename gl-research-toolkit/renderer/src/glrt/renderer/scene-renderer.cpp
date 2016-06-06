@@ -348,6 +348,9 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
   sceneUniformData.lightData = lightUniformBuffer.updateLightData();
   sceneUniformData.voxelHeader = voxelUniformBuffer.updateVoxelHeader();
+  sceneUniformData.totalTime = debugPosteffect.totalTime;
+  sceneUniformData.costsHeatvisionBlackLevel = costsHeatvisionBlackLevel;
+  sceneUniformData.costsHeatvisionWhiteLevel = costsHeatvisionWhiteLevel;
   sceneUniformBuffer.Unmap();
 }
 

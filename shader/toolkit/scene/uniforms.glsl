@@ -6,6 +6,8 @@
 #include <alignment.glsl>
 #include <glrt/glsl/math-glsl.h>
 
+#include <debugging/heat-vision.glsl>
+
 struct SceneLightData
 {
   uint64_t sphere_arealights_address;
@@ -30,8 +32,11 @@ struct SceneData
 {
   mat4 view_projection;
   vec3 camera_position;
+  float totalTime;
   SceneLightData lights;
   SceneVoxelHeader voxelHeader;
+  uint32_t costsHeatvisionBlackLevel;
+  uint32_t costsHeatvisionWhiteLevel;
 };
 
 #include <glrt/glsl/layout-constants.h>
@@ -83,5 +88,17 @@ Sphere* distance_fields_bounding_spheres()
 {
   return (Sphere*)scene.voxelHeader.distance_field_boundingsphere_array_address;
 }
+
+#ifndef POSTEFFECT_VISUALIZATION
+vec4 heatvision(uint32_t value)
+{
+  uint32_t blackLevel = scene.costsHeatvisionBlackLevel;
+  uint32_t whiteLevel = scene.costsHeatvisionWhiteLevel;
+  blackLevel = min(whiteLevel, blackLevel);
+  value = max(value, blackLevel);
+  
+  return heatvision(value-blackLevel, whiteLevel-blackLevel);
+}
+#endif
 
 #endif // SCENE_UNIFORMS_GLSL

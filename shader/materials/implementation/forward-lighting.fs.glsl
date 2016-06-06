@@ -68,9 +68,13 @@ return;
   return;
 #endif
 
-#if defined(DISTANCEFIELD_AO)
+#if defined(DISTANCEFIELD_AO) || defined(DISTANCEFIELD_AO_COST_TEX) || defined(DISTANCEFIELD_AO_COST_BRANCHING) || defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
   float ao_distancefield = distancefield_ao();
+#if defined(DISTANCEFIELD_AO)
   fragment_color = vec4(vec3(ao_distancefield), 1);
+#else
+  fragment_color = heatvision(ao_distancefield_cost);
+#endif
   return;
 #endif
 

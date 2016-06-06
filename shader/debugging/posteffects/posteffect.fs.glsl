@@ -1,9 +1,10 @@
 #include <extensions/command_list.glsl>
 
+#define POSTEFFECT_VISUALIZATION
+
 #include <glrt/glsl/math-glsl.h>
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
-#include <debugging/heat-vision.glsl>
 
 #include <lighting/rendering-equation.glsl>
 
@@ -23,8 +24,6 @@ layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform Po
 {
   PosteffectVisualizationData posteffect_param;
 };
-
-#define POSTEFFECT_VISUALIZATION
 
 in FragmentBlock
 {

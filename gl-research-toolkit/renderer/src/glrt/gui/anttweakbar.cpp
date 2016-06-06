@@ -17,7 +17,7 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     toggleLogHeatVision("LOG_HEATVISION"),
     toggleLogHeatVisionColors("HEATVISION_COLORS")
 {
-  toggleLogHeatVision.setter(true);
+  toggleLogHeatVision.setter(false);
   toggleLogHeatVisionColors.setter(true);
 
   Q_ASSERT(application != nullptr);
@@ -188,26 +188,34 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   setTweaBarAllocation(tweakBar, glm::ivec2(0, 4096), glm::ivec2(480, 160), glm::ivec2(32, 8));
   TwSetParam(tweakBar, nullptr, "valueswidth", TW_PARAM_CSTRING, 1, "256");
 
+  visualizationSwitcher = VisualizationEnumeration::Ptr(new VisualizationEnumeration("VisualizationEnumeration", tweakBar, "Shader Visualization", "keyincr=F7 keydecr=SHIFT+F7 help='The Surface Shader vizualization'"));
+  visualizationSwitcher->init(glrt::renderer::allSurfaceShaderVisualizations());
+  visualizationSwitcher->setCurrentValue(glrt::renderer::currentSurfaceShaderVisualization);
+  visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
+
+
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
   roughnessAdjustmentToggle.setter = [renderer](bool ar){renderer->setAdjustRoughness(ar);};
   roughnessAdjustmentToggle.getter = [renderer]() -> bool {return renderer->adjustRoughness();};
   roughnessAdjustmentToggle.TwAddVarCB(tweakBar, "Roughness Adjustment", "group=PBS");
+
   sdfShadowsToggle.setter = [renderer](bool ar){renderer->setSDFShadows(ar);};
   sdfShadowsToggle.getter = [renderer]() -> bool {return renderer->sdfShadows();};
-  sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=PBS");
+  sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=Debug");
+  TwSetParam(tweakBar, "Debug", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->costsHeatvisionBlackLevel, "group='Debug/Show Costs' min=0 max=2147483647");
+  TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->costsHeatvisionWhiteLevel, "group='Debug/Show Costs' min=1 max=2147483647");
+  toggleLogHeatVision.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
+  toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug/Show Costs'");
+  TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
 
   if(shaderDebugPrinter != nullptr)
   {
     shaderDebugPrinter->guiToggle.TwAddVarCB(tweakBar, "Use Printer", "group=Debug key=F6");
     TwAddVarRW(tweakBar, "Clear Scene", TW_TYPE_BOOLCPP, &shaderDebugPrinter->clearScene, "group=Debug");
   }
-
-  visualizationSwitcher = VisualizationEnumeration::Ptr(new VisualizationEnumeration("VisualizationEnumeration", tweakBar, "Shader Visualization", "keyincr=F7 keydecr=SHIFT+F7 help='The Surface Shader vizualization'"));
-  visualizationSwitcher->init(glrt::renderer::allSurfaceShaderVisualizations());
-  visualizationSwitcher->setCurrentValue(glrt::renderer::currentSurfaceShaderVisualization);
-  visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
-
   gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;
