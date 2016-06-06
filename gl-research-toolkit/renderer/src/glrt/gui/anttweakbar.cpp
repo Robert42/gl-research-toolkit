@@ -193,6 +193,9 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   roughnessAdjustmentToggle.setter = [renderer](bool ar){renderer->setAdjustRoughness(ar);};
   roughnessAdjustmentToggle.getter = [renderer]() -> bool {return renderer->adjustRoughness();};
   roughnessAdjustmentToggle.TwAddVarCB(tweakBar, "Roughness Adjustment", "group=PBS");
+  sdfShadowsToggle.setter = [renderer](bool ar){renderer->setSDFShadows(ar);};
+  sdfShadowsToggle.getter = [renderer]() -> bool {return renderer->sdfShadows();};
+  sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=PBS");
 
   if(shaderDebugPrinter != nullptr)
   {

@@ -74,6 +74,8 @@ public:
 
   bool adjustRoughness() const;
   void setAdjustRoughness(bool adjustRoughness);
+  bool sdfShadows() const;
+  void setSDFShadows(bool sdfShadows);
 
 protected:
   virtual void prepareFramebuffer() = 0;
@@ -104,6 +106,7 @@ private:
 
   bool _needRecapturing : 1;
   bool _adjustRoughness : 1;
+  bool _sdfShadows : 1;
 
   bool needRecapturing() const;
   bool needRerecording() const;

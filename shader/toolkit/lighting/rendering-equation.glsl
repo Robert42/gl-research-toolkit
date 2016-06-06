@@ -8,7 +8,6 @@
 
 #include "light-direction.glsl"
 
-#define CONETRACED_SHADOW 1
 
 struct LightData
 {
@@ -88,7 +87,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
     
     float occlusion = 1.f;
     
-#if CONETRACED_SHADOW
+#if defined(CONETRACED_SHADOW)
     float cone_length = distance(worldPosition, sphere.origin);
     Cone cone = cone_from_point_to_sphere(worldPosition, sphere);
     occlusion = coneSoftShadow(cone, global_distance_field, cone_length);

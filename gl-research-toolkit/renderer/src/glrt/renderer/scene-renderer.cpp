@@ -37,7 +37,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true),
-    _adjustRoughness(false)
+    _adjustRoughness(false),
+    _sdfShadows(false)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
@@ -57,6 +58,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_GlobalDistancefield_raymarch);
 
   setAdjustRoughness(true);
+  setSDFShadows(true);
 }
 
 Renderer::~Renderer()
@@ -365,6 +367,20 @@ void Renderer::setAdjustRoughness(bool adjustRoughness)
   {
     _adjustRoughness = adjustRoughness;
     ReloadableShader::defineMacro("ADJUST_ROUGHNESS", adjustRoughness);
+  }
+}
+
+bool Renderer::sdfShadows() const
+{
+  return _sdfShadows;
+}
+
+void Renderer::setSDFShadows(bool sdfShadows)
+{
+  if(_sdfShadows != sdfShadows)
+  {
+    _sdfShadows = sdfShadows;
+    ReloadableShader::defineMacro("CONETRACED_SHADOW", sdfShadows);
   }
 }
 

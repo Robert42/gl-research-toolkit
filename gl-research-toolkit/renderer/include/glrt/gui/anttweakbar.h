@@ -302,6 +302,7 @@ private:
 
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
+  gui::TweakBarCBVar<bool> sdfShadowsToggle;
   gui::TweakBarCBVar<bool> disableSceneryVoxels;
 
   bool _disableSceneryVoxels = false;
