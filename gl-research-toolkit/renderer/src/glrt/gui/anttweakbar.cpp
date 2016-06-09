@@ -16,11 +16,15 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     toggleGui(settings.toggleGui),
     toggleLogHeatVision_debugPosteffect("LOG_HEATVISION_DEBUG_POSTEFFECT"),
     toggleLogHeatVision_costs("LOG_HEATVISION_DEBUG_COSTS"),
-    toggleLogHeatVisionColors("HEATVISION_COLORS")
+    toggleLogHeatVisionColors("HEATVISION_COLORS"),
+    toggleConeBouquetNoise("CONE_BOUQUET_NOISE"),
+    toggleConeBouquetUnderwaterCaustics("CONE_BOUQUET_UNDERWATER_CAUSICS")
 {
   toggleLogHeatVision_debugPosteffect.setter(true);
   toggleLogHeatVision_costs.setter(false);
   toggleLogHeatVisionColors.setter(true);
+  toggleConeBouquetNoise.setter(false);
+  toggleConeBouquetUnderwaterCaustics.setter(false);
 
   Q_ASSERT(application != nullptr);
 
@@ -213,6 +217,10 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   toggleLogHeatVision_costs.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
   toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug/Show Costs'");
   TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  toggleConeBouquetNoise.TwAddVarCB(tweakBar, "Noise", "group='Debug/Cone-Bouquet'");
+  toggleConeBouquetUnderwaterCaustics.TwAddVarCB(tweakBar, "Underwater Caustics", "group='Debug/Cone-Bouquet'");
+  TwSetParam(tweakBar, "Debug/Cone-Bouquet", "opened", TW_PARAM_CSTRING, 1, "false");
 
   if(shaderDebugPrinter != nullptr)
   {

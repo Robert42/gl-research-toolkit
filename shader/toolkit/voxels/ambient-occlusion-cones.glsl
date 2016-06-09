@@ -1,4 +1,5 @@
 #include <voxels/raymarching-distance-cone-soft-shadow.glsl>
+#include <gl-noise/src/noise2D.glsl>
 
 #define N_GI_CONES 9
 
@@ -206,5 +207,21 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 #endif
 
   for(int i=0; i<N_GI_CONES; ++i)
-    cone_bouquet[i].direction = tangent_to_worldspace * cone_bouquet[i].direction;
+  {
+#if defined(CONE_BOUQUET_NOISE) || defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
+#if defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
+    float alpha = scene.totalTime;
+#elif defined(CONE_BOUQUET_NOISE)
+    float alpha = snoise((gl_FragCoord.xy + vec2(scene.totalTime*1000, 0)));
+#endif
+    float c = cos(alpha);
+    float s = sin(alpha);
+    mat3 rot = mat3(c, -s, 0,
+                    s,  c, 0,
+                    0,  0, 1);
+#else
+    mat3 rot = mat3(1);
+#endif
+    cone_bouquet[i].direction = tangent_to_worldspace * rot * cone_bouquet[i].direction;
+  }
 }

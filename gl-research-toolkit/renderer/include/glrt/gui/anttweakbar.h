@@ -325,6 +325,9 @@ private:
   TweakBarShaderToggle toggleLogHeatVision_costs;
   TweakBarShaderToggle toggleLogHeatVisionColors;
 
+  TweakBarShaderToggle toggleConeBouquetNoise;
+  TweakBarShaderToggle toggleConeBouquetUnderwaterCaustics;
+
   void updateAntTweakBarWindowSize();
 
   void handeledEvent(const SDL_Event& event);

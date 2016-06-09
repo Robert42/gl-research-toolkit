@@ -22,3 +22,6 @@
 [submodule "external/assets/advanced"]
 	path = external/assets/advanced
 	url = git@github.com:Robert42/gl-research-toolkit-advanced-assets.git
+[submodule "external/shader/gl-noise"]
+	path = external/shader/gl-noise
+	url = git@github.com:ashima/webgl-noise.git
