@@ -6,14 +6,14 @@ Cone cone_bouquet[N_GI_CONES];
 
 int ao_distancefield_cost = 0;
 
-float ao_coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global_distance_field, float intersection_distance_front, float intersection_distance_back, float cone_length)
+float ao_coneSoftShadow(in Cone cone, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, in WorldVoxelUvwSpaceFactor* spaceFactors, in sampler3D* distance_field_textures, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
   #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
       ao_distancefield_cost+=2;
   #endif
   
-  mat4 worldToVoxelSpace = global_distance_field.worldToVoxelSpaces[index];
-  ivec3 voxelSize = global_distance_field.voxelCounts[index];
+  mat4 worldToVoxelSpace = *worldToVoxelSpaces;
+  ivec3 voxelSize = *voxelCounts;
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_from_cone(cone), worldToVoxelSpace);
   
@@ -34,7 +34,7 @@ float ao_coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField glo
       ao_distancefield_cost++;
   #endif
   
-  WorldVoxelUvwSpaceFactor spaceFactor = global_distance_field.spaceFactors[index];
+  WorldVoxelUvwSpaceFactor spaceFactor = *spaceFactors;
   float worldToVoxelSpace_Factor = 1.f / spaceFactor.voxelToWorldSpace;
   
   float cone_length_voxelspace = cone_length * worldToVoxelSpace_Factor;
@@ -49,7 +49,7 @@ float ao_coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField glo
       ao_distancefield_cost++;
   #endif
   
-  sampler3D texture = global_distance_field.distance_field_textures[index];
+  sampler3D texture = *distance_field_textures;
     
   float t = intersection_distance_front;
   
@@ -85,13 +85,17 @@ float ao_coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_fie
   float occlusion = 1.f;
   
   Sphere* bounding_spheres = global_distance_field.bounding_spheres;
+  mat4* worldToVoxelSpaces = global_distance_field.worldToVoxelSpaces;
+  ivec3* voxelCounts = global_distance_field.voxelCounts;
+  WorldVoxelUvwSpaceFactor* spaceFactors = global_distance_field.spaceFactors;
+  sampler3D* distance_field_textures = global_distance_field.distance_field_textures;
   
   for(uint32_t i=0; i<num_distance_fields; ++i)
   {
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
         ao_distancefield_cost++;
     #endif
-    Sphere sphere = bounding_spheres[i];
+    Sphere sphere = *bounding_spheres;
     
     float distance_to_sphere_origin;
     if(cone_intersects_sphere(cone, sphere, distance_to_sphere_origin))
@@ -102,8 +106,14 @@ float ao_coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_fie
 
       float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
       float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-      occlusion = min(occlusion, ao_coneSoftShadow(cone, i, global_distance_field, intersection_distance_front, intersection_distance_back, cone_length));
+      occlusion = min(occlusion, ao_coneSoftShadow(cone, worldToVoxelSpaces, voxelCounts, spaceFactors, distance_field_textures, intersection_distance_front, intersection_distance_back, cone_length));
     }
+    
+    ++bounding_spheres;
+    ++worldToVoxelSpaces;
+    ++voxelCounts;
+    ++spaceFactors;
+    ++distance_field_textures;
   }
   
   occlusion = max(0, occlusion);
