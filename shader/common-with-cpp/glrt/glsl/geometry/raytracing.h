@@ -465,10 +465,10 @@ inline Cone cone_from_point_to_sphere(vec3 origin, in Sphere sphere, float max_s
   return cone_from_ray_angle(origin, direction, half_angle);
 }
 
-inline bool cone_intersects_sphere(in Cone cone, Sphere sphere, out(float) t)
+inline bool cone_intersects_sphere(in Cone cone, Sphere sphere, out(float) t, float t_max=inf)
 {
   t = dot(cone.direction, sphere.origin-cone.origin);
-  const float clamped_t = max(0.f, t);
+  const float clamped_t = clamp(t, 0.f, t_max);
   
   const vec3 p = cone.origin + cone.direction * clamped_t;
 

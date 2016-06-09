@@ -98,7 +98,7 @@ float ao_coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_fie
     Sphere sphere = *bounding_spheres;
     
     float distance_to_sphere_origin;
-    if(cone_intersects_sphere(cone, sphere, distance_to_sphere_origin))
+    if(cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length))
     {
       #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
           ao_distancefield_cost++;
