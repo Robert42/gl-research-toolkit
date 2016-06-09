@@ -17,12 +17,14 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     toggleLogHeatVision_debugPosteffect("LOG_HEATVISION_DEBUG_POSTEFFECT"),
     toggleLogHeatVision_costs("LOG_HEATVISION_DEBUG_COSTS"),
     toggleLogHeatVisionColors("HEATVISION_COLORS"),
+    toggleDistancefieldAOSphereTracing("DISTANCEFIELD_AO_SPHERE_TRACING"),
     toggleConeBouquetNoise("CONE_BOUQUET_NOISE"),
     toggleConeBouquetUnderwaterCaustics("CONE_BOUQUET_UNDERWATER_CAUSICS")
 {
   toggleLogHeatVision_debugPosteffect.setter(true);
   toggleLogHeatVision_costs.setter(false);
   toggleLogHeatVisionColors.setter(true);
+  toggleDistancefieldAOSphereTracing.setter(false);
   toggleConeBouquetNoise.setter(false);
   toggleConeBouquetUnderwaterCaustics.setter(false);
 
@@ -217,6 +219,9 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   toggleLogHeatVision_costs.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
   toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug/Show Costs'");
   TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  toggleDistancefieldAOSphereTracing.TwAddVarCB(tweakBar, "Sphere-Tracing", "group='Debug/SDF-AO'");
+  TwSetParam(tweakBar, "Debug/SDF-AO", "opened", TW_PARAM_CSTRING, 1, "false");
 
   toggleConeBouquetNoise.TwAddVarCB(tweakBar, "Noise", "group='Debug/Cone-Bouquet'");
   toggleConeBouquetUnderwaterCaustics.TwAddVarCB(tweakBar, "Underwater Caustics", "group='Debug/Cone-Bouquet'");

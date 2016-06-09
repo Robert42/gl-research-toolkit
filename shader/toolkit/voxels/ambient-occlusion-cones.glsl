@@ -51,15 +51,25 @@ float ao_coneSoftShadow(in Cone cone, in mat4* worldToVoxelSpaces, in ivec3* vox
   #endif
   
   sampler3D texture = *distance_field_textures;
-    
-  float t = intersection_distance_front;
   
   float minVisibility = 1.f;
   vec3 clamp_Range = vec3(voxelSize)-0.5f;
   
-  int max_num_loops = 1024;
+#if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
+  // In Range [intersection_distance_front, intersection_distance_back]
+  float t = intersection_distance_front;
+  
+  int max_num_loops = 256;
   while(t < intersection_distance_back && 0<=max_num_loops--)
   {
+#else
+  // In Range [0, 1]
+  float exponential = 1.f/16.f;
+  
+  for(int i=0; i<4; ++i)
+  {
+    float t = mix(intersection_distance_front, intersection_distance_back, exponential);
+#endif
     vec3 p = get_point(ray_voxelspace, t);
     
     vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
@@ -73,7 +83,11 @@ float ao_coneSoftShadow(in Cone cone, in mat4* worldToVoxelSpaces, in ivec3* vox
     occlusionHeuristic = mix(occlusionHeuristic, 1.f, t*inv_cone_length_voxelspace);
     minVisibility = min(minVisibility, occlusionHeuristic);
     
-    t += abs(d);
+#if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
+    t += max(0.1f, abs(d));
+#else
+    exponential *= 2.f;
+#endif
   }
   
   return minVisibility;

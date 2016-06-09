@@ -325,6 +325,8 @@ private:
   TweakBarShaderToggle toggleLogHeatVision_costs;
   TweakBarShaderToggle toggleLogHeatVisionColors;
 
+  TweakBarShaderToggle toggleDistancefieldAOSphereTracing;
+
   TweakBarShaderToggle toggleConeBouquetNoise;
   TweakBarShaderToggle toggleConeBouquetUnderwaterCaustics;
 
