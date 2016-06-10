@@ -21,8 +21,6 @@ add_custom_target(
   debugging/posteffects/posteffect.vs.glsl
   debugging/posteffects/raymarch-distancefield.fs
   debugging/posteffects/raymarch-distancefield.vs
-  debugging/posteffects/raymarch-global-distancefield.fs
-  debugging/posteffects/raymarch-global-distancefield.vs
   debugging/posteffects/show-bounding-spheres-as-distancefield.fs
   debugging/posteffects/show-bounding-spheres-as-distancefield.vs
   debugging/posteffects/show-distancefield-as-cubic-voxel.fs
@@ -69,7 +67,6 @@ add_custom_target(
   toolkit/scene/uniforms.glsl
   toolkit/voxels/ambient-occlusion-cones.glsl
   toolkit/voxels/distance-field-utils.glsl
-  toolkit/voxels/global-distance-field.glsl
   toolkit/voxels/raymarching-bounding-spheres.glsl
   toolkit/voxels/raymarching-cubic-voxels.glsl
   toolkit/voxels/raymarching-distance-cone-soft-shadow.glsl

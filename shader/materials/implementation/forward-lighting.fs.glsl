@@ -6,7 +6,6 @@
 #include <glrt/glsl/layout-constants.h>
 
 #include <scene/uniforms.glsl>
-#include <voxels/global-distance-field.glsl>
 
 out vec4 fragment_color;
 

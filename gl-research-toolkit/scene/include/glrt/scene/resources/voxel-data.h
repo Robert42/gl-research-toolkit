@@ -29,7 +29,9 @@ struct VoxelData
   glm::ivec3 voxelCount = glm::ivec3(1);
   quint64 gpuTextureHandle = 0;
 
-  glm::mat4 worldToVoxelSpaceMatrix(const CoordFrame& localToWorldSpace) const;
+  CoordFrame worldToVoxelSpaceCoordFrame(const CoordFrame& localToWorldSpace) const;
+  glm::mat4x3 worldToVoxelSpaceMatrix4x3(const CoordFrame& localToWorldSpace) const;
+  glm::mat4 worldToVoxelSpaceMatrix4(const CoordFrame& localToWorldSpace) const;
   BoundingSphere worldSpaceBoundignSphere(const CoordFrame& localToWorldSpace) const;
 };
 

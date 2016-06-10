@@ -12,16 +12,19 @@ class VoxelDataComponent : public glrt::scene::Node::Component
 public:
   typedef resources::VoxelData Data;
 
-  struct GridSize
+  struct VoxelDataBlock
   {
-    glm::ivec3 voxelCount;
-    padding<int, 1> _padding;
-  };
+    glm::vec3 globalWorldToVoxelMatrix_col0;
+    int voxelCount_x;
+    glm::vec3 globalWorldToVoxelMatrix_col1;
+    int voxelCount_y;
+    glm::vec3 globalWorldToVoxelMatrix_col2;
+    int voxelCount_z;
+    glm::vec3 globalWorldToVoxelMatrix_col3;
+    float globalWorldToVoxelFactor; // #TODO is this also usefull in the AO shader?
 
-  struct WorldVoxelUvwSpaceFactor
-  {
-    glm::vec3 voxelToUvwSpace;
-    float voxelToWorldSpace;
+    quint64 texture;
+    padding<quint64, 1> _padding1;
   };
 
 
@@ -30,9 +33,10 @@ public:
 
   VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data=Data(), bool voxelizedAsScenery=false);
 
-  glm::mat4 globalWorldToVoxelMatrix() const;
-  GridSize gridSize() const;
-  WorldVoxelUvwSpaceFactor spaceFactor() const;
+  glm::mat4x3 globalWorldToVoxelMatrix4x3() const;
+  glm::mat4 globalWorldToVoxelMatrix4() const;
+  glm::ivec3 gridSize() const;
+  VoxelDataBlock voxelDataBlock() const;
   quint64 textureData() const;
   resources::BoundingSphere boundingSphere() const;
 };

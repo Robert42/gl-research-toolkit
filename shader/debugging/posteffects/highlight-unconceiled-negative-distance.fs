@@ -4,11 +4,16 @@
 #include <voxels/raymarching-cubic-voxels.glsl>
 
 
-bool is_unconceiled_negative_distance_singlegrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t index, out vec3 intersection_point, out vec3 intersection_normal)
+bool is_unconceiled_negative_distance_singlegrid(in Ray ray_worldspace, in VoxelDataBlock* distance_field_data_blocks, out vec3 intersection_point, out vec3 intersection_normal)
 {
   int hit_dimension;
-  mat4 worldToVoxelSpace = worldToVoxelSpaces[index];
-  ivec3 voxelCount = voxelCounts[index];
+  mat4x3 worldToVoxelSpace;
+  ivec3 voxelCount;
+  vec3 voxelToUvwSpace;
+  float worldToVoxelSpace_Factor;
+  
+  sampler3D voxelTexture = distance_field_data(distance_field_data_blocks, worldToVoxelSpace, voxelCount, voxelToUvwSpace, worldToVoxelSpace_Factor);
+  
   
   int max_num_loops = 65536;
   
@@ -16,8 +21,6 @@ bool is_unconceiled_negative_distance_singlegrid(in Ray ray_worldspace, in mat4*
   
   if(!enter_cubic_voxel_grid_voxelspace(ray_voxelspace, voxelCount, hit_dimension))
     return false;
-    
-  sampler3D voxelTexture = voxelTextures[index];
   
   ivec3 voxelCoord = ivec3(floor(ray_voxelspace.origin));
   ivec3 marchingStep = ivec3(sign(ray_voxelspace.direction));
@@ -35,7 +38,7 @@ bool is_unconceiled_negative_distance_singlegrid(in Ray ray_worldspace, in mat4*
        intersection_point = ray_voxelspace.origin;
        intersection_normal = cubic_voxel_surface_normal(ray_voxelspace, hit_dimension);
        
-       intersection_point = point_voxel_to_worldspace(intersection_point, worldToVoxelSpace);
+       intersection_point = point_voxel_to_worldspace_slow(intersection_point, worldToVoxelSpace);
        intersection_normal = direction_voxel_to_worldspace_slow(intersection_normal, worldToVoxelSpace);
        return true;
      }
@@ -50,9 +53,7 @@ bool is_unconceiled_negative_distance_singlegrid(in Ray ray_worldspace, in mat4*
 
 
 bool is_unconceiled_negative_distance(in Ray ray_worldspace,
-                                      in mat4* worldToVoxelSpaces,
-                                      in ivec3* voxelCounts,
-                                      sampler3D* voxelTextures,
+                                      in VoxelDataBlock* distance_field_data_blocks,
                                       uint32_t num_voxels,
                                       out vec3 intersection_point,
                                       out vec3 intersection_normal)
@@ -65,7 +66,7 @@ bool is_unconceiled_negative_distance(in Ray ray_worldspace,
     vec3 intersection_point_tmp;
     vec3 intersection_normal_tmp;
     
-    bool got_hit = is_unconceiled_negative_distance_singlegrid(ray_worldspace, worldToVoxelSpaces, voxelCounts, voxelTextures, i, intersection_point_tmp, intersection_normal_tmp);
+    bool got_hit = is_unconceiled_negative_distance_singlegrid(ray_worldspace, distance_field_data_blocks, intersection_point_tmp, intersection_normal_tmp);
 
     float current_distance = sq_distance(intersection_point_tmp, ray_worldspace.origin);
     
@@ -77,6 +78,8 @@ bool is_unconceiled_negative_distance(in Ray ray_worldspace,
         intersection_point = intersection_point_tmp;
         intersection_normal = intersection_normal_tmp;
     }
+    
+    ++distance_field_data_blocks;
   }
   
   return is_unconceiled_negative_distance;
@@ -87,12 +90,10 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
   world_pos = vec3(0);
   world_normal = vec3(0);
   
+  VoxelDataBlock* distance_field_data_blocks = distance_fields_voxelData();
   uint32_t num_distance_fields = distance_fields_num();
-  mat4* worldToVoxelSpaces = distance_fields_worldToVoxelSpace();
-  ivec3* voxelCounts = distance_fields_voxelCount();
-  sampler3D* distance_field_textures = distance_fields_texture();
   
-  if(!is_unconceiled_negative_distance(ray, worldToVoxelSpaces, voxelCounts, distance_field_textures, num_distance_fields, world_pos, world_normal))
+  if(!is_unconceiled_negative_distance(ray, distance_field_data_blocks, num_distance_fields, world_pos, world_normal))
     discard;
   
   color.rgb = highlightColor();

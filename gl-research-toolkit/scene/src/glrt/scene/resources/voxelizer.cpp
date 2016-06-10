@@ -399,7 +399,7 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Vo
     VoxelData data;
     data.localToVoxelSpace = metaData.localToVoxelSpace;
     data.voxelCount = metaData.gridSize;
-    glm::mat4 _localToVoxelSpace = data.worldToVoxelSpaceMatrix(CoordFrame());
+    glm::mat4 _localToVoxelSpace = data.worldToVoxelSpaceMatrix4(CoordFrame());
 
     glm::vec3 p_min = transform_point(_localToVoxelSpace, meshBoundingBoxMin);
     glm::vec3 p_max = transform_point(_localToVoxelSpace, meshBoundingBoxMax);

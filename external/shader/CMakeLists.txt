@@ -5,6 +5,22 @@ add_custom_target(
   SOURCES
   cone-tracing/cone-occlusion.glsl
   distance-fields/debugging.glsl
+  gl-noise/benchmark/Win32/GL/glext.h
+  gl-noise/benchmark/Win32/GL/glfw.h
+  gl-noise/demo/Win32/GL/glext.h
+  gl-noise/demo/Win32/GL/glfw.h
+  gl-noise/src/cellular2D.glsl
+  gl-noise/src/cellular2x2.glsl
+  gl-noise/src/cellular2x2x2.glsl
+  gl-noise/src/cellular3D.glsl
+  gl-noise/src/classicnoise2D.glsl
+  gl-noise/src/classicnoise3D.glsl
+  gl-noise/src/classicnoise4D.glsl
+  gl-noise/src/noise2D.glsl
+  gl-noise/src/noise3D.glsl
+  gl-noise/src/noise3Dgrad.glsl
+  gl-noise/src/noise4D.glsl
+  gl-noise/src/psrdnoise2D.glsl
   mrp/mrp.glsl
   openvdb/triangle-distance.glsl
   pbs/brdf.glsl

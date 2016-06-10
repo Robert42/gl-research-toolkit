@@ -22,12 +22,9 @@ struct SceneLightData
 
 struct SceneVoxelHeader
 {
-  uint64_t distance_field_worldtovoxelMat_array_address;
-  uint64_t distance_field_voxelcount_array_address;
-  uint64_t distance_field_spacefactor_array_address;
-  uint64_t distance_field_textures_array_address;
   uint64_t distance_field_boundingsphere_array_address;
-  padding1(uint64_t, _padding1);
+  uint64_t distance_field_distancefielddata_array_address;
+  // padding1(uint64_t, _padding1);
   uint32_t num_distance_fields;
   padding3(uint32_t, _padding2);
 };
@@ -68,29 +65,14 @@ uint32_t distance_fields_num()
   return scene.voxelHeader.num_distance_fields;
 }
 
-mat4* distance_fields_worldToVoxelSpace()
-{
-  return (mat4*)scene.voxelHeader.distance_field_worldtovoxelMat_array_address;
-}
-
-ivec3* distance_fields_voxelCount()
-{
-  return (ivec3*)scene.voxelHeader.distance_field_voxelcount_array_address;
-}
-
-WorldVoxelUvwSpaceFactor* distance_fields_spaceFactor()
-{
-  return (WorldVoxelUvwSpaceFactor*)scene.voxelHeader.distance_field_spacefactor_array_address;
-}
-
-sampler3D* distance_fields_texture()
-{
-  return (sampler3D*)scene.voxelHeader.distance_field_textures_array_address;
-}
-
 Sphere* distance_fields_bounding_spheres()
 {
   return (Sphere*)scene.voxelHeader.distance_field_boundingsphere_array_address;
+}
+
+VoxelDataBlock* distance_fields_voxelData()
+{
+  return (VoxelDataBlock*)scene.voxelHeader.distance_field_distancefielddata_array_address;
 }
 
 #ifndef highlightColor_DEFINED

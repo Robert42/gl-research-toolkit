@@ -193,6 +193,16 @@ void PRINT_VALUE(in mat4 value)
   implement_print_value(GLSL_DEBUGGING_TYPE_MAT(4,4), value);
 }
 
+void PRINT_VALUE(in mat4x3 value)
+{
+  mat4 m = mat4(1);
+  m[0].xyz = value[0];
+  m[1].xyz = value[1];
+  m[2].xyz = value[2];
+  m[3].xyz = value[3];
+  implement_print_value(GLSL_DEBUGGING_TYPE_MAT(4,3), m);
+}
+
 void PRINT_VALUE(in mat3 value)
 {
   mat4 m = mat4(1);

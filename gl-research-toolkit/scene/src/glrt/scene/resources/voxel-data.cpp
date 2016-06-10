@@ -10,14 +10,24 @@ namespace resources {
 
 VoxelBoundingBox::VoxelBoundingBox(const VoxelDataComponent& c)
 {
-  worldToVoxelSpace = c.globalWorldToVoxelMatrix();
+  worldToVoxelSpace = c.globalWorldToVoxelMatrix4();
   voxelCount = c.data.voxelCount;
 }
 
 
-glm::mat4 VoxelData::worldToVoxelSpaceMatrix(const CoordFrame& localToWorldSpace) const
+CoordFrame VoxelData::worldToVoxelSpaceCoordFrame(const CoordFrame& localToWorldSpace) const
 {
-  return (localToVoxelSpace * localToWorldSpace.inverse()).toMat4();
+  return localToVoxelSpace * localToWorldSpace.inverse();
+}
+
+glm::mat4x3 VoxelData::worldToVoxelSpaceMatrix4x3(const CoordFrame& localToWorldSpace) const
+{
+  return worldToVoxelSpaceCoordFrame(localToWorldSpace).toMat4x3();
+}
+
+glm::mat4 VoxelData::worldToVoxelSpaceMatrix4(const CoordFrame& localToWorldSpace) const
+{
+  return worldToVoxelSpaceCoordFrame(localToWorldSpace).toMat4();
 }
 
 BoundingSphere VoxelData::worldSpaceBoundignSphere(const CoordFrame& localToWorldSpace) const

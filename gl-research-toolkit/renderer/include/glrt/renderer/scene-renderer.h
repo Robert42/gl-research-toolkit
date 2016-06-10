@@ -51,7 +51,6 @@ public:
   debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_boundingSpheres_raymarch;
-  debugging::DebugRenderer visualizePosteffect_GlobalDistancefield_raymarch;
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;
 

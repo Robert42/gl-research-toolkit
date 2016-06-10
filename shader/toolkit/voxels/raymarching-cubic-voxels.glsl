@@ -54,18 +54,21 @@ void next_cubic_grid_cell_voxelspace(inout Ray ray_voxelspace, in ivec3 marching
   dimension = i;
 }
 
-bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t index, float treshold, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
+bool raymarch_voxelgrid(in Ray ray_worldspace, in VoxelDataBlock* distance_field_data_block, float treshold, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
 {
   int hit_dimension;
-  mat4 worldToVoxelSpace = worldToVoxelSpaces[index];
-  ivec3 voxelCount = voxelCounts[index];
+  mat4x3 worldToVoxelSpace;
+  ivec3 voxelCount;
+  vec3 voxelToUvwSpace;
+  float worldToVoxelSpace_Factor;
+  
+  sampler3D voxelTexture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelCount, voxelToUvwSpace, worldToVoxelSpace_Factor);
+  
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, worldToVoxelSpace);
   
   if(!enter_cubic_voxel_grid_voxelspace(ray_voxelspace, voxelCount, hit_dimension))
     return false;
-    
-  sampler3D voxelTexture = voxelTextures[index];
   
   ivec3 marchingStep = ivec3(sign(ray_voxelspace.direction));
   ivec3 voxelCoord = ivec3(floor(ray_voxelspace.origin));
@@ -86,7 +89,7 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in i
        intersection_point = ray_voxelspace.origin;
        intersection_normal = cubic_voxel_surface_normal(ray_voxelspace, hit_dimension);
        
-       intersection_point = point_voxel_to_worldspace(intersection_point, worldToVoxelSpace);
+       intersection_point = point_voxel_to_worldspace_slow(intersection_point, worldToVoxelSpace);
        intersection_normal = direction_voxel_to_worldspace_slow(intersection_normal, worldToVoxelSpace);
        return true;
      }
@@ -97,7 +100,7 @@ bool raymarch_voxelgrid(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in i
   return false;
 }
 
-bool raymarch_voxelgrids(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in ivec3* voxelCounts, sampler3D* voxelTextures, uint32_t num_voxels, float treshold, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
+bool raymarch_voxelgrids(in Ray ray_worldspace, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_voxels, float treshold, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)
 {
   float nearest_distance = inf;
   
@@ -108,7 +111,7 @@ bool raymarch_voxelgrids(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in 
     vec3 intersection_point_tmp;
     vec3 intersection_normal_tmp;
     
-    bool got_hit = raymarch_voxelgrid(ray_worldspace, worldToVoxelSpaces, voxelCounts, voxelTextures, i, treshold, intersection_point_tmp, intersection_normal_tmp, stepCount);
+    bool got_hit = raymarch_voxelgrid(ray_worldspace, distance_field_data_blocks, treshold, intersection_point_tmp, intersection_normal_tmp, stepCount);
 
     float current_distance = sq_distance(intersection_point_tmp, ray_worldspace.origin);
     
@@ -119,6 +122,8 @@ bool raymarch_voxelgrids(in Ray ray_worldspace, in mat4* worldToVoxelSpaces, in 
         intersection_point = intersection_point_tmp;
         intersection_normal = intersection_normal_tmp;
     }
+    
+    ++distance_field_data_blocks;
   }
   
   return !isinf(nearest_distance);

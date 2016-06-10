@@ -37,6 +37,7 @@ using glm::ivec2;
 using glm::ivec3;
 using glm::ivec4;
 
+using glm::mat4x3;
 using glm::mat3;
 using glm::mat4;
 

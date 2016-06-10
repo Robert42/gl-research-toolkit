@@ -87,6 +87,15 @@ glm::mat4 CoordFrame::toMat4() const
   return m;
 }
 
+glm::mat4x3 CoordFrame::toMat4x3() const
+{
+  glm::mat4x3 m;
+
+  _to_mat4x3(reinterpret_cast<float*>(&m),
+            this->position, this->orientation, this->scaleFactor);
+  return m;
+}
+
 CoordFrame CoordFrame::inverse() const
 {
   CoordFrame i;

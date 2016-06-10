@@ -32,6 +32,7 @@ struct CoordFrame final
   glm::vec3 transform_point(const glm::vec3& point) const;
   glm::vec3 transform_direction(const glm::vec3& point) const;
 
+  glm::mat4x3 toMat4x3() const;
   glm::mat4 toMat4() const;
   CoordFrame inverse() const;
 
@@ -51,6 +52,8 @@ struct CoordFrame final
   static void _transform_direction(glm::vec3* outDirection,
                                    const glm::quat& orientation,
                                    const glm::vec3& inDirection);
+  static void _to_mat4x3(float* outMat,
+                        const glm::vec3& inPosition, const glm::quat& inOrientation, float inScaleFactor);
   static void _to_mat4(float* outMat,
                        const glm::vec3& inPosition, const glm::quat& inOrientation, float inScaleFactor);
   static void _inverse(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
