@@ -91,6 +91,7 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
 #if defined(CONETRACED_SHADOW)
     float cone_length = distance(worldPosition, sphere.origin);
     Cone cone = cone_from_point_to_sphere(worldPosition, sphere);
+    cone_length *= max(0, sign(dot(worldNormal, cone.direction)));
     occlusion = coneSoftShadow(cone, bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
     // TODO: Also other light sources should occlude this ligth source?
 #endif
