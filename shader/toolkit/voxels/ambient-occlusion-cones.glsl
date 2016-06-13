@@ -22,19 +22,6 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_from_cone(cone), worldToVoxelSpace);
   
-  /* TODO check for performance boost
-  float aabb_intersection_distance_front;
-  float aabb_intersection_distance_back;
-  if(intersects_aabb_twice(ray_voxelspace, vec3(0), vec3(voxelSize), aabb_intersection_distance_front, aabb_intersection_distance_back))
-  {
-    #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
-        ao_distancefield_cost++;
-    #endif
-    intersection_distance_front = max(aabb_intersection_distance_front, intersection_distance_front);
-    intersection_distance_back = min(aabb_intersection_distance_back, intersection_distance_back);
-  }
-  */
-  
   float cone_length_voxelspace = cone_length * worldToVoxelSpace_Factor;
   float inv_cone_length_voxelspace = 1.f / cone_length_voxelspace;
   
