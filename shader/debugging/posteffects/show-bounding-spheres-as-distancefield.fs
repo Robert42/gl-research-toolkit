@@ -6,17 +6,18 @@
 void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_normal)
 {
   world_pos = vec3(0);
-    world_normal = vec3(0);
+  world_normal = vec3(0);
   
+  Sphere* bounding_spheres = distance_fields_bounding_spheres();
+  VoxelDataBlock* distance_field_data_blocks = distance_fields_voxelData();
   uint32_t num_distance_fields = distance_fields_num();
-  mat4* worldToVoxelSpaces = distance_fields_worldToVoxelSpace();
-  ivec3* voxelCounts = distance_fields_voxelCount();
-  WorldVoxelUvwSpaceFactor* spaceFactors = distance_fields_spaceFactor();
-  Sphere* distance_field_bounding_spheres = distance_fields_bounding_spheres();
+  
+  PRINT_VALUE(bounding_spheres->origin);
+  PRINT_VALUE(bounding_spheres->radius);
   
   uint32_t stepCount = 0;
   
-  bool hit = raymarch_boundingspheres_as_distancefield(ray, distance_field_bounding_spheres, worldToVoxelSpaces, spaceFactors, voxelCounts, num_distance_fields, world_pos, world_normal, stepCount);
+  bool hit = raymarch_boundingspheres_as_distancefield(ray, bounding_spheres, distance_field_data_blocks, num_distance_fields, world_pos, world_normal, stepCount);
     
   if(posteffect_param.showNumSteps)
   {

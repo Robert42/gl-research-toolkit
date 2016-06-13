@@ -75,6 +75,9 @@ inline void printMatrixChunk(glm::ivec2 dimensions, const char* matrixPrefix, co
   case 4:
     switch(dimensions.y)
     {
+    case 3:
+      qDebug() << matrixPrefix  << glm::tmat4x3<T>(input[0].xyz(), input[1].xyz(), input[2].xyz(), input[3].xyz());
+      break;
     case 4:
       qDebug() << matrixPrefix  << glm::tmat4x4<T>(input);
       break;

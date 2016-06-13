@@ -14,11 +14,19 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     visible(settings.showByDefault),
     toggleHelp(settings.toggleHelp),
     toggleGui(settings.toggleGui),
-    toggleLogHeatVision("LOG_HEATVISION"),
-    toggleLogHeatVisionColors("HEATVISION_COLORS")
+    toggleLogHeatVision_debugPosteffect("LOG_HEATVISION_DEBUG_POSTEFFECT"),
+    toggleLogHeatVision_costs("LOG_HEATVISION_DEBUG_COSTS"),
+    toggleLogHeatVisionColors("HEATVISION_COLORS"),
+    toggleDistancefieldAOSphereTracing("DISTANCEFIELD_AO_SPHERE_TRACING"),
+    toggleConeBouquetNoise("CONE_BOUQUET_NOISE"),
+    toggleConeBouquetUnderwaterCaustics("CONE_BOUQUET_UNDERWATER_CAUSICS")
 {
-  toggleLogHeatVision.setter(true);
+  toggleLogHeatVision_debugPosteffect.setter(true);
+  toggleLogHeatVision_costs.setter(false);
   toggleLogHeatVisionColors.setter(true);
+  toggleDistancefieldAOSphereTracing.setter(false);
+  toggleConeBouquetNoise.setter(false);
+  toggleConeBouquetUnderwaterCaustics.setter(false);
 
   Q_ASSERT(application != nullptr);
 
@@ -120,7 +128,6 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   sceneSwitcher->valueChangedByUser = [&scene](const Uuid<Scene>& uuid){scene.load(uuid);};
 
   renderer->visualizePosteffect_Distancefield_boundingSpheres_raymarch.guiToggle.TwAddVarCB(tweakBar, "SDF B-Spheres", "group='Debug Voxels' help='Show the Bounding Spheres of the Distancefield Components as if they would define the distance field'");
-//  renderer->visualizePosteffect_GlobalDistancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Global-Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
@@ -134,7 +141,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwAddVarRW(tweakBar, "Show", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNumSteps, "group='Debug Shader/Show Step-Count'");
   TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsBlack, "group='Debug Shader/Show Step-Count' min=0 max=2147483647");
   TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsWhite, "group='Debug Shader/Show Step-Count' min=1 max=2147483647");
-  toggleLogHeatVision.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
+  toggleLogHeatVision_debugPosteffect.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
   toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug Shader/Show Step-Count'");
   TwSetParam(tweakBar, "Debug Shader/Show Step-Count", "opened", TW_PARAM_CSTRING, 1, "false");
 
@@ -145,7 +152,6 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwSetParam(tweakBar, "Camera", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Debug Scene -------------------------------------------------------
-
   disableSceneryVoxels.setter = [renderer,this,&scene](bool v){
     this->_disableSceneryVoxels=v;
     Array<scene::VoxelDataComponent*> voxelComponents = scene::collectAllComponentsWithType<scene::VoxelDataComponent>(&scene,
@@ -188,23 +194,42 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   setTweaBarAllocation(tweakBar, glm::ivec2(0, 4096), glm::ivec2(480, 160), glm::ivec2(32, 8));
   TwSetParam(tweakBar, nullptr, "valueswidth", TW_PARAM_CSTRING, 1, "256");
 
+  visualizationSwitcher = VisualizationEnumeration::Ptr(new VisualizationEnumeration("VisualizationEnumeration", tweakBar, "Shader Visualization", "keyincr=F7 keydecr=SHIFT+F7 help='The Surface Shader vizualization'"));
+  visualizationSwitcher->init(glrt::renderer::allSurfaceShaderVisualizations());
+  visualizationSwitcher->setCurrentValue(glrt::renderer::currentSurfaceShaderVisualization);
+  visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
+
+
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
   roughnessAdjustmentToggle.setter = [renderer](bool ar){renderer->setAdjustRoughness(ar);};
   roughnessAdjustmentToggle.getter = [renderer]() -> bool {return renderer->adjustRoughness();};
   roughnessAdjustmentToggle.TwAddVarCB(tweakBar, "Roughness Adjustment", "group=PBS");
+  TwSetParam(tweakBar, "PBS", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  sdfShadowsToggle.setter = [renderer](bool ar){renderer->setSDFShadows(ar);};
+  sdfShadowsToggle.getter = [renderer]() -> bool {return renderer->sdfShadows();};
+  sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=Debug");
+  TwSetParam(tweakBar, "Debug", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->costsHeatvisionBlackLevel, "group='Debug/Show Costs' min=0 max=2147483647");
+  TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->costsHeatvisionWhiteLevel, "group='Debug/Show Costs' min=1 max=2147483647");
+  toggleLogHeatVision_costs.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
+  toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug/Show Costs'");
+  TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  toggleDistancefieldAOSphereTracing.TwAddVarCB(tweakBar, "Sphere-Tracing", "group='Debug/SDF-AO'");
+  TwSetParam(tweakBar, "Debug/SDF-AO", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  toggleConeBouquetNoise.TwAddVarCB(tweakBar, "Noise", "group='Debug/Cone-Bouquet'");
+  toggleConeBouquetUnderwaterCaustics.TwAddVarCB(tweakBar, "Underwater Caustics", "group='Debug/Cone-Bouquet'");
+  TwSetParam(tweakBar, "Debug/Cone-Bouquet", "opened", TW_PARAM_CSTRING, 1, "false");
 
   if(shaderDebugPrinter != nullptr)
   {
     shaderDebugPrinter->guiToggle.TwAddVarCB(tweakBar, "Use Printer", "group=Debug key=F6");
     TwAddVarRW(tweakBar, "Clear Scene", TW_TYPE_BOOLCPP, &shaderDebugPrinter->clearScene, "group=Debug");
   }
-
-  visualizationSwitcher = VisualizationEnumeration::Ptr(new VisualizationEnumeration("VisualizationEnumeration", tweakBar, "Shader Visualization", "keyincr=F7 keydecr=SHIFT+F7 help='The Surface Shader vizualization'"));
-  visualizationSwitcher->init(glrt::renderer::allSurfaceShaderVisualizations());
-  visualizationSwitcher->setCurrentValue(glrt::renderer::currentSurfaceShaderVisualization);
-  visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
-
   gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;

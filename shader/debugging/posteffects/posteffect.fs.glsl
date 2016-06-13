@@ -1,11 +1,18 @@
 #include <extensions/command_list.glsl>
 
+#ifdef LOG_HEATVISION_DEBUG_POSTEFFECT
+#define LOG_HEATVISION
+#endif
+
+#define highlightColor_DEFINED
+
 #include <glrt/glsl/math-glsl.h>
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
-#include <debugging/heat-vision.glsl>
 
 #include <lighting/rendering-equation.glsl>
+
+#define POSTEFFECT_VISUALIZATION
 
 
 struct PosteffectVisualizationData
@@ -23,8 +30,6 @@ layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform Po
 {
   PosteffectVisualizationData posteffect_param;
 };
-
-#define POSTEFFECT_VISUALIZATION
 
 in FragmentBlock
 {

@@ -79,6 +79,29 @@ inline void CoordFrame::_to_mat4(float* outMat,
 }
 
 
+inline void CoordFrame::_to_mat4x3(float* outMat,
+                                  const glm::vec3& inPosition, const glm::quat& inOrientation, float inScaleFactor)
+{
+  const glm::mat3 m = glm::toMat3(inOrientation);
+
+  const float* rot_matrix = reinterpret_cast<const float*>(&m);
+  const float* translation = reinterpret_cast<const float*>(&inPosition);
+
+  outMat[0]  = rot_matrix[0] * inScaleFactor;
+  outMat[1]  = rot_matrix[1] * inScaleFactor;
+  outMat[2]  = rot_matrix[2] * inScaleFactor;
+  outMat[3]  = rot_matrix[3] * inScaleFactor;
+  outMat[4]  = rot_matrix[4] * inScaleFactor;
+  outMat[5]  = rot_matrix[5] * inScaleFactor;
+  outMat[6]  = rot_matrix[6] * inScaleFactor;
+  outMat[7]  = rot_matrix[7] * inScaleFactor;
+  outMat[8]  = rot_matrix[8] * inScaleFactor;
+  outMat[9]  = translation[0];
+  outMat[10] = translation[1];
+  outMat[11] = translation[2];
+}
+
+
 inline void CoordFrame::_inverse(glm::vec3* outPosition, glm::quat* outOrientation, float* outScaleFactor,
                                  const glm::vec3& inPosition, const glm::quat& inOrientation, float inScaleFactor)
 {

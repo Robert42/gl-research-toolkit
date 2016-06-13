@@ -14,12 +14,9 @@ class VoxelBuffer
 public:
   struct VoxelHeader
   {
-    GLuint64 distanceFieldWorldToVoxelMatrices;
-    GLuint64 distanceFieldGridSizes;
-    GLuint64 distanceFieldSpaceFactors;
-    GLuint64 distanceFieldTextures;
     GLuint64 distanceFieldBoundingSpheres;
-    padding<GLuint64, 1> _padding1;
+    GLuint64 distanceFieldDataStorageBuffer;
+    //padding<GLuint64, 1> _padding1;
     quint32 numDistanceFields;
     padding<quint32, 3> _padding2;
   };
@@ -30,10 +27,7 @@ public:
   const VoxelHeader& updateVoxelHeader();
 
 private:
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, glm::mat4, &scene::VoxelDataComponent::globalWorldToVoxelMatrix>> distanceFieldMat4StorageBuffer;
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::GridSize, &scene::VoxelDataComponent::gridSize>> distanceFieldGridSizesStorageBuffer;
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::WorldVoxelUvwSpaceFactor, &scene::VoxelDataComponent::spaceFactor>> distanceFieldSpaceFactorStorageBuffer;
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, quint64, &scene::VoxelDataComponent::textureData>> distanceFieldTextureHandleStorageBuffer;
+  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::VoxelDataBlock, &scene::VoxelDataComponent::voxelDataBlock>> distanceFieldDataStorageBuffer;
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::resources::BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
 
   VoxelHeader _voxelHeader;

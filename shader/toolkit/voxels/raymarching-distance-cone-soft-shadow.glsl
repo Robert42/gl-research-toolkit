@@ -1,29 +1,22 @@
 #ifndef RAYMARCHING_DISTANCEFIELD_CONE_SOFTSHADOW_GLSL
 #define RAYMARCHING_DISTANCEFIELD_CONE_SOFTSHADOW_GLSL
 
-#include "global-distance-field.glsl"
+#include <scene/uniforms.glsl>
+
+#include "distance-field-utils.glsl"
 
 #include <cone-tracing/cone-occlusion.glsl>
 
-float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global_distance_field, float intersection_distance_front, float intersection_distance_back, float cone_length)
+float coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
-  mat4 worldToVoxelSpace = global_distance_field.worldToVoxelSpaces[index];
-  ivec3 voxelSize = global_distance_field.voxelCounts[index];
+  mat4x3 worldToVoxelSpace;
+  ivec3 voxelSize;
+  vec3 voxelToUvwSpace;
+  float worldToVoxelSpace_Factor;
+  
+  sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_from_cone(cone), worldToVoxelSpace);
-  
-  /* TODO check for performance boost
-  float aabb_intersection_distance_front;
-  float aabb_intersection_distance_back;
-  if(intersects_aabb_twice(ray_voxelspace, vec3(0), vec3(voxelSize), aabb_intersection_distance_front, aabb_intersection_distance_back))
-  {
-    intersection_distance_front = max(aabb_intersection_distance_front, intersection_distance_front);
-    intersection_distance_back = min(aabb_intersection_distance_back, intersection_distance_back);
-  }
-  */
-  
-  WorldVoxelUvwSpaceFactor spaceFactor = global_distance_field.spaceFactors[index];
-  float worldToVoxelSpace_Factor = 1.f / spaceFactor.voxelToWorldSpace;
   
   float cone_length_voxelspace = cone_length * worldToVoxelSpace_Factor;
   float inv_cone_length_voxelspace = 1.f / cone_length_voxelspace;
@@ -32,8 +25,6 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   
   intersection_distance_front = max(intersection_distance_front*worldToVoxelSpace_Factor, self_shadow_avoidance);
   intersection_distance_back = min(intersection_distance_back*worldToVoxelSpace_Factor, cone_length_voxelspace);
-  
-  sampler3D texture = global_distance_field.distance_field_textures[index];
     
   float t = intersection_distance_front;
   
@@ -47,9 +38,10 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
     
     vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
     
-    float d = distancefield_distance(clamped_p, spaceFactor, texture) + distance(clamped_p, p);
+    float d = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
+    float cone_radius = cone.tan_half_angle * t;
     
-    minVisibility = min(minVisibility, coneOcclusionHeuristic(cone, t, d));
+    minVisibility = min(minVisibility, coneOcclusionHeuristic(cone_radius, d));
     
     t += abs(d);
   }
@@ -57,25 +49,24 @@ float coneSoftShadow(in Cone cone, uint32_t index, in GlobalDistanceField global
   return minVisibility;
 }
 
-float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field, float cone_length=inf)
+float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  uint32_t num_distance_fields = global_distance_field.num_distance_fields;
-  
   float occlusion = 1.f;
-  
-  Sphere* bounding_spheres = global_distance_field.bounding_spheres;
   
   for(uint32_t i=0; i<num_distance_fields; ++i)
   {
-    Sphere sphere = bounding_spheres[i];
+    Sphere sphere = *bounding_spheres;
     
     float distance_to_sphere_origin;
     if(cone_intersects_sphere(cone, sphere, distance_to_sphere_origin))
     {
       float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
       float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-      occlusion = min(occlusion, coneSoftShadow(cone, i, global_distance_field, intersection_distance_front, intersection_distance_back, cone_length));
+      occlusion = min(occlusion, coneSoftShadow(cone, distance_field_data_blocks, intersection_distance_front, intersection_distance_back, cone_length));
     }
+    
+    ++bounding_spheres;
+    ++distance_field_data_blocks;
   }
   
   occlusion = max(0, occlusion);
@@ -88,7 +79,7 @@ float coneSoftShadow(in Cone cone, in GlobalDistanceField global_distance_field,
 
 float coneSoftShadow(in Cone cone, float cone_length=inf)
 {
-  return coneSoftShadow(cone, init_global_distance_field(), cone_length);
+  return coneSoftShadow(cone, distance_fields_bounding_spheres(), distance_fields_voxelData(), distance_fields_num(), cone_length);
 }
 
 #endif // RAYMARCHING_DISTANCEFIELD_CONE_SOFTSHADOW_GLSL

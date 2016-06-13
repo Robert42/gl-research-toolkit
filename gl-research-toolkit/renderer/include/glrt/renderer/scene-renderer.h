@@ -51,13 +51,15 @@ public:
   debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_boundingSpheres_raymarch;
-  debugging::DebugRenderer visualizePosteffect_GlobalDistancefield_raymarch;
   debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
   debugging::PosteffectVisualizationDataBlock debugPosteffect;
 
   glm::ivec2 videoResolution;
+
+  quint32 costsHeatvisionBlackLevel = 0;
+  quint32 costsHeatvisionWhiteLevel = 1024;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
@@ -74,6 +76,8 @@ public:
 
   bool adjustRoughness() const;
   void setAdjustRoughness(bool adjustRoughness);
+  bool sdfShadows() const;
+  void setSDFShadows(bool sdfShadows);
 
 protected:
   virtual void prepareFramebuffer() = 0;
@@ -87,9 +91,12 @@ private:
   {
     glm::mat4 view_projection_matrix;
     glm::vec3 camera_position;
-    padding<float> _padding;
+    float totalTime;
     LightBuffer::LightData lightData;
     VoxelBuffer::VoxelHeader voxelHeader;
+    quint32 costsHeatvisionBlackLevel;
+    quint32 costsHeatvisionWhiteLevel;
+    padding<quint32, 2> _padding2;
   };
 
   LightBuffer lightUniformBuffer;
@@ -104,6 +111,7 @@ private:
 
   bool _needRecapturing : 1;
   bool _adjustRoughness : 1;
+  bool _sdfShadows : 1;
 
   bool needRecapturing() const;
   bool needRerecording() const;

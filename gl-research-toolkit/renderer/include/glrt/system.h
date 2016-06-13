@@ -22,7 +22,7 @@ public:
     glm::ivec2 windowSize = glm::ivec2(640, 480);
     SplashscreenStyle* splashscreenStyle = nullptr;
     int minOpenglVersion = 450;
-    bool VSync = true;
+    bool VSync = false;
     bool onlyOpenGLContext = false;
 
     static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))

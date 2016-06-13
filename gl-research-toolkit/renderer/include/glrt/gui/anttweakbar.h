@@ -302,6 +302,7 @@ private:
 
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
+  gui::TweakBarCBVar<bool> sdfShadowsToggle;
   gui::TweakBarCBVar<bool> disableSceneryVoxels;
 
   bool _disableSceneryVoxels = false;
@@ -320,8 +321,14 @@ private:
   CameraEnumeration::Ptr cameraSwitcher;
   VisualizationEnumeration::Ptr visualizationSwitcher;
 
-  TweakBarShaderToggle toggleLogHeatVision;
+  TweakBarShaderToggle toggleLogHeatVision_debugPosteffect;
+  TweakBarShaderToggle toggleLogHeatVision_costs;
   TweakBarShaderToggle toggleLogHeatVisionColors;
+
+  TweakBarShaderToggle toggleDistancefieldAOSphereTracing;
+
+  TweakBarShaderToggle toggleConeBouquetNoise;
+  TweakBarShaderToggle toggleConeBouquetUnderwaterCaustics;
 
   void updateAntTweakBarWindowSize();
 

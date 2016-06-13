@@ -74,6 +74,11 @@ TEST_F(coord_frame, to_matrix)
   EXPECT_VEC_NEAR(ma[1], a.toMat4()[1], 1.e-7);
   EXPECT_VEC_NEAR(ma[2], a.toMat4()[2], 1.e-7);
   EXPECT_VEC_NEAR(ma[3], a.toMat4()[3], 1.e-7);
+
+  EXPECT_VEC_NEAR(ma[0].xyz(), a.toMat4x3()[0], 1.e-7);
+  EXPECT_VEC_NEAR(ma[1].xyz(), a.toMat4x3()[1], 1.e-7);
+  EXPECT_VEC_NEAR(ma[2].xyz(), a.toMat4x3()[2], 1.e-7);
+  EXPECT_VEC_NEAR(ma[3].xyz(), a.toMat4x3()[3], 1.e-7);
 }
 
 TEST_F(coord_frame, from_matrix)

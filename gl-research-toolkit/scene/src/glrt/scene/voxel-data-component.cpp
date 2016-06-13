@@ -17,29 +17,42 @@ VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, cons
 }
 
 
-glm::mat4 VoxelDataComponent::globalWorldToVoxelMatrix() const
+glm::mat4x3 VoxelDataComponent::globalWorldToVoxelMatrix4x3() const
 {
-  return data.worldToVoxelSpaceMatrix(globalCoordFrame());
+  glm::mat4x3 m = data.worldToVoxelSpaceMatrix4x3(globalCoordFrame());
+  return m;
 }
 
-VoxelDataComponent::GridSize VoxelDataComponent::gridSize() const
+glm::mat4 VoxelDataComponent::globalWorldToVoxelMatrix4() const
 {
-  GridSize gridSize;
-
-  gridSize.voxelCount = data.voxelCount;
-
-  return gridSize;
+  glm::mat4 m = data.worldToVoxelSpaceMatrix4(globalCoordFrame());
+  return m;
 }
 
-VoxelDataComponent::WorldVoxelUvwSpaceFactor VoxelDataComponent::spaceFactor() const
+glm::ivec3 VoxelDataComponent::gridSize() const
 {
-  WorldVoxelUvwSpaceFactor factor;
-
-  factor.voxelToUvwSpace = 1.f / glm::vec3(data.voxelCount);
-  factor.voxelToWorldSpace = globalCoordFrame().scaleFactor / data.localToVoxelSpace.scaleFactor;
-
-  return factor;
+  return data.voxelCount;
 }
+
+VoxelDataComponent::VoxelDataBlock VoxelDataComponent::voxelDataBlock() const
+{
+  VoxelDataBlock dataBlock;
+
+  glm::mat4x3 globalWorldToVoxelMatrix = this->globalWorldToVoxelMatrix4x3();
+
+  dataBlock.globalWorldToVoxelFactor = data.localToVoxelSpace.scaleFactor / globalCoordFrame().scaleFactor;
+  dataBlock.globalWorldToVoxelMatrix_col0 = globalWorldToVoxelMatrix[0];
+  dataBlock.globalWorldToVoxelMatrix_col1 = globalWorldToVoxelMatrix[1];
+  dataBlock.globalWorldToVoxelMatrix_col2 = globalWorldToVoxelMatrix[2];
+  dataBlock.globalWorldToVoxelMatrix_col3 = globalWorldToVoxelMatrix[3];
+  dataBlock.voxelCount_x = data.voxelCount.x;
+  dataBlock.voxelCount_y = data.voxelCount.y;
+  dataBlock.voxelCount_z = data.voxelCount.z;
+  dataBlock.texture = textureData();
+
+  return dataBlock;
+}
+
 
 quint64 VoxelDataComponent::textureData() const
 {
