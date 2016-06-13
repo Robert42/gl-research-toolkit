@@ -21,7 +21,7 @@ public:
     glm::vec3 globalWorldToVoxelMatrix_col2;
     int voxelCount_z;
     glm::vec3 globalWorldToVoxelMatrix_col3;
-    float globalWorldToVoxelFactor; // #TODO is this also usefull in the AO shader?
+    float globalWorldToVoxelFactor;
 
     quint64 texture;
     padding<quint64, 1> _padding1;
