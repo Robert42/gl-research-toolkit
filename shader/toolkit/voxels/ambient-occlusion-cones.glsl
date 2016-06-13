@@ -4,6 +4,7 @@
 #define N_GI_CONES 9
 
 Cone cone_bouquet[N_GI_CONES];
+float cone_bouquet_ao[N_GI_CONES];
 
 int ao_distancefield_cost = 0;
 
@@ -73,10 +74,8 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   return minVisibility;
 }
 
-float ao_coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+void ao_coneSoftShadow(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  float occlusion = 1.f;
-  
   for(uint32_t i=0; i<num_distance_fields; ++i)
   {
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
@@ -84,34 +83,37 @@ float ao_coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataB
     #endif
     Sphere sphere = *bounding_spheres;
     
-    float distance_to_sphere_origin;
-    if(cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length))
+    for(int j=0; j<N_GI_CONES; ++j)
     {
-      #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
-          ao_distancefield_cost++;
-      #endif
+      float distance_to_sphere_origin;
+      if(cone_intersects_sphere(cone_bouquet[j], sphere, distance_to_sphere_origin, cone_length))
+      {
+        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+            ao_distancefield_cost++;
+        #endif
 
-      float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
-      float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-      occlusion = min(occlusion, ao_coneSoftShadow(cone, distance_field_data_blocks, intersection_distance_front, intersection_distance_back, cone_length));
+        float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
+        float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
+        cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao_coneSoftShadow(cone_bouquet[j], distance_field_data_blocks, intersection_distance_front, intersection_distance_back, cone_length));
+      }
     }
     
     ++bounding_spheres;
     ++distance_field_data_blocks;
   }
-  
-  occlusion = max(0, occlusion);
-  
-  return occlusion;
 }
 
 float distancefield_ao(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float radius=3.5)
 {
   float V = 0.f;
+  
   for(int i=0; i<N_GI_CONES; ++i)
-  {
-    V += ao_coneSoftShadow(cone_bouquet[i], bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
-  }
+    cone_bouquet_ao[i] = 1.f;
+  
+  ao_coneSoftShadow(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+    
+  for(int i=0; i<N_GI_CONES; ++i)
+    V += max(0, cone_bouquet_ao[i]);
     
   return V / N_GI_CONES;
 }
