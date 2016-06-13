@@ -86,6 +86,8 @@ void Renderer::render()
 void Renderer::update(float deltaTime)
 {
   debugPosteffect.totalTime += deltaTime;
+
+  statistics.numSdfInstances = voxelUniformBuffer.numVisibleVoxelGrids();
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)

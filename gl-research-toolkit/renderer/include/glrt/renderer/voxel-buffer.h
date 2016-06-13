@@ -26,13 +26,13 @@ public:
 
   const VoxelHeader& updateVoxelHeader();
 
+  quint32 numVisibleVoxelGrids() const;
+
 private:
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::VoxelDataBlock, &scene::VoxelDataComponent::voxelDataBlock>> distanceFieldDataStorageBuffer;
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::resources::BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
 
   VoxelHeader _voxelHeader;
-
-  quint32 numVisibleVoxelGrids() const;
 
   quint32 _numVisibleVoxelGrids = 0;
 };

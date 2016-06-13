@@ -174,6 +174,11 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
   TwSetParam(tweakBar, "Debug Scene", "opened", TW_PARAM_CSTRING, 1, "false");
 
+  //-------- Scene Statistics---------------------------------------------------
+  TwAddVarRO(tweakBar, "Num Visible SDF instances", TW_TYPE_UINT32, &renderer->statistics.numSdfInstances, "group='Statistics'");
+  TwSetParam(tweakBar, "Statistics", "opened", TW_PARAM_CSTRING, 1, "false");
+
+
   gui::Toolbar::registerTweakBar(tweakBar, true);
 
   return tweakBar;

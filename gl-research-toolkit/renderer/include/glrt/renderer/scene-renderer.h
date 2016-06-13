@@ -32,6 +32,13 @@ class Renderer : public QObject, public ReloadableShader::Listener
 {
   Q_OBJECT
 public:
+  struct Satistics
+  {
+    quint32 numSdfInstances = -1;
+  };
+
+  Satistics statistics;
+
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
   debugging::ShaderDebugPrinter& debugPrinter;
