@@ -18,16 +18,6 @@ float coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block,
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_from_cone(cone), worldToVoxelSpace);
   
-  /* TODO check for performance boost
-  float aabb_intersection_distance_front;
-  float aabb_intersection_distance_back;
-  if(intersects_aabb_twice(ray_voxelspace, vec3(0), vec3(voxelSize), aabb_intersection_distance_front, aabb_intersection_distance_back))
-  {
-    intersection_distance_front = max(aabb_intersection_distance_front, intersection_distance_front);
-    intersection_distance_back = min(aabb_intersection_distance_back, intersection_distance_back);
-  }
-  */
-  
   float cone_length_voxelspace = cone_length * worldToVoxelSpace_Factor;
   float inv_cone_length_voxelspace = 1.f / cone_length_voxelspace;
   
@@ -49,8 +39,9 @@ float coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block,
     vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
     
     float d = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
+    float cone_radius = cone.tan_half_angle * t;
     
-    minVisibility = min(minVisibility, coneOcclusionHeuristic(cone, t, d));
+    minVisibility = min(minVisibility, coneOcclusionHeuristic(cone_radius, d));
     
     t += abs(d);
   }

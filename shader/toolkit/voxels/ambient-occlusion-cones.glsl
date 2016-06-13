@@ -57,7 +57,9 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
     ao_distancefield_cost++;
 #endif
     
-    float occlusionHeuristic = coneOcclusionHeuristic(cone, t, d);
+    float cone_radius = cone.tan_half_angle * t;
+    
+    float occlusionHeuristic = coneOcclusionHeuristic(cone_radius, d);
     occlusionHeuristic = mix(occlusionHeuristic, 1.f, t*inv_cone_length_voxelspace);
     minVisibility = min(minVisibility, occlusionHeuristic);
     

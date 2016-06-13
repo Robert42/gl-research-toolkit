@@ -1,9 +1,9 @@
 #ifndef CONETRACING_CONE_OCCLUSION_GLSL
 #define CONETRACING_CONE_OCCLUSION_GLSL
 
-float coneOcclusionHeuristic(in Cone cone, float t, float distanceToSurface)
+float coneOcclusionHeuristic(float cone_radius, float distanceToSurface)
 {
-  return distanceToSurface / (cone.tan_half_angle * t);
+  return distanceToSurface / cone_radius;
 }
 
 #endif // CONETRACING_CONE_OCCLUSION_GLSL
