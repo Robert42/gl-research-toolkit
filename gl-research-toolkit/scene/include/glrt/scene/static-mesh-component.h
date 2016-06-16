@@ -2,6 +2,7 @@
 #define GLRT_SCENE_STATICMESHCOMPONENT_H
 
 #include "node.h"
+#include "aabb.h"
 
 namespace glrt {
 namespace scene {
@@ -14,6 +15,8 @@ public:
 
   StaticMeshComponent(Node& node, Node::Component* parent, const Uuid<StaticMeshComponent>& uuid, const Uuid<resources::StaticMesh>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
   ~StaticMeshComponent();
+
+  AABB boundingBox() const;
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();

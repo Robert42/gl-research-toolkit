@@ -51,6 +51,8 @@ public:
   debugging::DebugRenderer visualizeWorldGrid;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
+  debugging::DebugRenderer visualizeVoxelBoundingBoxes;
+  debugging::DebugRenderer visualizeVoxelSceneBoundingBox;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;

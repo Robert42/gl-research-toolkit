@@ -22,13 +22,19 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
 {
   resourceManager().addMaterialUser(materialUuid, staticMesh);
   resourceManager().loadStaticMesh(staticMesh);
-  scene().aabb |= resourceManager().staticMeshAABB(staticMesh);
+  scene().aabb |= this->boundingBox(); // #TODO: does the component already have the right position?
   scene().StaticMeshComponentAdded(this);
 }
 
 StaticMeshComponent::~StaticMeshComponent()
 {
   hideInDestructor();
+}
+
+
+AABB StaticMeshComponent::boundingBox() const
+{
+  return resourceManager().staticMeshAABB(staticMeshUuid);
 }
 
 

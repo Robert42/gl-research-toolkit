@@ -52,9 +52,8 @@ void ResourceManager::loadStaticMesh(const Uuid<StaticMesh>& uuid)
   this->staticMeshLoader.loadStaticMesh(uuid, this);
 }
 
-AABB ResourceManager::staticMeshAABB(const Uuid<StaticMesh>& uuid, const AABB& fallback)
+AABB ResourceManager::staticMeshAABB(const Uuid<StaticMesh>& uuid, const AABB& fallback) const
 {
-  loadStaticMesh(uuid);
   return this->staticMeshLoader.staticMeshAABB(uuid, this, fallback);
 }
 

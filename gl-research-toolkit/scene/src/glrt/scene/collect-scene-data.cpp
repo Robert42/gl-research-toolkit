@@ -1,4 +1,5 @@
 #include <glrt/scene/collect-scene-data.h>
+#include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/fps-debug-controller.h>
 
 namespace glrt {
@@ -77,6 +78,16 @@ QVector<BoundingSphere> collectVoxelBoundingSphere(Scene* scene)
 QHash<QString, BoundingSphere> collectNamedVoxelBoundingSphere(Scene* scene)
 {
   return collectNamedData<VoxelDataComponent,BoundingSphere>(scene, [](VoxelDataComponent* c) -> BoundingSphere{return c->boundingSphere();});
+}
+
+QVector<AABB> collectBoundingBoxes(Scene* scene)
+{
+  return collectData<StaticMeshComponent,AABB>(scene, [](StaticMeshComponent* c) -> AABB{return c->boundingBox();});
+}
+
+QHash<QString, AABB> collectNamedBoundingBoxes(Scene* scene)
+{
+  return collectNamedData<StaticMeshComponent,AABB>(scene, [](StaticMeshComponent* c) -> AABB{return c->boundingBox();});
 }
 
 

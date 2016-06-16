@@ -9,7 +9,9 @@ namespace scene {
 struct AABB
 {
   glm::vec3 minPoint;
+  padding<float, 1> _padding1;
   glm::vec3 maxPoint;
+  padding<float, 1> _padding2;
 
   bool isInf() const {return glm::any(glm::isinf(minPoint)) || glm::any(glm::isinf(maxPoint));}
   bool isNan() const {return glm::any(glm::isnan(minPoint)) || glm::any(glm::isnan(maxPoint));}

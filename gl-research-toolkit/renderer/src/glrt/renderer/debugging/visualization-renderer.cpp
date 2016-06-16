@@ -62,6 +62,24 @@ DebugRenderer VisualizationRenderer::debugVoxelBoundingSpheres(scene::Scene* sce
   });
 }
 
+DebugRenderer VisualizationRenderer::showSceneAABB(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    return debugging::DebugLineVisualisation::drawBoundingBoxes({scene->aabb});
+  });
+}
+
+DebugRenderer VisualizationRenderer::showMeshAABBs(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    QVector<scene::AABB> boundingBoxes = scene::collectBoundingBoxes(scene);
+    if(boundingBoxes.isEmpty())
+      return nullptr;
+    else
+      return debugging::DebugLineVisualisation::drawBoundingBoxes(boundingBoxes);
+  });
+}
+
 DebugRenderer VisualizationRenderer::debugPoints(QVector<glm::vec3>* points)
 {
   return DebugRenderer([points]() -> DebugRenderer::Implementation* {

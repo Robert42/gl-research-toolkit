@@ -50,6 +50,9 @@ QHash<QString, VoxelBoundingBox> collectNamedVoxelGridSize(Scene* scene);
 QVector<BoundingSphere> collectVoxelBoundingSphere(Scene* scene);
 QHash<QString, BoundingSphere> collectNamedVoxelBoundingSphere(Scene* scene);
 
+QVector<AABB> collectBoundingBoxes(Scene* scene);
+QHash<QString, AABB> collectNamedBoundingBoxes(Scene* scene);
+
 
 } // namespace scene
 } // namespace glrt
