@@ -25,6 +25,8 @@ private:
   glrt::scene::resources::ResourceManager* resourceManager;
 
   void loadStaticMeshImpl(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices) override;
+
+  scene::AABB aabbForAlreadyLoaded(const Uuid<StaticMesh>& uuid) const override;
 };
 
 } // namespace renderer

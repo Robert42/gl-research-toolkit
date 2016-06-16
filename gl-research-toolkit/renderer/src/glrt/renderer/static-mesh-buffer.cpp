@@ -13,7 +13,7 @@ StaticMeshBuffer::StaticMeshBuffer(gl::Buffer* indexBuffer, gl::Buffer* vertexBu
     vertexBuffer(std::move(vertexBuffer)),
     numberIndices(numberIndices),
     numberVertices(numberVertices),
-    aabb(aabb)
+    _aabb(aabb)
 {
 }
 

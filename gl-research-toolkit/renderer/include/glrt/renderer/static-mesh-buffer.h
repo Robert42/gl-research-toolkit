@@ -48,12 +48,14 @@ public:
   void recordDraw(gl::CommandListRecorder& recorder) const;
   void recordDrawInstances(gl::CommandListRecorder& recorder, int begin, int end) const;
 
+  AABB aabb() const {return _aabb;}
+
 private:
   gl::Buffer* indexBuffer;
   gl::Buffer* vertexBuffer;
   int numberIndices;
   int numberVertices;
-  AABB aabb;
+  AABB _aabb;
 
   static StaticMeshBuffer _createAsArray(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices);
 };

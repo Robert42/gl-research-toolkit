@@ -28,6 +28,13 @@ void StaticMeshBufferManager::removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> us
   }
 }
 
+scene::AABB StaticMeshBufferManager::aabbForAlreadyLoaded(const Uuid<StaticMesh>& uuid) const
+{
+  Q_ASSERT(isAlreadyLoaded(uuid));
+
+  return staticMeshes.value(uuid)->aabb();
+}
+
 bool StaticMeshBufferManager::isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const
 {
   return staticMeshes.contains(uuid);

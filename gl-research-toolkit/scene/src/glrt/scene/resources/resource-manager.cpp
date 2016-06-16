@@ -52,6 +52,12 @@ void ResourceManager::loadStaticMesh(const Uuid<StaticMesh>& uuid)
   this->staticMeshLoader.loadStaticMesh(uuid, this);
 }
 
+AABB ResourceManager::staticMeshAABB(const Uuid<StaticMesh>& uuid, const AABB& fallback)
+{
+  loadStaticMesh(uuid);
+  return this->staticMeshLoader.staticMeshAABB(uuid, this, fallback);
+}
+
 QString ResourceManager::labelForResourceUuid(const QUuid& uuid) const
 {
   return labelForResourceUuid(uuid, uuid.toString());

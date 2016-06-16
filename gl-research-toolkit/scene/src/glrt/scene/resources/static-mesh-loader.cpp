@@ -24,6 +24,9 @@ StaticMeshLoader::~StaticMeshLoader()
 
 void StaticMeshLoader::loadStaticMesh(const Uuid<StaticMesh>& uuid, const ResourceManager* resourceManager)
 {
+  if(isAlreadyLoaded(uuid))
+    return;
+
   QString file = resourceManager->staticMeshFileForUuid(uuid);
   if(!file.isEmpty())
     loadStaticMesh(uuid, file.toStdString());
@@ -48,6 +51,21 @@ void StaticMeshLoader::loadStaticMesh(const Uuid<StaticMesh>& uuid, const Static
 void StaticMeshLoader::loadStaticMesh(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices)
 {
   loadStaticMeshImpl(uuid, indices, numIndices, vertices, numVertices);
+}
+
+AABB StaticMeshLoader::staticMeshAABB(const Uuid<StaticMesh>& uuid, const ResourceManager* resourceManager, const AABB& fallback)
+{
+  if(isAlreadyLoaded(uuid))
+    return aabbForAlreadyLoaded(uuid);
+
+  QString filepath = resourceManager->staticMeshFileForUuid(uuid);
+  if(filepath.isEmpty())
+    return fallback;
+
+  StaticMeshFile file;
+  file.load(filepath);
+
+  return file.staticMesh.boundingBox();
 }
 
 void StaticMeshLoader::registerAngelScriptAPI()

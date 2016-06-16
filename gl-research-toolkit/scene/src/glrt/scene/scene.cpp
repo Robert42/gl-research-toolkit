@@ -47,6 +47,7 @@ Scene::~Scene()
 
 void Scene::clear()
 {
+  this->aabb = AABB::invalid();
   this->uuid = Uuid<Scene>();
 
   // the destructor of a scene layers removes the layer from the _layers hash.

@@ -8,19 +8,37 @@ AABB AABB::fromVertices(const glm::vec3* vertices, int numVertices)
   return fromVertices(vertices, numVertices, sizeof(glm::vec3));
 }
 
-AABB AABB::fromVertices(const glm::vec3* vertices, int numVertices, size_t stride)
+AABB AABB::invalid()
 {
   AABB aabb;
   aabb.minPoint = glm::vec3(INFINITY);
   aabb.maxPoint = glm::vec3(-INFINITY);
+
+  return aabb;
+}
+
+void AABB::operator |= (const AABB& other)
+{
+  *this |= other.maxPoint;
+  *this |= other.minPoint;
+}
+
+void AABB::operator |= (const glm::vec3& other)
+{
+  this->minPoint = glm::min(other, this->minPoint);
+  this->maxPoint = glm::max(other, this->maxPoint);
+}
+
+AABB AABB::fromVertices(const glm::vec3* vertices, int numVertices, size_t stride)
+{
+  AABB aabb = AABB::invalid();
   size_t address = size_t(vertices);
 
   for(int i=0; i<numVertices; ++i)
   {
     const glm::vec3& v = *reinterpret_cast<const glm::vec3*>(address);
 
-    aabb.minPoint = glm::min(v, aabb.minPoint);
-    aabb.maxPoint = glm::max(v, aabb.maxPoint);
+    aabb |= v;
 
     address += stride;
   }
@@ -32,9 +50,7 @@ AABB AABB::aabbOfTransformedBoundingBox(const CoordFrame& coordFrame) const
 {
   glm::vec3 p[2] = {this->minPoint, this->maxPoint};
 
-  AABB aabb;
-  aabb.minPoint = glm::vec3(INFINITY);
-  aabb.maxPoint = glm::vec3(-INFINITY);
+  AABB aabb = AABB::invalid();
   for(int i=0; i<8; ++i)
   {
     glm::ivec3 p_index((i&4) > 0,
@@ -45,8 +61,7 @@ AABB AABB::aabbOfTransformedBoundingBox(const CoordFrame& coordFrame) const
                                                        p[p_index.y].y,
                                                        p[p_index.z].z));
 
-    aabb.minPoint = glm::min(v, aabb.minPoint);
-    aabb.maxPoint = glm::max(v, aabb.maxPoint);
+    aabb |= v;
   }
 
   return aabb;

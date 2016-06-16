@@ -22,6 +22,7 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
 {
   resourceManager().addMaterialUser(materialUuid, staticMesh);
   resourceManager().loadStaticMesh(staticMesh);
+  scene().aabb |= resourceManager().staticMeshAABB(staticMesh);
   scene().StaticMeshComponentAdded(this);
 }
 

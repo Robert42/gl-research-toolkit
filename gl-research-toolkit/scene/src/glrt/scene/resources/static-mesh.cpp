@@ -28,9 +28,15 @@ public:
     memcpy(data.vertices.data(), vertices, numVertices*sizeof(StaticMesh::Vertex));
   }
 
-  bool isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const
+  bool isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const override
   {
+    Q_UNUSED(uuid);
     return false;
+  }
+
+  AABB aabbForAlreadyLoaded(const Uuid<StaticMesh>& uuid) const override
+  {
+    return AABB();
   }
 };
 
