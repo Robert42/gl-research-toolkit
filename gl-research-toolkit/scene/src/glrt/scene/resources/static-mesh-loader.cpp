@@ -31,6 +31,9 @@ void StaticMeshLoader::loadStaticMesh(const Uuid<StaticMesh>& uuid, const Resour
 
 void StaticMeshLoader::loadStaticMesh(const Uuid<StaticMesh>& uuid, const std::string& filepath)
 {
+  if(isAlreadyLoaded(uuid))
+    return;
+
   StaticMeshFile file;
   file.load(QString::fromStdString(filepath));
 

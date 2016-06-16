@@ -38,6 +38,7 @@ public:
 
 protected:
   virtual void loadStaticMeshImpl(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices) = 0;
+  virtual bool isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const = 0;
 };
 
 

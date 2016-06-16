@@ -18,6 +18,7 @@ public:
   StaticMeshBuffer* meshForUuid(const Uuid<StaticMesh>& uuid);
 
   void removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> usedStaticMeshes) override;
+  bool isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const override;
 
 private:
   QHash<Uuid<StaticMesh>, StaticMeshBuffer*> staticMeshes;

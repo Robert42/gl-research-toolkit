@@ -27,6 +27,11 @@ public:
     memcpy(data.indices.data(), indices, numIndices*sizeof(StaticMesh::index_type));
     memcpy(data.vertices.data(), vertices, numVertices*sizeof(StaticMesh::Vertex));
   }
+
+  bool isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const
+  {
+    return false;
+  }
 };
 
 StaticMesh StaticMesh::loadFromFile(const QString& filepath)
