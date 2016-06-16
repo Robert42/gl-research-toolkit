@@ -26,7 +26,7 @@ void FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::Upda
 template<class T_StaticMeshComponent, class T_recorder>
 bool FragmentedStaticMeshComponentArray<T_StaticMeshComponent, T_recorder>::UpdateCaller::valueLessThan(T_StaticMeshComponent* a, T_StaticMeshComponent* b)
 {
-  return a < b;
+  return a->zOrder() < b->zOrder();
 }
 
 

@@ -422,6 +422,12 @@ CoordFrame Node::Component::globalCoordFrame() const
   return _globalCoordFrame;
 }
 
+quint64 Node::Component::zOrder() const
+{
+  // #TODO: return a real zCode
+  return quint64(this);
+}
+
 /*!
 Calculates the global transformation of the given component.
 

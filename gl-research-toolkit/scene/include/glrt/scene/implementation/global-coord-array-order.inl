@@ -13,7 +13,7 @@ void GlobalCoordArrayOrder::UpdateCaller::handle_value(Node::Component**, int, e
 
 bool GlobalCoordArrayOrder::UpdateCaller::valueLessThan(Node::Component* a, Node::Component* b)
 {
-  return a<b;
+  return a->zOrder()<b->zOrder();
 }
 
 

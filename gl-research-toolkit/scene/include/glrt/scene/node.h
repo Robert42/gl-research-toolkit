@@ -111,6 +111,8 @@ public:
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
 
+  quint64 zOrder() const;
+
   CoordFrame updateGlobalCoordFrame();
   virtual CoordFrame calcGlobalCoordFrameImpl() const;
   bool hasCustomGlobalCoordUpdater() const;
