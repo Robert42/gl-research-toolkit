@@ -55,7 +55,7 @@ private:
   gl::Buffer* vertexBuffer;
   int numberIndices;
   int numberVertices;
-  AABB _aabb;
+  AABB _aabb = AABB::invalid();
 
   static StaticMeshBuffer _createAsArray(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices);
 };

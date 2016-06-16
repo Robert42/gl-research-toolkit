@@ -34,7 +34,7 @@ StaticMeshComponent::~StaticMeshComponent()
 
 AABB StaticMeshComponent::boundingBox() const
 {
-  return resourceManager().staticMeshAABB(staticMeshUuid);
+  return resourceManager().staticMeshAABB(staticMeshUuid).aabbOfTransformedBoundingBox(globalCoordFrame());
 }
 
 

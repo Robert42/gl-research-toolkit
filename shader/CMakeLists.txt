@@ -27,6 +27,8 @@ add_custom_target(
   debugging/posteffects/show-distancefield-as-cubic-voxel.vs
   debugging/visualizations/common-debug-line-visualization.fs.glsl
   debugging/visualizations/common-debug-line-visualization.vs.glsl
+  debugging/visualizations/visualize-aabbs.fs
+  debugging/visualizations/visualize-aabbs.vs
   debugging/visualizations/visualize-arrow.fs
   debugging/visualizations/visualize-arrow.vs
   debugging/visualizations/visualize-cone.fs

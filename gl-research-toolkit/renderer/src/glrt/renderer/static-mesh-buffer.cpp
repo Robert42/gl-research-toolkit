@@ -21,12 +21,14 @@ StaticMeshBuffer::StaticMeshBuffer(StaticMeshBuffer&& mesh)
   : indexBuffer(std::move(mesh.indexBuffer)),
     vertexBuffer(std::move(mesh.vertexBuffer)),
     numberIndices(mesh.numberIndices),
-    numberVertices(mesh.numberVertices)
+    numberVertices(mesh.numberVertices),
+    _aabb(mesh._aabb)
 {
   mesh.numberIndices = 0;
   mesh.numberVertices = 0;
   mesh.indexBuffer = nullptr;
   mesh.vertexBuffer = nullptr;
+  mesh._aabb = AABB::invalid();
 }
 
 
