@@ -8,11 +8,12 @@ namespace renderer {
 const GLuint vertexBufferBinding = 0;
 const GLuint indexBufferBinding = 1;
 
-StaticMeshBuffer::StaticMeshBuffer(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices)
+StaticMeshBuffer::StaticMeshBuffer(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices, const AABB& aabb)
   : indexBuffer(std::move(indexBuffer)),
     vertexBuffer(std::move(vertexBuffer)),
     numberIndices(numberIndices),
-    numberVertices(numberVertices)
+    numberVertices(numberVertices),
+    aabb(aabb)
 {
 }
 
@@ -76,9 +77,10 @@ StaticMeshBuffer StaticMeshBuffer::createIndexed(const index_type* indices, int 
   gl::Buffer* vertexBuffer = new gl::Buffer(numVertices*sizeof(Vertex), gl::Buffer::UsageFlag::IMMUTABLE, vertices);
 
   return StaticMeshBuffer(indexBuffer,
-                    vertexBuffer,
-                    numIndices,
-                    numVertices);
+                          vertexBuffer,
+                          numIndices,
+                          numVertices,
+                          AABB::fromVertices(&vertices->position, numVertices, sizeof(Vertex)));
 }
 
 
@@ -109,9 +111,10 @@ StaticMeshBuffer StaticMeshBuffer::createAsArray(const StaticMeshBuffer::Vertex*
   gl::Buffer* vertexBuffer = new gl::Buffer(numVertices*sizeof(Vertex), gl::Buffer::UsageFlag::IMMUTABLE, vertices);
 
   return StaticMeshBuffer(indexBuffer,
-                    vertexBuffer,
-                    numIndices,
-                    numVertices);
+                          vertexBuffer,
+                          numIndices,
+                          numVertices,
+                          AABB::fromVertices(&vertices->position, numVertices, sizeof(Vertex)));
 }
 
 
