@@ -1,4 +1,5 @@
 set(SOURCE_FILES
+  include/glrt/scene/aabb.h
   include/glrt/scene/camera-component.h
   include/glrt/scene/camera-parameter.h
   include/glrt/scene/collect-scene-data.h
@@ -47,6 +48,7 @@ set(SOURCE_FILES
   include/glrt/scene/ticking-object.h
   include/glrt/scene/tick-manager.h
   include/glrt/scene/voxel-data-component.h
+  src/glrt/scene/aabb.cpp
   src/glrt/scene/camera-component.cpp
   src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/collect-scene-data.cpp

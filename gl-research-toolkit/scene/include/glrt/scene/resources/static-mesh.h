@@ -3,16 +3,12 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/coord-frame.h>
+#include <glrt/scene/aabb.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
 
-struct AABB
-{
-  glm::vec3 minPoint;
-  glm::vec3 maxPoint;
-};
 
 struct BoundingSphere
 {
