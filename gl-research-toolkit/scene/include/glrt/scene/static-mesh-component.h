@@ -7,7 +7,7 @@
 namespace glrt {
 namespace scene {
 
-class StaticMeshComponent final : public Node::Component
+class StaticMeshComponent final : public ComponentWithAABB
 {
 public:
   const Uuid<resources::StaticMesh> staticMeshUuid;
@@ -15,8 +15,6 @@ public:
 
   StaticMeshComponent(Node& node, Node::Component* parent, const Uuid<StaticMeshComponent>& uuid, const Uuid<resources::StaticMesh>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
   ~StaticMeshComponent();
-
-  AABB boundingBox() const;
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();

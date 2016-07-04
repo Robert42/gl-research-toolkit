@@ -16,25 +16,19 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : Node::Component(node, parent, uuid),
+  : ComponentWithAABB(node, parent, uuid),
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {
   resourceManager().addMaterialUser(materialUuid, staticMesh);
   resourceManager().loadStaticMesh(staticMesh);
-  scene().aabb |= this->boundingBox(); // #TODO: does the component already have the right position?
+  localAabb = resourceManager().staticMeshAABB(staticMeshUuid);
   scene().StaticMeshComponentAdded(this);
 }
 
 StaticMeshComponent::~StaticMeshComponent()
 {
   hideInDestructor();
-}
-
-
-AABB StaticMeshComponent::boundingBox() const
-{
-  return resourceManager().staticMeshAABB(staticMeshUuid).aabbOfTransformedBoundingBox(globalCoordFrame());
 }
 
 

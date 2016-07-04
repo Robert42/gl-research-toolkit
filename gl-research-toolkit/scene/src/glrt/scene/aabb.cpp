@@ -19,6 +19,7 @@ AABB AABB::invalid()
 
 void AABB::operator |= (const AABB& other)
 {
+  Q_ASSERT(other.isValid());
   *this |= other.maxPoint;
   *this |= other.minPoint;
 }

@@ -82,12 +82,12 @@ QHash<QString, BoundingSphere> collectNamedVoxelBoundingSphere(Scene* scene)
 
 QVector<AABB> collectBoundingBoxes(Scene* scene)
 {
-  return collectData<StaticMeshComponent,AABB>(scene, [](StaticMeshComponent* c) -> AABB{return c->boundingBox();});
+  return collectData<StaticMeshComponent,AABB>(scene, [](StaticMeshComponent* c) -> AABB{return c->globalAABB();});
 }
 
 QHash<QString, AABB> collectNamedBoundingBoxes(Scene* scene)
 {
-  return collectNamedData<StaticMeshComponent,AABB>(scene, [](StaticMeshComponent* c) -> AABB{return c->boundingBox();});
+  return collectNamedData<StaticMeshComponent,AABB>(scene, [](StaticMeshComponent* c) -> AABB{return c->globalAABB();});
 }
 
 

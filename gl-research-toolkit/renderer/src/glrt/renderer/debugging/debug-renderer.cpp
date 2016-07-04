@@ -110,6 +110,7 @@ void DebugRenderer::List::render()
 
 void DebugRenderer::List::debuggingRenderingEnabled(DebugRenderer* renderer, Implementation* implementation)
 {
+  // #FIXME assertion triggered, when activating the SDF Boundingsphere preview
   Q_ASSERT(!implementations.contains(implementation));
   Q_ASSERT(!order.contains(renderer));
   Q_ASSERT(!order.values().contains(implementation));

@@ -2,6 +2,7 @@
 #define GLRT_SCENE_IMPLEMENTATION_GLOBALCOORDARRAYORDER_INL
 
 #include <glrt/scene/global-coord-updater.h>
+#include <glrt/scene/scene.h>
 
 namespace glrt {
 namespace scene {
@@ -75,7 +76,7 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
   if(begin==end)
     return;
 
-  if(hasCustomUpdater)
+  if(Q_UNLIKELY(hasCustomUpdater))
   {
     // #ISSUE-61 OMP
     for(int i=begin; i!=end; ++i)
@@ -84,7 +85,7 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
 
       component->_globalCoordFrame = component->calcGlobalCoordFrameImpl();
     }
-  }else if(objects[begin]->parent != nullptr)
+  }else if(Q_LIKELY(objects[begin]->parent != nullptr))
   {
     // #ISSUE-61 OMP
     for(int i=begin; i!=end; ++i)
@@ -111,6 +112,57 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_end_segment(Node::Co
   Q_UNUSED(begin);
   Q_UNUSED(end);
   Q_UNUSED(hasCustomUpdater);
+  Q_UNUSED(coordManager);
+}
+
+// ----
+
+bool GlobalCoordArrayOrder::HasAABBHandler::segmentLessThan(const Node::Component* a, const Node::Component* b)
+{
+  return segment_as_index(a->hasCustomGlobalCoordUpdater()) < segment_as_index(b->hasCustomGlobalCoordUpdater());
+}
+
+bool GlobalCoordArrayOrder::HasAABBHandler::classify(const Node::Component* component)
+{
+  Q_ASSERT(component != nullptr);
+  return component->hasAABB();
+}
+
+int GlobalCoordArrayOrder::HasAABBHandler::segment_as_index(bool hasAABB)
+{
+  return hasAABB;
+}
+
+bool GlobalCoordArrayOrder::HasAABBHandler::segment_from_index(int i)
+{
+  return i!=0;
+}
+
+void GlobalCoordArrayOrder::HasAABBHandler::handle_new_segment(Node::Component** objects, int begin, int end, bool hasAABB, extra_data_type coordManager)
+{
+  Q_UNUSED(coordManager);
+
+  Node::Component* component = objects[begin];
+
+  if(Q_LIKELY(hasAABB && component->movable()))
+  {
+    // parallelization not possible because of `expandSceneAABB`
+    for(int i=begin; i!=end; ++i)
+    {
+      ComponentWithAABB* component = reinterpret_cast<ComponentWithAABB*>(objects[i]);
+
+      // globalAABB is callable here, because HasCustomUpdaterHandler::handle_new_segment has been called before HasAABBHandler::handle_new_segment
+      component->expandSceneAABB();
+    }
+  }
+}
+
+void GlobalCoordArrayOrder::HasAABBHandler::handle_end_segment(Node::Component** objects, int begin, int end, bool hasAABB, extra_data_type coordManager)
+{
+  Q_UNUSED(objects);
+  Q_UNUSED(begin);
+  Q_UNUSED(end);
+  Q_UNUSED(hasAABB);
   Q_UNUSED(coordManager);
 }
 
