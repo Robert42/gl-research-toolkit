@@ -357,6 +357,7 @@ bool Node::Component::visible() const
 
 bool Node::Component::hasAABB() const
 {
+  Q_ASSERT(_hasAABB == is_instance_of<ComponentWithAABB>(this));
   return _hasAABB;
 }
 
@@ -611,6 +612,7 @@ AABB ComponentWithAABB::globalAABB() const
 
 void ComponentWithAABB::expandSceneAABB()
 {
+  Q_ASSERT(this->hasAABB());
   scene().aabb |= this->localAabb;
 }
 
