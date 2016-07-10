@@ -9,7 +9,7 @@ GlobalCoordUpdater::GlobalCoordUpdater()
 }
 
 
-void GlobalCoordUpdater::updateCoordinages()
+void GlobalCoordUpdater::updateCoordinates()
 {
   updateArray();
   fragmented_array.iterate(this);

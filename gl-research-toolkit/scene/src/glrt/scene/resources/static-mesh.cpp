@@ -36,6 +36,7 @@ public:
 
   AABB aabbForAlreadyLoaded(const Uuid<StaticMesh>& uuid) const override
   {
+    Q_UNUSED(uuid);
     return AABB();
   }
 };

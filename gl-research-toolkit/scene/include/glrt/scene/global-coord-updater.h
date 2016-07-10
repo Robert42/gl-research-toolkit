@@ -16,7 +16,7 @@ class GlobalCoordUpdater : public QObject
 public:
   GlobalCoordUpdater();
 
-  void updateCoordinages();
+  void updateCoordinates();
 
 private:
   friend class Node::Component;
