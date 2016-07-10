@@ -613,7 +613,7 @@ AABB ComponentWithAABB::globalAABB() const
 void ComponentWithAABB::expandSceneAABB()
 {
   Q_ASSERT(this->hasAABB());
-  scene().aabb |= this->localAabb;
+  scene().aabb |= this->globalAABB();
 }
 
 

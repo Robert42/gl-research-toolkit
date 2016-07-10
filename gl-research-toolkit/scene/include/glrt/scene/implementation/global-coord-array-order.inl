@@ -49,26 +49,26 @@ void GlobalCoordArrayOrder::DependencyDepthHandler::handle_end_segment(Node::Com
 
 bool GlobalCoordArrayOrder::HasCustomUpdaterHandler::segmentLessThan(const Node::Component* a, const Node::Component* b)
 {
-  return segment_as_index(a->hasCustomGlobalCoordUpdater()) < segment_as_index(b->hasCustomGlobalCoordUpdater());
+  return segment_as_index(classify(a)) < segment_as_index(classify(b));
 }
 
-bool GlobalCoordArrayOrder::HasCustomUpdaterHandler::classify(const Node::Component* component)
+GlobalCoordArrayOrder::UpdateType GlobalCoordArrayOrder::HasCustomUpdaterHandler::classify(const Node::Component* component)
 {
   Q_ASSERT(component != nullptr);
-  return component->hasCustomGlobalCoordUpdater();
+  return component->hasCustomGlobalCoordUpdater() ? UpdateType::Custom : component->parent != nullptr ? UpdateType::WithParent : UpdateType::NoParent;
 }
 
-int GlobalCoordArrayOrder::HasCustomUpdaterHandler::segment_as_index(bool hasCustomUpdater)
+int GlobalCoordArrayOrder::HasCustomUpdaterHandler::segment_as_index(UpdateType updateType)
 {
-  return hasCustomUpdater;
+  return int(updateType);
 }
 
-bool GlobalCoordArrayOrder::HasCustomUpdaterHandler::segment_from_index(int i)
+GlobalCoordArrayOrder::UpdateType GlobalCoordArrayOrder::HasCustomUpdaterHandler::segment_from_index(int i)
 {
-  return i!=0;
+  return UpdateType(glm::clamp(i, 0, 2));
 }
 
-void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Component** objects, int begin, int end, bool hasCustomUpdater, extra_data_type coordManager)
+void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Component** objects, int begin, int end, UpdateType updateType, extra_data_type coordManager)
 {
   Q_UNUSED(coordManager);
 
@@ -76,42 +76,54 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
   if(begin==end)
     return;
 
-  if(Q_UNLIKELY(hasCustomUpdater))
+  switch(updateType)
   {
+  case UpdateType::Custom:
     // #ISSUE-61 OMP
     for(int i=begin; i!=end; ++i)
     {
       Node::Component* component = objects[i];
+
+      Q_ASSERT(component->hasCustomGlobalCoordUpdater());
 
       component->_globalCoordFrame = component->calcGlobalCoordFrameImpl();
     }
-  }else if(Q_LIKELY(objects[begin]->parent != nullptr))
-  {
+    break;
+  case UpdateType::WithParent:
     // #ISSUE-61 OMP
     for(int i=begin; i!=end; ++i)
     {
       Node::Component* component = objects[i];
+
+      Q_ASSERT(!component->hasCustomGlobalCoordUpdater());
+      Q_ASSERT(component->parent != nullptr);
 
       component->_globalCoordFrame = component->parent->_globalCoordFrame * component->_localCoordFrame;
     }
-  }else
-  {
+    break;
+  case UpdateType::NoParent:
     // #ISSUE-61 OMP
     for(int i=begin; i!=end; ++i)
     {
       Node::Component* component = objects[i];
 
+      Q_ASSERT(!component->hasCustomGlobalCoordUpdater());
+      Q_ASSERT(component->parent == nullptr);
+
       component->_globalCoordFrame = component->_localCoordFrame;
     }
+    break;
+  default:
+    Q_UNREACHABLE();
   }
 }
 
-void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_end_segment(Node::Component** objects, int begin, int end, bool hasCustomUpdater, extra_data_type coordManager)
+void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_end_segment(Node::Component** objects, int begin, int end, UpdateType updateType, extra_data_type coordManager)
 {
   Q_UNUSED(objects);
   Q_UNUSED(begin);
   Q_UNUSED(end);
-  Q_UNUSED(hasCustomUpdater);
+  Q_UNUSED(updateType);
   Q_UNUSED(coordManager);
 }
 
@@ -119,7 +131,7 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_end_segment(Node::Co
 
 bool GlobalCoordArrayOrder::HasAABBHandler::segmentLessThan(const Node::Component* a, const Node::Component* b)
 {
-  return segment_as_index(a->hasCustomGlobalCoordUpdater()) < segment_as_index(b->hasCustomGlobalCoordUpdater());
+  return segment_as_index(a->hasAABB()) < segment_as_index(b->hasAABB());
 }
 
 bool GlobalCoordArrayOrder::HasAABBHandler::classify(const Node::Component* component)
@@ -152,7 +164,8 @@ void GlobalCoordArrayOrder::HasAABBHandler::handle_new_segment(Node::Component**
       ComponentWithAABB* component = reinterpret_cast<ComponentWithAABB*>(objects[i]);
 
       // globalAABB is callable here, because HasCustomUpdaterHandler::handle_new_segment has been called before HasAABBHandler::handle_new_segment
-      component->expandSceneAABB();
+      if(component->hasAABB())
+        component->expandSceneAABB();
     }
   }
 }
