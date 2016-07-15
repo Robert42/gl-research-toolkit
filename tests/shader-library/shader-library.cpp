@@ -2,11 +2,53 @@
 #include <glrt/glsl/math-cpp.h>
 #include <gtest/gtest.h>
 #include <test-vectors.h>
+#include <random>
 
 using namespace glrt::glsl;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
+
+
+TEST(shader_library, plane_clamp_point_to_front_side)
+{
+    Plane plane = plane_from_normal(vec3(0,0,1), 0.f);
+    EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, -1)), vec3(0));
+    EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, 0)), vec3(0, 0, 0));
+    EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, 1)), vec3(0, 0, 1));
+}
+
+
+TEST(shader_library, triangle_nearest_point)
+{
+    vec3 p, expected_uvw;
+    vec3 a, b, c;
+
+    std::default_random_engine engine;
+    engine.seed(0);
+    std::uniform_real_distribution<float> distribution_abc(-5, 5);
+    std::uniform_real_distribution<float> distribution_p(-8, 8);
+
+    for(int i=0; i<100; ++i)
+    {
+        p = vec3(distribution_p(engine), distribution_p(engine), distribution_p(engine));
+        a = vec3(distribution_abc(engine), distribution_abc(engine), distribution_abc(engine));
+        b = vec3(distribution_abc(engine), distribution_abc(engine), distribution_abc(engine));
+        c = vec3(distribution_abc(engine), distribution_abc(engine), distribution_abc(engine));
+
+        vec3 actual_uvw = triangle_to_barycentric_coordinates(p, a, b, c);
+
+        EXPECT_VEC_NEAR(triangle_from_barycentric_coordinates(actual_uvw, a, b, c), p, 1.e-4f);
+
+        vec3 actualResult = triangle_nearest_point(p, a, b, c);
+        vec3 expectedResult = closestPointOnTriangleToPoint(a, b, c, p, expected_uvw);
+
+        actual_uvw = clamp(actual_uvw, vec3(0), vec3(1));
+
+        EXPECT_VEC_NEAR(expected_uvw, actual_uvw, 1.e-4f);
+        EXPECT_VEC_NEAR(expectedResult, actualResult, 1.e-4f);
+    }
+}
 
 
 TEST(shader_library, cone_intersects_sphere)
