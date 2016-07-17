@@ -401,58 +401,6 @@ inline bool intersects_unclamped(in Rect rect, in Ray ray)
 
 // ======== Triangles =============================================================
 
-inline Plane _triangle_edge_plane(in vec3 v0, in vec3 v1, in vec3 v2, in vec3 normal, out(float) triangle_height)
-{
-    Plane plane = plane_from_three_points(v1+normal, v1, v2);
-
-    float signed_triangle_height = signed_distance_to(plane, v0);
-    float s = sign(signed_triangle_height);
-
-    plane.normal *= s;
-    plane.d *= s;
-    triangle_height = abs(signed_triangle_height); // TODO: measure, whether just multiplying signed_triangle_height with s ist faster than abs()
-
-
-    return plane;
-}
-
-inline vec3 triangle_to_barycentric_coordinates(in vec3 p, in vec3 v0, in vec3 v1, in vec3 v2)
-{
-    Plane plane = plane_from_three_points(v0, v1, v2);
-
-    const vec3 normal = plane.normal;
-
-    vec3 triangle_height;
-
-    Plane plane0 = _triangle_edge_plane(v0, v1, v2, normal, triangle_height[0]);
-    Plane plane1 = _triangle_edge_plane(v1, v2, v0, normal, triangle_height[1]);
-    Plane plane2 = _triangle_edge_plane(v2, v0, v1, normal, triangle_height[2]);
-
-    vec3 uvw;
-    uvw[0] = signed_distance_to(plane0, p);
-    uvw[1] = signed_distance_to(plane1, p);
-    uvw[2] = signed_distance_to(plane2, p);
-
-    uvw /= triangle_height;
-
-    return uvw;
-}
-
-inline vec3 triangle_from_barycentric_coordinates(vec3 uvw, in vec3 v0, in vec3 v1, in vec3 v2)
-{
-    uvw /= uvw[0] + uvw[1] + uvw[2];
-
-    return uvw[0] * v0 + uvw[1] * v1 + uvw[2] * v2;
-}
-
-inline vec3 triangle_nearest_point(in vec3 p, in vec3 v0, in vec3 v1, in vec3 v2)
-{
-    vec3 uvw = triangle_to_barycentric_coordinates(p, v0, v1, v2);
-    uvw = clamp(uvw, vec3(0), vec3(1));
-    return triangle_from_barycentric_coordinates(uvw, v0, v1, v2);
-
-}
-
 // returns 0 for no intersection, 1 for an intersection from the frontside and -1 for intersecting from the backside
 inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, float treshold=1.e-9f)
 {
