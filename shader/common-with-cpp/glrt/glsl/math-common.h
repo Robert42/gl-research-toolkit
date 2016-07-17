@@ -1,4 +1,4 @@
-#ifndef _GLRT_GLSL_MATH_H_
+﻿#ifndef _GLRT_GLSL_MATH_H_
 #define _GLRT_GLSL_MATH_H_
 
 const float pi = 3.1415926535897;
@@ -114,6 +114,16 @@ inline bvec4 is_smallest(vec4 vector)
   return lessThanEqual(vector.xyzw, min3(vector.yzwx, vector.zwxy, vector.wxyz));
 }
 
+inline bvec3 is_largest(vec3 vector)
+{
+  return greaterThanEqual(vector.xyz, min(vector.yzx, vector.zxy));
+}
+
+inline bvec4 is_largest(vec4 vector)
+{
+  return greaterThanEqual(vector.xyzw, min3(vector.yzwx, vector.zwxy, vector.wxyz));
+}
+
 // max
 
 inline int max3(int a, int b, int c)
@@ -221,6 +231,32 @@ inline int index_of_min_component_masked(vec4 vector, bvec4 mask)
   
   return index_of_first_true(is_smallest(vector) && mask);
 }
+
+
+inline int index_of_max_component(vec3 vector)
+{
+  return index_of_first_true(is_largest(vector));
+}
+
+inline int index_of_max_component_masked(vec3 vector, bvec3 mask)
+{
+  vector = mask_out_for_min(vector, mask);
+
+  return index_of_first_true(is_largest(vector));
+}
+
+inline int index_of_max_component(vec4 vector)
+{
+  return index_of_first_true(is_largest(vector));
+}
+
+inline int index_of_max_component_masked(vec4 vector, bvec4 mask)
+{
+  vector = mask_out_for_min(vector, mask);
+
+  return index_of_first_true(is_largest(vector) && mask);
+}
+
 
 inline float min_component_masked(vec3 vector, bvec3 mask)
 {
