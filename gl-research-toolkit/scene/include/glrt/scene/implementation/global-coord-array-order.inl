@@ -70,6 +70,8 @@ GlobalCoordArrayOrder::UpdateType GlobalCoordArrayOrder::HasCustomUpdaterHandler
 
 void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Component** objects, int begin, int end, UpdateType updateType, extra_data_type coordManager)
 {
+  // #FIXME check, whethe only the movalb e components are updated here.
+
   Q_UNUSED(coordManager);
 
   // necessary check for if(objects[begin]->parent != nullptr)

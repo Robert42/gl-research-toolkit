@@ -25,6 +25,7 @@ class StaticMeshLoader;
 class TextureManager;
 class Texture;
 class TextureSampler;
+class BoundingSphere;
 
 } // namespace resources
 } // namespace scene

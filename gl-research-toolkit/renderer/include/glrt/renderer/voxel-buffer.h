@@ -29,12 +29,23 @@ public:
   quint32 numVisibleVoxelGrids() const;
 
 private:
+  struct InnerNode
+  {
+    quint32 leftChild;
+    quint32 rightChild;
+  };
+
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::VoxelDataBlock, &scene::VoxelDataComponent::voxelDataBlock>> distanceFieldDataStorageBuffer;
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::resources::BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
+  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
+
+  ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
+  ManagedGLBuffer<InnerNode> bvhInnerNodes;
 
   VoxelHeader _voxelHeader;
 
   quint32 _numVisibleVoxelGrids = 0;
+
+  void updateBvhTree();
 };
 
 } // namespace renderer
