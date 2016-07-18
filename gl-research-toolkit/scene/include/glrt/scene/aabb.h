@@ -17,6 +17,8 @@ struct AABB
   bool isNan() const {return glm::any(glm::isnan(minPoint)) || glm::any(glm::isnan(maxPoint));}
   bool isValid() const{return !isInf() && !isNan();}
 
+  glm::vec3 toUnitSpace(const glm::vec3& v) const;
+
   void operator |= (const AABB& other);
   void operator |= (const glm::vec3& other);
 

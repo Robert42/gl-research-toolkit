@@ -17,6 +17,11 @@ AABB AABB::invalid()
   return aabb;
 }
 
+glm::vec3 AABB::toUnitSpace(const glm::vec3& v) const
+{
+  return (v-this->minPoint) / (this->maxPoint-this->minPoint);
+}
+
 void AABB::operator |= (const AABB& other)
 {
   Q_ASSERT(other.isValid());
