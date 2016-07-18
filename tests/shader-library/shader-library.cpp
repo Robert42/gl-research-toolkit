@@ -1,4 +1,5 @@
 #include <glrt/dependencies.h>
+#include <glrt/toolkit/zindex.h>
 #include <glrt/glsl/math-cpp.h>
 #include <gtest/gtest.h>
 #include <test-vectors.h>
@@ -10,12 +11,33 @@ using glm::vec3;
 using glm::vec4;
 
 
+TEST(shader_library, zindex)
+{
+  EXPECT_EQ(glrt::insertZeroBits(0x0),    0x0);
+  EXPECT_EQ(glrt::insertZeroBits(0x1),    0x1);
+  EXPECT_EQ(glrt::insertZeroBits(0x2),    0x8);
+  EXPECT_EQ(glrt::insertZeroBits(0x3),    0x9);
+  EXPECT_EQ(glrt::insertZeroBits(0x7),    0x49);
+  EXPECT_EQ(glrt::insertZeroBits(0xf),    0x249);
+  EXPECT_EQ(glrt::insertZeroBits(0x1f),   0x1249);
+  EXPECT_EQ(glrt::insertZeroBits(0x3f),   0x9249);
+  EXPECT_EQ(glrt::insertZeroBits(0x7f),   0x49249);
+  EXPECT_EQ(glrt::insertZeroBits(0xff),   0x249249);
+  EXPECT_EQ(glrt::insertZeroBits(0x1ff),  0x1249249);
+  EXPECT_EQ(glrt::insertZeroBits(0x3ff),  0x9249249);
+
+  // bits >= 1024 are ignored:
+  EXPECT_EQ(glrt::insertZeroBits(0xfff),  0x9249249);
+  EXPECT_EQ(glrt::insertZeroBits(0x1fff),  0x9249249);
+}
+
+
 TEST(shader_library, plane_clamp_point_to_front_side)
 {
-    Plane plane = plane_from_normal(vec3(0,0,1), 0.f);
-    EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, -1)), vec3(0));
-    EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, 0)), vec3(0, 0, 0));
-    EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, 1)), vec3(0, 0, 1));
+  Plane plane = plane_from_normal(vec3(0,0,1), 0.f);
+  EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, -1)), vec3(0));
+  EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, 0)), vec3(0, 0, 0));
+  EXPECT_VEC_EQ(clamp_point_to_front_side(plane, vec3(0, 0, 1)), vec3(0, 0, 1));
 }
 
 

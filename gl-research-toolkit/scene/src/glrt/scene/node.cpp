@@ -1,3 +1,4 @@
+#include <glrt/toolkit/zindex.h>
 #include <glrt/scene/node.h>
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-layer.h>
@@ -430,10 +431,9 @@ CoordFrame Node::Component::globalCoordFrame() const
   return _globalCoordFrame;
 }
 
-quint64 Node::Component::zOrder() const
+quint32 Node::Component::zOrder() const
 {
-  // #TODO: return a real zCode
-  return quint64(this);
+  return _zOrder;
 }
 
 /*!
@@ -453,10 +453,17 @@ CoordFrame Node::Component::updateGlobalCoordFrame()
   else
     _globalCoordFrame = localCoordFrame();
 
+  updateZOrder();
+
   if(Q_LIKELY(hasAABB()))
     reinterpret_cast<ComponentWithAABB*>(this)->expandSceneAABB();
 
   return _globalCoordFrame;
+}
+
+quint32 Node::Component::updateZOrder()
+{
+  return this->_zOrder = calcZIndex(scene().aabb.toUnitSpace(globalCoordFrame().position));
 }
 
 

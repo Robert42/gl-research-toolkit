@@ -116,6 +116,14 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
   default:
     Q_UNREACHABLE();
   }
+
+  // #ISSUE-61 OMP
+  for(int i=begin; i!=end; ++i)
+  {
+    Node::Component* component = objects[i];
+
+    component->updateZOrder();
+  }
 }
 
 void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_end_segment(Node::Component** objects, int begin, int end, UpdateType updateType, extra_data_type coordManager)
