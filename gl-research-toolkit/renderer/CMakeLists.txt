@@ -4,6 +4,7 @@ find_package(Qt5Widgets 5.5 REQUIRED)
 
 add_library(glrt
   ${SOURCE_FILES}
+  ${GLRT_EXTERNAL_DIR}/thinking-parallel/bvh.cpp
 )
 
 target_include_directories(

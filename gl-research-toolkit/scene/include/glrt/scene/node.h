@@ -115,10 +115,10 @@ public:
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
 
-  quint32 zOrder() const;
+  quint32 zIndex() const;
 
   CoordFrame updateGlobalCoordFrame();
-  quint32 updateZOrder();
+  quint32 updateZIndex();
   virtual CoordFrame calcGlobalCoordFrameImpl() const;
   bool hasCustomGlobalCoordUpdater() const;
 
@@ -179,7 +179,7 @@ private:
   friend class ComponentWithAABB;
   CoordFrame _localCoordFrame;
   CoordFrame _globalCoordFrame;
-  quint32 _zOrder = 0;
+  quint32 _zIndex = 0;
 
   bool _movable : 1;
   bool _mayBecomeMovable : 1;

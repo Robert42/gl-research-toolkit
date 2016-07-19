@@ -14,7 +14,7 @@ void GlobalCoordArrayOrder::UpdateCaller::handle_value(Node::Component**, int, e
 
 bool GlobalCoordArrayOrder::UpdateCaller::valueLessThan(Node::Component* a, Node::Component* b)
 {
-  return a->zOrder()<b->zOrder();
+  return a->zIndex()<b->zIndex();
 }
 
 
@@ -124,7 +124,7 @@ void GlobalCoordArrayOrder::HasCustomUpdaterHandler::handle_new_segment(Node::Co
   {
     Node::Component* component = objects[i];
 
-    component->updateZOrder();
+    component->updateZIndex();
   }
 }
 

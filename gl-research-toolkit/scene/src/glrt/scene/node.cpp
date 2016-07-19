@@ -431,9 +431,9 @@ CoordFrame Node::Component::globalCoordFrame() const
   return _globalCoordFrame;
 }
 
-quint32 Node::Component::zOrder() const
+quint32 Node::Component::zIndex() const
 {
-  return _zOrder;
+  return _zIndex;
 }
 
 /*!
@@ -453,7 +453,7 @@ CoordFrame Node::Component::updateGlobalCoordFrame()
   else
     _globalCoordFrame = localCoordFrame();
 
-  updateZOrder();
+  updateZIndex();
 
   if(Q_LIKELY(hasAABB()))
     reinterpret_cast<ComponentWithAABB*>(this)->expandSceneAABB();
@@ -461,9 +461,9 @@ CoordFrame Node::Component::updateGlobalCoordFrame()
   return _globalCoordFrame;
 }
 
-quint32 Node::Component::updateZOrder()
+quint32 Node::Component::updateZIndex()
 {
-  return this->_zOrder = calcZIndex(scene().aabb.toUnitSpace(globalCoordFrame().position));
+  return this->_zIndex = calcZIndex(scene().aabb.toUnitSpace(globalCoordFrame().position));
 }
 
 

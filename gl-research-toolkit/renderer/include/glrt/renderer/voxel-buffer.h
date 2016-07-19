@@ -9,6 +9,30 @@
 namespace glrt {
 namespace renderer {
 
+struct BVH
+{
+  struct InnerNode
+  {
+    int leftChild;
+    int rightChild;
+  };
+
+  const scene::VoxelDataComponent* const leaves;
+  BoundingSphere* const bvhInnerBoundingSpheres;
+  InnerNode* const bvhInnerNodes;
+  const quint32* const zIndices;
+  const int numLeaves;
+  const int innerNodesCapacity;
+  int numInnerNodes;
+
+  BVH(scene::VoxelDataComponent* leaves, BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes, const quint32* zIndices, int numLeaves, int innerNodesCapacity);
+  void updateTreeCPU();
+  int addInnerNode();
+
+  int generateHierarchy(int begin, int end);
+  int findSplit(int begin, int end);
+};
+
 class VoxelBuffer
 {
 public:
@@ -28,18 +52,14 @@ public:
 
   quint32 numVisibleVoxelGrids() const;
 
-private:
-  struct InnerNode
-  {
-    quint32 leftChild;
-    quint32 rightChild;
-  };
 
+private:
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::VoxelDataBlock, &scene::VoxelDataComponent::voxelDataBlock>> distanceFieldDataStorageBuffer;
   SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
 
+  QVector<quint32> zIndices;
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
-  ManagedGLBuffer<InnerNode> bvhInnerNodes;
+  ManagedGLBuffer<BVH::InnerNode> bvhInnerNodes;
 
   VoxelHeader _voxelHeader;
 

@@ -20,22 +20,6 @@ quint32 VoxelBuffer::numVisibleVoxelGrids() const
   return static_cast<quint32>(distanceFieldDataStorageBuffer.numElements());
 }
 
-void VoxelBuffer::updateBvhTree()
-{
-  // #TODO add profiling scope
-
-  const int numElements = distanceFieldDataStorageBuffer.numElements();
-  bvhInnerBoundingSpheres.setNumElements(numElements);
-  bvhInnerNodes.setNumElements(numElements);
-
-  BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map();
-  InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map();
-
-
-  this->bvhInnerBoundingSpheres.Unmap();
-  this->bvhInnerNodes.Unmap();
-}
-
 const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
   distanceFieldDataStorageBuffer.update();
@@ -49,6 +33,56 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
   return _voxelHeader;
 }
+
+void VoxelBuffer::updateBvhTree()
+{
+  // #TODO add profiling scope
+
+  const int numElements = distanceFieldDataStorageBuffer.numElements();
+  const int numInnerNodes = numElements - 1;
+  const scene::VoxelDataComponent* components = distanceFieldDataStorageBuffer.data();
+
+  zIndices.resize(numElements);
+
+  // ISSUE-61 OMP
+  for(int i=0; i<numElements; ++i)
+    zIndices[i] = components[i].zIndex();
+
+  bvhInnerBoundingSpheres.setNumElements(numInnerNodes);
+  bvhInnerNodes.setNumElements(numInnerNodes);
+
+  BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map();
+  BVH::InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map();
+
+  BVH bvh(bvhInnerBoundingSpheres, bvhInnerNodes, zIndices.data(), numElements, numInnerNodes);
+  bvh.updateTreeCPU();
+
+  this->bvhInnerBoundingSpheres.Unmap();
+  this->bvhInnerNodes.Unmap();
+}
+
+BVH::BVH(scene::VoxelDataComponent* leaveBoundingSpheres, BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes, const quint32* zIndices, int length, int innerNodesCapacity)
+  : leaves(leaveBoundingSpheres),
+    bvhInnerBoundingSpheres(bvhInnerBoundingSpheres),
+    bvhInnerNodes(bvhInnerNodes),
+    zIndices(zIndices),
+    numLeaves(length),
+    innerNodesCapacity(innerNodesCapacity),
+    numInnerNodes(0)
+{
+}
+
+void BVH::updateTreeCPU()
+{
+  generateHierarchy(0, numLeaves);
+}
+
+int BVH::addInnerNode()
+{
+  Q_ASSERT(numInnerNodes < innerNodesCapacity);
+  return numInnerNodes++;
+}
+
 
 } // namespace renderer
 } // namespace glrt
