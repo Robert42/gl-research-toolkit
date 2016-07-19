@@ -22,6 +22,8 @@ struct BoundingSphere
     s.radius = frame.scaleFactor * sphere.radius;
     return s;
   }
+
+  BoundingSphere operator|(const BoundingSphere& b);
 };
 
 struct TriangleArray;

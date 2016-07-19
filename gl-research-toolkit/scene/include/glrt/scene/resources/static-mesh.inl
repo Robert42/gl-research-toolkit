@@ -123,6 +123,23 @@ inline const glm::vec3& TriangleArray::operator[](size_t i) const
   return vertices[i];
 }
 
+inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
+{
+  const BoundingSphere& a = *this;
+
+  glm::vec3 a2b = glm::normalize(b.center - a.center);
+
+  glm::vec3 edge1 = a.center - a2b*a.radius;
+  glm::vec3 edge2 = b.center + a2b*b.radius;
+
+  BoundingSphere joined;
+
+  joined.center = glm::mix(edge1, edge2, 0.5f);
+  joined.radius = glm::distance(edge1, edge2);
+
+  return joined;
+}
+
 
 } // namespace resources
 } // namespace scene
