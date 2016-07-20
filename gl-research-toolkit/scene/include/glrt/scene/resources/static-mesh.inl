@@ -136,12 +136,12 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
   glm::vec3 a2b_dir = a2b / distance;
 
   glm::vec3 edge1 = a.center + a2b_dir * e1;
-  glm::vec3 edge2 = b.center + a2b_dir * e2;
+  glm::vec3 edge2 = a.center + a2b_dir * e2;
 
   BoundingSphere joined;
 
   joined.center = glm::mix(edge1, edge2, 0.5f);
-  joined.radius = glm::abs(e1) + glm::abs(e2);
+  joined.radius = (glm::abs(e1) + glm::abs(e2)) / 2.f;
 
   return joined;
 }

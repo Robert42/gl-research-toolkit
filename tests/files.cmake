@@ -8,5 +8,6 @@ set(SOURCE_FILES
   qt-tests/auto-disconnect-with-deletion.cpp
   qt-tests/auto-disconnect-with-deletion.h
   shader-includes/shader-includes.cpp
+  shader-library/bvh.cpp
   shader-library/shader-library.cpp
 )
