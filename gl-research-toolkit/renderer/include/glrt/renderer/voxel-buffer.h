@@ -31,6 +31,9 @@ struct BVH
 
   int generateHierarchy(int begin, int end);
   int findSplit(int begin, int end);
+
+private:
+  quint32 zIndexDistance(int a, int b);
 };
 
 class VoxelBuffer

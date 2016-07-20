@@ -32,11 +32,27 @@ int BVH::generateHierarchy(int begin, int end)
   return newNode;
 }
 
-// see https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
+inline quint32 BVH::zIndexDistance(int a, int b)
+{
+  return glm::highestBitValue(zIndices[a] ^ zIndices[b]);
+}
+
+// see also https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
 int BVH::findSplit(int begin, int end)
 {
-  // #TODO find a better split point
-  return (begin+end)/2;
+  int split = (begin+end)/2;
+
+  while(begin+1 < end)
+  {
+    if(zIndexDistance(begin, split) > zIndexDistance(split, end))
+      end = split;
+    else
+      begin = split;
+
+    split = (begin+end)/2;
+  }
+
+  return split;
 }
 
 } // namespace renderer
