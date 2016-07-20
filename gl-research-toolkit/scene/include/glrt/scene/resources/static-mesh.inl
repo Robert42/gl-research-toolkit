@@ -135,6 +135,11 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
 
   glm::vec3 a2b_dir = a2b / distance;
 
+  glm::vec3 alpha = step(a2b_dir, glm::vec3(1024.f)); // 0, if inf
+  a2b_dir = mix(glm::vec3(0.f),
+                clamp(a2b_dir, glm::vec3(-1024), glm::vec3(1024)), // mix doesn't work, if one is inf, so clamp it
+                alpha);
+
   glm::vec3 edge1 = a.center + a2b_dir * e1;
   glm::vec3 edge2 = a.center + a2b_dir * e2;
 
