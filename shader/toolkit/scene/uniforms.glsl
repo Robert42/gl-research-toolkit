@@ -22,6 +22,8 @@ struct SceneLightData
 
 struct SceneVoxelHeader
 {
+  uint64_t distance_field_bvh_inner_boundingsphere_array_address;
+  uint64_t distance_field_bvh_node_array_address;
   uint64_t distance_field_boundingsphere_array_address;
   uint64_t distance_field_distancefielddata_array_address;
   // padding1(uint64_t, _padding1);

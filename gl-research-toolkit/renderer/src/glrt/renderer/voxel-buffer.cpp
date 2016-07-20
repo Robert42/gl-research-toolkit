@@ -28,6 +28,8 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
   updateBvhTree();
 
   _voxelHeader.numDistanceFields = numVisibleVoxelGrids();
+  _voxelHeader.distanceFieldBvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.buffer.gpuBufferAddress();
+  _voxelHeader.distanceFieldBvhInnerNodes = this->bvhInnerNodes.buffer.gpuBufferAddress();
   _voxelHeader.distanceFieldDataStorageBuffer = distanceFieldDataStorageBuffer.gpuBufferAddress();
   _voxelHeader.distanceFieldBoundingSpheres = distanceFieldBoundingSphereStorageBuffer.gpuBufferAddress();
 

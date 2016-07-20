@@ -41,6 +41,8 @@ class VoxelBuffer
 public:
   struct VoxelHeader
   {
+    GLuint64 distanceFieldBvhInnerBoundingSpheres;
+    GLuint64 distanceFieldBvhInnerNodes;
     GLuint64 distanceFieldBoundingSpheres;
     GLuint64 distanceFieldDataStorageBuffer;
     //padding<GLuint64, 1> _padding1;
