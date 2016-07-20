@@ -15,7 +15,7 @@ int BVH::generateHierarchy(int begin, int end)
   {
     innerNode.leftChild = begin;
     innerNode.rightChild = begin;
-    boundingSphere = leaves->boundingSphere();
+    boundingSphere = leaves[begin]->boundingSphere();
   }else
   {
     int split = findSplit(begin, end);
@@ -35,7 +35,8 @@ int BVH::generateHierarchy(int begin, int end)
 // see https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
 int BVH::findSplit(int begin, int end)
 {
-  // #TODO
+  // #TODO find a better split point
+  return (begin+end)/2;
 }
 
 } // namespace renderer

@@ -11,6 +11,12 @@ using glm::vec3;
 using glm::vec4;
 
 
+TEST(shader_library, bvh_split)
+{
+  EXPECT_EQ(glm::highestBitValue(1025), 1024);
+}
+
+
 TEST(shader_library, zindex)
 {
   EXPECT_EQ(glrt::insertZeroBits(0x0),    0x0);

@@ -64,6 +64,12 @@ int SimpleShaderStorageBuffer<T_Component,T_DataDescription,T_FragmentedArray,T_
 }
 
 template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>
+const T_Component* const* SimpleShaderStorageBuffer<T_Component, T_DataDescription, T_FragmentedArray, T_BufferCapacityTraits>::data() const
+{
+  return lightComponents.fragmented_array.data();
+}
+
+template<class T_Component, typename T_DataDescription, typename T_FragmentedArray, typename T_BufferCapacityTraits>
 GLuint64 SimpleShaderStorageBuffer<T_Component,T_DataDescription,T_FragmentedArray,T_BufferCapacityTraits>::gpuBufferAddress() const
 {
   return buffer.buffer.gpuBufferAddress();

@@ -17,7 +17,7 @@ struct BVH
     int rightChild;
   };
 
-  const scene::VoxelDataComponent* const leaves;
+  const scene::VoxelDataComponent* const * leaves;
   BoundingSphere* const bvhInnerBoundingSpheres;
   InnerNode* const bvhInnerNodes;
   const quint32* const zIndices;
@@ -25,7 +25,7 @@ struct BVH
   const int innerNodesCapacity;
   int numInnerNodes;
 
-  BVH(scene::VoxelDataComponent* leaves, BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes, const quint32* zIndices, int numLeaves, int innerNodesCapacity);
+  BVH(const scene::VoxelDataComponent* const * leaves, BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes, const quint32* zIndices, int numLeaves, int innerNodesCapacity);
   void updateTreeCPU();
   int addInnerNode();
 

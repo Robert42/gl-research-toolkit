@@ -45,7 +45,7 @@ public:
 
   bool needRerecording() const;
   int numElements() const;
-  const T_Component* data() const;
+  const T_Component* const * data() const;
   GLuint64 gpuBufferAddress() const;
 
 private:
