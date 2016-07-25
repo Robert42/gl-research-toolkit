@@ -40,6 +40,8 @@ void VoxelBuffer::updateBvhTree()
 {
   // #TODO add profiling scope
   const int numElements = distanceFieldDataStorageBuffer.numElements();
+  if(numElements <= 1)
+    return;
   const int numInnerNodes = numElements - 1;
   const scene::VoxelDataComponent* const * components = distanceFieldDataStorageBuffer.data();
 
