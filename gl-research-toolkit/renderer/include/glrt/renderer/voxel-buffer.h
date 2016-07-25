@@ -45,7 +45,7 @@ public:
     GLuint64 distanceFieldBvhInnerNodes;
     GLuint64 distanceFieldBoundingSpheres;
     GLuint64 distanceFieldDataStorageBuffer;
-    //padding<GLuint64, 1> _padding1;
+    //padding<GLuint64, 1> _padding1; // necessary only, if the number of GLuint64%2 != 0
     quint32 numDistanceFields;
     padding<quint32, 3> _padding2;
   };
