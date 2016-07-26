@@ -41,6 +41,7 @@ using glm::mat4x3;
 using glm::mat3;
 using glm::mat4;
 
+using glm::sign;
 using glm::dot;
 using glm::max;
 using glm::min;
@@ -51,6 +52,7 @@ using glm::cos;
 using glm::sin;
 using glm::acos;
 using glm::asin;
+using glm::abs;
 
 using glm::all;
 using glm::any;

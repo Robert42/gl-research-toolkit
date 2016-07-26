@@ -65,6 +65,7 @@ public:
   static DebugRenderer::Implementation* drawWorldGrid();
   static DebugRenderer::Implementation* drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes);
   static DebugRenderer::Implementation* drawSpheres(const QList<BoundingSphere>& spheres);
+  static DebugRenderer::Implementation* drawBoundingBoxes(const QVector<scene::AABB>& boundingBoxes);
 
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;

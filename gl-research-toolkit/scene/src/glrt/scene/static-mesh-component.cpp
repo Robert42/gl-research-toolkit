@@ -16,13 +16,14 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : Node::Component(node, parent, uuid),
+  : ComponentWithAABB(node, parent, uuid),
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {
-  scene().StaticMeshComponentAdded(this);
   resourceManager().addMaterialUser(materialUuid, staticMesh);
   resourceManager().loadStaticMesh(staticMesh);
+  localAabb = resourceManager().staticMeshAABB(staticMeshUuid);
+  scene().StaticMeshComponentAdded(this);
 }
 
 StaticMeshComponent::~StaticMeshComponent()

@@ -47,6 +47,7 @@ Scene::~Scene()
 
 void Scene::clear()
 {
+  this->aabb = AABB::invalid();
   this->uuid = Uuid<Scene>();
 
   // the destructor of a scene layers removes the layer from the _layers hash.
@@ -73,7 +74,7 @@ bool Scene::handleEvents(const SDL_Event& event)
 void Scene::update(float deltaTime)
 {
   tickManager.tick(deltaTime);
-  globalCoordUpdater.updateCoordinages();
+  globalCoordUpdater.updateCoordinates();
 
   inputManager.update();
 }

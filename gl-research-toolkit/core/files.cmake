@@ -19,6 +19,7 @@ set(SOURCE_FILES
   include/glrt/toolkit/tcp-messages.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl
+  include/glrt/toolkit/zindex.h
   src/glrt/dependencies.cpp
   src/glrt/toolkit/escape-string.cpp
   src/glrt/toolkit/logger.cpp
@@ -27,4 +28,5 @@ set(SOURCE_FILES
   src/glrt/toolkit/profiler.cpp
   src/glrt/toolkit/tcp-messages.cpp
   src/glrt/toolkit/uuid.cpp
+  src/glrt/toolkit/zindex.cpp
 )

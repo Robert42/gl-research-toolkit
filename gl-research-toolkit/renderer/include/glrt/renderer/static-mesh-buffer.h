@@ -3,6 +3,7 @@
 
 #include <glrt/dependencies.h>
 #include <glrt/scene/resources/static-mesh.h>
+#include <glrt/scene/aabb.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
 
 #include <glhelper/buffer.hpp>
@@ -16,11 +17,12 @@ namespace renderer {
 class StaticMeshBuffer final
 {
 public:
+  typedef scene::AABB AABB;
   typedef scene::resources::StaticMesh::Vertex Vertex;
   typedef scene::resources::StaticMesh::index_type index_type;
 
   StaticMeshBuffer(StaticMeshBuffer&& mesh);
-  StaticMeshBuffer(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices);
+  StaticMeshBuffer(gl::Buffer* indexBuffer, gl::Buffer* vertexBuffer, int numberIndices, int numberVertices, const AABB& aabb);
   ~StaticMeshBuffer();
   StaticMeshBuffer& operator=(StaticMeshBuffer&&);
 
@@ -46,11 +48,14 @@ public:
   void recordDraw(gl::CommandListRecorder& recorder) const;
   void recordDrawInstances(gl::CommandListRecorder& recorder, int begin, int end) const;
 
+  AABB aabb() const {return _aabb;}
+
 private:
   gl::Buffer* indexBuffer;
   gl::Buffer* vertexBuffer;
   int numberIndices;
   int numberVertices;
+  AABB _aabb = AABB::invalid();
 
   static StaticMeshBuffer _createAsArray(const index_type* indices, int numIndices, const StaticMeshBuffer::Vertex* vertices, int numVertices);
 };

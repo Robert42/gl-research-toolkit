@@ -5,11 +5,13 @@
 #include <glrt/toolkit/array.h>
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/coord-frame.h>
+#include <glrt/scene/aabb.h>
 #include <glrt/scene/ticking-object.h>
 
 namespace glrt {
 namespace scene {
 
+class ComponentWithAABB;
 class SceneLayer;
 class Node final : public QObject
 {
@@ -108,10 +110,15 @@ public:
   bool mayBecomeMovable() const;
   bool visible() const;
 
+  bool hasAABB() const;
+
   CoordFrame localCoordFrame() const;
   CoordFrame globalCoordFrame() const;
 
+  quint32 zIndex() const;
+
   CoordFrame updateGlobalCoordFrame();
+  quint32 updateZIndex();
   virtual CoordFrame calcGlobalCoordFrameImpl() const;
   bool hasCustomGlobalCoordUpdater() const;
 
@@ -169,14 +176,17 @@ private:
   static void _registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const std::string& function_name, const char* arguments);
 
   friend struct implementation::GlobalCoordArrayOrder;
+  friend class ComponentWithAABB;
   CoordFrame _localCoordFrame;
   CoordFrame _globalCoordFrame;
+  quint32 _zIndex = 0;
 
   bool _movable : 1;
   bool _mayBecomeMovable : 1;
   bool _visible : 1;
   bool _parentVisible : 1;
   bool _hiddenBecauseDeletedNextFrame : 1;
+  bool _hasAABB : 1;
 
   QVector<Component*> _children;
   int _coorddependencyDepth;
@@ -185,6 +195,19 @@ private:
   void updateVisibility(bool prevVisibility);
 };
 
+
+class ComponentWithAABB : public Node::Component
+{
+public:
+  AABB localAabb;
+
+  ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid);
+  ~ComponentWithAABB();
+
+  AABB globalAABB() const;
+
+  void expandSceneAABB();
+};
 
 
 } // namespace scene

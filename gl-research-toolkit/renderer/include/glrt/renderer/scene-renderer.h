@@ -32,6 +32,13 @@ class Renderer : public QObject, public ReloadableShader::Listener
 {
   Q_OBJECT
 public:
+  struct Satistics
+  {
+    quint32 numSdfInstances = -1;
+  };
+
+  Satistics statistics;
+
   scene::Scene& scene;
   StaticMeshBufferManager& staticMeshBufferManager;
   debugging::ShaderDebugPrinter& debugPrinter;
@@ -44,6 +51,8 @@ public:
   debugging::DebugRenderer visualizeWorldGrid;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
+  debugging::DebugRenderer visualizeVoxelBoundingBoxes;
+  debugging::DebugRenderer visualizeVoxelSceneBoundingBox;
 
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;

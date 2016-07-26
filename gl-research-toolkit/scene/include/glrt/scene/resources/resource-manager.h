@@ -39,6 +39,7 @@ public:
   QList<Uuid<Scene>> allRegisteredScenes();
 
   void loadStaticMesh(const Uuid<StaticMesh>& uuid);
+  AABB staticMeshAABB(const Uuid<StaticMesh>& uuid, const AABB& fallback = AABB::invalid()) const;
 
   QString labelForResourceUuid(const QUuid& uuid, const QString& fallback) const;
   QString labelForResourceUuid(const QUuid& uuid) const;

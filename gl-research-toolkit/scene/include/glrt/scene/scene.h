@@ -2,6 +2,7 @@
 #define GLRT_SCENE_SCENE_H
 
 #include <glrt/dependencies.h>
+#include <glrt/scene/aabb.h>
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/node.h>
 #include <glrt/scene/tick-manager.h>
@@ -33,6 +34,8 @@ public:
   TickManager tickManager;
   GlobalCoordUpdater globalCoordUpdater;
   InputHandler::Manager inputManager;
+
+  AABB aabb;
 
   Scene(resources::ResourceManager* resourceManager);
   Scene(const Scene&) = delete;

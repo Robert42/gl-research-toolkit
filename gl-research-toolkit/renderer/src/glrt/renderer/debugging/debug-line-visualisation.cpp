@@ -284,6 +284,22 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawSpheres(const QList<B
 }
 
 
+DebugRenderer::Implementation* DebugLineVisualisation::drawBoundingBoxes(const QVector<scene::AABB>& boundingBoxes)
+{
+  DebugMesh::Painter painter;
+
+  painter.addCube(glm::vec3(0), glm::vec3(1));
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  boundingBoxes,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-aabbs",
+                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  v->use_dephtest = true;
+  return v;
+}
+
+
 void DebugLineVisualisation::render()
 {
   bool temporary_disable_depthtest = !use_dephtest && glIsEnabled(GL_DEPTH_TEST);

@@ -15,7 +15,7 @@ void FragmentedLightComponentArray<T_LightComponent>::UpdateCaller::handle_value
 template<class T_LightComponent>
 bool FragmentedLightComponentArray<T_LightComponent>::UpdateCaller::valueLessThan(T_LightComponent* a, T_LightComponent* b)
 {
-  return a < b;
+  return a->zIndex() < b->zIndex();
 }
 
 

@@ -2,11 +2,12 @@
 #define GLRT_SCENE_STATICMESHCOMPONENT_H
 
 #include "node.h"
+#include "aabb.h"
 
 namespace glrt {
 namespace scene {
 
-class StaticMeshComponent final : public Node::Component
+class StaticMeshComponent final : public ComponentWithAABB
 {
 public:
   const Uuid<resources::StaticMesh> staticMeshUuid;

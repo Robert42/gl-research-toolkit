@@ -1,3 +1,4 @@
+#include <glrt/toolkit/zindex.h>
 #include <glrt/scene/node.h>
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-layer.h>
@@ -213,6 +214,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
+    _hasAABB(false),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
 {
@@ -353,6 +355,13 @@ bool Node::Component::visible() const
   return _visible && _parentVisible && !_hiddenBecauseDeletedNextFrame;
 }
 
+
+bool Node::Component::hasAABB() const
+{
+  Q_ASSERT(_hasAABB == is_instance_of<ComponentWithAABB>(this));
+  return _hasAABB;
+}
+
 void Node::Component::setVisible(bool visible)
 {
   bool prevVisibility = this->visible();
@@ -422,6 +431,11 @@ CoordFrame Node::Component::globalCoordFrame() const
   return _globalCoordFrame;
 }
 
+quint32 Node::Component::zIndex() const
+{
+  return qHash(this); // _zIndex;
+}
+
 /*!
 Calculates the global transformation of the given component.
 
@@ -432,14 +446,24 @@ CoordFrame Node::Component::updateGlobalCoordFrame()
   if(this == nullptr)
     return CoordFrame();
 
-  if(hasCustomGlobalCoordUpdater())
+  if(Q_UNLIKELY(hasCustomGlobalCoordUpdater()))
     _globalCoordFrame = calcGlobalCoordFrameImpl();
-  else if(parent != nullptr)
+  else if(Q_LIKELY(parent != nullptr))
     _globalCoordFrame = parent->globalCoordFrame() * localCoordFrame();
   else
     _globalCoordFrame = localCoordFrame();
 
+  updateZIndex();
+
+  if(Q_LIKELY(hasAABB()))
+    reinterpret_cast<ComponentWithAABB*>(this)->expandSceneAABB();
+
   return _globalCoordFrame;
+}
+
+quint32 Node::Component::updateZIndex()
+{
+  return this->_zIndex = calcZIndex(scene().aabb.toUnitSpace(globalCoordFrame().position));
 }
 
 
@@ -574,6 +598,30 @@ void Node::Component::collectCoordDependencies(CoordDependencySet* dependencySet
 }
 
 
+// ======== ComponentWithAABB ====================================================
+
+
+ComponentWithAABB::ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid)
+  : Node::Component(node, parent, uuid),
+    localAabb(AABB::invalid())
+{
+  _hasAABB = true;
+}
+
+ComponentWithAABB::~ComponentWithAABB()
+{
+}
+
+AABB ComponentWithAABB::globalAABB() const
+{
+  return localAabb.aabbOfTransformedBoundingBox(this->globalCoordFrame());
+}
+
+void ComponentWithAABB::expandSceneAABB()
+{
+  Q_ASSERT(this->hasAABB());
+  scene().aabb |= this->globalAABB();
+}
 
 
 } // namespace scene

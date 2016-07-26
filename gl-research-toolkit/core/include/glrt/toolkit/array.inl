@@ -33,6 +33,8 @@ inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_rem
 template<int block_size_append, int block_size_remove>
 inline int ArrayCapacityTraits_Capacity_Blocks<block_size_append, block_size_remove>::recalc_capacity(int prev_capacity, int current_length)
 {
+  Q_ASSERT(current_length >= 0);
+
   if(prev_capacity < current_length)
     return new_capacity(prev_capacity, current_length, current_length-prev_capacity);
   else if(prev_capacity > current_length)

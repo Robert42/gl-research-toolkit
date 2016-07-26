@@ -28,6 +28,8 @@ void ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::setHeader(co
 template<typename T_element, typename T_CapacityTraits, typename T_header_traits>
 void ManagedGLBuffer<T_element, T_CapacityTraits, T_header_traits>::setNumElements(int numElements)
 {
+  Q_ASSERT(numElements >= 0);
+
   header.set_n_elements(&first_dirty_byte, &buffer, numElements);
 
   int newCapacity = T_CapacityTraits::recalc_capacity(buffer.GetSize(),

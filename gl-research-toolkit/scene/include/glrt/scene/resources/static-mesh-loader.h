@@ -18,6 +18,8 @@ class StaticMeshLoader : public QObject
 {
   Q_OBJECT
 public:
+  typedef glrt::scene::AABB ABB;
+
   StaticMeshLoader();
   virtual ~StaticMeshLoader();
 
@@ -36,8 +38,12 @@ public:
 
   static void registerAngelScriptAPI();
 
+  AABB staticMeshAABB(const Uuid<StaticMesh>& uuid, const ResourceManager* resourceManager, const AABB& fallback = AABB::invalid());
+
 protected:
   virtual void loadStaticMeshImpl(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices) = 0;
+  virtual bool isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const = 0;
+  virtual AABB aabbForAlreadyLoaded(const Uuid<StaticMesh>& uuid) const = 0;
 };
 
 

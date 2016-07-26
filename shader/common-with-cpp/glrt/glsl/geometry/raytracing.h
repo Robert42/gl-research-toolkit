@@ -258,6 +258,11 @@ inline vec3 nearest_point(in Plane plane, in vec3 point)
   return point - plane.normal * signed_distance_to(plane, point);
 }
 
+inline vec3 clamp_point_to_front_side(in Plane plane, in vec3 point)
+{
+  return point - plane.normal * min(0.f, signed_distance_to(plane, point));
+}
+
 // ---- contains
 
 inline bool contains(in Plane plane, in vec3 point, float epsilon)
@@ -469,7 +474,7 @@ inline bool cone_intersects_sphere(in Cone cone, Sphere sphere, out(float) t, fl
 {
   t = dot(cone.direction, sphere.origin-cone.origin);
   const float clamped_t = clamp(t, 0.f, t_max);
-  
+
   const vec3 p = cone.origin + cone.direction * clamped_t;
 
   // see doc/cone_intersects_sphere.svg

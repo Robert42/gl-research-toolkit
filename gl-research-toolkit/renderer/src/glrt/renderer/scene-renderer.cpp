@@ -24,6 +24,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
+    visualizeVoxelBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
+    visualizeVoxelSceneBoundingBox(debugging::VisualizationRenderer::showSceneAABB(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
@@ -48,6 +50,9 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
+  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
+  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingBoxes);
+  debugDrawList_Backbuffer.connectTo(&visualizeVoxelSceneBoundingBox);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
@@ -86,6 +91,8 @@ void Renderer::render()
 void Renderer::update(float deltaTime)
 {
   debugPosteffect.totalTime += deltaTime;
+
+  statistics.numSdfInstances = voxelUniformBuffer.numVisibleVoxelGrids();
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)

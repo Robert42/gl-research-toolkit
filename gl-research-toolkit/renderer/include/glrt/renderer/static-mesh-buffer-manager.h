@@ -18,12 +18,15 @@ public:
   StaticMeshBuffer* meshForUuid(const Uuid<StaticMesh>& uuid);
 
   void removeUnusedStaticMeshes(QSet<Uuid<StaticMesh>> usedStaticMeshes) override;
+  bool isAlreadyLoaded(const Uuid<StaticMesh>& uuid) const override;
 
 private:
   QHash<Uuid<StaticMesh>, StaticMeshBuffer*> staticMeshes;
   glrt::scene::resources::ResourceManager* resourceManager;
 
   void loadStaticMeshImpl(const Uuid<StaticMesh>& uuid, const StaticMesh::index_type* indices, size_t numIndices, const StaticMesh::Vertex* vertices, size_t numVertices) override;
+
+  scene::AABB aabbForAlreadyLoaded(const Uuid<StaticMesh>& uuid) const override;
 };
 
 } // namespace renderer

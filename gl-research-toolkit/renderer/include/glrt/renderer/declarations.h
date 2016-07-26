@@ -6,6 +6,8 @@
 namespace glrt {
 namespace renderer {
 
+using scene::resources::BoundingSphere;
+
 enum class Pass
 {
   DEPTH_PREPASS,
