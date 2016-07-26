@@ -433,7 +433,7 @@ CoordFrame Node::Component::globalCoordFrame() const
 
 quint32 Node::Component::zIndex() const
 {
-  return _zIndex;
+  return qHash(this); // _zIndex;
 }
 
 /*!

@@ -54,6 +54,7 @@ void VoxelBuffer::updateBvhTree()
   bvhInnerBoundingSpheres.setNumElements(numInnerNodes);
   bvhInnerNodes.setNumElements(numInnerNodes);
 
+  /* TODO uncomment
   BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map();
   BVH::InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map();
 
@@ -62,6 +63,7 @@ void VoxelBuffer::updateBvhTree()
 
   this->bvhInnerBoundingSpheres.Unmap();
   this->bvhInnerNodes.Unmap();
+  */
 }
 
 BVH::BVH(const scene::VoxelDataComponent* const * leaveBoundingSpheres, BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes, const quint32* zIndices, int length, int innerNodesCapacity)
