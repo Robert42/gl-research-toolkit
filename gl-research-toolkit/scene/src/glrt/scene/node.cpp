@@ -210,7 +210,6 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     uuid(uuid),
     _globalCoordFrame(glm::uninitialize),
     _movable(false),
-    _mayBecomeMovable(false),
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
@@ -292,6 +291,11 @@ const QVector<glrt::scene::Node::Component*>& Node::Component::children() const
   return this->_children;
 }
 
+inline bool isNull(const void* instance)
+{
+  return instance == nullptr;
+}
+
 /*!
 Appends the whole subtree of this component (including this component itself)
 to the ggiven vector \a subTree.
@@ -300,7 +304,7 @@ to the ggiven vector \a subTree.
 */
 void Node::Component::collectSubtree(QVector<Component*>* subTree)
 {
-  if(this == nullptr)
+  if(isNull(this))
     return;
 
   subTree->append(this);
@@ -312,13 +316,10 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
 Node::Component::MovabilityHint Node::Component::movabilityHint() const
 {
   int movable = static_cast<int>(this->movable());
-  int mayBecomeMovable = static_cast<int>(this->mayBecomeMovable());
   Q_ASSERT(movable<=1);
-  Q_ASSERT(mayBecomeMovable<=1);
-  int hintValue = (movable<<1) | (mayBecomeMovable & ~movable);
+  int hintValue = movable;
 
   Q_ASSERT(hintValue == static_cast<int>(MovabilityHint::STATIC) ||
-           hintValue == static_cast<int>(MovabilityHint::MAY_BECOME_MOVABLE) ||
            hintValue == static_cast<int>(MovabilityHint::MOVABLE));
 
   return static_cast<MovabilityHint>(hintValue);
@@ -329,11 +330,6 @@ bool Node::Component::movable() const
   return _movable || _coordinateIndex==-1;
 }
 
-bool Node::Component::mayBecomeMovable() const
-{
-  return _mayBecomeMovable;
-}
-
 void Node::Component::setMovable(bool movable)
 {
   if(this->movable() != movable)
@@ -342,12 +338,6 @@ void Node::Component::setMovable(bool movable)
     movableChanged(movable);
     componentMovabilityChanged(this);
   }
-}
-
-void Node::Component::setMayBecomeMovable(bool mayBecomeMovable)
-{
-  if(this->mayBecomeMovable() != mayBecomeMovable)
-    this->_mayBecomeMovable = mayBecomeMovable;
 }
 
 bool Node::Component::visible() const
@@ -443,7 +433,7 @@ Calculates the global transformation of the given component.
 */
 CoordFrame Node::Component::updateGlobalCoordFrame()
 {
-  if(this == nullptr)
+  if(isNull(this))
     return CoordFrame();
 
   if(Q_UNLIKELY(hasCustomGlobalCoordUpdater()))

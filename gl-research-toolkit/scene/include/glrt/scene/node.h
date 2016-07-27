@@ -78,14 +78,12 @@ class Node::Component : public TickingObject
 {
   Q_OBJECT
   Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
-  Q_PROPERTY(bool mayBecomeMovable READ mayBecomeMovable WRITE setMayBecomeMovable)
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
   enum class MovabilityHint
   {
     STATIC = 0,
-    MAY_BECOME_MOVABLE = 1,
-    MOVABLE = 2,
+    MOVABLE = 1,
   };
 
   Node& node;
@@ -107,7 +105,6 @@ public:
 
   MovabilityHint movabilityHint() const;
   bool movable() const;
-  bool mayBecomeMovable() const;
   bool visible() const;
 
   bool hasAABB() const;
@@ -161,8 +158,6 @@ protected:
 
   virtual void collectCoordDependencies(CoordDependencySet* dependencySet) const;
 
-  void setMayBecomeMovable(bool mayBecomeMovable);
-
   void hideInDestructor();
 
 private:
@@ -182,7 +177,6 @@ private:
   quint32 _zIndex = 0;
 
   bool _movable : 1;
-  bool _mayBecomeMovable : 1;
   bool _visible : 1;
   bool _parentVisible : 1;
   bool _hiddenBecauseDeletedNextFrame : 1;
