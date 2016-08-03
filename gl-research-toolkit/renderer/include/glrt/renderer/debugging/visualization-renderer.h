@@ -26,6 +26,7 @@ public:
   static DebugRenderer debugArrows(QVector<Arrow>* arrows);
   static DebugRenderer debugCones(QVector<Cone>* cones);
   static DebugRenderer showWorldGrid();
+  static DebugRenderer showUniformTest();
 };
 
 

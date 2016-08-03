@@ -22,6 +22,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
+    visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
     visualizeVoxelBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
@@ -33,21 +34,18 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
-    lightUniformBuffer(this->scene),
-    voxelUniformBuffer(this->scene)
-    #if 0
-      ,
-    staticMeshRenderer(this->scene, staticMeshBufferManager),
-    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true),
+    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    lightUniformBuffer(this->scene),
+    voxelUniformBuffer(this->scene),
+    #if 0
+    staticMeshRenderer(this->scene, staticMeshBufferManager),
+    #endif
     _adjustRoughness(false),
     _sdfShadows(false)
-#endif
 {
-#if 0
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
-#endif
 
   debugDrawList_Backbuffer.connectTo(&visualizeCameras);
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
@@ -55,6 +53,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
+  debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingBoxes);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelSceneBoundingBox);
@@ -75,16 +74,19 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-#if 0
   updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
 
+#if 0
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
   staticMeshRenderer.update();
 
+#endif
   prepareFramebuffer();
 
+#if 0
   commandList.call();
+#endif
 
   debugDrawList_Framebuffer.render();
 
@@ -92,7 +94,6 @@ void Renderer::render()
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Backbuffer.render();
-#endif
 }
 
 void Renderer::update(float deltaTime)

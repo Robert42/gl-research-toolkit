@@ -229,6 +229,26 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawWorldGrid()
   return v;
 }
 
+DebugRenderer::Implementation*DebugLineVisualisation::drawUniformTest()
+{
+  QVector<int> vector = {42};
+  DebugMesh::Painter painter;
+
+  for(int i=0; i<8; ++i)
+  {
+    glm::vec3 offset(i&1, (i&2)>>1, (i&4)>>2);
+    painter.addCube(offset+glm::vec3(-1),
+                    offset+glm::vec3(0));
+  }
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  vector,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-uniform-test",
+                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  return v;
+}
+
 
 DebugRenderer::Implementation* DebugLineVisualisation::drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes)
 {

@@ -63,6 +63,7 @@ public:
   static DebugRenderer::Implementation* drawArrows(const QVector<Arrow>& arrows);
   static DebugRenderer::Implementation* drawCones(const QVector<Cone>& cones);
   static DebugRenderer::Implementation* drawWorldGrid();
+  static DebugRenderer::Implementation* drawUniformTest();
   static DebugRenderer::Implementation* drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes);
   static DebugRenderer::Implementation* drawSpheres(const QList<BoundingSphere>& spheres);
   static DebugRenderer::Implementation* drawBoundingBoxes(const QVector<scene::AABB>& boundingBoxes);

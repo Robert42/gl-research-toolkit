@@ -49,6 +49,7 @@ public:
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
   debugging::DebugRenderer visualizeWorldGrid;
+  debugging::DebugRenderer visualizeUniformTest;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
   debugging::DebugRenderer visualizeVoxelBoundingBoxes;
