@@ -10,6 +10,8 @@ namespace glrt {
 namespace renderer {
 namespace debugging {
 
+const QString ShaderDebugPrinter::preprocessorDeclaration = "#define SHADER_DEBUG_PRINTER";
+
 int ShaderDebugPrinter::workaround71 = 0;
 
 struct ShaderDebugPrinter::Chunk
@@ -196,7 +198,7 @@ ShaderDebugPrinter::ShaderDebugPrinter()
   guiToggle.getter = [this]() -> bool {return this->active;};
   guiToggle.setter = [this](bool active) {
     this->active = active;
-    QString preprocessorBlock = "#define SHADER_DEBUG_PRINTER";
+    QString preprocessorBlock = preprocessorDeclaration;
     if(this->active)
     {
       ReloadableShader::globalPreprocessorBlock.insert(preprocessorBlock);

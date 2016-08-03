@@ -4,5 +4,6 @@
 
 void main()
 {
+  PRINT_VALUE(42);
   apply_color();
 }

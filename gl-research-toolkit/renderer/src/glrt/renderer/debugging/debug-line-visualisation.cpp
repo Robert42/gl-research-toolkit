@@ -244,8 +244,8 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawUniformTest()
   ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
                                                                                   vector,
-                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-uniform-test",
-                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles_WithDebugger("visualize-uniform-test",
+                                                                                                                                                QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
   return v;
 }
 

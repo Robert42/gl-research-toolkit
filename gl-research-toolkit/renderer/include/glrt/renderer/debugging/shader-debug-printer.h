@@ -16,6 +16,9 @@ namespace debugging {
 class ShaderDebugPrinter final
 {
 public:
+  static const QString preprocessorDeclaration;
+
+
   gui::TweakBarCBVar<bool> guiToggle;
   bool clearScene;
 
