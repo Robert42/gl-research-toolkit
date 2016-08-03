@@ -133,8 +133,7 @@ void Node::registerAngelScriptAPI()
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
-  : TickingObject(node.scene().tickManager, &node),
-    node(node),
+  : node(node),
     uuid(uuid)
 {
   node._allModularAttributes.append(this);
@@ -195,8 +194,7 @@ only changed by deleting the child or parent component.
 This component will have the given \a uuid.
 */
 Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass data_class)
-  : TickingObject(node.scene().tickManager, &node),
-    node(node),
+  : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
     data_class(makeStatic(data_class, parent!=nullptr && parent->isStatic())),
@@ -537,11 +535,6 @@ void Node::Component::registerAngelScriptAPI()
                                                                                                "const Uuid<NodeComponent> &in uuid, bool static=true");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
-}
-
-void Node::Component::collectDependencies(TickDependencySet* dependencySet) const
-{
-  TickingObject::collectDependencies(dependencySet);
 }
 
 void Node::Component::collectDependencies(CoordDependencySet* dependencySet) const

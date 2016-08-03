@@ -6,7 +6,7 @@
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/coord-frame.h>
 #include <glrt/scene/aabb.h>
-#include <glrt/scene/ticking-object.h>
+#include <glrt/toolkit/dependency-set.h>
 
 namespace glrt {
 namespace scene {
@@ -55,7 +55,7 @@ private:
 };
 
 
-class Node::ModularAttribute : public TickingObject
+class Node::ModularAttribute : public QObject
 {
   Q_OBJECT
 public:
@@ -74,7 +74,7 @@ public:
 };
 
 
-class Node::Component : public TickingObject
+class Node::Component : public QObject
 {
   Q_OBJECT
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
@@ -167,7 +167,6 @@ protected:
   template<typename T, T*>
   static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments);
 
-  void collectDependencies(TickDependencySet* dependencySet) const;
   void collectDependencies(CoordDependencySet* dependencySet) const;
 
   virtual void collectCoordDependencies(CoordDependencySet* dependencySet) const;

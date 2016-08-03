@@ -41,8 +41,6 @@ set(SOURCE_FILES
   include/glrt/scene/scene.inl
   include/glrt/scene/scene-layer.h
   include/glrt/scene/static-mesh-component.h
-  include/glrt/scene/ticking-object.h
-  include/glrt/scene/tick-manager.h
   include/glrt/scene/voxel-data-component.h
   src/glrt/scene/aabb.cpp
   src/glrt/scene/camera-component.cpp
@@ -77,7 +75,5 @@ set(SOURCE_FILES
   src/glrt/scene/scene-data.cpp
   src/glrt/scene/scene-layer.cpp
   src/glrt/scene/static-mesh-component.cpp
-  src/glrt/scene/ticking-object.cpp
-  src/glrt/scene/tick-manager.cpp
   src/glrt/scene/voxel-data-component.cpp
 )

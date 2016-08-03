@@ -6,6 +6,7 @@
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/collect-scene-data.h>
 #include <glrt/scene/fps-debug-controller.h>
+#include <glrt/scene/scene-data.h>
 #include <glrt/toolkit/assimp-glm-converter.h>
 
 #include <QFile>
@@ -36,13 +37,16 @@ resources::ResourceManager* get_resourceManager(Scene* scene)
 \warning The resourceManager instance must live longer than this scene instance
 */
 Scene::Scene(resources::ResourceManager* resourceManager)
-  : resourceManager(*resourceManager)
+  : resourceManager(*resourceManager),
+    data(new Data)
 {
 }
 
 Scene::~Scene()
 {
   clear();
+
+  delete data;
 }
 
 void Scene::clear()
@@ -73,7 +77,6 @@ bool Scene::handleEvents(const SDL_Event& event)
 
 void Scene::update(float deltaTime)
 {
-  tickManager.tick(deltaTime);
   globalCoordUpdater.updateCoordinates();
 
   inputManager.update();

@@ -38,11 +38,13 @@ public:
 
   FpsDebugController(Node::Component& component, const Uuid<FpsDebugController>& uuid);
 
+#if 0
   void tick(float timeDelta) override;
 
 protected:
   TickTraits tickTraits() const override;
   void collectTickDependencies(TickDependencySet* dependencySet) const override;
+#endif
 };
 
 } // namespace scene
