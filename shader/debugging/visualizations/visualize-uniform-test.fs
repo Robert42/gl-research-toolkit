@@ -4,6 +4,5 @@
 
 void main()
 {
-  PRINT_VALUE(42);
-  apply_color();
+  apply_color(DEBUG_FRAGMENT_COORD(ORANGE_COLOR));
 }
