@@ -18,19 +18,11 @@ set(SOURCE_FILES
   include/glrt/renderer/gl/shader-type.h
   include/glrt/renderer/gl/status-capture.h
   include/glrt/renderer/gl-texture-manager.h
-  include/glrt/renderer/implementation/fragmented-component-array.h
-  include/glrt/renderer/implementation/fragmented-component-array.inl
-  include/glrt/renderer/implementation/fragmented-light-component-array.h
-  include/glrt/renderer/implementation/fragmented-light-component-array.inl
-  include/glrt/renderer/implementation/fragmented-static-mesh-component-array.h
-  include/glrt/renderer/implementation/fragmented-static-mesh-component-array.inl
   include/glrt/renderer/light-buffer.h
   include/glrt/renderer/material-buffer.h
   include/glrt/renderer/material-state.h
   include/glrt/renderer/sample-resource-manager.h
   include/glrt/renderer/scene-renderer.h
-  include/glrt/renderer/simple-shader-storage-buffer.h
-  include/glrt/renderer/simple-shader-storage-buffer.inl
   include/glrt/renderer/static-mesh-buffer.h
   include/glrt/renderer/static-mesh-buffer-manager.h
   include/glrt/renderer/static-mesh-renderer.h

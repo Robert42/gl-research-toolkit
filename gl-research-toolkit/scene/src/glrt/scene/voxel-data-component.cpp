@@ -9,7 +9,7 @@ using resources::BoundingSphere;
 
 
 VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data, bool voxelizedAsScenery)
-  : Component(node, parent, uuid),
+  : Component(node, parent, uuid, DataClass::VOXELGRID),
     data(data),
     voxelizedAsScenery(voxelizedAsScenery)
 {

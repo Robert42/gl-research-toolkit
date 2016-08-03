@@ -10,27 +10,27 @@ namespace glrt {
 namespace renderer {
 
 
-template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager)
+template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
+StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager)
   : meshComponents(scene),
     staticMeshBufferManager(*staticMeshBufferManager)
 {
 }
 
-template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::update()
+template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
+void StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::update()
 {
   updateMovableObjectUniforms();
 }
 
-template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-bool StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::needRerecording() const
+template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
+bool StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::needRerecording() const
 {
   return meshComponents.dirty;
 }
 
-template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-TokenRanges StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
+template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
+TokenRanges StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
 {
   FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
 
@@ -76,8 +76,8 @@ TokenRanges StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_Buf
   return staticMeshRecorder.tokenRanges;
 }
 
-template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::updateMovableObjectUniforms()
+template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
+void StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::updateMovableObjectUniforms()
 {
   FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
 
@@ -91,8 +91,8 @@ void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapa
 #endif
 }
 
-template<class T_Component, class T_Recorder, typename T_FragmentedArray, typename T_BufferCapacityTraits>
-void StaticMeshRenderer<T_Component, T_Recorder, T_FragmentedArray, T_BufferCapacityTraits>::updateObjectUniforms(int begin, int end)
+template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
+void StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::updateObjectUniforms(int begin, int end)
 {
   FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
 

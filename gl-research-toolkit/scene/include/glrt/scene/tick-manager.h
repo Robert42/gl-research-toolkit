@@ -2,9 +2,6 @@
 #define GLRT_SCENE_TICKMANAGER_H
 
 #include <glrt/scene/ticking-object.h>
-#include <glrt/toolkit/fragmented-array.h>
-
-#include "implementation/tick-manager-tickorder-array.h"
 
 namespace glrt {
 namespace scene {
@@ -17,6 +14,7 @@ public:
 
   void tick(float deltaTime);
 
+#if 0
 private:
   friend class TickingObject;
   friend struct implementation::TickManager_TickObjectArray;
@@ -33,11 +31,15 @@ private:
 private slots:
   void removeObject(QObject* object);
   void updateObject(TickingObject* object);
+#endif
 };
+
 
 } // namespace scene
 } // namespace glrt
 
+#if 0
 #include "implementation/tick-manager-tickorder-array.inl"
+#endif
 
 #endif // GLRT_SCENE_TICKMANAGER_H

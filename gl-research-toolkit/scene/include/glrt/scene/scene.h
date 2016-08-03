@@ -28,6 +28,8 @@ class Scene final : public QObject
 {
   Q_OBJECT
 public:
+  class Data;
+
   resources::ResourceManager& resourceManager;
   Uuid<Scene> uuid;
   QString file;

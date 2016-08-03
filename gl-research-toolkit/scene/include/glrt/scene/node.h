@@ -77,20 +77,36 @@ public:
 class Node::Component : public TickingObject
 {
   Q_OBJECT
-  Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
-  enum class MovabilityHint
+  enum class DataClass
   {
-    STATIC = 0,
-    MOVABLE = 1,
+    EMPTY = 0x0,
+    EMPTY_STATIC = 0x1,
+    TRANSFORMATION = 0x2,
+    TRANSFORMATION_STATIC = TRANSFORMATION | EMPTY_STATIC,
+    SPHERELIGHT = 0x4,
+    SPHERELIGHT_STATIC = SPHERELIGHT | EMPTY_STATIC,
+    RECTLIGHT = 0x6,
+    RECTLIGHT_STATIC = RECTLIGHT | EMPTY_STATIC,
+    STATICMESH = 0x8,
+    STATICMESH_STATIC = STATICMESH | EMPTY_STATIC,
+    VOXELGRID = 0x10,
+    VOXELGRID_STATIC = VOXELGRID | EMPTY_STATIC,
+    CAMERA = 0x12,
+    CAMERA_STATIC = CAMERA | EMPTY_STATIC,
   };
+
+  friend DataClass operator&(DataClass a, DataClass b){return DataClass(quint32(a)&quint32(b));}
+  friend DataClass operator|(DataClass a, DataClass b){return DataClass(quint32(a)|quint32(b));}
 
   Node& node;
   Component* const parent;
   const Uuid<Component> uuid;
+  const DataClass data_class;
+  int data_index = -1;
 
-  Component(Node& node, Component* parent, const Uuid<Component>& uuid);
+  Component(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass data_class);
   virtual ~Component();
 
   Scene& scene();
@@ -103,8 +119,7 @@ public:
   const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
-  MovabilityHint movabilityHint() const;
-  bool movable() const;
+  bool isStatic() const;
   bool visible() const;
 
   bool hasAABB() const;
@@ -128,8 +143,9 @@ public:
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
+  static DataClass makeStatic(DataClass dataClass, bool makeStatic);
+
 public slots:
-  void setMovable(bool movable);
   void setVisible(bool visible);
   void show(bool show=true);
   void hide(bool hide=true);
@@ -138,10 +154,8 @@ public slots:
 
 signals:
   void coordDependencyDepthChanged(Component* sender);
-  void componentMovabilityChanged(Component* sender);
   void componentVisibilityChanged(Component* sender);
   void visibleChanged(bool);
-  void movableChanged(bool);
 
 protected:
   typedef DependencySet<Component> CoordDependencySet;
@@ -176,7 +190,6 @@ private:
   CoordFrame _globalCoordFrame;
   quint32 _zIndex = 0;
 
-  bool _movable : 1;
   bool _visible : 1;
   bool _parentVisible : 1;
   bool _hiddenBecauseDeletedNextFrame : 1;
@@ -195,7 +208,7 @@ class ComponentWithAABB : public Node::Component
 public:
   AABB localAabb;
 
-  ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid);
+  ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass dataClass);
   ~ComponentWithAABB();
 
   AABB globalAABB() const;
@@ -205,13 +218,6 @@ public:
 
 
 } // namespace scene
-
-template<>
-struct DefaultTraits<glrt::scene::Node::Component::MovabilityHint>
-{
-  typedef ArrayTraits_Primitive<glrt::scene::Node::Component::MovabilityHint> type;
-};
-
 } // namespace glrt
 
 #include "node.inl"

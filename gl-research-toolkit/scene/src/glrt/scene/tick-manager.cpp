@@ -13,12 +13,15 @@ TickManager::TickManager(QObject* parent)
 
 void TickManager::tick(float deltaTime)
 {
+#if 0
   this->deltaTime = deltaTime;
   updateObjects();
 
   fragmented_array.iterate(this);
+#endif
 }
 
+#if 0
 void TickManager::addTickingObject(TickingObject* tickingObject)
 {
   notYetAddedTickingPointers.insert(tickingObject);
@@ -68,6 +71,7 @@ void TickManager::updateObject(TickingObject* object)
   QWriteLocker l(&mutexFragmentedArray);
   fragmented_array.orderChangedForValue(object);
 }
+#endif
 
 
 } // namespace scene

@@ -1,6 +1,5 @@
 set(SOURCE_FILES
   arrays/arrays-tests.cpp
-  arrays/fragmented-array.test.cpp
   arrays/statespy.cpp
   arrays/statespy.h
   arrays/trait-handling.cpp

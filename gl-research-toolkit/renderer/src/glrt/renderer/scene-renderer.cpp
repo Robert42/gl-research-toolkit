@@ -34,15 +34,20 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
     lightUniformBuffer(this->scene),
-    voxelUniformBuffer(this->scene),
+    voxelUniformBuffer(this->scene)
+    #if 0
+      ,
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     _needRecapturing(true),
     _adjustRoughness(false),
     _sdfShadows(false)
+#endif
 {
+#if 0
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
+#endif
 
   debugDrawList_Backbuffer.connectTo(&visualizeCameras);
   debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
@@ -70,6 +75,7 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
+#if 0
   updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
 
   if(Q_UNLIKELY(needRerecording()))
@@ -86,13 +92,16 @@ void Renderer::render()
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Backbuffer.render();
+#endif
 }
 
 void Renderer::update(float deltaTime)
 {
   debugPosteffect.totalTime += deltaTime;
 
+#if 0
   statistics.numSdfInstances = voxelUniformBuffer.numVisibleVoxelGrids();
+#endif
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
@@ -201,9 +210,14 @@ bool Renderer::needRecapturing() const
 
 bool Renderer::needRerecording() const
 {
+#if 0
   return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.numVisibleChanged();
+#else
+  return _needRecapturing;
+#endif
 }
 
+#if 0
 void Renderer::captureStates()
 {
   for(MaterialState& materialState : materialStates)
@@ -311,6 +325,7 @@ void Renderer::recordCommandlist()
 
   scene.sceneRerecordedCommands();
 }
+#endif
 
 void Renderer::allShadersReloaded()
 {
@@ -391,7 +406,6 @@ void Renderer::setSDFShadows(bool sdfShadows)
     ReloadableShader::defineMacro("CONETRACED_SHADOW", sdfShadows);
   }
 }
-
 
 } // namespace renderer
 } // namespace glrt

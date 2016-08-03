@@ -180,15 +180,6 @@ const resources::ResourceManager& Node::ModularAttribute::resourceManager() cons
 // ======== Node::Component ====================================================
 
 /*!
-\property Node::Component::mayBecomeMovable
-
-This property is just a hint. For example the renderer might decide to order not
-movable components, which may be come movable later on between movable and not
-movable componetns in an array. this way, after becoming movable, a smaller part
-of components have to be resorted.
-*/
-
-/*!
 Constructs a new Components and adds it to the given \a node.
 
 Optionally, you can pass a \a parent component. Note, that you are allowed to
@@ -203,13 +194,13 @@ only changed by deleting the child or parent component.
 
 This component will have the given \a uuid.
 */
-Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
+Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass data_class)
   : TickingObject(node.scene().tickManager, &node),
     node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
+    data_class(makeStatic(data_class, parent!=nullptr && parent->isStatic())),
     _globalCoordFrame(glm::uninitialize),
-    _movable(false),
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
@@ -231,7 +222,9 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
 
   scene().componentAdded(this);
 
+#if 0
   scene().globalCoordUpdater.addComponent(this);
+#endif
 }
 
 /*!
@@ -313,31 +306,9 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
     child->collectSubtree(subTree);
 }
 
-Node::Component::MovabilityHint Node::Component::movabilityHint() const
+bool Node::Component::isStatic() const
 {
-  int movable = static_cast<int>(this->movable());
-  Q_ASSERT(movable<=1);
-  int hintValue = movable;
-
-  Q_ASSERT(hintValue == static_cast<int>(MovabilityHint::STATIC) ||
-           hintValue == static_cast<int>(MovabilityHint::MOVABLE));
-
-  return static_cast<MovabilityHint>(hintValue);
-}
-
-bool Node::Component::movable() const
-{
-  return _movable || _coordinateIndex==-1;
-}
-
-void Node::Component::setMovable(bool movable)
-{
-  if(this->movable() != movable)
-  {
-    this->_movable = movable;
-    movableChanged(movable);
-    componentMovabilityChanged(this);
-  }
+  return (this->data_class & DataClass::EMPTY_STATIC) == DataClass::EMPTY_STATIC;
 }
 
 bool Node::Component::visible() const
@@ -401,6 +372,14 @@ void Node::Component::hideInDestructor()
   bool prevVisibility = this->visible();
   _hiddenBecauseDeletedNextFrame = true;
   updateVisibility(prevVisibility);
+}
+
+Node::Component::DataClass Node::Component::makeStatic(Node::Component::DataClass dataClass, bool makeStatic)
+{
+  if(makeStatic)
+    return DataClass::EMPTY_STATIC | dataClass;
+  else
+    return dataClass;
 }
 
 
@@ -472,7 +451,7 @@ different than this component itself or it's CoordDependencies.
 Don't change any state of any object, just calculate the new GlobalCoordinate and
 return it.
 \br
-Don't change anything, expecially don't change the movability or delete any objects.
+Don't change anything, expecially don't delete any objects.
 */
 CoordFrame Node::Component::calcGlobalCoordFrameImpl() const
 {
@@ -488,9 +467,9 @@ bool Node::Component::hasCustomGlobalCoordUpdater() const
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
-  if(!movable())
+  if(isStatic())
   {
-    qWarning() << "Trying to move not movable component";
+    qWarning() << "Trying to move static component";
     return;
   }
 
@@ -540,9 +519,10 @@ void Node::Component::registerAngelScriptAPIDeclarations()
 
 inline Node::Component* createEmptyComponent(Node& node,
                                              Node::Component* parent,
-                                             const Uuid<Node::Component>& uuid)
+                                             const Uuid<Node::Component>& uuid,
+                                             bool makeStatic)
 {
-  return new Node::Component(node, parent, uuid);
+  return new Node::Component(node, parent, uuid, Node::Component::makeStatic(Node::Component::DataClass::EMPTY, makeStatic));
 }
 
 void Node::Component::registerAngelScriptAPI()
@@ -554,7 +534,7 @@ void Node::Component::registerAngelScriptAPI()
   Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
                                                                                                "NodeComponent",
                                                                                                "new_EmptyComponent",
-                                                                                               "const Uuid<NodeComponent> &in uuid");
+                                                                                               "const Uuid<NodeComponent> &in uuid, bool static=true");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -572,8 +552,8 @@ void Node::Component::collectDependencies(CoordDependencySet* dependencySet) con
   if(dependencySet->originalObject() == this)
   {
     for(const Component* dependency : dependencySet->queuedDependencies() + dependencySet->queuedDependencies())
-      if(!this->movable() && dependency->movable())
-        qWarning() << "Warning: not movable object " << this->uuid << " depending on a movable component " << dependency->uuid << ".";
+      if(this->isStatic() && !dependency->isStatic())
+        qWarning() << "Warning: static component " << this->uuid << " depending on a not static component " << dependency->uuid << ".";
   }
 
   if(!dependencySet->objectsWithCycles().isEmpty())
@@ -591,8 +571,8 @@ void Node::Component::collectCoordDependencies(CoordDependencySet* dependencySet
 // ======== ComponentWithAABB ====================================================
 
 
-ComponentWithAABB::ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid)
-  : Node::Component(node, parent, uuid),
+ComponentWithAABB::ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass dataClass)
+  : Node::Component(node, parent, uuid, dataClass),
     localAabb(AABB::invalid())
 {
   _hasAABB = true;

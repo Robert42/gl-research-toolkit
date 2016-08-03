@@ -51,6 +51,7 @@ DebuggingPosteffect::Renderer::~Renderer()
 
 void DebuggingPosteffect::Renderer::recordCommandList()
 {
+#if 0
   if(!needRerecording)
     return;
   needRerecording = false;
@@ -96,6 +97,7 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.append_drawcall(tokenRange, &statusCapture, &framebuffer);
 
   commandList = gl::CommandListRecorder::compile(std::move(segment));
+#endif
 }
 
 void DebuggingPosteffect::Renderer::enqueueRerecordingCommandList()

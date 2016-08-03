@@ -8,7 +8,7 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter)
-  : Component(node, parent, uuid),
+  : Component(node, parent, uuid, DataClass::CAMERA),
     cameraParameter(cameraParameter)
 {
   scene().CameraComponentAdded(this);

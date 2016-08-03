@@ -2,8 +2,8 @@
 #define GLRT_RENDERER_VOXELBUFFER_H
 
 #include <glrt/renderer/declarations.h>
+#include <glrt/renderer/toolkit/managed-gl-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
-#include <glrt/renderer/simple-shader-storage-buffer.h>
 
 
 namespace glrt {
@@ -59,9 +59,6 @@ public:
 
 
 private:
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::VoxelDataBlock, &scene::VoxelDataComponent::voxelDataBlock>> distanceFieldDataStorageBuffer;
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
-
   QVector<quint32> zIndices;
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
   ManagedGLBuffer<BVH::InnerNode> bvhInnerNodes;

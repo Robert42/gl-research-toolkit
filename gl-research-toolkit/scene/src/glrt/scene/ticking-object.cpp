@@ -9,7 +9,9 @@ TickingObject::TickingObject(TickManager& tickManager, QObject* parent)
   : QObject(parent),
     _tickDependencyDepth(0)
 {
+#if 0
   tickManager.addTickingObject(this);
+#endif
 }
 
 TickingObject::~TickingObject()

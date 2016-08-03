@@ -8,8 +8,6 @@ set(SOURCE_FILES
   include/glrt/toolkit/dependency-set.h
   include/glrt/toolkit/dependency-set.inl
   include/glrt/toolkit/escape-string.h
-  include/glrt/toolkit/fragmented-array.h
-  include/glrt/toolkit/fragmented-array.inl
   include/glrt/toolkit/geometry.h
   include/glrt/toolkit/linked-tuple.h
   include/glrt/toolkit/logger.h

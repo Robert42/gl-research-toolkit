@@ -10,8 +10,8 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 
-LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<LightComponent> &uuid)
-  : Node::Component(node, parent, uuid)
+LightComponent::LightComponent(Node &node, Node::Component* parent, const Uuid<LightComponent> &uuid, DataClass dataClass)
+  : Node::Component(node, parent, uuid, dataClass)
 {
   scene().LightComponentAdded(this);
 }
@@ -76,7 +76,7 @@ void LightComponent::registerAngelScriptAPI()
 
 
 SphereAreaLightComponent::SphereAreaLightComponent(Node& node, Node::Component* parent, const Uuid<SphereAreaLightComponent>& uuid, const Data& data)
-  : LightComponent(node, parent, uuid),
+  : LightComponent(node, parent, uuid, DataClass::SPHERELIGHT),
     data(data)
 {
   scene().SphereAreaLightComponentAdded(this);
@@ -97,7 +97,7 @@ SphereAreaLightComponent::Data SphereAreaLightComponent::globalData() const
 
 
 RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data)
-  : LightComponent(node, parent, uuid),
+  : LightComponent(node, parent, uuid, DataClass::SPHERELIGHT),
     data(data)
 {
   scene().RectAreaLightComponentAdded(this);

@@ -1,16 +1,13 @@
 #ifndef GLRT_SCENE_GLOBALCOORDUPDATER_H
 #define GLRT_SCENE_GLOBALCOORDUPDATER_H
 
-#include <glrt/toolkit/fragmented-array.h>
 #include <glrt/scene/node.h>
-
-#include "implementation/global-coord-array-order.h"
 
 namespace glrt {
 namespace scene {
 
 
-class GlobalCoordUpdater : public QObject
+class GlobalCoordUpdater final : public QObject
 {
   Q_OBJECT
 public:
@@ -18,6 +15,7 @@ public:
 
   void updateCoordinates();
 
+#if 0
 private:
   friend class Node::Component;
   friend struct implementation::GlobalCoordArrayOrder;
@@ -34,12 +32,11 @@ private slots:
   void removeObject(QObject*);
   void movabilityChanged(Node::Component* component);
   void dependencyDepthChanged(Node::Component* component);
+#endif
 };
 
 
 } // namespace scene
 } // namespace glrt
-
-#include "implementation/global-coord-array-order.inl"
 
 #endif // GLRT_SCENE_GLOBALCOORDUPDATER_H
