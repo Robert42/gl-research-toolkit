@@ -79,32 +79,36 @@ class Node::Component : public QObject
   Q_OBJECT
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
-  enum class DataClass
+  enum class DataClass : quint8
   {
-    EMPTY = 0x0,
-    EMPTY_STATIC = 0x1,
-    TRANSFORMATION = 0x2,
-    TRANSFORMATION_STATIC = TRANSFORMATION | EMPTY_STATIC,
-    SPHERELIGHT = 0x4,
-    SPHERELIGHT_STATIC = SPHERELIGHT | EMPTY_STATIC,
-    RECTLIGHT = 0x6,
-    RECTLIGHT_STATIC = RECTLIGHT | EMPTY_STATIC,
-    STATICMESH = 0x8,
-    STATICMESH_STATIC = STATICMESH | EMPTY_STATIC,
-    VOXELGRID = 0x10,
-    VOXELGRID_STATIC = VOXELGRID | EMPTY_STATIC,
-    CAMERA = 0x12,
-    CAMERA_STATIC = CAMERA | EMPTY_STATIC,
+    EMPTY = 0,
+    TRANSFORMATION,
+    SPHERELIGHT,
+    RECTLIGHT,
+    STATICMESH,
+    VOXELGRID,
+    CAMERA,
+
+    NUM_DATA_CLASSES,
+    MASK = 0x7f,
+    MOVABLE = 0x80
   };
 
   friend DataClass operator&(DataClass a, DataClass b){return DataClass(quint32(a)&quint32(b));}
   friend DataClass operator|(DataClass a, DataClass b){return DataClass(quint32(a)|quint32(b));}
 
+  struct DataIndex
+  {
+    const DataClass data_class;
+    quint8 _padding;
+
+    quint16 array_index;
+  };
+
   Node& node;
   Component* const parent;
   const Uuid<Component> uuid;
-  const DataClass data_class;
-  int data_index = -1;
+  DataIndex data_index;
 
   Component(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass data_class);
   virtual ~Component();

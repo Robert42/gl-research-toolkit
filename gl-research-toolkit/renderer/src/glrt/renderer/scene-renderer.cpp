@@ -347,7 +347,7 @@ void Renderer::updateCameraUniform()
         break;
       }
     }
-    if(!cameraComponent && !cameraComponents.isEmpty())
+    if(!this->cameraComponent && !cameraComponents.isEmpty())
       this->cameraComponent = cameraComponents.first();
   }
 

@@ -2,6 +2,7 @@
 #include <glrt/scene/node.h>
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-layer.h>
+#include <glrt/scene/scene-data.h>
 
 #include <angelscript-integration/call-script.h>
 
@@ -197,7 +198,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    data_class(makeStatic(data_class, parent!=nullptr && parent->isStatic())),
+    data_index{makeStatic(data_class, parent!=nullptr && parent->isStatic()), 0, 0xffff},
     _globalCoordFrame(glm::uninitialize),
     _visible(true),
     _parentVisible(true),
@@ -219,6 +220,25 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   }
 
   scene().componentAdded(this);
+
+  Scene::Data::Transformations& transformData = scene().data->transformDataForClass(data_index.data_class);
+  Q_ASSERT(transformData.capacity <= 0x10000); // no level used for my projects will contain more tha that.
+  Q_ASSERT(transformData.length < transformData.capacity);
+  quint16 new_index = static_cast<quint16>(transformData.length);
+
+  if(transformData.length > 0xffff)
+  {
+    qWarning() << "Too many node components";
+  }
+
+  transformData.component[new_index] = this;
+  transformData.orientation[new_index] = glm::quat::IDENTITY;
+  transformData.position[new_index] = glm::vec3(0);
+  transformData.scaleFactor[new_index] = 1;
+  transformData.localCoordFrame[new_index] = CoordFrame();
+  transformData.length++;
+
+  data_index.array_index = new_index;
 
 #if 0
   scene().globalCoordUpdater.addComponent(this);
@@ -244,6 +264,20 @@ Node::Component::~Component()
     parent->_children.removeOne(this);
   else
     node._rootComponent = nullptr;
+
+
+  Scene::Data::Transformations& transformData = scene().data->transformDataForClass(data_index.data_class);
+  Q_ASSERT(transformData.length>0);
+  quint16 last_index = static_cast<quint16>(transformData.length-1);
+  quint16 current_index = data_index.array_index;
+
+  transformData.component[last_index]->data_index.array_index = data_index.array_index;
+  transformData.component[current_index] = transformData.component[last_index];
+  transformData.orientation[current_index] = transformData.orientation[last_index];
+  transformData.position[current_index] = transformData.position[last_index];
+  transformData.scaleFactor[current_index] = transformData.scaleFactor[last_index];
+  transformData.localCoordFrame[current_index] = transformData.localCoordFrame[last_index];
+  transformData.length--;
 }
 
 Scene& Node::Component::scene()
@@ -375,9 +409,9 @@ void Node::Component::hideInDestructor()
 Node::Component::DataClass Node::Component::makeStatic(Node::Component::DataClass dataClass, bool makeStatic)
 {
   if(makeStatic)
-    return DataClass::EMPTY_STATIC | dataClass;
-  else
     return dataClass;
+  else
+    return DataClass::MOVABLE | dataClass;
 }
 
 

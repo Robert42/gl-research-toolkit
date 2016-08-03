@@ -35,7 +35,7 @@ public:
   GlobalCoordUpdater globalCoordUpdater;
   InputHandler::Manager inputManager;
 
-  Data* data;
+  Data* const data;
 
   AABB aabb;
 
