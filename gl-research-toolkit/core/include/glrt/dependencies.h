@@ -11,6 +11,7 @@
 #include <glm/gtx/perpendicular.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/io.hpp>
+#include <glm/fork/bit.h>
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>

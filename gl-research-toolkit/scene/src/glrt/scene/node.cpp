@@ -199,7 +199,6 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
     data_index{makeMovable(data_class, parent!=nullptr && parent->isMovable()), 0, 0xffff},
-    _globalCoordFrame(glm::uninitialize),
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
@@ -211,25 +210,21 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   {
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
-
-    connect(this->parent, &Node::Component::coordDependencyDepthChanged, this, &Node::Component::coordDependencyDepthChanged);
   }else
   {
     Q_ASSERT(node.rootComponent() == nullptr);
     this->node._rootComponent = this;
   }
 
-  scene().componentAdded(this);
-
   Scene::Data::Transformations& transformData = scene().data->transformDataForClass(data_index.data_class);
   Q_ASSERT(transformData.capacity <= 0x10000); // no level used for my projects will contain more tha that.
   Q_ASSERT(transformData.length < transformData.capacity);
-  quint16 new_index = static_cast<quint16>(transformData.length);
-
-  if(transformData.length > 0xffff)
+  if(Q_UNLIKELY(transformData.length > transformData.capacity))
   {
     qWarning() << "Too many node components";
+    std::exit(0);
   }
+  quint16 new_index = static_cast<quint16>(transformData.length);
 
   transformData.component[new_index] = this;
   transformData.orientation[new_index] = glm::quat::IDENTITY;
@@ -240,9 +235,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
 
   data_index.array_index = new_index;
 
-#if 0
-  scene().globalCoordUpdater.addComponent(this);
-#endif
+  scene().componentAdded(this);
 }
 
 /*!
@@ -266,18 +259,18 @@ Node::Component::~Component()
     node._rootComponent = nullptr;
 
 
-  Scene::Data::Transformations& transformData = scene().data->transformDataForClass(data_index.data_class);
-  Q_ASSERT(transformData.length>0);
-  quint16 last_index = static_cast<quint16>(transformData.length-1);
+  Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
+  Q_ASSERT(transformations.length>0);
+  quint16 last_index = static_cast<quint16>(transformations.length-1);
   quint16 current_index = data_index.array_index;
 
-  transformData.component[last_index]->data_index.array_index = data_index.array_index;
-  transformData.component[current_index] = transformData.component[last_index];
-  transformData.orientation[current_index] = transformData.orientation[last_index];
-  transformData.position[current_index] = transformData.position[last_index];
-  transformData.scaleFactor[current_index] = transformData.scaleFactor[last_index];
-  transformData.local_coord_frame[current_index] = transformData.local_coord_frame[last_index];
-  transformData.length--;
+  transformations.component[last_index]->data_index.array_index = data_index.array_index;
+  transformations.component[current_index] = transformations.component[last_index];
+  transformations.orientation[current_index] = transformations.orientation[last_index];
+  transformations.position[current_index] = transformations.position[last_index];
+  transformations.scaleFactor[current_index] = transformations.scaleFactor[last_index];
+  transformations.local_coord_frame[current_index] = transformations.local_coord_frame[last_index];
+  transformations.length--;
 }
 
 Scene& Node::Component::scene()
@@ -415,9 +408,10 @@ Node::Component::DataClass Node::Component::makeMovable(Node::Component::DataCla
 }
 
 
-CoordFrame Node::Component::localCoordFrame() const
+const CoordFrame& Node::Component::localCoordFrame() const
 {
-  return _localCoordFrame;
+  Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
+  return transformations.local_coord_frame[data_index.array_index];
 }
 
 /*!
@@ -429,9 +423,12 @@ the slow function calcGlobalCoordFrame to update it first or think, whether
 */
 CoordFrame Node::Component::globalCoordFrame() const
 {
-  return _globalCoordFrame;
+  // TODO remove this function?
+  Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
+  return CoordFrame(transformations.position[data_index.array_index], transformations.orientation[data_index.array_index], transformations.scaleFactor[data_index.array_index]);
 }
 
+#if 0
 quint32 Node::Component::zIndex() const
 {
   return qHash(this); // _zIndex;
@@ -496,16 +493,11 @@ bool Node::Component::hasCustomGlobalCoordUpdater() const
 
   return !std::isnan(c.scaleFactor);
 }
+#endif
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
-  if(!isMovable())
-  {
-    qWarning() << "Trying to move not movable component";
-    return;
-  }
-
-  this->_localCoordFrame = coordFrame;
+  scene().data->transformDataForIndex(data_index).local_coord_frame[data_index.array_index] = coordFrame;
 }
 
 
@@ -525,7 +517,6 @@ int Node::Component::updateCoordDependencyDepth()
   if(_coorddependencyDepth != newDepth)
   {
     _coorddependencyDepth = newDepth;
-    coordDependencyDepthChanged(this);
   }
 
   return _coorddependencyDepth;

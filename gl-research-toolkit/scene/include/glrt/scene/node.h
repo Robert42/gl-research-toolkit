@@ -127,17 +127,19 @@ public:
 
   bool hasAABB() const;
 
-  CoordFrame localCoordFrame() const;
+  const CoordFrame& localCoordFrame() const;
+
   CoordFrame globalCoordFrame() const;
 
+#if 0
   quint32 zIndex() const;
 
   CoordFrame updateGlobalCoordFrame();
   quint32 updateZIndex();
   virtual CoordFrame calcGlobalCoordFrameImpl() const;
   bool hasCustomGlobalCoordUpdater() const;
+#endif
 
-  void set_localCoordFrame(const CoordFrame& coordFrame);
 
   bool coordDependsOn(const Component* other) const;
   int updateCoordDependencyDepth();
@@ -156,7 +158,6 @@ public slots:
   void hideNowAndDeleteLater();
 
 signals:
-  void coordDependencyDepthChanged(Component* sender);
   void componentVisibilityChanged(Component* sender);
   void visibleChanged(bool);
 
@@ -176,6 +177,8 @@ protected:
 
   void hideInDestructor();
 
+  void set_localCoordFrame(const CoordFrame& coordFrame);
+
 private:
   template<typename T>
   struct _create_method_helper;
@@ -188,8 +191,6 @@ private:
 
   friend struct implementation::GlobalCoordArrayOrder;
   friend class ComponentWithAABB;
-  CoordFrame _localCoordFrame;
-  CoordFrame _globalCoordFrame;
   quint32 _zIndex = 0;
 
   bool _visible : 1;

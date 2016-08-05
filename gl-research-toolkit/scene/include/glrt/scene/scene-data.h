@@ -26,6 +26,7 @@ public:
     glm::quat orientation[arrayCapacity];
     float scaleFactor[arrayCapacity];
     CoordFrame local_coord_frame[arrayCapacity];
+    quint32 z_index[arrayCapacity];
     Node::Component* component[arrayCapacity];
   };
 
@@ -76,6 +77,12 @@ public:
     const quint32 capacity;
     padding<quint32, 1> _padding;
 
+    CoordFrame globalCoordFrame(quint32 index) const
+    {
+      Q_ASSERT(index<length);
+      return CoordFrame(position[index], orientation[index], scaleFactor[index]);
+    }
+
     template<quint32 c>
     Transformations(TransformData<c>& data)
       : length(data.length),
@@ -100,6 +107,10 @@ public:
   Transformations transformations[numTransformations];
 
   Transformations& transformDataForClass(Node::Component::DataClass dataClass);
+  Transformations& transformDataForIndex(Node::Component::DataIndex dataIndex);
+
+  const Transformations& transformDataForClass(Node::Component::DataClass dataClass) const;
+  const Transformations& transformDataForIndex(Node::Component::DataIndex dataIndex) const;
 
 
   Data();
@@ -108,12 +119,39 @@ public:
 
 inline Scene::Data::Transformations& Scene::Data::transformDataForClass(Node::Component::DataClass dataClass)
 {
-
   quint8 class_index = quint8(dataClass & Node::Component::DataClass::MASK);
 
   Q_ASSERT(class_index < numTransformations);
 
   return transformations[class_index];
+}
+
+inline Scene::Data::Transformations& Scene::Data::transformDataForIndex(Node::Component::DataIndex dataIndex)
+{
+  Transformations& transformations = Scene::Data::transformDataForClass(dataIndex.data_class);
+
+  Q_ASSERT(dataIndex.array_index < transformations.length);
+
+  return transformations;
+}
+
+
+inline const Scene::Data::Transformations& Scene::Data::transformDataForClass(Node::Component::DataClass dataClass) const
+{
+  quint8 class_index = quint8(dataClass & Node::Component::DataClass::MASK);
+
+  Q_ASSERT(class_index < numTransformations);
+
+  return transformations[class_index];
+}
+
+inline const Scene::Data::Transformations& Scene::Data::transformDataForIndex(Node::Component::DataIndex dataIndex) const
+{
+  const Transformations& transformations = Scene::Data::transformDataForClass(dataIndex.data_class);
+
+  Q_ASSERT(dataIndex.array_index < transformations.length);
+
+  return transformations;
 }
 
 

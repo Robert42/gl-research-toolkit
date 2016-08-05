@@ -38,8 +38,11 @@ resources::ResourceManager* get_resourceManager(Scene* scene)
 */
 Scene::Scene(resources::ResourceManager* resourceManager)
   : resourceManager(*resourceManager),
+    globalCoordUpdater(this),
     data(new Data)
 {
+  connect(this, &Scene::componentAdded, &globalCoordUpdater, &GlobalCoordUpdater::addComponent);
+  connect(this, &Scene::componentRemoved, &globalCoordUpdater, &GlobalCoordUpdater::removeComponent);
 }
 
 Scene::~Scene()
@@ -77,6 +80,8 @@ bool Scene::handleEvents(const SDL_Event& event)
 
 void Scene::update(float deltaTime)
 {
+  Q_UNUSED(deltaTime);
+
   globalCoordUpdater.updateCoordinates();
 
   inputManager.update();
