@@ -82,7 +82,6 @@ public:
   enum class DataClass : quint8
   {
     EMPTY = 0,
-    TRANSFORMATION,
     SPHERELIGHT,
     RECTLIGHT,
     STATICMESH,
@@ -123,7 +122,7 @@ public:
   const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
-  bool isStatic() const;
+  bool isMovable() const;
   bool visible() const;
 
   bool hasAABB() const;
@@ -147,7 +146,7 @@ public:
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
-  static DataClass makeStatic(DataClass dataClass, bool makeStatic);
+  static DataClass makeMovable(DataClass dataClass, bool makeMovable);
 
 public slots:
   void setVisible(bool visible);

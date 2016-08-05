@@ -198,7 +198,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    data_index{makeStatic(data_class, parent!=nullptr && parent->isStatic()), 0, 0xffff},
+    data_index{makeMovable(data_class, parent!=nullptr && parent->isMovable()), 0, 0xffff},
     _globalCoordFrame(glm::uninitialize),
     _visible(true),
     _parentVisible(true),
@@ -235,7 +235,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   transformData.orientation[new_index] = glm::quat::IDENTITY;
   transformData.position[new_index] = glm::vec3(0);
   transformData.scaleFactor[new_index] = 1;
-  transformData.localCoordFrame[new_index] = CoordFrame();
+  transformData.local_coord_frame[new_index] = CoordFrame();
   transformData.length++;
 
   data_index.array_index = new_index;
@@ -276,7 +276,7 @@ Node::Component::~Component()
   transformData.orientation[current_index] = transformData.orientation[last_index];
   transformData.position[current_index] = transformData.position[last_index];
   transformData.scaleFactor[current_index] = transformData.scaleFactor[last_index];
-  transformData.localCoordFrame[current_index] = transformData.localCoordFrame[last_index];
+  transformData.local_coord_frame[current_index] = transformData.local_coord_frame[last_index];
   transformData.length--;
 }
 
@@ -338,9 +338,9 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
     child->collectSubtree(subTree);
 }
 
-bool Node::Component::isStatic() const
+bool Node::Component::isMovable() const
 {
-  return (this->data_class & DataClass::EMPTY_STATIC) == DataClass::EMPTY_STATIC;
+  return (this->data_index.data_class & DataClass::MOVABLE) == DataClass::MOVABLE;
 }
 
 bool Node::Component::visible() const
@@ -406,12 +406,12 @@ void Node::Component::hideInDestructor()
   updateVisibility(prevVisibility);
 }
 
-Node::Component::DataClass Node::Component::makeStatic(Node::Component::DataClass dataClass, bool makeStatic)
+Node::Component::DataClass Node::Component::makeMovable(Node::Component::DataClass dataClass, bool makeMovable)
 {
-  if(makeStatic)
-    return dataClass;
-  else
+  if(makeMovable)
     return DataClass::MOVABLE | dataClass;
+  else
+    return dataClass;
 }
 
 
@@ -499,9 +499,9 @@ bool Node::Component::hasCustomGlobalCoordUpdater() const
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
-  if(isStatic())
+  if(!isMovable())
   {
-    qWarning() << "Trying to move static component";
+    qWarning() << "Trying to move not movable component";
     return;
   }
 
@@ -552,9 +552,9 @@ void Node::Component::registerAngelScriptAPIDeclarations()
 inline Node::Component* createEmptyComponent(Node& node,
                                              Node::Component* parent,
                                              const Uuid<Node::Component>& uuid,
-                                             bool makeStatic)
+                                             bool makeMovable)
 {
-  return new Node::Component(node, parent, uuid, Node::Component::makeStatic(Node::Component::DataClass::EMPTY, makeStatic));
+  return new Node::Component(node, parent, uuid, Node::Component::makeMovable(Node::Component::DataClass::EMPTY, makeMovable));
 }
 
 void Node::Component::registerAngelScriptAPI()
@@ -566,7 +566,7 @@ void Node::Component::registerAngelScriptAPI()
   Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
                                                                                                "NodeComponent",
                                                                                                "new_EmptyComponent",
-                                                                                               "const Uuid<NodeComponent> &in uuid, bool static=true");
+                                                                                               "const Uuid<NodeComponent> &in uuid, bool movable=false");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -579,8 +579,8 @@ void Node::Component::collectDependencies(CoordDependencySet* dependencySet) con
   if(dependencySet->originalObject() == this)
   {
     for(const Component* dependency : dependencySet->queuedDependencies() + dependencySet->queuedDependencies())
-      if(this->isStatic() && !dependency->isStatic())
-        qWarning() << "Warning: static component " << this->uuid << " depending on a not static component " << dependency->uuid << ".";
+      if(!this->isMovable() && dependency->isMovable())
+        qWarning() << "Warning: not movable component " << this->uuid << " depending on a movable component " << dependency->uuid << ".";
   }
 
   if(!dependencySet->objectsWithCycles().isEmpty())

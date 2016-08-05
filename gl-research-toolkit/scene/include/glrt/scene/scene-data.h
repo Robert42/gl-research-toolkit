@@ -9,6 +9,8 @@ namespace scene {
 class Scene::Data
 {
 public:
+  typedef Node::Component::DataClass DataClass;
+
   template<quint32 _capacity>
   struct TransformData
   {
@@ -52,32 +54,49 @@ public:
   {
   };
 
+  template<quint32 capacity>
+  struct VoxelGridData : public TransformData<capacity>
+  {
+  };
+
+  template<quint32 capacity>
+  struct CameraData : public TransformData<capacity>
+  {
+  };
+
   struct Transformations
   {
     quint32& length;
-    const quint32 capacity;
     glm::vec3* const position;
     glm::quat* const orientation;
     float* const scaleFactor;
+    CoordFrame* const local_coord_frame;
     Node::Component** const component;
+
+    const quint32 capacity;
+    padding<quint32, 1> _padding;
 
     template<quint32 c>
     Transformations(TransformData<c>& data)
       : length(data.length),
-        capacity(data.capacity),
         position(data.position),
         orientation(data.orientation),
-        scaleFactor(data.scaleFactor)
+        scaleFactor(data.scaleFactor),
+        local_coord_frame(data.local_coord_frame),
+        component(data.component),
+        capacity(data.capacity())
     {
     }
   };
 
   TransformData<0x10000> emptyNodes;
   SphereLightData<0x10000> sphereLightData;
-  RectLightData<0x10000> rectLightData;
+  RectLightData<0x100> rectLightData;
   StaticMeshData<0x10000> staticMeshData;
+  VoxelGridData<0x10000> voxelGridData;
+  CameraData<0x100> cameras;
 
-  static const quint32 numTransformations = quint32(Node::Component::DataClass::NUM_DATA_CLASSES);
+  static const quint32 numTransformations = quint32(DataClass::NUM_DATA_CLASSES);
   Transformations transformations[numTransformations];
 
   Transformations& transformDataForClass(Node::Component::DataClass dataClass);
