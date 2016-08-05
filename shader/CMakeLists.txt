@@ -45,6 +45,8 @@ add_custom_target(
   debugging/visualizations/visualize-sphere-area-light.vs
   debugging/visualizations/visualize-spheres.fs
   debugging/visualizations/visualize-spheres.vs
+  debugging/visualizations/visualize-uniform-test.fs
+  debugging/visualizations/visualize-uniform-test.vs
   debugging/visualizations/visualize-voxel-grids.fs
   debugging/visualizations/visualize-voxel-grids.vs
   materials/implementation/common-implementation.vs.glsl

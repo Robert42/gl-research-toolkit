@@ -8,5 +8,5 @@ void main()
 {
   vec3 ws_position = vertex_position;
 
-  pass_attributes_to_fragment_shader_no_transform(ws_position, vertex_color);
+  pass_attributes_to_fragment_shader(ws_position*0.5, vertex_color);
 }
