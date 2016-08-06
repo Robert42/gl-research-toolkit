@@ -51,12 +51,12 @@ QHash<QString, SphereAreaLightComponent::Data> collectNamedSphereAreaLights(Scen
 
 QVector<RectAreaLightComponent::Data> collectRectAreaLights(Scene* scene)
 {
-  return collectData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalData();});
 }
 
 QHash<QString, scene::RectAreaLightComponent::Data> collectNamedRectAreaLights(Scene* scene)
 {
-  return collectNamedData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectNamedData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalData();});
 }
 
 

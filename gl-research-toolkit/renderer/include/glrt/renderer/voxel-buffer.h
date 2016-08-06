@@ -4,6 +4,7 @@
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/toolkit/managed-gl-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
+#include <glrt/scene/scene-data.h>
 
 
 namespace glrt {
@@ -55,17 +56,17 @@ public:
 
   const VoxelHeader& updateVoxelHeader();
 
-  quint32 numVisibleVoxelGrids() const;
-
-
 private:
-  QVector<quint32> zIndices;
+  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
+  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
+
+  VoxelGrids& voxelGridData;
+  VoxelBVH& voxelBvh;
+
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
   ManagedGLBuffer<BVH::InnerNode> bvhInnerNodes;
 
   VoxelHeader _voxelHeader;
-
-  quint32 _numVisibleVoxelGrids = 0;
 
   void updateBvhTree();
 };

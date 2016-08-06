@@ -1,9 +1,16 @@
 #include <glrt/renderer/voxel-buffer.h>
+#include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
+#include <glrt/scene/resources/static-mesh.h>
 
 namespace glrt {
 namespace renderer {
 
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
+  : voxelGridData(scene.data->voxelGridData),
+    voxelBvh(scene.data->voxelBVH),
+    bvhInnerBoundingSpheres(scene.data->voxelBVH.capacity()),
+    bvhInnerNodes(scene.data->voxelBVH.capacity())
 {
 }
 

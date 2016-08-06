@@ -2,6 +2,7 @@
 #define GLRT_SCENE_SCENE_DATA_H
 
 #include "scene.h"
+#include <glrt/scene/resources/light-source.h>
 
 namespace glrt {
 namespace scene {
@@ -12,7 +13,7 @@ public:
   typedef Node::Component::DataClass DataClass;
 
   template<quint32 _capacity>
-  struct TransformData
+  struct DataArray
   {
     static const quint32 arrayCapacity = _capacity;
 
@@ -22,32 +23,64 @@ public:
 
     quint32 length = 0;
     quint16 numDynamic = 0;
-    glm::vec3 position[arrayCapacity];
-    glm::quat orientation[arrayCapacity];
-    float scaleFactor[arrayCapacity];
-    CoordFrame local_coord_frame[arrayCapacity];
-    quint32 z_index[arrayCapacity];
-    Node::Component* component[arrayCapacity];
+  };
+
+  template<quint32 capacity>
+  struct TransformData : public DataArray<capacity>
+  {
+    glm::vec3 position[capacity];
+    glm::quat orientation[capacity];
+    float scaleFactor[capacity];
+    CoordFrame local_coord_frame[capacity];
+    quint32 z_index[capacity];
+    Node::Component* component[capacity];
+
+    CoordFrame globalCoordFrame(quint32 index) const
+    {
+      Q_ASSERT(index<DataArray<capacity>::length);
+      return CoordFrame(position[index], orientation[index], scaleFactor[index]);
+    }
   };
 
   template<quint32 capacity>
   struct LightSourceData : public TransformData<capacity>
   {
-    glm::vec3 color[capacity];
-    float luminous_power[capacity];
-    float influence_radius[capacity];
+    resources::LightSource::CompactAreaLight lightData[capacity];
   };
 
   template<quint32 capacity>
   struct SphereLightData : public LightSourceData<capacity>
   {
     float radius[capacity];
+
+    float globalRadius(quint32 i) const
+    {
+      Q_ASSERT(i < LightSourceData<capacity>::length);
+      return radius[i] * LightSourceData<capacity>::scaleFactor[i];
+    }
   };
 
   template<quint32 capacity>
   struct RectLightData : public LightSourceData<capacity>
   {
-    float radius[capacity];
+    glm::vec2 half_size[capacity];
+
+    glm::vec2 globalHalfSize(quint32 i) const
+    {
+      Q_ASSERT(i < LightSourceData<capacity>::length);
+      return half_size[i] * LightSourceData<capacity>::scaleFactor[i];
+    }
+
+    void globalTangents(quint32 i, glm::vec3* tangent1, glm::vec3* tangent2) const
+    {
+      Q_ASSERT(i < LightSourceData<capacity>::length);
+      CoordFrame::_transform_direction(tangent1,
+                                       LightSourceData<capacity>::orientation[i],
+                                       glm::vec3(1, 0, 0));
+      CoordFrame::_transform_direction(tangent2,
+                                       LightSourceData<capacity>::orientation[i],
+                                       glm::vec3(0, 1, 0));
+    }
   };
 
   template<quint32 capacity>
@@ -57,6 +90,11 @@ public:
 
   template<quint32 capacity>
   struct VoxelGridData : public TransformData<capacity>
+  {
+  };
+
+  template<quint32 capacity>
+  struct VoxelBVH : public DataArray<capacity>
   {
   };
 
@@ -118,11 +156,18 @@ public:
     }
   };
 
+  typedef SphereLightData<0x10000> SphereLights;
+  typedef RectLightData<0x100> RectLights;
+  typedef StaticMeshData<0x10000> StaticMeshes;
+  typedef VoxelGridData<0x10000> VoxelGrids;
+  typedef VoxelBVH<VoxelGrids::arrayCapacity> VoxelBVHs;
+
   TransformData<0x10000> emptyNodes;
-  SphereLightData<0x10000> sphereLightData;
-  RectLightData<0x100> rectLightData;
-  StaticMeshData<0x10000> staticMeshData;
-  VoxelGridData<0x10000> voxelGridData;
+  SphereLights sphereLights;
+  RectLights rectLights;
+  StaticMeshes staticMeshData;
+  VoxelGrids voxelGridData;
+  VoxelBVHs voxelBVH;
   CameraData<0x100> cameras;
 
   static const quint32 numTransformations = quint32(DataClass::NUM_DATA_CLASSES);

@@ -18,6 +18,13 @@ struct LightSource final
     RECT_AREA_LIGHT,
   };
 
+  struct CompactAreaLight
+  {
+    glm::vec3 color = glm::vec3(1);
+    float luminous_power = 25.f;
+    float influence_radius = INFINITY;
+  };
+
   struct AreaLightCommon final
   {
     glm::vec3 color = glm::vec3(1);
@@ -26,6 +33,22 @@ struct LightSource final
     float influence_radius = INFINITY;
 
     AreaLightCommon(){}
+
+    operator CompactAreaLight() const
+    {
+      CompactAreaLight l;
+      l.color = color;
+      l.luminous_power = luminous_power;
+      l.influence_radius = influence_radius;
+      return l;
+    }
+
+    void operator=(const CompactAreaLight& l)
+    {
+      color = l.color;
+      luminous_power = l.luminous_power;
+      influence_radius = l.influence_radius;
+    }
 
     friend AreaLightCommon operator*(const CoordFrame& t, AreaLightCommon lightSource)
     {

@@ -59,8 +59,8 @@ void registerCommonAreaLightProperties(const char* name)
 
   r = angelScriptEngine->RegisterObjectProperty(name, "vec3 color", asOFFSET(LightSource::RectAreaLight, areaLightCommon)+asOFFSET(LightSource::AreaLightCommon, color));AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "float luminous_power", asOFFSET(LightSource::RectAreaLight, areaLightCommon)+asOFFSET(LightSource::AreaLightCommon, luminous_power));AngelScriptCheck(r);
-  r = angelScriptEngine->RegisterObjectProperty(name, "vec3 origin", asOFFSET(LightSource::RectAreaLight, areaLightCommon)+asOFFSET(LightSource::AreaLightCommon, origin));AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "float influence_radius", asOFFSET(LightSource::RectAreaLight, areaLightCommon)+asOFFSET(LightSource::AreaLightCommon, influence_radius));AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "vec3 origin", asOFFSET(LightSource::RectAreaLight, areaLightCommon)+sizeof(LightSource::AreaLightCommon));AngelScriptCheck(r);
 }
 
 void LightSource::registerAngelScriptTypes()
