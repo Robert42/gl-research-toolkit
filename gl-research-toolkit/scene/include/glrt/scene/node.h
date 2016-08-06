@@ -93,7 +93,7 @@ public:
 
     NUM_DATA_CLASSES,
     MASK = 0x7f,
-    MOVABLE = 0x80
+    DYNAMIC = 0x80
   };
 
   friend DataClass operator&(DataClass a, DataClass b){return DataClass(quint32(a)&quint32(b));}
@@ -125,7 +125,7 @@ public:
   const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
-  bool isMovable() const;
+  bool isDynamic() const;
   bool visible() const;
 
   bool hasAABB() const;
@@ -151,7 +151,7 @@ public:
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
-  static DataClass makeMovable(DataClass dataClass, bool makeMovable);
+  static DataClass makeDynamic(DataClass dataClass, bool makeDynamic);
 
 public slots:
   void setVisible(bool visible);

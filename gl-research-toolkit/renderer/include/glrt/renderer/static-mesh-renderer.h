@@ -13,8 +13,8 @@ namespace renderer {
 
 struct TokenRanges
 {
-  QMap<Material::Type, glm::ivec2> tokenRangeMovables;
-  QMap<Material::Type, glm::ivec2> tokenRangeNotMovable;
+  QMap<Material::Type, glm::ivec2> tokenRangeDynamics;
+  QMap<Material::Type, glm::ivec2> tokenRangeNotDynamic;
 };
 
 namespace implementation {
@@ -36,8 +36,8 @@ public:
 
   StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList);
 
-  void bindNotMovableTokens();
-  void bindMovableTokens();
+  void bindNotDynamicTokens();
+  void bindDynamicTokens();
   void unbindTokens();
 
   void bindMaterialType(Material::Type materialType);
@@ -86,7 +86,7 @@ private:
   TransformationBuffer transformationBuffer;
   StaticMeshBufferManager& staticMeshBufferManager;
 
-  void updateMovableObjectUniforms();
+  void updateDynamicObjectUniforms();
   void updateObjectUniforms(int begin, int end);
 };
 

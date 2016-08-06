@@ -291,7 +291,7 @@ void Renderer::recordCommandlist()
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
-  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRangeMovables.keys().toSet() | meshDrawRanges.tokenRangeNotMovable.keys().toSet();
+  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRangeDynamics.keys().toSet() | meshDrawRanges.tokenRangeNotDynamic.keys().toSet();
 
   for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
   {
@@ -304,15 +304,15 @@ void Renderer::recordCommandlist()
 
     recordLightVisualization(recorder, materialType, materialShader, commonTokenList);
 
-    if(meshDrawRanges.tokenRangeNotMovable.contains(materialType))
+    if(meshDrawRanges.tokenRangeNotDynamic.contains(materialType))
     {
-      range = meshDrawRanges.tokenRangeNotMovable[materialType];
+      range = meshDrawRanges.tokenRangeNotDynamic[materialType];
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
 
-    if(meshDrawRanges.tokenRangeMovables.contains(materialType))
+    if(meshDrawRanges.tokenRangeDynamics.contains(materialType))
     {
-      range = meshDrawRanges.tokenRangeMovables[materialType];
+      range = meshDrawRanges.tokenRangeDynamics[materialType];
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }

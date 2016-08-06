@@ -198,7 +198,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    data_index{makeMovable(data_class, parent!=nullptr && parent->isMovable()), 0, 0xffff},
+    data_index{makeDynamic(data_class, parent!=nullptr && parent->isDynamic()), 0, 0xffff},
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
@@ -331,9 +331,9 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
     child->collectSubtree(subTree);
 }
 
-bool Node::Component::isMovable() const
+bool Node::Component::isDynamic() const
 {
-  return (this->data_index.data_class & DataClass::MOVABLE) == DataClass::MOVABLE;
+  return (this->data_index.data_class & DataClass::DYNAMIC) == DataClass::DYNAMIC;
 }
 
 bool Node::Component::visible() const
@@ -399,10 +399,10 @@ void Node::Component::hideInDestructor()
   updateVisibility(prevVisibility);
 }
 
-Node::Component::DataClass Node::Component::makeMovable(Node::Component::DataClass dataClass, bool makeMovable)
+Node::Component::DataClass Node::Component::makeDynamic(Node::Component::DataClass dataClass, bool makeDynamic)
 {
-  if(makeMovable)
-    return DataClass::MOVABLE | dataClass;
+  if(makeDynamic)
+    return DataClass::DYNAMIC | dataClass;
   else
     return dataClass;
 }
@@ -543,9 +543,9 @@ void Node::Component::registerAngelScriptAPIDeclarations()
 inline Node::Component* createEmptyComponent(Node& node,
                                              Node::Component* parent,
                                              const Uuid<Node::Component>& uuid,
-                                             bool makeMovable)
+                                             bool makeDynamic)
 {
-  return new Node::Component(node, parent, uuid, Node::Component::makeMovable(Node::Component::DataClass::EMPTY, makeMovable));
+  return new Node::Component(node, parent, uuid, Node::Component::makeDynamic(Node::Component::DataClass::EMPTY, makeDynamic));
 }
 
 void Node::Component::registerAngelScriptAPI()
@@ -557,7 +557,7 @@ void Node::Component::registerAngelScriptAPI()
   Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
                                                                                                "NodeComponent",
                                                                                                "new_EmptyComponent",
-                                                                                               "const Uuid<NodeComponent> &in uuid, bool movable=false");
+                                                                                               "const Uuid<NodeComponent> &in uuid, bool dynamic=false");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -570,8 +570,8 @@ void Node::Component::collectDependencies(CoordDependencySet* dependencySet) con
   if(dependencySet->originalObject() == this)
   {
     for(const Component* dependency : dependencySet->queuedDependencies() + dependencySet->queuedDependencies())
-      if(!this->isMovable() && dependency->isMovable())
-        qWarning() << "Warning: not movable component " << this->uuid << " depending on a movable component " << dependency->uuid << ".";
+      if(!this->isDynamic() && dependency->isDynamic())
+        qWarning() << "Warning: not dynamic component " << this->uuid << " depending on a dynamic component " << dependency->uuid << ".";
   }
 
   if(!dependencySet->objectsWithCycles().isEmpty())

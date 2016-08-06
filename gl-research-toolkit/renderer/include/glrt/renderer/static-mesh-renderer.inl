@@ -20,7 +20,7 @@ StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::StaticMeshR
 template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
 void StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::update()
 {
-  updateMovableObjectUniforms();
+  updateDynamicObjectUniforms();
 }
 
 template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
@@ -77,13 +77,13 @@ TokenRanges StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>:
 }
 
 template<class T_Component, class T_Recorder, typename T_BufferCapacityTraits>
-void StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::updateMovableObjectUniforms()
+void StaticMeshRenderer<T_Component, T_Recorder, T_BufferCapacityTraits>::updateDynamicObjectUniforms()
 {
   FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
 
 
-#if GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
-  glm::ivec2 range = fragmentedArray.section_boundaries(glrt::scene::Node::Component::MovabilityHint::MOVABLE);
+#if GLRT_SUPPORT_UPDATE_DYNAMIC_UNIFORMS_SEPERATELY
+  glm::ivec2 range = fragmentedArray.section_boundaries(glrt::scene::Node::Component::MovabilityHint::DYNAMIC);
 
   updateObjectUniforms(range.x, range.y);
 #else

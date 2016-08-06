@@ -15,9 +15,9 @@ GlobalCoordUpdater::GlobalCoordUpdater(Scene* scene)
 
 GlobalCoordUpdater::~GlobalCoordUpdater()
 {
-  for(const Array<Node::Component*>& a : notMovableComponents_pending)
+  for(const Array<Node::Component*>& a : notDynamicComponents_pending)
     Q_ASSERT(a.isEmpty());
-  for(const Array<Node::Component*>& a : movableComponents)
+  for(const Array<Node::Component*>& a : dynamicComponents)
     Q_ASSERT(a.isEmpty());
 }
 
@@ -47,16 +47,16 @@ void GlobalCoordUpdater::removeComponent(Node::Component* component)
 
 void GlobalCoordUpdater::updateCoordinates()
 {
-  if(Q_UNLIKELY(_need_resorting_not_movable!=0))
+  if(Q_UNLIKELY(_need_resorting_not_dynamic!=0))
   {
-    resort(&notMovableComponents_pending, &_need_resorting_not_movable); // TODO is this increasing performance?
-    updateCoordinatesOf(notMovableComponents_pending);
+    resort(&notDynamicComponents_pending, &_need_resorting_not_dynamic); // TODO is this increasing performance?
+    updateCoordinatesOf(notDynamicComponents_pending);
   }
 
-  if(Q_UNLIKELY(_need_resorting_movable!=0))
-    resort(&movableComponents, &_need_resorting_movable);
+  if(Q_UNLIKELY(_need_resorting_dynamic!=0))
+    resort(&dynamicComponents, &_need_resorting_dynamic);
 
-  updateCoordinatesOf(movableComponents);
+  updateCoordinatesOf(dynamicComponents);
 }
 
 inline bool componentDataIndexOrder(const Node::Component* a, const Node::Component* b)
@@ -149,7 +149,7 @@ void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& arra
 
 Array<Node::Component*>& GlobalCoordUpdater::arrayFor(Node::Component* component)
 {
-  Array<Array<Node::Component*>>& arrays = component->isMovable() ? movableComponents : notMovableComponents_pending;
+  Array<Array<Node::Component*>>& arrays = component->isDynamic() ? dynamicComponents : notDynamicComponents_pending;
 
   int dependencyDepth = component->coordDependencyDepth();
 
@@ -161,7 +161,7 @@ Array<Node::Component*>& GlobalCoordUpdater::arrayFor(Node::Component* component
 
 void GlobalCoordUpdater::needResortingFor(Node::Component* component)
 {
-  quint64& need_resorting = component->isMovable() ? _need_resorting_movable : _need_resorting_not_movable;
+  quint64& need_resorting = component->isDynamic() ? _need_resorting_dynamic : _need_resorting_not_dynamic;
 
   int dependencyDepth = component->coordDependencyDepth();
 

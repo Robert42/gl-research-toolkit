@@ -27,19 +27,19 @@ StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, Resour
 {
   initMaterials(materialSet);
 
-#if !GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
-  bindNotMovableTokens();
+#if !GLRT_SUPPORT_UPDATE_DYNAMIC_UNIFORMS_SEPERATELY
+  bindNotDynamicTokens();
 #endif
 }
 
-void StaticMeshRecorder::bindNotMovableTokens()
+void StaticMeshRecorder::bindNotDynamicTokens()
 {
-  boundTokenRanges = &tokenRanges.tokenRangeNotMovable;
+  boundTokenRanges = &tokenRanges.tokenRangeNotDynamic;
 }
 
-void StaticMeshRecorder::bindMovableTokens()
+void StaticMeshRecorder::bindDynamicTokens()
 {
-  boundTokenRanges = &tokenRanges.tokenRangeMovables;
+  boundTokenRanges = &tokenRanges.tokenRangeDynamics;
 }
 
 void StaticMeshRecorder::unbindTokens()

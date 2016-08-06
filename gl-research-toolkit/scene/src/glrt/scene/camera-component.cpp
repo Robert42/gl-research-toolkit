@@ -8,10 +8,10 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter)
-  : Component(node, parent, uuid, DataClass::CAMERA | DataClass::MOVABLE),
+  : Component(node, parent, uuid, DataClass::CAMERA | DataClass::DYNAMIC),
     cameraParameter(cameraParameter)
 {
-  Q_ASSERT(isMovable());
+  Q_ASSERT(isDynamic());
   scene().CameraComponentAdded(this);
 }
 
@@ -29,7 +29,7 @@ CameraParameter CameraComponent::globalCameraParameter() const
 
 void CameraComponent::set_localCoordFrame(const CoordFrame& coordFrame)
 {
-  Q_ASSERT(isMovable());
+  Q_ASSERT(isDynamic());
   Node::Component::set_localCoordFrame(coordFrame);
 }
 

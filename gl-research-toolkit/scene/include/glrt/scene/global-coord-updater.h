@@ -44,10 +44,10 @@ private:
 
   Scene& scene;
 
-  Array<Array<Node::Component*>> notMovableComponents_pending;
-  Array<Array<Node::Component*>> movableComponents;
-  Bitfield _need_resorting_not_movable = 0;
-  Bitfield _need_resorting_movable = 0;
+  Array<Array<Node::Component*>> notDynamicComponents_pending;
+  Array<Array<Node::Component*>> dynamicComponents;
+  Bitfield _need_resorting_not_dynamic = 0;
+  Bitfield _need_resorting_dynamic = 0;
 
   Array<Node::Component*>& arrayFor(Node::Component* component);
   void needResortingFor(Node::Component* component);
