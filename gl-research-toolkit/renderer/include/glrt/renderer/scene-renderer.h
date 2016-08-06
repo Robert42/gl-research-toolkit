@@ -123,6 +123,7 @@ private:
   // other uniform buffer
   LightBuffer lightUniformBuffer;
   VoxelBuffer voxelUniformBuffer;
+  // TODO:::::::::::::::::::::::::::
 #if 0
   StaticMeshRenderer<> staticMeshRenderer;
 #endif

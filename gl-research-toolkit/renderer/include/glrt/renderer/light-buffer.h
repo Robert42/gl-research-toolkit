@@ -24,6 +24,7 @@ public:
 
   const LightData& updateLightData();
 
+  // TODO:::::::::::::::::::::::::::
 #if 0
   quint32 numVisibleRectAreaLights() const {return static_cast<quint32>(rectAreaShaderStorageBuffer.numElements());}
   quint32 numVisibleSphereAreaLights() const {return static_cast<quint32>(sphereAreaShaderStorageBuffer.numElements());}
@@ -35,6 +36,7 @@ public:
   quint32 numVisibleSphereAreaLights() const {return _numVisibleSphereAreaLights;}
 #endif
 
+  // TODO:::::::::::::::::::::::::::
 #if 0
 private:
   SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;

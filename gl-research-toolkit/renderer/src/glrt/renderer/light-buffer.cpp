@@ -7,6 +7,7 @@ namespace renderer {
 
 
 LightBuffer::LightBuffer(glrt::scene::Scene& scene)
+// TODO:::::::::::::::::::::::::::
 #if 0
   : sphereAreaShaderStorageBuffer(scene),
     rectAreaShaderStorageBuffer(scene)
@@ -20,6 +21,7 @@ LightBuffer::~LightBuffer()
 
 const LightBuffer::LightData& LightBuffer::updateLightData()
 {
+  // TODO:::::::::::::::::::::::::::
 #if 0
   sphereAreaShaderStorageBuffer.update();
   rectAreaShaderStorageBuffer.update();
@@ -27,6 +29,7 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
 #endif
   _lightData.numRectLights = numVisibleRectAreaLights();
   _lightData.numSphereLights = numVisibleSphereAreaLights();
+  // TODO:::::::::::::::::::::::::::
 #if 0
   _lightData.rectAreaLightsBuffer = rectAreaShaderStorageBuffer.gpuBufferAddress();
   _lightData.sphereAreaLightsBuffer = sphereAreaShaderStorageBuffer.gpuBufferAddress();
@@ -36,6 +39,7 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
 }
 
 
+// TODO:::::::::::::::::::::::::::
 #if 0
 void LightBuffer::updateNumberOfLights()
 {

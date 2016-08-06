@@ -38,6 +38,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
     voxelUniformBuffer(this->scene),
+    // TODO:::::::::::::::::::::::::::
     #if 0
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     #endif
@@ -76,6 +77,7 @@ void Renderer::render()
 {
   updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
 
+  // TODO:::::::::::::::::::::::::::
 #if 0
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
@@ -84,6 +86,7 @@ void Renderer::render()
 #endif
   prepareFramebuffer();
 
+  // TODO:::::::::::::::::::::::::::
 #if 0
   commandList.call();
 #endif
@@ -100,6 +103,7 @@ void Renderer::update(float deltaTime)
 {
   debugPosteffect.totalTime += deltaTime;
 
+  // TODO:::::::::::::::::::::::::::
 #if 0
   statistics.numSdfInstances = voxelUniformBuffer.numVisibleVoxelGrids();
 #endif
@@ -211,6 +215,7 @@ bool Renderer::needRecapturing() const
 
 bool Renderer::needRerecording() const
 {
+  // TODO:::::::::::::::::::::::::::
 #if 0
   return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.numVisibleChanged();
 #else
@@ -218,6 +223,7 @@ bool Renderer::needRerecording() const
 #endif
 }
 
+// TODO:::::::::::::::::::::::::::
 #if 0
 void Renderer::captureStates()
 {

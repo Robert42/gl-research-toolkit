@@ -426,6 +426,7 @@ CoordFrame Node::Component::globalCoordFrame() const
   return CoordFrame(transformations.position[data_index.array_index], transformations.orientation[data_index.array_index], transformations.scaleFactor[data_index.array_index]);
 }
 
+// TODO:::::::::::::::::::::::::::
 #if 0
 quint32 Node::Component::zIndex() const
 {

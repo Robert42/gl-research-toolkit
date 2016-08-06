@@ -11,6 +11,7 @@ VoxelBuffer::~VoxelBuffer()
 {
 }
 
+// TODO:::::::::::::::::::::::::::
 #if 0
 quint32 VoxelBuffer::numVisibleVoxelGrids() const
 {
@@ -22,6 +23,7 @@ quint32 VoxelBuffer::numVisibleVoxelGrids() const
 
 const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
+  // TODO:::::::::::::::::::::::::::
 #if 0
   distanceFieldDataStorageBuffer.update();
   distanceFieldBoundingSphereStorageBuffer.update();
@@ -40,6 +42,7 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
   return _voxelHeader;
 }
 
+// TODO:::::::::::::::::::::::::::
 #if 0
 void VoxelBuffer::updateBvhTree()
 {

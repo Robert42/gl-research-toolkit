@@ -134,6 +134,7 @@ public:
 
   CoordFrame globalCoordFrame() const;
 
+  // TODO:::::::::::::::::::::::::::
 #if 0
   quint32 zIndex() const;
 

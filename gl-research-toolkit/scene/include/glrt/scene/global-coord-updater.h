@@ -20,6 +20,7 @@ public slots:
   void addComponent(Node::Component* component);
   void removeComponent(Node::Component* component);
 
+  // TODO:::::::::::::::::::::::::::
 #if 0
 private:
   friend class Node::Component;
