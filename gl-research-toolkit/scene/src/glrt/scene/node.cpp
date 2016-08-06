@@ -234,13 +234,6 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   transformations.local_coord_frame[last_item_index] = CoordFrame();
   data_index.array_index = last_item_index;
 
-  if(!this->isDynamic())
-  {
-    transformations.firstDynamic++;
-    data_index.array_index = transformations.firstDynamic-1;
-    transformations.swap_transform_data(data_index.array_index, last_item_index);
-  }
-
   scene().componentAdded(this);
 }
 
@@ -273,9 +266,6 @@ Node::Component::~Component()
   transformations.component[last_index]->data_index.array_index = data_index.array_index;
   transformations.swap_transform_data(current_index, last_index);
   transformations.length--;
-
-  if(!this->isDynamic())
-    transformations.firstDynamic--;
 }
 
 Scene& Node::Component::scene()

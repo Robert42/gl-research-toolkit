@@ -21,8 +21,6 @@ public:
     quint32 capacity() const{return arrayCapacity;}
 
     quint32 length = 0;
-    quint16 firstDynamic = 0;
-    quint16 firstDirty = 0;
     glm::vec3 position[arrayCapacity];
     glm::quat orientation[arrayCapacity];
     float scaleFactor[arrayCapacity];
@@ -71,8 +69,6 @@ public:
     const quint32 capacity;
     padding<quint32, 1> _padding;
     quint32& length;
-    quint16& firstDynamic;
-    quint16& firstDirty;
     glm::vec3* const position;
     glm::quat* const orientation;
     float* const scaleFactor;
@@ -89,8 +85,6 @@ public:
     Transformations(TransformData<c>& data)
       : capacity(data.capacity()),
         length(data.length),
-        firstDynamic(data.firstDynamic),
-        firstDirty(data.firstDirty),
         position(data.position),
         orientation(data.orientation),
         scaleFactor(data.scaleFactor),
