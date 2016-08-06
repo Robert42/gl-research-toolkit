@@ -1,7 +1,8 @@
 #ifndef GLRT_RENDERER_STATICMESHRENDERER_H
 #define GLRT_RENDERER_STATICMESHRENDERER_H
 
-#include <glrt/renderer/implementation/fragmented-static-mesh-component-array.h>
+#if 0
+
 #include <glrt/renderer/synced-fragmented-component-array.h>
 #include <glrt/renderer/material-buffer.h>
 #include <glrt/renderer/transformation-buffer.h>
@@ -67,7 +68,7 @@ private:
 } // namespace implementation
 
 
-template<class T_Component=scene::StaticMeshComponent, class T_Recorder=implementation::StaticMeshRecorder, typename T_FragmentedArray=typename implementation::FragmentedStaticMeshComponentArray<T_Component, T_Recorder>::type, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
+template<class T_Component=scene::StaticMeshComponent, class T_Recorder=implementation::StaticMeshRecorder, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
 class StaticMeshRenderer final
 {
 public:
@@ -81,10 +82,6 @@ public:
   TokenRanges recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList);
 
 private:
-  typedef T_FragmentedArray FragmentedArray;
-  typedef SyncedFragmentedComponentArray<T_Component, FragmentedArray> StaticMeshComponentArray;
-
-  StaticMeshComponentArray meshComponents;
   MaterialBuffer materialBuffer;
   TransformationBuffer transformationBuffer;
   StaticMeshBufferManager& staticMeshBufferManager;
@@ -98,4 +95,5 @@ private:
 
 #include "static-mesh-renderer.inl"
 
+#endif
 #endif // GLRT_RENDERER_STATICMESHRENDERER_H

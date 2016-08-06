@@ -5,10 +5,10 @@
 #include <glrt/scene/aabb.h>
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/node.h>
-#include <glrt/scene/tick-manager.h>
 #include <glrt/scene/global-coord-updater.h>
 #include <glrt/scene/input-handler.h>
 #include <glrt/scene/fps-debug-controller.h>
+#include <glrt/scene/tick-manager.h>
 
 struct aiNode;
 struct aiScene;
@@ -28,14 +28,18 @@ class Scene final : public QObject
 {
   Q_OBJECT
 public:
+  class Data;
+
   resources::ResourceManager& resourceManager;
   Uuid<Scene> uuid;
   QString file;
-  TickManager tickManager;
   GlobalCoordUpdater globalCoordUpdater;
   InputHandler::Manager inputManager;
 
+  Data* const data;
+
   AABB aabb;
+  TickManager tickManager;
 
   Scene(resources::ResourceManager* resourceManager);
   Scene(const Scene&) = delete;

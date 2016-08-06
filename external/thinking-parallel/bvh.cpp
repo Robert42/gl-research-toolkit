@@ -3,6 +3,7 @@
 namespace glrt {
 namespace renderer {
 
+#if 0
 // see https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
 int BVH::generateHierarchy(int begin, int end)
 {
@@ -54,6 +55,6 @@ int BVH::findSplit(int begin, int end)
 
   return split;
 }
-
+#endif
 } // namespace renderer
 } // namespace glrt

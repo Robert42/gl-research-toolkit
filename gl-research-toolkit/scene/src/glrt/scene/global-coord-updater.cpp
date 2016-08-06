@@ -1,82 +1,173 @@
 #include <glrt/scene/global-coord-updater.h>
+#include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
+#include <glrt/toolkit/concatenated-less-than.h>
+#include <glrt/toolkit/bit-magic.h>
 
 namespace glrt {
 namespace scene {
 
 
-GlobalCoordUpdater::GlobalCoordUpdater()
+GlobalCoordUpdater::GlobalCoordUpdater(Scene* scene)
+  : scene(*scene)
 {
 }
 
-
-void GlobalCoordUpdater::updateCoordinates()
+GlobalCoordUpdater::~GlobalCoordUpdater()
 {
-  updateArray();
-  fragmented_array.iterate(this);
+  for(const Array<Node::Component*>& a : notMovableComponents_pending)
+    Q_ASSERT(a.isEmpty());
+  for(const Array<Node::Component*>& a : movableComponents)
+    Q_ASSERT(a.isEmpty());
 }
 
 
 void GlobalCoordUpdater::addComponent(Node::Component* component)
 {
-  if(component->movable())
-    fragmented_array.append_copy(component);
-  else
-    staticComponentsToUpdate.append(component);
-
   component->updateCoordDependencyDepth();
 
-  connect(component, &GlobalCoordUpdater::destroyed, this, &GlobalCoordUpdater::removeObject);
-  connect(component, &Node::Component::componentMovabilityChanged, this, &GlobalCoordUpdater::movabilityChanged);
-  connect(component, &Node::Component::coordDependencyDepthChanged, this, &GlobalCoordUpdater::dependencyDepthChanged);
+  Array<Node::Component*>& array = arrayFor(component);
+
+  array.append(component);
+
+  needResortingFor(component);
+}
+
+void GlobalCoordUpdater::removeComponent(Node::Component* component)
+{
+  Array<Node::Component*>& array = arrayFor(component);
+
+  int index = array.indexOfFirst(component, -1);
+  Q_ASSERT(index != -1);
+  array.removeAt(index);
+
+  needResortingFor(component);
 }
 
 
-void GlobalCoordUpdater::updateArray()
+void GlobalCoordUpdater::updateCoordinates()
 {
-  // #ISSUE-61 OMP
-  for(int i=0; i<staticComponentsToUpdate.length(); ++i)
+  if(Q_UNLIKELY(_need_resorting_not_movable!=0))
   {
-    QPointer<Node::Component> componentPtr = staticComponentsToUpdate[i];
-
-    if(componentPtr.isNull())
-      continue;
-
-    Node::Component* component = componentPtr.data();
-
-    if(component->movable())
-      continue;
-
-    component->updateGlobalCoordFrame();
+    resort(&notMovableComponents_pending, &_need_resorting_not_movable); // TODO is this increasing performance?
+    updateCoordinatesOf(notMovableComponents_pending);
   }
-  staticComponentsToUpdate.clear();
 
+  if(Q_UNLIKELY(_need_resorting_movable!=0))
+    resort(&movableComponents, &_need_resorting_movable);
 
-  fragmented_array.updateSegments(this);
+  updateCoordinatesOf(movableComponents);
 }
 
-
-void GlobalCoordUpdater::removeObject(QObject* object)
+inline bool componentDataIndexOrder(const Node::Component* a, const Node::Component* b)
 {
-  fragmented_array.remove(fragmented_array.indexOf_Safe(static_cast<Node::Component*>(object)));
+  return concatenated_lessThan(a->data_index.data_class, b->data_index.data_class,
+                               a->data_index.array_index, b->data_index.array_index,
+                               a->parent!=nullptr ? quint32(a->parent->data_index.data_class) : 0, b->parent!=nullptr ? quint32(b->parent->data_index.data_class) : 0,
+                               a->parent!=nullptr ? a->parent->data_index.array_index : 0, b->parent!=nullptr ? b->parent->data_index.array_index : 0);
 }
 
-void GlobalCoordUpdater::movabilityChanged(Node::Component* component)
+void GlobalCoordUpdater::resort(Array<Array<Node::Component*>>* arrays, GlobalCoordUpdater::Bitfield* needResorting)
 {
-  if(!component->movable())
+  int highestDepth = static_cast<int>(bitIndexOf<quint64>(glm::highestBitValue(*needResorting)));
+  int lowestDepth = static_cast<int>(bitIndexOf<quint64>(glm::lowestBitValue(*needResorting)));
+
+  Q_ASSERT(glm::highestBitValue(*needResorting) == (quint64(1)<<quint64(highestDepth)));
+  Q_ASSERT(glm::lowestBitValue(*needResorting) == (quint64(1)<<quint64(lowestDepth)));
+
+  for(int depth = lowestDepth; depth<=highestDepth; ++depth)
   {
-    fragmented_array.remove(fragmented_array.indexOf(component));
-    staticComponentsToUpdate.append(component);
-  }else
+    Bitfield bitfield = quint64(1)<<quint64(depth);
+    if(Q_UNLIKELY(bitfield & *needResorting))
+    {
+      arrays->at(depth).sort(componentDataIndexOrder);
+
+      *needResorting &= ~bitfield;
+    }
+  }
+
+  Q_ASSERT(*needResorting == 0);
+}
+
+void GlobalCoordUpdater::updateCoordinatesOf(Array<Array<Node::Component*>>& arrays)
+{
+  if(Q_UNLIKELY(arrays.isEmpty()))
+    return;
+
+  copyLocalToGlobalCoordinates(arrays.first());
+
+  for(int depth=1; depth<arrays.length(); ++depth)
+    updateCoordinatesOf(arrays.at(depth));
+}
+
+void GlobalCoordUpdater::copyLocalToGlobalCoordinates(const Array<Node::Component*>& array)
+{
+  const int n = array.length();
+  Scene::Data& sceneData = *scene.data;
+
+  #pragma omp parallel for
+  for(int i=0; i<n; ++i)
   {
-    fragmented_array.append_copy(component);
+    Q_ASSERT(array[i]->parent == nullptr);
+
+    Node::Component::DataIndex data_index = array[i]->data_index;
+
+    Scene::Data::Transformations& transformations = sceneData.transformDataForIndex(data_index);
+    const quint32 array_index = data_index.array_index;
+
+    transformations.position[array_index] = transformations.local_coord_frame[array_index].position;
+    transformations.orientation[array_index] = transformations.local_coord_frame[array_index].orientation;
+    transformations.scaleFactor[array_index] = transformations.local_coord_frame[array_index].scaleFactor;
   }
 }
 
-void GlobalCoordUpdater::dependencyDepthChanged(Node::Component* component)
+void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& array)
 {
-  fragmented_array.orderChangedForValue(component);
+  const int n = array.length();
+  Scene::Data& sceneData = *scene.data;
+
+  #pragma omp parallel for
+  for(int i=0; i<n; ++i)
+  {
+    Q_ASSERT(array[i]->parent != nullptr);
+
+    Node::Component::DataIndex data_index = array[i]->data_index;
+    Node::Component::DataIndex parent_data_index = array[i]->parent->data_index;
+
+    Scene::Data::Transformations& transformations = sceneData.transformDataForIndex(data_index);
+    Scene::Data::Transformations& transformations_parent = sceneData.transformDataForIndex(parent_data_index);
+    const quint32 array_index = data_index.array_index;
+    const quint32 parent_array_index = parent_data_index.array_index;
+
+    CoordFrame global_coord = transformations_parent.globalCoordFrame(parent_array_index) * transformations.local_coord_frame[array_index];
+
+    transformations.position[array_index] = global_coord.position;
+    transformations.orientation[array_index] = global_coord.orientation;
+    transformations.scaleFactor[array_index] = global_coord.scaleFactor;
+  }
 }
 
+Array<Node::Component*>& GlobalCoordUpdater::arrayFor(Node::Component* component)
+{
+  Array<Array<Node::Component*>>& arrays = component->isMovable() ? movableComponents : notMovableComponents_pending;
+
+  int dependencyDepth = component->coordDependencyDepth();
+
+  while(dependencyDepth>=arrays.length())
+    arrays.append(std::move(Array<Node::Component*>()));
+
+  return arrays[dependencyDepth];
+}
+
+void GlobalCoordUpdater::needResortingFor(Node::Component* component)
+{
+  quint64& need_resorting = component->isMovable() ? _need_resorting_movable : _need_resorting_not_movable;
+
+  int dependencyDepth = component->coordDependencyDepth();
+
+  Q_ASSERT(dependencyDepth>=0 && dependencyDepth<64);
+  need_resorting |= 1<<dependencyDepth;
+}
 
 } // namespace scene
 } // namespace glrt

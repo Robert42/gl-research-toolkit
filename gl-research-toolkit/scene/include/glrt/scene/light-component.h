@@ -13,7 +13,7 @@ class LightComponent : public Node::Component
 {
   Q_OBJECT
 public:
-  LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid);
+  LightComponent(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, DataClass dataClass);
   ~LightComponent();
 
   static LightComponent* createForLightSource(Node& node, Node::Component* parent, const Uuid<LightComponent>& uuid, const resources::LightSource& lightSource);

@@ -16,7 +16,7 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : ComponentWithAABB(node, parent, uuid),
+  : ComponentWithAABB(node, parent, uuid, DataClass::STATICMESH),
     staticMeshUuid(staticMesh),
     materialUuid(materialUuid)
 {

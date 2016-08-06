@@ -49,6 +49,7 @@ public:
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
   debugging::DebugRenderer visualizeWorldGrid;
+  debugging::DebugRenderer visualizeUniformTest;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
   debugging::DebugRenderer visualizeVoxelBoundingBoxes;
@@ -96,6 +97,16 @@ protected:
   void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
 private:
+  // Shaders
+  QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
+  Array<ReloadableShader> materialShaders;
+  Array<MaterialState> materialStates;
+
+  // command lists
+  bool _needRecapturing : 1;
+  gl::CommandList commandList;
+
+  // Scene uniform buffer
   struct SceneUniformBlock
   {
     glm::mat4 view_projection_matrix;
@@ -107,20 +118,19 @@ private:
     quint32 costsHeatvisionWhiteLevel;
     padding<quint32, 2> _padding2;
   };
+  gl::Buffer sceneUniformBuffer;
 
+  // other uniform buffer
   LightBuffer lightUniformBuffer;
   VoxelBuffer voxelUniformBuffer;
+#if 0
   StaticMeshRenderer<> staticMeshRenderer;
-  QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
-  Array<ReloadableShader> materialShaders;
-  Array<MaterialState> materialStates;
+#endif
 
-  gl::Buffer sceneUniformBuffer;
-  gl::CommandList commandList;
-
-  bool _needRecapturing : 1;
+  // debugging
   bool _adjustRoughness : 1;
   bool _sdfShadows : 1;
+
 
   bool needRecapturing() const;
   bool needRerecording() const;

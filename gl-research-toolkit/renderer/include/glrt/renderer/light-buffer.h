@@ -3,7 +3,6 @@
 
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
-#include <glrt/renderer/simple-shader-storage-buffer.h>
 
 namespace glrt {
 namespace renderer {
@@ -25,15 +24,22 @@ public:
 
   const LightData& updateLightData();
 
+#if 0
   quint32 numVisibleRectAreaLights() const {return static_cast<quint32>(rectAreaShaderStorageBuffer.numElements());}
   quint32 numVisibleSphereAreaLights() const {return static_cast<quint32>(sphereAreaShaderStorageBuffer.numElements());}
   bool numVisibleChanged() const {return _numVisibleRectAreaLights!=numVisibleRectAreaLights() || _numVisibleSphereAreaLights!=numVisibleSphereAreaLights();}
 
   void updateNumberOfLights();
+#else
+  quint32 numVisibleRectAreaLights() const {return _numVisibleRectAreaLights;}
+  quint32 numVisibleSphereAreaLights() const {return _numVisibleSphereAreaLights;}
+#endif
 
+#if 0
 private:
   SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
   SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
+#endif
 
   LightData _lightData;
 

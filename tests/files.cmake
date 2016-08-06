@@ -1,9 +1,9 @@
 set(SOURCE_FILES
   arrays/arrays-tests.cpp
-  arrays/fragmented-array.test.cpp
   arrays/statespy.cpp
   arrays/statespy.h
   arrays/trait-handling.cpp
+  bit-magic.cpp
   coord-frame/coord-frame.cpp
   qt-tests/auto-disconnect-with-deletion.cpp
   qt-tests/auto-disconnect-with-deletion.h

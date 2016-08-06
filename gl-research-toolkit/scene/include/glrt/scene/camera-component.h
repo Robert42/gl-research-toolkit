@@ -17,6 +17,8 @@ public:
 
   CameraParameter globalCameraParameter() const;
 
+  void set_localCoordFrame(const CoordFrame& coordFrame);
+
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 };

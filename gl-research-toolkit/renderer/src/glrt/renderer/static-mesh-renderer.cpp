@@ -1,5 +1,4 @@
-#ifndef GLRT_RENDERER_STATICMESHRENDERER_INL
-#define GLRT_RENDERER_STATICMESHRENDERER_INL
+#if 0
 
 #include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/glsl/layout-constants.h>
@@ -129,4 +128,4 @@ void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
 } // namespace renderer
 } // namespace glrt
 
-#endif // GLRT_RENDERER_STATICMESHRENDERER_INL
+#endif

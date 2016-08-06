@@ -1,43 +1,40 @@
 #ifndef GLRT_SCENE_TICKMANAGER_H
 #define GLRT_SCENE_TICKMANAGER_H
 
-#include <glrt/scene/ticking-object.h>
-#include <glrt/toolkit/fragmented-array.h>
-
-#include "implementation/tick-manager-tickorder-array.h"
+#include <glrt/scene/node.h>
 
 namespace glrt {
 namespace scene {
 
-class TickManager : public QObject
+class TickNodeAttribute;
+
+class TickManager final
 {
-  Q_OBJECT
+  Q_DISABLE_COPY(TickManager)
 public:
-  TickManager(QObject* parent=nullptr);
+  TickManager();
+  ~TickManager();
 
   void tick(float deltaTime);
 
 private:
-  friend class TickingObject;
-  friend struct implementation::TickManager_TickObjectArray;
+  friend class TickNodeAttribute;
 
-  implementation::TickManager_TickObjectArray::type fragmented_array;
-  QSet<QPointer<TickingObject>> notYetAddedTickingPointers;
-  QSet<TickingObject*> deletedObjects;
-  QReadWriteLock mutexFragmentedArray;
-  float deltaTime;
-
-  void addTickingObject(TickingObject* tickingObject);
-  void updateObjects();
-
-private slots:
-  void removeObject(QObject* object);
-  void updateObject(TickingObject* object);
+  Array<TickNodeAttribute*> tickingAttribute;
 };
+
+class TickNodeAttribute : public Node::ModularAttribute
+{
+  Q_DISABLE_COPY(TickNodeAttribute)
+public:
+  TickNodeAttribute(Node& node, const Uuid<ModularAttribute>& uuid);
+  ~TickNodeAttribute();
+
+  virtual void tick(float deltaTime) = 0;
+};
+
 
 } // namespace scene
 } // namespace glrt
-
-#include "implementation/tick-manager-tickorder-array.inl"
 
 #endif // GLRT_SCENE_TICKMANAGER_H

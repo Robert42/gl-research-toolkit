@@ -484,6 +484,12 @@ private:
   int _length;
 };
 
+template<typename T>
+struct DefaultTraits<Array<T>>
+{
+  typedef ArrayTraits_mCmOD<Array<T>> type;
+};
+
 template<typename T, class T_traits, class T_allocator>
 QDebug operator<<(QDebug d, const Array<T, T_traits, T_allocator>& array);
 

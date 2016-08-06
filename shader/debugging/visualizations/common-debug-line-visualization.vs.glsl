@@ -17,10 +17,22 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   mat4 view_projection;
 }scene;
 
+void pass_attributes_to_fragment_shader_no_transform(vec4 position, vec3 color)
+{
+  gl_Position = position;
+  fragment.color = color;
+}
+
+void pass_attributes_to_fragment_shader_no_transform(vec3 position, vec3 color)
+{
+  pass_attributes_to_fragment_shader_no_transform(vec4(position, 1), color);
+}
+
 void pass_attributes_to_fragment_shader(vec3 position, vec3 color)
 {
-  gl_Position = scene.view_projection * vec4(position, 1);
-  fragment.color = color;
+  vec4 transformed_position = scene.view_projection * vec4(position, 1);
+
+  pass_attributes_to_fragment_shader_no_transform(transformed_position, color);
 }
 
 void pass_vertex_attributes_to_fragment_shader()

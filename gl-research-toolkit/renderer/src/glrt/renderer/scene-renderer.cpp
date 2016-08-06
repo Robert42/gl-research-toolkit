@@ -22,6 +22,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
+    visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
     visualizeVoxelBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
@@ -33,11 +34,13 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
+    _needRecapturing(true),
+    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
     voxelUniformBuffer(this->scene),
+    #if 0
     staticMeshRenderer(this->scene, staticMeshBufferManager),
-    sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
-    _needRecapturing(true),
+    #endif
     _adjustRoughness(false),
     _sdfShadows(false)
 {
@@ -50,6 +53,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
+  debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingBoxes);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelSceneBoundingBox);
@@ -72,13 +76,17 @@ void Renderer::render()
 {
   updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
 
+#if 0
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
   staticMeshRenderer.update();
 
+#endif
   prepareFramebuffer();
 
+#if 0
   commandList.call();
+#endif
 
   debugDrawList_Framebuffer.render();
 
@@ -92,7 +100,9 @@ void Renderer::update(float deltaTime)
 {
   debugPosteffect.totalTime += deltaTime;
 
+#if 0
   statistics.numSdfInstances = voxelUniformBuffer.numVisibleVoxelGrids();
+#endif
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
@@ -201,9 +211,14 @@ bool Renderer::needRecapturing() const
 
 bool Renderer::needRerecording() const
 {
+#if 0
   return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.numVisibleChanged();
+#else
+  return _needRecapturing;
+#endif
 }
 
+#if 0
 void Renderer::captureStates()
 {
   for(MaterialState& materialState : materialStates)
@@ -311,6 +326,7 @@ void Renderer::recordCommandlist()
 
   scene.sceneRerecordedCommands();
 }
+#endif
 
 void Renderer::allShadersReloaded()
 {
@@ -331,7 +347,7 @@ void Renderer::updateCameraUniform()
         break;
       }
     }
-    if(!cameraComponent && !cameraComponents.isEmpty())
+    if(!this->cameraComponent && !cameraComponents.isEmpty())
       this->cameraComponent = cameraComponents.first();
   }
 
@@ -391,7 +407,6 @@ void Renderer::setSDFShadows(bool sdfShadows)
     ReloadableShader::defineMacro("CONETRACED_SHADOW", sdfShadows);
   }
 }
-
 
 } // namespace renderer
 } // namespace glrt

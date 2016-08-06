@@ -23,7 +23,7 @@ target_link_libraries(glew INTERFACE ${GLEW_LIBRARY} ${OPENGL_gl_LIBRARY})
 
 ######## glm ###################################################################
 add_library(glm INTERFACE)
-target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR})
+target_include_directories(glm INTERFACE ${GLM_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/glm-fork)
 
 ######## glhelpers #############################################################
 set(GLHELPER_CONFIG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glhelperconfig/)

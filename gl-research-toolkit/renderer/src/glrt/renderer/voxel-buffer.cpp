@@ -4,8 +4,6 @@ namespace glrt {
 namespace renderer {
 
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
-  : distanceFieldDataStorageBuffer(scene),
-    distanceFieldBoundingSphereStorageBuffer(scene)
 {
 }
 
@@ -13,15 +11,18 @@ VoxelBuffer::~VoxelBuffer()
 {
 }
 
+#if 0
 quint32 VoxelBuffer::numVisibleVoxelGrids() const
 {
   Q_ASSERT(distanceFieldDataStorageBuffer.numElements() == distanceFieldBoundingSphereStorageBuffer.numElements());
 
   return static_cast<quint32>(distanceFieldDataStorageBuffer.numElements());
 }
+#endif
 
 const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
+#if 0
   distanceFieldDataStorageBuffer.update();
   distanceFieldBoundingSphereStorageBuffer.update();
 
@@ -33,12 +34,16 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
   _voxelHeader.distanceFieldDataStorageBuffer = distanceFieldDataStorageBuffer.gpuBufferAddress();
   _voxelHeader.distanceFieldBoundingSpheres = distanceFieldBoundingSphereStorageBuffer.gpuBufferAddress();
 
+#else
+  _voxelHeader.numDistanceFields = 0;
+#endif
   return _voxelHeader;
 }
 
+#if 0
 void VoxelBuffer::updateBvhTree()
 {
-  // #TODO add profiling scope
+  // TODO add profiling scope
   const int numElements = distanceFieldDataStorageBuffer.numElements();
   if(numElements <= 1)
     return;
@@ -87,6 +92,7 @@ int BVH::addInnerNode()
   Q_ASSERT(numInnerNodes < innerNodesCapacity);
   return numInnerNodes++;
 }
+#endif
 
 
 } // namespace renderer
