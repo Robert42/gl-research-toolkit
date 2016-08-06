@@ -21,7 +21,8 @@ public:
     quint32 capacity() const{return arrayCapacity;}
 
     quint32 length = 0;
-    // TODO: performance increase, when adding the capacity as member for better alignment?
+    quint16 firstDynamic = 0;
+    quint16 firstDirty = 0;
     glm::vec3 position[arrayCapacity];
     glm::quat orientation[arrayCapacity];
     float scaleFactor[arrayCapacity];
@@ -67,15 +68,16 @@ public:
 
   struct Transformations
   {
+    const quint32 capacity;
+    padding<quint32, 1> _padding;
     quint32& length;
+    quint16& firstDynamic;
+    quint16& firstDirty;
     glm::vec3* const position;
     glm::quat* const orientation;
     float* const scaleFactor;
     CoordFrame* const local_coord_frame;
     Node::Component** const component;
-
-    const quint32 capacity;
-    padding<quint32, 1> _padding;
 
     CoordFrame globalCoordFrame(quint32 index) const
     {
@@ -85,14 +87,34 @@ public:
 
     template<quint32 c>
     Transformations(TransformData<c>& data)
-      : length(data.length),
+      : capacity(data.capacity()),
+        length(data.length),
+        firstDynamic(data.firstDynamic),
+        firstDirty(data.firstDirty),
         position(data.position),
         orientation(data.orientation),
         scaleFactor(data.scaleFactor),
         local_coord_frame(data.local_coord_frame),
-        component(data.component),
-        capacity(data.capacity())
+        component(data.component)
     {
+    }
+
+    void swap_transform_data(quint16 a, quint16 b)
+    {
+      Q_ASSERT(a < length);
+      Q_ASSERT(b < length);
+
+      std::swap(position[a], position[b]);
+      std::swap(orientation[a], orientation[b]);
+      std::swap(scaleFactor[a], scaleFactor[b]);
+      std::swap(local_coord_frame[a], local_coord_frame[b]);
+      std::swap(component[a], component[b]);
+    }
+
+    quint16 last_item_index() const
+    {
+      Q_ASSERT(length <= 0x10000);
+      return static_cast<quint16>(length - 1);
     }
   };
 

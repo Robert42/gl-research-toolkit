@@ -216,24 +216,30 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     this->node._rootComponent = this;
   }
 
-  Scene::Data::Transformations& transformData = scene().data->transformDataForClass(data_index.data_class);
-  Q_ASSERT(transformData.capacity <= 0x10000); // no level used for my projects will contain more tha that.
-  Q_ASSERT(transformData.length < transformData.capacity);
-  if(Q_UNLIKELY(transformData.length > transformData.capacity))
+  Scene::Data::Transformations& transformations = scene().data->transformDataForClass(data_index.data_class);
+  Q_ASSERT(transformations.capacity <= 0x10000); // no level used for my projects will contain more tha that.
+  Q_ASSERT(transformations.length < transformations.capacity);
+  if(Q_UNLIKELY(transformations.length > transformations.capacity))
   {
     qWarning() << "Too many node components";
     std::exit(0);
   }
-  quint16 new_index = static_cast<quint16>(transformData.length);
+  transformations.length++;
+  const quint16 last_item_index = transformations.last_item_index();
 
-  transformData.component[new_index] = this;
-  transformData.orientation[new_index] = glm::quat::IDENTITY;
-  transformData.position[new_index] = glm::vec3(0);
-  transformData.scaleFactor[new_index] = 1;
-  transformData.local_coord_frame[new_index] = CoordFrame();
-  transformData.length++;
+  transformations.component[last_item_index] = this;
+  transformations.orientation[last_item_index] = glm::quat::IDENTITY;
+  transformations.position[last_item_index] = glm::vec3(0);
+  transformations.scaleFactor[last_item_index] = 1;
+  transformations.local_coord_frame[last_item_index] = CoordFrame();
+  data_index.array_index = last_item_index;
 
-  data_index.array_index = new_index;
+  if(!this->isDynamic())
+  {
+    transformations.firstDynamic++;
+    data_index.array_index = transformations.firstDynamic-1;
+    transformations.swap_transform_data(data_index.array_index, last_item_index);
+  }
 
   scene().componentAdded(this);
 }
@@ -261,16 +267,15 @@ Node::Component::~Component()
 
   Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
   Q_ASSERT(transformations.length>0);
-  quint16 last_index = static_cast<quint16>(transformations.length-1);
+  quint16 last_index = transformations.last_item_index();
   quint16 current_index = data_index.array_index;
 
   transformations.component[last_index]->data_index.array_index = data_index.array_index;
-  transformations.component[current_index] = transformations.component[last_index];
-  transformations.orientation[current_index] = transformations.orientation[last_index];
-  transformations.position[current_index] = transformations.position[last_index];
-  transformations.scaleFactor[current_index] = transformations.scaleFactor[last_index];
-  transformations.local_coord_frame[current_index] = transformations.local_coord_frame[last_index];
+  transformations.swap_transform_data(current_index, last_index);
   transformations.length--;
+
+  if(!this->isDynamic())
+    transformations.firstDynamic--;
 }
 
 Scene& Node::Component::scene()
