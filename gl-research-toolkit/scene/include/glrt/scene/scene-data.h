@@ -73,6 +73,7 @@ public:
     glm::quat* const orientation;
     float* const scaleFactor;
     CoordFrame* const local_coord_frame;
+    quint32* const z_index;
     Node::Component** const component;
 
     CoordFrame globalCoordFrame(quint32 index) const
@@ -89,6 +90,7 @@ public:
         orientation(data.orientation),
         scaleFactor(data.scaleFactor),
         local_coord_frame(data.local_coord_frame),
+        z_index(data.z_index),
         component(data.component)
     {
     }
@@ -102,6 +104,7 @@ public:
       std::swap(orientation[a], orientation[b]);
       std::swap(scaleFactor[a], scaleFactor[b]);
       std::swap(local_coord_frame[a], local_coord_frame[b]);
+      std::swap(z_index[a], z_index[b]);
       std::swap(component[a], component[b]);
     }
 

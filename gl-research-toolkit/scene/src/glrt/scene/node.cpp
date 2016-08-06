@@ -232,6 +232,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   transformations.position[last_item_index] = glm::vec3(0);
   transformations.scaleFactor[last_item_index] = 1;
   transformations.local_coord_frame[last_item_index] = CoordFrame();
+  transformations.z_index[last_item_index] = 0;
   data_index.array_index = last_item_index;
 
   scene().componentAdded(this);

@@ -118,6 +118,7 @@ void GlobalCoordUpdater::copyLocalToGlobalCoordinates(const Array<Node::Componen
     transformations.position[array_index] = transformations.local_coord_frame[array_index].position;
     transformations.orientation[array_index] = transformations.local_coord_frame[array_index].orientation;
     transformations.scaleFactor[array_index] = transformations.local_coord_frame[array_index].scaleFactor;
+    // transformations.z_index[array_index] = scene.aabb.toUnitSpace(); TODO calc z_index
   }
 }
 
