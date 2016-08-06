@@ -41,6 +41,8 @@ set(SOURCE_FILES
   include/glrt/scene/scene.inl
   include/glrt/scene/scene-layer.h
   include/glrt/scene/static-mesh-component.h
+  include/glrt/scene/tick-manager.cpp
+  include/glrt/scene/tick-manager.h
   include/glrt/scene/voxel-data-component.h
   src/glrt/scene/aabb.cpp
   src/glrt/scene/camera-component.cpp

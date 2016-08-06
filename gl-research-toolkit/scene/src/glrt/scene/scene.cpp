@@ -80,7 +80,7 @@ bool Scene::handleEvents(const SDL_Event& event)
 
 void Scene::update(float deltaTime)
 {
-  Q_UNUSED(deltaTime);
+  tickManager.tick(deltaTime);
 
   globalCoordUpdater.updateCoordinates();
 

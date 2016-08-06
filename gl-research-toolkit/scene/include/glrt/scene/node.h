@@ -57,7 +57,9 @@ private:
 
 class Node::ModularAttribute : public QObject
 {
+  // TODO: should this even be an QObject?
   Q_OBJECT
+  Q_DISABLE_COPY(ModularAttribute)
 public:
   Node& node;
   const Uuid<ModularAttribute> uuid;
@@ -76,6 +78,7 @@ public:
 
 class Node::Component : public QObject
 {
+  // TODO: should this even be an QObject?
   Q_OBJECT
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:

@@ -85,37 +85,23 @@ void FpsDebugInputHandler::update(float deltaTime)
 
 // =============================================================================
 
-FpsDebugController::FpsDebugController(Node::Component& component, const Uuid<FpsDebugController>& uuid)
-  : Node::ModularAttribute(component.node, uuid),
+FpsDebugController::FpsDebugController(CameraComponent& component, const Uuid<FpsDebugController>& uuid)
+  : TickNodeAttribute(component.node, uuid),
     component(component)
 {
-#if 0
   connect(&component, &Node::Component::destroyed, this, &FpsDebugController::deleteLater);
 
   scene().inputManager.addHandler(&inputHandler);
 
   inputHandler.frame = component.localCoordFrame();
-#endif
 }
 
-#if 0
 void FpsDebugController::tick(float timeDelta)
 {
   inputHandler.update(timeDelta);
 
   component.set_localCoordFrame(inputHandler.frame);
 }
-
-TickingObject::TickTraits FpsDebugController::tickTraits() const
-{
-  return TickTraits::OnlyMainThread;
-}
-
-void FpsDebugController::collectTickDependencies(TickDependencySet* dependencySet) const
-{
-  dependencySet->addDependency(&component);
-}
-#endif
 
 
 } // namespace scene

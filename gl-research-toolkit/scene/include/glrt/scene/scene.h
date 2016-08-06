@@ -8,6 +8,7 @@
 #include <glrt/scene/global-coord-updater.h>
 #include <glrt/scene/input-handler.h>
 #include <glrt/scene/fps-debug-controller.h>
+#include <glrt/scene/tick-manager.h>
 
 struct aiNode;
 struct aiScene;
@@ -38,6 +39,7 @@ public:
   Data* const data;
 
   AABB aabb;
+  TickManager tickManager;
 
   Scene(resources::ResourceManager* resourceManager);
   Scene(const Scene&) = delete;

@@ -6,6 +6,8 @@
 #include <glrt/scene/node.h>
 #include <glrt/scene/camera-parameter.h>
 #include <glrt/scene/input-handler.h>
+#include <glrt/scene/tick-manager.h>
+#include <glrt/scene/camera-component.h>
 
 namespace glrt {
 namespace scene {
@@ -30,21 +32,15 @@ private:
   bool movementMode;
 };
 
-class FpsDebugController final : public Node::ModularAttribute
+class FpsDebugController final : public TickNodeAttribute
 {
 public:
   FpsDebugInputHandler inputHandler;
-  Node::Component& component;
+  CameraComponent& component;
 
-  FpsDebugController(Node::Component& component, const Uuid<FpsDebugController>& uuid);
+  FpsDebugController(CameraComponent& component, const Uuid<FpsDebugController>& uuid);
 
-#if 0
   void tick(float timeDelta) override;
-
-protected:
-  TickTraits tickTraits() const override;
-  void collectTickDependencies(TickDependencySet* dependencySet) const override;
-#endif
 };
 
 } // namespace scene

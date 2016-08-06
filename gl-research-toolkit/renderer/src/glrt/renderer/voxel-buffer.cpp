@@ -43,7 +43,7 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 #if 0
 void VoxelBuffer::updateBvhTree()
 {
-  // #TODO add profiling scope
+  // TODO add profiling scope
   const int numElements = distanceFieldDataStorageBuffer.numElements();
   if(numElements <= 1)
     return;
