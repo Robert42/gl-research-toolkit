@@ -12,7 +12,6 @@ class ManagedGLBuffer final
 {
 public:
   gl::Buffer buffer;
-  bool gpuAddressChanged : 1;
 
   ManagedGLBuffer(quint32 capacity);
 
