@@ -9,8 +9,8 @@ namespace renderer {
 LightBuffer::LightBuffer(glrt::scene::Scene& scene)
   : sphereLights(scene.data->sphereLights),
     rectLights(scene.data->rectLights),
-    sphereLightUniforms(sphereLights.length),
-    rectLightUniforms(rectLights.length)
+    sphereLightUniforms(sphereLights.capacity()),
+    rectLightUniforms(rectLights.capacity())
 {
 }
 

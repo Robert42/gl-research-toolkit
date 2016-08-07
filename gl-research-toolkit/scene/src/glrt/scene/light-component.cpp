@@ -139,7 +139,7 @@ void RectAreaLightComponent::setGlobalData(const RectAreaLightComponent::Data& d
   rectLights.half_size[index] = glm::vec2(data.half_width, data.half_height);
   rectLights.local_coord_frame[index] = CoordFrame(glm::mat4(glm::vec4(data.tangent1, 0.f),
                                                              glm::vec4(data.tangent2, 0.f),
-                                                             glm::vec4(cross(data.tangent1, data.tangent2), 0.f), // TODO::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: check
+                                                             glm::vec4(data.normal(), 0.f),
                                                              glm::vec4(data.areaLightCommon.origin, 1.f)));
 }
 

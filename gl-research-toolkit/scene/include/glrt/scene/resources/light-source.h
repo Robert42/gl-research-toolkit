@@ -86,6 +86,13 @@ struct LightSource final
     glm::vec3 tangent2 = glm::vec3(0, 1, 0);
     float half_height = 1.f;
 
+    glm::vec3 normal() const
+    {
+      const glm::vec3& tangent = tangent1;
+      const glm::vec3& bitangent = tangent2;
+      return cross(tangent, bitangent);
+    }
+
     friend RectAreaLight operator*(const CoordFrame& frame, RectAreaLight data)
     {
       data.areaLightCommon = frame * data.areaLightCommon;
