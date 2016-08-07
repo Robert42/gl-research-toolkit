@@ -235,6 +235,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   transformations.z_index[last_item_index] = 0;
   data_index.array_index = last_item_index;
   transformations.numDynamic+=this->isDynamic();
+  transformations.dirtyOrder = true;
 
   scene().componentAdded(this);
 }
@@ -269,6 +270,7 @@ Node::Component::~Component()
   transformations.swap_transform_data(current_index, last_index);
   transformations.length--;
   transformations.numDynamic-=this->isDynamic();
+  transformations.dirtyOrder = true;
 }
 
 Scene& Node::Component::scene()

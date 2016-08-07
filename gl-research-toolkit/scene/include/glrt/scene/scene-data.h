@@ -23,6 +23,8 @@ public:
 
     quint32 length = 0;
     quint16 numDynamic = 0;
+    bool dirtyOrder = false;
+    quint8 _padding = 42;
   };
 
   template<quint32 capacity>
@@ -109,6 +111,7 @@ public:
     padding<quint32, 1> _padding;
     quint32& length;
     quint16& numDynamic;
+    bool& dirtyOrder;
     glm::vec3* const position;
     glm::quat* const orientation;
     float* const scaleFactor;
@@ -127,6 +130,7 @@ public:
       : capacity(data.capacity()),
         length(data.length),
         numDynamic(data.numDynamic),
+        dirtyOrder(data.dirtyOrder),
         position(data.position),
         orientation(data.orientation),
         scaleFactor(data.scaleFactor),
