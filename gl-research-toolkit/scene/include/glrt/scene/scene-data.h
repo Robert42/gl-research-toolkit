@@ -78,7 +78,7 @@ public:
       Q_ASSERT(i < LightSourceData<capacity>::length);
       CoordFrame::_transform_direction(tangent1,
                                        LightSourceData<capacity>::orientation[i],
-                                       glm::vec3(1, 0, 0));
+                                       glm::vec3(-1, 0, 0));
       CoordFrame::_transform_direction(tangent2,
                                        LightSourceData<capacity>::orientation[i],
                                        glm::vec3(0, 1, 0));
