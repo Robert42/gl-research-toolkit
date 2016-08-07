@@ -21,6 +21,9 @@ LightBuffer::~LightBuffer()
 
 const LightBuffer::LightData& LightBuffer::updateLightData()
 {
+  // TODO: if(Q_UNLIKELY(sphereLights.dirtyOrder)) sort by zindex for better cache utilzation
+  // TODO: if(Q_UNLIKELY(rectLights.dirtyOrder)) sort by zindex for better cache utilzation
+
   SphereAreaLight* sphereLightBuffer = sphereLightUniforms.Map(sphereLights.length);
 #pragma omp parallel for
   for(quint32 i=0; i<sphereLights.length; ++i)
