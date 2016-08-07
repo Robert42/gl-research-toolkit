@@ -51,10 +51,10 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
   }
   rectLightUniforms.Unmap();
 
-  _lightData.numRectLights = sphereLights.length;
-  _lightData.numSphereLights = rectLights.length;
+  _lightData.numRectLights = rectLights.length;
+  _lightData.numSphereLights = sphereLights.length;
 
-  _lightData.rectAreaLightsBuffer = sphereLightUniforms.buffer.gpuBufferAddress();
+  _lightData.rectAreaLightsBuffer = rectLightUniforms.buffer.gpuBufferAddress();
   _lightData.sphereAreaLightsBuffer = sphereLightUniforms.buffer.gpuBufferAddress();
 
   return _lightData;
