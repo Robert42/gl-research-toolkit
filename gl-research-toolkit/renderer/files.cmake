@@ -26,9 +26,6 @@ set(SOURCE_FILES
   include/glrt/renderer/static-mesh-buffer.h
   include/glrt/renderer/static-mesh-buffer-manager.h
   include/glrt/renderer/static-mesh-renderer.h
-  include/glrt/renderer/static-mesh-renderer.inl
-  include/glrt/renderer/synced-fragmented-component-array.h
-  include/glrt/renderer/synced-fragmented-component-array.inl
   include/glrt/renderer/toolkit/aligned-vector.h
   include/glrt/renderer/toolkit/compute-shader-set.h
   include/glrt/renderer/toolkit/gpu-voxelizer-implementation.h

@@ -26,6 +26,11 @@ public:
 
   const LightData& updateLightData();
 
+  quint32 numVisibleSphereAreaLights() const{return sphereLights.length;}
+  quint32 numVisibleRectAreaLights() const{return rectLights.length;}
+
+  bool needRerecording() const;
+
 private:
   typedef scene::resources::LightSource::SphereAreaLight SphereAreaLight;
   typedef scene::resources::LightSource::RectAreaLight RectAreaLight;

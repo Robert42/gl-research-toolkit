@@ -21,8 +21,16 @@ LightBuffer::~LightBuffer()
 
 const LightBuffer::LightData& LightBuffer::updateLightData()
 {
-  // TODO: if(Q_UNLIKELY(sphereLights.dirtyOrder)) sort by zindex for better cache utilzation
-  // TODO: if(Q_UNLIKELY(rectLights.dirtyOrder)) sort by zindex for better cache utilzation
+  if(Q_UNLIKELY(sphereLights.dirtyOrder))
+  {
+    // TODO: sort by zindex for better cache utilzation
+    sphereLights.dirtyOrder = false;
+  }
+  if(Q_UNLIKELY(rectLights.dirtyOrder))
+  {
+    // TODO: sort by zindex for better cache utilzation
+    rectLights.dirtyOrder = false;
+  }
 
   SphereAreaLight* sphereLightBuffer = sphereLightUniforms.Map(sphereLights.length);
 #pragma omp parallel for
@@ -61,6 +69,11 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
   _lightData.sphereAreaLightsBuffer = sphereLightUniforms.buffer.gpuBufferAddress();
 
   return _lightData;
+}
+
+bool LightBuffer::needRerecording() const
+{
+  return sphereLights.numDynamic>0 || sphereLights.dirtyOrder ||rectLights.numDynamic>0 || rectLights.dirtyOrder;
 }
 
 } // namespace renderer

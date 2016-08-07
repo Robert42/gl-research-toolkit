@@ -1,6 +1,3 @@
-// TODO:::::::::::::::::::::::::::
-#if 0
-
 #include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/renderer/gl/shader-type.h>
@@ -9,9 +6,10 @@ namespace glrt {
 namespace renderer {
 namespace implementation {
 
+
+
 struct NoPrint
 {
-public:
   template<typename T>
   NoPrint operator<<(const T&){return NoPrint();}
 };
@@ -19,6 +17,8 @@ public:
 #define LOG_MESH_LAODING NoPrint()
 //#define LOG_MESH_LAODING qDebug() << "StaticMeshRecorder: "
 
+// TODO:::::::::::::::::::::::::::
+#if 0
 StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList)
   : recorder(recorder),
     resourceManager(resourceManager),
@@ -28,19 +28,12 @@ StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, Resour
 {
   initMaterials(materialSet);
 
-#if !GLRT_SUPPORT_UPDATE_DYNAMIC_UNIFORMS_SEPERATELY
-  bindNotDynamicTokens();
-#endif
+  bindTokens();
 }
 
-void StaticMeshRecorder::bindNotDynamicTokens()
+void StaticMeshRecorder::bindTokens()
 {
-  boundTokenRanges = &tokenRanges.tokenRangeNotDynamic;
-}
-
-void StaticMeshRecorder::bindDynamicTokens()
-{
-  boundTokenRanges = &tokenRanges.tokenRangeDynamics;
+  boundTokenRanges = &tokenRanges.tokenRange;
 }
 
 void StaticMeshRecorder::unbindTokens()
@@ -124,9 +117,94 @@ void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
   materialGpuAddresses = materialBufferInitializer.gpuAddresses;
 }
 
+#endif
 
 } // namespace implementation
+
+// ======== StaticMeshRenderer =================================================
+
+StaticMeshRenderer::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager)
+  : staticMeshes(scene.data->staticMeshes),
+    staticMeshBufferManager(*staticMeshBufferManager)
+{
+}
+
+void StaticMeshRenderer::update()
+{
+  updateObjectUniforms();
+}
+
+bool StaticMeshRenderer::needRerecording() const
+{
+  return staticMeshes.dirtyOrder;
+}
+
+TokenRanges StaticMeshRenderer::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
+{
+  staticMeshes.dirtyOrder = false;
+
+// TODO:::::::::::::::::::::::::::
+#if 0
+  FragmentedArray& fragmentedArray = meshComponents.fragmented_array;
+
+  meshComponents.dirty = false;
+  fragmentedArray.updateSegments(nullptr);
+
+  const int length = fragmentedArray.length();
+
+  if(length == 0)
+  {
+    transformationBuffer = std::move(TransformationBuffer());
+    materialBuffer = std::move(MaterialBuffer());
+    return TokenRanges();
+  }
+
+  QSet<Uuid<Material>> materialSet;
+  T_Component** components = fragmentedArray.data();
+  glrt::scene::resources::ResourceManager& resourceManager = components[0]->resourceManager();
+
+  transformationBuffer.init(const_cast<const T_Component**>(fragmentedArray.data()), fragmentedArray.length());
+
+  for(int i=0; i<length; ++i)
+    materialSet.insert(components[i]->materialUuid);
+  Array<Uuid<Material>> allMaterials;
+  allMaterials.reserve(materialSet.size());
+  for(Uuid<Material> m : materialSet)
+    allMaterials.append(m);
+  allMaterials.sort([&resourceManager](Uuid<Material> a, Uuid<Material> b){return implementation::materialLessThan(resourceManager.materialForUuid(a), resourceManager.materialForUuid(b), a, b);});
+
+  T_Recorder staticMeshRecorder(recorder,
+                                resourceManager,
+                                allMaterials,
+                                transformationBuffer,
+                                staticMeshBufferManager,
+                                commonTokenList);
+
+  fragmentedArray.iterate(&staticMeshRecorder);
+
+  updateObjectUniforms(0, fragmentedArray.length());
+
+  this->materialBuffer = std::move(staticMeshRecorder.materialBuffer);
+
+  // TODO: call in  the right place!! staticMeshes.dirtyOrder = false;
+
+  return staticMeshRecorder.tokenRanges;
+#endif
+  return TokenRanges();
+}
+
+void StaticMeshRenderer::updateObjectUniforms()
+{
+  updateObjectUniforms(0, staticMeshes.length);
+}
+
+void StaticMeshRenderer::updateObjectUniforms(quint32 begin, quint32 end)
+{
+// TODO:::::::::::::::::::::::::::
+#if 0
+  transformationBuffer.update(begin, end, const_cast<const T_Component**>(fragmentedArray.data()), fragmentedArray.length());
+#endif
+}
+
 } // namespace renderer
 } // namespace glrt
-
-#endif

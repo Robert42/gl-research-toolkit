@@ -40,12 +40,12 @@ QHash<QString, CameraParameter> collectNamedCameraParameters(Scene* scene)
 
 QVector<SphereAreaLightComponent::Data> collectSphereAreaLights(Scene* scene)
 {
-  return collectData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalData();});
 }
 
 QHash<QString, SphereAreaLightComponent::Data> collectNamedSphereAreaLights(Scene* scene)
 {
-  return collectNamedData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectNamedData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalData();});
 }
 
 

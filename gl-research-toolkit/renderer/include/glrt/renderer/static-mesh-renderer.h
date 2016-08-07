@@ -1,12 +1,10 @@
 #ifndef GLRT_RENDERER_STATICMESHRENDERER_H
 #define GLRT_RENDERER_STATICMESHRENDERER_H
 
-// TODO:::::::::::::::::::::::::::
-#if 0
 
-#include <glrt/renderer/synced-fragmented-component-array.h>
 #include <glrt/renderer/material-buffer.h>
 #include <glrt/renderer/transformation-buffer.h>
+#include <glrt/scene/scene-data.h>
 
 
 namespace glrt {
@@ -14,8 +12,7 @@ namespace renderer {
 
 struct TokenRanges
 {
-  QMap<Material::Type, glm::ivec2> tokenRangeDynamics;
-  QMap<Material::Type, glm::ivec2> tokenRangeNotDynamic;
+  QMap<Material::Type, glm::ivec2> tokenRange;
 };
 
 namespace implementation {
@@ -37,8 +34,7 @@ public:
 
   StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList);
 
-  void bindNotDynamicTokens();
-  void bindDynamicTokens();
+  void bindTokens();
   void unbindTokens();
 
   void bindMaterialType(Material::Type materialType);
@@ -69,7 +65,6 @@ private:
 } // namespace implementation
 
 
-template<class T_Component=scene::StaticMeshComponent, class T_Recorder=implementation::StaticMeshRecorder, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
 class StaticMeshRenderer final
 {
 public:
@@ -83,18 +78,18 @@ public:
   TokenRanges recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList);
 
 private:
+  typedef scene::Scene::Data::StaticMeshes StaticMeshes;
+
+  StaticMeshes& staticMeshes;
   MaterialBuffer materialBuffer;
   TransformationBuffer transformationBuffer;
   StaticMeshBufferManager& staticMeshBufferManager;
 
-  void updateDynamicObjectUniforms();
-  void updateObjectUniforms(int begin, int end);
+  void updateObjectUniforms();
+  void updateObjectUniforms(quint32 begin, quint32 end);
 };
 
 } // namespace renderer
 } // namespace glrt
 
-#include "static-mesh-renderer.inl"
-
-#endif
 #endif // GLRT_RENDERER_STATICMESHRENDERER_H

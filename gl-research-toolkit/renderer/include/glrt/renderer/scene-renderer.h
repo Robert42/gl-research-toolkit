@@ -123,10 +123,7 @@ private:
   // other uniform buffer
   LightBuffer lightUniformBuffer;
   VoxelBuffer voxelUniformBuffer;
-  // TODO:::::::::::::::::::::::::::
-#if 0
-  StaticMeshRenderer<> staticMeshRenderer;
-#endif
+  StaticMeshRenderer staticMeshRenderer;
 
   // debugging
   bool _adjustRoughness : 1;

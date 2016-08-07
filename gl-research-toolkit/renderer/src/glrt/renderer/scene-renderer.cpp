@@ -38,10 +38,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
     voxelUniformBuffer(this->scene),
-    // TODO:::::::::::::::::::::::::::
-    #if 0
     staticMeshRenderer(this->scene, staticMeshBufferManager),
-    #endif
     _adjustRoughness(false),
     _sdfShadows(false)
 {
@@ -75,21 +72,15 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-  updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
-
-  // TODO:::::::::::::::::::::::::::
-#if 0
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
+
+  updateCameraUniform();
   staticMeshRenderer.update();
 
-#endif
   prepareFramebuffer();
 
-  // TODO:::::::::::::::::::::::::::
-#if 0
   commandList.call();
-#endif
 
   debugDrawList_Framebuffer.render();
 
@@ -215,16 +206,9 @@ bool Renderer::needRecapturing() const
 
 bool Renderer::needRerecording() const
 {
-  // TODO:::::::::::::::::::::::::::
-#if 0
-  return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.numVisibleChanged();
-#else
-  return _needRecapturing;
-#endif
+  return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.needRerecording();
 }
 
-// TODO:::::::::::::::::::::::::::
-#if 0
 void Renderer::captureStates()
 {
   for(MaterialState& materialState : materialStates)
@@ -251,8 +235,6 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
 {
   if(materialType.testFlag(Material::TypeFlag::AREA_LIGHT))
   {
-    glm::ivec2 range;
-
     StaticMeshBuffer* staticMesh = nullptr;
     quint32 numLights;
     if(materialType.testFlag(Material::TypeFlag::SPHERE_LIGHT))
@@ -273,7 +255,7 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
       recorder.beginTokenListWithCopy(commonTokenList);
       staticMesh->recordBind(recorder);
       staticMesh->recordDrawInstances(recorder, 0, int(numLights));
-      range = recorder.endTokenList();
+      glm::ivec2 range = recorder.endTokenList();
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }
@@ -283,8 +265,6 @@ void Renderer::recordCommandlist()
 {
   if(Q_UNLIKELY(needRecapturing()))
     captureStates();
-
-  lightUniformBuffer.updateNumberOfLights();
 
   glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
@@ -297,7 +277,7 @@ void Renderer::recordCommandlist()
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
-  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRangeDynamics.keys().toSet() | meshDrawRanges.tokenRangeNotDynamic.keys().toSet();
+  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRange.keys().toSet();
 
   for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
   {
@@ -310,15 +290,9 @@ void Renderer::recordCommandlist()
 
     recordLightVisualization(recorder, materialType, materialShader, commonTokenList);
 
-    if(meshDrawRanges.tokenRangeNotDynamic.contains(materialType))
+    if(meshDrawRanges.tokenRange.contains(materialType))
     {
-      range = meshDrawRanges.tokenRangeNotDynamic[materialType];
-      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
-    }
-
-    if(meshDrawRanges.tokenRangeDynamics.contains(materialType))
-    {
-      range = meshDrawRanges.tokenRangeDynamics[materialType];
+      range = meshDrawRanges.tokenRange[materialType];
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }
@@ -332,7 +306,6 @@ void Renderer::recordCommandlist()
 
   scene.sceneRerecordedCommands();
 }
-#endif
 
 void Renderer::allShadersReloaded()
 {

@@ -106,7 +106,7 @@ SphereAreaLightComponent::Data SphereAreaLightComponent::globalData() const
 
   SphereAreaLightComponent::Data data;
 
-  data.radius = sphereLights.radius[index];
+  data.radius = sphereLights.globalRadius(index);
   data.areaLightCommon = sphereLights.lightData[index];
   data.areaLightCommon.origin = sphereLights.position[index];
 
@@ -118,7 +118,7 @@ SphereAreaLightComponent::Data SphereAreaLightComponent::globalData() const
 
 
 RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* parent, const Uuid<RectAreaLightComponent>& uuid, const Data& data)
-  : LightComponent(node, parent, uuid, DataClass::SPHERELIGHT)
+  : LightComponent(node, parent, uuid, DataClass::RECTLIGHT)
 {
   setGlobalData(data);
 

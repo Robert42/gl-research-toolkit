@@ -169,10 +169,11 @@ public:
   TransformData<0x10000> emptyNodes;
   SphereLights sphereLights;
   RectLights rectLights;
-  StaticMeshes staticMeshData;
+  StaticMeshes staticMeshes;
   VoxelGrids voxelGridData;
-  VoxelBVHs voxelBVH;
   CameraData<0x100> cameras;
+
+  VoxelBVHs voxelBVH;
 
   static const quint32 numTransformations = quint32(DataClass::NUM_DATA_CLASSES);
   Transformations transformations[numTransformations];
