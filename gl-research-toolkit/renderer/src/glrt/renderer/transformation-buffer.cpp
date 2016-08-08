@@ -4,9 +4,10 @@
 namespace glrt {
 namespace renderer {
 
-TransformationBuffer::TransformationBuffer()
+TransformationBuffer::TransformationBuffer(quint16 capacity)
+  : alignment(aligned_vector<UniformData>::retrieveAlignmentOffset(aligned_vector<UniformData>::Alignment::UniformBufferOffsetAlignment)),
+    buffer(static_cast<GLsizeiptr>(alignment) * static_cast<GLsizeiptr>(capacity), gl::Buffer::MAP_WRITE)
 {
-  alignment = aligned_vector<UniformData>::retrieveAlignmentOffset(aligned_vector<UniformData>::Alignment::UniformBufferOffsetAlignment);
 }
 
 TransformationBuffer::~TransformationBuffer()
@@ -15,46 +16,35 @@ TransformationBuffer::~TransformationBuffer()
 
 
 TransformationBuffer::TransformationBuffer(TransformationBuffer&& other)
-  : buffer(std::move(other.buffer)),
-    alignment(other.alignment)
+  : alignment(other.alignment),
+    buffer(std::move(other.buffer))
 {
 }
 
 TransformationBuffer& TransformationBuffer::operator=(TransformationBuffer&& other)
 {
-  this->buffer = std::move(other.buffer);
   this->alignment = std::move(other.alignment);
+  this->buffer = std::move(other.buffer);
   return *this;
 }
 
-void TransformationBuffer::init(const glrt::scene::StaticMeshComponent** components, int length)
+void TransformationBuffer::update(quint16 begin, quint16 end, const scene::Scene::Data::Transformations& transformations)
 {
-  this->buffer = std::move(gl::Buffer(alignment * length, gl::Buffer::MAP_WRITE));
+  const quint16 num_elemnts_to_copy = end - begin;
 
-  update(0, length, components, length);
-}
+  quint8* tempBuffer = reinterpret_cast<quint8*>(buffer.Map(static_cast<GLintptr>(begin) * static_cast<GLsizeiptr>(sizeof(glm::mat4)), static_cast<GLsizeiptr>(num_elemnts_to_copy) * static_cast<GLsizeiptr>(alignment), gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
 
-void TransformationBuffer::update(int begin, int end, const glrt::scene::StaticMeshComponent** components, int length)
-{
-  const int num_elemnts_to_copy = end - begin;
-
-  Q_ASSERT(buffer.GetSize() > (end-1)*alignment);
-  Q_ASSERT(end<=length);
-  Q_ASSERT(begin<=end);
-  Q_ASSERT(end<=length);
-
-  quint8* tempBuffer = reinterpret_cast<quint8*>(buffer.Map(begin * sizeof(glm::mat4), num_elemnts_to_copy * sizeof(glm::mat4), gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
-
-  for(int i=0; i<num_elemnts_to_copy; ++i)
+#pragma omp parallel for
+  for(quint16 i=0; i<num_elemnts_to_copy; ++i)
   {
-    UniformData& data = *reinterpret_cast<UniformData*>(tempBuffer + i * alignment);
-    data.transformation = components[i]->globalCoordFrame().toMat4();
+    UniformData& data = *reinterpret_cast<UniformData*>(tempBuffer + size_t(i) * size_t(alignment));
+    data.transformation = transformations.globalCoordFrame(i).toMat4();
   }
 
   buffer.Unmap();
 }
 
-GLuint64 TransformationBuffer::gpuAddressForInstance(int i) const
+GLuint64 TransformationBuffer::gpuAddressForInstance(quint16 i) const
 {
   Q_ASSERT(GLuint64(i+1) * GLuint64(alignment) <= GLuint64(this->buffer.GetSize()));
 

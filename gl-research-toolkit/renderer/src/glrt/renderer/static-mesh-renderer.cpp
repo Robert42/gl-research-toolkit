@@ -126,6 +126,7 @@ void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
 StaticMeshRenderer::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager)
   : scene_data(*scene.data),
     staticMeshes(scene_data.staticMeshes),
+    transformationBuffer(scene_data.staticMeshes->capacity()),
     staticMeshBufferManager(*staticMeshBufferManager)
 {
 }
@@ -143,6 +144,8 @@ bool StaticMeshRenderer::needRerecording() const
 TokenRanges StaticMeshRenderer::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
 {
   scene_data.sort_staticMeshes();
+
+
 
 // TODO:::::::::::::::::::::::::::
 #if 0
@@ -196,15 +199,13 @@ TokenRanges StaticMeshRenderer::recordCommandList(gl::CommandListRecorder& recor
 
 void StaticMeshRenderer::updateObjectUniforms()
 {
-  updateObjectUniforms(0, staticMeshes->length);
+  if(Q_UNLIKELY(staticMeshes->dirtyOrder || staticMeshes->numDynamic>0))
+    updateObjectUniforms(0, staticMeshes->length);
 }
 
 void StaticMeshRenderer::updateObjectUniforms(quint16 begin, quint16 end)
 {
-// TODO:::::::::::::::::::::::::::
-#if 0
-  transformationBuffer.update(begin, end, const_cast<const T_Component**>(fragmentedArray.data()), fragmentedArray.length());
-#endif
+  transformationBuffer.update(begin, end, scene_data.transformDataForClass(scene::Node::Component::DataClass::STATICMESH));
 }
 
 } // namespace renderer

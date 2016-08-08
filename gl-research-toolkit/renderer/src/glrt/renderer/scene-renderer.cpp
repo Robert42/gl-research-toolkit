@@ -72,11 +72,12 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
+  staticMeshRenderer.update(); // otherwise, the transformations don't get updated
+
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
 
   updateCameraUniform();
-  staticMeshRenderer.update();
 
   prepareFramebuffer();
 

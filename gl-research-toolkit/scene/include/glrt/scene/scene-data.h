@@ -192,7 +192,7 @@ public:
     quint32* const z_index;
     Node::Component** const component;
 
-    CoordFrame globalCoordFrame(quint32 index) const
+    CoordFrame globalCoordFrame(quint16 index) const
     {
       Q_ASSERT(index<length);
       return CoordFrame(position[index], orientation[index], scaleFactor[index]);

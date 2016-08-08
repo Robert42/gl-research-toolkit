@@ -2,7 +2,7 @@
 #define GLRT_RENDERER_TRANSFORMATIONBUFFER_H
 
 #include <glrt/renderer/dependencies.h>
-#include <glrt/scene/static-mesh-component.h>
+#include <glrt/scene/scene-data.h>
 #include <glrt/toolkit/array.h>
 
 #include <glhelper/buffer.hpp>
@@ -13,7 +13,7 @@ namespace renderer {
 class TransformationBuffer final
 {
 public:
-  TransformationBuffer();
+  TransformationBuffer(quint16 capacity);
   ~TransformationBuffer();
 
   TransformationBuffer(TransformationBuffer&&);
@@ -22,9 +22,8 @@ public:
   TransformationBuffer(const TransformationBuffer&)=delete;
   TransformationBuffer&operator=(const TransformationBuffer&)=delete;
 
-  void init(const glrt::scene::StaticMeshComponent** components, int length);
-  void update(int begin, int end, const scene::StaticMeshComponent** components, int length);
-  GLuint64 gpuAddressForInstance(int i) const;
+  void update(quint16 begin, quint16 end, const scene::Scene::Data::Transformations& transformations);
+  GLuint64 gpuAddressForInstance(quint16 i) const;
 
 private:
   struct UniformData
@@ -32,8 +31,8 @@ private:
     glm::mat4 transformation;
   };
 
-  gl::Buffer buffer;
   int alignment;
+  gl::Buffer buffer;
 };
 
 } // namespace renderer
