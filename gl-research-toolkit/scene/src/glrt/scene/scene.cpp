@@ -69,8 +69,6 @@ void Scene::clear()
   _lights.clear();
 
   sceneCleared();
-
-  Q_ASSERT(data->meshMaterialCombinations.length == 0);
 }
 
 

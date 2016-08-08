@@ -24,9 +24,10 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
   localAabb = resourceManager().staticMeshAABB(staticMesh);
   scene().StaticMeshComponentAdded(this);
 
+  const quint16 index = data_index.array_index;
   Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
-
-  staticMeshes.push_static_mesh_target(staticMesh, materialUuid);
+  staticMeshes.materialUuid[index] = materialUuid;
+  staticMeshes.staticMeshUuid[index] = staticMesh;
 }
 
 StaticMeshComponent::~StaticMeshComponent()
@@ -35,25 +36,22 @@ StaticMeshComponent::~StaticMeshComponent()
 
   Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
   staticMeshes.swap_staticmesh_data(data_index.array_index, staticMeshes.last_item_index());
-  staticMeshes.pop_static_mesh_target();
 }
 
 const Uuid<resources::StaticMesh>& StaticMeshComponent::staticMeshUuid() const
 {
   const quint16 index = data_index.array_index;
   const Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
-  const Scene::Data::MeshMaterialCombinations& meshMaterialCombinations = scene().data->meshMaterialCombinations;
 
-  return meshMaterialCombinations.static_mesh_uuid[staticMeshes.redirection_index[index]];
+  return staticMeshes.staticMeshUuid[index];
 }
 
 const Uuid<resources::Material>& StaticMeshComponent::materialUuid() const
 {
   const quint16 index = data_index.array_index;
   const Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
-  const Scene::Data::MeshMaterialCombinations& meshMaterialCombinations = scene().data->meshMaterialCombinations;
 
-  return meshMaterialCombinations.material_uuid[staticMeshes.redirection_index[index]];
+  return staticMeshes.materialUuid[index];
 }
 
 

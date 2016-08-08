@@ -4,8 +4,7 @@ namespace glrt {
 namespace scene {
 
 Scene::Data::Data()
-  : staticMeshes(meshMaterialCombinations),
-    transformations{emptyNodes, sphereLights, rectLights, staticMeshes, voxelGrids, cameras}
+  : transformations{emptyNodes, sphereLights, rectLights, staticMeshes, voxelGrids, cameras}
 {
   Q_ASSERT(transformations[quint32(DataClass::EMPTY)].position ==  emptyNodes.position);
   Q_ASSERT(transformations[quint32(DataClass::SPHERELIGHT)].position ==  sphereLights.position);
