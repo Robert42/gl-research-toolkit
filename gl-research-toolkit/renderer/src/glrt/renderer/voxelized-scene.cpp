@@ -27,7 +27,7 @@ void VoxelizedScene::enabledSignedDistanceFields()
 
 void VoxelizedScene::appendSignedDistanceField(StaticMeshComponent* staticMeshComponent)
 {
-  Uuid<StaticMesh> meshUuid = staticMeshComponent->staticMeshUuid;
+  Uuid<StaticMesh> meshUuid = staticMeshComponent->staticMeshUuid();
 
   ResourceManager& resourceManager = scene.resourceManager;
   const ResourceIndex* index = resourceManager.indexForResourceUuid(meshUuid, nullptr);

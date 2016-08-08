@@ -23,6 +23,13 @@ struct LightSource final
     glm::vec3 color = glm::vec3(1);
     float luminous_power = 25.f;
     float influence_radius = INFINITY;
+
+    void swap(CompactAreaLight& other)
+    {
+      std::swap(other.color, color);
+      std::swap(other.luminous_power, luminous_power);
+      std::swap(other.influence_radius, influence_radius);
+    }
   };
 
   struct AreaLightCommon final

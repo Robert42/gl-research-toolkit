@@ -25,6 +25,12 @@ public:
     quint16 numDynamic = 0;
     bool dirtyOrder = false;
     quint8 _padding = 42;
+
+    quint16 last_item_index() const
+    {
+      Q_ASSERT(length <= 0x10000);
+      return static_cast<quint16>(length - 1);
+    }
   };
 
   template<quint32 capacity>
@@ -48,6 +54,12 @@ public:
   struct LightSourceData : public TransformData<capacity>
   {
     resources::LightSource::CompactAreaLight lightData[capacity];
+
+  protected:
+    void swap_light_data(quint16 a, quint16 b)
+    {
+      lightData[a].swap(lightData[b]);
+    }
   };
 
   template<quint32 capacity>
@@ -59,6 +71,12 @@ public:
     {
       Q_ASSERT(i < LightSourceData<capacity>::length);
       return radius[i] * LightSourceData<capacity>::scaleFactor[i];
+    }
+
+    void swap_spherelight_data(quint16 a, quint16 b)
+    {
+      LightSourceData<capacity>::swap_light_data(a,b);
+      std::swap(radius[a], radius[b]);
     }
   };
 
@@ -83,16 +101,35 @@ public:
                                        LightSourceData<capacity>::orientation[i],
                                        glm::vec3(0, 1, 0));
     }
+
+    void swap_rectlight_data(quint16 a, quint16 b)
+    {
+      LightSourceData<capacity>::swap_light_data(a,b);
+      std::swap(half_size[a], half_size[b]);
+    }
   };
 
   template<quint32 capacity>
   struct StaticMeshData : public TransformData<capacity>
   {
+    Uuid<resources::StaticMesh> staticMeshUuid[capacity];
+    Uuid<resources::Material> materialUuid[capacity];
+
+    void swap_staticmesh_data(quint16 a, quint16 b)
+    {
+      staticMeshUuid[a].swap(staticMeshUuid[b]);
+      materialUuid[a].swap(materialUuid[b]);
+    }
   };
 
   template<quint32 capacity>
   struct VoxelGridData : public TransformData<capacity>
   {
+    void swap_voxel_data(quint16 a, quint16 b)
+    {
+      Q_UNUSED(a);
+      Q_UNUSED(b);
+    }
   };
 
   template<quint32 capacity>
@@ -103,6 +140,11 @@ public:
   template<quint32 capacity>
   struct CameraData : public TransformData<capacity>
   {
+    void swap_camera_data(quint16 a, quint16 b)
+    {
+      Q_UNUSED(a);
+      Q_UNUSED(b);
+    }
   };
 
   struct Transformations
@@ -165,13 +207,14 @@ public:
   typedef StaticMeshData<0x10000> StaticMeshes;
   typedef VoxelGridData<0x10000> VoxelGrids;
   typedef VoxelBVH<VoxelGrids::arrayCapacity> VoxelBVHs;
+  typedef CameraData<0x100> Cameras;
 
   TransformData<0x10000> emptyNodes;
   SphereLights sphereLights;
   RectLights rectLights;
   StaticMeshes staticMeshes;
-  VoxelGrids voxelGridData;
-  CameraData<0x100> cameras;
+  VoxelGrids voxelGrids;
+  Cameras cameras;
 
   VoxelBVHs voxelBVH;
 

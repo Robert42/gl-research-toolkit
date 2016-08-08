@@ -1,5 +1,6 @@
 #include <glrt/scene/voxel-data-component.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
 
 namespace glrt {
 namespace scene {
@@ -14,6 +15,12 @@ VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, cons
     voxelizedAsScenery(voxelizedAsScenery)
 {
   scene().VoxelDataComponentAdded(this);
+}
+
+VoxelDataComponent::~VoxelDataComponent()
+{
+  Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
+  voxelGrids.swap_voxel_data(data_index.array_index, voxelGrids.last_item_index());
 }
 
 

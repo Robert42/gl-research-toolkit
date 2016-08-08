@@ -1,6 +1,7 @@
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/scene-layer.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
 
 namespace glrt {
 namespace scene {
@@ -19,6 +20,9 @@ CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid
 CameraComponent::~CameraComponent()
 {
   hideInDestructor();
+
+  Scene::Data::Cameras& cameras = scene().data->cameras;
+  cameras.swap_camera_data(data_index.array_index, cameras.last_item_index());
 }
 
 

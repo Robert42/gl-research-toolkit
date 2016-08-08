@@ -222,7 +222,7 @@ void Scene::unloadUnusedResources()
 
   for(const StaticMeshComponent* staticMeshComponent : allStaticMeshComponents)
   {
-    allUsedStaticMeshes.insert(staticMeshComponent->staticMeshUuid);
+    allUsedStaticMeshes.insert(staticMeshComponent->staticMeshUuid());
 
     Material material = staticMeshComponent->material();
 

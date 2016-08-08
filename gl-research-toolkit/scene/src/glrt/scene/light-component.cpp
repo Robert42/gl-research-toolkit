@@ -87,6 +87,9 @@ SphereAreaLightComponent::SphereAreaLightComponent(Node& node, Node::Component* 
 SphereAreaLightComponent::~SphereAreaLightComponent()
 {
   hideInDestructor();
+
+  Scene::Data::SphereLights& sphereLights = scene().data->sphereLights;
+  sphereLights.swap_spherelight_data(data_index.array_index, sphereLights.last_item_index());
 }
 
 void SphereAreaLightComponent::setGlobalData(const SphereAreaLightComponent::Data& data) const
@@ -123,6 +126,9 @@ RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* pare
   setGlobalData(data);
 
   scene().RectAreaLightComponentAdded(this);
+
+  Scene::Data::RectLights& rectLights = scene().data->rectLights;
+  rectLights.swap_rectlight_data(data_index.array_index, rectLights.last_item_index());
 }
 
 RectAreaLightComponent::~RectAreaLightComponent()

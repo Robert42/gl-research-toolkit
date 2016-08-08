@@ -7,7 +7,7 @@ namespace glrt {
 namespace renderer {
 
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
-  : voxelGridData(scene.data->voxelGridData),
+  : voxelGridData(scene.data->voxelGrids),
     voxelBvh(scene.data->voxelBVH),
     bvhInnerBoundingSpheres(scene.data->voxelBVH.capacity()),
     bvhInnerNodes(scene.data->voxelBVH.capacity())

@@ -91,6 +91,8 @@ public:
   QString toString() const;
   bool isNull() const;
 
+  void swap(Uuid& other);
+
   bool operator==(const this_type& other) const;
   bool operator!=(const this_type& other) const;
   bool operator>(const this_type& other) const;
