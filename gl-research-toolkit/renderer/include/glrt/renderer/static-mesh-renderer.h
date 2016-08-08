@@ -80,13 +80,14 @@ public:
 private:
   typedef scene::Scene::Data::StaticMeshes StaticMeshes;
 
-  StaticMeshes& staticMeshes;
+  scene::Scene::Data& scene_data;
+  StaticMeshes*& staticMeshes;
   MaterialBuffer materialBuffer;
   TransformationBuffer transformationBuffer;
   StaticMeshBufferManager& staticMeshBufferManager;
 
   void updateObjectUniforms();
-  void updateObjectUniforms(quint32 begin, quint32 end);
+  void updateObjectUniforms(quint16 begin, quint16 end);
 };
 
 } // namespace renderer

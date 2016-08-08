@@ -25,33 +25,33 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
   scene().StaticMeshComponentAdded(this);
 
   const quint16 index = data_index.array_index;
-  Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
-  staticMeshes.materialUuid[index] = materialUuid;
-  staticMeshes.staticMeshUuid[index] = staticMesh;
+  Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
+  staticMeshes->materialUuid[index] = materialUuid;
+  staticMeshes->staticMeshUuid[index] = staticMesh;
 }
 
 StaticMeshComponent::~StaticMeshComponent()
 {
   hideInDestructor();
 
-  Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
-  staticMeshes.swap_staticmesh_data(data_index.array_index, staticMeshes.last_item_index());
+  Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
+  staticMeshes->swap_staticmesh_data(data_index.array_index, staticMeshes->last_item_index());
 }
 
 const Uuid<resources::StaticMesh>& StaticMeshComponent::staticMeshUuid() const
 {
   const quint16 index = data_index.array_index;
-  const Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
+  const Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
 
-  return staticMeshes.staticMeshUuid[index];
+  return staticMeshes->staticMeshUuid[index];
 }
 
 const Uuid<resources::Material>& StaticMeshComponent::materialUuid() const
 {
   const quint16 index = data_index.array_index;
-  const Scene::Data::StaticMeshes& staticMeshes = scene().data->staticMeshes;
+  const Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
 
-  return staticMeshes.materialUuid[index];
+  return staticMeshes->materialUuid[index];
 }
 
 

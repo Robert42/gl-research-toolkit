@@ -217,7 +217,6 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   }
 
   Scene::Data::Transformations& transformations = scene().data->transformDataForClass(data_index.data_class);
-  Q_ASSERT(transformations.capacity <= 0x10000); // no level used for my projects will contain more tha that.
   Q_ASSERT(transformations.length < transformations.capacity);
   if(Q_UNLIKELY(transformations.length > transformations.capacity))
   {

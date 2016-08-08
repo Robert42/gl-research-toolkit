@@ -124,7 +124,8 @@ void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
 // ======== StaticMeshRenderer =================================================
 
 StaticMeshRenderer::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager)
-  : staticMeshes(scene.data->staticMeshes),
+  : scene_data(*scene.data),
+    staticMeshes(scene_data.staticMeshes),
     staticMeshBufferManager(*staticMeshBufferManager)
 {
 }
@@ -136,12 +137,12 @@ void StaticMeshRenderer::update()
 
 bool StaticMeshRenderer::needRerecording() const
 {
-  return staticMeshes.dirtyOrder;
+  return staticMeshes->dirtyOrder;
 }
 
 TokenRanges StaticMeshRenderer::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
 {
-  staticMeshes.dirtyOrder = false;
+  scene_data.sort_staticMeshes();
 
 // TODO:::::::::::::::::::::::::::
 #if 0
@@ -195,10 +196,10 @@ TokenRanges StaticMeshRenderer::recordCommandList(gl::CommandListRecorder& recor
 
 void StaticMeshRenderer::updateObjectUniforms()
 {
-  updateObjectUniforms(0, staticMeshes.length);
+  updateObjectUniforms(0, staticMeshes->length);
 }
 
-void StaticMeshRenderer::updateObjectUniforms(quint32 begin, quint32 end)
+void StaticMeshRenderer::updateObjectUniforms(quint16 begin, quint16 end)
 {
 // TODO:::::::::::::::::::::::::::
 #if 0
