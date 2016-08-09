@@ -265,7 +265,6 @@ Node::Component::~Component()
   quint16 last_index = transformations.last_item_index();
   quint16 current_index = data_index.array_index;
 
-  transformations.component[last_index]->data_index.array_index = data_index.array_index;
   transformations.swap_transform_data(current_index, last_index);
   transformations.length--;
   transformations.numDynamic-=this->isDynamic();

@@ -218,6 +218,8 @@ public:
       Q_ASSERT(a < length);
       Q_ASSERT(b < length);
 
+      std::swap(component[a]->data_index.array_index, component[b]->data_index.array_index);
+
       std::swap(position[a], position[b]);
       std::swap(orientation[a], orientation[b]);
       std::swap(scaleFactor[a], scaleFactor[b]);
