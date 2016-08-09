@@ -68,6 +68,15 @@ public:
       target_data->local_coord_frame[target_index] = source_data->local_coord_frame[source_index];
       target_data->z_index[target_index] = source_data->z_index[source_index];
       target_data->component[target_index] = source_data->component[source_index];
+      target_data->component[target_index]->data_index.array_index = target_index;
+    }
+
+    inline void assert_valid_indices() const
+    {
+#ifdef QT_DEBUG
+      for(quint16 i=0; i<DataArray<capacity>::length; ++i)
+        Q_ASSERT(component[i]->data_index.array_index == i);
+#endif
     }
   };
 

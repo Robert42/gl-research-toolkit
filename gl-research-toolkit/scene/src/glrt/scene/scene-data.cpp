@@ -29,6 +29,8 @@ Scene::Data::~Data()
 
 void Scene::Data::sort_staticMeshes()
 {
+  staticMeshes->assert_valid_indices();
+
 #pragma omp parallel for
   for(quint16 i=0; i<staticMeshes->length; ++i)
     static_mesh_index_reorder[i] = i;
@@ -61,6 +63,7 @@ void Scene::Data::sort_staticMeshes()
   std::swap(transformation_staticMeshes_backbuffer, transformations[static_cast<quint32>(DataClass::STATICMESH)]);
 
 #ifdef QT_DEBUG
+  staticMeshes->assert_valid_indices();
   #pragma omp parallel for
     for(quint16 i=0; i<staticMeshes->length; ++i)
       static_mesh_index_reorder[i] = i;
