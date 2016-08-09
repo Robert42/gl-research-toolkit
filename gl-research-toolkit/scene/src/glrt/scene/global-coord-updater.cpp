@@ -137,8 +137,8 @@ void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& arra
 
     Scene::Data::Transformations& transformations = sceneData.transformDataForIndex(data_index);
     Scene::Data::Transformations& transformations_parent = sceneData.transformDataForIndex(parent_data_index);
-    const quint32 array_index = data_index.array_index;
-    const quint32 parent_array_index = parent_data_index.array_index;
+    const quint16 array_index = data_index.array_index;
+    const quint16 parent_array_index = parent_data_index.array_index;
 
     CoordFrame global_coord = transformations_parent.globalCoordFrame(parent_array_index) * transformations.local_coord_frame[array_index];
 
