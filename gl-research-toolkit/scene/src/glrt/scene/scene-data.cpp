@@ -47,7 +47,7 @@ void Scene::Data::sort_staticMeshes()
                                        staticMeshes->z_index[b]);
   };
 
-  std::sort(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order);
+  std::stable_sort(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order);
 
   StaticMeshes::copy_array_metadata(staticMeshes_backbuffer, staticMeshes);
 #pragma omp parallel for
@@ -64,9 +64,7 @@ void Scene::Data::sort_staticMeshes()
   #pragma omp parallel for
     for(quint16 i=0; i<staticMeshes->length; ++i)
       static_mesh_index_reorder[i] = i;
-  std::sort(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order);
-  for(quint16 i=0; i<staticMeshes->length; ++i)
-    Q_ASSERT(static_mesh_index_reorder[i] == i);
+  Q_ASSERT(std::is_sorted(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order));
 #endif
 
   staticMeshes->dirtyOrder = false;
