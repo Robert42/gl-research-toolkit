@@ -278,7 +278,7 @@ void Renderer::recordCommandlist()
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
-  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRange.keys().toSet();
+  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.keys().toSet();
 
   for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
   {
@@ -291,9 +291,9 @@ void Renderer::recordCommandlist()
 
     recordLightVisualization(recorder, materialType, materialShader, commonTokenList);
 
-    if(meshDrawRanges.tokenRange.contains(materialType))
+    if(meshDrawRanges.contains(materialType))
     {
-      range = meshDrawRanges.tokenRange[materialType];
+      range = meshDrawRanges[materialType];
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }

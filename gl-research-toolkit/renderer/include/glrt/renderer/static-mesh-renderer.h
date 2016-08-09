@@ -10,10 +10,7 @@
 namespace glrt {
 namespace renderer {
 
-struct TokenRanges
-{
-  QMap<Material::Type, glm::ivec2> tokenRange;
-};
+typedef QMap<Material::Type, glm::ivec2> TokenRanges;
 
 namespace implementation {
 
@@ -21,45 +18,27 @@ namespace implementation {
 struct StaticMeshRecorder final
 {
 public:
-  typedef typename glrt::scene::resources::Material Material;
-  typedef typename glrt::scene::resources::StaticMesh StaticMesh;
-  typedef typename glrt::scene::resources::ResourceManager ResourceManager;
-
   gl::CommandListRecorder& recorder;
-  ResourceManager& resourceManager;
-
-  MaterialBuffer materialBuffer;
-
+  const glm::ivec2 commonTokenList;
   TokenRanges tokenRanges;
 
-  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList);
-
-  void bindTokens();
-  void unbindTokens();
+  StaticMeshRecorder(gl::CommandListRecorder& recorder,
+                     const glm::ivec2& commonTokenList);
 
   void bindMaterialType(Material::Type materialType);
-  void unbindMaterialType(Material::Type materialType);
+  void unbindMaterialType();
 
-  void bindMaterial(const Uuid<Material>& material);
-  void unbindMaterial(const Uuid<Material>& material);
+  void bindMaterial(GLuint64 uniformBufer);
+  void unbindMaterial();
 
-  void bindMesh(const Uuid<StaticMesh>& mesh);
-  void unbindMesh(const Uuid<StaticMesh>& mesh);
+  void bindMesh(StaticMeshBuffer* staticMesh);
+  void unbindMesh();
 
-  void drawInstances(int begin, int end);
+  void appendDraw(GLuint64 transformUniform);
 
 private:
-  QMap<Uuid<Material>, GLuint64> materialGpuAddresses;
-  Uuid<StaticMesh> currentMesh;
-  StaticMeshBufferManager& staticMeshBufferManager;
-  TransformationBuffer& transformationBuffer;
-
-  const glm::ivec2 commonTokenList;
-  QMap<Material::Type, glm::ivec2>* boundTokenRanges = nullptr;
-
+  StaticMeshBuffer* currentStaticMesh = nullptr;
   Material::Type currentMaterialType;
-
-  void initMaterials(const Array<Uuid<Material>>& materialSet);
 };
 
 } // namespace implementation

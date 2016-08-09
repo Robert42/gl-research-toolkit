@@ -6,7 +6,7 @@ namespace scene {
 
 Scene::Data::Data(resources::ResourceManager& resourceManager)
   : resourceManager(resourceManager),
-    transformations{new Transformations(emptyNodes), new Transformations(sphereLights), new Transformations(rectLights), new Transformations(*staticMeshes), new Transformations(voxelGrids), new Transformations(cameras)},
+    transformations{new Transformations(emptyNodes), new Transformations(sphereLights), new Transformations(rectLights), new Transformations(staticMeshes1), new Transformations(voxelGrids), new Transformations(cameras)},
     transformation_staticMeshes_backbuffer(new Transformations(staticMeshes2))
 {
   Q_ASSERT(transformations[quint32(DataClass::EMPTY)]->position ==  emptyNodes.position);
@@ -61,6 +61,9 @@ void Scene::Data::sort_staticMeshes()
   std::swap(transformation_staticMeshes_backbuffer, transformations[static_cast<quint32>(DataClass::STATICMESH)]);
 
 #ifdef QT_DEBUG
+  #pragma omp parallel for
+    for(quint16 i=0; i<staticMeshes->length; ++i)
+      static_mesh_index_reorder[i] = i;
   std::sort(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order);
   for(quint16 i=0; i<staticMeshes->length; ++i)
     Q_ASSERT(static_mesh_index_reorder[i] == i);
