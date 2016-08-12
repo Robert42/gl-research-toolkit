@@ -2,7 +2,7 @@
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/scene/resources/texture-manager.h>
 #include <glrt/scene/voxel-data-component.h>
-
+#include <glrt/toolkit/geometry.h>
 namespace glrt {
 namespace scene {
 namespace resources {
@@ -11,7 +11,12 @@ namespace resources {
 VoxelBoundingBox::VoxelBoundingBox(const VoxelDataComponent& c)
 {
   worldToVoxelSpace = c.globalWorldToVoxelMatrix4();
-  voxelCount = c.data.voxelCount;
+  voxelCount = c.gridSize();
+
+  PRINT_VALUE(transform_point(worldToVoxelSpace, glm::vec3(-1, 1, 0)));
+  PRINT_VALUE(transform_point(worldToVoxelSpace, glm::vec3(1, -1, 2)));
+  PRINT_VALUE(transform_point(glm::inverse(worldToVoxelSpace), glm::vec3(0)));
+  PRINT_VALUE(transform_point(glm::inverse(worldToVoxelSpace), glm::vec3(voxelCount)));
 }
 
 

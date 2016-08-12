@@ -49,6 +49,22 @@ struct VoxelIndex
 };
 
 
+struct VoxelUniformDataBlock
+{
+  glm::vec3 globalWorldToVoxelMatrix_col0;
+  int voxelCount_x;
+  glm::vec3 globalWorldToVoxelMatrix_col1;
+  int voxelCount_y;
+  glm::vec3 globalWorldToVoxelMatrix_col2;
+  int voxelCount_z;
+  glm::vec3 globalWorldToVoxelMatrix_col3;
+  float globalWorldToVoxelFactor;
+
+  quint64 texture;
+  padding<quint64, 1> _padding1;
+};
+
+
 } // namespace resources
 } // namespace scene
 } // namespace glrt

@@ -156,7 +156,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
     this->_disableSceneryVoxels=v;
     Array<scene::VoxelDataComponent*> voxelComponents = scene::collectAllComponentsWithType<scene::VoxelDataComponent>(&scene,
                                                                                                                        [](scene::VoxelDataComponent* c){
-                                                        return c->voxelizedAsScenery;
+                                                        return c->voxelizedAsScenery();
     });
 
     for(scene::VoxelDataComponent* c : voxelComponents)

@@ -5,6 +5,13 @@
 
 #include <voxels/voxel-structs.glsl>
 
+
+struct VoxelBoundingBox
+{
+  mat4 worldToVoxelSpace;
+  ivec3 voxelCount;
+};
+
 layout(binding=UNIFORM_BINDING_MESH_INSTANCE_BLOCK, std140)
 uniform PositionBlock
 {
@@ -16,7 +23,7 @@ void main()
 {
   vec3 grid_position = vertex_color + vertex_position * vec3(voxelData.voxelCount);
   
-  vec3 ws_position = transform_point(inverseOf4x3As4x4(voxelData.worldToVoxelSpace), grid_position);
+  vec3 ws_position = transform_point(inverse(voxelData.worldToVoxelSpace), grid_position);
   
   if(any(greaterThan(grid_position, voxelData.voxelCount)))
     ws_position = vec3(0);

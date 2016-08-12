@@ -63,6 +63,10 @@ private:
   VoxelGrids& voxelGridData;
   VoxelBVH& voxelBvh;
 
+  ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
+  ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
+
+
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
   ManagedGLBuffer<BVH::InnerNode> bvhInnerNodes;
 

@@ -3,6 +3,7 @@
 
 #include "scene.h"
 #include <glrt/scene/resources/light-source.h>
+#include <glrt/scene/resources/voxel-data.h>
 #include <glrt/scene/resources/resource-manager.h>
 
 namespace glrt {
@@ -165,10 +166,13 @@ public:
   template<quint16 capacity>
   struct VoxelGridData : public TransformData<capacity>
   {
+    resources::VoxelData voxelData[capacity];
+    bool voxelizedAsScenery[capacity];
+
     void swap_voxel_data(quint16 a, quint16 b)
     {
-      Q_UNUSED(a);
-      Q_UNUSED(b);
+      std::swap(voxelData[a], voxelData[b]);
+      std::swap(voxelizedAsScenery[a], voxelizedAsScenery[b]);
     }
   };
 
