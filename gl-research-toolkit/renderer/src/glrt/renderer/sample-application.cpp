@@ -1,4 +1,5 @@
 #include <glrt/sample-application.h>
+#include <glrt/toolkit/profiler.h>
 
 
 namespace glrt {
@@ -40,6 +41,7 @@ bool SampleApplication::handleEvents(const SDL_Event& event)
 
 float SampleApplication::update()
 {
+  PROFILE_SCOPE("SampleApplication::update()")
   const float deltaTime = Application::update();
   scene.update(deltaTime);
   antweakbar.update(deltaTime);

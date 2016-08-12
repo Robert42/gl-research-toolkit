@@ -104,6 +104,7 @@ bool StaticMeshRenderer::needRerecording() const
 
 TokenRanges StaticMeshRenderer::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
 {
+  PROFILE_SCOPE("StaticMeshRenderer::recordCommandList()")
   scene_data.sort_staticMeshes();
 
   const quint16 length = staticMeshes->length;

@@ -115,7 +115,7 @@ void GlobalCoordUpdater::copyLocalToGlobalCoordinates(const Array<Node::Componen
   const int n = array.length();
   Scene::Data& sceneData = *scene.data;
 
-  #pragma omp parallel for
+// #pragma omp parallel for
   for(int i=0; i<n; ++i)
   {
     Q_ASSERT(array[i]->parent == nullptr);
@@ -138,7 +138,7 @@ void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& arra
   const int n = array.length();
   Scene::Data& sceneData = *scene.data;
 
-  #pragma omp parallel for
+//  #pragma omp parallel for
   for(int i=0; i<n; ++i)
   {
     Q_ASSERT(array[i]->parent != nullptr);
@@ -156,6 +156,7 @@ void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& arra
     transformations.position[array_index] = global_coord.position;
     transformations.orientation[array_index] = global_coord.orientation;
     transformations.scaleFactor[array_index] = global_coord.scaleFactor;
+    // transformations.z_index[array_index] = scene.aabb.toUnitSpace(); TODO calc z_index
   }
 }
 
