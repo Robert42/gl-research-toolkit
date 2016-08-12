@@ -3,6 +3,7 @@
 #include <glrt/scene/scene-data.h>
 #include <glrt/toolkit/concatenated-less-than.h>
 #include <glrt/toolkit/bit-magic.h>
+#include <glrt/toolkit/profiler.h>
 
 namespace glrt {
 namespace scene {
@@ -47,14 +48,20 @@ void GlobalCoordUpdater::removeComponent(Node::Component* component)
 
 void GlobalCoordUpdater::updateCoordinates()
 {
+  PROFILE_SCOPE("GlobalCoordUpdater::updateCoordinates()");
+
   if(Q_UNLIKELY(_need_resorting_not_dynamic!=0))
   {
+    PROFILE_SCOPE("GlobalCoordUpdater _need_resorting_not_dynamic!=0");
     resort(&notDynamicComponents_pending, &_need_resorting_not_dynamic); // TODO is this increasing performance?
     updateCoordinatesOf(notDynamicComponents_pending);
   }
 
   if(Q_UNLIKELY(_need_resorting_dynamic!=0))
+  {
+    PROFILE_SCOPE("GlobalCoordUpdater _need_resorting_dynamic!=0");
     resort(&dynamicComponents, &_need_resorting_dynamic);
+  }
 
   updateCoordinatesOf(dynamicComponents);
 }
@@ -91,6 +98,8 @@ void GlobalCoordUpdater::resort(Array<Array<Node::Component*>>* arrays, GlobalCo
 
 void GlobalCoordUpdater::updateCoordinatesOf(Array<Array<Node::Component*>>& arrays)
 {
+  PROFILE_SCOPE("GlobalCoordUpdater::updateCoordinatesOf(Array<Array<>>)");
+
   if(Q_UNLIKELY(arrays.isEmpty()))
     return;
 
@@ -102,6 +111,7 @@ void GlobalCoordUpdater::updateCoordinatesOf(Array<Array<Node::Component*>>& arr
 
 void GlobalCoordUpdater::copyLocalToGlobalCoordinates(const Array<Node::Component*>& array)
 {
+  PROFILE_SCOPE("GlobalCoordUpdater::copyLocalToGlobalCoordinates");
   const int n = array.length();
   Scene::Data& sceneData = *scene.data;
 
@@ -124,6 +134,7 @@ void GlobalCoordUpdater::copyLocalToGlobalCoordinates(const Array<Node::Componen
 
 void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& array)
 {
+  PROFILE_SCOPE("GlobalCoordUpdater::updateCoordinatesOf(Array<>)");
   const int n = array.length();
   Scene::Data& sceneData = *scene.data;
 
