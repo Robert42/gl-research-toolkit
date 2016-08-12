@@ -1,4 +1,5 @@
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/toolkit/profiler.h>
 
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/light-component.h>
@@ -72,6 +73,8 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
+  PROFILE_SCOPE("Renderer::render()")
+
   staticMeshRenderer.update(); // otherwise, the transformations don't get updated
 
   if(Q_UNLIKELY(needRerecording()))
@@ -264,6 +267,7 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
 
 void Renderer::recordCommandlist()
 {
+  PROFILE_SCOPE("Renderer::recordCommandlist()")
   if(Q_UNLIKELY(needRecapturing()))
     captureStates();
 
@@ -344,6 +348,7 @@ void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
 
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
+  PROFILE_SCOPE("Renderer::fillCameraUniform()")
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   sceneUniformData.camera_position = cameraParameter.position;
   sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();

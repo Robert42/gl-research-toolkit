@@ -2,6 +2,7 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-data.h>
 #include <glrt/scene/resources/static-mesh.h>
+#include <glrt/toolkit/profiler.h>
 
 namespace glrt {
 namespace renderer {
@@ -30,6 +31,7 @@ quint32 VoxelBuffer::numVisibleVoxelGrids() const
 
 const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
+  PROFILE_SCOPE("VoxelBuffer::updateVoxelHeader()")
   // TODO:::::::::::::::::::::::::::
 #if 0
   distanceFieldDataStorageBuffer.update();

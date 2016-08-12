@@ -1,6 +1,7 @@
 #include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/renderer/gl/shader-type.h>
+#include <glrt/toolkit/profiler.h>
 
 namespace glrt {
 namespace renderer {
@@ -92,6 +93,7 @@ StaticMeshRenderer::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferMana
 
 void StaticMeshRenderer::update()
 {
+  PROFILE_SCOPE("StaticMeshRenderer::update()")
   updateObjectUniforms();
 }
 

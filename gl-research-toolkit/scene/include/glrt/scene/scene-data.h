@@ -147,7 +147,7 @@ public:
     Uuid<resources::StaticMesh> staticMeshUuid[capacity];
     Uuid<resources::Material> materialUuid[capacity];
 
-    StaticMeshComponent** const staticMeshComponent = reinterpret_cast<StaticMeshComponent**>(TransformData<capacity>::component);
+    StaticMeshComponent* const * staticMeshComponent(){return reinterpret_cast<StaticMeshComponent* const *>(TransformData<capacity>::component);}
 
     void swap_staticmesh_data(quint16 a, quint16 b)
     {
