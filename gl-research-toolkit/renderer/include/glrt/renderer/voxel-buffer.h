@@ -18,10 +18,13 @@ struct BVH
     int rightChild;
   };
 
-  const scene::Scene::Data::VoxelGrids& voxelGridData;
-  const scene::Scene::Data::VoxelBVHs& voxelBvhData;
+  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
+  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
 
-  BVH(const scene::Scene::Data& scene_data);
+  const VoxelGrids& voxelGridData;
+  const VoxelBVH& voxelBvhData;
+
+  BVH(const VoxelGrids& voxelGridData, VoxelBVH& voxelBvhData);
   void updateTreeCPU();
   int addInnerNode();
 
@@ -53,13 +56,13 @@ public:
 
 private:
   typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
-  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
+  typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
-  VoxelGrids& voxelGridData;
+  VoxelGrid& voxelGridData;
   VoxelBVH& voxelBvh;
 
-  ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
+  ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
 
 
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
@@ -67,6 +70,7 @@ private:
 
   VoxelHeader _voxelHeader;
 
+  void updateVoxelGrid();
   void updateBvhTree();
 };
 

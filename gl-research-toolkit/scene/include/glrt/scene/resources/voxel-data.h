@@ -25,7 +25,6 @@ struct VoxelBoundingBox
 struct VoxelData
 {
   CoordFrame localToVoxelSpace;
-  BoundingSphere boundingSphere;
   glm::ivec3 voxelCount = glm::ivec3(1);
   quint64 gpuTextureHandle = 0;
 

@@ -17,6 +17,8 @@ public:
 
   T_element* Map(quint32 numElements);
   void Unmap();
+
+  GLuint64 gpuBufferAddress() const;
 };
 
 } // namespace renderer

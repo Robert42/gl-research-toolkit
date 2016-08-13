@@ -22,10 +22,10 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
-    visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
-    visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
+    visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
+    visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
     visualizeSceneBoundingBox(debugging::VisualizationRenderer::showSceneAABB(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
@@ -96,11 +96,6 @@ void Renderer::render()
 void Renderer::update(float deltaTime)
 {
   debugPosteffect.totalTime += deltaTime;
-
-  // TODO:::::::::::::::::::::::::::
-#if 0
-  statistics.numSdfInstances = voxelUniformBuffer.numVisibleVoxelGrids();
-#endif
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)

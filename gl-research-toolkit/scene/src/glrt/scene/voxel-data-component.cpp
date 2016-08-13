@@ -9,11 +9,12 @@ namespace scene {
 using resources::BoundingSphere;
 
 
-VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data, bool voxelizedAsScenery)
+VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data, const BoundingSphere& boundingSphere, bool voxelizedAsScenery)
   : Component(node, parent, uuid, DataClass::VOXELGRID)
 {
   Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
   voxelGrids.voxelData[data_index.array_index] = data;
+  voxelGrids.boundingSphere[data_index.array_index] = boundingSphere;
   voxelGrids.voxelizedAsScenery[data_index.array_index] = voxelizedAsScenery;
 
   scene().VoxelDataComponentAdded(this);
@@ -46,30 +47,6 @@ glm::ivec3 VoxelDataComponent::gridSize() const
   return data().voxelCount;
 }
 
-
-// TODO:::::::::::::::::::::::::::::::::
-#if 0
-VoxelDataComponent::VoxelDataBlock VoxelDataComponent::voxelDataBlock() const
-{
-  VoxelDataBlock dataBlock;
-
-  glm::mat4x3 globalWorldToVoxelMatrix = this->globalWorldToVoxelMatrix4x3();
-
-  dataBlock.globalWorldToVoxelFactor = data.localToVoxelSpace.scaleFactor / globalCoordFrame().scaleFactor;
-  dataBlock.globalWorldToVoxelMatrix_col0 = globalWorldToVoxelMatrix[0];
-  dataBlock.globalWorldToVoxelMatrix_col1 = globalWorldToVoxelMatrix[1];
-  dataBlock.globalWorldToVoxelMatrix_col2 = globalWorldToVoxelMatrix[2];
-  dataBlock.globalWorldToVoxelMatrix_col3 = globalWorldToVoxelMatrix[3];
-  dataBlock.voxelCount_x = data.voxelCount.x;
-  dataBlock.voxelCount_y = data.voxelCount.y;
-  dataBlock.voxelCount_z = data.voxelCount.z;
-  dataBlock.texture = textureData();
-
-  return dataBlock;
-}
-#endif
-
-
 quint64 VoxelDataComponent::textureData() const
 {
   return data().gpuTextureHandle;
@@ -79,7 +56,7 @@ BoundingSphere VoxelDataComponent::boundingSphere() const
 {
   Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
   const quint16 i = data_index.array_index;
-  return voxelGrids.voxelData[i].worldSpaceBoundignSphere(voxelGrids.globalCoordFrame(i));
+  return voxelGrids.globalCoordFrame(i) * voxelGrids.boundingSphere[i];
 }
 
 const VoxelDataComponent::Data&VoxelDataComponent::data() const

@@ -167,11 +167,13 @@ public:
   struct VoxelGridData : public TransformData<capacity>
   {
     resources::VoxelData voxelData[capacity];
+    resources::BoundingSphere boundingSphere[capacity];
     bool voxelizedAsScenery[capacity];
 
     void swap_voxel_data(quint16 a, quint16 b)
     {
       std::swap(voxelData[a], voxelData[b]);
+      std::swap(boundingSphere[a], boundingSphere[b]);
       std::swap(voxelizedAsScenery[a], voxelizedAsScenery[b]);
     }
   };

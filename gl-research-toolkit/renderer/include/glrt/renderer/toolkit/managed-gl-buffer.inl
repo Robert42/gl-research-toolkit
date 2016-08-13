@@ -29,6 +29,12 @@ void ManagedGLBuffer<T_element>::Unmap()
     this->buffer.Unmap();
 }
 
+template<typename T_element>
+GLuint64 ManagedGLBuffer<T_element>::gpuBufferAddress() const
+{
+  return this->buffer.gpuBufferAddress();
+}
+
 } // namespace renderer
 } // namespace glrt
 

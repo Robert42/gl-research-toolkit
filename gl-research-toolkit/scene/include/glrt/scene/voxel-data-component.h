@@ -11,8 +11,9 @@ class VoxelDataComponent : public glrt::scene::Node::Component
 {
 public:
   typedef resources::VoxelData Data;
+  typedef resources::BoundingSphere BoundingSphere;
 
-  VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data=Data(), bool voxelizedAsScenery=false);
+  VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data, const BoundingSphere& boundingSphere, bool voxelizedAsScenery=false);
   ~VoxelDataComponent();
   glm::mat4x3 globalWorldToVoxelMatrix4x3() const;
   glm::mat4 globalWorldToVoxelMatrix4() const;

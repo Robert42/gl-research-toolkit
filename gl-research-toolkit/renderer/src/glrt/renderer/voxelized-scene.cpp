@@ -42,7 +42,7 @@ void VoxelizedScene::appendSignedDistanceField(StaticMeshComponent* staticMeshCo
   const VoxelIndex& voxelIndex = index->voxelIndices.value(voxelIndexUuid);
   VoxelData voxelGpuData = voxelIndex.toData(resourceManager);
 
-  new VoxelDataComponent(staticMeshComponent->node, staticMeshComponent, Uuid<VoxelDataComponent>::create(), voxelGpuData, voxelIndex.voxelizedAsScenery);
+  new VoxelDataComponent(staticMeshComponent->node, staticMeshComponent, Uuid<VoxelDataComponent>::create(), voxelGpuData, voxelIndex.boundingSphere, voxelIndex.voxelizedAsScenery);
 }
 
 } // namespace renderer
