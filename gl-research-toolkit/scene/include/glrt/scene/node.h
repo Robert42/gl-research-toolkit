@@ -132,17 +132,6 @@ public:
 
   CoordFrame globalCoordFrame() const;
 
-  // TODO:::::::::::::::::::::::::::
-#if 0
-  quint32 zIndex() const;
-
-  CoordFrame updateGlobalCoordFrame();
-  quint32 updateZIndex();
-  virtual CoordFrame calcGlobalCoordFrameImpl() const;
-  bool hasCustomGlobalCoordUpdater() const;
-#endif
-
-
   bool coordDependsOn(const Component* other) const;
   int updateCoordDependencyDepth();
   int coordDependencyDepth() const;

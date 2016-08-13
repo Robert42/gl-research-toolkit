@@ -252,7 +252,7 @@ public:
   typedef RectLightData<0x100> RectLights;
   typedef StaticMeshData<0xffff> StaticMeshes;
   typedef VoxelGridData<0xffff> VoxelGrids;
-  typedef VoxelBVH<VoxelGrids::arrayCapacity> VoxelBVHs;
+  typedef VoxelBVH<VoxelGrids::arrayCapacity-1> VoxelBVHs;
   typedef CameraData<0x100> Cameras;
 
   TransformData<0xffff> emptyNodes;
