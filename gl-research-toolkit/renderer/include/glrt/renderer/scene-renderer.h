@@ -45,24 +45,24 @@ public:
 
   QPointer<scene::CameraComponent> cameraComponent;
 
+  debugging::DebugRenderer::List debugDrawList_Backbuffer;
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
-  debugging::DebugRenderer visualizeWorldGrid;
-  debugging::DebugRenderer visualizeUniformTest;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
-  debugging::DebugRenderer visualizeVoxelBoundingBoxes;
-  debugging::DebugRenderer visualizeVoxelSceneBoundingBox;
+  debugging::DebugRenderer visualizeWorldGrid;
+  debugging::DebugRenderer visualizeUniformTest;
+  debugging::DebugRenderer visualizeBoundingBoxes;
+  debugging::DebugRenderer visualizeSceneBoundingBox;
 
+  debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;
   debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
   debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_boundingSpheres_raymarch;
-  debugging::DebugRenderer::List debugDrawList_Framebuffer;
-  debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
   debugging::PosteffectVisualizationDataBlock debugPosteffect;
 
