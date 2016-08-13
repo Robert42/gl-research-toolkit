@@ -145,7 +145,7 @@ void Profiler::send_data(QDataStream& stream)
     stream << ptr << strings_to_send[ptr];
   strings_to_send.clear();
 
-  stream << int(recordedScopes.size());GLRT_PROFILER
+  stream << int(recordedScopes.size());
   for(const RecordedScope& s : recordedScopes)
     s.write(stream);
 }

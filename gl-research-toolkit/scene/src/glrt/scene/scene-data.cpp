@@ -31,7 +31,7 @@ void Scene::Data::sort_staticMeshes()
 {
   staticMeshes->assert_valid_indices();
 
-#pragma omp parallel for
+#pragma omp simd
   for(quint16 i=0; i<staticMeshes->length; ++i)
     static_mesh_index_reorder[i] = i;
 
@@ -52,7 +52,7 @@ void Scene::Data::sort_staticMeshes()
   std::stable_sort(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order);
 
   StaticMeshes::copy_array_metadata(staticMeshes_backbuffer, staticMeshes);
-#pragma omp parallel for
+#pragma omp simd
   for(quint16 i=0; i<staticMeshes->length; ++i)
   {
     StaticMeshes::copy_transform_data(staticMeshes_backbuffer, i, staticMeshes, static_mesh_index_reorder[i]);
@@ -64,7 +64,7 @@ void Scene::Data::sort_staticMeshes()
 
 #ifdef QT_DEBUG
   staticMeshes->assert_valid_indices();
-  #pragma omp parallel for
+  #pragma omp simd
     for(quint16 i=0; i<staticMeshes->length; ++i)
       static_mesh_index_reorder[i] = i;
   Q_ASSERT(std::is_sorted(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order));
