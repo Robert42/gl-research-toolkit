@@ -3,6 +3,7 @@
 #include <glrt/scene/scene-data.h>
 #include <glrt/toolkit/concatenated-less-than.h>
 #include <glrt/toolkit/bit-magic.h>
+#include <glrt/toolkit/profiler.h>
 
 namespace glrt {
 namespace scene {
@@ -15,9 +16,9 @@ GlobalCoordUpdater::GlobalCoordUpdater(Scene* scene)
 
 GlobalCoordUpdater::~GlobalCoordUpdater()
 {
-  for(const Array<Node::Component*>& a : notMovableComponents_pending)
+  for(const Array<Node::Component*>& a : notDynamicComponents_pending)
     Q_ASSERT(a.isEmpty());
-  for(const Array<Node::Component*>& a : movableComponents)
+  for(const Array<Node::Component*>& a : dynamicComponents)
     Q_ASSERT(a.isEmpty());
 }
 
@@ -47,16 +48,22 @@ void GlobalCoordUpdater::removeComponent(Node::Component* component)
 
 void GlobalCoordUpdater::updateCoordinates()
 {
-  if(Q_UNLIKELY(_need_resorting_not_movable!=0))
+  PROFILE_SCOPE("GlobalCoordUpdater::updateCoordinates()");
+
+  if(Q_UNLIKELY(_need_resorting_not_dynamic!=0))
   {
-    resort(&notMovableComponents_pending, &_need_resorting_not_movable); // TODO is this increasing performance?
-    updateCoordinatesOf(notMovableComponents_pending);
+    PROFILE_SCOPE("GlobalCoordUpdater _need_resorting_not_dynamic!=0");
+    resort(&notDynamicComponents_pending, &_need_resorting_not_dynamic); // PERFORMANCE is this increasing performance?
+    updateCoordinatesOf(notDynamicComponents_pending);
   }
 
-  if(Q_UNLIKELY(_need_resorting_movable!=0))
-    resort(&movableComponents, &_need_resorting_movable);
+  if(Q_UNLIKELY(_need_resorting_dynamic!=0))
+  {
+    PROFILE_SCOPE("GlobalCoordUpdater _need_resorting_dynamic!=0");
+    resort(&dynamicComponents, &_need_resorting_dynamic);
+  }
 
-  updateCoordinatesOf(movableComponents);
+  updateCoordinatesOf(dynamicComponents);
 }
 
 inline bool componentDataIndexOrder(const Node::Component* a, const Node::Component* b)
@@ -91,6 +98,8 @@ void GlobalCoordUpdater::resort(Array<Array<Node::Component*>>* arrays, GlobalCo
 
 void GlobalCoordUpdater::updateCoordinatesOf(Array<Array<Node::Component*>>& arrays)
 {
+  PROFILE_SCOPE("GlobalCoordUpdater::updateCoordinatesOf(Array<Array<>>)");
+
   if(Q_UNLIKELY(arrays.isEmpty()))
     return;
 
@@ -102,10 +111,11 @@ void GlobalCoordUpdater::updateCoordinatesOf(Array<Array<Node::Component*>>& arr
 
 void GlobalCoordUpdater::copyLocalToGlobalCoordinates(const Array<Node::Component*>& array)
 {
+  PROFILE_SCOPE("GlobalCoordUpdater::copyLocalToGlobalCoordinates");
   const int n = array.length();
   Scene::Data& sceneData = *scene.data;
 
-  #pragma omp parallel for
+// #pragma omp parallel for
   for(int i=0; i<n; ++i)
   {
     Q_ASSERT(array[i]->parent == nullptr);
@@ -118,15 +128,17 @@ void GlobalCoordUpdater::copyLocalToGlobalCoordinates(const Array<Node::Componen
     transformations.position[array_index] = transformations.local_coord_frame[array_index].position;
     transformations.orientation[array_index] = transformations.local_coord_frame[array_index].orientation;
     transformations.scaleFactor[array_index] = transformations.local_coord_frame[array_index].scaleFactor;
+    // transformations.z_index[array_index] = scene.aabb.toUnitSpace(); TODO calc z_index
   }
 }
 
 void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& array)
 {
+  PROFILE_SCOPE("GlobalCoordUpdater::updateCoordinatesOf(Array<>)");
   const int n = array.length();
   Scene::Data& sceneData = *scene.data;
 
-  #pragma omp parallel for
+//  #pragma omp parallel for
   for(int i=0; i<n; ++i)
   {
     Q_ASSERT(array[i]->parent != nullptr);
@@ -136,20 +148,21 @@ void GlobalCoordUpdater::updateCoordinatesOf(const Array<Node::Component*>& arra
 
     Scene::Data::Transformations& transformations = sceneData.transformDataForIndex(data_index);
     Scene::Data::Transformations& transformations_parent = sceneData.transformDataForIndex(parent_data_index);
-    const quint32 array_index = data_index.array_index;
-    const quint32 parent_array_index = parent_data_index.array_index;
+    const quint16 array_index = data_index.array_index;
+    const quint16 parent_array_index = parent_data_index.array_index;
 
     CoordFrame global_coord = transformations_parent.globalCoordFrame(parent_array_index) * transformations.local_coord_frame[array_index];
 
     transformations.position[array_index] = global_coord.position;
     transformations.orientation[array_index] = global_coord.orientation;
     transformations.scaleFactor[array_index] = global_coord.scaleFactor;
+    // transformations.z_index[array_index] = scene.aabb.toUnitSpace(); TODO calc z_index
   }
 }
 
 Array<Node::Component*>& GlobalCoordUpdater::arrayFor(Node::Component* component)
 {
-  Array<Array<Node::Component*>>& arrays = component->isMovable() ? movableComponents : notMovableComponents_pending;
+  Array<Array<Node::Component*>>& arrays = component->isDynamic() ? dynamicComponents : notDynamicComponents_pending;
 
   int dependencyDepth = component->coordDependencyDepth();
 
@@ -161,7 +174,7 @@ Array<Node::Component*>& GlobalCoordUpdater::arrayFor(Node::Component* component
 
 void GlobalCoordUpdater::needResortingFor(Node::Component* component)
 {
-  quint64& need_resorting = component->isMovable() ? _need_resorting_movable : _need_resorting_not_movable;
+  quint64& need_resorting = component->isDynamic() ? _need_resorting_dynamic : _need_resorting_not_dynamic;
 
   int dependencyDepth = component->coordDependencyDepth();
 

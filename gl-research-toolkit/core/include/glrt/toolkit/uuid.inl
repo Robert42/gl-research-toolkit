@@ -70,6 +70,13 @@ bool Uuid<T>::isNull() const
 
 
 template<class T>
+void Uuid<T>::swap(Uuid<T>& other)
+{
+  std::swap(this->_index, other._index);
+}
+
+
+template<class T>
 template<class T_target>
 Uuid<T_target> Uuid<T>::cast() const
 {

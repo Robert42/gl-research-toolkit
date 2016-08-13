@@ -1,6 +1,7 @@
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/scene-layer.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
 
 namespace glrt {
 namespace scene {
@@ -8,10 +9,10 @@ namespace scene {
 using AngelScriptIntegration::AngelScriptCheck;
 
 CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid<CameraComponent>& uuid, const CameraParameter& cameraParameter)
-  : Component(node, parent, uuid, DataClass::CAMERA | DataClass::MOVABLE),
+  : Component(node, parent, uuid, DataClass::CAMERA | DataClass::DYNAMIC),
     cameraParameter(cameraParameter)
 {
-  Q_ASSERT(isMovable());
+  Q_ASSERT(isDynamic());
   scene().CameraComponentAdded(this);
 }
 
@@ -19,6 +20,9 @@ CameraComponent::CameraComponent(Node& node, Node::Component* parent, const Uuid
 CameraComponent::~CameraComponent()
 {
   hideInDestructor();
+
+  Scene::Data::Cameras& cameras = scene().data->cameras;
+  cameras.swap_camera_data(data_index.array_index, cameras.last_item_index());
 }
 
 
@@ -29,7 +33,7 @@ CameraParameter CameraComponent::globalCameraParameter() const
 
 void CameraComponent::set_localCoordFrame(const CoordFrame& coordFrame)
 {
-  Q_ASSERT(isMovable());
+  Q_ASSERT(isDynamic());
   Node::Component::set_localCoordFrame(coordFrame);
 }
 

@@ -1,4 +1,5 @@
 #include <glrt/glsl/layout-constants.h>
+#include <glrt/toolkit/profiler.h>
 
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/light-component.h>
@@ -21,12 +22,12 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeCameras(debugging::VisualizationRenderer::debugSceneCameras(scene)),
     visualizeSphereAreaLights(debugging::VisualizationRenderer::debugSphereAreaLights(scene)),
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
-    visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
-    visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
-    visualizeVoxelBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
-    visualizeVoxelSceneBoundingBox(debugging::VisualizationRenderer::showSceneAABB(scene)),
+    visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
+    visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
+    visualizeBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
+    visualizeSceneBoundingBox(debugging::VisualizationRenderer::showSceneAABB(scene)),
     visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
     visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
@@ -38,9 +39,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
     voxelUniformBuffer(this->scene),
-    #if 0
     staticMeshRenderer(this->scene, staticMeshBufferManager),
-    #endif
     _adjustRoughness(false),
     _sdfShadows(false)
 {
@@ -54,9 +53,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
-  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
-  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingBoxes);
-  debugDrawList_Backbuffer.connectTo(&visualizeVoxelSceneBoundingBox);
+  debugDrawList_Backbuffer.connectTo(&visualizeBoundingBoxes);
+  debugDrawList_Backbuffer.connectTo(&visualizeSceneBoundingBox);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
@@ -74,19 +72,18 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-  updateCameraUniform(); // This must be called before calling recordCommandlist (so the right numbe rof lights is known)
+  PROFILE_SCOPE("Renderer::render()")
 
-#if 0
+  staticMeshRenderer.update(); // otherwise, the transformations don't get updated
+
   if(Q_UNLIKELY(needRerecording()))
     recordCommandlist();
-  staticMeshRenderer.update();
 
-#endif
+  updateCameraUniform();
+
   prepareFramebuffer();
 
-#if 0
   commandList.call();
-#endif
 
   debugDrawList_Framebuffer.render();
 
@@ -99,10 +96,6 @@ void Renderer::render()
 void Renderer::update(float deltaTime)
 {
   debugPosteffect.totalTime += deltaTime;
-
-#if 0
-  statistics.numSdfInstances = voxelUniformBuffer.numVisibleVoxelGrids();
-#endif
 }
 
 bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
@@ -211,14 +204,9 @@ bool Renderer::needRecapturing() const
 
 bool Renderer::needRerecording() const
 {
-#if 0
-  return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.numVisibleChanged();
-#else
-  return _needRecapturing;
-#endif
+  return staticMeshRenderer.needRerecording() || _needRecapturing || lightUniformBuffer.needRerecording();
 }
 
-#if 0
 void Renderer::captureStates()
 {
   for(MaterialState& materialState : materialStates)
@@ -245,8 +233,6 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
 {
   if(materialType.testFlag(Material::TypeFlag::AREA_LIGHT))
   {
-    glm::ivec2 range;
-
     StaticMeshBuffer* staticMesh = nullptr;
     quint32 numLights;
     if(materialType.testFlag(Material::TypeFlag::SPHERE_LIGHT))
@@ -267,7 +253,7 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
       recorder.beginTokenListWithCopy(commonTokenList);
       staticMesh->recordBind(recorder);
       staticMesh->recordDrawInstances(recorder, 0, int(numLights));
-      range = recorder.endTokenList();
+      glm::ivec2 range = recorder.endTokenList();
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }
@@ -275,10 +261,9 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
 
 void Renderer::recordCommandlist()
 {
+  PROFILE_SCOPE("Renderer::recordCommandlist()")
   if(Q_UNLIKELY(needRecapturing()))
     captureStates();
-
-  lightUniformBuffer.updateNumberOfLights();
 
   glm::ivec2 commonTokenList;
   gl::CommandListRecorder recorder;
@@ -291,7 +276,7 @@ void Renderer::recordCommandlist()
   commonTokenList = recorder.endTokenList();
 
   TokenRanges meshDrawRanges = staticMeshRenderer.recordCommandList(recorder, commonTokenList);
-  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.tokenRangeMovables.keys().toSet() | meshDrawRanges.tokenRangeNotMovable.keys().toSet();
+  QSet<Material::Type> unusedMaterialTypes = meshDrawRanges.keys().toSet();
 
   for(auto i=materialShaderMetadata.begin(); i!=materialShaderMetadata.end(); ++i)
   {
@@ -304,15 +289,9 @@ void Renderer::recordCommandlist()
 
     recordLightVisualization(recorder, materialType, materialShader, commonTokenList);
 
-    if(meshDrawRanges.tokenRangeNotMovable.contains(materialType))
+    if(meshDrawRanges.contains(materialType))
     {
-      range = meshDrawRanges.tokenRangeNotMovable[materialType];
-      recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
-    }
-
-    if(meshDrawRanges.tokenRangeMovables.contains(materialType))
-    {
-      range = meshDrawRanges.tokenRangeMovables[materialType];
+      range = meshDrawRanges[materialType];
       recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
     }
   }
@@ -326,7 +305,6 @@ void Renderer::recordCommandlist()
 
   scene.sceneRerecordedCommands();
 }
-#endif
 
 void Renderer::allShadersReloaded()
 {
@@ -364,6 +342,7 @@ void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
 
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
+  PROFILE_SCOPE("Renderer::fillCameraUniform()")
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   sceneUniformData.camera_position = cameraParameter.position;
   sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();

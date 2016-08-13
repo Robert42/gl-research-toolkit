@@ -29,34 +29,34 @@ FpsDebugController* findFpsDebugController(Scene* scene)
 
 QVector<CameraParameter> collectCameraParameters(Scene* scene)
 {
-  return collectData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{/*TODO remove or uncomment c->updateGlobalCoordFrame();*/return c->globalCameraParameter();});
+  return collectData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->globalCameraParameter();});
 }
 
 QHash<QString, CameraParameter> collectNamedCameraParameters(Scene* scene)
 {
-  return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{/*TODO remove or uncomment c->updateGlobalCoordFrame();*/return c->globalCameraParameter();});
+  return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->globalCameraParameter();});
 }
 
 
 QVector<SphereAreaLightComponent::Data> collectSphereAreaLights(Scene* scene)
 {
-  return collectData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalData();});
 }
 
 QHash<QString, SphereAreaLightComponent::Data> collectNamedSphereAreaLights(Scene* scene)
 {
-  return collectNamedData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectNamedData<SphereAreaLightComponent,SphereAreaLightComponent::Data>(scene, [](SphereAreaLightComponent* c) -> SphereAreaLightComponent::Data{return c->globalData();});
 }
 
 
 QVector<RectAreaLightComponent::Data> collectRectAreaLights(Scene* scene)
 {
-  return collectData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalData();});
 }
 
 QHash<QString, scene::RectAreaLightComponent::Data> collectNamedRectAreaLights(Scene* scene)
 {
-  return collectNamedData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalCoordFrame() * c->data;});
+  return collectNamedData<RectAreaLightComponent,RectAreaLightComponent::Data>(scene, [](RectAreaLightComponent* c) -> RectAreaLightComponent::Data{return c->globalData();});
 }
 
 

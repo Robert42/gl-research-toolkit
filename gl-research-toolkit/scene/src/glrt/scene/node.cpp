@@ -198,7 +198,7 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    data_index{makeMovable(data_class, parent!=nullptr && parent->isMovable()), 0, 0xffff},
+    data_index{makeDynamic(data_class, parent!=nullptr && parent->isDynamic()), 0, 0xffff},
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
@@ -216,24 +216,25 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     this->node._rootComponent = this;
   }
 
-  Scene::Data::Transformations& transformData = scene().data->transformDataForClass(data_index.data_class);
-  Q_ASSERT(transformData.capacity <= 0x10000); // no level used for my projects will contain more tha that.
-  Q_ASSERT(transformData.length < transformData.capacity);
-  if(Q_UNLIKELY(transformData.length > transformData.capacity))
+  Scene::Data::Transformations& transformations = scene().data->transformDataForClass(data_index.data_class);
+  Q_ASSERT(transformations.length < transformations.capacity);
+  if(Q_UNLIKELY(transformations.length > transformations.capacity))
   {
     qWarning() << "Too many node components";
     std::exit(0);
   }
-  quint16 new_index = static_cast<quint16>(transformData.length);
+  transformations.length++;
+  const quint16 last_item_index = transformations.last_item_index();
 
-  transformData.component[new_index] = this;
-  transformData.orientation[new_index] = glm::quat::IDENTITY;
-  transformData.position[new_index] = glm::vec3(0);
-  transformData.scaleFactor[new_index] = 1;
-  transformData.local_coord_frame[new_index] = CoordFrame();
-  transformData.length++;
-
-  data_index.array_index = new_index;
+  transformations.component[last_item_index] = this;
+  transformations.orientation[last_item_index] = glm::quat::IDENTITY;
+  transformations.position[last_item_index] = glm::vec3(0);
+  transformations.scaleFactor[last_item_index] = 1;
+  transformations.local_coord_frame[last_item_index] = CoordFrame();
+  transformations.z_index[last_item_index] = 0;
+  data_index.array_index = last_item_index;
+  transformations.numDynamic+=this->isDynamic();
+  transformations.dirtyOrder = true;
 
   scene().componentAdded(this);
 }
@@ -261,16 +262,13 @@ Node::Component::~Component()
 
   Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
   Q_ASSERT(transformations.length>0);
-  quint16 last_index = static_cast<quint16>(transformations.length-1);
+  quint16 last_index = transformations.last_item_index();
   quint16 current_index = data_index.array_index;
 
-  transformations.component[last_index]->data_index.array_index = data_index.array_index;
-  transformations.component[current_index] = transformations.component[last_index];
-  transformations.orientation[current_index] = transformations.orientation[last_index];
-  transformations.position[current_index] = transformations.position[last_index];
-  transformations.scaleFactor[current_index] = transformations.scaleFactor[last_index];
-  transformations.local_coord_frame[current_index] = transformations.local_coord_frame[last_index];
+  transformations.swap_transform_data(current_index, last_index);
   transformations.length--;
+  transformations.numDynamic-=this->isDynamic();
+  transformations.dirtyOrder = true;
 }
 
 Scene& Node::Component::scene()
@@ -331,9 +329,9 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
     child->collectSubtree(subTree);
 }
 
-bool Node::Component::isMovable() const
+bool Node::Component::isDynamic() const
 {
-  return (this->data_index.data_class & DataClass::MOVABLE) == DataClass::MOVABLE;
+  return (this->data_index.data_class & DataClass::DYNAMIC) == DataClass::DYNAMIC;
 }
 
 bool Node::Component::visible() const
@@ -399,10 +397,10 @@ void Node::Component::hideInDestructor()
   updateVisibility(prevVisibility);
 }
 
-Node::Component::DataClass Node::Component::makeMovable(Node::Component::DataClass dataClass, bool makeMovable)
+Node::Component::DataClass Node::Component::makeDynamic(Node::Component::DataClass dataClass, bool makeDynamic)
 {
-  if(makeMovable)
-    return DataClass::MOVABLE | dataClass;
+  if(makeDynamic)
+    return DataClass::DYNAMIC | dataClass;
   else
     return dataClass;
 }
@@ -423,77 +421,9 @@ the slow function calcGlobalCoordFrame to update it first or think, whether
 */
 CoordFrame Node::Component::globalCoordFrame() const
 {
-  // TODO remove this function?
   Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
-  return CoordFrame(transformations.position[data_index.array_index], transformations.orientation[data_index.array_index], transformations.scaleFactor[data_index.array_index]);
+  return transformations.globalCoordFrame(data_index.array_index);
 }
-
-#if 0
-quint32 Node::Component::zIndex() const
-{
-  return qHash(this); // _zIndex;
-}
-
-/*!
-Calculates the global transformation of the given component.
-
-\note This Method is able to accept nullptr as this value.
-*/
-CoordFrame Node::Component::updateGlobalCoordFrame()
-{
-  if(isNull(this))
-    return CoordFrame();
-
-  if(Q_UNLIKELY(hasCustomGlobalCoordUpdater()))
-    _globalCoordFrame = calcGlobalCoordFrameImpl();
-  else if(Q_LIKELY(parent != nullptr))
-    _globalCoordFrame = parent->globalCoordFrame() * localCoordFrame();
-  else
-    _globalCoordFrame = localCoordFrame();
-
-  updateZIndex();
-
-  if(Q_LIKELY(hasAABB()))
-    reinterpret_cast<ComponentWithAABB*>(this)->expandSceneAABB();
-
-  return _globalCoordFrame;
-}
-
-quint32 Node::Component::updateZIndex()
-{
-  return this->_zIndex = calcZIndex(scene().aabb.toUnitSpace(globalCoordFrame().position));
-}
-
-
-/*!
-This function allows to use a customzed calculation for the global coord frame
-of a compent.
-
-The default implementation returns a coord frame containing only nans to signalize
-not to use this virtual function to improve performance.
-
-\warning Either always return a coord frame consisting only of NANs or never.
-
-\warning This functions will be called multithreaded, so don't depend on anything
-different than this component itself or it's CoordDependencies.
-\br
-Don't change any state of any object, just calculate the new GlobalCoordinate and
-return it.
-\br
-Don't change anything, expecially don't delete any objects.
-*/
-CoordFrame Node::Component::calcGlobalCoordFrameImpl() const
-{
-  return CoordFrame(glm::vec3(NAN), glm::quat(NAN, NAN, NAN, NAN), NAN);
-}
-
-bool Node::Component::hasCustomGlobalCoordUpdater() const
-{
-  CoordFrame c = calcGlobalCoordFrameImpl();
-
-  return !std::isnan(c.scaleFactor);
-}
-#endif
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
@@ -543,9 +473,9 @@ void Node::Component::registerAngelScriptAPIDeclarations()
 inline Node::Component* createEmptyComponent(Node& node,
                                              Node::Component* parent,
                                              const Uuid<Node::Component>& uuid,
-                                             bool makeMovable)
+                                             bool makeDynamic)
 {
-  return new Node::Component(node, parent, uuid, Node::Component::makeMovable(Node::Component::DataClass::EMPTY, makeMovable));
+  return new Node::Component(node, parent, uuid, Node::Component::makeDynamic(Node::Component::DataClass::EMPTY, makeDynamic));
 }
 
 void Node::Component::registerAngelScriptAPI()
@@ -557,7 +487,7 @@ void Node::Component::registerAngelScriptAPI()
   Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
                                                                                                "NodeComponent",
                                                                                                "new_EmptyComponent",
-                                                                                               "const Uuid<NodeComponent> &in uuid, bool movable=false");
+                                                                                               "const Uuid<NodeComponent> &in uuid, bool dynamic=false");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
 }
@@ -570,8 +500,8 @@ void Node::Component::collectDependencies(CoordDependencySet* dependencySet) con
   if(dependencySet->originalObject() == this)
   {
     for(const Component* dependency : dependencySet->queuedDependencies() + dependencySet->queuedDependencies())
-      if(!this->isMovable() && dependency->isMovable())
-        qWarning() << "Warning: not movable component " << this->uuid << " depending on a movable component " << dependency->uuid << ".";
+      if(!this->isDynamic() && dependency->isDynamic())
+        qWarning() << "Warning: not dynamic component " << this->uuid << " depending on a dynamic component " << dependency->uuid << ".";
   }
 
   if(!dependencySet->objectsWithCycles().isEmpty())

@@ -1,21 +1,16 @@
 #ifndef GLRT_RENDERER_STATICMESHRENDERER_H
 #define GLRT_RENDERER_STATICMESHRENDERER_H
 
-#if 0
 
-#include <glrt/renderer/synced-fragmented-component-array.h>
 #include <glrt/renderer/material-buffer.h>
 #include <glrt/renderer/transformation-buffer.h>
+#include <glrt/scene/scene-data.h>
 
 
 namespace glrt {
 namespace renderer {
 
-struct TokenRanges
-{
-  QMap<Material::Type, glm::ivec2> tokenRangeMovables;
-  QMap<Material::Type, glm::ivec2> tokenRangeNotMovable;
-};
+typedef QMap<Material::Type, glm::ivec2> TokenRanges;
 
 namespace implementation {
 
@@ -23,52 +18,32 @@ namespace implementation {
 struct StaticMeshRecorder final
 {
 public:
-  typedef typename glrt::scene::resources::Material Material;
-  typedef typename glrt::scene::resources::StaticMesh StaticMesh;
-  typedef typename glrt::scene::resources::ResourceManager ResourceManager;
-
   gl::CommandListRecorder& recorder;
-  ResourceManager& resourceManager;
-
-  MaterialBuffer materialBuffer;
-
+  const glm::ivec2 commonTokenList;
   TokenRanges tokenRanges;
 
-  StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList);
-
-  void bindNotMovableTokens();
-  void bindMovableTokens();
-  void unbindTokens();
+  StaticMeshRecorder(gl::CommandListRecorder& recorder,
+                     const glm::ivec2& commonTokenList);
 
   void bindMaterialType(Material::Type materialType);
-  void unbindMaterialType(Material::Type materialType);
+  void unbindMaterialType();
 
-  void bindMaterial(const Uuid<Material>& material);
-  void unbindMaterial(const Uuid<Material>& material);
+  void bindMaterial(GLuint64 uniformBufer);
+  void unbindMaterial();
 
-  void bindMesh(const Uuid<StaticMesh>& mesh);
-  void unbindMesh(const Uuid<StaticMesh>& mesh);
+  void bindMesh(StaticMeshBuffer* staticMesh);
+  void unbindMesh();
 
-  void drawInstances(int begin, int end);
+  void appendDraw(GLuint64 transformUniform);
 
 private:
-  QMap<Uuid<Material>, GLuint64> materialGpuAddresses;
-  Uuid<StaticMesh> currentMesh;
-  StaticMeshBufferManager& staticMeshBufferManager;
-  TransformationBuffer& transformationBuffer;
-
-  const glm::ivec2 commonTokenList;
-  QMap<Material::Type, glm::ivec2>* boundTokenRanges = nullptr;
-
+  StaticMeshBuffer* currentStaticMesh = nullptr;
   Material::Type currentMaterialType;
-
-  void initMaterials(const Array<Uuid<Material>>& materialSet);
 };
 
 } // namespace implementation
 
 
-template<class T_Component=scene::StaticMeshComponent, class T_Recorder=implementation::StaticMeshRecorder, typename T_BufferCapacityTraits=ArrayCapacityTraits_Capacity_Blocks<512, 4096>>
 class StaticMeshRenderer final
 {
 public:
@@ -82,18 +57,19 @@ public:
   TokenRanges recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList);
 
 private:
+  typedef scene::Scene::Data::StaticMeshes StaticMeshes;
+
+  scene::Scene::Data& scene_data;
+  StaticMeshes*& staticMeshes;
   MaterialBuffer materialBuffer;
   TransformationBuffer transformationBuffer;
   StaticMeshBufferManager& staticMeshBufferManager;
 
-  void updateMovableObjectUniforms();
-  void updateObjectUniforms(int begin, int end);
+  void updateObjectUniforms();
+  void updateObjectUniforms(quint16 begin, quint16 end);
 };
 
 } // namespace renderer
 } // namespace glrt
 
-#include "static-mesh-renderer.inl"
-
-#endif
 #endif // GLRT_RENDERER_STATICMESHRENDERER_H

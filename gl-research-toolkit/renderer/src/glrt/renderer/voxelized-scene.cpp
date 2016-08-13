@@ -27,7 +27,7 @@ void VoxelizedScene::enabledSignedDistanceFields()
 
 void VoxelizedScene::appendSignedDistanceField(StaticMeshComponent* staticMeshComponent)
 {
-  Uuid<StaticMesh> meshUuid = staticMeshComponent->staticMeshUuid;
+  Uuid<StaticMesh> meshUuid = staticMeshComponent->staticMeshUuid();
 
   ResourceManager& resourceManager = scene.resourceManager;
   const ResourceIndex* index = resourceManager.indexForResourceUuid(meshUuid, nullptr);
@@ -42,7 +42,7 @@ void VoxelizedScene::appendSignedDistanceField(StaticMeshComponent* staticMeshCo
   const VoxelIndex& voxelIndex = index->voxelIndices.value(voxelIndexUuid);
   VoxelData voxelGpuData = voxelIndex.toData(resourceManager);
 
-  new VoxelDataComponent(staticMeshComponent->node, staticMeshComponent, Uuid<VoxelDataComponent>::create(), voxelGpuData, voxelIndex.voxelizedAsScenery);
+  new VoxelDataComponent(staticMeshComponent->node, staticMeshComponent, Uuid<VoxelDataComponent>::create(), voxelGpuData, voxelIndex.boundingSphere, voxelIndex.voxelizedAsScenery);
 }
 
 } // namespace renderer

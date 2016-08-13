@@ -24,6 +24,14 @@ inline T one_if_not_zero(T value)
   return (value==0 ? 0 : 1);
 }
 
+
+// Equivalent to (value==0 ? 1 : 0)
+template<typename T>
+inline T one_if_zero(T value)
+{
+  return 1 - one_if_not_zero(value);
+}
+
 // Warning: if value has more tha one bits set, the behavior is undefined
 //
 // returns i, if value==(1<<i)

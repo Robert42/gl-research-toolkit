@@ -3,12 +3,6 @@
 
 #include <alignment.glsl>
 
-struct VoxelBoundingBox
-{
-  mat4x3 worldToVoxelSpace;
-  ivec3 voxelCount;
-};
-
 struct VoxelDataBlock
 {
     vec3 globalWorldToVoxelMatrix_col0;

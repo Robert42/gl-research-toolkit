@@ -2,6 +2,7 @@
 #include <glrt/renderer/static-mesh-buffer.h>
 #include <glrt/system.h>
 #include <glrt/glsl/math-cpp.h>
+#include <glrt/glsl/layout-constants.h>
 #include <glrt/renderer/gl/shader-type.h>
 #include <QTimer>
 
@@ -51,7 +52,6 @@ DebuggingPosteffect::Renderer::~Renderer()
 
 void DebuggingPosteffect::Renderer::recordCommandList()
 {
-#if 0
   if(!needRerecording)
     return;
   needRerecording = false;
@@ -97,7 +97,6 @@ void DebuggingPosteffect::Renderer::recordCommandList()
   segment.append_drawcall(tokenRange, &statusCapture, &framebuffer);
 
   commandList = gl::CommandListRecorder::compile(std::move(segment));
-#endif
 }
 
 void DebuggingPosteffect::Renderer::enqueueRerecordingCommandList()

@@ -12,6 +12,9 @@ template<typename T>
 T one_if_not_zero(T value);
 
 template<typename T>
+T one_if_zero(T value);
+
+template<typename T>
 T bitIndexOf(T value);
 
 } // namespace glrt

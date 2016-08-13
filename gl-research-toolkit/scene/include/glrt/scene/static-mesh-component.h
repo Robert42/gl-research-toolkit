@@ -10,11 +10,11 @@ namespace scene {
 class StaticMeshComponent final : public ComponentWithAABB
 {
 public:
-  const Uuid<resources::StaticMesh> staticMeshUuid;
-  const Uuid<resources::Material> materialUuid;
-
   StaticMeshComponent(Node& node, Node::Component* parent, const Uuid<StaticMeshComponent>& uuid, const Uuid<resources::StaticMesh>& staticMeshUuid, const Uuid<resources::Material> & materialUuid);
   ~StaticMeshComponent();
+
+  const Uuid<resources::StaticMesh>& staticMeshUuid() const;
+  const Uuid<resources::Material>& materialUuid() const;
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
