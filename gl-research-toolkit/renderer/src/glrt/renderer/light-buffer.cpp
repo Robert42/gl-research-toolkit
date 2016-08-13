@@ -28,11 +28,11 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
   {
     if(Q_UNLIKELY(sphereLights.dirtyOrder))
     {
-      // TODO: sort by zindex for better cache utilzation
+      // PERFORMANCE: sort by zindex for better cache utilzation
     }
     if(Q_UNLIKELY(rectLights.dirtyOrder))
     {
-      // TODO: sort by zindex for better cache utilzation
+      // PERFORMANCE: sort by zindex for better cache utilzation
     }
     sphereLights.dirtyOrder = false;
     rectLights.dirtyOrder = false;

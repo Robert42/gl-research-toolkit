@@ -21,10 +21,6 @@ public:
   resources::BoundingSphere boundingSphere() const;
   const Data& data() const;
   bool voxelizedAsScenery() const;
-// TODO:::::::::::::::::::::::::::::::::
-#if 0
-  VoxelDataBlock voxelDataBlock() const;
-#endif
 };
 
 } // namespace scene

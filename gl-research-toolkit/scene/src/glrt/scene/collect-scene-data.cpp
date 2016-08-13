@@ -29,12 +29,12 @@ FpsDebugController* findFpsDebugController(Scene* scene)
 
 QVector<CameraParameter> collectCameraParameters(Scene* scene)
 {
-  return collectData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{/*TODO remove or uncomment c->updateGlobalCoordFrame();*/return c->globalCameraParameter();});
+  return collectData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->globalCameraParameter();});
 }
 
 QHash<QString, CameraParameter> collectNamedCameraParameters(Scene* scene)
 {
-  return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{/*TODO remove or uncomment c->updateGlobalCoordFrame();*/return c->globalCameraParameter();});
+  return collectNamedData<CameraComponent,CameraParameter>(scene, [](CameraComponent* c) -> CameraParameter{return c->globalCameraParameter();});
 }
 
 

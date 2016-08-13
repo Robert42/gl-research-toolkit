@@ -316,9 +316,9 @@ inline bool intersection_point(in Plane plane, in Ray ray, out(vec3) point)
   return intersects;
 }
 
-// TODO: what if point is equal wo view_position?
 inline vec3 perspective_projection_unclamped(in Plane plane, in vec3 view_position, in vec3 point)
 {
+// possble artifact: what if point is equal wo view_position?
   Ray ray;
   ray.direction = normalize(point-view_position);
   ray.origin = view_position;
