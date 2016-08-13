@@ -45,23 +45,24 @@ public:
 
   QPointer<scene::CameraComponent> cameraComponent;
 
+  debugging::DebugRenderer::List debugDrawList_Backbuffer;
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
-  debugging::DebugRenderer visualizeWorldGrid;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
-  debugging::DebugRenderer visualizeVoxelBoundingBoxes;
-  debugging::DebugRenderer visualizeVoxelSceneBoundingBox;
+  debugging::DebugRenderer visualizeWorldGrid;
+  debugging::DebugRenderer visualizeUniformTest;
+  debugging::DebugRenderer visualizeBoundingBoxes;
+  debugging::DebugRenderer visualizeSceneBoundingBox;
 
+  debugging::DebugRenderer::List debugDrawList_Framebuffer;
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;
   debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
   debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_boundingSpheres_raymarch;
-  debugging::DebugRenderer::List debugDrawList_Framebuffer;
-  debugging::DebugRenderer::List debugDrawList_Backbuffer;
 
   debugging::PosteffectVisualizationDataBlock debugPosteffect;
 
@@ -96,6 +97,16 @@ protected:
   void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
 private:
+  // Shaders
+  QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
+  Array<ReloadableShader> materialShaders;
+  Array<MaterialState> materialStates;
+
+  // command lists
+  bool _needRecapturing : 1;
+  gl::CommandList commandList;
+
+  // Scene uniform buffer
   struct SceneUniformBlock
   {
     glm::mat4 view_projection_matrix;
@@ -107,20 +118,17 @@ private:
     quint32 costsHeatvisionWhiteLevel;
     padding<quint32, 2> _padding2;
   };
+  gl::Buffer sceneUniformBuffer;
 
+  // other uniform buffer
   LightBuffer lightUniformBuffer;
   VoxelBuffer voxelUniformBuffer;
-  StaticMeshRenderer<> staticMeshRenderer;
-  QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
-  Array<ReloadableShader> materialShaders;
-  Array<MaterialState> materialStates;
+  StaticMeshRenderer staticMeshRenderer;
 
-  gl::Buffer sceneUniformBuffer;
-  gl::CommandList commandList;
-
-  bool _needRecapturing : 1;
+  // debugging
   bool _adjustRoughness : 1;
   bool _sdfShadows : 1;
+
 
   bool needRecapturing() const;
   bool needRerecording() const;

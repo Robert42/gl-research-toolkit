@@ -1,5 +1,8 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/toolkit/logger.h>
+
+#include <glrt/renderer/toolkit/reloadable-shader.h>
 
 #include <glhelper/shaderobject.hpp>
 
@@ -198,6 +201,13 @@ gl::Program ShaderCompiler::compileProgramFromFiles(const QString& name, const Q
   settings.shaderDir = shaderDir;
   settings.preprocessorBlock = preprocessorBlock;
   return compileProgramFromFiles_SubProcess(settings);
+}
+
+gl::Program ShaderCompiler::compileProgramFromFiles_WithDebugger(const QString& name, const QDir& shaderDir, QStringList preprocessorBlock)
+{
+  if(ReloadableShader::globalPreprocessorBlock.contains(debugging::ShaderDebugPrinter::preprocessorDeclaration))
+    preprocessorBlock << debugging::ShaderDebugPrinter::preprocessorDeclaration;
+  return compileProgramFromFiles(name, shaderDir, preprocessorBlock);
 }
 
 

@@ -21,16 +21,25 @@ public:
   typedef Material::TypeFlag TypeFlag;
   typedef Material::Type Type;
 
-  struct Initializer;
+  const scene::resources::ResourceManager& resourceManager;
+  const GLuint64 blockOffset;
+  const GLuint64 totalCapacity;
 
-  MaterialBuffer();
+  quint16 numAddresses = 0;
+  gl::Buffer buffer;
+
+  MaterialBuffer(scene::resources::ResourceManager& resourceManager, quint16 capacity);
   ~MaterialBuffer();
 
-  MaterialBuffer(MaterialBuffer&&);
-  MaterialBuffer&operator=(MaterialBuffer&&);
+  MaterialBuffer(MaterialBuffer&&)=delete;
+  MaterialBuffer&operator=(MaterialBuffer&&)=delete;
 
   MaterialBuffer(const MaterialBuffer&)=delete;
   MaterialBuffer&operator=(const MaterialBuffer&)=delete;
+
+  void map(quint16 maxNumMaterials);
+  Material::Type append(const Uuid<Material>& materialUuid);
+  void unmap();
 
 private:
   struct BlockSize
@@ -44,24 +53,7 @@ private:
     static int expectedBlockOffset();
   };
 
-  gl::Buffer buffer;
-};
-
-struct MaterialBuffer::Initializer
-{
-  gl::CommandListRecorder& recorder;
-  const glrt::scene::resources::ResourceManager& resourceManager;
-
-  Initializer(gl::CommandListRecorder& recorder, const glrt::scene::resources::ResourceManager& resourceManager);
-
-  void begin(int expectedNumberMaterials);
-  int append(const Uuid<Material>& materialUuid);
-  MaterialBuffer end();
-
-  QMap<Uuid<Material>, GLuint64> gpuAddresses;
-
-private:
-  Array<byte> data;
+  byte* mapped_data = nullptr;
 };
 
 

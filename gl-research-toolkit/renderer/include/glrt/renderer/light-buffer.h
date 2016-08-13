@@ -2,8 +2,9 @@
 #define GLRT_RENDERER_LIGHTBUFFER_H
 
 #include <glrt/renderer/declarations.h>
-#include <glrt/renderer/gl/command-list-recorder.h>
-#include <glrt/renderer/simple-shader-storage-buffer.h>
+#include <glrt/renderer/toolkit/managed-gl-buffer.h>
+#include <glrt/scene/scene-data.h>
+#include <glrt/scene/resources/light-source.h>
 
 namespace glrt {
 namespace renderer {
@@ -25,20 +26,22 @@ public:
 
   const LightData& updateLightData();
 
-  quint32 numVisibleRectAreaLights() const {return static_cast<quint32>(rectAreaShaderStorageBuffer.numElements());}
-  quint32 numVisibleSphereAreaLights() const {return static_cast<quint32>(sphereAreaShaderStorageBuffer.numElements());}
-  bool numVisibleChanged() const {return _numVisibleRectAreaLights!=numVisibleRectAreaLights() || _numVisibleSphereAreaLights!=numVisibleSphereAreaLights();}
+  quint32 numVisibleSphereAreaLights() const{return sphereLights.length;}
+  quint32 numVisibleRectAreaLights() const{return rectLights.length;}
 
-  void updateNumberOfLights();
+  bool needRerecording() const;
 
 private:
-  SimpleShaderStorageBuffer<scene::SphereAreaLightComponent> sphereAreaShaderStorageBuffer;
-  SimpleShaderStorageBuffer<scene::RectAreaLightComponent> rectAreaShaderStorageBuffer;
+  typedef scene::resources::LightSource::SphereAreaLight SphereAreaLight;
+  typedef scene::resources::LightSource::RectAreaLight RectAreaLight;
+
+  scene::Scene::Data::SphereLights& sphereLights;
+  scene::Scene::Data::RectLights& rectLights;
+
+  ManagedGLBuffer<SphereAreaLight> sphereLightUniforms;
+  ManagedGLBuffer<RectAreaLight> rectLightUniforms;
 
   LightData _lightData;
-
-  quint32 _numVisibleRectAreaLights = 0;
-  quint32 _numVisibleSphereAreaLights = 0;
 };
 
 } // namespace renderer

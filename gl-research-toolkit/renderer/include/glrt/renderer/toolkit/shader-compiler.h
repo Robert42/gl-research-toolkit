@@ -45,6 +45,7 @@ public:
   static ShaderCompiler& singleton();
 
   gl::Program compileProgramFromFiles(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
+  gl::Program compileProgramFromFiles_WithDebugger(const QString& name, const QDir& shaderDir, QStringList preprocessorBlock=QStringList());
 
   QByteArray compileProgramFromFiles_GetBinary(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock=QStringList());
   QByteArray compileProgramFromFiles_GetBinary(const CompileSettings& settings);

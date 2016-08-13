@@ -6,7 +6,7 @@
 #include <glrt/scene/declarations.h>
 #include <glrt/scene/coord-frame.h>
 #include <glrt/scene/aabb.h>
-#include <glrt/scene/ticking-object.h>
+#include <glrt/toolkit/dependency-set.h>
 
 namespace glrt {
 namespace scene {
@@ -55,9 +55,10 @@ private:
 };
 
 
-class Node::ModularAttribute : public TickingObject
+class Node::ModularAttribute : public QObject
 {
   Q_OBJECT
+  Q_DISABLE_COPY(ModularAttribute)
 public:
   Node& node;
   const Uuid<ModularAttribute> uuid;
@@ -74,25 +75,42 @@ public:
 };
 
 
-class Node::Component : public TickingObject
+class Node::Component : public QObject
 {
   Q_OBJECT
-  Q_PROPERTY(bool movable READ movable WRITE setMovable NOTIFY movableChanged)
-  Q_PROPERTY(bool mayBecomeMovable READ mayBecomeMovable WRITE setMayBecomeMovable)
   Q_PROPERTY(bool visible READ visible WRITE setVisible NOTIFY visibleChanged)
 public:
-  enum class MovabilityHint
+  enum class DataClass : quint8
   {
-    STATIC = 0,
-    MAY_BECOME_MOVABLE = 1,
-    MOVABLE = 2,
+    EMPTY = 0,
+    SPHERELIGHT,
+    RECTLIGHT,
+    STATICMESH,
+    VOXELGRID,
+    CAMERA,
+
+    NUM_DATA_CLASSES,
+    MASK = 0x7f,
+    DYNAMIC = 0x80
+  };
+
+  friend DataClass operator&(DataClass a, DataClass b){return DataClass(quint32(a)&quint32(b));}
+  friend DataClass operator|(DataClass a, DataClass b){return DataClass(quint32(a)|quint32(b));}
+
+  struct DataIndex
+  {
+    const DataClass data_class;
+    quint8 _padding;
+
+    quint16 array_index;
   };
 
   Node& node;
   Component* const parent;
   const Uuid<Component> uuid;
+  DataIndex data_index;
 
-  Component(Node& node, Component* parent, const Uuid<Component>& uuid);
+  Component(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass data_class);
   virtual ~Component();
 
   Scene& scene();
@@ -105,24 +123,14 @@ public:
   const QVector<Component*>& children() const;
   void collectSubtree(QVector<Component*>* subTree);
 
-  MovabilityHint movabilityHint() const;
-  bool movable() const;
-  bool mayBecomeMovable() const;
+  bool isDynamic() const;
   bool visible() const;
 
   bool hasAABB() const;
 
-  CoordFrame localCoordFrame() const;
+  const CoordFrame& localCoordFrame() const;
+
   CoordFrame globalCoordFrame() const;
-
-  quint32 zIndex() const;
-
-  CoordFrame updateGlobalCoordFrame();
-  quint32 updateZIndex();
-  virtual CoordFrame calcGlobalCoordFrameImpl() const;
-  bool hasCustomGlobalCoordUpdater() const;
-
-  void set_localCoordFrame(const CoordFrame& coordFrame);
 
   bool coordDependsOn(const Component* other) const;
   int updateCoordDependencyDepth();
@@ -131,8 +139,9 @@ public:
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
+  static DataClass makeDynamic(DataClass dataClass, bool makeDynamic);
+
 public slots:
-  void setMovable(bool movable);
   void setVisible(bool visible);
   void show(bool show=true);
   void hide(bool hide=true);
@@ -140,11 +149,8 @@ public slots:
   void hideNowAndDeleteLater();
 
 signals:
-  void coordDependencyDepthChanged(Component* sender);
-  void componentMovabilityChanged(Component* sender);
   void componentVisibilityChanged(Component* sender);
   void visibleChanged(bool);
-  void movableChanged(bool);
 
 protected:
   typedef DependencySet<Component> CoordDependencySet;
@@ -156,14 +162,13 @@ protected:
   template<typename T, T*>
   static void registerCreateMethod(AngelScript::asIScriptEngine* engine, const char* type, const char* arguments);
 
-  void collectDependencies(TickDependencySet* dependencySet) const;
   void collectDependencies(CoordDependencySet* dependencySet) const;
 
   virtual void collectCoordDependencies(CoordDependencySet* dependencySet) const;
 
-  void setMayBecomeMovable(bool mayBecomeMovable);
-
   void hideInDestructor();
+
+  void set_localCoordFrame(const CoordFrame& coordFrame);
 
 private:
   template<typename T>
@@ -177,12 +182,8 @@ private:
 
   friend struct implementation::GlobalCoordArrayOrder;
   friend class ComponentWithAABB;
-  CoordFrame _localCoordFrame;
-  CoordFrame _globalCoordFrame;
   quint32 _zIndex = 0;
 
-  bool _movable : 1;
-  bool _mayBecomeMovable : 1;
   bool _visible : 1;
   bool _parentVisible : 1;
   bool _hiddenBecauseDeletedNextFrame : 1;
@@ -201,7 +202,7 @@ class ComponentWithAABB : public Node::Component
 public:
   AABB localAabb;
 
-  ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid);
+  ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass dataClass);
   ~ComponentWithAABB();
 
   AABB globalAABB() const;
@@ -211,13 +212,6 @@ public:
 
 
 } // namespace scene
-
-template<>
-struct DefaultTraits<glrt::scene::Node::Component::MovabilityHint>
-{
-  typedef ArrayTraits_Primitive<glrt::scene::Node::Component::MovabilityHint> type;
-};
-
 } // namespace glrt
 
 #include "node.inl"

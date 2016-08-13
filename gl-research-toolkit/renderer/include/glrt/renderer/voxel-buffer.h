@@ -2,8 +2,9 @@
 #define GLRT_RENDERER_VOXELBUFFER_H
 
 #include <glrt/renderer/declarations.h>
+#include <glrt/renderer/toolkit/managed-gl-buffer.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
-#include <glrt/renderer/simple-shader-storage-buffer.h>
+#include <glrt/scene/scene-data.h>
 
 
 namespace glrt {
@@ -17,15 +18,13 @@ struct BVH
     int rightChild;
   };
 
-  const scene::VoxelDataComponent* const * leaves;
-  BoundingSphere* const bvhInnerBoundingSpheres;
-  InnerNode* const bvhInnerNodes;
-  const quint32* const zIndices;
-  const int numLeaves;
-  const int innerNodesCapacity;
-  int numInnerNodes;
+  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
+  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
 
-  BVH(const scene::VoxelDataComponent* const * leaves, BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes, const quint32* zIndices, int numLeaves, int innerNodesCapacity);
+  const VoxelGrids& voxelGridData;
+  const VoxelBVH& voxelBvhData;
+
+  BVH(const VoxelGrids& voxelGridData, VoxelBVH& voxelBvhData);
   void updateTreeCPU();
   int addInnerNode();
 
@@ -55,21 +54,23 @@ public:
 
   const VoxelHeader& updateVoxelHeader();
 
-  quint32 numVisibleVoxelGrids() const;
-
-
 private:
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, scene::VoxelDataComponent::VoxelDataBlock, &scene::VoxelDataComponent::voxelDataBlock>> distanceFieldDataStorageBuffer;
-  SimpleShaderStorageBuffer<scene::VoxelDataComponent, implementation::RandomComponentDataDescription<scene::VoxelDataComponent, BoundingSphere, &scene::VoxelDataComponent::boundingSphere>> distanceFieldBoundingSphereStorageBuffer;
+  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
+  typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
-  QVector<quint32> zIndices;
+  VoxelGrid& voxelGridData;
+  VoxelBVH& voxelBvh;
+
+  ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
+  ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
+
+
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
   ManagedGLBuffer<BVH::InnerNode> bvhInnerNodes;
 
   VoxelHeader _voxelHeader;
 
-  quint32 _numVisibleVoxelGrids = 0;
-
+  void updateVoxelGrid();
   void updateBvhTree();
 };
 

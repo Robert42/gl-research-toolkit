@@ -42,17 +42,22 @@ quint64 Timer::elapsedTimeAsMicroseconds() const
 // ======== Profiler ===========================================================
 
 
+#ifdef GLRT_PROFILER
 Profiler* Profiler::activeProfiler = nullptr;
 int Profiler::frameId = -1;
-
+#endif
 
 Profiler::Profiler(const QString& applicationName)
-  : applicationName(applicationName),
-    currentDepth(0)
+  : applicationName(applicationName)
+#ifdef GLRT_PROFILER
+  ,currentDepth(0)
+#endif
 {
+#ifdef GLRT_PROFILER
   connect(&tcpSocket, &QTcpSocket::disconnected, this, &Profiler::deactivate);
   connect(&tcpSocket, &QTcpSocket::readyRead, this, &Profiler::readStringsToWrite);
   connect(&tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(connectionError()));
+#endif
 }
 
 
@@ -86,29 +91,38 @@ float Profiler::update()
 
 bool Profiler::isActive() const
 {
+#ifdef GLRT_PROFILER
   return activeProfiler == this;
+#else
+  return false;
+#endif
 }
 
 
 void Profiler::activate()
 {
+#ifdef GLRT_PROFILER
   activeProfiler = this;
   recordedScopes.clear();
   tcpSocket.connectToHost(QHostAddress::LocalHost, GLRT_PROFILER_DEFAULT_PORT);
   if(!tcpSocket.waitForConnected(1000))
     deactivate();
+#endif
 }
 
 
 void Profiler::deactivate()
 {
+#ifdef GLRT_PROFILER
   if(activeProfiler == this)
   {
     activeProfiler = nullptr;
     tcpSocket.abort();
   }
+#endif
 }
 
+#ifdef GLRT_PROFILER
 void Profiler::send_data_through_tcp(float frameTime)
 {
   if(tcpSocket.isOpen())
@@ -131,7 +145,7 @@ void Profiler::send_data(QDataStream& stream)
     stream << ptr << strings_to_send[ptr];
   strings_to_send.clear();
 
-  stream << int(recordedScopes.size());
+  stream << int(recordedScopes.size());GLRT_PROFILER
   for(const RecordedScope& s : recordedScopes)
     s.write(stream);
 }
@@ -154,7 +168,6 @@ void Profiler::readStringsToWrite()
       strings_to_send[ptr] = reinterpret_cast<char*>(ptr);
   }
 }
-
 
 // ======== Profiler::RecordedScope ============================================
 
@@ -211,6 +224,7 @@ Profiler::Scope::~Scope()
   activeProfiler->recordedScopes[this->index].gpuTime = MAX_TIME; // #ISSUE-58 use the real value instead of MAX:TIME
   this->index = INVALID_INDEX;
 }
+#endif
 
 } // namespace glrt
 

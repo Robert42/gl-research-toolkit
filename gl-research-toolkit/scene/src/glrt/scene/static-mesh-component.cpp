@@ -1,5 +1,6 @@
 #include <glrt/scene/static-mesh-component.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
 #include <glrt/scene/scene-layer.h>
 #include <glrt/scene/resources/material.h>
 #include <glrt/scene/resources/resource-manager.h>
@@ -16,19 +17,42 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : ComponentWithAABB(node, parent, uuid),
-    staticMeshUuid(staticMesh),
-    materialUuid(materialUuid)
+  : ComponentWithAABB(node, parent, uuid, DataClass::STATICMESH)
 {
   resourceManager().addMaterialUser(materialUuid, staticMesh);
   resourceManager().loadStaticMesh(staticMesh);
-  localAabb = resourceManager().staticMeshAABB(staticMeshUuid);
+  localAabb = resourceManager().staticMeshAABB(staticMesh);
+
+  const quint16 index = data_index.array_index;
+  Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
+  staticMeshes->materialUuid[index] = materialUuid;
+  staticMeshes->staticMeshUuid[index] = staticMesh;
+
   scene().StaticMeshComponentAdded(this);
 }
 
 StaticMeshComponent::~StaticMeshComponent()
 {
   hideInDestructor();
+
+  Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
+  staticMeshes->swap_staticmesh_data(data_index.array_index, staticMeshes->last_item_index());
+}
+
+const Uuid<resources::StaticMesh>& StaticMeshComponent::staticMeshUuid() const
+{
+  const quint16 index = data_index.array_index;
+  const Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
+
+  return staticMeshes->staticMeshUuid[index];
+}
+
+const Uuid<resources::Material>& StaticMeshComponent::materialUuid() const
+{
+  const quint16 index = data_index.array_index;
+  const Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
+
+  return staticMeshes->materialUuid[index];
 }
 
 
@@ -65,7 +89,7 @@ void StaticMeshComponent::registerAngelScriptAPI()
 
 resources::Material StaticMeshComponent::material() const
 {
-  return this->node.resourceManager().materialForUuid(this->materialUuid);
+  return this->node.resourceManager().materialForUuid(materialUuid());
 }
 
 

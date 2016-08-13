@@ -1,17 +1,16 @@
-#ifndef GLRT_RENDERER_STATICMESHRENDERER_INL
-#define GLRT_RENDERER_STATICMESHRENDERER_INL
-
 #include <glrt/renderer/static-mesh-renderer.h>
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/renderer/gl/shader-type.h>
+#include <glrt/toolkit/profiler.h>
 
 namespace glrt {
 namespace renderer {
 namespace implementation {
 
+
+
 struct NoPrint
 {
-public:
   template<typename T>
   NoPrint operator<<(const T&){return NoPrint();}
 };
@@ -19,33 +18,13 @@ public:
 #define LOG_MESH_LAODING NoPrint()
 //#define LOG_MESH_LAODING qDebug() << "StaticMeshRecorder: "
 
-StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder, ResourceManager& resourceManager, const Array<Uuid<Material>>& materialSet, TransformationBuffer& transformationBuffer, StaticMeshBufferManager& staticMeshBufferManager, const glm::ivec2& commonTokenList)
+
+
+StaticMeshRecorder::StaticMeshRecorder(gl::CommandListRecorder& recorder,
+                                       const glm::ivec2& commonTokenList)
   : recorder(recorder),
-    resourceManager(resourceManager),
-    staticMeshBufferManager(staticMeshBufferManager),
-    transformationBuffer(transformationBuffer),
     commonTokenList(commonTokenList)
 {
-  initMaterials(materialSet);
-
-#if !GLRT_SUPPORT_UPDATE_MOVABLE_UNIFORMS_SEPERATELY
-  bindNotMovableTokens();
-#endif
-}
-
-void StaticMeshRecorder::bindNotMovableTokens()
-{
-  boundTokenRanges = &tokenRanges.tokenRangeNotMovable;
-}
-
-void StaticMeshRecorder::bindMovableTokens()
-{
-  boundTokenRanges = &tokenRanges.tokenRangeMovables;
-}
-
-void StaticMeshRecorder::unbindTokens()
-{
-  boundTokenRanges = nullptr;
 }
 
 void StaticMeshRecorder::bindMaterialType(Material::Type materialType)
@@ -57,76 +36,150 @@ void StaticMeshRecorder::bindMaterialType(Material::Type materialType)
   recorder.beginTokenListWithCopy(commonTokenList);
 }
 
-void StaticMeshRecorder::unbindMaterialType(Material::Type materialType)
+void StaticMeshRecorder::unbindMaterialType()
 {
-  Q_ASSERT(boundTokenRanges != nullptr);
-  boundTokenRanges->insert(materialType, recorder.endTokenList());
+  tokenRanges.insert(currentMaterialType, recorder.endTokenList());
 }
 
-void StaticMeshRecorder::bindMaterial(const Uuid<Material>& material)
+void StaticMeshRecorder::bindMaterial(GLuint64 uniformBufer)
 {
-  Q_ASSERT(materialGpuAddresses.contains(material)); // if the material is not known, the mateiral wasn't initialized correctly
-
   if(currentMaterialType.testFlag(Material::TypeFlag::FRAGMENT_SHADER_UNIFORM))
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderType::FRAGMENT, materialGpuAddresses.value(material));
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderType::FRAGMENT, uniformBufer);
   else if(currentMaterialType.testFlag(Material::TypeFlag::VERTEX_SHADER_UNIFORM))
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderType::VERTEX, materialGpuAddresses.value(material));
+    recorder.append_token_UniformAddress(UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK, gl::ShaderType::VERTEX, uniformBufer);
   else
     Q_UNREACHABLE();
 
-  LOG_MESH_LAODING << "bindMaterial(" << labelForUuid(material) << ")";
+  LOG_MESH_LAODING << "bindMaterial()";
 }
 
-void StaticMeshRecorder::unbindMaterial(const Uuid<Material>& material)
+void StaticMeshRecorder::unbindMaterial()
 {
-  Q_UNUSED(material);
-  LOG_MESH_LAODING;
 }
 
-void StaticMeshRecorder::bindMesh(const Uuid<StaticMesh>& mesh)
+void StaticMeshRecorder::bindMesh(StaticMeshBuffer* staticMesh)
 {
-  currentMesh = mesh;
+  currentStaticMesh = staticMesh;
 
-  LOG_MESH_LAODING << "bindMesh(" << labelForUuid(mesh) << ")";
+  currentStaticMesh->recordBind(recorder);
 }
 
-void StaticMeshRecorder::unbindMesh(const Uuid<StaticMesh>& mesh)
+void StaticMeshRecorder::unbindMesh()
 {
-  Q_ASSERT(currentMesh == mesh);
-  currentMesh = Uuid<StaticMesh>();
+  currentStaticMesh = nullptr;
 }
 
-void StaticMeshRecorder::drawInstances(int begin, int end)
+void StaticMeshRecorder::appendDraw(GLuint64 transformUniform)
 {
-  LOG_MESH_LAODING << "drawInstances(" << end-begin << ")";
+  Q_ASSERT(currentStaticMesh!=nullptr);
 
-  Q_ASSERT(currentMesh != Uuid<StaticMesh>());
-
-  StaticMeshBuffer* staticMesh = staticMeshBufferManager.meshForUuid(currentMesh);
-
-  staticMesh->recordBind(recorder);
-  for(int i=begin; i<end; ++i)
-  {
-    recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderType::VERTEX, transformationBuffer.gpuAddressForInstance(i));
-    staticMesh->recordDraw(recorder);
-  }
-}
-
-void StaticMeshRecorder::initMaterials(const Array<Uuid<Material>>& materialSet)
-{
-  MaterialBuffer::Initializer materialBufferInitializer(recorder, resourceManager);
-
-  materialBufferInitializer.begin(materialSet.length());
-  for(Uuid<Material> m : materialSet)
-    materialBufferInitializer.append(m);
-  this->materialBuffer = std::move(materialBufferInitializer.end());
-
-  materialGpuAddresses = materialBufferInitializer.gpuAddresses;
+  recorder.append_token_UniformAddress(UNIFORM_BINDING_MESH_INSTANCE_BLOCK, gl::ShaderType::VERTEX, transformUniform);
+  currentStaticMesh->recordDraw(recorder);
 }
 
 
 } // namespace implementation
+
+// ======== StaticMeshRenderer =================================================
+
+StaticMeshRenderer::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager)
+  : scene_data(*scene.data),
+    staticMeshes(scene_data.staticMeshes),
+    materialBuffer(scene_data.resourceManager, scene_data.staticMeshes->capacity()),
+    transformationBuffer(scene_data.staticMeshes->capacity()),
+    staticMeshBufferManager(*staticMeshBufferManager)
+{
+}
+
+void StaticMeshRenderer::update()
+{
+  PROFILE_SCOPE("StaticMeshRenderer::update()")
+  updateObjectUniforms();
+}
+
+bool StaticMeshRenderer::needRerecording() const
+{
+  return staticMeshes->dirtyOrder;
+}
+
+TokenRanges StaticMeshRenderer::recordCommandList(gl::CommandListRecorder& recorder, const glm::ivec2& commonTokenList)
+{
+  PROFILE_SCOPE("StaticMeshRenderer::recordCommandList()")
+  scene_data.sort_staticMeshes();
+
+  const quint16 length = staticMeshes->length;
+
+  if(Q_UNLIKELY(length == 0))
+    return TokenRanges();
+
+  const Uuid<Material>* materials = staticMeshes->materialUuid;
+  const Uuid<StaticMesh>* meshes = staticMeshes->staticMeshUuid;
+  Uuid<Material> prevMaterial;
+  Uuid<StaticMesh> prevMesh;
+  Material::Type prevMaterialType = Material::TypeFlag(0xffffffff);
+  const GLuint64 materialUniformBuffer = materialBuffer.buffer.gpuBufferAddress();
+  GLuint64 currentMaterialUniformBuffer = materialUniformBuffer;
+
+  implementation::StaticMeshRecorder staticMeshRecorder(recorder,
+                                                        commonTokenList);
+
+  Q_ASSERT(materials[0] != prevMaterial);
+  Q_ASSERT(meshes[0] != prevMesh);
+
+  materialBuffer.map(length);
+  for(quint16 i=0; i<length; ++i)
+  {
+    if(prevMaterial != materials[i])
+    {
+      prevMaterial = materials[i];
+      Material::Type materialType = materialBuffer.append(materials[i]);
+
+      if(Q_LIKELY(i!=0))
+        staticMeshRecorder.unbindMaterial();
+      if(Q_UNLIKELY(materialType != prevMaterialType))
+      {
+        if(Q_LIKELY(i!=0))
+          staticMeshRecorder.unbindMaterialType();
+        prevMaterialType = materialType;
+        staticMeshRecorder.bindMaterialType(materialType);
+      }
+      staticMeshRecorder.bindMaterial(currentMaterialUniformBuffer);
+      currentMaterialUniformBuffer += materialBuffer.blockOffset;
+    }
+
+    if(prevMesh != meshes[i])
+    {
+      if(Q_LIKELY(i!=0))
+        staticMeshRecorder.unbindMesh();
+
+      prevMesh = meshes[i];
+      staticMeshRecorder.bindMesh(staticMeshBufferManager.meshForUuid(meshes[i]));
+    }
+
+    staticMeshRecorder.appendDraw(transformationBuffer.gpuAddressForInstance(i));
+  }
+  staticMeshRecorder.unbindMesh();
+  staticMeshRecorder.unbindMaterial();
+  staticMeshRecorder.unbindMaterialType();
+  materialBuffer.unmap();
+
+  Q_ASSERT(materialUniformBuffer == materialBuffer.buffer.gpuBufferAddress());
+
+  updateObjectUniforms(0, length);
+
+  return staticMeshRecorder.tokenRanges;
+}
+
+void StaticMeshRenderer::updateObjectUniforms()
+{
+  if(Q_UNLIKELY(staticMeshes->dirtyOrder || staticMeshes->numDynamic>0))
+    updateObjectUniforms(0, staticMeshes->length);
+}
+
+void StaticMeshRenderer::updateObjectUniforms(quint16 begin, quint16 end)
+{
+  transformationBuffer.update(begin, end, scene_data.transformDataForClass(scene::Node::Component::DataClass::STATICMESH));
+}
+
 } // namespace renderer
 } // namespace glrt
-
-#endif // GLRT_RENDERER_STATICMESHRENDERER_INL

@@ -117,6 +117,14 @@ DebugRenderer VisualizationRenderer::showWorldGrid()
   });
 }
 
+DebugRenderer VisualizationRenderer::showUniformTest()
+{
+  return DebugRenderer([]() -> DebugRenderer::Implementation* {
+    return debugging::DebugLineVisualisation::drawUniformTest();
+  });
+}
+
+
 
 } // namespace debugging
 } // namespace renderer

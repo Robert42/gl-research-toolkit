@@ -2,6 +2,7 @@
 #include <glrt/scene/node.h>
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-layer.h>
+#include <glrt/scene/scene-data.h>
 
 #include <angelscript-integration/call-script.h>
 
@@ -133,8 +134,7 @@ void Node::registerAngelScriptAPI()
 
 
 Node::ModularAttribute::ModularAttribute(Node& node, const Uuid<ModularAttribute>& uuid)
-  : TickingObject(node.scene().tickManager, &node),
-    node(node),
+  : node(node),
     uuid(uuid)
 {
   node._allModularAttributes.append(this);
@@ -180,15 +180,6 @@ const resources::ResourceManager& Node::ModularAttribute::resourceManager() cons
 // ======== Node::Component ====================================================
 
 /*!
-\property Node::Component::mayBecomeMovable
-
-This property is just a hint. For example the renderer might decide to order not
-movable components, which may be come movable later on between movable and not
-movable componetns in an array. this way, after becoming movable, a smaller part
-of components have to be resorted.
-*/
-
-/*!
 Constructs a new Components and adds it to the given \a node.
 
 Optionally, you can pass a \a parent component. Note, that you are allowed to
@@ -203,14 +194,11 @@ only changed by deleting the child or parent component.
 
 This component will have the given \a uuid.
 */
-Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid)
-  : TickingObject(node.scene().tickManager, &node),
-    node(node),
+Node::Component::Component(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass data_class)
+  : node(node),
     parent(parent==nullptr ? node.rootComponent() : parent),
     uuid(uuid),
-    _globalCoordFrame(glm::uninitialize),
-    _movable(false),
-    _mayBecomeMovable(false),
+    data_index{makeDynamic(data_class, parent!=nullptr && parent->isDynamic()), 0, 0xffff},
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
@@ -222,17 +210,33 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
   {
     Q_ASSERT(&this->node == &this->parent->node);
     this->parent->_children.append(this);
-
-    connect(this->parent, &Node::Component::coordDependencyDepthChanged, this, &Node::Component::coordDependencyDepthChanged);
   }else
   {
     Q_ASSERT(node.rootComponent() == nullptr);
     this->node._rootComponent = this;
   }
 
-  scene().componentAdded(this);
+  Scene::Data::Transformations& transformations = scene().data->transformDataForClass(data_index.data_class);
+  Q_ASSERT(transformations.length < transformations.capacity);
+  if(Q_UNLIKELY(transformations.length > transformations.capacity))
+  {
+    qWarning() << "Too many node components";
+    std::exit(0);
+  }
+  transformations.length++;
+  const quint16 last_item_index = transformations.last_item_index();
 
-  scene().globalCoordUpdater.addComponent(this);
+  transformations.component[last_item_index] = this;
+  transformations.orientation[last_item_index] = glm::quat::IDENTITY;
+  transformations.position[last_item_index] = glm::vec3(0);
+  transformations.scaleFactor[last_item_index] = 1;
+  transformations.local_coord_frame[last_item_index] = CoordFrame();
+  transformations.z_index[last_item_index] = 0;
+  data_index.array_index = last_item_index;
+  transformations.numDynamic+=this->isDynamic();
+  transformations.dirtyOrder = true;
+
+  scene().componentAdded(this);
 }
 
 /*!
@@ -254,6 +258,17 @@ Node::Component::~Component()
     parent->_children.removeOne(this);
   else
     node._rootComponent = nullptr;
+
+
+  Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
+  Q_ASSERT(transformations.length>0);
+  quint16 last_index = transformations.last_item_index();
+  quint16 current_index = data_index.array_index;
+
+  transformations.swap_transform_data(current_index, last_index);
+  transformations.length--;
+  transformations.numDynamic-=this->isDynamic();
+  transformations.dirtyOrder = true;
 }
 
 Scene& Node::Component::scene()
@@ -292,6 +307,11 @@ const QVector<glrt::scene::Node::Component*>& Node::Component::children() const
   return this->_children;
 }
 
+inline bool isNull(const void* instance)
+{
+  return instance == nullptr;
+}
+
 /*!
 Appends the whole subtree of this component (including this component itself)
 to the ggiven vector \a subTree.
@@ -300,7 +320,7 @@ to the ggiven vector \a subTree.
 */
 void Node::Component::collectSubtree(QVector<Component*>* subTree)
 {
-  if(this == nullptr)
+  if(isNull(this))
     return;
 
   subTree->append(this);
@@ -309,45 +329,9 @@ void Node::Component::collectSubtree(QVector<Component*>* subTree)
     child->collectSubtree(subTree);
 }
 
-Node::Component::MovabilityHint Node::Component::movabilityHint() const
+bool Node::Component::isDynamic() const
 {
-  int movable = static_cast<int>(this->movable());
-  int mayBecomeMovable = static_cast<int>(this->mayBecomeMovable());
-  Q_ASSERT(movable<=1);
-  Q_ASSERT(mayBecomeMovable<=1);
-  int hintValue = (movable<<1) | (mayBecomeMovable & ~movable);
-
-  Q_ASSERT(hintValue == static_cast<int>(MovabilityHint::STATIC) ||
-           hintValue == static_cast<int>(MovabilityHint::MAY_BECOME_MOVABLE) ||
-           hintValue == static_cast<int>(MovabilityHint::MOVABLE));
-
-  return static_cast<MovabilityHint>(hintValue);
-}
-
-bool Node::Component::movable() const
-{
-  return _movable || _coordinateIndex==-1;
-}
-
-bool Node::Component::mayBecomeMovable() const
-{
-  return _mayBecomeMovable;
-}
-
-void Node::Component::setMovable(bool movable)
-{
-  if(this->movable() != movable)
-  {
-    this->_movable = movable;
-    movableChanged(movable);
-    componentMovabilityChanged(this);
-  }
-}
-
-void Node::Component::setMayBecomeMovable(bool mayBecomeMovable)
-{
-  if(this->mayBecomeMovable() != mayBecomeMovable)
-    this->_mayBecomeMovable = mayBecomeMovable;
+  return (this->data_index.data_class & DataClass::DYNAMIC) == DataClass::DYNAMIC;
 }
 
 bool Node::Component::visible() const
@@ -413,10 +397,19 @@ void Node::Component::hideInDestructor()
   updateVisibility(prevVisibility);
 }
 
-
-CoordFrame Node::Component::localCoordFrame() const
+Node::Component::DataClass Node::Component::makeDynamic(Node::Component::DataClass dataClass, bool makeDynamic)
 {
-  return _localCoordFrame;
+  if(makeDynamic)
+    return DataClass::DYNAMIC | dataClass;
+  else
+    return dataClass;
+}
+
+
+const CoordFrame& Node::Component::localCoordFrame() const
+{
+  Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
+  return transformations.local_coord_frame[data_index.array_index];
 }
 
 /*!
@@ -428,83 +421,13 @@ the slow function calcGlobalCoordFrame to update it first or think, whether
 */
 CoordFrame Node::Component::globalCoordFrame() const
 {
-  return _globalCoordFrame;
-}
-
-quint32 Node::Component::zIndex() const
-{
-  return qHash(this); // _zIndex;
-}
-
-/*!
-Calculates the global transformation of the given component.
-
-\note This Method is able to accept nullptr as this value.
-*/
-CoordFrame Node::Component::updateGlobalCoordFrame()
-{
-  if(this == nullptr)
-    return CoordFrame();
-
-  if(Q_UNLIKELY(hasCustomGlobalCoordUpdater()))
-    _globalCoordFrame = calcGlobalCoordFrameImpl();
-  else if(Q_LIKELY(parent != nullptr))
-    _globalCoordFrame = parent->globalCoordFrame() * localCoordFrame();
-  else
-    _globalCoordFrame = localCoordFrame();
-
-  updateZIndex();
-
-  if(Q_LIKELY(hasAABB()))
-    reinterpret_cast<ComponentWithAABB*>(this)->expandSceneAABB();
-
-  return _globalCoordFrame;
-}
-
-quint32 Node::Component::updateZIndex()
-{
-  return this->_zIndex = calcZIndex(scene().aabb.toUnitSpace(globalCoordFrame().position));
-}
-
-
-/*!
-This function allows to use a customzed calculation for the global coord frame
-of a compent.
-
-The default implementation returns a coord frame containing only nans to signalize
-not to use this virtual function to improve performance.
-
-\warning Either always return a coord frame consisting only of NANs or never.
-
-\warning This functions will be called multithreaded, so don't depend on anything
-different than this component itself or it's CoordDependencies.
-\br
-Don't change any state of any object, just calculate the new GlobalCoordinate and
-return it.
-\br
-Don't change anything, expecially don't change the movability or delete any objects.
-*/
-CoordFrame Node::Component::calcGlobalCoordFrameImpl() const
-{
-  return CoordFrame(glm::vec3(NAN), glm::quat(NAN, NAN, NAN, NAN), NAN);
-}
-
-bool Node::Component::hasCustomGlobalCoordUpdater() const
-{
-  CoordFrame c = calcGlobalCoordFrameImpl();
-
-  return !std::isnan(c.scaleFactor);
+  Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
+  return transformations.globalCoordFrame(data_index.array_index);
 }
 
 void Node::Component::set_localCoordFrame(const CoordFrame& coordFrame)
 {
-  if(!movable())
-  {
-    qWarning() << "Trying to move not movable component";
-    return;
-  }
-
-  this->_localCoordFrame = coordFrame;
+  scene().data->transformDataForIndex(data_index).local_coord_frame[data_index.array_index] = coordFrame;
 }
 
 
@@ -524,7 +447,6 @@ int Node::Component::updateCoordDependencyDepth()
   if(_coorddependencyDepth != newDepth)
   {
     _coorddependencyDepth = newDepth;
-    coordDependencyDepthChanged(this);
   }
 
   return _coorddependencyDepth;
@@ -550,9 +472,10 @@ void Node::Component::registerAngelScriptAPIDeclarations()
 
 inline Node::Component* createEmptyComponent(Node& node,
                                              Node::Component* parent,
-                                             const Uuid<Node::Component>& uuid)
+                                             const Uuid<Node::Component>& uuid,
+                                             bool makeDynamic)
 {
-  return new Node::Component(node, parent, uuid);
+  return new Node::Component(node, parent, uuid, Node::Component::makeDynamic(Node::Component::DataClass::EMPTY, makeDynamic));
 }
 
 void Node::Component::registerAngelScriptAPI()
@@ -564,14 +487,9 @@ void Node::Component::registerAngelScriptAPI()
   Node::Component::_registerCreateMethod<decltype(createEmptyComponent), createEmptyComponent>(angelScriptEngine,
                                                                                                "NodeComponent",
                                                                                                "new_EmptyComponent",
-                                                                                               "const Uuid<NodeComponent> &in uuid");
+                                                                                               "const Uuid<NodeComponent> &in uuid, bool dynamic=false");
 
   angelScriptEngine->SetDefaultAccessMask(previousMask);
-}
-
-void Node::Component::collectDependencies(TickDependencySet* dependencySet) const
-{
-  TickingObject::collectDependencies(dependencySet);
 }
 
 void Node::Component::collectDependencies(CoordDependencySet* dependencySet) const
@@ -582,8 +500,8 @@ void Node::Component::collectDependencies(CoordDependencySet* dependencySet) con
   if(dependencySet->originalObject() == this)
   {
     for(const Component* dependency : dependencySet->queuedDependencies() + dependencySet->queuedDependencies())
-      if(!this->movable() && dependency->movable())
-        qWarning() << "Warning: not movable object " << this->uuid << " depending on a movable component " << dependency->uuid << ".";
+      if(!this->isDynamic() && dependency->isDynamic())
+        qWarning() << "Warning: not dynamic component " << this->uuid << " depending on a dynamic component " << dependency->uuid << ".";
   }
 
   if(!dependencySet->objectsWithCycles().isEmpty())
@@ -601,8 +519,8 @@ void Node::Component::collectCoordDependencies(CoordDependencySet* dependencySet
 // ======== ComponentWithAABB ====================================================
 
 
-ComponentWithAABB::ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid)
-  : Node::Component(node, parent, uuid),
+ComponentWithAABB::ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass dataClass)
+  : Node::Component(node, parent, uuid, dataClass),
     localAabb(AABB::invalid())
 {
   _hasAABB = true;

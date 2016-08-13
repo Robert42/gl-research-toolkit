@@ -6,16 +6,11 @@ set(SOURCE_FILES
   include/glrt/scene/collect-scene-data.inl
   include/glrt/scene/component-decorator.h
   include/glrt/scene/component-decorator.inl
-  include/glrt/scene/coord-constraints.h
   include/glrt/scene/coord-frame.h
   include/glrt/scene/coord-frame.inl
   include/glrt/scene/declarations.h
   include/glrt/scene/fps-debug-controller.h
   include/glrt/scene/global-coord-updater.h
-  include/glrt/scene/implementation/global-coord-array-order.h
-  include/glrt/scene/implementation/global-coord-array-order.inl
-  include/glrt/scene/implementation/tick-manager-tickorder-array.h
-  include/glrt/scene/implementation/tick-manager-tickorder-array.inl
   include/glrt/scene/input-handler.h
   include/glrt/scene/light-component.h
   include/glrt/scene/node.h
@@ -41,18 +36,18 @@ set(SOURCE_FILES
   include/glrt/scene/resources/voxel-data.h
   include/glrt/scene/resources/voxel-file.h
   include/glrt/scene/resources/voxelizer.h
+  include/glrt/scene/scene-data.h
   include/glrt/scene/scene.h
   include/glrt/scene/scene.inl
   include/glrt/scene/scene-layer.h
   include/glrt/scene/static-mesh-component.h
-  include/glrt/scene/ticking-object.h
+  include/glrt/scene/tick-manager.cpp
   include/glrt/scene/tick-manager.h
   include/glrt/scene/voxel-data-component.h
   src/glrt/scene/aabb.cpp
   src/glrt/scene/camera-component.cpp
   src/glrt/scene/camera-parameter.cpp
   src/glrt/scene/collect-scene-data.cpp
-  src/glrt/scene/coord-constraints.cpp
   src/glrt/scene/coord-frame.cpp
   src/glrt/scene/fps-debug-controller.cpp
   src/glrt/scene/global-coord-updater.cpp
@@ -79,9 +74,8 @@ set(SOURCE_FILES
   src/glrt/scene/resources/voxel-file.cpp
   src/glrt/scene/resources/voxelizer.cpp
   src/glrt/scene/scene.cpp
+  src/glrt/scene/scene-data.cpp
   src/glrt/scene/scene-layer.cpp
   src/glrt/scene/static-mesh-component.cpp
-  src/glrt/scene/ticking-object.cpp
-  src/glrt/scene/tick-manager.cpp
   src/glrt/scene/voxel-data-component.cpp
 )

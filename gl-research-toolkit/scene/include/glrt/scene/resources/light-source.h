@@ -18,6 +18,20 @@ struct LightSource final
     RECT_AREA_LIGHT,
   };
 
+  struct CompactAreaLight
+  {
+    glm::vec3 color = glm::vec3(1);
+    float luminous_power = 25.f;
+    float influence_radius = INFINITY;
+
+    void swap(CompactAreaLight& other)
+    {
+      std::swap(other.color, color);
+      std::swap(other.luminous_power, luminous_power);
+      std::swap(other.influence_radius, influence_radius);
+    }
+  };
+
   struct AreaLightCommon final
   {
     glm::vec3 color = glm::vec3(1);
@@ -26,6 +40,22 @@ struct LightSource final
     float influence_radius = INFINITY;
 
     AreaLightCommon(){}
+
+    operator CompactAreaLight() const
+    {
+      CompactAreaLight l;
+      l.color = color;
+      l.luminous_power = luminous_power;
+      l.influence_radius = influence_radius;
+      return l;
+    }
+
+    void operator=(const CompactAreaLight& l)
+    {
+      color = l.color;
+      luminous_power = l.luminous_power;
+      influence_radius = l.influence_radius;
+    }
 
     friend AreaLightCommon operator*(const CoordFrame& t, AreaLightCommon lightSource)
     {
@@ -62,6 +92,13 @@ struct LightSource final
     float half_width = 1.f;
     glm::vec3 tangent2 = glm::vec3(0, 1, 0);
     float half_height = 1.f;
+
+    glm::vec3 normal() const
+    {
+      const glm::vec3& tangent = tangent1;
+      const glm::vec3& bitangent = tangent2;
+      return cross(tangent, bitangent);
+    }
 
     friend RectAreaLight operator*(const CoordFrame& frame, RectAreaLight data)
     {

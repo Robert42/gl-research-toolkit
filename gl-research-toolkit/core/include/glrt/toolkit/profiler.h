@@ -38,7 +38,9 @@ public:
   void activate();
   void deactivate();
   bool isActive() const;
+
 private:
+#ifdef GLRT_PROFILER
   struct RecordedScope
   {
     quint64 cpuTime;
@@ -67,8 +69,10 @@ private:
 private slots:
   void connectionError();
   void readStringsToWrite();
+#endif
 };
 
+#ifdef GLRT_PROFILER
 class Profiler::Scope final
 {
 public:
@@ -79,6 +83,7 @@ public:
   Scope(const char* file, int line, const char* function, const char* name);
   ~Scope();
 };
+#endif
 
 } // namespace glrt
 

@@ -156,7 +156,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
     this->_disableSceneryVoxels=v;
     Array<scene::VoxelDataComponent*> voxelComponents = scene::collectAllComponentsWithType<scene::VoxelDataComponent>(&scene,
                                                                                                                        [](scene::VoxelDataComponent* c){
-                                                        return c->voxelizedAsScenery;
+                                                        return c->voxelizedAsScenery();
     });
 
     for(scene::VoxelDataComponent* c : voxelComponents)
@@ -168,10 +168,11 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
   renderer->visualizeVoxelBoundingSpheres.guiToggle.TwAddVarCB(tweakBar, "Show SDF B-Spheres", "group='Debug Scene' help='Show the Bounding Spheres of the Distancefield Components'");
 
-  renderer->visualizeVoxelBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Mesh-AABBs", "group='Debug Scene'");
-  renderer->visualizeVoxelSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");
+  renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Mesh-AABBs", "group='Debug Scene'");
+  renderer->visualizeSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");
 
   renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group='Debug Scene'");
+  renderer->visualizeUniformTest.guiToggle.TwAddVarCB(tweakBar, "Show Uniform Test", "group='Debug Scene'");
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
