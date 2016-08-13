@@ -34,7 +34,7 @@ void TransformationBuffer::update(quint16 begin, quint16 end, const scene::Scene
 
   quint8* tempBuffer = reinterpret_cast<quint8*>(buffer.Map(static_cast<GLintptr>(begin) * static_cast<GLsizeiptr>(sizeof(glm::mat4)), static_cast<GLsizeiptr>(num_elemnts_to_copy) * static_cast<GLsizeiptr>(alignment), gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_RANGE));
 
-#pragma omp parallel for
+#pragma omp simd
   for(quint16 i=0; i<num_elemnts_to_copy; ++i)
   {
     UniformData& data = *reinterpret_cast<UniformData*>(tempBuffer + size_t(i) * size_t(alignment));

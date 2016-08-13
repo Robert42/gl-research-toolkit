@@ -38,7 +38,7 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
     rectLights.dirtyOrder = false;
 
     SphereAreaLight* sphereLightBuffer = sphereLightUniforms.Map(sphereLights.length);
-  // #pragma omp parallel for
+   #pragma omp simd
     for(quint32 i=0; i<sphereLights.length; ++i)
     {
       sphereLightBuffer[i].areaLightCommon.color = sphereLights.lightData[i].color;
@@ -50,7 +50,7 @@ const LightBuffer::LightData& LightBuffer::updateLightData()
     sphereLightUniforms.Unmap();
 
     RectAreaLight* rectLightBuffer = rectLightUniforms.Map(rectLights.length);
-  // #pragma omp parallel for
+   #pragma omp simd
     for(quint32 i=0; i<rectLights.length; ++i)
     {
       rectLightBuffer[i].areaLightCommon.color = rectLights.lightData[i].color;
