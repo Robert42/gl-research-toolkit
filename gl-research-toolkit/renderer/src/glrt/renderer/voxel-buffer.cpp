@@ -47,6 +47,7 @@ void VoxelBuffer::updateVoxelGrid()
   const quint16 n = voxelGridData.length;
 
   scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n);
+  BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n);
 
   // #pragma omp parallel for
   for(quint16 i=0; i<n; ++i)
@@ -63,19 +64,11 @@ void VoxelBuffer::updateVoxelGrid()
     dataBlock[i].voxelCount_y = data.voxelCount.y;
     dataBlock[i].voxelCount_z = data.voxelCount.z;
     dataBlock[i].texture = data.gpuTextureHandle;
+
+    boundingSphere[i] = voxelGridData.globalCoordFrame(i) * voxelGridData.boundingSphere[i];
   }
 
   distanceFieldVoxelData.Unmap();
-
-  BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n);
-
-  // #pragma omp parallel for
-  for(quint16 i=0; i<n; ++i)
-  {
-    boundingSphere[i].center = voxelGridData.boundingSphere[i].center * voxelGridData.scaleFactor[i] + voxelGridData.position[i];
-    boundingSphere[i].radius = voxelGridData.boundingSphere[i].radius * voxelGridData.scaleFactor[i];
-  }
-
   distanceFieldboundingSpheres.Unmap();
 }
 
