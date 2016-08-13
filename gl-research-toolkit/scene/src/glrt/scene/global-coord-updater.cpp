@@ -53,7 +53,7 @@ void GlobalCoordUpdater::updateCoordinates()
   if(Q_UNLIKELY(_need_resorting_not_dynamic!=0))
   {
     PROFILE_SCOPE("GlobalCoordUpdater _need_resorting_not_dynamic!=0");
-    resort(&notDynamicComponents_pending, &_need_resorting_not_dynamic); // TODO is this increasing performance?
+    resort(&notDynamicComponents_pending, &_need_resorting_not_dynamic); // PERFORMANCE is this increasing performance?
     updateCoordinatesOf(notDynamicComponents_pending);
   }
 

@@ -27,13 +27,17 @@ VoxelDataComponent::~VoxelDataComponent()
 
 glm::mat4x3 VoxelDataComponent::globalWorldToVoxelMatrix4x3() const
 {
-  glm::mat4x3 m = data().worldToVoxelSpaceMatrix4x3(globalCoordFrame());
+  Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
+  const quint16 i = data_index.array_index;
+  glm::mat4x3 m = voxelGrids.voxelData[i].worldToVoxelSpaceMatrix4x3(voxelGrids.globalCoordFrame(i));
   return m;
 }
 
 glm::mat4 VoxelDataComponent::globalWorldToVoxelMatrix4() const
 {
-  glm::mat4 m = data().worldToVoxelSpaceMatrix4(globalCoordFrame());
+  Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
+  const quint16 i = data_index.array_index;
+  glm::mat4 m = voxelGrids.voxelData[i].worldToVoxelSpaceMatrix4(voxelGrids.globalCoordFrame(i));
   return m;
 }
 
@@ -73,7 +77,9 @@ quint64 VoxelDataComponent::textureData() const
 
 BoundingSphere VoxelDataComponent::boundingSphere() const
 {
-  return data().worldSpaceBoundignSphere(globalCoordFrame());
+  Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
+  const quint16 i = data_index.array_index;
+  return voxelGrids.voxelData[i].worldSpaceBoundignSphere(voxelGrids.globalCoordFrame(i));
 }
 
 const VoxelDataComponent::Data&VoxelDataComponent::data() const

@@ -421,9 +421,8 @@ the slow function calcGlobalCoordFrame to update it first or think, whether
 */
 CoordFrame Node::Component::globalCoordFrame() const
 {
-  // TODO remove this function?
   Scene::Data::Transformations& transformations = scene().data->transformDataForIndex(data_index);
-  return CoordFrame(transformations.position[data_index.array_index], transformations.orientation[data_index.array_index], transformations.scaleFactor[data_index.array_index]);
+  return transformations.globalCoordFrame(data_index.array_index);
 }
 
 // TODO:::::::::::::::::::::::::::
