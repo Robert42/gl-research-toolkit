@@ -49,7 +49,7 @@ void VoxelBuffer::updateVoxelGrid()
   scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n);
   BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n);
 
-  // #pragma omp parallel for
+  #pragma omp simd
   for(quint16 i=0; i<n; ++i)
   {
     const scene::resources::VoxelData& data = voxelGridData.voxelData[i];
