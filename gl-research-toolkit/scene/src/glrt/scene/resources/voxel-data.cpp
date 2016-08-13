@@ -12,11 +12,6 @@ VoxelBoundingBox::VoxelBoundingBox(const VoxelDataComponent& c)
 {
   worldToVoxelSpace = c.globalWorldToVoxelMatrix4();
   voxelCount = c.gridSize();
-
-  PRINT_VALUE(transform_point(worldToVoxelSpace, glm::vec3(-1, 1, 0)));
-  PRINT_VALUE(transform_point(worldToVoxelSpace, glm::vec3(1, -1, 2)));
-  PRINT_VALUE(transform_point(glm::inverse(worldToVoxelSpace), glm::vec3(0)));
-  PRINT_VALUE(transform_point(glm::inverse(worldToVoxelSpace), glm::vec3(voxelCount)));
 }
 
 

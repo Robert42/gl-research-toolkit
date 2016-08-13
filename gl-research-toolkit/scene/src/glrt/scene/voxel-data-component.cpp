@@ -12,16 +12,11 @@ using resources::BoundingSphere;
 VoxelDataComponent::VoxelDataComponent(Node& node, Node::Component* parent, const Uuid<VoxelDataComponent>& uuid, const Data& data, bool voxelizedAsScenery)
   : Component(node, parent, uuid, DataClass::VOXELGRID)
 {
-  scene().VoxelDataComponentAdded(this);
-
   Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
   voxelGrids.voxelData[data_index.array_index] = data;
   voxelGrids.voxelizedAsScenery[data_index.array_index] = voxelizedAsScenery;
 
-  // TODO::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: delete
-  PRINT_VALUE(data.localToVoxelSpace);
-  PRINT_VALUE(data.localToVoxelSpace.transform_point(glm::vec3(-1,  1, -1)));
-  PRINT_VALUE(data.localToVoxelSpace.transform_point(glm::vec3( 1, -1, 1)));
+  scene().VoxelDataComponentAdded(this);
 }
 
 VoxelDataComponent::~VoxelDataComponent()

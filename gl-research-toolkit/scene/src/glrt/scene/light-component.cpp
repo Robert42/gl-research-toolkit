@@ -126,14 +126,14 @@ RectAreaLightComponent::RectAreaLightComponent(Node& node, Node::Component* pare
   setGlobalData(data);
 
   scene().RectAreaLightComponentAdded(this);
-
-  Scene::Data::RectLights& rectLights = scene().data->rectLights;
-  rectLights.swap_rectlight_data(data_index.array_index, rectLights.last_item_index());
 }
 
 RectAreaLightComponent::~RectAreaLightComponent()
 {
   hideInDestructor();
+
+  Scene::Data::RectLights& rectLights = scene().data->rectLights;
+  rectLights.swap_rectlight_data(data_index.array_index, rectLights.last_item_index());
 }
 
 void RectAreaLightComponent::setGlobalData(const RectAreaLightComponent::Data& data) const

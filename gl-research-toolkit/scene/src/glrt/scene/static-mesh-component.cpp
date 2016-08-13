@@ -22,12 +22,13 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
   resourceManager().addMaterialUser(materialUuid, staticMesh);
   resourceManager().loadStaticMesh(staticMesh);
   localAabb = resourceManager().staticMeshAABB(staticMesh);
-  scene().StaticMeshComponentAdded(this);
 
   const quint16 index = data_index.array_index;
   Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
   staticMeshes->materialUuid[index] = materialUuid;
   staticMeshes->staticMeshUuid[index] = staticMesh;
+
+  scene().StaticMeshComponentAdded(this);
 }
 
 StaticMeshComponent::~StaticMeshComponent()
