@@ -16,7 +16,6 @@ set(SOURCE_FILES
   include/glrt/toolkit/network.h
   include/glrt/toolkit/plain-old-data-stream.h
   include/glrt/toolkit/profiler.h
-  include/glrt/toolkit/tcp-messages.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl
   include/glrt/toolkit/zindex.h
@@ -26,7 +25,6 @@ set(SOURCE_FILES
   src/glrt/toolkit/network.cpp
   src/glrt/toolkit/plain-old-data-stream.cpp
   src/glrt/toolkit/profiler.cpp
-  src/glrt/toolkit/tcp-messages.cpp
   src/glrt/toolkit/uuid.cpp
   src/glrt/toolkit/zindex.cpp
 )

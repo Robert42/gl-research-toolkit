@@ -15,23 +15,11 @@ public:
   Compiler();
   ~Compiler();
 
-protected:
-  void timerEvent(QTimerEvent* event) override;
+  void compile(const QString& shaderFile);
 
 private:
-  QTcpSocket tcpSocket;
-
-private slots:
-  void compile();
-  void disconnected();
-
-private:
-  bool dialogVisible = false;
-
   void sendCompiledProgram(const QByteArray& byteArray);
-  void sendData(glrt::TcpMessages::Id id, const QByteArray& byteArray);
-
-  void shaderDialogVisible(glrt::renderer::ShaderCompiler::DialogAction action);
+  void waitForReceived();
 };
 
 

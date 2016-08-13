@@ -15,6 +15,11 @@
 #include <QTcpSocket>
 #include <QElapsedTimer>
 
+
+const int ms = 1;
+const int seconds = 1000 * ms;
+const int minutes = 60 * seconds;
+
 namespace glrt {
 namespace renderer {
 
@@ -120,21 +125,14 @@ private:
 };
 
 
-ShaderCompiler::ShaderCompiler(bool startServer)
+ShaderCompiler::ShaderCompiler()
 {
   Q_ASSERT(_singleton == nullptr);
   _singleton = this;
-
-  compileProcess.setProcessChannelMode(QProcess::ForwardedChannels);
-
-  if(startServer)
-    startCompileProcess();
 }
 
 ShaderCompiler::~ShaderCompiler()
 {
-  endCompileProcess();
-
   Q_ASSERT(_singleton == this);
   _singleton = nullptr;
 }
@@ -218,117 +216,57 @@ gl::Program ShaderCompiler::compileProgramFromFiles_SubProcess(const CompileSett
 
   Q_ASSERT(CompileSettings::fromString(settings.toString()) == settings);
 
-  glrt::TcpMessages messages;
-  messages.connection = tcpConnection;
+  QFileInfo subProcessFile = QString(GLRT_SHADER_COMPILER_PATH);
+  if(!subProcessFile.exists())
+    throw GLRT_EXCEPTION("Couldn't find the shader-compiler executable");
 
-  TcpMessages::Message msgCompile;
-  msgCompile.id = shaderCompileCommand;
-  msgCompile.byteArray = settings.toString().toUtf8();
 
-  startCompileProcess();
-  messages.sendMessage(msgCompile);
+  QByteArray byteCode;
 
-  QElapsedTimer timer;
-  timer.start();
-
-  bool currentlyWaitingForUser = false;
-  while(true)
+  while(byteCode.isEmpty())
   {
-    if(!messages.waitForReadyRead(1000) && !currentlyWaitingForUser)
-    {
-      endCompileProcess();
-      messages.connection = tcpConnection;
-      timer.restart();
-    }
+    QProcess compileProcess;
+    compileProcess.start(subProcessFile.absoluteFilePath(), {settings.toString()}, QIODevice::ReadOnly|QIODevice::WriteOnly);
 
-    if(!compilerProcessIsRunning())
-    {
-      startCompileProcess();
-      messages.connection = tcpConnection;
-      messages.sendMessage(msgCompile);
-    }
+    if(!compileProcess.waitForStarted(1 * minutes))
+      continue;
+    compileProcess.setProcessChannelMode(QProcess::SeparateChannels);
 
-    if(messages.messageAvialable())
-    {
-      TcpMessages::Message msg = messages.readMessage();
-      if(msg.id == glslBytecode)
-      {
-        gl::Program program;
-        program.loadFromBinary(msg.byteArray);
+    compileProcess.setReadChannel(QProcess::StandardError);
 
-        return program;
-      }else if(msg.id == startedWaitingForUserInput)
+    QString finishedSignal;
+
+    const int totalWaitTime = 10*minutes;
+    int waitTime = 0;
+    int waitTimeDelta = 100 * ms;
+    while(compileProcess.state()==QProcess::Running &&
+          waitTime < totalWaitTime &&
+          !finishedSignal.contains("[Finished Compiling]"))
+    {
+      if(compileProcess.waitForReadyRead(waitTimeDelta))
       {
-        currentlyWaitingForUser = true;
-      }else if(msg.id == finishedWaitingForUserInput)
-      {
-        currentlyWaitingForUser = false;
-      }else if(msg.id == exitApplication)
-      {
-        qInfo() << "Aborted by user";
-        std::exit(0);
+        finishedSignal += QString::fromLatin1(compileProcess.readAllStandardError());
       }
+
+      waitTime += waitTime;
     }
-  }
-}
+    compileProcess.setReadChannel(QProcess::StandardOutput);
+    byteCode = compileProcess.readAllStandardOutput();
 
-bool ShaderCompiler::compilerProcessIsRunning() const
-{
-  return compileProcess.state() == QProcess::Running && tcpConnection!=nullptr && tcpConnection->isOpen();
-}
-
-void ShaderCompiler::startCompileProcess()
-{
-  if(!compilerProcessIsRunning())
-  {
-    if(nProcessStarted != 0)
-      qWarning() << "Compile process didn't respond, creating a new compile process";
-    ++nProcessStarted;
-
-    endCompileProcess();
-
-    tcpServer.listen(QHostAddress::LocalHost, GLRT_SHADER_COMPILER_PORT);
-
-    QFileInfo subProcessFile = QString(GLRT_SHADER_COMPILER_PATH);
-    if(!subProcessFile.exists())
-      throw GLRT_EXCEPTION("Couldn't find the shader-compiler executable");
-    compileProcess.start(subProcessFile.absoluteFilePath(), QIODevice::NotOpen);
-
-    if(!compileProcess.waitForStarted())
-      throw GLRT_EXCEPTION("Couldn't start compiler process");
-
-    if(!tcpServer.waitForNewConnection(30000))
-      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (waited for connection unsuccessfully)");
-
-    if(!tcpServer.hasPendingConnections())
-      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x3514)");
-
-    delete this->tcpConnection;
-    this->tcpConnection = tcpServer.nextPendingConnection();
-
-    if(tcpServer.hasPendingConnections())
-      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x6817)");
-
-    if(!compilerProcessIsRunning())
-      throw GLRT_EXCEPTION("Couldn't connect to the compiler process (error code: 0x57475)");
-  }
-}
-
-void ShaderCompiler::endCompileProcess()
-{
-  if(tcpConnection)
-  {
-    delete this->tcpConnection;
-    tcpServer.close();
-    tcpConnection = nullptr;
-  }
-  if(compileProcess.state() == QProcess::Running)
-  {
-    compileProcess.waitForFinished(30000);
-    compileProcess.terminate();
+    if(!byteCode.isEmpty())
+      compileProcess.write("[Received]\n");
     compileProcess.close();
+    if(!compileProcess.waitForFinished(1 * minutes))
+      compileProcess.kill();
+    if(byteCode.isEmpty())
+      qDebug()<<"Compiling Process failed. Trying a second time.";
   }
+
+  gl::Program program;
+  program.loadFromBinary(byteCode);
+  return program;
 }
+
 
 QByteArray ShaderCompiler::compileProgramFromFiles_GetBinary(const QString& name, const QDir& shaderDir, const QStringList& preprocessorBlock)
 {

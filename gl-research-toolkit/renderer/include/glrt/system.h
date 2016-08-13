@@ -24,6 +24,7 @@ public:
     int minOpenglVersion = 450;
     bool VSync = false;
     bool onlyOpenGLContext = false;
+    padding<byte, 2> _padding;
 
     static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))
     {

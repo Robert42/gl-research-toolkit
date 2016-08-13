@@ -1,10 +1,7 @@
 #include <glrt/system.h>
+#include <QMessageBox>
 
 #include "compiler.h"
-
-#include "debugmessage.h"
-
-bool isRunning = true;
 
 int main(int argc, char** argv)
 {
@@ -13,12 +10,15 @@ int main(int argc, char** argv)
 
   Compiler compiler;
 
-  int result = qApp->exec();
+  if(qApp->arguments().length() != 2)
+  {
+    QMessageBox::warning(nullptr, "Shader-Compile Process", "The Shader-Compile process expects exactly one argument being the path to the shader source file!");
+    return -1;
+  }
 
-  while(isRunning)
-    qApp->processEvents(QEventLoop::WaitForMoreEvents);
+  compiler.compile(qApp->arguments().last());
 
   Q_UNUSED(system);
   Q_UNUSED(compiler);
-  return result;
+  return 0;
 }

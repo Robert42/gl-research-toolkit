@@ -11,8 +11,6 @@ add_executable(shader-compiler
   main.cpp
   compiler.h
   compiler.cpp
-  debugmessage.cpp
-  debugmessage.h
   ${UI_HEADERS}
 )
 

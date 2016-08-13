@@ -4,6 +4,8 @@
 #include <glrt/dependencies.h>
 #include <QTcpSocket>
 
+#undef GLRT_PROFILER
+
 namespace glrt {
 
 class Timer final
