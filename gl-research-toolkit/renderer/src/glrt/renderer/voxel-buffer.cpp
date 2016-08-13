@@ -54,7 +54,7 @@ void VoxelBuffer::updateVoxelGrid()
   {
     const scene::resources::VoxelData& data = voxelGridData.voxelData[i];
 
-    dataBlock[i].globalWorldToVoxelFactor = voxelGridData.scaleFactor[i];
+    dataBlock[i].globalWorldToVoxelFactor = data.localToVoxelSpace.scaleFactor / voxelGridData.scaleFactor[i];
     glm::mat4x3 globalWorldToVoxelMatrix = data.worldToVoxelSpaceMatrix4x3(voxelGridData.globalCoordFrame(i));
     dataBlock[i].globalWorldToVoxelMatrix_col0 = globalWorldToVoxelMatrix[0];
     dataBlock[i].globalWorldToVoxelMatrix_col1 = globalWorldToVoxelMatrix[1];
