@@ -6,7 +6,7 @@ namespace renderer {
 // see https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
 quint16 BVH::generateHierarchy(quint16 begin, quint16 end)
 {
-  int newNode = addInnerNode();
+  quint16 newNode = addInnerNode();
   InnerNode innerNode;
   BoundingSphere boundingSphere;
 
@@ -18,7 +18,7 @@ quint16 BVH::generateHierarchy(quint16 begin, quint16 end)
     boundingSphere = leaves.boundingSphere[begin];
   }else
   {
-    int split = findSplit(begin, end);
+    quint16 split = findSplit(begin, end);
 
     innerNode.leftChild = generateHierarchy(begin, split);
     innerNode.rightChild = generateHierarchy(split, end);
@@ -32,7 +32,7 @@ quint16 BVH::generateHierarchy(quint16 begin, quint16 end)
   return newNode;
 }
 
-inline quint32 BVH::zIndexDistance(int a, int b)
+inline quint32 BVH::zIndexDistance(quint16 a, quint16 b)
 {
   return glm::highestBitValue(leaves.z_index[a] ^ leaves.z_index[b]);
 }

@@ -14,8 +14,8 @@ struct BVH
 {
   struct InnerNode
   {
-    int leftChild;
-    int rightChild;
+    quint16 leftChild;
+    quint16 rightChild;
   };
 
   typedef scene::resources::BoundingSphere BoundingSphere;
@@ -40,7 +40,7 @@ private:
   quint16 generateHierarchy(quint16 begin, quint16 end);
   quint16 findSplit(quint16 begin, quint16 end);
 
-  quint32 zIndexDistance(int a, int b);
+  quint32 zIndexDistance(quint16 a, quint16 b);
 };
 
 class VoxelBuffer
