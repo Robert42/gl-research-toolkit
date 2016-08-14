@@ -202,7 +202,6 @@ Node::Component::Component(Node& node, Component* parent, const Uuid<Component>&
     _visible(true),
     _parentVisible(true),
     _hiddenBecauseDeletedNextFrame(false),
-    _hasAABB(false),
     _coorddependencyDepth(0),
     _coordinateIndex(-1)
 {
@@ -339,12 +338,6 @@ bool Node::Component::visible() const
   return _visible && _parentVisible && !_hiddenBecauseDeletedNextFrame;
 }
 
-
-bool Node::Component::hasAABB() const
-{
-  Q_ASSERT(_hasAABB == is_instance_of<ComponentWithAABB>(this));
-  return _hasAABB;
-}
 
 void Node::Component::setVisible(bool visible)
 {
@@ -513,32 +506,6 @@ void Node::Component::collectCoordDependencies(CoordDependencySet* dependencySet
 {
   if(parent != nullptr)
     dependencySet->addDependency(parent);
-}
-
-
-// ======== ComponentWithAABB ====================================================
-
-
-ComponentWithAABB::ComponentWithAABB(Node& node, Component* parent, const Uuid<Component>& uuid, DataClass dataClass)
-  : Node::Component(node, parent, uuid, dataClass),
-    localAabb(AABB::invalid())
-{
-  _hasAABB = true;
-}
-
-ComponentWithAABB::~ComponentWithAABB()
-{
-}
-
-AABB ComponentWithAABB::globalAABB() const
-{
-  return localAabb.aabbOfTransformedBoundingBox(this->globalCoordFrame());
-}
-
-void ComponentWithAABB::expandSceneAABB()
-{
-  Q_ASSERT(this->hasAABB());
-  scene().aabb |= this->globalAABB();
 }
 
 

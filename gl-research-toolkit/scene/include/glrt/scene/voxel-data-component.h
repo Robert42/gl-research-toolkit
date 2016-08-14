@@ -22,6 +22,8 @@ public:
   resources::BoundingSphere boundingSphere() const;
   const Data& data() const;
   bool voxelizedAsScenery() const;
+
+  AABB globalAABB() const;
 };
 
 } // namespace scene

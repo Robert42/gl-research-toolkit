@@ -8,7 +8,8 @@ namespace glrt {
 namespace renderer {
 
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
-  : voxelGridData(scene.data->voxelGrids),
+  : scene(scene),
+    voxelGridData(scene.data->voxelGrids),
     voxelBvh(scene.data->voxelBVH),
     distanceFieldVoxelData(scene.data->voxelGrids.capacity()),
     distanceFieldboundingSpheres(scene.data->voxelGrids.capacity()),
@@ -49,27 +50,35 @@ void VoxelBuffer::updateVoxelGrid()
   scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n);
   BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n);
 
+  scene::AABB scene_aabb = scene::AABB::invalid();
+
   #pragma omp simd
   for(quint16 i=0; i<n; ++i)
   {
-    const scene::resources::VoxelData& data = voxelGridData.voxelData[i];
+    voxelGridData.aabb_for(&scene_aabb, i);
 
+    const scene::resources::VoxelData& data = voxelGridData.voxelData[i];
     dataBlock[i].globalWorldToVoxelFactor = data.localToVoxelSpace.scaleFactor / voxelGridData.scaleFactor[i];
-    glm::mat4x3 globalWorldToVoxelMatrix = data.worldToVoxelSpaceMatrix4x3(voxelGridData.globalCoordFrame(i));
+    const glm::mat4x3 globalWorldToVoxelMatrix = data.worldToVoxelSpaceMatrix4x3(voxelGridData.globalCoordFrame(i));
+    const glm::ivec3 voxelCount = data.voxelCount;
+    const quint64 gpuTextureHandle = data.gpuTextureHandle;
+
     dataBlock[i].globalWorldToVoxelMatrix_col0 = globalWorldToVoxelMatrix[0];
     dataBlock[i].globalWorldToVoxelMatrix_col1 = globalWorldToVoxelMatrix[1];
     dataBlock[i].globalWorldToVoxelMatrix_col2 = globalWorldToVoxelMatrix[2];
     dataBlock[i].globalWorldToVoxelMatrix_col3 = globalWorldToVoxelMatrix[3];
-    dataBlock[i].voxelCount_x = data.voxelCount.x;
-    dataBlock[i].voxelCount_y = data.voxelCount.y;
-    dataBlock[i].voxelCount_z = data.voxelCount.z;
-    dataBlock[i].texture = data.gpuTextureHandle;
+    dataBlock[i].voxelCount_x = voxelCount.x;
+    dataBlock[i].voxelCount_y = voxelCount.y;
+    dataBlock[i].voxelCount_z = voxelCount.z;
+    dataBlock[i].texture = gpuTextureHandle;
 
     boundingSphere[i] = voxelGridData.globalCoordFrame(i) * voxelGridData.boundingSphere[i];
   }
 
   distanceFieldVoxelData.Unmap();
   distanceFieldboundingSpheres.Unmap();
+
+  scene.aabb = scene_aabb;
 }
 
 void VoxelBuffer::updateBvhTree()

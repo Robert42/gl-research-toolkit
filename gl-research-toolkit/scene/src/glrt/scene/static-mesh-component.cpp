@@ -17,11 +17,10 @@ StaticMeshComponent::StaticMeshComponent(Node& node,
                                          const Uuid<StaticMeshComponent>& uuid,
                                          const Uuid<resources::StaticMesh>& staticMesh,
                                          const Uuid<resources::Material>& materialUuid)
-  : ComponentWithAABB(node, parent, uuid, DataClass::STATICMESH)
+  : Component(node, parent, uuid, DataClass::STATICMESH)
 {
   resourceManager().addMaterialUser(materialUuid, staticMesh);
   resourceManager().loadStaticMesh(staticMesh);
-  localAabb = resourceManager().staticMeshAABB(staticMesh);
 
   const quint16 index = data_index.array_index;
   Scene::Data::StaticMeshes* staticMeshes = scene().data->staticMeshes;
