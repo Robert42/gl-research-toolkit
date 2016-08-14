@@ -43,20 +43,20 @@ TEST(shader_library, bvh_split)
 
 TEST(shader_library, zindex)
 {
-  EXPECT_EQ(glrt::insertZeroBits(0x0),    0x0);
-  EXPECT_EQ(glrt::insertZeroBits(0x1),    0x1);
-  EXPECT_EQ(glrt::insertZeroBits(0x2),    0x8);
-  EXPECT_EQ(glrt::insertZeroBits(0x3),    0x9);
-  EXPECT_EQ(glrt::insertZeroBits(0x7),    0x49);
-  EXPECT_EQ(glrt::insertZeroBits(0xf),    0x249);
-  EXPECT_EQ(glrt::insertZeroBits(0x1f),   0x1249);
-  EXPECT_EQ(glrt::insertZeroBits(0x3f),   0x9249);
-  EXPECT_EQ(glrt::insertZeroBits(0x7f),   0x49249);
-  EXPECT_EQ(glrt::insertZeroBits(0xff),   0x249249);
-  EXPECT_EQ(glrt::insertZeroBits(0x1ff),  0x1249249);
-  EXPECT_EQ(glrt::insertZeroBits(0x3ff),  0x9249249);
+  EXPECT_EQ(glrt::insertZeroBits(0x0),    quint32(0x0));
+  EXPECT_EQ(glrt::insertZeroBits(0x1),    quint32(0x1));
+  EXPECT_EQ(glrt::insertZeroBits(0x2),    quint32(0x8));
+  EXPECT_EQ(glrt::insertZeroBits(0x3),    quint32(0x9));
+  EXPECT_EQ(glrt::insertZeroBits(0x7),    quint32(0x49));
+  EXPECT_EQ(glrt::insertZeroBits(0xf),    quint32(0x249));
+  EXPECT_EQ(glrt::insertZeroBits(0x1f),   quint32(0x1249));
+  EXPECT_EQ(glrt::insertZeroBits(0x3f),   quint32(0x9249));
+  EXPECT_EQ(glrt::insertZeroBits(0x7f),   quint32(0x49249));
+  EXPECT_EQ(glrt::insertZeroBits(0xff),   quint32(0x249249));
+  EXPECT_EQ(glrt::insertZeroBits(0x1ff),  quint32(0x1249249));
+  EXPECT_EQ(glrt::insertZeroBits(0x3ff),  quint32(0x9249249));
 
   // bits >= 1024 are ignored:
-  EXPECT_EQ(glrt::insertZeroBits(0xfff),  0x9249249);
-  EXPECT_EQ(glrt::insertZeroBits(0x1fff),  0x9249249);
+  EXPECT_EQ(glrt::insertZeroBits(0xfff),  quint32(0x9249249));
+  EXPECT_EQ(glrt::insertZeroBits(0x1fff),  quint32(0x9249249));
 }
