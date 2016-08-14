@@ -3,10 +3,8 @@
 namespace glrt {
 namespace renderer {
 
-// TODO:::::::::::::::::::::::::::
-#if 0
 // see https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
-int BVH::generateHierarchy(int begin, int end)
+quint16 BVH::generateHierarchy(quint16 begin, quint16 end)
 {
   int newNode = addInnerNode();
   InnerNode innerNode;
@@ -17,7 +15,7 @@ int BVH::generateHierarchy(int begin, int end)
   {
     innerNode.leftChild = begin;
     innerNode.rightChild = begin;
-    boundingSphere = leaves[begin]->boundingSphere();
+    boundingSphere = leaves.boundingSphere[begin];
   }else
   {
     int split = findSplit(begin, end);
@@ -36,13 +34,13 @@ int BVH::generateHierarchy(int begin, int end)
 
 inline quint32 BVH::zIndexDistance(int a, int b)
 {
-  return glm::highestBitValue(zIndices[a] ^ zIndices[b]);
+  return glm::highestBitValue(leaves.z_index[a] ^ leaves.z_index[b]);
 }
 
 // see also https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
-int BVH::findSplit(int begin, int end)
+quint16 BVH::findSplit(quint16 begin, quint16 end)
 {
-  int split = (begin+end)/2;
+  quint16 split = (begin+end)/2;
 
   while(begin+1 < end)
   {
@@ -56,6 +54,6 @@ int BVH::findSplit(int begin, int end)
 
   return split;
 }
-#endif
+
 } // namespace renderer
 } // namespace glrt

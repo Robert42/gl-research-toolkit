@@ -46,6 +46,8 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
 void VoxelBuffer::updateVoxelGrid()
 {
+  PROFILE_SCOPE("VoxelBuffer::updateVoxelGrid()")
+
   const quint16 n = voxelGridData.length;
 
   scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n);
@@ -92,57 +94,47 @@ void VoxelBuffer::updateVoxelGrid()
 
 void VoxelBuffer::updateBvhTree()
 {
-// TODO:::::::::::::::::::::::::::
-#if 0
-  // TODO add profiling scope
-  const int numElements = distanceFieldDataStorageBuffer.numElements();
+  PROFILE_SCOPE("VoxelBuffer::updateBvhTree()")
+
+  const quint16 numElements = voxelGridData.length;
   if(numElements <= 1)
     return;
-  const int numInnerNodes = numElements - 1;
-  const scene::VoxelDataComponent* const * components = distanceFieldDataStorageBuffer.data();
+  const quint16 numInnerNodes = numElements - 1;
 
-  zIndices.resize(numElements);
-
-  // ISSUE-61 OMP
-  for(int i=0; i<numElements; ++i)
-    zIndices[i] = components[i]->zIndex();
-
-  bvhInnerBoundingSpheres.setNumElements(numInnerNodes);
-  bvhInnerNodes.setNumElements(numInnerNodes);
-
-  /* TODO uncomment
-  BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map();
-  BVH::InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map();
+  voxelBvh.length = numInnerNodes;
 
   BVH bvh(voxelGridData, voxelBvh);
-  bvh.updateTreeCPU();
 
+  BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map(numInnerNodes);
+  BVH::InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map(numInnerNodes);
+  bvh.updateTreeCPU(bvhInnerBoundingSpheres, bvhInnerNodes);
   this->bvhInnerBoundingSpheres.Unmap();
   this->bvhInnerNodes.Unmap();
-  */
+
 }
 
-BVH::BVH(const scene::VoxelDataComponent* const * leaveBoundingSpheres, BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes, const quint32* zIndices, int length, int innerNodesCapacity)
-  : leaves(leaveBoundingSpheres),
-    bvhInnerBoundingSpheres(bvhInnerBoundingSpheres),
-    bvhInnerNodes(bvhInnerNodes),
-    zIndices(zIndices),
-    numLeaves(length),
-    innerNodesCapacity(innerNodesCapacity),
-    numInnerNodes(0)
+BVH::BVH(const VoxelGrids& voxelGridData, VoxelBVH& voxelBvhData)
+  : leaves(voxelGridData),
+    nodes(voxelBvhData),
+    innerNodesCapacity(voxelBvhData.length)
 {
 }
 
-void BVH::updateTreeCPU()
+void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode* bvhInnerNodes)
 {
-  generateHierarchy(0, numLeaves);
+  this->bvhInnerBoundingSpheres = bvhInnerBoundingSpheres;
+  this->bvhInnerNodes = bvhInnerNodes;
+
+  generateHierarchy(0, nodes.length);
+
+  this->bvhInnerBoundingSpheres = nullptr;
+  this->bvhInnerNodes = nullptr;
 }
 
-int BVH::addInnerNode()
+quint16 BVH::addInnerNode()
 {
   Q_ASSERT(numInnerNodes < innerNodesCapacity);
   return numInnerNodes++;
-#endif
 }
 
 

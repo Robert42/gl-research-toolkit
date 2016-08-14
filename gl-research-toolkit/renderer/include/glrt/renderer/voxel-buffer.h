@@ -18,20 +18,28 @@ struct BVH
     int rightChild;
   };
 
+  typedef scene::resources::BoundingSphere BoundingSphere;
+
   typedef scene::Scene::Data::VoxelGrids VoxelGrids;
   typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
 
-  const VoxelGrids& voxelGridData;
-  const VoxelBVH& voxelBvhData;
+  const VoxelGrids& leaves;
+  const VoxelBVH& nodes;
 
   BVH(const VoxelGrids& voxelGridData, VoxelBVH& voxelBvhData);
-  void updateTreeCPU();
-  int addInnerNode();
-
-  int generateHierarchy(int begin, int end);
-  int findSplit(int begin, int end);
+  void updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes);
 
 private:
+  BoundingSphere* bvhInnerBoundingSpheres = nullptr;
+  BVH::InnerNode* bvhInnerNodes = nullptr;
+  quint16 numInnerNodes = 0;
+  const quint16 innerNodesCapacity;
+
+  quint16 addInnerNode();
+
+  quint16 generateHierarchy(quint16 begin, quint16 end);
+  quint16 findSplit(quint16 begin, quint16 end);
+
   quint32 zIndexDistance(int a, int b);
 };
 
