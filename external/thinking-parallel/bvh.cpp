@@ -15,7 +15,7 @@ quint16 BVH::generateHierarchy(quint16 begin, quint16 end)
   {
     innerNode.leftChild = begin;
     innerNode.rightChild = begin;
-    boundingSphere = leaves.boundingSphere[begin];
+    boundingSphere = leaves_bounding_spheres[begin];
   }else
   {
     quint16 split = findSplit(begin, end);
@@ -34,7 +34,7 @@ quint16 BVH::generateHierarchy(quint16 begin, quint16 end)
 
 inline quint32 BVH::zIndexDistance(quint16 a, quint16 b)
 {
-  return glm::highestBitValue(leaves.z_index[a] ^ leaves.z_index[b]);
+  return glm::highestBitValue(leaves_z_indices[a] ^ leaves_z_indices[b]);
 }
 
 // see also https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/

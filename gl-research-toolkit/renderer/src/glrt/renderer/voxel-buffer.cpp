@@ -11,11 +11,10 @@ namespace renderer {
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
   : scene(scene),
     voxelGridData(scene.data->voxelGrids),
-    voxelBvh(scene.data->voxelBVH),
     distanceFieldVoxelData(scene.data->voxelGrids.capacity()),
     distanceFieldboundingSpheres(scene.data->voxelGrids.capacity()),
-    bvhInnerBoundingSpheres(scene.data->voxelBVH.capacity()),
-    bvhInnerNodes(scene.data->voxelBVH.capacity())
+    bvhInnerBoundingSpheres(scene.data->voxelGrids.capacity()),
+    bvhInnerNodes(scene.data->voxelGrids.capacity())
 {
 }
 
@@ -101,9 +100,7 @@ void VoxelBuffer::updateBvhTree()
     return;
   const quint16 numInnerNodes = numElements - 1;
 
-  voxelBvh.length = numInnerNodes;
-
-  BVH bvh(voxelGridData, voxelBvh);
+  BVH bvh(voxelGridData);
 
   BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map(numInnerNodes);
   BVH::InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map(numInnerNodes);
@@ -113,10 +110,16 @@ void VoxelBuffer::updateBvhTree()
 
 }
 
-BVH::BVH(const VoxelGrids& voxelGridData, VoxelBVH& voxelBvhData)
-  : leaves(voxelGridData),
-    nodes(voxelBvhData),
-    innerNodesCapacity(voxelBvhData.length)
+BVH::BVH(const VoxelGrids& voxelGridData)
+  : BVH(voxelGridData.boundingSphere, voxelGridData.z_index, voxelGridData.length)
+{
+}
+
+BVH::BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves)
+  : leaves_bounding_spheres(leaves_bounding_spheres),
+    leaves_z_indices(leaves_z_indices),
+    num_leaves(num_leaves),
+    capacity_inner_nodes(num_leaves)
 {
 }
 
@@ -125,7 +128,7 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
   this->bvhInnerBoundingSpheres = bvhInnerBoundingSpheres;
   this->bvhInnerNodes = bvhInnerNodes;
 
-  generateHierarchy(0, nodes.length);
+  generateHierarchy(0, num_leaves);
 
   this->bvhInnerBoundingSpheres = nullptr;
   this->bvhInnerNodes = nullptr;
@@ -133,8 +136,8 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
 
 quint16 BVH::addInnerNode()
 {
-  Q_ASSERT(numInnerNodes < innerNodesCapacity);
-  return numInnerNodes++;
+  Q_ASSERT(num_inner_nodes < capacity_inner_nodes);
+  return num_inner_nodes++;
 }
 
 

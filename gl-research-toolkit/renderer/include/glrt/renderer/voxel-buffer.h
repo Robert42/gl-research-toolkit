@@ -21,19 +21,20 @@ struct BVH
   typedef scene::resources::BoundingSphere BoundingSphere;
 
   typedef scene::Scene::Data::VoxelGrids VoxelGrids;
-  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
 
-  const VoxelGrids& leaves;
-  const VoxelBVH& nodes;
+  const BoundingSphere* const leaves_bounding_spheres;
+  const quint32* const leaves_z_indices;
+  const quint16 num_leaves;
 
-  BVH(const VoxelGrids& voxelGridData, VoxelBVH& voxelBvhData);
+  BVH(const VoxelGrids& voxelGridData);
+  BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves);
   void updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes);
 
 private:
   BoundingSphere* bvhInnerBoundingSpheres = nullptr;
   BVH::InnerNode* bvhInnerNodes = nullptr;
-  quint16 numInnerNodes = 0;
-  const quint16 innerNodesCapacity;
+  quint16 num_inner_nodes = 0;
+  const quint16 capacity_inner_nodes;
 
   quint16 addInnerNode();
 
@@ -63,12 +64,10 @@ public:
   const VoxelHeader& updateVoxelHeader();
 
 private:
-  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
   typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
   glrt::scene::Scene& scene;
   VoxelGrid& voxelGridData;
-  VoxelBVH& voxelBvh;
 
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;

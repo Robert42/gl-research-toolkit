@@ -191,11 +191,6 @@ public:
   };
 
   template<quint16 capacity>
-  struct VoxelBVH : public DataArray<capacity>
-  {
-  };
-
-  template<quint16 capacity>
   struct CameraData : public TransformData<capacity>
   {
     void swap_camera_data(quint16 a, quint16 b)
@@ -263,7 +258,6 @@ public:
   typedef RectLightData<0x100> RectLights;
   typedef StaticMeshData<0xffff> StaticMeshes;
   typedef VoxelGridData<0xffff> VoxelGrids;
-  typedef VoxelBVH<VoxelGrids::arrayCapacity-1> VoxelBVHs;
   typedef CameraData<0x100> Cameras;
 
   TransformData<0xffff> emptyNodes;
@@ -272,8 +266,6 @@ public:
   StaticMeshes* staticMeshes = &staticMeshes1;
   VoxelGrids voxelGrids;
   Cameras cameras;
-
-  VoxelBVHs voxelBVH;
 
   Scene& scene;
 
