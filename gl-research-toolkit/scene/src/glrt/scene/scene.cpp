@@ -39,7 +39,7 @@ resources::ResourceManager* get_resourceManager(Scene* scene)
 Scene::Scene(resources::ResourceManager* resourceManager)
   : resourceManager(*resourceManager),
     globalCoordUpdater(this),
-    data(new Data(*resourceManager))
+    data(new Data(*this))
 {
   connect(this, &Scene::componentAdded, &globalCoordUpdater, &GlobalCoordUpdater::addComponent);
   connect(this, &Scene::componentRemoved, &globalCoordUpdater, &GlobalCoordUpdater::removeComponent);

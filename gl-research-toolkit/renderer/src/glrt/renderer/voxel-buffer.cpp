@@ -3,6 +3,7 @@
 #include <glrt/scene/scene-data.h>
 #include <glrt/scene/resources/static-mesh.h>
 #include <glrt/toolkit/profiler.h>
+#include <glrt/toolkit/zindex.h>
 
 namespace glrt {
 namespace renderer {
@@ -57,9 +58,11 @@ void VoxelBuffer::updateVoxelGrid()
   {
     voxelGridData.aabb_for(&scene_aabb, i);
 
+    scene::CoordFrame globalCoordFrame = voxelGridData.globalCoordFrame(i);
+
     const scene::resources::VoxelData& data = voxelGridData.voxelData[i];
     dataBlock[i].globalWorldToVoxelFactor = data.localToVoxelSpace.scaleFactor / voxelGridData.scaleFactor[i];
-    const glm::mat4x3 globalWorldToVoxelMatrix = data.worldToVoxelSpaceMatrix4x3(voxelGridData.globalCoordFrame(i));
+    const glm::mat4x3 globalWorldToVoxelMatrix = data.worldToVoxelSpaceMatrix4x3(globalCoordFrame);
     const glm::ivec3 voxelCount = data.voxelCount;
     const quint64 gpuTextureHandle = data.gpuTextureHandle;
 
@@ -72,7 +75,13 @@ void VoxelBuffer::updateVoxelGrid()
     dataBlock[i].voxelCount_z = voxelCount.z;
     dataBlock[i].texture = gpuTextureHandle;
 
-    boundingSphere[i] = voxelGridData.globalCoordFrame(i) * voxelGridData.boundingSphere[i];
+    boundingSphere[i] = globalCoordFrame * voxelGridData.boundingSphere[i];
+  }
+
+#pragma omp simd
+  for(quint16 i=0; i<n; ++i)
+  {
+    voxelGridData.z_index[i] = calcZIndex(scene_aabb.toUnitSpace(voxelGridData.local_coord_frame[i].position));
   }
 
   distanceFieldVoxelData.Unmap();

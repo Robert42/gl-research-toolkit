@@ -1,5 +1,4 @@
 #include <glrt/dependencies.h>
-#include <glrt/toolkit/zindex.h>
 #include <glrt/glsl/math-cpp.h>
 #include <gtest/gtest.h>
 #include <test-vectors.h>

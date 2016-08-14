@@ -85,7 +85,7 @@ void StaticMeshRecorder::appendDraw(GLuint64 transformUniform)
 StaticMeshRenderer::StaticMeshRenderer(scene::Scene& scene, StaticMeshBufferManager* staticMeshBufferManager)
   : scene_data(*scene.data),
     staticMeshes(scene_data.staticMeshes),
-    materialBuffer(scene_data.resourceManager, scene_data.staticMeshes->capacity()),
+    materialBuffer(scene_data.scene.resourceManager, scene_data.staticMeshes->capacity()),
     transformationBuffer(scene_data.staticMeshes->capacity()),
     staticMeshBufferManager(*staticMeshBufferManager)
 {

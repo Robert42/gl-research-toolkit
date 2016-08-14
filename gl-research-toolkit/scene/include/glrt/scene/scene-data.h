@@ -49,7 +49,6 @@ public:
     glm::quat orientation[capacity];
     float scaleFactor[capacity];
     CoordFrame local_coord_frame[capacity];
-    quint32 z_index[capacity];
     Node::Component* component[capacity];
 
     CoordFrame globalCoordFrame(quint32 index) const
@@ -67,7 +66,6 @@ public:
       target_data->orientation[target_index] = source_data->orientation[source_index];
       target_data->scaleFactor[target_index] = source_data->scaleFactor[source_index];
       target_data->local_coord_frame[target_index] = source_data->local_coord_frame[source_index];
-      target_data->z_index[target_index] = source_data->z_index[source_index];
       target_data->component[target_index] = source_data->component[source_index];
       target_data->component[target_index]->data_index.array_index = target_index;
     }
@@ -168,12 +166,14 @@ public:
   {
     resources::VoxelData voxelData[capacity];
     resources::BoundingSphere boundingSphere[capacity];
+    quint32 z_index[capacity];
     bool voxelizedAsScenery[capacity];
 
     void swap_voxel_data(quint16 a, quint16 b)
     {
       std::swap(voxelData[a], voxelData[b]);
       std::swap(boundingSphere[a], boundingSphere[b]);
+      std::swap(z_index[a], z_index[b]);
       std::swap(voxelizedAsScenery[a], voxelizedAsScenery[b]);
     }
 
@@ -216,7 +216,6 @@ public:
     glm::quat* const orientation;
     float* const scaleFactor;
     CoordFrame* const local_coord_frame;
-    quint32* const z_index;
     Node::Component** const component;
 
     CoordFrame globalCoordFrame(quint16 index) const
@@ -235,7 +234,6 @@ public:
         orientation(data.orientation),
         scaleFactor(data.scaleFactor),
         local_coord_frame(data.local_coord_frame),
-        z_index(data.z_index),
         component(data.component)
     {
     }
@@ -251,7 +249,6 @@ public:
       std::swap(orientation[a], orientation[b]);
       std::swap(scaleFactor[a], scaleFactor[b]);
       std::swap(local_coord_frame[a], local_coord_frame[b]);
-      std::swap(z_index[a], z_index[b]);
       std::swap(component[a], component[b]);
     }
 
@@ -278,7 +275,7 @@ public:
 
   VoxelBVHs voxelBVH;
 
-  resources::ResourceManager& resourceManager;
+  Scene& scene;
 
   static const quint32 numTransformations = quint32(DataClass::NUM_DATA_CLASSES);
   Transformations* transformations[numTransformations];
@@ -290,7 +287,7 @@ public:
   const Transformations& transformDataForIndex(Node::Component::DataIndex dataIndex) const;
 
 
-  Data(resources::ResourceManager& resourceManager);
+  Data(Scene& scene);
   ~Data();
 
   void sort_staticMeshes();

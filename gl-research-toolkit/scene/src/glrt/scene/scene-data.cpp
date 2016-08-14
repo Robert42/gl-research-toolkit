@@ -4,8 +4,8 @@
 namespace glrt {
 namespace scene {
 
-Scene::Data::Data(resources::ResourceManager& resourceManager)
-  : resourceManager(resourceManager),
+Scene::Data::Data(Scene& scene)
+  : scene(scene),
     transformations{new Transformations(emptyNodes), new Transformations(sphereLights), new Transformations(rectLights), new Transformations(staticMeshes1), new Transformations(voxelGrids), new Transformations(cameras)},
     transformation_staticMeshes_backbuffer(new Transformations(staticMeshes2))
 {
@@ -35,7 +35,9 @@ void Scene::Data::sort_staticMeshes()
   for(quint16 i=0; i<staticMeshes->length; ++i)
     static_mesh_index_reorder[i] = i;
 
-  auto sorting_order = [this](quint16 a, quint16 b){
+  const resources::ResourceManager& resourceManager = scene.resourceManager;
+
+  auto sorting_order = [this,&resourceManager](quint16 a, quint16 b){
           const Uuid<resources::Material>& material_uuid_a = staticMeshes->materialUuid[a];
           const Uuid<resources::Material>& material_uuid_b = staticMeshes->materialUuid[b];
 
@@ -44,9 +46,8 @@ void Scene::Data::sort_staticMeshes()
                                        material_uuid_a,
                                        material_uuid_b,
                                        staticMeshes->staticMeshUuid[a],
-                                       staticMeshes->staticMeshUuid[b],
-                                       staticMeshes->z_index[a],
-                                       staticMeshes->z_index[b]);
+                                       staticMeshes->staticMeshUuid[b]);
+          // PERFORMANCE: also sort by zindex for better cache utilzation
   };
 
   std::stable_sort(&static_mesh_index_reorder[0], &static_mesh_index_reorder[staticMeshes->length], sorting_order);
