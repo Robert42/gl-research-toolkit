@@ -51,6 +51,8 @@ private:
 
 class VoxelBuffer
 {
+  // PERFORMANCE: really big voxelgrids (spinza itself don't need to be part of the bvh)
+  // PERFORMANCE: sort also by size of the bounding spheres?
 public:
   struct VoxelHeader
   {
