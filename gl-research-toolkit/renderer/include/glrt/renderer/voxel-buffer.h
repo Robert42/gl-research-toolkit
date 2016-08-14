@@ -58,6 +58,7 @@ private:
   typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
   typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
+  glrt::scene::Scene& scene;
   VoxelGrid& voxelGridData;
   VoxelBVH& voxelBvh;
 

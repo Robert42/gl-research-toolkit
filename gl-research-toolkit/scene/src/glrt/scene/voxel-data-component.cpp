@@ -71,6 +71,16 @@ bool VoxelDataComponent::voxelizedAsScenery() const
   return voxelGrids.voxelizedAsScenery[data_index.array_index];
 }
 
+AABB VoxelDataComponent::globalAABB() const
+{
+  Scene::Data::VoxelGrids& voxelGrids = scene().data->voxelGrids;
+  const quint16 i = data_index.array_index;
+
+  AABB aabb = AABB::invalid();
+  voxelGrids.aabb_for(&aabb, i);
+  return aabb;
+}
+
 
 } // namespace scene
 } // namespace glrt

@@ -176,6 +176,18 @@ public:
       std::swap(boundingSphere[a], boundingSphere[b]);
       std::swap(voxelizedAsScenery[a], voxelizedAsScenery[b]);
     }
+
+    void aabb_for(AABB* target_aabb, quint16 i) const
+    {
+      CoordFrame coordFrame = TransformData<capacity>::globalCoordFrame(i) * voxelData[i].localToVoxelSpace.inverse();
+      glm::vec3 voxelSize = glm::vec3(voxelData[i].voxelCount);
+
+      glm::vec3 a = coordFrame.transform_point(glm::vec3(0));
+      glm::vec3 b = coordFrame.transform_point(voxelSize);
+
+      *target_aabb |= a;
+      *target_aabb |= b;
+    }
   };
 
   template<quint16 capacity>
