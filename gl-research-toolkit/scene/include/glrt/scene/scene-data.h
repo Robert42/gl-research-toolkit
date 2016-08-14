@@ -254,10 +254,12 @@ public:
     }
   };
 
-  typedef SphereLightData<0xffff> SphereLights;
+  static const quint16 max_num_meshes = 0x8000; // highest index: 0x7fff: The highest bit is used for the bvh structure to differentiate between inner node and leaf
+
+  typedef SphereLightData<0x100> SphereLights;
   typedef RectLightData<0x100> RectLights;
-  typedef StaticMeshData<0xffff> StaticMeshes;
-  typedef VoxelGridData<0xffff> VoxelGrids;
+  typedef StaticMeshData<max_num_meshes> StaticMeshes;
+  typedef VoxelGridData<max_num_meshes> VoxelGrids;
   typedef CameraData<0x100> Cameras;
 
   TransformData<0xffff> emptyNodes;

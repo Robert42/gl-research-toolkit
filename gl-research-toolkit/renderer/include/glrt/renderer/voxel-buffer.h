@@ -12,15 +12,20 @@ namespace renderer {
 
 struct BVH
 {
+  typedef scene::resources::BoundingSphere BoundingSphere;
+  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
+
   struct InnerNode
   {
-    quint16 leftChild;
-    quint16 rightChild;
+    quint16 left_child;
+    quint16 right_child;
   };
 
-  typedef scene::resources::BoundingSphere BoundingSphere;
-
-  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
+  struct SubTree
+  {
+    BoundingSphere bounding_sphere;
+    quint16 index;
+  };
 
   const BoundingSphere* const leaves_bounding_spheres;
   const quint32* const leaves_z_indices;
@@ -30,6 +35,9 @@ struct BVH
   BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves);
   void updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes);
 
+  quint16 findSplit(quint16 begin, quint16 end);
+  quint32 zIndexDistance(quint16 a, quint16 b);
+
 private:
   BoundingSphere* bvhInnerBoundingSpheres = nullptr;
   BVH::InnerNode* bvhInnerNodes = nullptr;
@@ -38,10 +46,7 @@ private:
 
   quint16 addInnerNode();
 
-  quint16 generateHierarchy(quint16 begin, quint16 end);
-  quint16 findSplit(quint16 begin, quint16 end);
-
-  quint32 zIndexDistance(quint16 a, quint16 b);
+  SubTree generateHierarchy(quint16 begin, quint16 end);
 };
 
 class VoxelBuffer
