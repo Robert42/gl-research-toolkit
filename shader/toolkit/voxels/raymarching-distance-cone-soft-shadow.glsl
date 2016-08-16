@@ -7,7 +7,7 @@
 
 #include <cone-tracing/cone-occlusion.glsl>
 
-float coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
+float coneSoftShadow_singleVoxel(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
   mat4x3 worldToVoxelSpace;
   ivec3 voxelSize;
@@ -49,7 +49,7 @@ float coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block,
   return minVisibility;
 }
 
-float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+float coneSoftShadow_array_of_leaves(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
   float occlusion = 1.f;
   
@@ -62,7 +62,7 @@ float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBloc
     {
       float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
       float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-      occlusion = min(occlusion, coneSoftShadow(cone, distance_field_data_blocks, intersection_distance_front, intersection_distance_back, cone_length));
+      occlusion = min(occlusion, coneSoftShadow_singleVoxel(cone, distance_field_data_blocks, intersection_distance_front, intersection_distance_back, cone_length));
     }
     
     ++bounding_spheres;
@@ -76,6 +76,29 @@ float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBloc
   
   return occlusion;
 }
+
+#if defined(NO_BVH)
+
+float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+{
+  return coneSoftShadow_array_of_leaves(cone, bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
+}
+
+#else
+
+#if defined(BVH_RECURSIVE)
+float coneSoftShadow(in Cone cone, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+{
+  return 1.f;
+}
+#endif
+
+float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+{
+  return coneSoftShadow(cone, bvh_inner_nodes(), bvh_inner_bounding_spheres(), bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
+}
+
+#endif
 
 float coneSoftShadow(in Cone cone, float cone_length=inf)
 {

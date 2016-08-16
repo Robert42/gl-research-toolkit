@@ -77,6 +77,16 @@ VoxelDataBlock* distance_fields_voxelData()
   return (VoxelDataBlock*)scene.voxelHeader.distance_field_distancefielddata_array_address;
 }
 
+Sphere* bvh_inner_bounding_spheres()
+{
+  return (Sphere*)scene.voxelHeader.distance_field_bvh_inner_boundingsphere_array_address;
+}
+
+uint16_t* bvh_inner_nodes()
+{
+  return (uint16_t*)scene.voxelHeader.distance_field_bvh_node_array_address;
+}
+
 #ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)
 {
@@ -84,7 +94,7 @@ vec4 heatvision(uint32_t value)
   uint32_t whiteLevel = scene.costsHeatvisionWhiteLevel;
   blackLevel = min(whiteLevel, blackLevel);
   value = max(value, blackLevel);
-  
+
   return heatvision(value-blackLevel, whiteLevel-blackLevel);
 }
 #define highlightColor_DEFINED

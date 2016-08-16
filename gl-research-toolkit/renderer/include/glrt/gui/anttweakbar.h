@@ -6,6 +6,7 @@
 #include <glrt/toolkit/uuid.h>
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/renderer/debugging/surface-shader-visualizations.h>
+#include <glrt/renderer/bvh-usage.h>
 
 #include <glrt/scene/camera-parameter.h>
 
@@ -299,6 +300,7 @@ private:
   typedef TweakBarEnum<Uuid<Scene>> SceneEnumeration;
   typedef TweakBarEnum<QPointer<scene::CameraComponent>> CameraEnumeration;
   typedef TweakBarEnum<glrt::renderer::SurfaceShaderVisualization> VisualizationEnumeration;
+  typedef TweakBarEnum<glrt::renderer::BvhUsage> BvhUsageEnumeration;
 
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
@@ -320,6 +322,7 @@ private:
   SceneEnumeration::Ptr sceneSwitcher;
   CameraEnumeration::Ptr cameraSwitcher;
   VisualizationEnumeration::Ptr visualizationSwitcher;
+  BvhUsageEnumeration::Ptr bvhUsageSwitcher;
 
   TweakBarShaderToggle toggleLogHeatVision_debugPosteffect;
   TweakBarShaderToggle toggleLogHeatVision_costs;

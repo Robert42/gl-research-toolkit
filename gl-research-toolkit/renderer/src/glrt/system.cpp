@@ -3,6 +3,7 @@
 
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/renderer/bvh-usage.h>
 
 
 #include <assimp/version.h>
@@ -47,6 +48,8 @@ System::System(int& argc, char** argv, const Settings& settings)
 
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]
   std::locale::global(std::locale("C"));
+
+  glrt::renderer::setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
 
   initSDL(settings);
   initGLEW(settings);

@@ -2,6 +2,7 @@ set(SOURCE_FILES
   include/glrt/application.h
   include/glrt/gui/anttweakbar.h
   include/glrt/gui/toolbar.h
+  include/glrt/renderer/bvh-usage.h
   include/glrt/renderer/debugging/debugging-posteffect.h
   include/glrt/renderer/debugging/debug-line-visualisation.h
   include/glrt/renderer/debugging/debug-mesh.h
@@ -42,6 +43,7 @@ set(SOURCE_FILES
   src/glrt/application.cpp
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
+  src/glrt/renderer/bvh-usage.cpp
   src/glrt/renderer/debugging/debugging-posteffect.cpp
   src/glrt/renderer/debugging/debug-line-visualisation.cpp
   src/glrt/renderer/debugging/debug-mesh.cpp
