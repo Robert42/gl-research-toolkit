@@ -69,17 +69,60 @@ float coneSoftShadow_array_of_leaves(in Cone cone, in Sphere* bounding_spheres, 
     ++distance_field_data_blocks;
   }
   
-  occlusion = max(0, occlusion);
-  
-  occlusion = sq(occlusion);
-  occlusion = smoothstep(0, 1, occlusion);
-  
   return occlusion;
 }
 
-float coneSoftShadow_bvh_recursive(in Cone cone, in uint16_t root_node, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+float smooth_shadow_occlusion_value(float occlusion)
 {
-  return 1.f;
+  occlusion = max(0, occlusion);
+
+  occlusion = sq(occlusion);
+  occlusion = smoothstep(0, 1, occlusion);
+
+  return occlusion;
+}
+
+float coneSoftShadow_bvh_leaf(in Cone cone, in uint16_t leaf_node, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* leaf_distance_field_data_blocks, float cone_length=inf)
+{
+  float distance_to_sphere_origin;
+  Sphere sphere = leaf_bounding_spheres[leaf_node];
+  if(cone_intersects_sphere(cone, sphere, distance_to_sphere_origin))
+  {
+    float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
+    float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
+    return coneSoftShadow_singleVoxel(cone, leaf_distance_field_data_blocks+leaf_node, intersection_distance_front, intersection_distance_back, cone_length);
+  }else
+    return 1.f;
+}
+
+float coneSoftShadow_bvh_recursive(in Cone cone, in uint16_t root_node, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* leaf_distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf, int depth=0)
+{
+  float distance_to_sphere_origin;
+  if(!cone_intersects_sphere(cone, bvh_inner_bounding_sphere[root_node], distance_to_sphere_origin))
+    return 1.f;
+  
+  uint16_t* child_nodes = inner_nodes + root_node*uint16_t(2);
+  uint16_t left_node = child_nodes[0];
+  uint16_t right_node = child_nodes[1];
+  
+  float occlusion = 1.f;
+  
+  bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
+  bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
+  left_node = left_node & uint16_t(0x7fff);
+  right_node = right_node & uint16_t(0x7fff);
+  
+  if(left_is_inner_node)
+    occlusion = coneSoftShadow_bvh_leaf(cone, left_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length);
+  else
+    occlusion = coneSoftShadow_bvh_recursive(cone, left_node, inner_nodes, bvh_inner_bounding_sphere, leaf_bounding_spheres, leaf_distance_field_data_blocks, num_distance_fields, cone_length, depth+1);
+    
+  if(right_is_inner_node)
+    occlusion = min(occlusion, coneSoftShadow_bvh_leaf(cone, right_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length));
+  else
+    occlusion = min(occlusion, coneSoftShadow_bvh_recursive(cone, right_node, inner_nodes, bvh_inner_bounding_sphere, leaf_bounding_spheres, leaf_distance_field_data_blocks, num_distance_fields, cone_length, depth+1));
+  
+  return occlusion;
 }
 
 #if defined(NO_BVH)
