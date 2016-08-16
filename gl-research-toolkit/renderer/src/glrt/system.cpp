@@ -49,7 +49,7 @@ System::System(int& argc, char** argv, const Settings& settings)
   // make glm print a vec3 as [1.2, 0.1, 0.0] instead of [1,2, 0,1, 0,0]
   std::locale::global(std::locale("C"));
 
-  glrt::renderer::setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
+  renderer::init_bvh_shader_macros();
 
   initSDL(settings);
   initGLEW(settings);

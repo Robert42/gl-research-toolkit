@@ -6,7 +6,8 @@ namespace renderer {
 
 BvhUsage currentBvhUsage = BvhUsage::BVH_RECURSIVE;
 
-const quint16 BVH_MAX_DEPTH = 64;
+// FIXME set to a lower value!
+const quint16 BVH_MAX_DEPTH = 256;
 
 QMap<QString, BvhUsage> allcurrentBvhUsages()
 {
@@ -38,6 +39,12 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
   }
 
   ReloadableShader::reloadAll();
+}
+
+void init_bvh_shader_macros()
+{
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_DEPTH %0").arg(BVH_MAX_DEPTH));
+  glrt::renderer::setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
 }
 
 } // namespace renderer

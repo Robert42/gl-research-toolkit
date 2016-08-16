@@ -95,33 +95,50 @@ float coneSoftShadow_bvh_leaf(in Cone cone, in uint16_t leaf_node, in Sphere* le
     return 1.f;
 }
 
-float coneSoftShadow_bvh_recursive(in Cone cone, in uint16_t root_node, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* leaf_distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf, int depth=0)
+float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* leaf_distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  float distance_to_sphere_origin;
-  if(!cone_intersects_sphere(cone, bvh_inner_bounding_sphere[root_node], distance_to_sphere_origin))
-    return 1.f;
+  // TODO try, whether using uint8_t instead of uint16_t has more performance
   
-  uint16_t* child_nodes = inner_nodes + root_node*uint16_t(2);
-  uint16_t left_node = child_nodes[0];
-  uint16_t right_node = child_nodes[1];
-  
+  uint16_t stack[BVH_MAX_DEPTH];
+  stack[0] = root_node;
+  uint16_t stack_depth=uint16_t(1);
   float occlusion = 1.f;
   
-  bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
-  bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
-  left_node = left_node & uint16_t(0x7fff);
-  right_node = right_node & uint16_t(0x7fff);
-  
-  if(left_is_inner_node)
-    occlusion = coneSoftShadow_bvh_leaf(cone, left_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length);
-  else
-    occlusion = coneSoftShadow_bvh_recursive(cone, left_node, inner_nodes, bvh_inner_bounding_sphere, leaf_bounding_spheres, leaf_distance_field_data_blocks, num_distance_fields, cone_length, depth+1);
+  do {
+    stack_depth--;
+    uint16_t current_node = stack[stack_depth];
     
-  if(right_is_inner_node)
-    occlusion = min(occlusion, coneSoftShadow_bvh_leaf(cone, right_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length));
-  else
-    occlusion = min(occlusion, coneSoftShadow_bvh_recursive(cone, right_node, inner_nodes, bvh_inner_bounding_sphere, leaf_bounding_spheres, leaf_distance_field_data_blocks, num_distance_fields, cone_length, depth+1));
-  
+    uint16_t* child_nodes = inner_nodes + current_node*uint16_t(2);
+    uint16_t left_node = child_nodes[0];
+    uint16_t right_node = child_nodes[1];
+    
+    bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
+    bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
+    left_node = left_node & uint16_t(0x7fff);
+    right_node = right_node & uint16_t(0x7fff);
+    
+    if(left_is_inner_node)
+    {
+      float d;
+      if(cone_intersects_sphere(cone, bvh_inner_bounding_sphere[left_node], d))
+        stack[stack_depth++] = left_node;
+    }else
+    {
+      occlusion = min(occlusion, coneSoftShadow_bvh_leaf(cone, left_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length));
+    }
+      
+    if(right_is_inner_node)
+    {
+      float d;
+      if(cone_intersects_sphere(cone, bvh_inner_bounding_sphere[right_node], d))
+        stack[stack_depth++] = right_node;
+    }else
+    {
+      occlusion = min(occlusion, coneSoftShadow_bvh_leaf(cone, right_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length));
+    }
+    
+  }while(stack_depth>uint16_t(0));
+
   return occlusion;
 }
 
@@ -137,7 +154,7 @@ float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBloc
 #if defined(BVH_RECURSIVE)
 float coneSoftShadow(in Cone cone, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  return coneSoftShadow_bvh_recursive(cone, uint16_t(0), inner_nodes, bvh_inner_bounding_sphere, bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
+  return coneSoftShadow_bvh_iterative(cone, uint16_t(0), inner_nodes, bvh_inner_bounding_sphere, bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
 }
 #endif
 
