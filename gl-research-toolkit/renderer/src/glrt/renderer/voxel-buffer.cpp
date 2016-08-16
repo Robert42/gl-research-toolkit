@@ -132,8 +132,9 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
   generateHierarchy(0, num_leaves);
 
   const quint16 depth = calcDepth(0, bvhInnerNodes);
-  PRINT_VALUE(num_leaves);
-  PRINT_VALUE(depth);
+  if(depth == num_leaves-1)
+    qWarning() << "Malformed tree (no performence gains)";
+  qDebug() << "BVH::updateTreeCPU{num_leaves:" <<num_leaves << " depth:"<<depth<<"}";
   Q_ASSERT(depth < BVH_MAX_DEPTH);
 
   this->bvhInnerBoundingSpheres = nullptr;
