@@ -36,7 +36,10 @@ BVH::SubTree BVH::generateHierarchy(quint16 begin, quint16 end)
 
 inline quint32 BVH::zIndexDistance(quint16 a, quint16 b)
 {
-  return glm::highestBitValue(leaves_z_indices[a] ^ leaves_z_indices[b]);
+  Q_ASSERT(a<num_leaves);
+  Q_ASSERT(b-1<num_leaves);
+  Q_ASSERT(b>0);
+  return glm::highestBitValue(leaves_z_indices[a] ^ leaves_z_indices[b-1]);
 }
 
 // see also https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
