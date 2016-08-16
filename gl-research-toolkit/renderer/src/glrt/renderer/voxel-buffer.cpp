@@ -1,4 +1,5 @@
 #include <glrt/renderer/voxel-buffer.h>
+#include <glrt/renderer/bvh-usage.h>
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-data.h>
 #include <glrt/scene/resources/static-mesh.h>
@@ -130,6 +131,11 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
 
   generateHierarchy(0, num_leaves);
 
+  const quint16 depth = calcDepth(0, bvhInnerNodes);
+  PRINT_VALUE(num_leaves);
+  PRINT_VALUE(depth);
+  Q_ASSERT(depth < BVH_MAX_DEPTH);
+
   this->bvhInnerBoundingSpheres = nullptr;
   this->bvhInnerNodes = nullptr;
 }
@@ -138,6 +144,17 @@ quint16 BVH::addInnerNode()
 {
   Q_ASSERT(num_inner_nodes < capacity_inner_nodes);
   return num_inner_nodes++;
+}
+
+quint16 BVH::calcDepth(quint16 root, InnerNode* bvhInnerNodes) const
+{
+  if(root & 0x8000)
+    return 0;
+
+  Q_ASSERT(num_inner_nodes > root);
+
+  return 1+glm::max(calcDepth(bvhInnerNodes[root].left_child, bvhInnerNodes),
+                  calcDepth(bvhInnerNodes[root].right_child, bvhInnerNodes));
 }
 
 

@@ -16,6 +16,8 @@ extern BvhUsage currentBvhUsage;
 QMap<QString, BvhUsage> allcurrentBvhUsages();
 void setCurrentBVHUsage(BvhUsage bvhUsage);
 
+extern const quint16 BVH_MAX_DEPTH;
+
 } // namespace renderer
 } // namespace glrt
 

@@ -46,6 +46,8 @@ private:
 
   quint16 addInnerNode();
 
+  quint16 calcDepth(quint16 root, InnerNode* bvhInnerNodes) const;
+
   SubTree generateHierarchy(quint16 begin, quint16 end);
 };
 
