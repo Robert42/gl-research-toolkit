@@ -77,6 +77,11 @@ float coneSoftShadow_array_of_leaves(in Cone cone, in Sphere* bounding_spheres, 
   return occlusion;
 }
 
+float coneSoftShadow_bvh_recursive(in Cone cone, in uint16_t root_node, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+{
+  return 1.f;
+}
+
 #if defined(NO_BVH)
 
 float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
@@ -89,7 +94,7 @@ float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBloc
 #if defined(BVH_RECURSIVE)
 float coneSoftShadow(in Cone cone, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  return 1.f;
+  return coneSoftShadow_bvh_recursive(cone, uint16_t(0), inner_nodes, bvh_inner_bounding_sphere, bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
 }
 #endif
 
