@@ -99,7 +99,38 @@ void Scene::Data::sort_voxelGrids()
 {
   voxelGrids->assert_valid_indices();
 
-  voxelGrids->dirtyOrder = false;
+#pragma omp simd
+  for(quint16 i=0; i<voxelGrids->length; ++i)
+    index_reorder[i] = i;
+
+  quint32* z_indices = voxelGrids->z_index;
+  auto sorting_order = [&z_indices](quint16 a, quint16 b){
+          return z_indices[a]<z_indices[b];
+  };
+
+  std::stable_sort(&index_reorder[0], &index_reorder[voxelGrids->length], sorting_order);
+
+  VoxelGrids::copy_array_metadata(voxelGrids_backbuffer, voxelGrids);
+#pragma omp simd
+  for(quint16 i=0; i<voxelGrids->length; ++i)
+  {
+    VoxelGrids::copy_transform_data(voxelGrids_backbuffer, i, voxelGrids, index_reorder[i]);
+    VoxelGrids::copy_voxelgrid_data(voxelGrids_backbuffer, i, voxelGrids, index_reorder[i]);
+  }
+  std::swap(voxelGrids, voxelGrids_backbuffer);
+  std::swap(transformation_voxelGrids_backbuffer, transformations[static_cast<quint32>(DataClass::VOXELGRID)]);
+
+#ifdef QT_DEBUG
+  z_indices = voxelGrids->z_index; // after swapping the old address is invalid
+
+  voxelGrids->assert_valid_indices();
+  #pragma omp simd
+    for(quint16 i=0; i<voxelGrids->length; ++i)
+      index_reorder[i] = i;
+  Q_ASSERT(std::is_sorted(&index_reorder[0], &index_reorder[voxelGrids->length], sorting_order));
+#endif
+
+    voxelGrids->dirtyOrder = false;
 }
 
 } // namespace scene
