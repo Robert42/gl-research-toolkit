@@ -284,6 +284,8 @@ public:
   Data(Scene& scene);
   ~Data();
 
+  void clear();
+
   void sort_staticMeshes();
 
 private:

@@ -68,6 +68,8 @@ void Scene::clear()
   _cameras.clear();
   _lights.clear();
 
+  data->clear();
+
   sceneCleared();
 }
 

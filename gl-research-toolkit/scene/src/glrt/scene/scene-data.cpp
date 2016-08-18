@@ -17,6 +17,8 @@ Scene::Data::Data(Scene& scene)
   Q_ASSERT(transformations[quint32(DataClass::CAMERA)]->position ==  cameras.position);
 
   Q_ASSERT(transformation_staticMeshes_backbuffer->position ==  staticMeshes_backbuffer->position);
+
+  clear();
 }
 
 Scene::Data::~Data()
@@ -25,6 +27,22 @@ Scene::Data::~Data()
     delete transformations[i];
 
   delete transformation_staticMeshes_backbuffer;
+}
+
+void Scene::Data::clear()
+{
+  for(uint32_t i=0; i<numTransformations; ++i)
+    Q_ASSERT(transformations[i]->length == 0);
+
+  const uint16_t n = voxelGrids.capacity();
+  resources::BoundingSphere* spheres = voxelGrids.boundingSphere;
+#pragma omp for simd
+  for(int i=0; i<n; ++i)
+  {
+    spheres[i].center = glm::vec3(NAN);
+    spheres[i].radius = NAN;
+  }
+
 }
 
 void Scene::Data::sort_staticMeshes()

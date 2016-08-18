@@ -148,6 +148,10 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b) const
   joined.center = glm::mix(edge1, edge2, 0.5f);
   joined.radius = (glm::abs(e1) + glm::abs(e2)) / 2.f;
 
+  const float epsilon = 1.e-7f;
+  Q_ASSERT(joined.contains(a, epsilon));
+  Q_ASSERT(joined.contains(b, epsilon));
+
   return joined;
 }
 

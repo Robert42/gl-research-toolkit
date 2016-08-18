@@ -26,9 +26,10 @@ BVH::SubTree BVH::generateHierarchy(quint16 begin, quint16 end)
 
     bvhInnerNodes[newNode].left_child = left_subtree.index;
     bvhInnerNodes[newNode].right_child = right_subtree.index;
+    bvhInnerBoundingSpheres[newNode] = left_subtree.bounding_sphere | right_subtree.bounding_sphere;
 
     root.index = newNode;
-    root.bounding_sphere = left_subtree.bounding_sphere | right_subtree.bounding_sphere;
+    root.bounding_sphere = bvhInnerBoundingSpheres[newNode];
   }
 
   return root;
