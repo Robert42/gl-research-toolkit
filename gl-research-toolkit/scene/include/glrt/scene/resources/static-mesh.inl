@@ -146,9 +146,7 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b) const
   BoundingSphere joined;
 
   joined.center = glm::mix(edge1, edge2, 0.5f);
-  joined.radius = (glm::abs(e1) + glm::abs(e2)) / 2.f;
-
-  joined.radius += glm::max(glm::max(sticking_out_part_of_contained_spehre(a), sticking_out_part_of_contained_spehre(b)), 1.e-5f);
+  joined.radius = glm::max(joined.radius_for_enclosing_contained_spehre(a), joined.radius_for_enclosing_contained_spehre(b)) + 1.e-7f;
 
   Q_ASSERT(joined.contains(a, 0.f));
   Q_ASSERT(joined.contains(b, 0.f));
@@ -166,12 +164,12 @@ inline bool BoundingSphere::contains(const BoundingSphere& b, float epsilon) con
   if(b.center==this->center)
     return b.radius <= this->radius+epsilon;
   else
-    return sticking_out_part_of_contained_spehre(b) <= epsilon;
+    return radius_for_enclosing_contained_spehre(b) <= this->radius+epsilon;
 }
 
-inline float BoundingSphere::sticking_out_part_of_contained_spehre(const BoundingSphere& other) const
+inline float BoundingSphere::radius_for_enclosing_contained_spehre(const BoundingSphere& other) const
 {
-  return glm::distance(other.center, this->center) + other.radius - this->radius;
+  return glm::distance(other.center, this->center) + other.radius;
 }
 
 

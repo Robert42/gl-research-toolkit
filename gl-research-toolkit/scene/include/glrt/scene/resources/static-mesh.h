@@ -28,7 +28,7 @@ struct BoundingSphere
   bool contains(const BoundingSphere& other, float epsilon=0.f) const;
 
 private:
-  float sticking_out_part_of_contained_spehre(const BoundingSphere& other) const;
+  float radius_for_enclosing_contained_spehre(const BoundingSphere& other) const;
 };
 
 struct TriangleArray;
