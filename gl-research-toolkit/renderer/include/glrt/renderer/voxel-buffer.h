@@ -79,7 +79,7 @@ private:
   typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
   glrt::scene::Scene& scene;
-  VoxelGrid& voxelGridData;
+  VoxelGrid*& voxelGridData;
 
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;

@@ -12,10 +12,10 @@ namespace renderer {
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
   : scene(scene),
     voxelGridData(scene.data->voxelGrids),
-    distanceFieldVoxelData(scene.data->voxelGrids.capacity()),
-    distanceFieldboundingSpheres(scene.data->voxelGrids.capacity()),
-    bvhInnerBoundingSpheres(scene.data->voxelGrids.capacity()),
-    bvhInnerNodes(scene.data->voxelGrids.capacity())
+    distanceFieldVoxelData(scene.data->voxelGrids->capacity()),
+    distanceFieldboundingSpheres(scene.data->voxelGrids->capacity()),
+    bvhInnerBoundingSpheres(scene.data->voxelGrids->capacity()),
+    bvhInnerNodes(scene.data->voxelGrids->capacity())
 {
 }
 
@@ -27,18 +27,18 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
   PROFILE_SCOPE("VoxelBuffer::updateVoxelHeader()")
 
-  if(Q_UNLIKELY(voxelGridData.numDynamic>0 || voxelGridData.dirtyOrder))
+  if(Q_UNLIKELY(voxelGridData->numDynamic>0 || voxelGridData->dirtyOrder))
   {
-    voxelGridData.dirtyOrder = false;
-
     updateVoxelGrid();
     updateBvhTree();
 
-    _voxelHeader.numDistanceFields = voxelGridData.length;
+    _voxelHeader.numDistanceFields = voxelGridData->length;
     _voxelHeader.distanceFieldBvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.buffer.gpuBufferAddress();
     _voxelHeader.distanceFieldBvhInnerNodes = this->bvhInnerNodes.buffer.gpuBufferAddress();
     _voxelHeader.distanceFieldDataStorageBuffer = this->distanceFieldVoxelData.gpuBufferAddress();
     _voxelHeader.distanceFieldBoundingSpheres = this->distanceFieldboundingSpheres.gpuBufferAddress();
+
+    Q_ASSERT(voxelGridData->dirtyOrder == false);
   }
 
   return _voxelHeader;
@@ -48,22 +48,38 @@ void VoxelBuffer::updateVoxelGrid()
 {
   PROFILE_SCOPE("VoxelBuffer::updateVoxelGrid()")
 
-  const quint16 n = voxelGridData.length;
+  const quint16 n = voxelGridData->length;
+
+  scene::AABB scene_aabb = scene::AABB::invalid();
+#pragma omp simd
+  for(quint16 i=0; i<n; ++i)
+    voxelGridData->aabb_for(&scene_aabb, i);
+
+  quint32* z_indices = voxelGridData->z_index;
+#pragma omp simd
+  for(quint16 i=0; i<n; ++i)
+    z_indices[i] = voxelGridData->z_index[i] = calcZIndex(scene_aabb.toUnitSpace(voxelGridData->position[i]));
+
+  scene.aabb = scene_aabb;
+
+  // -- W A R N I N G -- voxelgriddata swap happening here!!!!
+  scene.data->sort_voxelGrids();
+
+  // after swapping the old address is invalid
+  z_indices = voxelGridData->z_index;
+  const float* scaleFactor = voxelGridData->scaleFactor;
+  const BoundingSphere* boundingSpheres = voxelGridData->boundingSphere;
 
   scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n);
   BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n);
 
-  scene::AABB scene_aabb = scene::AABB::invalid();
-
   #pragma omp simd
   for(quint16 i=0; i<n; ++i)
   {
-    voxelGridData.aabb_for(&scene_aabb, i);
+    scene::CoordFrame globalCoordFrame = voxelGridData->globalCoordFrame(i);
 
-    scene::CoordFrame globalCoordFrame = voxelGridData.globalCoordFrame(i);
-
-    const scene::resources::VoxelData& data = voxelGridData.voxelData[i];
-    dataBlock[i].globalWorldToVoxelFactor = data.localToVoxelSpace.scaleFactor / voxelGridData.scaleFactor[i];
+    const scene::resources::VoxelData& data = voxelGridData->voxelData[i];
+    dataBlock[i].globalWorldToVoxelFactor = data.localToVoxelSpace.scaleFactor / scaleFactor[i];
     const glm::mat4x3 globalWorldToVoxelMatrix = data.worldToVoxelSpaceMatrix4x3(globalCoordFrame);
     const glm::ivec3 voxelCount = data.voxelCount;
     const quint64 gpuTextureHandle = data.gpuTextureHandle;
@@ -77,31 +93,24 @@ void VoxelBuffer::updateVoxelGrid()
     dataBlock[i].voxelCount_z = voxelCount.z;
     dataBlock[i].texture = gpuTextureHandle;
 
-    boundingSphere[i] = globalCoordFrame * voxelGridData.boundingSphere[i];
-  }
-
-#pragma omp simd
-  for(quint16 i=0; i<n; ++i)
-  {
-    voxelGridData.z_index[i] = calcZIndex(scene_aabb.toUnitSpace(voxelGridData.position[i]));
+    boundingSphere[i] = globalCoordFrame * boundingSpheres[i];
   }
 
   distanceFieldVoxelData.Unmap();
   distanceFieldboundingSpheres.Unmap();
 
-  scene.aabb = scene_aabb;
 }
 
 void VoxelBuffer::updateBvhTree()
 {
   PROFILE_SCOPE("VoxelBuffer::updateBvhTree()")
 
-  const quint16 numElements = voxelGridData.length;
+  const quint16 numElements = voxelGridData->length;
   if(numElements <= 1)
     return;
   const quint16 numInnerNodes = numElements - 1;
 
-  BVH bvh(voxelGridData);
+  BVH bvh(*voxelGridData);
 
   BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map(numInnerNodes);
   BVH::InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map(numInnerNodes);

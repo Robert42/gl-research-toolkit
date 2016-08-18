@@ -188,6 +188,15 @@ public:
       *target_aabb |= a;
       *target_aabb |= b;
     }
+
+    static void copy_voxelgrid_data(VoxelGridData<capacity>* target_data, quint16 target_index, VoxelGridData<capacity>* source_data, quint16 source_index)
+    {
+      target_data->voxelData[target_index] = source_data->voxelData[source_index];
+      target_data->boundingSphere[target_index] = source_data->boundingSphere[source_index];
+      target_data->z_index[target_index] = source_data->z_index[source_index];
+      target_data->voxelizedAsScenery[target_index] = source_data->voxelizedAsScenery[source_index];
+    }
+
   };
 
   template<quint16 capacity>
@@ -266,7 +275,7 @@ public:
   SphereLights sphereLights;
   RectLights rectLights;
   StaticMeshes* staticMeshes = &staticMeshes1;
-  VoxelGrids voxelGrids;
+  VoxelGrids* voxelGrids = &voxelGrids1;
   Cameras cameras;
 
   Scene& scene;
@@ -287,14 +296,24 @@ public:
   void clear();
 
   void sort_staticMeshes();
+  void sort_voxelGrids();
 
 private:
+  static_assert(max_num_meshes==StaticMeshes::arrayCapacity, "index_reorder expects StaticMeshes and VoxelGrids to have the same capacity");
+  static_assert(max_num_meshes==VoxelGrids::arrayCapacity, "index_reorder expects StaticMeshes and VoxelGrids to have the same capacity");
+  quint16 index_reorder[max_num_meshes];
+
   // static_mesh double buffering
   StaticMeshes* staticMeshes_backbuffer = &staticMeshes2;
   Transformations* transformation_staticMeshes_backbuffer;
   StaticMeshes staticMeshes1;
   StaticMeshes staticMeshes2;
-  quint16 static_mesh_index_reorder[StaticMeshes::arrayCapacity];
+
+  // voxelgrid double buffering
+  VoxelGrids* voxelGrids_backbuffer = &voxelGrids2;
+  Transformations* transformation_voxelGrids_backbuffer;
+  VoxelGrids voxelGrids1;
+  VoxelGrids voxelGrids2;
 };
 
 
