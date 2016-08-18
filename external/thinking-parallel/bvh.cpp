@@ -45,6 +45,7 @@ inline quint32 BVH::zIndexDistance(quint16 a, quint16 b)
 // see also https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
 quint16 BVH::findSplit(quint16 begin, quint16 end)
 {
+#define FORCE_BALANCED 0
 #define PRINT_SPLITS 0
 
 #if PRINT_SPLITS
@@ -55,10 +56,11 @@ quint16 BVH::findSplit(quint16 begin, quint16 end)
   qDebug() << "  before split:\n"<<str1.toStdString().c_str();
 #endif
 
+  quint16 split = (begin+end)/2;
+
+#if !FORCE_BALANCED
   quint16 range_begin=begin;
   quint16 range_end=end;
-
-  quint16 split = (range_begin+end)/2;
 
   while(range_begin+1 < range_end)
   {
@@ -72,6 +74,7 @@ quint16 BVH::findSplit(quint16 begin, quint16 end)
 
     split = (range_begin+range_end)/2;
   }
+#endif
 
   split = glm::clamp<quint16>(split, begin+1, end-1);
 
