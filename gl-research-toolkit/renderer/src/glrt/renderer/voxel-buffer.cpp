@@ -174,7 +174,7 @@ void BVH::verifyBoundingSpheres(uint16_t root_node) const
     left_node = left_node & uint16_t(0x7fff);
     right_node = right_node & uint16_t(0x7fff);
 
-    const float epsilon = 1.e-6f;
+    const float epsilon = 0.f;
 
     if(left_is_inner_node)
     {
