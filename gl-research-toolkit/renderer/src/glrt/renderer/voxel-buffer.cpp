@@ -83,7 +83,7 @@ void VoxelBuffer::updateVoxelGrid()
 #pragma omp simd
   for(quint16 i=0; i<n; ++i)
   {
-    voxelGridData.z_index[i] = calcZIndex(scene_aabb.toUnitSpace(voxelGridData.local_coord_frame[i].position));
+    voxelGridData.z_index[i] = calcZIndex(scene_aabb.toUnitSpace(voxelGridData.position[i]));
   }
 
   distanceFieldVoxelData.Unmap();
