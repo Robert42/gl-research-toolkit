@@ -18,7 +18,8 @@ void setCurrentBVHUsage(BvhUsage bvhUsage);
 
 void init_bvh_shader_macros();
 
-extern const quint16 BVH_MAX_DEPTH;
+// FIXME set to a lower value!
+const quint16 BVH_MAX_DEPTH = 256;
 
 } // namespace renderer
 } // namespace glrt

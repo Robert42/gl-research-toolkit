@@ -23,7 +23,9 @@ struct BoundingSphere
     return s;
   }
 
-  BoundingSphere operator|(const BoundingSphere& b);
+  BoundingSphere operator|(const BoundingSphere& b) const;
+  bool contains(const glm::vec3& point, float epsilon=0.f) const;
+  bool contains(const BoundingSphere& other, float epsilon=0.f) const;
 };
 
 struct TriangleArray;

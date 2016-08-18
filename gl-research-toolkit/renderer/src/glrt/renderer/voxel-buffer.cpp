@@ -131,14 +131,70 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
 
   generateHierarchy(0, num_leaves);
 
+  verifyHierarchy();
+
+  this->bvhInnerBoundingSpheres = nullptr;
+  this->bvhInnerNodes = nullptr;
+}
+
+void BVH::verifyHierarchy() const
+{
+  verifyTreeDepth();
+  verifyBoundingSpheres();
+}
+
+void BVH::verifyTreeDepth() const
+{
   const quint16 depth = calcDepth(0, bvhInnerNodes);
   if(depth == num_leaves-1)
     qWarning() << "Malformed tree (no performence gains)";
   qDebug() << "BVH::updateTreeCPU{num_leaves:" <<num_leaves << " depth:"<<depth<<"}";
   Q_ASSERT(depth < BVH_MAX_DEPTH);
+}
 
-  this->bvhInnerBoundingSpheres = nullptr;
-  this->bvhInnerNodes = nullptr;
+void BVH::verifyBoundingSpheres(uint16_t root_node) const
+{
+  const uint16_t* inner_nodes = reinterpret_cast<const uint16_t*>(this->bvhInnerNodes);
+
+  uint16_t stack[BVH_MAX_DEPTH];
+  stack[0] = root_node;
+  uint16_t stack_depth=uint16_t(1);
+
+  do {
+    stack_depth--;
+    uint16_t current_node = stack[stack_depth];
+    const BoundingSphere& currentBoundingSphere = bvhInnerBoundingSpheres[current_node];
+
+    const uint16_t* child_nodes = inner_nodes + current_node*uint16_t(2);
+    uint16_t left_node = child_nodes[0];
+    uint16_t right_node = child_nodes[1];
+
+    bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
+    bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
+    left_node = left_node & uint16_t(0x7fff);
+    right_node = right_node & uint16_t(0x7fff);
+
+    const float epsilon = 0.f;
+
+    if(left_is_inner_node)
+    {
+      Q_ASSERT(currentBoundingSphere.contains(bvhInnerBoundingSpheres[left_node], epsilon));
+      stack[stack_depth++] = left_node;
+    }else
+    {
+      Q_ASSERT(currentBoundingSphere.contains(leaves_bounding_spheres[left_node], epsilon));
+    }
+
+    if(right_is_inner_node)
+    {
+      Q_ASSERT(currentBoundingSphere.contains(bvhInnerBoundingSpheres[right_node], epsilon));
+      stack[stack_depth++] = right_node;
+    }else
+    {
+      Q_ASSERT(currentBoundingSphere.contains(leaves_bounding_spheres[right_node], epsilon));
+    }
+
+  }while(stack_depth>uint16_t(0));
 }
 
 quint16 BVH::addInnerNode()

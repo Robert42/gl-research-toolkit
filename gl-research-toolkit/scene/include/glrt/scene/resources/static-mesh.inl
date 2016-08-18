@@ -123,7 +123,7 @@ inline const glm::vec3& TriangleArray::operator[](size_t i) const
   return vertices[i];
 }
 
-inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
+inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b) const
 {
   const BoundingSphere& a = *this;
 
@@ -149,6 +149,19 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
   joined.radius = (glm::abs(e1) + glm::abs(e2)) / 2.f;
 
   return joined;
+}
+
+inline bool BoundingSphere::contains(const glm::vec3& point, float epsilon) const
+{
+  return glm::distance(point, this->center) <= this->radius+epsilon;
+}
+
+inline bool BoundingSphere::contains(const BoundingSphere& b, float epsilon) const
+{
+  if(b.center==this->center)
+    return b.radius <= this->radius+epsilon;
+  else
+    return this->contains(b.center+b.radius*glm::normalize(b.center-this->center), epsilon);
 }
 
 

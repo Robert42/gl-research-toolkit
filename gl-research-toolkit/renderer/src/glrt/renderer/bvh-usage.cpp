@@ -6,9 +6,6 @@ namespace renderer {
 
 BvhUsage currentBvhUsage = BvhUsage::BVH_RECURSIVE;
 
-// FIXME set to a lower value!
-const quint16 BVH_MAX_DEPTH = 256;
-
 QMap<QString, BvhUsage> allcurrentBvhUsages()
 {
   QMap<QString, BvhUsage> map;
