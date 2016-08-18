@@ -135,10 +135,10 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b) const
 
   glm::vec3 a2b_dir = a2b / distance;
 
-  glm::vec3 alpha = step(a2b_dir, glm::vec3(1024.f)); // 0, if inf
-  a2b_dir = mix(glm::vec3(0.f),
-                clamp(a2b_dir, glm::vec3(-1024), glm::vec3(1024)), // mix doesn't work, if one is inf, so clamp it
-                alpha);
+  glm::bvec3 replace_with_zero = glm::isnan(a2b_dir) || glm::isinf(a2b_dir);
+  for(int i=0; i<3; ++i)
+    if(replace_with_zero[i])
+      a2b_dir[i] = 0;
 
   glm::vec3 edge1 = a.center + a2b_dir * e1;
   glm::vec3 edge2 = a.center + a2b_dir * e2;
@@ -148,7 +148,7 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b) const
   joined.center = glm::mix(edge1, edge2, 0.5f);
   joined.radius = (glm::abs(e1) + glm::abs(e2)) / 2.f;
 
-  const float epsilon = 1.e-7f;
+  const float epsilon = 1.e-6f;
   Q_ASSERT(joined.contains(a, epsilon));
   Q_ASSERT(joined.contains(b, epsilon));
 
