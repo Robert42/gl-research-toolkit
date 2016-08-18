@@ -80,7 +80,7 @@ quint16 BVH::findSplit(quint16 begin, quint16 end)
   for(quint16 i=begin; i<split; ++i)
     str1 += QString("0x%0 ").arg(QString::number(leaves_z_indices[i], 16));
   for(quint16 i=split; i<end; ++i)
-    str1 += QString("0x%0 ").arg(QString::number(leaves_z_indices[i], 16));
+    str2 += QString("0x%0 ").arg(QString::number(leaves_z_indices[i], 16));
   qDebug() << "  after split:\n"<<str1.toStdString().c_str()<<"  ||  "<<str2.toStdString().c_str();
 #endif
 
