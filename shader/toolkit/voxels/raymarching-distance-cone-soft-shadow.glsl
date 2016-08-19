@@ -102,7 +102,9 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
   uint16_t stack[BVH_MAX_DEPTH];
   stack[0] = root_node;
   uint16_t stack_depth=uint16_t(1);
-  float occlusion = 1.f;
+  
+  uint16_t leaves[BVH_MAX_DEPTH];
+  uint16_t num_leaves = uint16_t(0);
   
   do {
     stack_depth--;
@@ -114,8 +116,6 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
     
     bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
     bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
-    left_node = left_node & uint16_t(0x7fff);
-    right_node = right_node & uint16_t(0x7fff);
     
     if(left_is_inner_node)
     {
@@ -124,7 +124,7 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
         stack[stack_depth++] = left_node;
     }else
     {
-      occlusion = min(occlusion, coneSoftShadow_bvh_leaf(cone, left_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length));
+      leaves[num_leaves++] = left_node & uint16_t(0x7fff);
     }
       
     if(right_is_inner_node)
@@ -134,10 +134,16 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
         stack[stack_depth++] = right_node;
     }else
     {
-      occlusion = min(occlusion, coneSoftShadow_bvh_leaf(cone, right_node, leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length));
+      leaves[num_leaves++] = right_node & uint16_t(0x7fff);
     }
     
   }while(stack_depth>uint16_t(0));
+  
+  float occlusion = 1.f;
+  for(uint16_t i=uint16_t(0); i<num_leaves; ++i)
+  {
+    occlusion = min(occlusion, coneSoftShadow_bvh_leaf(cone, leaves[i], leaf_bounding_spheres, leaf_distance_field_data_blocks, cone_length));
+  }
 
   return occlusion;
 }
