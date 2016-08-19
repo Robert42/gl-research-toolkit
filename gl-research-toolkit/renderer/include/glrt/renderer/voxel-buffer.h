@@ -36,7 +36,7 @@ struct BVH
   const quint32* const leaves_z_indices;
   const quint16 num_leaves;
 
-  BVH(const VoxelGrids& voxelGridData);
+  BVH(const BoundingSphere* leaves_bounding_spheres, const VoxelGrids& voxelGridData);
   BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves);
   void updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes);
 
@@ -100,7 +100,7 @@ private:
   VoxelHeader _voxelHeader;
 
   void updateVoxelGrid();
-  void updateBvhTree();
+  void updateBvhTree(const glrt::scene::resources::BoundingSphere* leaves_bounding_spheres);
 };
 
 } // namespace renderer

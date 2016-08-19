@@ -30,7 +30,6 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
   if(Q_UNLIKELY(voxelGridData->numDynamic>0 || voxelGridData->dirtyOrder))
   {
     updateVoxelGrid();
-    updateBvhTree();
 
     _voxelHeader.numDistanceFields = voxelGridData->length;
     _voxelHeader.distanceFieldBvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.buffer.gpuBufferAddress();
@@ -96,12 +95,14 @@ void VoxelBuffer::updateVoxelGrid()
     boundingSphere[i] = globalCoordFrame * boundingSpheres[i];
   }
 
+  updateBvhTree(boundingSphere);
+
   distanceFieldVoxelData.Unmap();
   distanceFieldboundingSpheres.Unmap();
 
 }
 
-void VoxelBuffer::updateBvhTree()
+void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
 {
   PROFILE_SCOPE("VoxelBuffer::updateBvhTree()")
 
@@ -110,7 +111,7 @@ void VoxelBuffer::updateBvhTree()
     return;
   const quint16 numInnerNodes = numElements - 1;
 
-  BVH bvh(*voxelGridData);
+  BVH bvh(leaves_bounding_spheres, *voxelGridData);
 
   BoundingSphere* bvhInnerBoundingSpheres = this->bvhInnerBoundingSpheres.Map(numInnerNodes);
   BVH::InnerNode* bvhInnerNodes = this->bvhInnerNodes.Map(numInnerNodes);
@@ -120,8 +121,8 @@ void VoxelBuffer::updateBvhTree()
 
 }
 
-BVH::BVH(const VoxelGrids& voxelGridData)
-  : BVH(voxelGridData.boundingSphere, voxelGridData.z_index, voxelGridData.length)
+BVH::BVH(const BoundingSphere* leaves_bounding_spheres, const VoxelGrids& voxelGridData)
+  : BVH(leaves_bounding_spheres, voxelGridData.z_index, voxelGridData.length)
 {
 }
 
