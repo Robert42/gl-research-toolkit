@@ -8,35 +8,65 @@
 
 
 namespace glrt {
+namespace glsl {
+
+struct Cone;
+
+} // namespace glsl
 namespace renderer {
 
 struct BVH
 {
+  typedef scene::resources::BoundingSphere BoundingSphere;
+  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
+
   struct InnerNode
   {
-    int leftChild;
-    int rightChild;
+    quint16 left_child;
+    quint16 right_child;
   };
 
-  typedef scene::Scene::Data::VoxelGrids VoxelGrids;
-  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
+  struct SubTree
+  {
+    BoundingSphere bounding_sphere;
+    quint16 index;
+  };
 
-  const VoxelGrids& voxelGridData;
-  const VoxelBVH& voxelBvhData;
+  const BoundingSphere* const leaves_bounding_spheres;
+  const quint32* const leaves_z_indices;
+  const quint16 num_leaves;
 
-  BVH(const VoxelGrids& voxelGridData, VoxelBVH& voxelBvhData);
-  void updateTreeCPU();
-  int addInnerNode();
+  BVH(const BoundingSphere* leaves_bounding_spheres, const VoxelGrids& voxelGridData);
+  BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves);
+  void updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes);
 
-  int generateHierarchy(int begin, int end);
-  int findSplit(int begin, int end);
+  quint16 findSplit(quint16 begin, quint16 end);
+  quint32 zIndexDistance(quint16 a, quint16 b);
 
 private:
-  quint32 zIndexDistance(int a, int b);
+  BoundingSphere* bvhInnerBoundingSpheres = nullptr;
+  BVH::InnerNode* bvhInnerNodes = nullptr;
+  quint16 num_inner_nodes = 0;
+  const quint16 capacity_inner_nodes;
+
+  quint16 addInnerNode();
+
+  quint16 calcDepth(quint16 root, InnerNode* bvhInnerNodes) const;
+
+  SubTree generateHierarchy(quint16 begin, quint16 end);
+  void verifyHierarchy() const;
+  void verifyTreeDepth() const;
+  void verifyBoundingSpheres(uint16_t root_node=0) const;
+
+  void testOcclusion() const;
+  QSet<quint16> shadow_occlusion_without_bvh(const glsl::Cone& cone) const;
+  QSet<quint16> shadow_occlusion_with_bvh(const glsl::Cone& cone, uint16_t root_node=0) const;
 };
 
 class VoxelBuffer
 {
+  // PERFORMANCE: really big voxelgrids (spinza itself don't need to be part of the bvh)
+  // PERFORMANCE: sort also by size of the bounding spheres?
 public:
   struct VoxelHeader
   {
@@ -55,12 +85,10 @@ public:
   const VoxelHeader& updateVoxelHeader();
 
 private:
-  typedef scene::Scene::Data::VoxelBVHs VoxelBVH;
   typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
   glrt::scene::Scene& scene;
-  VoxelGrid& voxelGridData;
-  VoxelBVH& voxelBvh;
+  VoxelGrid*& voxelGridData;
 
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
@@ -72,7 +100,7 @@ private:
   VoxelHeader _voxelHeader;
 
   void updateVoxelGrid();
-  void updateBvhTree();
+  void updateBvhTree(const glrt::scene::resources::BoundingSphere* leaves_bounding_spheres);
 };
 
 } // namespace renderer

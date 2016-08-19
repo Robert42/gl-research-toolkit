@@ -123,7 +123,7 @@ inline const glm::vec3& TriangleArray::operator[](size_t i) const
   return vertices[i];
 }
 
-inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
+inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b) const
 {
   const BoundingSphere& a = *this;
 
@@ -135,10 +135,10 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
 
   glm::vec3 a2b_dir = a2b / distance;
 
-  glm::vec3 alpha = step(a2b_dir, glm::vec3(1024.f)); // 0, if inf
-  a2b_dir = mix(glm::vec3(0.f),
-                clamp(a2b_dir, glm::vec3(-1024), glm::vec3(1024)), // mix doesn't work, if one is inf, so clamp it
-                alpha);
+  glm::bvec3 replace_with_zero = glm::isnan(a2b_dir) || glm::isinf(a2b_dir);
+  for(int i=0; i<3; ++i)
+    if(replace_with_zero[i])
+      a2b_dir[i] = 0;
 
   glm::vec3 edge1 = a.center + a2b_dir * e1;
   glm::vec3 edge2 = a.center + a2b_dir * e2;
@@ -146,9 +146,30 @@ inline BoundingSphere BoundingSphere::operator|(const BoundingSphere& b)
   BoundingSphere joined;
 
   joined.center = glm::mix(edge1, edge2, 0.5f);
-  joined.radius = (glm::abs(e1) + glm::abs(e2)) / 2.f;
+  joined.radius = glm::max(joined.radius_for_enclosing_contained_spehre(a), joined.radius_for_enclosing_contained_spehre(b)) + 1.e-7f;
+
+  Q_ASSERT(joined.contains(a, 0.f));
+  Q_ASSERT(joined.contains(b, 0.f));
 
   return joined;
+}
+
+inline bool BoundingSphere::contains(const glm::vec3& point, float epsilon) const
+{
+  return glm::distance(point, this->center) <= this->radius+epsilon;
+}
+
+inline bool BoundingSphere::contains(const BoundingSphere& b, float epsilon) const
+{
+  if(b.center==this->center)
+    return b.radius <= this->radius+epsilon;
+  else
+    return radius_for_enclosing_contained_spehre(b) <= this->radius+epsilon;
+}
+
+inline float BoundingSphere::radius_for_enclosing_contained_spehre(const BoundingSphere& other) const
+{
+  return glm::distance(other.center, this->center) + other.radius;
 }
 
 

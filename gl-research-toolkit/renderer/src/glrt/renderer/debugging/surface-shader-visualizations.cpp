@@ -72,8 +72,6 @@ void setCurrentSurfaceShaderVisualization(SurfaceShaderVisualization visualizati
     const QString& key = i.key();
     SurfaceShaderVisualization value = i.value();
 
-    QString macro = QString("#define %0").arg(key);
-
     ReloadableShader::defineMacro(key, visualization == value && visualization!=SurfaceShaderVisualization::NONE, false);
   }
 

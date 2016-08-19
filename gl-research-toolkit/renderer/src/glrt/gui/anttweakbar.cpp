@@ -48,6 +48,7 @@ AntTweakBar::~AntTweakBar()
   cameraSwitcher.clear();
   sceneSwitcher.clear();
   visualizationSwitcher.clear();
+  bvhUsageSwitcher.clear();
 
   toolbar.deinit();
   TwTerminate();
@@ -207,6 +208,11 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   visualizationSwitcher->init(glrt::renderer::allSurfaceShaderVisualizations());
   visualizationSwitcher->setCurrentValue(glrt::renderer::currentSurfaceShaderVisualization);
   visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
+
+  bvhUsageSwitcher = BvhUsageEnumeration::Ptr(new BvhUsageEnumeration("BvhUsageEnumeration", tweakBar, "BVH Usage", "keyincr=F8 keydecr=SHIFT+F8 help='Switch the suage of the BVH-tree'"));
+  bvhUsageSwitcher->init(glrt::renderer::allcurrentBvhUsages());
+  bvhUsageSwitcher->setCurrentValue(glrt::renderer::currentBvhUsage);
+  bvhUsageSwitcher->valueChanged = [](glrt::renderer::BvhUsage bvhUsage){glrt::renderer::setCurrentBVHUsage(bvhUsage);};
 
 
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");

@@ -1,5 +1,4 @@
 #include <glrt/dependencies.h>
-#include <glrt/toolkit/zindex.h>
 #include <glrt/glsl/math-cpp.h>
 #include <gtest/gtest.h>
 #include <test-vectors.h>
@@ -213,4 +212,20 @@ TEST(shader_library, projection_plane)
     p[i] = perspective_projection_unclamped(projection_plane, vec3(0), p[i]);
   EXPECT_VEC_NEAR(p[0], vec3(-0.819333, 1.733090, 3.113433), 1.e-5);
   EXPECT_VEC_NEAR(p[1], vec3(-12.459891, 7.266071, 63.365238), 0.001f);
+}
+
+TEST(shader_library, cone_flagpole)
+{
+  float dummy;
+  Cone cone_flagpole = cone_from_ray_tan_angle(vec3(-3.497906f, -0.867900f, 0.000001f), // origin
+                                               normalize(vec3(-0.248960f, 0.209587f, 0.945565f)), // direction
+                                               0.0142003f // tan_half_angle
+                                               );
+
+  Sphere sphere_flagpole;
+  sphere_flagpole.origin = vec3(-5.58566999f, 1.59861326f, 7.78433561f);
+  sphere_flagpole.radius = 0.895080328f;
+
+  EXPECT_TRUE(cone_intersects_sphere(cone_flagpole, sphere_flagpole, dummy));
+
 }

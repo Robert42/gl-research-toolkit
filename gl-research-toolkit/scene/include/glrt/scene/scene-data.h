@@ -49,7 +49,6 @@ public:
     glm::quat orientation[capacity];
     float scaleFactor[capacity];
     CoordFrame local_coord_frame[capacity];
-    quint32 z_index[capacity];
     Node::Component* component[capacity];
 
     CoordFrame globalCoordFrame(quint32 index) const
@@ -67,7 +66,6 @@ public:
       target_data->orientation[target_index] = source_data->orientation[source_index];
       target_data->scaleFactor[target_index] = source_data->scaleFactor[source_index];
       target_data->local_coord_frame[target_index] = source_data->local_coord_frame[source_index];
-      target_data->z_index[target_index] = source_data->z_index[source_index];
       target_data->component[target_index] = source_data->component[source_index];
       target_data->component[target_index]->data_index.array_index = target_index;
     }
@@ -168,12 +166,14 @@ public:
   {
     resources::VoxelData voxelData[capacity];
     resources::BoundingSphere boundingSphere[capacity];
+    quint32 z_index[capacity];
     bool voxelizedAsScenery[capacity];
 
     void swap_voxel_data(quint16 a, quint16 b)
     {
       std::swap(voxelData[a], voxelData[b]);
       std::swap(boundingSphere[a], boundingSphere[b]);
+      std::swap(z_index[a], z_index[b]);
       std::swap(voxelizedAsScenery[a], voxelizedAsScenery[b]);
     }
 
@@ -188,11 +188,15 @@ public:
       *target_aabb |= a;
       *target_aabb |= b;
     }
-  };
 
-  template<quint16 capacity>
-  struct VoxelBVH : public DataArray<capacity>
-  {
+    static void copy_voxelgrid_data(VoxelGridData<capacity>* target_data, quint16 target_index, VoxelGridData<capacity>* source_data, quint16 source_index)
+    {
+      target_data->voxelData[target_index] = source_data->voxelData[source_index];
+      target_data->boundingSphere[target_index] = source_data->boundingSphere[source_index];
+      target_data->z_index[target_index] = source_data->z_index[source_index];
+      target_data->voxelizedAsScenery[target_index] = source_data->voxelizedAsScenery[source_index];
+    }
+
   };
 
   template<quint16 capacity>
@@ -216,7 +220,6 @@ public:
     glm::quat* const orientation;
     float* const scaleFactor;
     CoordFrame* const local_coord_frame;
-    quint32* const z_index;
     Node::Component** const component;
 
     CoordFrame globalCoordFrame(quint16 index) const
@@ -235,7 +238,6 @@ public:
         orientation(data.orientation),
         scaleFactor(data.scaleFactor),
         local_coord_frame(data.local_coord_frame),
-        z_index(data.z_index),
         component(data.component)
     {
     }
@@ -251,7 +253,6 @@ public:
       std::swap(orientation[a], orientation[b]);
       std::swap(scaleFactor[a], scaleFactor[b]);
       std::swap(local_coord_frame[a], local_coord_frame[b]);
-      std::swap(z_index[a], z_index[b]);
       std::swap(component[a], component[b]);
     }
 
@@ -262,23 +263,22 @@ public:
     }
   };
 
-  typedef SphereLightData<0xffff> SphereLights;
+  static const quint16 max_num_meshes = 0x8000; // highest index: 0x7fff: The highest bit is used for the bvh structure to differentiate between inner node and leaf
+
+  typedef SphereLightData<0x100> SphereLights;
   typedef RectLightData<0x100> RectLights;
-  typedef StaticMeshData<0xffff> StaticMeshes;
-  typedef VoxelGridData<0xffff> VoxelGrids;
-  typedef VoxelBVH<VoxelGrids::arrayCapacity-1> VoxelBVHs;
+  typedef StaticMeshData<max_num_meshes> StaticMeshes;
+  typedef VoxelGridData<max_num_meshes> VoxelGrids;
   typedef CameraData<0x100> Cameras;
 
   TransformData<0xffff> emptyNodes;
   SphereLights sphereLights;
   RectLights rectLights;
   StaticMeshes* staticMeshes = &staticMeshes1;
-  VoxelGrids voxelGrids;
+  VoxelGrids* voxelGrids = &voxelGrids1;
   Cameras cameras;
 
-  VoxelBVHs voxelBVH;
-
-  resources::ResourceManager& resourceManager;
+  Scene& scene;
 
   static const quint32 numTransformations = quint32(DataClass::NUM_DATA_CLASSES);
   Transformations* transformations[numTransformations];
@@ -290,18 +290,30 @@ public:
   const Transformations& transformDataForIndex(Node::Component::DataIndex dataIndex) const;
 
 
-  Data(resources::ResourceManager& resourceManager);
+  Data(Scene& scene);
   ~Data();
 
+  void clear();
+
   void sort_staticMeshes();
+  void sort_voxelGrids();
 
 private:
+  static_assert(max_num_meshes==StaticMeshes::arrayCapacity, "index_reorder expects StaticMeshes and VoxelGrids to have the same capacity");
+  static_assert(max_num_meshes==VoxelGrids::arrayCapacity, "index_reorder expects StaticMeshes and VoxelGrids to have the same capacity");
+  quint16 index_reorder[max_num_meshes];
+
   // static_mesh double buffering
   StaticMeshes* staticMeshes_backbuffer = &staticMeshes2;
   Transformations* transformation_staticMeshes_backbuffer;
   StaticMeshes staticMeshes1;
   StaticMeshes staticMeshes2;
-  quint16 static_mesh_index_reorder[StaticMeshes::arrayCapacity];
+
+  // voxelgrid double buffering
+  VoxelGrids* voxelGrids_backbuffer = &voxelGrids2;
+  Transformations* transformation_voxelGrids_backbuffer;
+  VoxelGrids voxelGrids1;
+  VoxelGrids voxelGrids2;
 };
 
 
