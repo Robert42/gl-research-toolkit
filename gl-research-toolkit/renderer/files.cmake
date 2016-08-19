@@ -72,6 +72,7 @@ set(SOURCE_FILES
   src/glrt/renderer/toolkit/shader-compiler.cpp
   src/glrt/renderer/transformation-buffer.cpp
   src/glrt/renderer/voxel-buffer.cpp
+  src/glrt/renderer/voxel-buffer-test.cpp
   src/glrt/renderer/voxelized-scene.cpp
   src/glrt/splashscreen-style.cpp
   src/glrt/system.cpp

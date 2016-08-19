@@ -141,6 +141,7 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
   generateHierarchy(0, num_leaves);
 
   verifyHierarchy();
+  testOcclusion();
 
   this->bvhInnerBoundingSpheres = nullptr;
   this->bvhInnerNodes = nullptr;
@@ -206,6 +207,7 @@ void BVH::verifyBoundingSpheres(uint16_t root_node) const
   }while(stack_depth>uint16_t(0));
 }
 
+
 quint16 BVH::addInnerNode()
 {
   Q_ASSERT(num_inner_nodes < capacity_inner_nodes);
@@ -220,7 +222,7 @@ quint16 BVH::calcDepth(quint16 root, InnerNode* bvhInnerNodes) const
   Q_ASSERT(num_inner_nodes > root);
 
   return 1+glm::max(calcDepth(bvhInnerNodes[root].left_child, bvhInnerNodes),
-                  calcDepth(bvhInnerNodes[root].right_child, bvhInnerNodes));
+                    calcDepth(bvhInnerNodes[root].right_child, bvhInnerNodes));
 }
 
 

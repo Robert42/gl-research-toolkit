@@ -8,6 +8,11 @@
 
 
 namespace glrt {
+namespace glsl {
+
+struct Cone;
+
+} // namespace glsl
 namespace renderer {
 
 struct BVH
@@ -52,6 +57,10 @@ private:
   void verifyHierarchy() const;
   void verifyTreeDepth() const;
   void verifyBoundingSpheres(uint16_t root_node=0) const;
+
+  void testOcclusion() const;
+  QSet<quint16> shadow_occlusion_without_bvh(const glsl::Cone& cone) const;
+  QSet<quint16> shadow_occlusion_with_bvh(const glsl::Cone& cone, uint16_t root_node=0) const;
 };
 
 class VoxelBuffer
