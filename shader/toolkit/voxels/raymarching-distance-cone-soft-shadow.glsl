@@ -52,6 +52,7 @@ float coneSoftShadow_singleVoxel(in Cone cone, in VoxelDataBlock* distance_field
 float coneSoftShadow_array_of_leaves(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
   float occlusion = 1.f;
+  uint32_t best_hit = 0xffffffff;
   
   for(uint32_t i=0; i<num_distance_fields; ++i)
   {
@@ -62,12 +63,18 @@ float coneSoftShadow_array_of_leaves(in Cone cone, in Sphere* bounding_spheres, 
     {
       float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
       float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-      occlusion = min(occlusion, coneSoftShadow_singleVoxel(cone, distance_field_data_blocks, intersection_distance_front, intersection_distance_back, cone_length));
+      
+      float current_occlusion = coneSoftShadow_singleVoxel(cone, distance_field_data_blocks, intersection_distance_front, intersection_distance_back, cone_length);
+      if(current_occlusion < occlusion)
+        best_hit = i;
+      occlusion = min(occlusion, current_occlusion);
     }
     
     ++bounding_spheres;
     ++distance_field_data_blocks;
   }
+  
+  PRINT_VALUE(best_hit);
   
   return occlusion;
 }
