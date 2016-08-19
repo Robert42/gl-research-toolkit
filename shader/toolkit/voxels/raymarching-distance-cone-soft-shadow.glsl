@@ -116,6 +116,9 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
     
     bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
     bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
+
+    left_node = left_node & uint16_t(0x7fff);
+    right_node = right_node & uint16_t(0x7fff);
     
     if(left_is_inner_node)
     {
@@ -124,7 +127,7 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
         stack[stack_depth++] = left_node;
     }else
     {
-      leaves[num_leaves++] = left_node & uint16_t(0x7fff);
+      leaves[num_leaves++] = left_node;
     }
       
     if(right_is_inner_node)
@@ -134,7 +137,7 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
         stack[stack_depth++] = right_node;
     }else
     {
-      leaves[num_leaves++] = right_node & uint16_t(0x7fff);
+      leaves[num_leaves++] = right_node;
     }
     
   }while(stack_depth>uint16_t(0));
