@@ -160,7 +160,7 @@ float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBloc
 
 #else
 
-#if defined(BVH_RECURSIVE)
+#if defined(BVH_WITH_STACK)
 float coneSoftShadow(in Cone cone, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
   return coneSoftShadow_bvh_iterative(cone, uint16_t(0), inner_nodes, bvh_inner_bounding_sphere, bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);

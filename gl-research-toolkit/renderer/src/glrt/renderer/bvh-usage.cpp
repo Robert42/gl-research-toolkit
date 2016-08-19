@@ -4,7 +4,7 @@
 namespace glrt {
 namespace renderer {
 
-BvhUsage currentBvhUsage = BvhUsage::BVH_RECURSIVE;
+BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
 
 QMap<QString, BvhUsage> allcurrentBvhUsages()
 {
@@ -13,7 +13,7 @@ QMap<QString, BvhUsage> allcurrentBvhUsages()
 #define VALUE(MACRO) map[#MACRO] = BvhUsage::MACRO
 
   VALUE(NO_BVH);
-  VALUE(BVH_RECURSIVE);
+  VALUE(BVH_WITH_STACK);
 
   return map;
 }
