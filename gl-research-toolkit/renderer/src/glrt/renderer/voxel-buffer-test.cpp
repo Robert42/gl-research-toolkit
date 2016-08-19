@@ -14,19 +14,27 @@ using glm::vec3;
 void BVH::testOcclusion() const
 {
 #ifdef QT_DEBUG
-  glsl::Cone cone_flagpole;
 
-  cone_flagpole.origin = glm::vec3(-3.497906f, -0.867900f, 0.000001f);
-  cone_flagpole.direction = glm::vec3(-0.248960f, 0.209587f, 0.945565f);
-  cone_flagpole.tan_half_angle = 0.0142003f;
+  glsl::Cone cone_flagpole = glsl::cone_from_ray_tan_angle(vec3(-3.497906f, -0.867900f, 0.000001f), // origin
+                                                           normalize(vec3(-0.248960f, 0.209587f, 0.945565f)), // direction
+                                                           0.0142003f // tan_half_angle
+                                                           );
+
+  glsl::Sphere sphere_flagpole;
+  sphere_flagpole.origin = vec3(-5.58566999f, 1.59861326f, 7.78433561f);
+  sphere_flagpole.radius = 0.895080328f;
 
 //  const uint16_t roof = 52;
 //  const uint16_t vase = 22;
   const uint16_t flagpole = 208;
 
+  if(num_leaves <= flagpole || glm::distance(sphere_flagpole.origin, sphere_flagpole.origin)>1.e-5f || glm::distance(sphere_flagpole.radius, sphere_flagpole.radius)>1.e-5f)
+    return; // not the sponza_full scene
+
   float dummy;
   const glsl::Sphere* const leaf_bounding_spheres = reinterpret_cast<const glsl::Sphere*>(this->leaves_bounding_spheres);
 
+  Q_ASSERT(cone_intersects_sphere(cone_flagpole, sphere_flagpole, dummy));
   Q_ASSERT(cone_intersects_sphere(cone_flagpole, leaf_bounding_spheres[flagpole], dummy));
   Q_ASSERT(BVH::shadow_occlusion_without_bvh(cone_flagpole).contains(flagpole));
   Q_ASSERT(BVH::shadow_occlusion_with_bvh(cone_flagpole).contains(flagpole));
