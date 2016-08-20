@@ -74,7 +74,7 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   return minVisibility;
 }
 
-void ao_coneSoftShadow(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
   for(uint32_t i=0; i<num_distance_fields; ++i)
   {
@@ -103,14 +103,135 @@ void ao_coneSoftShadow(in Sphere* bounding_spheres, in VoxelDataBlock* distance_
   }
 }
 
-float distancefield_ao(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float radius=3.5)
+void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner_nodes, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+{
+  uint16_t stack[BVH_MAX_DEPTH];
+  stack[0] = uint16_t(0);
+  uint16_t stack_depth=uint16_t(1);
+
+  uint16_t leaves[BVH_MAX_DEPTH * N_GI_CONES];
+  uint16_t num_leaves[N_GI_CONES];
+  for(int i=0; i<N_GI_CONES; ++i)
+    num_leaves[i] = uint16_t(0);
+
+  do {
+    stack_depth--;
+    uint16_t current_node = stack[stack_depth];
+    
+    uint16_t* child_nodes = inner_nodes + current_node*uint16_t(2);
+    uint16_t left_node = child_nodes[0];
+    uint16_t right_node = child_nodes[1];
+    
+    bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
+    bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
+
+    left_node = left_node & uint16_t(0x7fff);
+    right_node = right_node & uint16_t(0x7fff);
+    
+    if(left_is_inner_node)
+    {
+      float d;
+      for(uint16_t i=uint16_t(0); i<uint16_t(N_GI_CONES); ++i)
+      {
+        if(cone_intersects_sphere(cone_bouquet[i], bvh_inner_bounding_sphere[left_node], d))
+        {
+          stack[stack_depth] = left_node;
+          break;
+        }
+      }
+    }else
+    {
+      float d;
+      for(uint16_t i=uint16_t(0); i<uint16_t(N_GI_CONES); ++i)
+      {
+        #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
+            ao_distancefield_cost++;
+        #endif
+        if(cone_intersects_sphere(cone_bouquet[i], bounding_spheres[left_node], d))
+        {
+          leaves[num_leaves[i] + i*uint16_t(N_GI_CONES)] = left_node;
+          num_leaves[i]++;
+        }
+      }
+    }
+      
+    if(right_is_inner_node)
+    {
+      float d;
+      for(uint16_t i=uint16_t(0); i<uint16_t(N_GI_CONES); ++i)
+      {
+        if(cone_intersects_sphere(cone_bouquet[i], bvh_inner_bounding_sphere[right_node], d))
+        {
+          stack[stack_depth] = right_node;
+          break;
+        }
+      }
+    }else
+    {
+      float d;
+      for(uint16_t i=uint16_t(0); i<uint16_t(N_GI_CONES); ++i)
+      {
+        #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
+            ao_distancefield_cost++;
+        #endif
+        if(cone_intersects_sphere(cone_bouquet[i], bounding_spheres[right_node], d))
+        {
+          leaves[num_leaves[i] + i*uint16_t(N_GI_CONES)] = right_node;
+          num_leaves[i]++;
+        }
+      }
+    }
+    
+  }while(stack_depth>uint16_t(0));
+  
+  
+  for(uint16_t j=uint16_t(0); j<uint16_t(N_GI_CONES); ++j)
+  {
+    Cone cone = cone_bouquet[j];
+    
+    const uint16_t n = num_leaves[j];
+    float ao = 1.f;
+    
+    for(uint16_t i=uint16_t(0); i<n; ++i)
+    {
+      uint16_t leaf_index = leaves[uint32_t(i) + uint32_t(j)*uint32_t(BVH_MAX_DEPTH)];
+      Sphere sphere = bounding_spheres[leaf_index];
+      
+      {
+        float distance_to_sphere_origin;
+        /*
+        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+            ao_distancefield_cost++;
+        #endif
+        if(*/cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);/*)*/
+        {
+
+          float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
+          float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
+          ao = min(ao, ao_coneSoftShadow(cone, distance_field_data_blocks+leaf_index, intersection_distance_front, intersection_distance_back, cone_length));
+        }
+      }
+      
+    }
+    
+    cone_bouquet_ao[j] = ao;
+  }
+}
+
+float distancefield_ao(in Sphere* bvh_bounding_spheres, uint16_t* bvh_nodes, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float radius=3.5)
 {
   float V = 0.f;
   
   for(int i=0; i<N_GI_CONES; ++i)
     cone_bouquet_ao[i] = 1.f;
-  
-  ao_coneSoftShadow(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+    
+  #if defined(NO_BVH)
+  ao_coneSoftShadow_bruteforce(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+  #elif defined(BVH_WITH_STACK)
+  ao_coneSoftShadow_bvh(bvh_bounding_spheres, bvh_nodes, bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+  #else
+  #error UNKNOWN BVH usage
+  #endif
     
   for(int i=0; i<N_GI_CONES; ++i)
     V += max(0, cone_bouquet_ao[i]);
@@ -120,11 +241,13 @@ float distancefield_ao(in Sphere* bounding_spheres, in VoxelDataBlock* distance_
 
 float distancefield_ao(float radius=3.5)
 {
-  Sphere* bounding_spheres = distance_fields_bounding_spheres();
-  VoxelDataBlock* distance_field_data_blocks = distance_fields_voxelData();
-  uint32_t num_distance_fields = distance_fields_num();
+  Sphere* _bvh_bounding_spheres = bvh_inner_bounding_spheres();
+  uint16_t* _bvh_nodes = bvh_inner_nodes();
+  Sphere* _bounding_spheres = distance_fields_bounding_spheres();
+  VoxelDataBlock* _distance_field_data_blocks = distance_fields_voxelData();
+  uint32_t _num_distance_fields = distance_fields_num();
   
-  return distancefield_ao(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+  return distancefield_ao(_bvh_bounding_spheres, _bvh_nodes, _bounding_spheres, _distance_field_data_blocks, _num_distance_fields, radius);
 }
 
 void SHOW_CONES()
