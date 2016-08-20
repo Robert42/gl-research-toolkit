@@ -8,8 +8,8 @@ namespace renderer {
 
 enum class BvhUsage
 {
-  NO_BVH,
-  BVH_RECURSIVE,
+  NO_BVH,         // Just go linear over all BVH leaves
+  BVH_WITH_STACK, // All SDFs within a single BVH-Tree
 };
 
 extern BvhUsage currentBvhUsage;
