@@ -9,11 +9,11 @@ vec3 cone_normal;
 
 int ao_distancefield_cost = 0;
 
-bool intersects_with_cone_bouquet(in Sphere sphere, float cone_length, out float distance_to_sphere)
+bool intersects_with_cone_bouquet(in Sphere sphere, float cone_length)
 {
   vec3 cone_origin = cone_bouquet[0].origin;
   
-  distance_to_sphere = max(0, distance(cone_origin, sphere.origin) - sphere.radius);
+  float distance_to_sphere = max(0, distance(cone_origin, sphere.origin) - sphere.radius);
   
   float side_of_sphere = dot(sphere.origin+cone_normal*sphere.radius - cone_origin, cone_normal);
   
@@ -141,31 +141,27 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
     
     if(left_is_inner_node)
     {
-      float d;
-      if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[left_node], cone_length, d))
+      if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[left_node], cone_length))
         stack[stack_depth++] = left_node;
     }else
     {
-      float d;
       #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
           ao_distancefield_cost++;
       #endif
-      if(intersects_with_cone_bouquet(bounding_spheres[left_node], cone_length, d))
+      if(intersects_with_cone_bouquet(bounding_spheres[left_node], cone_length))
         leaves[num_leaves++] = left_node;
     }
       
     if(right_is_inner_node)
     {
-      float d;
-      if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[right_node], cone_length, d))
+      if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[right_node], cone_length))
         stack[stack_depth++] = right_node;
     }else
     {
-      float d;
       #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
           ao_distancefield_cost++;
       #endif
-      if(intersects_with_cone_bouquet(bounding_spheres[right_node], cone_length, d))
+      if(intersects_with_cone_bouquet(bounding_spheres[right_node], cone_length))
         leaves[num_leaves++] = right_node;
     }
     
