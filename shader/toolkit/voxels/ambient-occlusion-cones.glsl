@@ -122,6 +122,7 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
   uint16_t stack_depth=uint16_t(1);
 
   uint16_t leaves[BVH_MAX_DEPTH];
+  float leave_distances[BVH_MAX_DEPTH];
   uint16_t num_leaves;
   num_leaves = uint16_t(0);
 
@@ -151,7 +152,11 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
           ao_distancefield_cost++;
       #endif
       if(intersects_with_cone_bouquet(bounding_spheres[left_node], cone_length, d))
-        leaves[num_leaves++] = left_node;
+      {
+        leave_distances[num_leaves] = d;
+        leaves[num_leaves] = left_node;
+        num_leaves++;
+      }
     }
       
     if(right_is_inner_node)
@@ -166,7 +171,11 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
           ao_distancefield_cost++;
       #endif
       if(intersects_with_cone_bouquet(bounding_spheres[right_node], cone_length, d))
-        leaves[num_leaves++] = right_node;
+      {
+        leave_distances[num_leaves] = d;
+        leaves[num_leaves] = right_node;
+        num_leaves++;
+      }
     }
     
   }while(stack_depth>uint16_t(0));
@@ -179,18 +188,18 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
     #endif
     Sphere sphere = bounding_spheres[leaves[i]];
     VoxelDataBlock* sdf = distance_field_data_blocks + leaves[i];
+    float distance_to_sphere_origin  = leave_distances[i];
     
     for(int j=0; j<N_GI_CONES; ++j)
     {
-      float distance_to_sphere_origin;
-      if(cone_intersects_sphere(cone_bouquet[j], sphere, distance_to_sphere_origin, cone_length))
+      //if(cone_intersects_sphere(cone_bouquet[j], sphere, distance_to_sphere_origin, cone_length))
       {
         #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
             ao_distancefield_cost++;
         #endif
 
-        float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
-        float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
+        float intersection_distance_front = distance_to_sphere_origin/*sphere.radius*/;
+        float intersection_distance_back = distance_to_sphere_origin+2.f*sphere.radius;
         cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao_coneSoftShadow(cone_bouquet[j], sdf, intersection_distance_front, intersection_distance_back, cone_length));
       }
     }
