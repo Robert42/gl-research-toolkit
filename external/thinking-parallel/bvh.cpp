@@ -35,6 +35,25 @@ BVH::SubTree BVH::generateHierarchy(quint16 begin, quint16 end)
   return root;
 }
 
+BVH::SubTree BVH::generateSingleElementHierarchy()
+{
+  SubTree root;
+
+  quint16 newNode = addInnerNode();
+  SubTree left_subtree = generateHierarchy(0, 1);
+  SubTree right_subtree;
+  right_subtree.index = 0x8001;
+  right_subtree.bounding_sphere = BoundingSphere{glm::vec3(NAN), NAN};
+
+  bvhInnerNodes[newNode].left_child = left_subtree.index;
+  bvhInnerNodes[newNode].right_child = right_subtree.index;
+  bvhInnerBoundingSpheres[newNode] = left_subtree.bounding_sphere;
+
+  root.index = newNode;
+  root.bounding_sphere = bvhInnerBoundingSpheres[newNode];
+  return root;
+}
+
 inline quint32 BVH::zIndexDistance(quint16 a, quint16 b)
 {
   Q_ASSERT(a<num_leaves);

@@ -69,8 +69,10 @@ void VoxelBuffer::updateVoxelGrid()
   const float* scaleFactor = voxelGridData->scaleFactor;
   const BoundingSphere* boundingSpheres = voxelGridData->boundingSphere;
 
-  scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n);
-  BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n);
+  const quint16 n_mintwo = glm::max<quint16>(2, n);
+
+  scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n_mintwo);
+  BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n_mintwo);
 
   #pragma omp simd
   for(quint16 i=0; i<n; ++i)
@@ -95,6 +97,12 @@ void VoxelBuffer::updateVoxelGrid()
     boundingSphere[i] = globalCoordFrame * boundingSpheres[i];
   }
 
+  if(Q_UNLIKELY(n==1))
+  {
+    dataBlock[1] = dataBlock[0];
+    boundingSphere[1] = BoundingSphere{glm::vec3(NAN), NAN};
+  }
+
   updateBvhTree(boundingSphere);
 
   distanceFieldVoxelData.Unmap();
@@ -107,9 +115,9 @@ void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
   PROFILE_SCOPE("VoxelBuffer::updateBvhTree()")
 
   const quint16 numElements = voxelGridData->length;
-  if(numElements <= 1)
-    return;
-  const quint16 numInnerNodes = numElements - 1;
+  const quint16 numInnerNodes = glm::max<quint16>(1, numElements - 1);
+
+  Q_ASSERT(numElements>0);
 
   BVH bvh(leaves_bounding_spheres, *voxelGridData);
 
@@ -139,10 +147,16 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
   this->bvhInnerBoundingSpheres = bvhInnerBoundingSpheres;
   this->bvhInnerNodes = bvhInnerNodes;
 
-  generateHierarchy(0, num_leaves);
+  if(Q_LIKELY(num_leaves > 1))
+  {
+    generateHierarchy(0, num_leaves);
+    verifyHierarchy();
+    testOcclusion();
+  }else
+  {
+    generateSingleElementHierarchy();
+  }
 
-  verifyHierarchy();
-  testOcclusion();
 
   this->bvhInnerBoundingSpheres = nullptr;
   this->bvhInnerNodes = nullptr;
