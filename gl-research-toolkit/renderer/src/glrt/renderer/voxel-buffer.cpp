@@ -171,17 +171,19 @@ void BVH::verifyHierarchy() const
 void BVH::verifyTreeDepth() const
 {
   const quint16 depth = calcDepth(0, bvhInnerNodes);
-  if(depth == num_leaves-1)
+  if(Q_UNLIKELY(depth == num_leaves-1))
     qWarning() << "Malformed tree (no performence gains)";
+  if(Q_UNLIKELY(BVH_MAX_STACK_DEPTH < depth))
+    qWarning() << "bvh has a greater depth than the bvh traversal stack";
   qDebug() << "BVH::updateTreeCPU{num_leaves:" <<num_leaves << " depth:"<<depth<<"}";
-  Q_ASSERT(depth < BVH_MAX_DEPTH);
+  Q_ASSERT(depth < MAX_NUM_STATIC_MESHES);
 }
 
 void BVH::verifyBoundingSpheres(uint16_t root_node) const
 {
   const uint16_t* inner_nodes = reinterpret_cast<const uint16_t*>(this->bvhInnerNodes);
 
-  uint16_t stack[BVH_MAX_DEPTH];
+  uint16_t stack[MAX_NUM_STATIC_MESHES];
   stack[0] = root_node;
   uint16_t stack_depth=uint16_t(1);
 
