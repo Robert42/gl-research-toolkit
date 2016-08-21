@@ -127,14 +127,14 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
       {
         stack[stack_depth++] = left_node;
         #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
-        stack_depth = min(stack_depth, BVH_MAX_STACK_DEPTH-1);
+        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
         #endif
       }
     }else
     {
       leaves[num_leaves++] = left_node;
       #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
-      num_leaves = min(num_leaves, BVH_MAX_VISITED_LEAVES-1);
+      num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
       #endif
     }
       
@@ -145,14 +145,14 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
       {
         stack[stack_depth++] = right_node;
         #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
-        stack_depth = min(stack_depth, BVH_MAX_STACK_DEPTH-1);
+        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
         #endif
       }
     }else
     {
       leaves[num_leaves++] = right_node;
       #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
-      num_leaves = min(num_leaves, BVH_MAX_VISITED_LEAVES-1);
+      num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
       #endif
     }
     
