@@ -9,6 +9,10 @@
 namespace glrt {
 namespace scene {
 
+
+#define ENFORCE_HUGE_BVH_LEAVES_FIRST 1
+#define BVH_HUGE_LEAVES_LIMIT 0.25f
+
 class Scene::Data
 {
 public:
@@ -168,6 +172,7 @@ public:
     resources::BoundingSphere boundingSphere[capacity];
     quint32 z_index[capacity];
     bool voxelizedAsScenery[capacity];
+    float huge_bvh_limit;
 
     void swap_voxel_data(quint16 a, quint16 b)
     {
@@ -197,6 +202,10 @@ public:
       target_data->voxelizedAsScenery[target_index] = source_data->voxelizedAsScenery[source_index];
     }
 
+    static void copy_voxelgrid_metadata(VoxelGridData<capacity>* target_data, VoxelGridData<capacity>* source_data)
+    {
+      target_data->huge_bvh_limit = source_data->huge_bvh_limit;
+    }
   };
 
   template<quint16 capacity>

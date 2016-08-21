@@ -103,14 +103,26 @@ void Scene::Data::sort_voxelGrids()
   for(quint16 i=0; i<voxelGrids->length; ++i)
     index_reorder[i] = i;
 
-  quint32* z_indices = voxelGrids->z_index;
-  auto sorting_order = [&z_indices](quint16 a, quint16 b){
-          return z_indices[a]<z_indices[b];
+  const float huge_bvh_limit = voxelGrids->huge_bvh_limit;
+  const quint32* z_indices = voxelGrids->z_index;
+  const resources::BoundingSphere* bounding_spheres = voxelGrids->boundingSphere;
+  auto sorting_order = [&z_indices, &bounding_spheres,huge_bvh_limit](quint16 a, quint16 b){
+#if ENFORCE_HUGE_BVH_LEAVES_FIRST
+    bool a_is_huge = bounding_spheres[a].radius>huge_bvh_limit;
+    bool b_is_huge = bounding_spheres[b].radius>huge_bvh_limit;
+    if(Q_UNLIKELY(a_is_huge != b_is_huge))
+      return a_is_huge;
+#else
+    Q_UNUSED(bounding_spheres);
+    Q_UNUSED(huge_bvh_limit);
+#endif
+    return z_indices[a]<z_indices[b];
   };
 
   std::stable_sort(&index_reorder[0], &index_reorder[voxelGrids->length], sorting_order);
 
   VoxelGrids::copy_array_metadata(voxelGrids_backbuffer, voxelGrids);
+  VoxelGrids::copy_voxelgrid_metadata(voxelGrids_backbuffer, voxelGrids);
 #pragma omp simd
   for(quint16 i=0; i<voxelGrids->length; ++i)
   {
@@ -122,6 +134,7 @@ void Scene::Data::sort_voxelGrids()
 
 #ifdef QT_DEBUG
   z_indices = voxelGrids->z_index; // after swapping the old address is invalid
+  bounding_spheres = voxelGrids->boundingSphere;
 
   voxelGrids->assert_valid_indices();
   #pragma omp simd

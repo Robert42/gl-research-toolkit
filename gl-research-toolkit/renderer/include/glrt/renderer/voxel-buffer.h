@@ -35,9 +35,10 @@ struct BVH
   const BoundingSphere* const leaves_bounding_spheres;
   const quint32* const leaves_z_indices;
   const quint16 num_leaves;
+  const float huge_bvh_limit;
 
   BVH(const BoundingSphere* leaves_bounding_spheres, const VoxelGrids& voxelGridData);
-  BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves);
+  BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves, float huge_bvh_limit=INFINITY);
   void updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes);
 
   quint16 findSplit(quint16 begin, quint16 end);

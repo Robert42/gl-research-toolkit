@@ -99,6 +99,21 @@ quint16 BVH::findSplit(quint16 begin, quint16 end)
 
   quint16 split = (begin+end)/2;
 
+#if ENFORCE_HUGE_BVH_LEAVES_FIRST
+  if(Q_UNLIKELY(begin==0 && end==num_leaves))
+  {
+    quint16 huge_end;
+    const float huge_bvh_limit = this->huge_bvh_limit;
+
+    for(huge_end=begin; huge_end<end && leaves_bounding_spheres[huge_end].radius>=huge_bvh_limit; ++huge_end)
+    {
+    }
+
+    if(Q_LIKELY(huge_end < end))
+      return huge_end;
+  }
+#endif
+
 #if !FORCE_BALANCED
   quint16 range_begin=begin;
   quint16 range_end=end;
