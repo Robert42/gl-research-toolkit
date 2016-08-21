@@ -41,7 +41,9 @@ struct BVH
   void updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, InnerNode* bvhInnerNodes);
 
   quint16 findSplit(quint16 begin, quint16 end);
-  quint32 zIndexDistance(quint16 a, quint16 b);
+  quint32 zIndexDistance(quint16 a, quint16 b) const;
+  float boundingSphereRadius(quint16 a, quint16 b) const;
+  float boundingSphereRadius_heuristic(quint16 a, quint16 b) const;
 
 private:
   BoundingSphere* bvhInnerBoundingSpheres = nullptr;

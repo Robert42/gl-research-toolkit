@@ -54,11 +54,30 @@ BVH::SubTree BVH::generateSingleElementHierarchy()
   return root;
 }
 
-inline quint32 BVH::zIndexDistance(quint16 a, quint16 b)
+inline quint32 BVH::zIndexDistance(quint16 a, quint16 b) const
 {
   Q_ASSERT(a<num_leaves);
   Q_ASSERT(b<num_leaves);
   return glm::highestBitValue(leaves_z_indices[a] ^ leaves_z_indices[b]);
+}
+
+inline float BVH::boundingSphereRadius(quint16 a, quint16 b) const
+{
+  Q_ASSERT(a<num_leaves);
+  Q_ASSERT(b<num_leaves);
+  BoundingSphere bs = leaves_bounding_spheres[a];
+
+  for(quint16 i=a+1; i<=b; ++i)
+    bs = bs | leaves_bounding_spheres[b];
+
+  return bs.radius;
+}
+
+inline float BVH::boundingSphereRadius_heuristic(quint16 a, quint16 b) const
+{
+  Q_ASSERT(a<num_leaves);
+  Q_ASSERT(b<num_leaves);
+  return (leaves_bounding_spheres[a] | leaves_bounding_spheres[b]).radius;
 }
 
 // see also https://devblogs.nvidia.com/parallelforall/thinking-parallel-part-iii-tree-construction-gpu/
@@ -66,6 +85,9 @@ quint16 BVH::findSplit(quint16 begin, quint16 end)
 {
 #define FORCE_BALANCED 0
 #define PRINT_SPLITS 0
+#define SPLIT_BY_Z_INDEX 0
+#define SPLIT_BY_BOUNDING_SPHERE_SIZE_HEURISTIC 0
+#define SPLIT_BY_BOUNDING_SPHERE_SIZE 1
 
 #if PRINT_SPLITS
   qDebug() << "\n\n\nBVH::findSplit("<<begin<<"," << end << ")";
@@ -86,7 +108,22 @@ quint16 BVH::findSplit(quint16 begin, quint16 end)
     Q_ASSERT(split>0);
     Q_ASSERT(range_end>0);
 
-    if(zIndexDistance(range_begin, split-1) > zIndexDistance(split, range_end-1))
+#define LEFT_SUBTREE range_begin, split-1
+#define RIGHT_SUBTREE split, range_end-1
+
+    bool prefer_left_subtree;
+
+#if SPLIT_BY_Z_INDEX
+    prefer_left_subtree = zIndexDistance(LEFT_SUBTREE) > zIndexDistance(RIGHT_SUBTREE)
+#elif SPLIT_BY_BOUNDING_SPHERE_SIZE
+    prefer_left_subtree = boundingSphereRadius(LEFT_SUBTREE) > boundingSphereRadius(RIGHT_SUBTREE);
+#elif SPLIT_BY_BOUNDING_SPHERE_SIZE_HEURISTIC
+    prefer_left_subtree = boundingSphereRadius_heuristic(LEFT_SUBTREE) > boundingSphereRadius_heuristic(RIGHT_SUBTREE);
+#else
+#error missing split ciriterium
+#endif
+
+    if(prefer_left_subtree)
       range_end = split;
     else
       range_begin = split;
@@ -94,6 +131,9 @@ quint16 BVH::findSplit(quint16 begin, quint16 end)
     split = (range_begin+range_end)/2;
   }
 #endif
+
+#undef LEFT_SUBTREE
+#undef RIGHT_SUBTREE
 
   split = glm::clamp<quint16>(split, begin+1, end-1);
 
