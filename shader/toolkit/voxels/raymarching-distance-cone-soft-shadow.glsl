@@ -97,8 +97,6 @@ float coneSoftShadow_bvh_leaf(in Cone cone, in uint16_t leaf_node, in Sphere* le
 
 float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* leaf_distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  // TODO try, whether using uint8_t instead of uint16_t has more performance
-  
   uint16_t stack[BVH_MAX_STACK_DEPTH];
   stack[0] = root_node;
   uint16_t stack_depth=uint16_t(1);
