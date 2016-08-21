@@ -62,7 +62,7 @@ QSet<quint16> BVH::shadow_occlusion_with_bvh(const Cone& cone, uint16_t root_nod
   const glsl::Sphere* bvh_inner_bounding_sphere = reinterpret_cast<const glsl::Sphere*>(this->bvhInnerBoundingSpheres);
   const glsl::Sphere* leaf_bounding_spheres = reinterpret_cast<const glsl::Sphere*>(this->leaves_bounding_spheres);
 
-  uint16_t stack[BVH_MAX_DEPTH];
+  uint16_t stack[MAX_NUM_STATIC_MESHES];
   stack[0] = root_node;
   uint16_t stack_depth=uint16_t(1);
 

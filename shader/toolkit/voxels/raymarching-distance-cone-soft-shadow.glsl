@@ -99,11 +99,11 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
 {
   // TODO try, whether using uint8_t instead of uint16_t has more performance
   
-  uint16_t stack[BVH_MAX_DEPTH];
+  uint16_t stack[BVH_MAX_STACK_DEPTH];
   stack[0] = root_node;
   uint16_t stack_depth=uint16_t(1);
   
-  uint16_t leaves[BVH_MAX_DEPTH];
+  uint16_t leaves[BVH_MAX_VISITED_LEAVES];
   uint16_t num_leaves = uint16_t(0);
   
   do {
@@ -124,20 +124,36 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
     {
       float d;
       if(cone_intersects_sphere(cone, bvh_inner_bounding_sphere[left_node], d))
+      {
         stack[stack_depth++] = left_node;
+        #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
+        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
+        #endif
+      }
     }else
     {
       leaves[num_leaves++] = left_node;
+      #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
+      num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
+      #endif
     }
       
     if(right_is_inner_node)
     {
       float d;
       if(cone_intersects_sphere(cone, bvh_inner_bounding_sphere[right_node], d))
+      {
         stack[stack_depth++] = right_node;
+        #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
+        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
+        #endif
+      }
     }else
     {
       leaves[num_leaves++] = right_node;
+      #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
+      num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
+      #endif
     }
     
   }while(stack_depth>uint16_t(0));

@@ -117,11 +117,11 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
 
 void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner_nodes, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  uint16_t stack[BVH_MAX_DEPTH];
+  uint16_t stack[BVH_MAX_STACK_DEPTH];
   stack[0] = uint16_t(0);
   uint16_t stack_depth=uint16_t(1);
 
-  uint16_t leaves[BVH_MAX_DEPTH];
+  uint16_t leaves[BVH_MAX_VISITED_LEAVES];
   uint16_t num_leaves;
   num_leaves = uint16_t(0);
 
@@ -142,27 +142,47 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
     if(left_is_inner_node)
     {
       if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[left_node], cone_length))
+      {
         stack[stack_depth++] = left_node;
+        #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
+        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
+        #endif
+      }
     }else
     {
       #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
           ao_distancefield_cost++;
       #endif
       if(intersects_with_cone_bouquet(bounding_spheres[left_node], cone_length))
+      {
         leaves[num_leaves++] = left_node;
+        #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
+        num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
+        #endif
+      }
     }
       
     if(right_is_inner_node)
     {
       if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[right_node], cone_length))
+      {
         stack[stack_depth++] = right_node;
+        #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
+        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
+        #endif
+      }
     }else
     {
       #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
           ao_distancefield_cost++;
       #endif
       if(intersects_with_cone_bouquet(bounding_spheres[right_node], cone_length))
+      {
         leaves[num_leaves++] = right_node;
+        #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
+        num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
+        #endif
+      }
     }
     
   }while(stack_depth>uint16_t(0));
