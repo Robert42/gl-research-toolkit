@@ -14,9 +14,10 @@ uniform NodeBlock
 
 void main()
 {
-  const vec3 c = vec3(1, 0.5, 0);
+  vec3 c = vec3(1, 0.5, 0);
   
   Sphere* bvh_inner_spheres = bvh_inner_bounding_spheres();
+  Sphere* leaf_spheres = distance_fields_bounding_spheres();
   uint16_t* bvh_inner_nodes = bvh_inner_nodes();
   
   // ==== SPECIAL CASE HANDLING ====
@@ -51,11 +52,29 @@ void main()
   
   vec3 ws_position;
   
-  bool is_sphere = vertex_color[0]>0;
+  bool is_sphere = vertex_color.x>0.f;
+  bool is_connection_to_left = vertex_color.y>0.f;
+  bool is_connection_to_right = vertex_color.z>0.f;
+  bool is_connection = is_connection_to_left || is_connection_to_right;
+  
+  uint16_t index_of_child = bvh_inner_nodes[int(node_id)*2 + (is_connection_to_left?0:1)];
   
   if(is_sphere)
+  {
     ws_position = vertex_position * bvh_inner_spheres[node_id].radius + bvh_inner_spheres[node_id].origin;
-  else
+  }else if(is_connection && node_level+uint16_t(1)<scene.bvh_debug_depth_end)
+  {
+    c = vec3(0.5, 0.95, 0.05);
+    Sphere parent_sphere = bvh_inner_spheres[node_id];
+    Sphere child_sphere;
+    
+    if((index_of_child & uint16_t(0x8000)) != uint16_t(0))
+      child_sphere = leaf_spheres[index_of_child & uint16_t(0x7fff)];
+    else
+      child_sphere = bvh_inner_spheres[index_of_child];
+    
+    ws_position = mix(parent_sphere.origin, child_sphere.origin, vertex_position.x);
+  }else
     ws_position = vec3(0);
 
   pass_attributes_to_fragment_shader(ws_position, c);
