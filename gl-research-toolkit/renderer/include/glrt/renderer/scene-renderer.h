@@ -71,6 +71,8 @@ public:
 
   quint32 costsHeatvisionBlackLevel = 0;
   quint32 costsHeatvisionWhiteLevel = 1024;
+  quint16 bvh_debug_depth_begin = 0;
+  quint16 bvh_debug_depth_end = 2;
 
   Renderer(const Renderer&) = delete;
   Renderer(Renderer&&) = delete;
@@ -115,11 +117,11 @@ private:
     float totalTime;
     LightBuffer::LightData lightData;
     VoxelBuffer::VoxelHeader voxelHeader;
-    quint32 costsHeatvisionBlackLevel;
-    quint32 costsHeatvisionWhiteLevel;
 
     // Padding & debugging
-    quint16 bvh_debug_depth_start;
+    quint32 costsHeatvisionBlackLevel;
+    quint32 costsHeatvisionWhiteLevel;
+    quint16 bvh_debug_depth_begin;
     quint16 bvh_debug_depth_end;
     padding<quint32, 1> _padding2;
   };

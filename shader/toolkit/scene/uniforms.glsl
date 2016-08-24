@@ -40,8 +40,8 @@ struct SceneData
   SceneVoxelHeader voxelHeader;
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;
-  uint16_t min_bvh_level_to_show;
-  uint16_t maxs_bvh_level_to_show;
+  uint16_t bvh_debug_depth_begin;
+  uint16_t bvh_debug_depth_end;
 };
 
 #include <glrt/glsl/layout-constants.h>

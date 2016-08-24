@@ -1,6 +1,7 @@
 #include <glrt/toolkit/profiler.h>
 #include <glrt/application.h>
 #include <glrt/gui/anttweakbar.h>
+#include <glrt/renderer/bvh-usage.h>
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
@@ -169,6 +170,10 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
   renderer->visualizeVoxelBoundingSpheres.guiToggle.TwAddVarCB(tweakBar, "Show SDF B-Spheres", "group='Debug Scene' help='Show the Bounding Spheres of the Distancefield Components'");
   renderer->visualizeBVH.guiToggle.TwAddVarCB(tweakBar, "Show BVH Tree", "group='Debug Scene' help='Show the SDF Bounding Volume Hierarchy'");
+
+
+  TwAddVarRW(tweakBar, "BVH Debug depth begin", TW_TYPE_UINT16, &renderer->bvh_debug_depth_begin, QString("group='Debug Scene' min=0 max=%0").arg(renderer::BVH_MAX_STACK_DEPTH).toStdString().c_str());
+  TwAddVarRW(tweakBar, "BVH Debug depth end", TW_TYPE_UINT16, &renderer->bvh_debug_depth_end, QString("group='Debug Scene' min=1 max=%0").arg(renderer::BVH_MAX_STACK_DEPTH).toStdString().c_str());
 
   renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Voxel-AABBs", "group='Debug Scene'");
   renderer->visualizeSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");
