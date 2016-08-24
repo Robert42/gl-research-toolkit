@@ -1,5 +1,5 @@
 #include <extensions/common.glsl>
-#include <debugging/print.glsl>
+#include <scene/uniforms.glsl>
 
 in FragmentBlock
 {

@@ -24,6 +24,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
+    visualizeBVH(debugging::VisualizationRenderer::showSceneBVH(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
@@ -51,6 +52,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
+  debugDrawList_Backbuffer.connectTo(&visualizeBVH);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
   debugDrawList_Backbuffer.connectTo(&visualizeBoundingBoxes);

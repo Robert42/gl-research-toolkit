@@ -168,6 +168,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
 
   renderer->visualizeVoxelGrids.guiToggle.TwAddVarCB(tweakBar, "Show VoxelGrids", "group='Debug Scene'");
   renderer->visualizeVoxelBoundingSpheres.guiToggle.TwAddVarCB(tweakBar, "Show SDF B-Spheres", "group='Debug Scene' help='Show the Bounding Spheres of the Distancefield Components'");
+  renderer->visualizeBVH.guiToggle.TwAddVarCB(tweakBar, "Show BVH Tree", "group='Debug Scene' help='Show the SDF Bounding Volume Hierarchy'");
 
   renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Voxel-AABBs", "group='Debug Scene'");
   renderer->visualizeSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");

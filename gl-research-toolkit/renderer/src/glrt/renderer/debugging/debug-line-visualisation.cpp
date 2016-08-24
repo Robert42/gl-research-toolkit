@@ -319,6 +319,35 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawBoundingBoxes(const Q
   return v;
 }
 
+DebugRenderer::Implementation*DebugLineVisualisation::drawBvh(quint16 num_bvh_leaves)
+{
+  DebugMesh::Painter painter;
+
+  painter.nextAttribute.color = glm::vec3(1, 0, 0);
+  painter.addSphere(1.f, 96);
+  painter.nextAttribute.color = glm::vec3(0, 1, 0);
+  painter.addVertex(0, 0, 0);
+  painter.addVertex(1, 0, 0);
+  painter.nextAttribute.color = glm::vec3(0, 0, 1);
+  painter.addVertex(0, 0, 0);
+  painter.addVertex(1, 0, 0);
+
+  QVector<uint16_t> nodes;
+  nodes.resize(num_bvh_leaves-1);
+  for(uint16_t i=0; i<uint16_t(nodes.length()); ++i)
+  {
+    nodes[i] = i;
+  }
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  nodes,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-bvh",
+                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"))))));
+  v->use_dephtest = true;
+  return v;
+}
+
 
 void DebugLineVisualisation::render()
 {

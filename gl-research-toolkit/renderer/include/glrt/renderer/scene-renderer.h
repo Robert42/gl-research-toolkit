@@ -51,6 +51,7 @@ public:
   debugging::DebugRenderer visualizeRectAreaLights;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
+  debugging::DebugRenderer visualizeBVH;
   debugging::DebugRenderer visualizeWorldGrid;
   debugging::DebugRenderer visualizeUniformTest;
   debugging::DebugRenderer visualizeBoundingBoxes;
@@ -116,7 +117,11 @@ private:
     VoxelBuffer::VoxelHeader voxelHeader;
     quint32 costsHeatvisionBlackLevel;
     quint32 costsHeatvisionWhiteLevel;
-    padding<quint32, 2> _padding2;
+
+    // Padding & debugging
+    quint16 bvh_debug_depth_start;
+    quint16 bvh_debug_depth_end;
+    padding<quint32, 1> _padding2;
   };
   gl::Buffer sceneUniformBuffer;
 
