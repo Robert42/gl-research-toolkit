@@ -1,5 +1,6 @@
 #include <glrt/renderer/debugging/visualization-renderer.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
 #include <glrt/scene/collect-scene-data.h>
 
 namespace glrt {
@@ -59,6 +60,17 @@ DebugRenderer VisualizationRenderer::debugVoxelBoundingSpheres(scene::Scene* sce
       return nullptr;
     else
       return debugging::DebugLineVisualisation::drawSpheres(voxelBoundingSpheres.values());
+  });
+}
+
+DebugRenderer VisualizationRenderer::showSceneBVH(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    const uint16_t n = scene->data->voxelGrids->length;
+    if(n > 0)
+      return debugging::DebugLineVisualisation::drawBvh(n);
+    else
+      return nullptr;
   });
 }
 

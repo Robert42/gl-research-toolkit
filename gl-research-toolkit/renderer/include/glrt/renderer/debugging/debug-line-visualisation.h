@@ -67,6 +67,7 @@ public:
   static DebugRenderer::Implementation* drawVoxelGrids(const QList<VoxelBoundingBox>& gridSizes);
   static DebugRenderer::Implementation* drawSpheres(const QList<BoundingSphere>& spheres);
   static DebugRenderer::Implementation* drawBoundingBoxes(const QVector<scene::AABB>& boundingBoxes);
+  static DebugRenderer::Implementation* drawBvh(quint16 num_bvh_leaves);
 
 
   DebugLineVisualisation(const DebugLineVisualisation&) = delete;

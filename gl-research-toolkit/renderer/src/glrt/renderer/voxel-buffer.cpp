@@ -60,6 +60,7 @@ void VoxelBuffer::updateVoxelGrid()
     z_indices[i] = voxelGridData->z_index[i] = calcZIndex(scene_aabb.toUnitSpace(voxelGridData->position[i]));
 
   scene.aabb = scene_aabb;
+  voxelGridData->huge_bvh_limit = BVH_HUGE_LEAVES_LIMIT * glm::distance(scene_aabb.maxPoint, scene_aabb.minPoint);
 
   // -- W A R N I N G -- voxelgriddata swap happening here!!!!
   scene.data->sort_voxelGrids();
@@ -130,14 +131,15 @@ void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
 }
 
 BVH::BVH(const BoundingSphere* leaves_bounding_spheres, const VoxelGrids& voxelGridData)
-  : BVH(leaves_bounding_spheres, voxelGridData.z_index, voxelGridData.length)
+  : BVH(leaves_bounding_spheres, voxelGridData.z_index, voxelGridData.length, voxelGridData.huge_bvh_limit)
 {
 }
 
-BVH::BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves)
+BVH::BVH(const BoundingSphere* leaves_bounding_spheres, const quint32* leaves_z_indices, quint16 num_leaves, float huge_bvh_limit)
   : leaves_bounding_spheres(leaves_bounding_spheres),
     leaves_z_indices(leaves_z_indices),
     num_leaves(num_leaves),
+    huge_bvh_limit(huge_bvh_limit),
     capacity_inner_nodes(num_leaves)
 {
 }

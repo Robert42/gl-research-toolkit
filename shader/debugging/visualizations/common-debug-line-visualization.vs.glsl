@@ -1,6 +1,7 @@
 #include <extensions/common.glsl>
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/glsl/math-glsl.h>
+#include <scene/uniforms.glsl>
 
 layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_POSITION) in vec3 vertex_position;
 layout(location=DEBUG_MESH_VERTEX_ATTRIBUTE_LOCATION_PARAMETER1) in float vertex_parameter1;
@@ -11,11 +12,6 @@ out FragmentBlock
 {
   vec3 color;
 }fragment;
-
-layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
-{
-  mat4 view_projection;
-}scene;
 
 void pass_attributes_to_fragment_shader_no_transform(vec4 position, vec3 color)
 {

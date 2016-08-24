@@ -2,12 +2,6 @@
 
 #include "common-debug-line-visualization.fs.glsl"
 
-
-layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
-{
-  mat4 view_projection;
-}scene;
-
 void test_project_line(vec3 v)
 {
   PRINT_VALUE((scene.view_projection * vec4(v, 1)).xyz);

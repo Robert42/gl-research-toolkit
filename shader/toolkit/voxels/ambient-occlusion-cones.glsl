@@ -119,33 +119,33 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
 {
   uint16_t stack[BVH_MAX_STACK_DEPTH];
   stack[0] = uint16_t(0);
-  uint16_t stack_depth=uint16_t(1);
+  uint32_t stack_depth=1;
 
   uint16_t leaves[BVH_MAX_VISITED_LEAVES];
-  uint16_t num_leaves;
-  num_leaves = uint16_t(0);
+  uint32_t num_leaves;
+  num_leaves = 0;
 
   do {
     stack_depth--;
-    uint16_t current_node = stack[stack_depth];
+    uint32_t current_node = stack[stack_depth];
     
-    uint16_t* child_nodes = inner_nodes + current_node*uint16_t(2);
-    uint16_t left_node = child_nodes[0];
-    uint16_t right_node = child_nodes[1];
+    uint16_t* child_nodes = inner_nodes + current_node*2;
+    uint32_t left_node = child_nodes[0];
+    uint32_t right_node = child_nodes[1];
     
-    bool left_is_inner_node = (left_node & uint16_t(0x8000)) == uint16_t(0);
-    bool right_is_inner_node = (right_node & uint16_t(0x8000)) == uint16_t(0);
+    bool left_is_inner_node = (left_node & 0x8000) == 0;
+    bool right_is_inner_node = (right_node & 0x8000) == 0;
 
-    left_node = left_node & uint16_t(0x7fff);
-    right_node = right_node & uint16_t(0x7fff);
+    left_node = left_node & 0x7fff;
+    right_node = right_node & 0x7fff;
     
     if(left_is_inner_node)
     {
       if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[left_node], cone_length))
       {
-        stack[stack_depth++] = left_node;
+        stack[stack_depth++] = uint16_t(left_node);
         #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
-        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
+        stack_depth = min(stack_depth, BVH_MAX_STACK_DEPTH-1);
         #endif
       }
     }else
@@ -155,9 +155,9 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
       #endif
       if(intersects_with_cone_bouquet(bounding_spheres[left_node], cone_length))
       {
-        leaves[num_leaves++] = left_node;
+        leaves[num_leaves++] = uint16_t(left_node);
         #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
-        num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
+        num_leaves = min(num_leaves, BVH_MAX_VISITED_LEAVES-1);
         #endif
       }
     }
@@ -166,9 +166,9 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
     {
       if(intersects_with_cone_bouquet(bvh_inner_bounding_sphere[right_node], cone_length))
       {
-        stack[stack_depth++] = right_node;
+        stack[stack_depth++] = uint16_t(right_node);
         #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
-        stack_depth = min(stack_depth, uint16_t(BVH_MAX_STACK_DEPTH-1));
+        stack_depth = min(stack_depth, BVH_MAX_STACK_DEPTH-1);
         #endif
       }
     }else
@@ -178,17 +178,17 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
       #endif
       if(intersects_with_cone_bouquet(bounding_spheres[right_node], cone_length))
       {
-        leaves[num_leaves++] = right_node;
+        leaves[num_leaves++] = uint16_t(right_node);
         #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
-        num_leaves = min(num_leaves, uint16_t(BVH_MAX_VISITED_LEAVES-1));
+        num_leaves = min(num_leaves, BVH_MAX_VISITED_LEAVES-1);
         #endif
       }
     }
     
-  }while(stack_depth>uint16_t(0));
+  }while(stack_depth>0);
 
 
-  for(uint16_t i=uint16_t(0); i<num_leaves; ++i)
+  for(uint32_t i=0; i<num_leaves; ++i)
   {
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
         ao_distancefield_cost++;
