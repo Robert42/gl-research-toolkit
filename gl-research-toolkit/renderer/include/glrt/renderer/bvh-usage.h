@@ -11,7 +11,7 @@ enum class BvhUsage : quint32
   NO_BVH,         // Just go linear over all BVH leaves
   BVH_WITH_STACK, // All SDFs within a single BVH-Tree
 
-  // BVH GRID usages must be >=1024 and <2048
+  // bvh grid usages must be >=1024 and <2048
   BVH_GRID_NEAREST_LEAF = 1024,
 //  BVH_GRID_NEAREST_FOUR_LEAVES,
 //  BVH_GRID_NEAREST_LEAF_WITH_HEURISTIC_FOR_REST,
