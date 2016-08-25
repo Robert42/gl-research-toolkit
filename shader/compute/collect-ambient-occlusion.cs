@@ -2,6 +2,7 @@
 #include <extensions/common.glsl>
 
 #include <glrt/glsl/math-glsl.h>
+#include <glrt/glsl/layout-constants.h>
 
 layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
@@ -28,7 +29,7 @@ struct CollectOcclusionMetaData
   vec3 gridLocation[4];
 };
 
-layout(binding=0, std140)
+layout(binding=UNIFORM_COLLECT_OCCLUSION_METADATA_BLOCK, std140)
 uniform CollectOcclusionMetaDataBlock
 {
   CollectOcclusionMetaData metaData;
