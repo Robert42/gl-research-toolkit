@@ -36,6 +36,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
+    collectAmbientOcclusionToGrid(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs"),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
@@ -66,6 +67,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
 
   setAdjustRoughness(true);
   setSDFShadows(true);
+
+  collectAmbientOcclusionToGrid.reinit(glm::ivec3(16, 16, 16*3));
 }
 
 Renderer::~Renderer()
@@ -82,6 +85,8 @@ void Renderer::render()
     recordCommandlist();
 
   updateCameraUniform();
+
+  // TODO collectAmbientOcclusionToGrid.invoke(); // TODO possible to do this
 
   prepareFramebuffer();
 

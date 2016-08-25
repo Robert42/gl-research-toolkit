@@ -19,6 +19,7 @@
 #include <glrt/renderer/material-state.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/compute-step.h>
 
 #include <glhelper/framebufferobject.hpp>
 #include <glhelper/texture2d.hpp>
@@ -104,6 +105,9 @@ private:
   QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
   Array<ReloadableShader> materialShaders;
   Array<MaterialState> materialStates;
+
+  // Compute Steps
+  ComputeStep collectAmbientOcclusionToGrid;
 
   // command lists
   bool _needRecapturing : 1;
