@@ -14,6 +14,7 @@ QMap<QString, BvhUsage> allcurrentBvhUsages()
 
   VALUE(NO_BVH);
   VALUE(BVH_WITH_STACK);
+  VALUE(BVH_GRID_NEAREST_LEAF);
 
   return map;
 }

@@ -16,6 +16,8 @@ public:
   void reinit(const glm::ivec3& totalWorkAmount, bool mustBeMultiple=true, const QSet<QString>& preprocessorBlock=QSet<QString>());
   void reinit(const glm::ivec3& workerGroupSize, const glm::ivec3& totalWorkAmount, bool mustBeMultiple=true, const QSet<QString>& preprocessorBlock=QSet<QString>());
 
+  void invoke();
+
   static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple);
   static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple, int maxNumInvocations);
 

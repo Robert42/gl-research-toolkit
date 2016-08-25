@@ -6,13 +6,25 @@
 namespace glrt {
 namespace renderer {
 
-enum class BvhUsage
+enum class BvhUsage : quint32
 {
   NO_BVH,         // Just go linear over all BVH leaves
   BVH_WITH_STACK, // All SDFs within a single BVH-Tree
+
+  // BVH GRID usages must be >=1024 and <2048
+  BVH_GRID_NEAREST_LEAF = 1024,
+//  BVH_GRID_NEAREST_FOUR_LEAVES,
+//  BVH_GRID_NEAREST_LEAF_WITH_HEURISTIC_FOR_REST,
+//  BVH_GRID_NEAREST_FOUR__LEAF_WITH_HEURISTIC_FOR_REST,
 };
 
 extern BvhUsage currentBvhUsage;
+
+inline bool isUsingBvhLeafGrid()
+{
+  return quint32(currentBvhUsage) >= 1024 && quint32(currentBvhUsage)<2048;
+}
+
 QMap<QString, BvhUsage> allcurrentBvhUsages();
 void setCurrentBVHUsage(BvhUsage bvhUsage);
 

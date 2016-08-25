@@ -86,7 +86,8 @@ void Renderer::render()
 
   updateCameraUniform();
 
-  // TODO collectAmbientOcclusionToGrid.invoke(); // TODO possible to do this
+  if(isUsingBvhLeafGrid())
+    collectAmbientOcclusionToGrid.invoke();
 
   prepareFramebuffer();
 

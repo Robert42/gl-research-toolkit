@@ -43,8 +43,6 @@ void ComputeStep::reinit(const glm::ivec3& workerGroupSize, const glm::ivec3& to
     Q_UNREACHABLE();
   }
 
-  glm::ivec3 numInvocations;
-
   if(Q_LIKELY(mustBeMultiple))
   {
     if(Q_UNLIKELY(!isMultiple(totalWorkAmount, workerGroupSize)))
@@ -59,6 +57,13 @@ void ComputeStep::reinit(const glm::ivec3& workerGroupSize, const glm::ivec3& to
     numInvocations = (totalWorkAmount+workerGroupSize-1) / workerGroupSize;
   }
 
+  Q_ASSERT(numInvocations.x > 0);
+  Q_ASSERT(numInvocations.y > 0);
+  Q_ASSERT(numInvocations.z > 0);
+  Q_ASSERT(numInvocations.x * workerGroupSize.x >= totalWorkAmount.x);
+  Q_ASSERT(numInvocations.y * workerGroupSize.y >= totalWorkAmount.y);
+  Q_ASSERT(numInvocations.z * workerGroupSize.z >= totalWorkAmount.z);
+
   ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   glProgram = shaderCompiler.compileProgramFromFiles(shaderFileBasename,
                                                      shaderFileDir,
@@ -66,6 +71,13 @@ void ComputeStep::reinit(const glm::ivec3& workerGroupSize, const glm::ivec3& to
                                                                   QString("#define GROUPS_SIZE_Y %1").arg(workerGroupSize.y),
                                                                   QString("#define GROUPS_SIZE_Z %2").arg(workerGroupSize.z)})
                                                      + preprocessorBlock.toList());
+}
+
+void ComputeStep::invoke()
+{
+  glProgram.use();
+  GL_CALL(glDispatchCompute, GLuint(numInvocations.x), GLuint(numInvocations.y), GLuint(numInvocations.z));
+  gl::Program::useNone();
 }
 
 glm::ivec3 ComputeStep::calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple)
