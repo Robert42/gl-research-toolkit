@@ -13,23 +13,24 @@ inline bool isMultiple(const glm::ivec3& a, const glm::ivec3& b)
 
 
 
-ComputeStep::ComputeStep(const QString& shaderFileName)
+ComputeStep::ComputeStep(const QString& shaderFileName, const glm::ivec3& totalWorkAmount, const QSet<QString>& preprocessorBlock)
+  : shader(QFileInfo(shaderFileName).baseName(), QFileInfo(shaderFileName).absoluteDir(), preprocessorBlock | groupSizeAsMacro(totalWorkAmount, true))
 {
   Q_ASSERT(calcBestWorkGroupSize(glm::ivec3(16, 16, 3*16), true, 1536) == glm::ivec3(16, 16, 6));
   Q_ASSERT(calcBestWorkGroupSize(glm::ivec3(16, 16, 3*16), true, 2048) == glm::ivec3(16, 16, 8));
-
-  QFileInfo fileInfo(shaderFileName);
-  shaderFileDir = fileInfo.absoluteDir();
-  shaderFileBasename = fileInfo.baseName();
 }
 
-void ComputeStep::reinit(const glm::ivec3& totalWorkAmount, bool mustBeMultiple, const QSet<QString>& preprocessorBlock)
+void ComputeStep::invoke()
 {
-  reinit(calcBestWorkGroupSize(glm::ivec3(16, 16, 3*16), mustBeMultiple), totalWorkAmount, mustBeMultiple, preprocessorBlock);
+  shader.glProgram.use();
+  GL_CALL(glDispatchCompute, GLuint(numInvocations.x), GLuint(numInvocations.y), GLuint(numInvocations.z));
+  gl::Program::useNone();
 }
 
-void ComputeStep::reinit(const glm::ivec3& workerGroupSize, const glm::ivec3& totalWorkAmount, bool mustBeMultiple, const QSet<QString>& preprocessorBlock)
+QSet<QString> ComputeStep::groupSizeAsMacro(const glm::ivec3& totalWorkAmount, bool mustBeMultiple)
 {
+  glm::ivec3 workerGroupSize = calcBestWorkGroupSize(totalWorkAmount, mustBeMultiple);
+
   if(Q_UNLIKELY(glm::any(glm::lessThanEqual(System::maxComputeWorkGroupSize, workerGroupSize))))
   {
     qWarning() << "Too large workerGroupSize"<<workerGroupSize<<"max supported size is"<<System::maxComputeWorkGroupSize;
@@ -64,25 +65,14 @@ void ComputeStep::reinit(const glm::ivec3& workerGroupSize, const glm::ivec3& to
   Q_ASSERT(numInvocations.y * workerGroupSize.y >= totalWorkAmount.y);
   Q_ASSERT(numInvocations.z * workerGroupSize.z >= totalWorkAmount.z);
 
-  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
-  glProgram = shaderCompiler.compileProgramFromFiles(shaderFileBasename,
-                                                     shaderFileDir,
-                                                     QStringList({QString("#define GROUPS_SIZE_X %0").arg(workerGroupSize.x),
-                                                                  QString("#define GROUPS_SIZE_Y %1").arg(workerGroupSize.y),
-                                                                  QString("#define GROUPS_SIZE_Z %2").arg(workerGroupSize.z)})
-                                                     + preprocessorBlock.toList());
+  return QSet<QString>({QString("#define GROUPS_SIZE_X %0").arg(workerGroupSize.x),
+                        QString("#define GROUPS_SIZE_Y %1").arg(workerGroupSize.y),
+                        QString("#define GROUPS_SIZE_Z %2").arg(workerGroupSize.z)});
 }
 
-void ComputeStep::invoke()
+glm::ivec3 ComputeStep::calcBestWorkGroupSize(const glm::ivec3& workerGroupSize, bool mustBeMultiple)
 {
-  glProgram.use();
-  GL_CALL(glDispatchCompute, GLuint(numInvocations.x), GLuint(numInvocations.y), GLuint(numInvocations.z));
-  gl::Program::useNone();
-}
-
-glm::ivec3 ComputeStep::calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple)
-{
-  return calcBestWorkGroupSize(totalWorkAmount, mustBeMultiple, System::maxComputeWorkGroupInvocations);
+  return calcBestWorkGroupSize(workerGroupSize, mustBeMultiple, System::maxComputeWorkGroupInvocations);
 }
 
 glm::ivec3 ComputeStep::calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple, int maxNumInvocations)

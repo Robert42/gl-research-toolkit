@@ -2,7 +2,7 @@
 #define GLRT_RENDERER_COMPUTESTEP_H
 
 #include <glrt/renderer/dependencies.h>
-#include <glrt/renderer/gl/program.h>
+#include <glrt/renderer/toolkit/reloadable-shader.h>
 
 namespace glrt {
 namespace renderer {
@@ -11,21 +11,18 @@ class ComputeStep
 {
   Q_DISABLE_COPY(ComputeStep)
 public:
-  ComputeStep(const QString& shaderFileName);
-
-  void reinit(const glm::ivec3& totalWorkAmount, bool mustBeMultiple=true, const QSet<QString>& preprocessorBlock=QSet<QString>());
-  void reinit(const glm::ivec3& workerGroupSize, const glm::ivec3& totalWorkAmount, bool mustBeMultiple=true, const QSet<QString>& preprocessorBlock=QSet<QString>());
+  ComputeStep(const QString& shaderFileName, const glm::ivec3& totalWorkAmount, const QSet<QString>& preprocessorBlock=QSet<QString>());
 
   void invoke();
 
-  static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple);
-  static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple, int maxNumInvocations);
 
 private:
+  ReloadableShader shader;
   glm::ivec3 numInvocations;
-  gl::Program glProgram;
-  QDir shaderFileDir;
-  QString shaderFileBasename;
+
+  QSet<QString> groupSizeAsMacro(const glm::ivec3& totalWorkAmount, bool mustBeMultiple=true);
+  static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple);
+  static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple, int maxNumInvocations);
 };
 
 } // namespace renderer
