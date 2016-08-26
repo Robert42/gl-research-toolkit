@@ -67,7 +67,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
 
   setAdjustRoughness(true);
-  setSDFShadows(true);
+  setSDFShadows(false);
 
   initCascadedGridTextures();
 }

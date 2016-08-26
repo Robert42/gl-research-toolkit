@@ -134,6 +134,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances.guiToggle.TwAddVarCB(tweakBar, "Highlight Unconveiled Negative Distances", "group='Debug Voxels'");
+  TwSetParam(tweakBar, "Debug Voxels", "opened", TW_PARAM_CSTRING, 1, "false");
 
   TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
   renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");
@@ -145,6 +146,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->debugPosteffect.stepCountAsWhite, "group='Debug Shader/Show Step-Count' min=1 max=2147483647");
   toggleLogHeatVision_debugPosteffect.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug Shader/Show Step-Count'");
   toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug Shader/Show Step-Count'");
+  TwSetParam(tweakBar, "Debug Shader", "opened", TW_PARAM_CSTRING, 1, "false");
   TwSetParam(tweakBar, "Debug Shader/Show Step-Count", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Camera ------------------------------------------------------------
@@ -183,7 +185,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
-  TwSetParam(tweakBar, "Debug Scene", "opened", TW_PARAM_CSTRING, 1, "false");
+  TwSetParam(tweakBar, "Debug Scene", "opened", TW_PARAM_CSTRING, 1, "true");
 
   //-------- Scene Statistics---------------------------------------------------
   TwAddVarRO(tweakBar, "Num Visible SDF instances", TW_TYPE_UINT32, &renderer->statistics.numSdfInstances, "group='Statistics'");
