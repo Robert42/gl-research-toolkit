@@ -12,6 +12,8 @@
 #endif
 #include <debugging/heat-vision.glsl>
 
+#include <cascaded-grid/uniforms.glsl>
+
 struct SceneLightData
 {
   uint64_t sphere_arealights_address;
@@ -38,6 +40,7 @@ struct SceneData
   float totalTime;
   SceneLightData lights;
   SceneVoxelHeader voxelHeader;
+  CascadedGrids cascadedGrids;
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;
   uint16_t bvh_debug_depth_begin;
@@ -88,6 +91,31 @@ uint16_t* bvh_inner_nodes()
 {
   return (uint16_t*)scene.voxelHeader.distance_field_bvh_node_array_address;
 }
+
+
+// which_grid must be in 0..3
+vec3 cascaded_grid_origin(uint which_grid)
+{
+  return scene.cascadedGrids.gridLocation[which_grid].xyz;
+}
+
+// which_grid must be in 0..3
+float cascaded_grid_scale_factor(uint which_grid)
+{
+  return scene.cascadedGrids.gridLocation[which_grid].w;
+}
+
+vec3 cascaded_grid_cell_to_worldspace(uvec3 gridCoord, uint which_grid)
+{
+  return vec3(gridCoord) / cascaded_grid_scale_factor(which_grid) + cascaded_grid_origin(which_grid);
+}
+
+vec3 cascaded_grid_cell_from_worldspace(vec3 world_pos, uint which_grid)
+{
+  return (world_pos - cascaded_grid_origin(which_grid)) * cascaded_grid_scale_factor(which_grid);
+}
+
+
 
 #ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)

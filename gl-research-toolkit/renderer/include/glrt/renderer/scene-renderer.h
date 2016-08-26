@@ -113,6 +113,14 @@ private:
   bool _needRecapturing : 1;
   gl::CommandList commandList;
 
+  struct CascadedGridsHeader
+  {
+    GLuint64 gridTexture[3];
+    padding<quint64, 1> _padding1;
+    glm::vec4 gridOrigins[3];
+    padding<glm::vec4, 1> _padding2;
+  };
+
   // Scene uniform buffer
   struct SceneUniformBlock
   {
@@ -121,6 +129,7 @@ private:
     float totalTime;
     LightBuffer::LightData lightData;
     VoxelBuffer::VoxelHeader voxelHeader;
+    CascadedGridsHeader cascadedGrids;
 
     // Padding & debugging
     quint32 costsHeatvisionBlackLevel;
