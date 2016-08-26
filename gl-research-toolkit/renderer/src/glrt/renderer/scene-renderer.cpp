@@ -67,10 +67,13 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
 
   setAdjustRoughness(true);
   setSDFShadows(true);
+
+  initCascadedGridTextures();
 }
 
 Renderer::~Renderer()
 {
+  deinitCascadedGridTextures();
 }
 
 void Renderer::render()
@@ -85,7 +88,10 @@ void Renderer::render()
   updateCameraUniform();
 
   if(isUsingBvhLeafGrid())
+  {
+    sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
     collectAmbientOcclusionToGrid.invoke();
+  }
 
   prepareFramebuffer();
 
@@ -201,6 +207,68 @@ void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSe
 
   materialShader->framebuffer = framebuffer;
   _needRecapturing = true;
+}
+
+void Renderer::initCascadedGridTextures()
+{
+  auto textureFormat = [](int i) {
+    if(i<3)
+      return gl::TextureFormat::R16UI;
+    else
+      return gl::TextureFormat::RGBA16UI;
+  };
+  auto imageFormat = [](int i) {
+    if(i<3)
+      return GL_R16UI;
+    else
+      return GL_RGBA16UI;
+  };
+
+  for(int i=0; i<6; ++i)
+  {
+    gridTexture[i] = new gl::Texture3D(16, 16, 16, textureFormat(i));
+    gl::TextureId textureId = gridTexture[i]->GetInternHandle();
+    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, 0, 0, imageFormat(i));
+    GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
+
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+    GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
+
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));
+
+    computeTextureHandles[i] = imageHandle;
+    renderTextureHandles[i] = textureHandle;
+  }
+}
+
+void Renderer::deinitCascadedGridTextures()
+{
+  for(int i=0; i<6; ++i)
+    delete gridTexture[i];
+}
+
+inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
+{
+  CascadedGridsHeader header;
+
+  for(int i=0; i<3; ++i)
+  {
+    glm::vec3 grid_origin = glm::vec3(i);
+    float grid_scale_factor = 1.f;
+
+    header.gridLocations[i] = glm::vec4(grid_origin, grid_scale_factor);
+  }
+
+  int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? 3 : 0;
+
+  for(int i=0; i<3; ++i)
+  {
+    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
+    header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
+  }
+
+  return header;
 }
 
 bool Renderer::needRecapturing() const
@@ -359,6 +427,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.costsHeatvisionWhiteLevel = costsHeatvisionWhiteLevel;
   sceneUniformData.bvh_debug_depth_begin = bvh_debug_depth_begin;
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
+  sceneUniformData.cascadedGrids = updateCascadedGrids();
   sceneUniformBuffer.Unmap();
 }
 

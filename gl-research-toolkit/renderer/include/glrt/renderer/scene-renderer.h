@@ -106,8 +106,13 @@ private:
   Array<ReloadableShader> materialShaders;
   Array<MaterialState> materialStates;
 
-  // Compute Steps
+  // Cascaded Grids
   ComputeStep collectAmbientOcclusionToGrid;
+  gl::Texture3D* gridTexture[6];
+  GLuint64 computeTextureHandles[6];
+  GLuint64 renderTextureHandles[6];
+  void initCascadedGridTextures();
+  void deinitCascadedGridTextures();
 
   // command lists
   bool _needRecapturing : 1;
@@ -115,10 +120,12 @@ private:
 
   struct CascadedGridsHeader
   {
-    GLuint64 gridTexture[3];
+    glm::vec4 gridLocations[3];
+    padding<glm::vec4, 1> _padding3;
+    GLuint64 gridTextureRender[3];
+    padding<quint64, 1> _padding2;
+    GLuint64 gridTextureCompute[3];
     padding<quint64, 1> _padding1;
-    glm::vec4 gridOrigins[3];
-    padding<glm::vec4, 1> _padding2;
   };
 
   // Scene uniform buffer
@@ -148,6 +155,8 @@ private:
   // debugging
   bool _adjustRoughness : 1;
   bool _sdfShadows : 1;
+
+  CascadedGridsHeader updateCascadedGrids() const;
 
 
   bool needRecapturing() const;
