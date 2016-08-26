@@ -15,7 +15,7 @@ void main()
 #else
   layout(r16ui)
 #endif 
-      writeonly uimage3D targetTexture = scene.cascadedGrids.targetTexture[whichTexture];
+      writeonly uimage3D targetTexture = scene.cascadedGrids.targetTexture0;
 
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
   

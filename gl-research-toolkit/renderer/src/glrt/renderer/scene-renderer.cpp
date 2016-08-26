@@ -265,8 +265,8 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 
   for(int i=0; i<3; ++i)
   {
-    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
-    header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
+//    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
+    //header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
   }
 
   return header;
