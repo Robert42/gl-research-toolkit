@@ -10,6 +10,13 @@ void main()
   uint whichTexture = gl_GlobalInvocationID.z / 16;
   uvec3 grid_cell = uvec3(gl_GlobalInvocationID.xy, gl_GlobalInvocationID.z%16);
   
+#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
+  layout(rgba16ui)
+#else
+  layout(r16ui)
+#endif 
+      writeonly uimage3D targetTexture = scene.cascadedGrids.targetTexture[whichTexture];
+
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
   
   
