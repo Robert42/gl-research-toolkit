@@ -173,6 +173,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
 
   TwAddVarRW(tweakBar, "BVH Debug depth begin", TW_TYPE_UINT16, &renderer->bvh_debug_depth_begin, QString("group='Debug Scene' min=0 max=%0").arg(renderer::BVH_MAX_STACK_DEPTH).toStdString().c_str());
   TwAddVarRW(tweakBar, "BVH Debug depth end", TW_TYPE_UINT16, &renderer->bvh_debug_depth_end, QString("group='Debug Scene' min=1 max=%0").arg(renderer::BVH_MAX_STACK_DEPTH).toStdString().c_str());
+  renderer->visualizeBVH_Grid.guiToggle.TwAddVarCB(tweakBar, "Show BVH Cascaded Grids", "group='Debug Scene' help='Show the Grids accessing the SDF Bounding Volume Hierarchy'");
 
   renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Voxel-AABBs", "group='Debug Scene'");
   renderer->visualizeSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");

@@ -25,6 +25,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
     visualizeBVH(debugging::VisualizationRenderer::showSceneBVH(scene)),
+    visualizeBVH_Grid(debugging::VisualizationRenderer::showSceneBVH_Grid(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),

@@ -74,6 +74,13 @@ DebugRenderer VisualizationRenderer::showSceneBVH(scene::Scene* scene)
   });
 }
 
+DebugRenderer VisualizationRenderer::showSceneBVH_Grid(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    return debugging::DebugLineVisualisation::drawBvh_Grid(3);
+  });
+}
+
 DebugRenderer VisualizationRenderer::showSceneAABB(scene::Scene* scene)
 {
   return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {

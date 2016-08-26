@@ -11,4 +11,6 @@ void main()
   uvec3 grid_cell = uvec3(gl_GlobalInvocationID.xy, gl_GlobalInvocationID.z%16);
   
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
+  
+  
 }
