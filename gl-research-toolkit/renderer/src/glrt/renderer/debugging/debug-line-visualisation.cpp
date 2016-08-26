@@ -373,7 +373,7 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawBvh_Grid(quint16 num_b
   grids.resize(num_bvh_grids);
   for(quint16 i=0; i<num_bvh_grids; ++i)
   {
-    grids[i] = i;
+    grids[i] = num_bvh_grids-1-i;
   }
 
   ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
