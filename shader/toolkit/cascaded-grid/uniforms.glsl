@@ -16,25 +16,23 @@
 
 struct CascadedGrids
 {
-  // The first 3 images are used, the 4th image not
 #ifdef IMAGE_FORMAT_R16UI
   layout(r16ui)
 #else
   layout(rgba16ui)
 #endif
-      writeonly uimage3D targetTexture[4];
-  // The first 3 vectors are used, the others not. xyz are the grid origins and w the scale Factor for each grid.
-  vec4 gridLocation[4];
+      writeonly uimage3D targetTexture[3];
+  // xyz are the grid origins and w the scale Factor for each grid.
+  vec4 gridLocation[3];
 };
 
 #else // Vertex-/Fragment-Shader
 
 struct CascadedGrids
 {
-  // The first 3 samplers are used, the 4th image not
-  usampler3D targetTexture[4];
-  // The first 3 vectors are used, the others not. xyz are the grid origins and w the scale Factor for each grid.
-  vec4 gridLocation[4];
+  usampler3D targetTexture[3];
+  // xyz are the grid origins and w the scale Factor for each grid.
+  vec4 gridLocation[3];
 };
 
 #endif
