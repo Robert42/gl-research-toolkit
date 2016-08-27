@@ -53,6 +53,11 @@ return;
   return;
 #endif
 
+#if defined(CASCADED_GRID_WEIGHTS)
+  fragment_color = vec4(cascadedGridWeights(surface.position), 1);
+  return;
+#endif
+
 #if defined(MESH_NORMALS_WS)
   fragment_color = vec4(encode_direction_as_color(fragment.normal), 1);
   return;

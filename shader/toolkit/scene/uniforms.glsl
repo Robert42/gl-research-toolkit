@@ -115,6 +115,21 @@ vec3 cascaded_grid_cell_from_worldspace(vec3 world_pos, uint which_grid)
   return (world_pos - cascaded_grid_origin(which_grid)) * cascaded_grid_scale_factor(which_grid);
 }
 
+vec3 cascadedGridWeights(vec3 world_pos)
+{
+  vec3 weights = vec3(0);
+  vec3 world_positions[NUM_GRID_CASCADES];
+  
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+    vec3 grid_cell = cascaded_grid_cell_from_worldspace(world_pos, i);
+    
+    weights[i] = float(clamp(grid_cell, vec3(-0.5), vec3(15.5)) == grid_cell);
+  }
+  
+  return weights;
+}
+
 #ifdef COMPUTE_GRIDS
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
   layout(rgba16ui)
