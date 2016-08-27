@@ -55,6 +55,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeBVH);
+  debugDrawList_Backbuffer.connectTo(&visualizeBVH_Grid);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
   debugDrawList_Backbuffer.connectTo(&visualizeBoundingBoxes);

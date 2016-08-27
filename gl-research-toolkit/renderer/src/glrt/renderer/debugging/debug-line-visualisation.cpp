@@ -352,22 +352,23 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawBvh_Grid(quint16 num_b
 {
   DebugMesh::Painter painter;
 
-  glm::ivec3 gridSize(16);
+  int gridSize = 16;
 
   for(int dimension = 0; dimension<3; ++dimension)
   {
-    const int n = gridSize[dimension];
+    const int n = gridSize;
     glm::mat4 matrix = glm::mat4(1);
     std::swap(matrix[2], matrix[dimension]);
     painter.pushMatrix(matrix);
     for(int i=0; i<=n; ++i)
     {
       painter.pushMatrix(glm::vec3(0, 0, i));
-      painter.addRect(glm::vec2(0), glm::vec2(1));
+      painter.addRect(glm::vec2(0), glm::vec2(gridSize));
       painter.popMatrix();
     }
     painter.popMatrix();
   }
+
 
   QVector<uint16_t> grids;
   grids.resize(num_bvh_grids);
