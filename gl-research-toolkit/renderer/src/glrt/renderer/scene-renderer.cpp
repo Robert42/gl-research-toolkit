@@ -256,8 +256,10 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 
   for(int i=0; i<3; ++i)
   {
+    float gridSize = 1.f;
+
     glm::vec3 grid_origin = glm::vec3(i);
-    float grid_scale_factor = 1.f;
+    float grid_scale_factor = 16.f / gridSize;
 
     header.gridLocations[i] = glm::vec4(grid_origin, grid_scale_factor);
   }
@@ -266,8 +268,8 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 
   for(int i=0; i<3; ++i)
   {
-//    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
-    //header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
+    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
+    header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
   }
 
   return header;
