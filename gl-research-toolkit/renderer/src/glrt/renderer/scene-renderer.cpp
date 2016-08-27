@@ -252,11 +252,13 @@ void Renderer::deinitCascadedGridTextures()
 
 inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 {
+  const float gridSizes[3] = {8., 16, 32};
+
   CascadedGridsHeader header;
 
   for(int i=0; i<3; ++i)
   {
-    float gridSize = 1.f;
+    float gridSize = gridSizes[i];
 
     glm::vec3 grid_origin = glm::vec3(i);
     float grid_scale_factor = 16.f / gridSize;
