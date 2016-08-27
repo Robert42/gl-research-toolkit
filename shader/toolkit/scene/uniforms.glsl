@@ -134,6 +134,8 @@ vec3 cascadedGridWeights(vec3 world_pos)
   
   // offset
   const float o = -0.5;
+  // margin
+  const float m = 2.0f;
   
   float left_weight = 1.f;
   
@@ -141,12 +143,20 @@ vec3 cascadedGridWeights(vec3 world_pos)
   {
     vec3 grid_cell = cascaded_grid_cell_from_worldspace_smooth(world_pos, i);
     
-    float w = min_component(smoothstep(vec3(o), vec3(o+d), grid_cell) * smoothstep(-vec3(o+16), -vec3(o+16-d), -grid_cell));
+    float w = min_component(smoothstep(vec3(o+m), vec3(o+d+m), grid_cell) * smoothstep(-vec3(o+16-m), -vec3(o+16-d-m), -grid_cell));
     w *= left_weight;
     
     left_weight -= w;
     
     weights[i] = w;
+    
+#define HIGHLIGHT_AREA_OUTSIDE_SNAPPED_BUT_WITH_WEIGHT_GT_0 0
+#if HIGHLIGHT_AREA_OUTSIDE_SNAPPED_BUT_WITH_WEIGHT_GT_0 && (defined(CASCADED_GRID_WEIGHTS_TINTED) || defined(CASCADED_GRID_WEIGHTS))
+    vec3 not_smooth = cascaded_grid_cell_from_worldspace(world_pos, i);
+    
+    if(w > 0 && clamp(not_smooth, o, 16+o)!=not_smooth)
+      return vec3(1,0, 1);
+#endif  
   }
   
   return weights;
