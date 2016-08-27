@@ -112,6 +112,8 @@ private:
   gl::Texture3D* gridTexture[NUM_GRID_CASCADES*2];
   GLuint64 computeTextureHandles[NUM_GRID_CASCADES*2];
   GLuint64 renderTextureHandles[NUM_GRID_CASCADES*2];
+  glm::vec3 grid_camera_pos = glm::vec3(NAN), grid_camera_dir = glm::vec3(NAN);
+  bool _update_grid_camera : 1;
   void initCascadedGridTextures();
   void deinitCascadedGridTextures();
 
@@ -170,6 +172,7 @@ private:
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
+  void forceNewGridCameraPos();
 };
 
 

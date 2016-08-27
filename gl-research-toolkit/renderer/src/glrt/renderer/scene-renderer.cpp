@@ -38,6 +38,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
     collectAmbientOcclusionToGrid(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*NUM_GRID_CASCADES), QSet<QString>({"#define COMPUTE_GRIDS"})),
+    _update_grid_camera(true),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
@@ -66,6 +67,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
+
+  connect(scene, &scene::Scene::sceneCleared, this, &Renderer::forceNewGridCameraPos);
 
   setAdjustRoughness(true);
   setSDFShadows(false);
@@ -267,8 +270,13 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
   {
     float gridSize = gridSizes[i];
 
-    glm::vec3 grid_origin = glm::vec3(i);
     float grid_scale_factor = 16.f / gridSize;
+
+    glm::vec3 grid_center = grid_camera_pos + 12.f * grid_camera_dir;
+
+    grid_center = glm::roundMultiple(grid_center, glm::vec3(1.f / grid_scale_factor));
+
+    glm::vec3 grid_origin = grid_center - gridSize*0.5f;
 
     header.gridLocations[i] = glm::vec4(grid_origin, grid_scale_factor);
   }
@@ -298,11 +306,10 @@ void Renderer::captureStates()
 {
   for(MaterialState& materialState : materialStates)
   {
+    Q_ASSERT(materialState.framebuffer != nullptr);
+
     gl::FramebufferObject& framebuffer = *materialState.framebuffer;
     ReloadableShader& shader = materialShaders[materialState.shader];
-
-    Q_ASSERT(&framebuffer != nullptr);
-    Q_ASSERT(&shader != nullptr);
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
@@ -427,12 +434,26 @@ void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
   fillCameraUniform(cameraComponent->globalCameraParameter());
 }
 
+void Renderer::forceNewGridCameraPos()
+{
+  grid_camera_pos = glm::vec3(NAN);
+}
+
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
+  glm::vec3 camera_position = cameraParameter.position;
+  glm::mat4 view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+
+  if(Q_LIKELY(_update_grid_camera || glm::isnan(grid_camera_pos.x)))
+  {
+    grid_camera_pos = camera_position;
+    grid_camera_dir = cameraParameter.lookAt;
+  }
+
   PROFILE_SCOPE("Renderer::fillCameraUniform()")
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneUniformData.camera_position = cameraParameter.position;
-  sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  sceneUniformData.camera_position = camera_position;
+  sceneUniformData.view_projection_matrix = view_projection_matrix;
   sceneUniformData.lightData = lightUniformBuffer.updateLightData();
   sceneUniformData.voxelHeader = voxelUniformBuffer.updateVoxelHeader();
   sceneUniformData.totalTime = debugPosteffect.totalTime;
