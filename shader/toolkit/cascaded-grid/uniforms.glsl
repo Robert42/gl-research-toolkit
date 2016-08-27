@@ -49,7 +49,8 @@ struct CascadedGrids
 #endif
       
   // xyz are the grid origins and w the scale Factor for each grid.
-  vec4 gridLocation[NUM_GRID_CASCADES];
+  vec4 snappedGridLocation[NUM_GRID_CASCADES];
+  vec4 smoothGridLocation[NUM_GRID_CASCADES];
 };
 
 
@@ -74,7 +75,8 @@ struct CascadedGrids
 #endif
   
 // xyz are the grid origins and w the scale Factor for each grid.
-  vec4 gridLocation[NUM_GRID_CASCADES];
+  vec4 snappedGridLocation[NUM_GRID_CASCADES];
+  vec4 smoothGridLocation[NUM_GRID_CASCADES];
 };
 
 #endif
