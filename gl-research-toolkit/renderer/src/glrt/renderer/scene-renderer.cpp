@@ -266,13 +266,16 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 
   CascadedGridsHeader header;
 
+  float margin = 2.f;
+
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
     float gridSize = gridSizes[i];
 
     float grid_scale_factor = 16.f / gridSize;
 
-    glm::vec3 grid_center = grid_camera_pos + 12.f * grid_camera_dir;
+    // See /doc/cascaded_grid_position.svg
+    glm::vec3 grid_center = grid_camera_pos + (16 - (margin + 1) * 2.f)*0.5f * grid_camera_dir;
 
     grid_center = glm::roundMultiple(grid_center, glm::vec3(1.f / grid_scale_factor));
 

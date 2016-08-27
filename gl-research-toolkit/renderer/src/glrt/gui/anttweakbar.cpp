@@ -180,9 +180,14 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Voxel-AABBs", "group='Debug Scene'");
   renderer->visualizeSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");
 
+  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
+  updateGridCameraToggle.setter = [renderer](bool ar){renderer->set_update_grid_camera(ar);};
+  updateGridCameraToggle.getter = [renderer]() -> bool {return renderer->update_grid_camera();};
+  updateGridCameraToggle.TwAddVarCB(tweakBar, "Update Grid for Camera", "group='Debug Scene'");
+
   renderer->visualizeWorldGrid.guiToggle.TwAddVarCB(tweakBar, "Show World Grid", "group='Debug Scene'");
   renderer->visualizeUniformTest.guiToggle.TwAddVarCB(tweakBar, "Show Uniform Test", "group='Debug Scene'");
-  renderer->visualizeCameras.guiToggle.TwAddVarCB(tweakBar, "Show Scene Cameras", "group='Debug Scene'");
+
   renderer->visualizeSphereAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Sphere Area-Lights", "group='Debug Scene'");
   renderer->visualizeRectAreaLights.guiToggle.TwAddVarCB(tweakBar, "Show Rect Area-Lights", "group='Debug Scene'");
   TwSetParam(tweakBar, "Debug Scene", "opened", TW_PARAM_CSTRING, 1, "true");
@@ -233,9 +238,6 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   sdfShadowsToggle.setter = [renderer](bool ar){renderer->setSDFShadows(ar);};
   sdfShadowsToggle.getter = [renderer]() -> bool {return renderer->sdfShadows();};
   sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=Debug");
-  updateGridCameraToggle.setter = [renderer](bool ar){renderer->set_update_grid_camera(ar);};
-  updateGridCameraToggle.getter = [renderer]() -> bool {return renderer->update_grid_camera();};
-  updateGridCameraToggle.TwAddVarCB(tweakBar, "Update Grid for Camera", "group=Debug");
   TwSetParam(tweakBar, "Debug", "opened", TW_PARAM_CSTRING, 1, "false");
 
   TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->costsHeatvisionBlackLevel, "group='Debug/Show Costs' min=0 max=2147483647");
