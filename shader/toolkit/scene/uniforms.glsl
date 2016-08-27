@@ -105,9 +105,9 @@ float cascaded_grid_scale_factor(uint which_grid)
   return scene.cascadedGrids.gridLocation[which_grid].w;
 }
 
-vec3 cascaded_grid_cell_to_worldspace(uvec3 gridCoord, uint which_grid)
+vec3 cascaded_grid_cell_to_worldspace(vec3 gridCoord, uint which_grid)
 {
-  return vec3(gridCoord) / cascaded_grid_scale_factor(which_grid) + cascaded_grid_origin(which_grid);
+  return gridCoord / cascaded_grid_scale_factor(which_grid) + cascaded_grid_origin(which_grid);
 }
 
 vec3 cascaded_grid_cell_from_worldspace(vec3 world_pos, uint which_grid)
