@@ -25,15 +25,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.5"
-     inkscape:cx="447.91671"
-     inkscape:cy="587.96656"
+     inkscape:zoom="2"
+     inkscape:cx="328.96403"
+     inkscape:cy="298.40978"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1028"
-     inkscape:window-x="0"
+     inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1" />
   <metadata
@@ -44,7 +44,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -213,7 +213,7 @@
            x="28.991379"
            y="326.87064"
            style="-inkscape-font-specification:'DejaVu Sans Ultra-Light';font-family:'DejaVu Sans';font-weight:200;font-style:normal;font-stretch:normal;font-variant:normal;font-size:20px;" /></flowRegion><flowPara
-         id="flowPara4416"></flowPara></flowRoot>    <flowRoot
+         id="flowPara4416" /></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot4418"
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -247,9 +247,9 @@
    style="font-size:76.74820423%;baseline-shift:sub"
    id="flowSpan4599">diag</flowSpan></flowSpan> = (<flowSpan
    style="fill:#4e9a06"
-   id="flowSpan4448">s</flowSpan> - (<flowSpan
+   id="flowSpan4448">s</flowSpan>*0.5 - (<flowSpan
    style="fill:#cc0000"
-   id="flowSpan4442">m</flowSpan>+1)*2) * 0.5 * sqrt(2)</flowPara></flowRoot>    <text
+   id="flowSpan4442">m</flowSpan>+1)) * sqrt(2)</flowPara></flowRoot>    <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:25.76612854px;line-height:125%;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        x="45.515808"
@@ -445,11 +445,11 @@
    id="flowSpan4532"
    style="fill:#f57900">d<flowSpan
    style="font-size:64.99999762%;baseline-shift:sub"
-   id="flowSpan4595">aa</flowSpan></flowSpan> = (<flowSpan
+   id="flowSpan4595">aa</flowSpan></flowSpan> = <flowSpan
    id="flowSpan4534"
-   style="fill:#4e9a06">s</flowSpan> - (<flowSpan
+   style="fill:#4e9a06">s</flowSpan>*0.5 - (<flowSpan
    id="flowSpan4536"
-   style="fill:#cc0000">m</flowSpan>+1)*2) * 0.5</flowPara></flowRoot>    <text
+   style="fill:#cc0000">m</flowSpan>+1)</flowPara></flowRoot>    <text
        sodipodi:linespacing="125%"
        id="text4538"
        y="455.85028"
@@ -489,13 +489,13 @@
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
          id="flowPara4591">So we calculate the optimal distance by dividing the axis aligned componentwize through the camera direction:</flowPara><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
-         id="flowPara4593">center_of_grid = camera_pos + vec3(<flowSpan
+         id="flowPara4609">center_of_grid = camera_pos + abs(vec3(<flowSpan
    style="fill:#ce5c00"
    id="flowSpan4605">d</flowSpan><flowSpan
    style="font-size:64.99999762%;baseline-shift:sub;fill:#ce5c00"
-   id="flowSpan4603">aa</flowSpan>) / camera_dir</flowPara><flowPara
+   id="flowSpan4603">aa</flowSpan>) / (grid_size * camera_dir)) * camera_dir</flowPara><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
-         id="flowPara4609">This way, it's unchanged for the axis aligned case, as every component will have the length 1, and it will be equal to the diagonal cas, if the direction is diagonal, as every component has the length 1/sqrt(2)</flowPara></flowRoot>    <text
+         id="flowPara4252">This way, it's unchanged for the axis aligned case, as every component will have the length 1, and it will be equal to the diagonal cas, if the direction is diagonal, as every component has the length 1/sqrt(2)</flowPara></flowRoot>    <text
        sodipodi:linespacing="125%"
        id="text4611"
        y="49.102295"
