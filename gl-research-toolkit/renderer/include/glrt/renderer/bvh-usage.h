@@ -50,6 +50,8 @@ inline bool isUsingBvhLeafGrid()
   return bvh_is_grid(currentBvhUsage);
 }
 
+#define NUM_GRID_CASCADES 3
+
 } // namespace renderer
 } // namespace glrt
 

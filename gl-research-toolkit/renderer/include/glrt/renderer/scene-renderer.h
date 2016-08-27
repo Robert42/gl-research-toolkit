@@ -121,10 +121,9 @@ private:
 
   struct CascadedGridsHeader
   {
-    GLuint64 gridTextureRender[3];
-    GLuint64 gridTextureCompute[3];
-    glm::vec4 gridLocations[3];
-    padding<glm::vec4, 1> _padding3;
+    GLuint64 gridTextureRender[NUM_GRID_CASCADES];
+    GLuint64 gridTextureCompute[NUM_GRID_CASCADES];
+    glm::vec4 gridLocations[NUM_GRID_CASCADES];
   };
 
   // Scene uniform buffer

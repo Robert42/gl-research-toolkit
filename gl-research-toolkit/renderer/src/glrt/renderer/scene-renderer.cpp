@@ -37,7 +37,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
-    collectAmbientOcclusionToGrid(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*3), QSet<QString>({"#define COMPUTE_GRIDS"})),
+    collectAmbientOcclusionToGrid(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*NUM_GRID_CASCADES), QSet<QString>({"#define COMPUTE_GRIDS"})),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
@@ -214,19 +214,19 @@ void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSe
 void Renderer::initCascadedGridTextures()
 {
   auto textureFormat = [](int i) {
-    if(i<3)
+    if(i<NUM_GRID_CASCADES)
       return gl::TextureFormat::R16UI;
     else
       return gl::TextureFormat::RGBA16UI;
   };
   auto imageFormat = [](int i) {
-    if(i<3)
+    if(i<NUM_GRID_CASCADES)
       return GL_R16UI;
     else
       return GL_RGBA16UI;
   };
 
-  for(int i=0; i<6; ++i)
+  for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
   {
     gridTexture[i] = new gl::Texture3D(16, 16, 16, textureFormat(i));
     gl::TextureId textureId = gridTexture[i]->GetInternHandle();
@@ -246,17 +246,24 @@ void Renderer::initCascadedGridTextures()
 
 void Renderer::deinitCascadedGridTextures()
 {
-  for(int i=0; i<6; ++i)
+  for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
     delete gridTexture[i];
 }
 
 inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 {
+  static_assert(NUM_GRID_CASCADES<=3, "unexpected number of cascades");
+#if NUM_GRID_CASCADES == 2
+  const float gridSizes[3] = {8., 32};
+#elif NUM_GRID_CASCADES == 3
   const float gridSizes[3] = {8., 16, 32};
+#else
+#error TODO, need gridsize for the current number of Grid Cascades
+#endif
 
   CascadedGridsHeader header;
 
-  for(int i=0; i<3; ++i)
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
     float gridSize = gridSizes[i];
 
@@ -266,9 +273,9 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
     header.gridLocations[i] = glm::vec4(grid_origin, grid_scale_factor);
   }
 
-  int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? 3 : 0;
+  int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
 
-  for(int i=0; i<3; ++i)
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
     header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
     header.gridTextureRender[i] = renderTextureHandles[i + texture_base];

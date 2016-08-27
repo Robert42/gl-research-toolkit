@@ -93,13 +93,13 @@ uint16_t* bvh_inner_nodes()
 }
 
 
-// which_grid must be in 0..3
+// which_grid must be in 0..NUM_GRID_CASCADES
 vec3 cascaded_grid_origin(uint which_grid)
 {
   return scene.cascadedGrids.gridLocation[which_grid].xyz;
 }
 
-// which_grid must be in 0..3
+// which_grid must be in 0..NUM_GRID_CASCADES
 float cascaded_grid_scale_factor(uint which_grid)
 {
   return scene.cascadedGrids.gridLocation[which_grid].w;
@@ -128,22 +128,30 @@ vec3 cascaded_grid_cell_from_worldspace(vec3 world_pos, uint which_grid)
 #else
   layout(r16ui)
 #endif 
-    writeonly uimage3D targetTextures[3];
+    writeonly uimage3D targetTextures[NUM_GRID_CASCADES];
     
     targetTextures[0] = scene.cascadedGrids.targetTexture0;
+    #if NUM_GRID_CASCADES > 1
     targetTextures[1] = scene.cascadedGrids.targetTexture1;
+    #endif
+    #if NUM_GRID_CASCADES > 2
     targetTextures[2] = scene.cascadedGrids.targetTexture2;
+    #endif
     
     return targetTextures[i];
 }
 #else
 usampler3D cascaded_grid_texture(uint i)
 {
-  usampler3D targetTextures[3];
+  usampler3D targetTextures[NUM_GRID_CASCADES];
   
   targetTextures[0] = scene.cascadedGrids.gridTexture0;
+  #if NUM_GRID_CASCADES > 1
   targetTextures[1] = scene.cascadedGrids.gridTexture1;
+  #endif
+  #if NUM_GRID_CASCADES > 2
   targetTextures[2] = scene.cascadedGrids.gridTexture2;
+  #endif
   
   return targetTextures[i];
 }
