@@ -115,7 +115,39 @@ vec3 cascaded_grid_cell_from_worldspace(vec3 world_pos, uint which_grid)
   return (world_pos - cascaded_grid_origin(which_grid)) * cascaded_grid_scale_factor(which_grid);
 }
 
-
+#ifdef COMPUTE_GRIDS
+#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
+  layout(rgba16ui)
+#else
+  layout(r16ui)
+#endif 
+    writeonly uimage3D cascaded_grid_image(uint i)
+{
+#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
+  layout(rgba16ui)
+#else
+  layout(r16ui)
+#endif 
+    writeonly uimage3D targetTextures[3];
+    
+    targetTextures[0] = scene.cascadedGrids.targetTexture0;
+    targetTextures[1] = scene.cascadedGrids.targetTexture1;
+    targetTextures[2] = scene.cascadedGrids.targetTexture2;
+    
+    return targetTextures[i];
+}
+#else
+usampler3D cascaded_grid_texture(uint i)
+{
+  usampler3D targetTextures[3];
+  
+  targetTextures[0] = scene.cascadedGrids.gridTexture0;
+  targetTextures[1] = scene.cascadedGrids.gridTexture1;
+  targetTextures[2] = scene.cascadedGrids.gridTexture2;
+  
+  return targetTextures[i];
+}
+#endif
 
 #ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)

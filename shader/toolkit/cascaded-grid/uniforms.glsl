@@ -37,6 +37,8 @@ struct CascadedGrids
   float _padding;
 };
 
+
+
 #else // Vertex-/Fragment-Shader
 
 struct CascadedGrids
@@ -45,9 +47,9 @@ struct CascadedGrids
   #if 0
   usampler3D targetTexture[4];
   #else
-  usampler3D targetTexture0;
-  usampler3D targetTexture1;
-  usampler3D targetTexture2;
+  usampler3D gridTexture0;
+  usampler3D gridTexture1;
+  usampler3D gridTexture2;
   usampler3D padding0;
   usampler3D padding1;
   usampler3D padding2;
