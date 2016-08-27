@@ -12,6 +12,8 @@
 #endif
 #include <debugging/heat-vision.glsl>
 
+#include <cascaded-grid/uniforms.glsl>
+
 struct SceneLightData
 {
   uint64_t sphere_arealights_address;
@@ -38,6 +40,7 @@ struct SceneData
   float totalTime;
   SceneLightData lights;
   SceneVoxelHeader voxelHeader;
+  CascadedGrids cascadedGrids;
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;
   uint16_t bvh_debug_depth_begin;
@@ -88,6 +91,99 @@ uint16_t* bvh_inner_nodes()
 {
   return (uint16_t*)scene.voxelHeader.distance_field_bvh_node_array_address;
 }
+
+
+// which_grid must be in 0..NUM_GRID_CASCADES
+vec3 cascaded_grid_origin(uint which_grid)
+{
+  return scene.cascadedGrids.gridLocation[which_grid].xyz;
+}
+
+// which_grid must be in 0..NUM_GRID_CASCADES
+float cascaded_grid_scale_factor(uint which_grid)
+{
+  return scene.cascadedGrids.gridLocation[which_grid].w;
+}
+
+vec3 cascaded_grid_cell_to_worldspace(vec3 gridCoord, uint which_grid)
+{
+  return gridCoord / cascaded_grid_scale_factor(which_grid) + cascaded_grid_origin(which_grid);
+}
+
+vec3 cascaded_grid_cell_from_worldspace(vec3 world_pos, uint which_grid)
+{
+  return (world_pos - cascaded_grid_origin(which_grid)) * cascaded_grid_scale_factor(which_grid);
+}
+
+vec3 cascadedGridWeights(vec3 world_pos)
+{
+  vec3 weights = vec3(0);
+  vec3 world_positions[NUM_GRID_CASCADES];
+  
+  // smoothing_distance
+  const float d = 2.;
+  
+  // offset
+  const float o = -0.5;
+  
+  float left_weight = 1.f;
+  
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+    vec3 grid_cell = cascaded_grid_cell_from_worldspace(world_pos, i);
+    
+    float w = min_component(smoothstep(vec3(o), vec3(o+d), grid_cell) * smoothstep(-vec3(o+16), -vec3(o+16-d), -grid_cell));
+    w *= left_weight;
+    
+    left_weight -= w;
+    
+    weights[i] = w;
+  }
+  
+  return weights;
+}
+
+#ifdef COMPUTE_GRIDS
+#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
+  layout(rgba16ui)
+#else
+  layout(r16ui)
+#endif 
+    writeonly uimage3D cascaded_grid_image(uint i)
+{
+#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
+  layout(rgba16ui)
+#else
+  layout(r16ui)
+#endif 
+    writeonly uimage3D targetTextures[NUM_GRID_CASCADES];
+    
+    targetTextures[0] = scene.cascadedGrids.targetTexture0;
+    #if NUM_GRID_CASCADES > 1
+    targetTextures[1] = scene.cascadedGrids.targetTexture1;
+    #endif
+    #if NUM_GRID_CASCADES > 2
+    targetTextures[2] = scene.cascadedGrids.targetTexture2;
+    #endif
+    
+    return targetTextures[i];
+}
+#else
+usampler3D cascaded_grid_texture(uint i)
+{
+  usampler3D targetTextures[NUM_GRID_CASCADES];
+  
+  targetTextures[0] = scene.cascadedGrids.gridTexture0;
+  #if NUM_GRID_CASCADES > 1
+  targetTextures[1] = scene.cascadedGrids.gridTexture1;
+  #endif
+  #if NUM_GRID_CASCADES > 2
+  targetTextures[2] = scene.cascadedGrids.gridTexture2;
+  #endif
+  
+  return targetTextures[i];
+}
+#endif
 
 #ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)

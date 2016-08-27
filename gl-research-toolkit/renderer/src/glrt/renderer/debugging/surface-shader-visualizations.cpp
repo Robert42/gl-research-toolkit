@@ -17,6 +17,7 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   map[" - "] = SurfaceShaderVisualization::NONE;
 
   VALUE(AMBIENT_OCCLUSION);
+  VALUE(CASCADED_GRID_WEIGHTS);
   VALUE(DISTANCEFIELD_AO);
   VALUE(DISTANCEFIELD_AO_COST_TEX);
   VALUE(DISTANCEFIELD_AO_COST_BRANCHING);

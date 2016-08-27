@@ -25,6 +25,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
     visualizeBVH(debugging::VisualizationRenderer::showSceneBVH(scene)),
+    visualizeBVH_Grid(debugging::VisualizationRenderer::showSceneBVH_Grid(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
@@ -36,6 +37,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
+    collectAmbientOcclusionToGrid(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*NUM_GRID_CASCADES), QSet<QString>({"#define COMPUTE_GRIDS"})),
+    _update_grid_camera(true),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
@@ -53,6 +56,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
   debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Backbuffer.connectTo(&visualizeBVH);
+  debugDrawList_Backbuffer.connectTo(&visualizeBVH_Grid);
   debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
   debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
   debugDrawList_Backbuffer.connectTo(&visualizeBoundingBoxes);
@@ -64,12 +68,17 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
   debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
 
+  connect(scene, &scene::Scene::sceneCleared, this, &Renderer::forceNewGridCameraPos);
+
   setAdjustRoughness(true);
-  setSDFShadows(true);
+  setSDFShadows(false);
+
+  initCascadedGridTextures();
 }
 
 Renderer::~Renderer()
 {
+  deinitCascadedGridTextures();
 }
 
 void Renderer::render()
@@ -82,6 +91,12 @@ void Renderer::render()
     recordCommandlist();
 
   updateCameraUniform();
+
+  if(isUsingBvhLeafGrid())
+  {
+    sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+    collectAmbientOcclusionToGrid.invoke();
+  }
 
   prepareFramebuffer();
 
@@ -199,6 +214,91 @@ void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSe
   _needRecapturing = true;
 }
 
+void Renderer::initCascadedGridTextures()
+{
+  auto textureFormat = [](int i) {
+    if(i<NUM_GRID_CASCADES)
+      return gl::TextureFormat::R16UI;
+    else
+      return gl::TextureFormat::RGBA16UI;
+  };
+  auto imageFormat = [](int i) {
+    if(i<NUM_GRID_CASCADES)
+      return GL_R16UI;
+    else
+      return GL_RGBA16UI;
+  };
+
+  for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
+  {
+    gridTexture[i] = new gl::Texture3D(16, 16, 16, textureFormat(i));
+    gl::TextureId textureId = gridTexture[i]->GetInternHandle();
+    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, 0, 0, imageFormat(i));
+    GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
+
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+    GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
+
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));
+
+    computeTextureHandles[i] = imageHandle;
+    renderTextureHandles[i] = textureHandle;
+  }
+}
+
+void Renderer::deinitCascadedGridTextures()
+{
+  for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
+    delete gridTexture[i];
+}
+
+inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
+{
+  static_assert(NUM_GRID_CASCADES<=3, "unexpected number of cascades");
+#if NUM_GRID_CASCADES == 2
+  const float gridSizes[3] = {8., 32};
+#elif NUM_GRID_CASCADES == 3
+  const float gridSizes[3] = {8., 16, 32};
+#else
+#error TODO, need gridsize for the current number of Grid Cascades
+#endif
+
+  CascadedGridsHeader header;
+
+  float margin = 1.f;
+
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+    float gridSize = gridSizes[i];
+
+    const int numGridCells = 16;
+
+    float grid_scale_factor = numGridCells / gridSize;
+
+    // See /doc/cascaded_grid_position.svg
+    float d_aa = numGridCells*0.5f - (margin + 1);
+    d_aa /= grid_scale_factor;
+    glm::vec3 grid_center = grid_camera_pos + d_aa * grid_camera_dir;
+
+    grid_center = glm::roundMultiple(grid_center, glm::vec3(1.f / grid_scale_factor));
+
+    glm::vec3 grid_origin = grid_center - gridSize*0.5f;
+
+    header.gridLocations[i] = glm::vec4(grid_origin, grid_scale_factor);
+  }
+
+  int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
+
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
+    header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
+  }
+
+  return header;
+}
+
 bool Renderer::needRecapturing() const
 {
   return _needRecapturing;
@@ -213,11 +313,10 @@ void Renderer::captureStates()
 {
   for(MaterialState& materialState : materialStates)
   {
+    Q_ASSERT(materialState.framebuffer != nullptr);
+
     gl::FramebufferObject& framebuffer = *materialState.framebuffer;
     ReloadableShader& shader = materialShaders[materialState.shader];
-
-    Q_ASSERT(&framebuffer != nullptr);
-    Q_ASSERT(&shader != nullptr);
 
     StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
@@ -342,12 +441,26 @@ void Renderer::updateCameraComponent(scene::CameraComponent* cameraComponent)
   fillCameraUniform(cameraComponent->globalCameraParameter());
 }
 
+void Renderer::forceNewGridCameraPos()
+{
+  grid_camera_pos = glm::vec3(NAN);
+}
+
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
+  glm::vec3 camera_position = cameraParameter.position;
+  glm::mat4 view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+
+  if(Q_LIKELY(_update_grid_camera || glm::isnan(grid_camera_pos.x)))
+  {
+    grid_camera_pos = camera_position;
+    grid_camera_dir = cameraParameter.lookAt;
+  }
+
   PROFILE_SCOPE("Renderer::fillCameraUniform()")
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  sceneUniformData.camera_position = cameraParameter.position;
-  sceneUniformData.view_projection_matrix = cameraParameter.projectionMatrix() * cameraParameter.viewMatrix();
+  sceneUniformData.camera_position = camera_position;
+  sceneUniformData.view_projection_matrix = view_projection_matrix;
   sceneUniformData.lightData = lightUniformBuffer.updateLightData();
   sceneUniformData.voxelHeader = voxelUniformBuffer.updateVoxelHeader();
   sceneUniformData.totalTime = debugPosteffect.totalTime;
@@ -355,6 +468,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.costsHeatvisionWhiteLevel = costsHeatvisionWhiteLevel;
   sceneUniformData.bvh_debug_depth_begin = bvh_debug_depth_begin;
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
+  sceneUniformData.cascadedGrids = updateCascadedGrids();
   sceneUniformBuffer.Unmap();
 }
 
@@ -389,6 +503,16 @@ void Renderer::setSDFShadows(bool sdfShadows)
     _sdfShadows = sdfShadows;
     ReloadableShader::defineMacro("CONETRACED_SHADOW", sdfShadows);
   }
+}
+
+bool Renderer::update_grid_camera() const
+{
+  return _update_grid_camera;
+}
+
+void Renderer::set_update_grid_camera(bool update_grid_camera)
+{
+  _update_grid_camera = update_grid_camera;
 }
 
 } // namespace renderer

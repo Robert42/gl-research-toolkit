@@ -68,7 +68,7 @@ Uuid<scene::Scene> SampleResourceManager::multiple_textured_objects()
 
 Uuid<scene::Scene> SampleResourceManager::defaultScene()
 {
-  return cornellBoxMergedScene();
+  return sponzaScene();
 }
 
 Uuid<scene::resources::StaticMesh> SampleResourceManager::suzanneLowPoly()
