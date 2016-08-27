@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="328.96403"
-     inkscape:cy="298.40978"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="443.75552"
+     inkscape:cy="367.52653"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -478,8 +478,8 @@
        transform="matrix(0.65590209,0,0,0.65590209,31.301728,388.0964)"><flowRegion
          id="flowRegion4552"><rect
            id="rect4554"
-           width="1013.6627"
-           height="186.5201"
+           width="1005.5771"
+           height="135.31187"
            x="39.490036"
            y="572.00848" /></flowRegion><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
@@ -489,11 +489,11 @@
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
          id="flowPara4591">So we calculate the optimal distance by dividing the axis aligned componentwize through the camera direction:</flowPara><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
-         id="flowPara4609">center_of_grid = camera_pos + abs(vec3(<flowSpan
+         id="flowPara4609">center_of_grid = camera_pos + vec3(<flowSpan
    style="fill:#ce5c00"
    id="flowSpan4605">d</flowSpan><flowSpan
    style="font-size:64.99999762%;baseline-shift:sub;fill:#ce5c00"
-   id="flowSpan4603">aa</flowSpan>) / (grid_size * camera_dir)) * camera_dir</flowPara><flowPara
+   id="flowSpan4603">aa</flowSpan> * f)/ (max(abs(camera_dir), 1/sqrt(2)))) * camera_dir</flowPara><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
          id="flowPara4252">This way, it's unchanged for the axis aligned case, as every component will have the length 1, and it will be equal to the diagonal cas, if the direction is diagonal, as every component has the length 1/sqrt(2)</flowPara></flowRoot>    <text
        sodipodi:linespacing="125%"
