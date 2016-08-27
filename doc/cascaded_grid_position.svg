@@ -479,7 +479,7 @@
          id="flowRegion4552"><rect
            id="rect4554"
            width="1005.5771"
-           height="135.31187"
+           height="216.16696"
            x="39.490036"
            y="572.00848" /></flowRegion><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
@@ -487,15 +487,11 @@
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
          id="flowPara4589">If it's diagonal, each axis has the length 1/sqrt(2)</flowPara><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
-         id="flowPara4591">So we calculate the optimal distance by dividing the axis aligned componentwize through the camera direction:</flowPara><flowPara
+         id="flowPara4266">We need to handle the case, where the camera component is 0 or near zero</flowPara><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
-         id="flowPara4609">center_of_grid = camera_pos + vec3(<flowSpan
-   style="fill:#ce5c00"
-   id="flowSpan4605">d</flowSpan><flowSpan
-   style="font-size:64.99999762%;baseline-shift:sub;fill:#ce5c00"
-   id="flowSpan4603">aa</flowSpan> * f)/ (max(abs(camera_dir), 1/sqrt(2)))) * camera_dir</flowPara><flowPara
+         id="flowPara4296" /><flowPara
          style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:16.93850708px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans Ultra-Light';fill:#000000"
-         id="flowPara4252">This way, it's unchanged for the axis aligned case, as every component will have the length 1, and it will be equal to the diagonal cas, if the direction is diagonal, as every component has the length 1/sqrt(2)</flowPara></flowRoot>    <text
+         id="flowPara4298">TODO</flowPara></flowRoot>    <text
        sodipodi:linespacing="125%"
        id="text4611"
        y="49.102295"
