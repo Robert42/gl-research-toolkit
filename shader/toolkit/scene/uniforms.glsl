@@ -120,11 +120,24 @@ vec3 cascadedGridWeights(vec3 world_pos)
   vec3 weights = vec3(0);
   vec3 world_positions[NUM_GRID_CASCADES];
   
+  // smoothing_distance
+  const float d = 2.;
+  
+  // offset
+  const float o = -0.5;
+  
+  float left_weight = 1.f;
+  
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
     vec3 grid_cell = cascaded_grid_cell_from_worldspace(world_pos, i);
     
-    weights[i] = float(clamp(grid_cell, vec3(-0.5), vec3(15.5)) == grid_cell);
+    float w = min_component(smoothstep(vec3(o), vec3(o+d), grid_cell) * smoothstep(-vec3(o+16), -vec3(o+16-d), -grid_cell));
+    w *= left_weight;
+    
+    left_weight -= w;
+    
+    weights[i] = w;
   }
   
   return weights;
