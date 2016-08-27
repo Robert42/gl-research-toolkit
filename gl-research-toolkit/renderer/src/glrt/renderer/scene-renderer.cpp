@@ -281,11 +281,13 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
     d_aa /= grid_scale_factor;
     glm::vec3 grid_center = grid_camera_pos + d_aa * grid_camera_dir;
 
-    grid_center = glm::roundMultiple(grid_center, glm::vec3(1.f / grid_scale_factor));
+    glm::vec3 snapped_grid_center = glm::roundMultiple(grid_center, glm::vec3(1.f / grid_scale_factor));
 
     glm::vec3 grid_origin = grid_center - gridSize*0.5f;
+    glm::vec3 snapped_grid_origin = snapped_grid_center - gridSize*0.5f;
 
-    header.gridLocations[i] = glm::vec4(grid_origin, grid_scale_factor);
+    header.snappedGridLocation[i] = glm::vec4(snapped_grid_origin, grid_scale_factor);
+    header.smoothGridLocation[i] = glm::vec4(grid_origin, grid_scale_factor);
   }
 
   int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;

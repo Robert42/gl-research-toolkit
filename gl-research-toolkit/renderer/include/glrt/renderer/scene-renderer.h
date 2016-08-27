@@ -127,7 +127,8 @@ private:
   {
     GLuint64 gridTextureRender[NUM_GRID_CASCADES];
     GLuint64 gridTextureCompute[NUM_GRID_CASCADES];
-    glm::vec4 gridLocations[NUM_GRID_CASCADES];
+    glm::vec4 snappedGridLocation[NUM_GRID_CASCADES];
+    glm::vec4 smoothGridLocation[NUM_GRID_CASCADES];
   };
 
   // Scene uniform buffer
