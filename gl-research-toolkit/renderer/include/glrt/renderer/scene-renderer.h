@@ -93,6 +93,8 @@ public:
   void setAdjustRoughness(bool adjustRoughness);
   bool sdfShadows() const;
   void setSDFShadows(bool sdfShadows);
+  bool update_grid_camera() const;
+  void set_update_grid_camera(bool update_grid_camera);
 
 protected:
   virtual void prepareFramebuffer() = 0;

@@ -233,6 +233,9 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   sdfShadowsToggle.setter = [renderer](bool ar){renderer->setSDFShadows(ar);};
   sdfShadowsToggle.getter = [renderer]() -> bool {return renderer->sdfShadows();};
   sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=Debug");
+  updateGridCameraToggle.setter = [renderer](bool ar){renderer->set_update_grid_camera(ar);};
+  updateGridCameraToggle.getter = [renderer]() -> bool {return renderer->update_grid_camera();};
+  updateGridCameraToggle.TwAddVarCB(tweakBar, "Update Grid for Camera", "group=Debug");
   TwSetParam(tweakBar, "Debug", "opened", TW_PARAM_CSTRING, 1, "false");
 
   TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->costsHeatvisionBlackLevel, "group='Debug/Show Costs' min=0 max=2147483647");

@@ -498,6 +498,16 @@ void Renderer::setSDFShadows(bool sdfShadows)
   }
 }
 
+bool Renderer::update_grid_camera() const
+{
+  return _update_grid_camera;
+}
+
+void Renderer::set_update_grid_camera(bool update_grid_camera)
+{
+  _update_grid_camera = update_grid_camera;
+}
+
 } // namespace renderer
 } // namespace glrt
 
