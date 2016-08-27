@@ -109,9 +109,9 @@ private:
 
   // Cascaded Grids
   ComputeStep collectAmbientOcclusionToGrid;
-  gl::Texture3D* gridTexture[6];
-  GLuint64 computeTextureHandles[6];
-  GLuint64 renderTextureHandles[6];
+  gl::Texture3D* gridTexture[NUM_GRID_CASCADES*2];
+  GLuint64 computeTextureHandles[NUM_GRID_CASCADES*2];
+  GLuint64 renderTextureHandles[NUM_GRID_CASCADES*2];
   void initCascadedGridTextures();
   void deinitCascadedGridTextures();
 
