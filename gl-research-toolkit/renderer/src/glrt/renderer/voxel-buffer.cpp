@@ -149,6 +149,13 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
   this->bvhInnerBoundingSpheres = bvhInnerBoundingSpheres;
   this->bvhInnerNodes = bvhInnerNodes;
 
+  Q_ASSERT(num_leaves>0);
+
+  // Make sure, the last inner Node has some valid values, so a branchless tree traversal can assume,it's never NAN
+  this->bvhInnerBoundingSpheres[num_leaves-1] = BoundingSphere{glm::vec3(10000.f), 0.f};
+  this->bvhInnerNodes[num_leaves-1].left_child = 0x8000;
+  this->bvhInnerNodes[num_leaves-1].right_child = 0x8000;
+
   const quint16 skip_first_n = HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
   if(Q_LIKELY(num_leaves > 1 + skip_first_n))
   {

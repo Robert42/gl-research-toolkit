@@ -27,7 +27,7 @@ void setCurrentBVHUsage(BvhUsage bvhUsage);
 void init_bvh_shader_macros();
 
 // FIXME set to a lower value!
-const quint16 MAX_NUM_STATIC_MESHES = 256;
+const quint16 MAX_NUM_STATIC_MESHES = 255;
 const quint16 BVH_MAX_STACK_DEPTH = MAX_NUM_STATIC_MESHES;
 const quint16 BVH_MAX_VISITED_LEAVES = MAX_NUM_STATIC_MESHES;
 
