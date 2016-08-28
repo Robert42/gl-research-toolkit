@@ -54,6 +54,10 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   SceneData scene;
 };
 
+float blink(float rate=0.2)
+{
+  return step(rate, mod(scene.totalTime, rate*2.));
+}
 
 void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)
 {
