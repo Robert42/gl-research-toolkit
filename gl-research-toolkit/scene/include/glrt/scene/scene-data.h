@@ -10,8 +10,13 @@ namespace glrt {
 namespace scene {
 
 
+#define HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE 1
 #define ENFORCE_HUGE_BVH_LEAVES_FIRST 1
 #define BVH_HUGE_LEAVES_LIMIT 0.25f
+
+#if HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE
+#define ENFORCE_HUGE_BVH_LEAVES_FIRST 1
+#endif
 
 class Scene::Data
 {
