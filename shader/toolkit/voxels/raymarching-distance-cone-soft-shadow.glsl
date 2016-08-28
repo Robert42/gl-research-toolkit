@@ -101,8 +101,6 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
   uint16_t leaves[BVH_MAX_VISITED_LEAVES+1];
   uint32_t num_leaves = 0;
   
-  uint32_t endless_loop_prevention = 0;
-  
   do {
     stack_depth--;
     uint32_t current_node = stack[stack_depth];
@@ -117,8 +115,8 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
     uint32_t left_is_inner_node = uint32_t(1) ^ left_is_leaf;
     uint32_t right_is_inner_node = uint32_t(1) ^ right_is_leaf;
 
-    left_node = left_node & uint16_t(0x7fff);
-    right_node = right_node & uint16_t(0x7fff);
+    left_node = left_node & uint32_t(0x7fff);
+    right_node = right_node & uint32_t(0x7fff);
     
     Sphere left_sphere;
     left_sphere.origin = mix(leaf_bounding_spheres[left_node].origin, bvh_inner_bounding_sphere[left_node].origin, left_is_inner_node);
@@ -131,29 +129,24 @@ float coneSoftShadow_bvh_iterative(in Cone cone, in uint16_t root_node, in uint1
     uint32_t cone_intersects_left = uint32_t(cone_intersects_sphere(cone, left_sphere, d));
     uint32_t cone_intersects_right = uint32_t(cone_intersects_sphere(cone, right_sphere, d));
     
-    left_is_inner_node = left_is_inner_node & cone_intersects_left;
-    right_is_inner_node = right_is_inner_node & cone_intersects_right;
-    left_is_leaf = left_is_leaf & cone_intersects_left;
-    right_is_leaf = right_is_leaf & cone_intersects_right;
-    
     stack[stack_depth] = uint16_t(left_node);
-    stack_depth+=left_is_inner_node;
+    stack_depth+=left_is_inner_node & cone_intersects_left;
     #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
     stack_depth = min(stack_depth, BVH_MAX_STACK_DEPTH-1);
     #endif
     stack[stack_depth] = uint16_t(right_node);
-    stack_depth+=right_is_inner_node;
+    stack_depth+=right_is_inner_node & cone_intersects_right;
     #if BVH_MAX_STACK_DEPTH < MAX_NUM_STATIC_MESHES
     stack_depth = min(stack_depth, BVH_MAX_STACK_DEPTH-1);
     #endif
     
     leaves[num_leaves] = uint16_t(right_node);
-    num_leaves+=right_is_leaf;
+    num_leaves+=right_is_leaf & cone_intersects_right;
     #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
     num_leaves = min(num_leaves, BVH_MAX_VISITED_LEAVES-1);
     #endif
     leaves[num_leaves] = uint16_t(left_node);
-    num_leaves+=left_is_leaf;
+    num_leaves+=left_is_leaf & cone_intersects_left;
     #if BVH_MAX_VISITED_LEAVES < MAX_NUM_STATIC_MESHES
     num_leaves = min(num_leaves, BVH_MAX_VISITED_LEAVES-1);
     #endif
