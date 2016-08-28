@@ -31,6 +31,10 @@ add_custom_target(
   debugging/visualizations/visualize-aabbs.vs
   debugging/visualizations/visualize-arrow.fs
   debugging/visualizations/visualize-arrow.vs
+  debugging/visualizations/visualize-bvh-cascaded-grids.fs
+  debugging/visualizations/visualize-bvh-cascaded-grids.vs
+  debugging/visualizations/visualize-bvh.fs
+  debugging/visualizations/visualize-bvh.vs
   debugging/visualizations/visualize-cone.fs
   debugging/visualizations/visualize-cone.vs
   debugging/visualizations/visualize-debug-printing-fragment.fs
@@ -60,6 +64,7 @@ add_custom_target(
   materials/material.fs
   materials/material.vs
   toolkit/alignment.glsl
+  toolkit/cascaded-grid/uniforms.glsl
   toolkit/debugging/heat-vision.glsl
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl

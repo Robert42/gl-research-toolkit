@@ -14,6 +14,10 @@ QMap<QString, BvhUsage> allcurrentBvhUsages()
 
   VALUE(NO_BVH);
   VALUE(BVH_WITH_STACK);
+  VALUE(BVH_GRID_NEAREST_LEAF);
+  VALUE(BVH_GRID_NEAREST_FOUR_LEAVES);
+  VALUE(BVH_GRID_NEAREST_LEAF_WITH_HEURISTIC_FOR_REST);
+  VALUE(BVH_GRID_NEAREST_FOUR_LEAVES_WITH_HEURISTIC_FOR_REST);
 
   return map;
 }
@@ -35,6 +39,9 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
     ReloadableShader::defineMacro(key, bvhUsage == value, false);
   }
 
+  ReloadableShader::defineMacro("BVH_USE_GRID", bvh_is_grid(bvhUsage), false);
+  ReloadableShader::defineMacro("BVH_GRID_HAS_FOUR_COMPONENTS", bvh_is_grid_with_four_components(bvhUsage), false);
+
   ReloadableShader::reloadAll();
 }
 
@@ -43,7 +50,8 @@ void init_bvh_shader_macros()
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_STATIC_MESHES %0").arg(MAX_NUM_STATIC_MESHES));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_STACK_DEPTH %0").arg(BVH_MAX_STACK_DEPTH));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_VISITED_LEAVES %0").arg(BVH_MAX_VISITED_LEAVES));
-  glrt::renderer::setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define NUM_GRID_CASCADES %0").arg(NUM_GRID_CASCADES));
+  setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
 }
 
 } // namespace renderer

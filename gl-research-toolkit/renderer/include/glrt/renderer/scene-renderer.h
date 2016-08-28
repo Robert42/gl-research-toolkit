@@ -19,6 +19,7 @@
 #include <glrt/renderer/material-state.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/compute-step.h>
 
 #include <glhelper/framebufferobject.hpp>
 #include <glhelper/texture2d.hpp>
@@ -52,6 +53,7 @@ public:
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
   debugging::DebugRenderer visualizeBVH;
+  debugging::DebugRenderer visualizeBVH_Grid;
   debugging::DebugRenderer visualizeWorldGrid;
   debugging::DebugRenderer visualizeUniformTest;
   debugging::DebugRenderer visualizeBoundingBoxes;
@@ -91,6 +93,8 @@ public:
   void setAdjustRoughness(bool adjustRoughness);
   bool sdfShadows() const;
   void setSDFShadows(bool sdfShadows);
+  bool update_grid_camera() const;
+  void set_update_grid_camera(bool update_grid_camera);
 
 protected:
   virtual void prepareFramebuffer() = 0;
@@ -105,9 +109,27 @@ private:
   Array<ReloadableShader> materialShaders;
   Array<MaterialState> materialStates;
 
+  // Cascaded Grids
+  ComputeStep collectAmbientOcclusionToGrid;
+  gl::Texture3D* gridTexture[NUM_GRID_CASCADES*2];
+  GLuint64 computeTextureHandles[NUM_GRID_CASCADES*2];
+  GLuint64 renderTextureHandles[NUM_GRID_CASCADES*2];
+  glm::vec3 grid_camera_pos = glm::vec3(NAN), grid_camera_dir = glm::vec3(NAN);
+  bool _update_grid_camera : 1;
+  void initCascadedGridTextures();
+  void deinitCascadedGridTextures();
+
   // command lists
   bool _needRecapturing : 1;
   gl::CommandList commandList;
+
+  struct CascadedGridsHeader
+  {
+    GLuint64 gridTextureRender[NUM_GRID_CASCADES];
+    GLuint64 gridTextureCompute[NUM_GRID_CASCADES];
+    glm::vec4 snappedGridLocation[NUM_GRID_CASCADES];
+    glm::vec4 smoothGridLocation[NUM_GRID_CASCADES];
+  };
 
   // Scene uniform buffer
   struct SceneUniformBlock
@@ -117,6 +139,7 @@ private:
     float totalTime;
     LightBuffer::LightData lightData;
     VoxelBuffer::VoxelHeader voxelHeader;
+    CascadedGridsHeader cascadedGrids;
 
     // Padding & debugging
     quint32 costsHeatvisionBlackLevel;
@@ -136,6 +159,8 @@ private:
   bool _adjustRoughness : 1;
   bool _sdfShadows : 1;
 
+  CascadedGridsHeader updateCascadedGrids() const;
+
 
   bool needRecapturing() const;
   bool needRerecording() const;
@@ -150,6 +175,7 @@ private:
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
+  void forceNewGridCameraPos();
 };
 
 
