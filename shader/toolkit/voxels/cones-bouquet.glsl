@@ -1,3 +1,7 @@
+#ifndef N_GI_CONES
+#error N_GI_CONES undefined
+#endif
+
 
 Cone cone_bouquet[N_GI_CONES];
 float cone_bouquet_ao[N_GI_CONES];

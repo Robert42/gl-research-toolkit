@@ -4,7 +4,7 @@
 #include <scene/uniforms.glsl>
 
 #define N_GI_CONES 18
-#include <voxels/cones-bouquet.glsl>
+#include <voxels/ambient-occlusion-cones.glsl>
 
 layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
@@ -151,10 +151,7 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
         float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
         float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
         
-        /*
         float ao = ao_coneSoftShadow(cone, sdf, intersection_distance_front, intersection_distance_back, cone_length);
-        */
-        float ao = 1.f;
         cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
         V += max(0, ao);
       }

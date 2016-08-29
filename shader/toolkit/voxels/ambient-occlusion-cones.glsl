@@ -1,7 +1,6 @@
 #include <voxels/raymarching-distance-cone-soft-shadow.glsl>
 #include <gl-noise/src/noise2D.glsl>
 
-#define N_GI_CONES 9
 #include <voxels/cones-bouquet.glsl>
 
 int ao_distancefield_cost = 0;
