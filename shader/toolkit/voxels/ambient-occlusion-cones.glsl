@@ -177,8 +177,6 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
   }while(stack_depth>0);
 
 
-#define BRANCHLESS 0
-
   for(uint32_t i=0; i<num_leaves; ++i)
   {
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
@@ -192,9 +190,7 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
       Cone cone = cone_bouquet[j];
       float distance_to_sphere_origin;
       bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
-      #if !BRANCHLESS
       if(has_intersection)
-      #endif
       {
         #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
             ao_distancefield_cost++;
@@ -204,11 +200,6 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
         float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
         
         float ao = ao_coneSoftShadow(cone_bouquet[j], sdf, intersection_distance_front, intersection_distance_back, cone_length);
-        
-        #if BRANCHLESS
-        ao = mix(1.f, ao, float(has_intersection));
-        #endif
-        
         cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
       }
     }
