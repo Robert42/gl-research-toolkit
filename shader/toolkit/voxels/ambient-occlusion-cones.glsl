@@ -189,11 +189,8 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
     {
       Cone cone = cone_bouquet[j];
       float distance_to_sphere_origin;
-      #if 0
-      distance_to_sphere_origin = dot(cone.direction, sphere.origin-cone.origin);
-      #else
-      if(cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length))
-      #endif
+      bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
+      if(has_intersection)
       {
         #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
             ao_distancefield_cost++;
@@ -201,7 +198,9 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
 
         float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
         float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-        cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao_coneSoftShadow(cone_bouquet[j], sdf, intersection_distance_front, intersection_distance_back, cone_length));
+        
+        float ao = ao_coneSoftShadow(cone_bouquet[j], sdf, intersection_distance_front, intersection_distance_back, cone_length);
+        cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
       }
     }
   }
