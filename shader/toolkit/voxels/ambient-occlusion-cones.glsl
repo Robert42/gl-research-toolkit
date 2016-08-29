@@ -2,10 +2,7 @@
 #include <gl-noise/src/noise2D.glsl>
 
 #define N_GI_CONES 9
-
-Cone cone_bouquet[N_GI_CONES];
-float cone_bouquet_ao[N_GI_CONES];
-vec3 cone_normal;
+#include <voxels/cones-bouquet.glsl>
 
 int ao_distancefield_cost = 0;
 
@@ -227,109 +224,13 @@ float distancefield_ao(in Sphere* bvh_bounding_spheres, uint16_t* bvh_nodes, in 
   return V / N_GI_CONES;
 }
 
-float distancefield_ao(float radius=3.5)
+float distancefield_ao(float radius=AO_RADIUS)
 {
-  Sphere* _bvh_bounding_spheres = bvh_inner_bounding_spheres();
-  uint16_t* _bvh_nodes = bvh_inner_nodes();
+  Sphere* _bvh_bounding_spheres = get_bvh_inner_bounding_spheres();
+  uint16_t* _bvh_nodes = get_bvh_inner_nodes();
   Sphere* _bounding_spheres = distance_fields_bounding_spheres();
   VoxelDataBlock* _distance_field_data_blocks = distance_fields_voxelData();
   uint32_t _num_distance_fields = distance_fields_num();
   
   return distancefield_ao(_bvh_bounding_spheres, _bvh_nodes, _bounding_spheres, _distance_field_data_blocks, _num_distance_fields, radius);
-}
-
-void SHOW_CONES()
-{
-  for(int i=0; i<N_GI_CONES; ++i)
-    SHOW_VALUE(cone_bouquet[i]);
-}
-
-void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
-{
-  const float tan_half_angle_of_60 = 0.577350269189626;
-  const float tan_half_angle_of_45 = 0.414213562373095;
-  const float inv_cos_half_angle_of_60 = 1.15470053837925;
-  const float inv_cos_half_angle_of_45 = 1.08239220029239;
-  
-  cone_bouquet[0].origin = world_position;
-  cone_bouquet[0].direction = vec3(0, -0.866025403784439, 0.5);
-  cone_bouquet[0].tan_half_angle = tan_half_angle_of_60;
-  cone_bouquet[0].inv_cos_half_angle = inv_cos_half_angle_of_60;
-  
-  cone_bouquet[1].origin = world_position;
-  cone_bouquet[1].direction = vec3(0.75, -0.433012701892219, 0.5);
-  cone_bouquet[1].tan_half_angle = tan_half_angle_of_60;
-  cone_bouquet[1].inv_cos_half_angle = inv_cos_half_angle_of_60;
-  
-  cone_bouquet[2].origin = world_position;
-  cone_bouquet[2].direction = vec3(0.75, 0.433012701892219, 0.5);
-  cone_bouquet[2].tan_half_angle = tan_half_angle_of_60;
-  cone_bouquet[2].inv_cos_half_angle = inv_cos_half_angle_of_60;
-  
-  cone_bouquet[3].origin = world_position;
-  cone_bouquet[3].direction = vec3(1.06057523872491e-16, 8.66025403784439e-01, 0.5);
-  cone_bouquet[3].tan_half_angle = tan_half_angle_of_60;
-  cone_bouquet[3].inv_cos_half_angle = inv_cos_half_angle_of_60;
-  
-  cone_bouquet[4].origin = world_position;
-  cone_bouquet[4].direction = vec3(-0.75, 0.433012701892220, 0.5);
-  cone_bouquet[4].tan_half_angle = tan_half_angle_of_60;
-  cone_bouquet[4].inv_cos_half_angle = inv_cos_half_angle_of_60;
-  
-  cone_bouquet[5].origin = world_position;
-  cone_bouquet[5].direction = vec3(-0.75, -0.433012701892219, 0.5);
-  cone_bouquet[5].tan_half_angle = tan_half_angle_of_60;
-  cone_bouquet[5].inv_cos_half_angle = inv_cos_half_angle_of_60;
-  
-#if N_GI_CONES == 7
-  cone_bouquet[6].origin = world_position;
-  cone_bouquet[6].direction = vec3(0, 0, 1);
-  cone_bouquet[6].tan_half_angle = tan_half_angle_of_60;
-  cone_bouquet[6].inv_cos_half_angle = inv_cos_half_angle_of_60;
-  
-#elif N_GI_CONES == 9
-  cone_bouquet[6].origin = world_position;
-  cone_bouquet[6].direction = vec3(0, -0.382683432365090, 0.923879532511287);
-  cone_bouquet[6].tan_half_angle = tan_half_angle_of_45;
-  cone_bouquet[6].inv_cos_half_angle = inv_cos_half_angle_of_45;
-  
-  cone_bouquet[7].origin = world_position;
-  cone_bouquet[7].direction = vec3(0.331413574035592, 0.191341716182545, 0.923879532511287);
-  cone_bouquet[7].tan_half_angle = tan_half_angle_of_45;
-  cone_bouquet[7].inv_cos_half_angle = inv_cos_half_angle_of_45;
-  
-  cone_bouquet[8].origin = world_position;
-  cone_bouquet[8].direction = vec3(-0.331413574035592, 0.191341716182545, 0.923879532511287);
-  cone_bouquet[8].tan_half_angle = tan_half_angle_of_45;
-  cone_bouquet[8].inv_cos_half_angle = inv_cos_half_angle_of_45;
-#else
-#error unexpected number of cones
-#endif
-
-  for(int i=0; i<N_GI_CONES; ++i)
-  {
-#if defined(CONE_BOUQUET_NOISE) || defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
-#if defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
-    float alpha = scene.totalTime;
-#elif defined(CONE_BOUQUET_NOISE)
-    float alpha = snoise((gl_FragCoord.xy + vec2(scene.totalTime*1000, 0)));
-#endif
-    float c = cos(alpha);
-    float s = sin(alpha);
-    mat3 rot = mat3(c, -s, 0,
-                    s,  c, 0,
-                    0,  0, 1);
-#else
-    mat3 rot = mat3(1);
-#endif
-    cone_bouquet[i].direction = tangent_to_worldspace * rot * cone_bouquet[i].direction;
-  }
-  
-#if N_GI_CONES == 7
-  cone_normal = cone_bouquet[6].direction;
-#elif N_GI_CONES == 9
-  cone_normal = tangent_to_worldspace * vec3(0,0,1);
-#else
-#error unexpected number of cones
-#endif
 }

@@ -86,12 +86,12 @@ VoxelDataBlock* distance_fields_voxelData()
   return (VoxelDataBlock*)scene.voxelHeader.distance_field_distancefielddata_array_address;
 }
 
-Sphere* bvh_inner_bounding_spheres()
+Sphere* get_bvh_inner_bounding_spheres()
 {
   return (Sphere*)scene.voxelHeader.distance_field_bvh_inner_boundingsphere_array_address;
 }
 
-uint16_t* bvh_inner_nodes()
+uint16_t* get_bvh_inner_nodes()
 {
   return (uint16_t*)scene.voxelHeader.distance_field_bvh_node_array_address;
 }

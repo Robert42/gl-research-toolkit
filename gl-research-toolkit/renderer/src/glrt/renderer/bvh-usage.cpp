@@ -47,6 +47,7 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
 
 void init_bvh_shader_macros()
 {
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define AO_RADIUS 3.5"));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_STATIC_MESHES %0").arg(MAX_NUM_STATIC_MESHES));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_STACK_DEPTH %0").arg(BVH_MAX_STACK_DEPTH));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_VISITED_LEAVES %0").arg(BVH_MAX_VISITED_LEAVES));
