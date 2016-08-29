@@ -38,13 +38,15 @@ void main()
 
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
   
+  init_cone_bouquet(mat3(1), world_pos);
+  
   collect_scene_information_at(world_pos, grid_cell, AO_RADIUS);
 }
 
 // =============================================================================
 
 void init_found_leaf(out found_leaf_t leaf);
-void take_better_node(inout found_leaf_t found_leaf, inout found_leaf_t next_candidate);
+void take_better_node(inout found_leaf_t found_leaf, in uint32_t index, in float occlusion);
 
 void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radius)
 {
@@ -120,7 +122,11 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
 
   found_leaf_t found_leaf;
   init_found_leaf(found_leaf);
-/*
+  
+  init_cone_bouquet_ao();
+  
+  const float cone_length = ao_radius;
+
   for(uint32_t i=0; i<num_leaves; ++i)
   {
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
@@ -128,10 +134,9 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
     #endif
     uint32_t leaf = leaves[i];
     Sphere sphere = leaf_bounding_spheres[leaf];
-    VoxelDataBlock* sdf = distance_field_data_blocks + leaf;
+    VoxelDataBlock* sdf = leaf_data_blocks + leaf;
     
-    take_better_node(found_leaf, found_leaf_distance, leaf, distance(sphere, world_pos));
-    
+    float V = 0.f;
     for(int j=0; j<N_GI_CONES; ++j)
     {
       Cone cone = cone_bouquet[j];
@@ -146,12 +151,21 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
         float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
         float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
         
-        float ao = ao_coneSoftShadow(cone_bouquet[j], sdf, intersection_distance_front, intersection_distance_back, cone_length);
+        /*
+        float ao = ao_coneSoftShadow(cone, sdf, intersection_distance_front, intersection_distance_back, cone_length);
+        */
+        float ao = 1.f;
         cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
+        V += max(0, ao);
       }
     }
+    
+    V /= N_GI_CONES;
+    
+    take_better_node(found_leaf, leaf, V);
   }
-  */
+  
+  const float total_ao_at = accumulate_bouquet_to_total_occlusion();
   
   imageStore(targetTexture, ivec3(voxel), uvec4(found_leaf.index));
 }
@@ -165,9 +179,14 @@ void init_found_leaf(out found_leaf_t leaf)
   leaf.occlusion = vec4(1.f);
 }
 
-
-void take_better_node(inout found_leaf_t found_leaf, inout found_leaf_t next_candidate)
+void take_better_node(inout found_leaf_t found_leaf, in uint32_t index, in float occlusion)
 {
+  int i = index_of_max_component(leaf.occlusion);
+  
+  float new_is_better = step(found_leaf.occlusion[i], occlusion);
+  
+  found_leaf.occlusion[i] = min(found_leaf.occlusion[i], occlusion);
+  found_leaf.index[i] = uint32_t(mix(found_leaf.index, index, uint32_t(new_is_better)));
 }
 
 #else
@@ -178,8 +197,12 @@ void init_found_leaf(out found_leaf_t leaf)
   leaf.occlusion = 1.f;
 }
 
-void take_better_node(inout found_leaf_t found_leaf, inout found_leaf_t next_candidate)
+void take_better_node(inout found_leaf_t found_leaf, in uint32_t index, in float occlusion)
 {
+  float new_is_better = step(found_leaf.occlusion, occlusion);
+  
+  found_leaf.occlusion = min(found_leaf.occlusion, occlusion);
+  found_leaf.index = uint32_t(mix(found_leaf.index, index, uint32_t(new_is_better)));
 }
 
 #endif

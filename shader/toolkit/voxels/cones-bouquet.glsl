@@ -3,11 +3,36 @@ Cone cone_bouquet[N_GI_CONES];
 float cone_bouquet_ao[N_GI_CONES];
 vec3 cone_normal;
 
+void init_cone_bouquet_ao()
+{
+  for(int i=0; i<N_GI_CONES; ++i)
+    cone_bouquet_ao[i] = 1.f;
+}
+
+float accumulate_bouquet_to_total_occlusion()
+{
+  float V = 0.f;
+  for(int i=0; i<N_GI_CONES; ++i)
+    V += max(0, cone_bouquet_ao[i]);
+  return V / N_GI_CONES;
+}
+
 
 void SHOW_CONES()
 {
   for(int i=0; i<N_GI_CONES; ++i)
     SHOW_VALUE(cone_bouquet[i]);
+}
+
+bool intersects_with_cone_bouquet(in Sphere sphere, float cone_length)
+{
+  vec3 cone_origin = cone_bouquet[0].origin;
+  
+  float distance_to_sphere = max(0, distance(cone_origin, sphere.origin) - sphere.radius);
+  
+  float side_of_sphere = dot(sphere.origin+cone_normal*sphere.radius - cone_origin, cone_normal);
+  
+  return distance_to_sphere <= cone_length &&  side_of_sphere >= 0;
 }
 
 void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
@@ -75,17 +100,27 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 #if N_GI_CONES > 9
   {
     const int n = N_GI_CONES/2;
-    const float alpha = radians(60);
+    
+    cone_bouquet[9] = cone_bouquet[9%n];
+    cone_bouquet[10] = cone_bouquet[10%n];
+    cone_bouquet[11] = cone_bouquet[11%n];
+    cone_bouquet[12] = cone_bouquet[12%n];
+    cone_bouquet[13] = cone_bouquet[13%n];
+    #if N_GI_CONES > 14
+    cone_bouquet[14] = cone_bouquet[14%n];
+    cone_bouquet[15] = cone_bouquet[15%n];
+    cone_bouquet[16] = cone_bouquet[16%n];
+    cone_bouquet[17] = cone_bouquet[17%n];
+    #endif
+    
+    const float alpha = radians(30);
     const float c = cos(alpha);
     const float s = sin(alpha);
     const mat3 r = mat3( c, s, 0,
                         -s, c, 0,
                          0, 0, 1);
-    for(int i=0; i<n; ++i)
-    {
-      cone_bouquet[i+n] = cone_bouquet[i];
-      cone_bouquet[i+n].direction = r * cone_bouquet[i+n].direction;
-    }
+    for(int i=n; i<N_GI_CONES; ++i)
+      cone_bouquet[i].direction = r * cone_bouquet[i].direction;
   }
 #endif
 

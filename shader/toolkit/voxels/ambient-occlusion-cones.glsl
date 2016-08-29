@@ -6,17 +6,6 @@
 
 int ao_distancefield_cost = 0;
 
-bool intersects_with_cone_bouquet(in Sphere sphere, float cone_length)
-{
-  vec3 cone_origin = cone_bouquet[0].origin;
-  
-  float distance_to_sphere = max(0, distance(cone_origin, sphere.origin) - sphere.radius);
-  
-  float side_of_sphere = dot(sphere.origin+cone_normal*sphere.radius - cone_origin, cone_normal);
-  
-  return distance_to_sphere <= cone_length &&  side_of_sphere >= 0;
-}
-
 float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
   mat4x3 worldToVoxelSpace;
@@ -205,10 +194,7 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
 
 float distancefield_ao(in Sphere* bvh_bounding_spheres, uint16_t* bvh_nodes, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float radius=3.5)
 {
-  float V = 0.f;
-  
-  for(int i=0; i<N_GI_CONES; ++i)
-    cone_bouquet_ao[i] = 1.f;
+  init_cone_bouquet_ao();
     
   #if defined(NO_BVH)
   ao_coneSoftShadow_bruteforce(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
@@ -218,10 +204,7 @@ float distancefield_ao(in Sphere* bvh_bounding_spheres, uint16_t* bvh_nodes, in 
   #error UNKNOWN BVH usage
   #endif
     
-  for(int i=0; i<N_GI_CONES; ++i)
-    V += max(0, cone_bouquet_ao[i]);
-    
-  return V / N_GI_CONES;
+  return accumulate_bouquet_to_total_occlusion();
 }
 
 float distancefield_ao(float radius=AO_RADIUS)
