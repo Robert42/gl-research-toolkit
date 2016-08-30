@@ -174,7 +174,7 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
   
   imageStore(leafIndexTexture, ivec3(voxel), uvec4(found_leaf.index));
 #if BVH_USE_GRID_OCCLUSION
-  imageStore(occlusionTexture, ivec3(voxel), uvec4(total_ao_at));
+  imageStore(occlusionTexture, ivec3(voxel), vec4(total_ao_at));
 #endif
 }
 
