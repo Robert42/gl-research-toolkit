@@ -269,6 +269,17 @@ void Renderer::initCascadedGridTextures()
       return rgba16ui_dummy_data.data();
   };
 
+  const gl::SamplerObject& samplerObject = gl::SamplerObject::GetSamplerObject(gl::SamplerObject::Desc(gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Filter::LINEAR,
+                                                                                                       gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Border::CLAMP,
+                                                                                                       1 /* max anisotropy */,
+                                                                                                       glm::vec4(0.5f),
+                                                                                                       gl::SamplerObject::CompareMode::NONE,
+                                                                                                       0.f /* min lod */,
+                                                                                                       0.f /* max lod */));
+  GLuint clampedLinearSampler = samplerObject.GetInternHandle();
+
   for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
   {
     gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
@@ -304,7 +315,7 @@ void Renderer::initCascadedGridTextures()
     GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
 
     GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R8);
-    GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
+    GLuint64 textureHandle = GL_RET_CALL(glGetTextureSamplerHandleNV, textureId, clampedLinearSampler);
 
     GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));

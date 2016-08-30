@@ -79,7 +79,7 @@ return;
   #endif
   return;
 #elif defined(BVH_OCCLUSION_GRID_ONLY_)
-  float grid_occlusion = texture(cascaded_grid_texture_occlusion(BVH_OCCLUSION_GRID_ONLY_), cascaded_grid_uvw_from_worldspace(world_pos, BVH_OCCLUSION_GRID_ONLY_), 0).r;
+  float grid_occlusion = textureLod(cascaded_grid_texture_occlusion(BVH_OCCLUSION_GRID_ONLY_), cascaded_grid_uvw_from_worldspace(world_pos, BVH_OCCLUSION_GRID_ONLY_), 0).r;
   fragment_color = vec4(vec3(grid_occlusion), 1);
   return;
 #endif
