@@ -1,5 +1,6 @@
 #include <glrt/sample-application.h>
 
+const bool ADD_VSYNC = false;
 
 int main(int argc, char** argv)
 {
@@ -8,7 +9,7 @@ int main(int argc, char** argv)
                                                                           ),
                               glrt::SampleApplication::Settings::techDemo(),
                               glrt::Application::Settings::techDemo(),
-                              glrt::System::Settings::simpleWindow("Forward-Renderer"));
+                              glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Forward-Renderer"), ADD_VSYNC));
 
   app.showWindow();
 
