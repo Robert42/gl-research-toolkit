@@ -86,11 +86,19 @@ struct CascadedGrids
 
 #if BVH_USE_GRID_OCCLUSION
   sampler3D targetOcclusionTexture0;
+#if NUM_GRID_CASCADES>1
   sampler3D targetOcclusionTexture1;
+#endif
+#if NUM_GRID_CASCADES>2
   sampler3D targetOcclusionTexture2;
+#endif
   sampler3D padding_occlusion_0;
+#if NUM_GRID_CASCADES>1
   sampler3D padding_occlusion_1;
+#endif
+#if NUM_GRID_CASCADES>2
   sampler3D padding_occlusion_2;
+#endif
 #endif
   
 // xyz are the grid origins and w the scale Factor for each grid.
