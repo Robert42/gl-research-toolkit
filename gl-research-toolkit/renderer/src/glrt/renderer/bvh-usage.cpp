@@ -16,8 +16,6 @@ QMap<QString, BvhUsage> allcurrentBvhUsages()
   VALUE(BVH_WITH_STACK);
   VALUE(BVH_GRID_NEAREST_LEAF);
   VALUE(BVH_GRID_NEAREST_FOUR_LEAVES);
-  VALUE(BVH_GRID_NEAREST_LEAF_WITH_HEURISTIC_FOR_REST);
-  VALUE(BVH_GRID_NEAREST_FOUR_LEAVES_WITH_HEURISTIC_FOR_REST);
 
   return map;
 }
@@ -52,6 +50,7 @@ void init_bvh_shader_macros()
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_STACK_DEPTH %0").arg(BVH_MAX_STACK_DEPTH));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_VISITED_LEAVES %0").arg(BVH_MAX_VISITED_LEAVES));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define NUM_GRID_CASCADES %0").arg(NUM_GRID_CASCADES));
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_USE_GRID_OCCLUSION %0").arg(BVH_USE_GRID_OCCLUSION));
   setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
 }
 

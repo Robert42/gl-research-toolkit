@@ -114,6 +114,11 @@ private:
   gl::Texture3D* gridTexture[NUM_GRID_CASCADES*2];
   GLuint64 computeTextureHandles[NUM_GRID_CASCADES*2];
   GLuint64 renderTextureHandles[NUM_GRID_CASCADES*2];
+#if BVH_USE_GRID_OCCLUSION
+  gl::Texture3D* gridOcclusionTexture[NUM_GRID_CASCADES];
+  GLuint64 computeOcclusionTextureHandles[NUM_GRID_CASCADES];
+  GLuint64 textureOcclusionTextureHandles[NUM_GRID_CASCADES];
+#endif
   glm::vec3 grid_camera_pos = glm::vec3(NAN), grid_camera_dir = glm::vec3(NAN);
   bool _update_grid_camera : 1;
   void initCascadedGridTextures();
@@ -127,6 +132,10 @@ private:
   {
     GLuint64 gridTextureRender[NUM_GRID_CASCADES];
     GLuint64 gridTextureCompute[NUM_GRID_CASCADES];
+#if BVH_USE_GRID_OCCLUSION
+    GLuint64 occlusionTextureRender[NUM_GRID_CASCADES];
+    GLuint64 occlusionTextureCompute[NUM_GRID_CASCADES];
+#endif
     glm::vec4 snappedGridLocation[NUM_GRID_CASCADES];
     glm::vec4 smoothGridLocation[NUM_GRID_CASCADES];
   };

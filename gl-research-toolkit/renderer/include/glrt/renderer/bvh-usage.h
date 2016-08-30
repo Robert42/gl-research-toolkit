@@ -14,9 +14,7 @@ enum class BvhUsage : quint32
   // bvh grid usages with r16ui must be >=1024 and <1536
   // bvh grid usages with rgba16ui must be >=1536 and <2048
   BVH_GRID_NEAREST_LEAF = 1024,
-  BVH_GRID_NEAREST_LEAF_WITH_HEURISTIC_FOR_REST,
   BVH_GRID_NEAREST_FOUR_LEAVES = 1536,
-  BVH_GRID_NEAREST_FOUR_LEAVES_WITH_HEURISTIC_FOR_REST,
 };
 
 extern BvhUsage currentBvhUsage;
@@ -51,6 +49,7 @@ inline bool isUsingBvhLeafGrid()
 }
 
 #define NUM_GRID_CASCADES 3
+#define BVH_USE_GRID_OCCLUSION 1
 
 } // namespace renderer
 } // namespace glrt

@@ -13,7 +13,11 @@ layout(rgba16ui)
 #else
 layout(r16ui)
 #endif 
-    writeonly uimage3D targetTexture;
+    writeonly uimage3D leafIndexTexture;
+
+#if BVH_USE_GRID_OCCLUSION
+    layout(r16f) writeonly image3D occlusionTexture;
+#endif
 
 struct found_leaf_t
 {
@@ -26,7 +30,6 @@ struct found_leaf_t
   float occlusion;
 #endif
 };
-
     
 void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_length);
 
@@ -34,7 +37,10 @@ void main()
 {
   uint whichTexture = gl_GlobalInvocationID.z / 16;
   uvec3 grid_cell = uvec3(gl_GlobalInvocationID.xy, gl_GlobalInvocationID.z%16);
-  targetTexture = cascaded_grid_image(whichTexture);
+  leafIndexTexture = cascaded_grid_image(whichTexture);
+#if BVH_USE_GRID_OCCLUSION
+  occlusionTexture = cascaded_grid_image_occlusion(whichTexture);
+#endif
 
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
   
@@ -164,7 +170,10 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
   
   const float total_ao_at = accumulate_bouquet_to_total_occlusion();
   
-  imageStore(targetTexture, ivec3(voxel), uvec4(found_leaf.index));
+  imageStore(leafIndexTexture, ivec3(voxel), uvec4(found_leaf.index));
+#if BVH_USE_GRID_OCCLUSION
+  imageStore(occlusionTexture, ivec3(voxel), uvec4(total_ao_at));
+#endif
 }
 
 

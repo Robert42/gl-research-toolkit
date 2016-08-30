@@ -75,6 +75,7 @@ add_custom_target(
   toolkit/lighting/rendering-equation.glsl
   toolkit/scene/uniforms.glsl
   toolkit/voxels/ambient-occlusion-cones.glsl
+  toolkit/voxels/cones-bouquet.glsl
   toolkit/voxels/distance-field-utils.glsl
   toolkit/voxels/raymarching-bounding-spheres.glsl
   toolkit/voxels/raymarching-cubic-voxels.glsl

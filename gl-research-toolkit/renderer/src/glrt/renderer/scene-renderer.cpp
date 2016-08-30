@@ -245,12 +245,35 @@ void Renderer::initCascadedGridTextures()
     computeTextureHandles[i] = imageHandle;
     renderTextureHandles[i] = textureHandle;
   }
+
+#if BVH_USE_GRID_OCCLUSION
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+    gridOcclusionTexture[i] = new gl::Texture3D(16, 16, 16, gl::TextureFormat::R16F);
+    gl::TextureId textureId = gridOcclusionTexture[i]->GetInternHandle();
+    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, 0, 0, imageFormat(i));
+    GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
+
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+    GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
+
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));
+
+    computeOcclusionTextureHandles[i] = imageHandle;
+    textureOcclusionTextureHandles[i] = textureHandle;
+  }
+#endif
 }
 
 void Renderer::deinitCascadedGridTextures()
 {
   for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
     delete gridTexture[i];
+#if BVH_USE_GRID_OCCLUSION
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+    delete gridOcclusionTexture[i];
+#endif
 }
 
 inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
@@ -296,6 +319,10 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
   {
     header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
     header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
+#if BVH_USE_GRID_OCCLUSION
+    header.occlusionTextureCompute[i] = computeOcclusionTextureHandles[i];
+    header.occlusionTextureRender[i] = textureOcclusionTextureHandles[i];
+#endif
   }
 
   return header;
