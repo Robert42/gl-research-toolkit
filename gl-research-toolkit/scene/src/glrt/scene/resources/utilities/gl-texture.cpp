@@ -14,11 +14,15 @@ int GlTexture::channelsPerPixelForFormat(Format format)
   switch(format)
   {
   case Format::RED:
+  case Format::RED_INTEGER:
     return 1;
+  case Format::RG_INTEGER:
   case Format::RG:
     return 2;
+  case Format::RGB_INTEGER:
   case Format::RGB:
     return 3;
+  case Format::RGBA_INTEGER:
   case Format::RGBA:
     return 4;
   }
@@ -78,6 +82,14 @@ GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
       return GL_RGB8;
     case Format::RGBA:
       return GL_RGBA8;
+    case Format::RED_INTEGER:
+      return GL_R8UI;
+    case Format::RG_INTEGER:
+      return GL_RG8UI;
+    case Format::RGB_INTEGER:
+      return GL_RGB8UI;
+    case Format::RGBA_INTEGER:
+      return GL_RGBA8UI;
     }
     break;
   case Type::INT8:
@@ -91,6 +103,14 @@ GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
       return GL_RGB8_SNORM;
     case Format::RGBA:
       return GL_RGBA8_SNORM;
+    case Format::RED_INTEGER:
+      return GL_R8I;
+    case Format::RG_INTEGER:
+      return GL_RG8I;
+    case Format::RGB_INTEGER:
+      return GL_RGB8I;
+    case Format::RGBA_INTEGER:
+      return GL_RGBA8I;
     }
     break;
   case Type::UINT16:
@@ -101,9 +121,17 @@ GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
     case Format::RG:
       return GL_RG16;
     case Format::RGB:
-      break;
+      break; // Why?
     case Format::RGBA:
       return GL_RGBA16;
+    case Format::RED_INTEGER:
+      return GL_R16UI;
+    case Format::RG_INTEGER:
+      return GL_RG16UI;
+    case Format::RGB_INTEGER:
+      return GL_RGB16UI;
+    case Format::RGBA_INTEGER:
+      return GL_RGBA16UI;
     }
     break;
   case Type::INT16:
@@ -117,6 +145,14 @@ GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
       return GL_RGB16_SNORM;
     case Format::RGBA:
       break;
+    case Format::RED_INTEGER:
+      return GL_R16I;
+    case Format::RG_INTEGER:
+      return GL_RG16I;
+    case Format::RGB_INTEGER:
+      return GL_RGB16I;
+    case Format::RGBA_INTEGER:
+      return GL_RGBA16I;
     }
     break;
   case Type::FLOAT16:
@@ -130,6 +166,11 @@ GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
       return GL_RGB16F;
     case Format::RGBA:
       return GL_RGBA16F;
+    case Format::RED_INTEGER:
+    case Format::RG_INTEGER:
+    case Format::RGB_INTEGER:
+    case Format::RGBA_INTEGER:
+      break;
     }
     break;
   case Type::FLOAT32:
@@ -143,6 +184,11 @@ GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
       return GL_RGB32F;
     case Format::RGBA:
       return GL_RGBA32F;
+    case Format::RED_INTEGER:
+    case Format::RG_INTEGER:
+    case Format::RGB_INTEGER:
+    case Format::RGBA_INTEGER:
+      break;
     }
     break;
   }
@@ -592,6 +638,29 @@ GlTexture::Target GlTexture::target() const
   }
   Q_UNREACHABLE();
   return Target::TEXTURE_2D;
+}
+
+GlTexture::UncompressedImage GlTexture::format(const glm::uvec3& size, int level, GlTexture::Format format, GlTexture::Type type, Target target)
+{
+  UncompressedImage image;
+  image.type = type;
+  image.format = format;
+  image.alignment = 1;
+
+  image.width = size.x;
+  image.height = size.y;
+  image.depth = size.z;
+
+  // format, type, width and alignment must be set before calling calcRowStride!
+  image.rowStride = image.calcRowStride();
+  image.mipmap = quint32(level);
+  image.target = target;
+  image.rawDataLength = image.rowStride * image.height * image.depth;
+  bool supportedFormat;
+  internalFormat(image.format, image.type, &supportedFormat);
+  Q_ASSERT(supportedFormat);
+
+  return image;
 }
 
 QPair<GlTexture::UncompressedImage, QVector<byte>> GlTexture::uncompressed2DImage(int level,

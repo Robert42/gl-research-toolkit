@@ -104,6 +104,8 @@ protected:
   void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
 private:
+  typedef scene::resources::utilities::GlTexture GlTexture;
+
   // Shaders
   QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
   Array<ReloadableShader> materialShaders;
@@ -111,11 +113,11 @@ private:
 
   // Cascaded Grids
   ComputeStep collectAmbientOcclusionToGrid;
-  gl::Texture3D* gridTexture[NUM_GRID_CASCADES*2];
+  GlTexture gridTexture[NUM_GRID_CASCADES*2];
   GLuint64 computeTextureHandles[NUM_GRID_CASCADES*2];
   GLuint64 renderTextureHandles[NUM_GRID_CASCADES*2];
 #if BVH_USE_GRID_OCCLUSION
-  gl::Texture3D* gridOcclusionTexture[NUM_GRID_CASCADES];
+  GlTexture gridOcclusionTexture[NUM_GRID_CASCADES];
   GLuint64 computeOcclusionTextureHandles[NUM_GRID_CASCADES];
   GLuint64 renderOcclusionTextureHandles[NUM_GRID_CASCADES];
 #endif

@@ -218,11 +218,43 @@ void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSe
 
 void Renderer::initCascadedGridTextures()
 {
+  std::vector<uint8_t> r8ui_dummy_data;
+  std::vector<uint16_t> r16ui_dummy_data;
+  std::vector<uint16_t> rgba16ui_dummy_data;
+
+  r8ui_dummy_data.resize(16*16*16);
+  r16ui_dummy_data.resize(16*16*16);
+  rgba16ui_dummy_data.resize(16*16*16*4);
+
+  for(uint8_t u=0; u<16; ++u)
+  {
+    for(uint8_t v=0; v<16; ++v)
+    {
+      for(uint8_t w=0; w<16; ++w)
+      {
+        uint16_t is_even = (u%2) ^ (v%2) ^ (w%2);
+
+        uint8_t r8ui_value = uint8_t(is_even * 255) + 0;
+        uint16_t r16ui_value = uint16_t(is_even * 255) + 0;
+
+        r8ui_dummy_data[(u*256 + v*16 + w) * 1] = r8ui_value;
+        r16ui_dummy_data[(u*256 + v*16 + w) * 1] = r16ui_value;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 0] = r16ui_value;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 1] = r16ui_value/2;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 2] = r16ui_value/3;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 3] = r16ui_value/4;
+      }
+    }
+  }
+
   auto textureFormat = [](int i) {
+    GlTexture::Format f;
     if(i<NUM_GRID_CASCADES)
-      return gl::TextureFormat::R16UI;
+      f = GlTexture::Format::RED_INTEGER;
     else
-      return gl::TextureFormat::RGBA16UI;
+      f = GlTexture::Format::RGBA_INTEGER;
+
+    return GlTexture::format(glm::uvec3(16, 16, 16), 0, f, GlTexture::Type::UINT16, GlTexture::Target::TEXTURE_3D);
   };
   auto imageFormat = [](int i) {
     if(i<NUM_GRID_CASCADES)
@@ -230,11 +262,22 @@ void Renderer::initCascadedGridTextures()
     else
       return GL_RGBA16UI;
   };
+  auto init_data = [&](int i) -> const uint16_t* {
+    if(i<NUM_GRID_CASCADES)
+      return r16ui_dummy_data.data();
+    else
+      return rgba16ui_dummy_data.data();
+  };
 
   for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
   {
-    gridTexture[i] = new gl::Texture3D(16, 16, 16, textureFormat(i));
-    gl::TextureId textureId = gridTexture[i]->GetInternHandle();
+    gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
+    gl::TextureId textureId = gridTexture[i].textureId;
+
+    // Make the texture complete
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
+
     GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, imageFormat(i));
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
 
@@ -253,8 +296,13 @@ void Renderer::initCascadedGridTextures()
 #if BVH_USE_GRID_OCCLUSION
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
-    gridOcclusionTexture[i] = new gl::Texture3D(16, 16, 16, gl::TextureFormat::R8);
-    gl::TextureId textureId = gridOcclusionTexture[i]->GetInternHandle();
+    gridOcclusionTexture[i].setUncompressed2DImage(GlTexture::format(glm::uvec3(16, 16, 16), 0, GlTexture::Format::RED, GlTexture::Type::UINT8, GlTexture::Target::TEXTURE_3D), r8ui_dummy_data.data());
+    gl::TextureId textureId = gridOcclusionTexture[i].textureId;
+    // Make the texture complete
+
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
+
     GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R8);
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
 
@@ -274,12 +322,6 @@ void Renderer::initCascadedGridTextures()
 
 void Renderer::deinitCascadedGridTextures()
 {
-  for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
-    delete gridTexture[i];
-#if BVH_USE_GRID_OCCLUSION
-  for(int i=0; i<NUM_GRID_CASCADES; ++i)
-    delete gridOcclusionTexture[i];
-#endif
 }
 
 inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const

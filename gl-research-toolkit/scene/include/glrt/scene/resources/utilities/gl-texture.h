@@ -108,6 +108,8 @@ public:
   GLint maxLevel() const;
   Target target() const;
 
+  static UncompressedImage format(const glm::uvec3& size, int level, Format format, Type type, Target target);
+
   QPair<UncompressedImage, QVector<byte>> uncompressed2DImage(int level,
                                                               Format format,
                                                               Type type) const;
