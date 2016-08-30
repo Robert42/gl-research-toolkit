@@ -12,6 +12,11 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/renderer/debugging/debugging-posteffect.h>
 
+#define MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY 1
+#define MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING 2
+
+#define RESIDENCY_TACTIC MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY | MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
+
 namespace glrt {
 namespace renderer {
 
@@ -93,10 +98,7 @@ void Renderer::render()
   updateCameraUniform();
 
   if(isUsingBvhLeafGrid())
-  {
-    sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
-    collectAmbientOcclusionToGrid.invoke();
-  }
+    updateBvhLeafGrid();
 
   prepareFramebuffer();
 
@@ -236,11 +238,13 @@ void Renderer::initCascadedGridTextures()
     GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, imageFormat(i));
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
 
-    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
     GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
-
-    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));
+
+#if !(RESIDENCY_TACTIC|MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY)
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
+#endif
 
     computeTextureHandles[i] = imageHandle;
     renderTextureHandles[i] = textureHandle;
@@ -254,14 +258,16 @@ void Renderer::initCascadedGridTextures()
     GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R8);
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
 
-    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
     GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
-
-    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));
 
+#if !(RESIDENCY_TACTIC|MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY)
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
+#endif
+
     computeOcclusionTextureHandles[i] = imageHandle;
-    textureOcclusionTextureHandles[i] = textureHandle;
+    renderOcclusionTextureHandles[i] = textureHandle;
   }
 #endif
 }
@@ -321,11 +327,50 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
     header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
 #if BVH_USE_GRID_OCCLUSION
     header.occlusionTextureCompute[i] = computeOcclusionTextureHandles[i];
-    header.occlusionTextureRender[i] = textureOcclusionTextureHandles[i];
+    header.occlusionTextureRender[i] = renderOcclusionTextureHandles[i];
 #endif
   }
 
   return header;
+}
+
+void Renderer::updateBvhLeafGrid()
+{
+  const int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+#if RESIDENCY_TACTIC|MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
+    GL_CALL(glMakeTextureHandleNonResidentNV, renderTextureHandles[i + texture_base]);
+    GL_CALL(glMakeTextureHandleNonResidentNV, renderOcclusionTextureHandles[i]);
+#endif
+
+#if RESIDENCY_TACTIC|MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
+    GL_CALL(glMakeImageHandleResidentNV, computeTextureHandles[i + texture_base], GL_WRITE_ONLY);
+    GL_CALL(glMakeImageHandleResidentNV, computeOcclusionTextureHandles[i], GL_WRITE_ONLY);
+#endif
+
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeTextureHandles[i + texture_base]));
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeOcclusionTextureHandles[i]));
+  }
+
+  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+  collectAmbientOcclusionToGrid.invoke();
+
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+#if RESIDENCY_TACTIC|MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
+    GL_CALL(glMakeImageHandleNonResidentNV, computeTextureHandles[i + texture_base]);
+    GL_CALL(glMakeImageHandleNonResidentNV, computeOcclusionTextureHandles[i]);
+#endif
+
+#if RESIDENCY_TACTIC|MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
+    GL_CALL(glMakeTextureHandleResidentNV, renderTextureHandles[i + texture_base]);
+    GL_CALL(glMakeTextureHandleResidentNV, renderOcclusionTextureHandles[i]);
+#endif
+
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderOcclusionTextureHandles[i]));
+  }
 }
 
 bool Renderer::needRecapturing() const

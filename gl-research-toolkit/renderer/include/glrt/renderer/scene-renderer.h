@@ -117,7 +117,7 @@ private:
 #if BVH_USE_GRID_OCCLUSION
   gl::Texture3D* gridOcclusionTexture[NUM_GRID_CASCADES];
   GLuint64 computeOcclusionTextureHandles[NUM_GRID_CASCADES];
-  GLuint64 textureOcclusionTextureHandles[NUM_GRID_CASCADES];
+  GLuint64 renderOcclusionTextureHandles[NUM_GRID_CASCADES];
 #endif
   glm::vec3 grid_camera_pos = glm::vec3(NAN), grid_camera_dir = glm::vec3(NAN);
   bool _update_grid_camera : 1;
@@ -181,6 +181,8 @@ private:
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);
 
   void allShadersReloaded() final override;
+
+  void updateBvhLeafGrid();
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
