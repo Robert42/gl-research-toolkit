@@ -16,7 +16,7 @@ layout(r16ui)
     writeonly uimage3D leafIndexTexture;
 
 #if BVH_USE_GRID_OCCLUSION
-    layout(r16f) writeonly image3D occlusionTexture;
+    layout(r8) writeonly image3D occlusionTexture;
 #endif
 
 struct found_leaf_t

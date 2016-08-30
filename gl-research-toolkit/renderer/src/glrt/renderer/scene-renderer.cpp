@@ -233,7 +233,7 @@ void Renderer::initCascadedGridTextures()
   {
     gridTexture[i] = new gl::Texture3D(16, 16, 16, textureFormat(i));
     gl::TextureId textureId = gridTexture[i]->GetInternHandle();
-    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, 0, 0, imageFormat(i));
+    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, imageFormat(i));
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
 
     GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
@@ -249,9 +249,9 @@ void Renderer::initCascadedGridTextures()
 #if BVH_USE_GRID_OCCLUSION
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
-    gridOcclusionTexture[i] = new gl::Texture3D(16, 16, 16, gl::TextureFormat::R16F);
+    gridOcclusionTexture[i] = new gl::Texture3D(16, 16, 16, gl::TextureFormat::R8);
     gl::TextureId textureId = gridOcclusionTexture[i]->GetInternHandle();
-    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, 0, 0, imageFormat(i));
+    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R8);
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
 
     GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);

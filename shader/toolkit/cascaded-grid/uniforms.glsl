@@ -50,13 +50,21 @@ struct CascadedGrids
 
 #if BVH_USE_GRID_OCCLUSION
   usampler3D padding_occlusion_0;
+#if NUM_GRID_CASCADES>1
   usampler3D padding_occlusion_1;
-  usampler3D padding_occlusion_2;
-  layout(r16f) writeonly image3D targetOcclusionTexture0;
-  layout(r16f) writeonly image3D targetOcclusionTexture1;
-  layout(r16f) writeonly image3D targetOcclusionTexture2;
 #endif
-      
+#if NUM_GRID_CASCADES>2
+  usampler3D padding_occlusion_2;
+#endif
+  layout(r8) writeonly image3D targetOcclusionTexture0;
+#if NUM_GRID_CASCADES>1
+  layout(r8) writeonly image3D targetOcclusionTexture1;
+#endif
+#if NUM_GRID_CASCADES>2
+  layout(r8) writeonly image3D targetOcclusionTexture2;
+#endif
+#endif
+
   // xyz are the grid origins and w the scale Factor for each grid.
   vec4 snappedGridLocation[NUM_GRID_CASCADES];
   vec4 smoothGridLocation[NUM_GRID_CASCADES];
