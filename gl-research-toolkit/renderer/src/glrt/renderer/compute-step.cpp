@@ -14,10 +14,15 @@ inline bool isMultiple(const glm::ivec3& a, const glm::ivec3& b)
 
 
 ComputeStep::ComputeStep(const QString& shaderFileName, const glm::ivec3& totalWorkAmount, const QSet<QString>& preprocessorBlock)
-  : shader(QFileInfo(shaderFileName).baseName(), QFileInfo(shaderFileName).absoluteDir(), preprocessorBlock | groupSizeAsMacro(totalWorkAmount, true))
+  : numInvocations(glm::uninitialize),
+    shader(QFileInfo(shaderFileName).baseName(), QFileInfo(shaderFileName).absoluteDir(), preprocessorBlock | groupSizeAsMacro(totalWorkAmount, true))
 {
   Q_ASSERT(calcBestWorkGroupSize(glm::ivec3(16, 16, 3*16), true, 1536) == glm::ivec3(16, 16, 6));
   Q_ASSERT(calcBestWorkGroupSize(glm::ivec3(16, 16, 3*16), true, 2048) == glm::ivec3(16, 16, 8));
+
+  Q_ASSERT(numInvocations.x > 0);
+  Q_ASSERT(numInvocations.y > 0);
+  Q_ASSERT(numInvocations.z > 0);
 }
 
 void ComputeStep::invoke()

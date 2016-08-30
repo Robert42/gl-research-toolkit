@@ -17,8 +17,9 @@ public:
 
 
 private:
-  ReloadableShader shader;
+  // UGLY HACK: numInvocationsis initialized while initilaizing the shader member, so the numInvocations member must be initialized before shader
   glm::ivec3 numInvocations;
+  ReloadableShader shader;
 
   QSet<QString> groupSizeAsMacro(const glm::ivec3& totalWorkAmount, bool mustBeMultiple=true);
   static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple);
