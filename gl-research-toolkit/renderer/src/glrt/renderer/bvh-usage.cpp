@@ -16,6 +16,10 @@ QMap<QString, BvhUsage> allcurrentBvhUsages()
   VALUE(BVH_WITH_STACK);
   VALUE(BVH_GRID_NEAREST_LEAF);
   VALUE(BVH_GRID_NEAREST_FOUR_LEAVES);
+#if BVH_USE_GRID_OCCLUSION
+  VALUE(BVH_GRID_NEAREST_LEAF_UNCLAMPED_OCCLUSION);
+  VALUE(BVH_GRID_NEAREST_FOUR_LEAVES_UNCLAMPED_OCCLUSION);
+#endif
 
   return map;
 }
@@ -39,6 +43,7 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
 
   ReloadableShader::defineMacro("BVH_USE_GRID", bvh_is_grid(bvhUsage), false);
   ReloadableShader::defineMacro("BVH_GRID_HAS_FOUR_COMPONENTS", bvh_is_grid_with_four_components(bvhUsage), false);
+  ReloadableShader::defineMacro("BVH_GRID_UNCLAMPED_OCCLUSION", bvh_is_occlusion_grid_unclamped(bvhUsage), false);
 
   ReloadableShader::reloadAll();
 }

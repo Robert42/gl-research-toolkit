@@ -159,7 +159,9 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
         
         float ao = ao_coneSoftShadow(cone, sdf, intersection_distance_front, intersection_distance_back, cone_length);
         cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
+        #ifndef BVH_GRID_UNCLAMPED_OCCLUSION
         V += max(0, ao);
+        #endif
       }
     }
     
@@ -187,12 +189,12 @@ void init_found_leaf(out found_leaf_t leaf)
 
 void take_better_node(inout found_leaf_t found_leaf, in uint32_t index, in float occlusion)
 {
-  int i = index_of_max_component(leaf.occlusion);
+  int i = index_of_max_component(found_leaf.occlusion);
   
   float new_is_better = step(found_leaf.occlusion[i], occlusion);
   
   found_leaf.occlusion[i] = min(found_leaf.occlusion[i], occlusion);
-  found_leaf.index[i] = uint32_t(mix(found_leaf.index, index, uint32_t(new_is_better)));
+  found_leaf.index[i] = uint32_t(mix(found_leaf.index[i], index, uint32_t(new_is_better)));
 }
 
 #else

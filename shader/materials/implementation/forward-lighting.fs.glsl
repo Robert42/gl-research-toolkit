@@ -16,7 +16,9 @@ void calc_tangent_to_worldspace();
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
-  init_cone_bouquet(tangent_to_worldspace, surface.position);
+  vec3 world_pos = surface.position;
+  
+  init_cone_bouquet(tangent_to_worldspace, world_pos);
   
 #ifdef MASKED
   alpha = step(MASK_THRESHOLD, alpha);
@@ -50,6 +52,35 @@ return;
   return;
 #elif defined(MATERIAL_OCCLUSION)
   fragment_color = vec4(vec3(material.occlusion), alpha);
+  return;
+#endif
+
+#if defined(BVH_NEAREST_LEAF_INDEX_0)
+#define BVH_NEAREST_LEAF_INDEX_ 0
+#elif defined(BVH_NEAREST_LEAF_INDEX_1)
+#define BVH_NEAREST_LEAF_INDEX_ 1
+#elif defined(BVH_NEAREST_LEAF_INDEX_2)
+#define BVH_NEAREST_LEAF_INDEX_ 2
+#endif
+#if defined(BVH_OCCLUSION_GRID_ONLY_0)
+#define BVH_OCCLUSION_GRID_ONLY_ 0
+#elif defined(BVH_OCCLUSION_GRID_ONLY_1)
+#define BVH_OCCLUSION_GRID_ONLY_ 1
+#elif defined(BVH_OCCLUSION_GRID_ONLY_2)
+#define BVH_OCCLUSION_GRID_ONLY_ 2
+#endif
+
+#if defined(BVH_NEAREST_LEAF_INDEX_)
+  uvec4 nearest_leaves_index = texelFetch(cascaded_grid_texture(BVH_NEAREST_LEAF_INDEX_), ivec3(round(cascaded_grid_cell_from_worldspace(world_pos, BVH_NEAREST_LEAF_INDEX_))), 0);
+  #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
+  fragment_color = vec4(nearest_leaves_index) / float(BVH_MAX_VISITED_LEAVES-1);
+  #else
+  fragment_color = heatvision_linear(float(nearest_leaves_index[0]) / float(BVH_MAX_VISITED_LEAVES-1));
+  #endif
+  return;
+#elif defined(BVH_OCCLUSION_GRID_ONLY_)
+  float grid_occlusion = texture(cascaded_grid_texture_occlusion(BVH_OCCLUSION_GRID_ONLY_), ivec3(round(cascaded_grid_cell_from_worldspace(world_pos, BVH_OCCLUSION_GRID_ONLY_))), 0).r;
+  fragment_color = vec4(vec3(grid_occlusion), 1);
   return;
 #endif
 

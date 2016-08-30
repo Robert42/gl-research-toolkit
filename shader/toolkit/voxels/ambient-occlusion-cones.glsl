@@ -199,6 +199,8 @@ float distancefield_ao(in Sphere* bvh_bounding_spheres, uint16_t* bvh_nodes, in 
   ao_coneSoftShadow_bruteforce(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
   #elif defined(BVH_WITH_STACK)
   ao_coneSoftShadow_bvh(bvh_bounding_spheres, bvh_nodes, bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+  #elif defined(BVH_USE_GRID)
+  return 1.f;
   #else
   #error UNKNOWN BVH usage
   #endif

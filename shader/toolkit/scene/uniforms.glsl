@@ -123,6 +123,7 @@ vec3 cascaded_grid_cell_from_worldspace(vec3 world_pos, uint which_grid)
   return (world_pos - cascaded_grid_origin_snapped(which_grid)) * cascaded_grid_scale_factor(which_grid);
 }
 
+// Use this ONLY for the weights!!
 vec3 cascaded_grid_cell_from_worldspace_smooth(vec3 world_pos, uint which_grid)
 {
   return (world_pos - cascaded_grid_origin_smooth(which_grid)) * cascaded_grid_scale_factor(which_grid);
@@ -222,7 +223,7 @@ usampler3D cascaded_grid_texture(uint i)
   return targetTextures[i];
 }
 
-sampler3D cascaded_grid_image_occlusion(uint i)
+sampler3D cascaded_grid_texture_occlusion(uint i)
 {
   sampler3D targetOcclusionTextures[NUM_GRID_CASCADES];
     
