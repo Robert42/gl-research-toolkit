@@ -21,6 +21,14 @@ float accumulate_bouquet_to_total_occlusion()
   return V / N_GI_CONES;
 }
 
+float accumulate_bouquet_to_total_occlusion_unclamped()
+{
+  float V = 0.f;
+  for(int i=0; i<N_GI_CONES; ++i)
+    V += cone_bouquet_ao[i];
+  return V / N_GI_CONES;
+}
+
 
 void SHOW_CONES()
 {

@@ -159,9 +159,9 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
         
         float ao = ao_coneSoftShadow(cone, sdf, intersection_distance_front, intersection_distance_back, cone_length);
         cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
-        #ifndef BVH_GRID_UNCLAMPED_OCCLUSION
+        
+        // TODO make this clamping optional? (negative values might be preferred)
         V += max(0, ao);
-        #endif
       }
     }
     
@@ -170,7 +170,11 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
     take_better_node(found_leaf, leaf, V);
   }
   
+  #ifndef BVH_GRID_UNCLAMPED_OCCLUSION
+  const float total_ao_at = accumulate_bouquet_to_total_occlusion_unclamped();
+  #else
   const float total_ao_at = accumulate_bouquet_to_total_occlusion();
+  #endif
   
   imageStore(leafIndexTexture, ivec3(voxel), uvec4(found_leaf.index));
 #if BVH_USE_GRID_OCCLUSION
