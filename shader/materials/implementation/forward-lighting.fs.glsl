@@ -73,7 +73,7 @@ return;
 #if defined(BVH_NEAREST_LEAF_INDEX_)
   uvec4 nearest_leaves_index = texelFetch(cascaded_grid_texture(BVH_NEAREST_LEAF_INDEX_), ivec3(round(cascaded_grid_cell_from_worldspace(world_pos, BVH_NEAREST_LEAF_INDEX_))), 0);
   #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
-  fragment_color = vec4(nearest_leaves_index) / float(BVH_MAX_VISITED_LEAVES-1);
+  fragment_color = vec4(nearest_leaves_index.xyz / float(BVH_MAX_VISITED_LEAVES-1), 1);
   #else
   fragment_color = heatvision_linear(float(nearest_leaves_index[0]) / float(BVH_MAX_VISITED_LEAVES-1));
   #endif
