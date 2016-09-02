@@ -15,14 +15,9 @@
 #define MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY 1
 #define MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING 2
 
+// TODO remove
 #define RESIDENCY_TACTIC 0
 //#define RESIDENCY_TACTIC (MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY | MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING)
-// TODO remove again
-struct TestHeader
-{
-  GLuint64 handle;
-};
-gl::Buffer* test_header_buffer;
 
 namespace glrt {
 namespace renderer {
@@ -53,6 +48,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     _update_grid_camera(true),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    aoCollectHeaderUniformBuffer(sizeof(AoCollectHeader), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
     voxelUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
@@ -336,10 +332,6 @@ void Renderer::initCascadedGridTextures()
     renderOcclusionTextureHandles[i] = textureHandle;
   }
 #endif
-
-  TestHeader testHeader;
-  testHeader.handle = computeOcclusionTextureHandles[0];
-  test_header_buffer = new gl::Buffer(sizeof(TestHeader), gl::Buffer::UsageFlag::MAP_WRITE, &testHeader);
 }
 
 void Renderer::deinitCascadedGridTextures()
@@ -387,11 +379,9 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
-    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
-    header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
+    header.gridTexture[i] = renderTextureHandles[i + texture_base];
 #if BVH_USE_GRID_OCCLUSION
-    header.occlusionTextureCompute[i] = computeOcclusionTextureHandles[i];
-    header.occlusionTextureRender[i] = renderOcclusionTextureHandles[i];
+    header.occlusionTexture[i] = renderOcclusionTextureHandles[i];
 #endif
   }
 
@@ -418,7 +408,7 @@ void Renderer::updateBvhLeafGrid()
   }
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
-  test_header_buffer->BindUniformBuffer(0);
+  aoCollectHeaderUniformBuffer.BindUniformBuffer(UNIFORM_COLLECT_OCCLUSION_METADATA_BLOCK);
   collectAmbientOcclusionToGrid.invoke();
 
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
@@ -597,6 +587,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   }
 
   PROFILE_SCOPE("Renderer::fillCameraUniform()")
+
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   sceneUniformData.camera_position = camera_position;
   sceneUniformData.view_projection_matrix = view_projection_matrix;
@@ -608,6 +599,23 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.bvh_debug_depth_begin = bvh_debug_depth_begin;
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
   sceneUniformData.cascadedGrids = updateCascadedGrids();
+
+  if(isUsingBvhLeafGrid())
+  {
+    AoCollectHeader& aoCollectSceneUniformData = *reinterpret_cast<AoCollectHeader*>(aoCollectHeaderUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+
+    int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
+    for(int i=0; i<NUM_GRID_CASCADES; ++i)
+    {
+      aoCollectSceneUniformData.gridTexture[i] = computeTextureHandles[i + texture_base];
+  #if BVH_USE_GRID_OCCLUSION
+      aoCollectSceneUniformData.occlusionTexture[i] = computeOcclusionTextureHandles[i];
+  #endif
+    }
+
+    aoCollectHeaderUniformBuffer.Unmap();
+  }
+
   sceneUniformBuffer.Unmap();
 }
 

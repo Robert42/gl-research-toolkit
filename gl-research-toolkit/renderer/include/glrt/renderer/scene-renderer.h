@@ -132,14 +132,19 @@ private:
 
   struct CascadedGridsHeader
   {
-    GLuint64 gridTextureRender[NUM_GRID_CASCADES];
-    GLuint64 gridTextureCompute[NUM_GRID_CASCADES];
+    GLuint64 gridTexture[NUM_GRID_CASCADES];
 #if BVH_USE_GRID_OCCLUSION
-    GLuint64 occlusionTextureRender[NUM_GRID_CASCADES];
-    GLuint64 occlusionTextureCompute[NUM_GRID_CASCADES];
+    GLuint64 occlusionTexture[NUM_GRID_CASCADES];
 #endif
     glm::vec4 snappedGridLocation[NUM_GRID_CASCADES];
     glm::vec4 smoothGridLocation[NUM_GRID_CASCADES];
+  };
+  struct AoCollectHeader
+  {
+    AlignedImageHandle gridTexture[NUM_GRID_CASCADES];
+#if BVH_USE_GRID_OCCLUSION
+    AlignedImageHandle occlusionTexture[NUM_GRID_CASCADES];
+#endif
   };
 
   // Scene uniform buffer
@@ -160,6 +165,7 @@ private:
     padding<quint32, 1> _padding2;
   };
   gl::Buffer sceneUniformBuffer;
+  gl::Buffer aoCollectHeaderUniformBuffer;
 
   // other uniform buffer
   LightBuffer lightUniformBuffer;

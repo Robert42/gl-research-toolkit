@@ -172,47 +172,7 @@ vec3 cascadedGridWeights(vec3 world_pos)
   return weights;
 }
 
-#ifdef COMPUTE_GRIDS
-#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
-  layout(rgba16ui)
-#else
-  layout(r16ui)
-#endif 
-    writeonly uimage3D cascaded_grid_image(uint i)
-{
-#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
-  layout(rgba16ui)
-#else
-  layout(r16ui)
-#endif 
-    writeonly uimage3D targetTextures[NUM_GRID_CASCADES];
-    
-    targetTextures[0] = scene.cascadedGrids.targetTexture0;
-    #if NUM_GRID_CASCADES > 1
-    targetTextures[1] = scene.cascadedGrids.targetTexture1;
-    #endif
-    #if NUM_GRID_CASCADES > 2
-    targetTextures[2] = scene.cascadedGrids.targetTexture2;
-    #endif
-    
-    return targetTextures[i];
-}
 
-layout(r8) writeonly image3D cascaded_grid_image_occlusion(uint i)
-{
-  layout(r8) writeonly image3D targetOcclusionTextures[NUM_GRID_CASCADES];
-    
-  targetOcclusionTextures[0] = scene.cascadedGrids.targetOcclusionTexture0;
-  #if NUM_GRID_CASCADES > 1
-  targetOcclusionTextures[1] = scene.cascadedGrids.targetOcclusionTexture1;
-  #endif
-  #if NUM_GRID_CASCADES > 2
-  targetOcclusionTextures[2] = scene.cascadedGrids.targetOcclusionTexture2;
-  #endif
-  
-  return targetOcclusionTextures[i];
-}
-#else
 usampler3D cascaded_grid_texture(uint i)
 {
   usampler3D targetTextures[NUM_GRID_CASCADES];
@@ -242,7 +202,6 @@ sampler3D cascaded_grid_texture_occlusion(uint i)
   
   return targetOcclusionTextures[i];
 }
-#endif
 
 #ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)

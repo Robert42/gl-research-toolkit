@@ -132,6 +132,14 @@ private:
   quint8 _[sizeof(T)*N];
 };
 
+struct AlignedImageHandle
+{
+  uint64_t handle;
+  padding<uint64_t, 1> _padding;
+
+  void operator=(uint64_t handle){this->handle = handle;}
+};
+
 extern AngelScript::asIScriptEngine* angelScriptEngine;
 
 template<typename T_parent, typename T_child>
