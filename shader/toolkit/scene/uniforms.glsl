@@ -134,9 +134,9 @@ vec3 cascaded_grid_cell_from_worldspace_smooth(vec3 world_pos, uint which_grid)
   return (world_pos - cascaded_grid_origin_smooth(which_grid)) * cascaded_grid_scale_factor(which_grid);
 }
 
-vec3 cascadedGridWeights(vec3 world_pos)
+vec4 cascadedGridWeights(vec3 world_pos)
 {
-  vec3 weights = vec3(0);
+  vec4 weights = vec4(0);
   vec3 world_positions[NUM_GRID_CASCADES];
   
   // smoothing_distance
@@ -168,6 +168,8 @@ vec3 cascadedGridWeights(vec3 world_pos)
       return vec3(1,0, 1);
 #endif  
   }
+  
+  weights[3] = left_weight;
   
   return weights;
 }

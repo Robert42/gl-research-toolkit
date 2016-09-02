@@ -22,7 +22,7 @@ struct found_leaf_t
 #endif
 };
     
-void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_length);
+void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float ao_length);
 
 void main()
 {
@@ -34,7 +34,7 @@ void main()
   
   init_cone_bouquet(mat3(1), world_pos);
   
-#if 0
+#if 1
   collect_scene_information_at(world_pos, grid_cell, AO_RADIUS);
 #else
   imageStore(leafIndexTexture, grid_cell, uvec4(grid_cell*16, whichTexture));
