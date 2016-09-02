@@ -2,29 +2,20 @@
 #include <extensions/common.glsl>
 
 #include <scene/uniforms.glsl>
+#include "ao-collect-uniform.glsl"
 
 #define N_GI_CONES 18
 #include <voxels/ambient-occlusion-cones.glsl>
 
 layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
-#ifdef BVH_GRID_HAS_FOUR_COMPONENTS
-layout(rgba16ui)
-#else
-layout(r16ui)
-#endif 
-    writeonly uimage3D leafIndexTexture;
-
-#if BVH_USE_GRID_OCCLUSION
-    layout(r8) writeonly image3D occlusionTexture;
-#endif
 
 struct found_leaf_t
 {
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
   uvec4 index;
   vec4 occlusion;
-#define found_leaf_real_t vec4
+// TODO remove #define found_leaf_real_t vec4
 #else
   uint index;
   float occlusion;
@@ -36,17 +27,21 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_lengt
 void main()
 {
   uint whichTexture = gl_GlobalInvocationID.z / 16;
-  uvec3 grid_cell = uvec3(gl_GlobalInvocationID.xy, gl_GlobalInvocationID.z%16);
-  leafIndexTexture = cascaded_grid_image(whichTexture);
-#if BVH_USE_GRID_OCCLUSION
-  occlusionTexture = cascaded_grid_image_occlusion(whichTexture);
-#endif
+  ivec3 grid_cell = ivec3(gl_GlobalInvocationID.xy, gl_GlobalInvocationID.z%16);
+  get_cascaded_grid_images(whichTexture);
 
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
   
   init_cone_bouquet(mat3(1), world_pos);
   
+#if 0
   collect_scene_information_at(world_pos, grid_cell, AO_RADIUS);
+#else
+  imageStore(leafIndexTexture, grid_cell, uvec4(grid_cell*16, whichTexture));
+  #if BVH_USE_GRID_OCCLUSION
+  imageStore(occlusionTexture, grid_cell, vec4(vec3(grid_cell)/16., 1));
+  #endif
+#endif
 }
 
 // =============================================================================
@@ -54,7 +49,7 @@ void main()
 void init_found_leaf(out found_leaf_t leaf);
 void take_better_node(inout found_leaf_t found_leaf, in uint32_t index, in float occlusion);
 
-void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radius)
+void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float ao_radius)
 {
   Sphere* bvh_inner_bounding_sphere = get_bvh_inner_bounding_spheres();
   uint16_t* inner_nodes = get_bvh_inner_nodes();
@@ -176,9 +171,9 @@ void collect_scene_information_at(in vec3 world_pos, uvec3 voxel, float ao_radiu
   const float total_ao_at = accumulate_bouquet_to_total_occlusion();
   #endif
   
-  imageStore(leafIndexTexture, ivec3(voxel), uvec4(found_leaf.index));
+  imageStore(leafIndexTexture, voxel, uvec4(found_leaf.index));
 #if BVH_USE_GRID_OCCLUSION
-  imageStore(occlusionTexture, ivec3(voxel), vec4(total_ao_at));
+  imageStore(occlusionTexture, voxel, vec4(total_ao_at));
 #endif
 }
 
