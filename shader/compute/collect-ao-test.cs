@@ -12,6 +12,7 @@ void main()
   
   if(gl_GlobalInvocationID.z < 16)
   {
+    imageStore(leafIndexTexture, ivec3(gl_GlobalInvocationID), uvec4(255, 0, 255, 0));
   #if BVH_USE_GRID_OCCLUSION
     imageStore(occlusionTexture, ivec3(gl_GlobalInvocationID), vec4(vec3(gl_GlobalInvocationID)/16., 1));
   #endif
