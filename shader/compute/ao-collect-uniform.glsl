@@ -45,6 +45,7 @@ uniform AoCollectHeaderBLock
 #endif 
     writeonly uimage3D cascaded_grid_image(uint i)
 {
+  /*
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
   layout(rgba16ui)
 #else
@@ -61,6 +62,19 @@ uniform AoCollectHeaderBLock
     #endif
     
     return targetTextures[i];
+    */
+    
+    if(i==0)
+      return header.targetTexture0;
+    #if NUM_GRID_CASCADES > 1
+    else if(i==1)
+      return header.targetTexture1;
+    #endif
+    #if NUM_GRID_CASCADES > 2
+    else if(i==2)
+      return header.targetTexture2;
+    #endif
+    return header.targetTexture0;
 }
 
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
@@ -75,6 +89,7 @@ layout(r8) writeonly image3D occlusionTexture;
     
 layout(r8) writeonly image3D cascaded_grid_image_occlusion(uint i)
 {
+  /*
   layout(r8) writeonly image3D targetOcclusionTextures[NUM_GRID_CASCADES];
     
   targetOcclusionTextures[0] = header.targetOcclusionTexture0;
@@ -86,6 +101,19 @@ layout(r8) writeonly image3D cascaded_grid_image_occlusion(uint i)
   #endif
   
   return targetOcclusionTextures[i];
+  */
+  
+  if(i==0)
+    return header.targetOcclusionTexture0;
+  #if NUM_GRID_CASCADES > 1
+  else if(i==1)
+    return header.targetOcclusionTexture1;
+  #endif
+  #if NUM_GRID_CASCADES > 2
+  else if(i==2)
+    return header.targetOcclusionTexture2;
+  #endif
+  return header.targetOcclusionTexture0;
 }
 #endif
 

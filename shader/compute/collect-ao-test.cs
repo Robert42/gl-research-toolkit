@@ -8,13 +8,13 @@ layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROU
 
 void main()
 {
-  get_cascaded_grid_images(0);
+  uint texture_index = gl_GlobalInvocationID.z / 16;
+  ivec3 grid_cell = ivec3(gl_GlobalInvocationID.xy, gl_GlobalInvocationID.z%16);
+    
+  get_cascaded_grid_images(texture_index);
   
-  if(gl_GlobalInvocationID.z < 16)
-  {
-    imageStore(leafIndexTexture, ivec3(gl_GlobalInvocationID), uvec4(255, 0, 255, 0));
-  #if BVH_USE_GRID_OCCLUSION
-    imageStore(occlusionTexture, ivec3(gl_GlobalInvocationID), vec4(vec3(gl_GlobalInvocationID)/16., 1));
-  #endif
-  }
+  imageStore(leafIndexTexture, grid_cell, uvec4(grid_cell*16, texture_index));
+#if BVH_USE_GRID_OCCLUSION
+  imageStore(occlusionTexture, grid_cell, vec4(vec3(grid_cell)/16., 1));
+#endif
 }
