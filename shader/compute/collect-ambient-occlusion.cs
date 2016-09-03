@@ -15,7 +15,6 @@ struct found_leaf_t
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
   uvec4 index;
   vec4 occlusion;
-// TODO remove #define found_leaf_real_t vec4
 #else
   uint index;
   float occlusion;

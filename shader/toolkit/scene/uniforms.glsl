@@ -205,6 +205,20 @@ sampler3D cascaded_grid_texture_occlusion(uint i)
   return targetOcclusionTextures[i];
 }
 
+float merged_cascaded_grid_texture_occlusion(vec3 world_pos)
+{
+  vec4 weights = cascadedGridWeights(world_pos);
+  float grid_occlusion = textureLod(scene.cascadedGrids.targetOcclusionTexture0, cascaded_grid_uvw_from_worldspace(world_pos, 0), 0).r * weights.r
+                            #if NUM_GRID_CASCADES > 1
+                            + textureLod(scene.cascadedGrids.targetOcclusionTexture1, cascaded_grid_uvw_from_worldspace(world_pos, 1), 1).r * weights.g
+                            #endif
+                            #if NUM_GRID_CASCADES > 2
+                            + textureLod(scene.cascadedGrids.targetOcclusionTexture2, cascaded_grid_uvw_from_worldspace(world_pos, 2), 2).r * weights.b
+                            #endif
+                            + weights.a;
+  return grid_occlusion;
+}
+
 #ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)
 {

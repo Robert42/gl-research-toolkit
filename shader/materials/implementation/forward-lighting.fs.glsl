@@ -83,15 +83,8 @@ return;
   fragment_color = vec4(vec3(grid_occlusion), 1);
   return;
 #elif defined(BVH_OCCLUSION_GRID)
-  vec4 weights = cascadedGridWeights(surface.position);
-  float grid_occlusion = textureLod(cascaded_grid_texture_occlusion(0), cascaded_grid_uvw_from_worldspace(world_pos, 0), 0).r * weights.r
-                             #if NUM_GRID_CASCADES > 1
-                              + textureLod(cascaded_grid_texture_occlusion(1), cascaded_grid_uvw_from_worldspace(world_pos, 1), 1).r * weights.g
-                             #endif
-                             #if NUM_GRID_CASCADES > 2
-                             + textureLod(cascaded_grid_texture_occlusion(2), cascaded_grid_uvw_from_worldspace(world_pos, 2), 2).r * weights.b
-                             #endif
-                             + weights.a;
+  vec4 weights = cascadedGridWeights(world_pos);
+  float grid_occlusion = merged_cascaded_grid_texture_occlusion();
   PRINT_VALUE(weights);
   fragment_color = vec4(vec3(grid_occlusion), 1);
   return;
