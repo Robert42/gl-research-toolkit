@@ -105,31 +105,37 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
   const vec3 world_pos = cone_bouquet[0].origin;
 
 #if NUM_GRID_CASCADES == 1
+  const uint32_t N_voxel_weights = 9; // 1 + 1 * 8
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
   const uint32_t N = 33; // 1 + 1 * 8 * 4
 #else
   const uint32_t N = 9; // 1 + 1 * 8 * 1
 #endif
 #elif NUM_GRID_CASCADES == 2
+  const uint32_t N_voxel_weights = 17; // 1 + 2 * 8
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
   const uint32_t N = 65; // 1 + 2 * 8 * 4
 #else
   const uint32_t N = 17; // 1 + 2 * 8 * 1
 #endif
 #elif NUM_GRID_CASCADES == 3
+  const uint32_t N_voxel_weights = 25; // 1 + 3 * 8
 #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
   const uint32_t N = 97; // 1 + 3 * 8 * 4
 #else
   const uint32_t N = 25; // 1 + 3 * 8 * 1
 #endif
 #endif
+  float voxel_weights[N_voxel_weights];
   uint16_t ids[N];
   ids[0] = uint16_t(0);
+  voxel_weights[0] = 1.0;
   const uint32_t start = 1;
   uint32_t n = start;
+  uint32_t n_voxel_weights = start;
   
   vec3 grid0_uvw = cascaded_grid_cell_from_worldspace(world_pos, 0);
-  vec4 weights = cascadedGridWeights(world_pos);
+  vec4 cascade_weights = cascadedGridWeights(world_pos);
   #if NUM_GRID_CASCADES>1
   vec3 grid1_uvw = cascaded_grid_cell_from_worldspace(world_pos, 1);
   #endif
@@ -146,8 +152,11 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
   ceil_uvw = clamp(ivec3(ceil(grid##ID##_uvw)), ivec3(0), ivec3(15)); \
   for(uint32_t i=0; i<8; ++i) \
   { \
-      ivec3 uvw = ivec3(mix(floor_uvw, ceil_uvw, ivec3((i&4)>>2, (i&2)>>1, i&1))); \
+      vec3 voxel_pos = mix(floor_uvw, ceil_uvw, ivec3((i&4)>>2, (i&2)>>1, i&1)); \
+      ivec3 uvw = ivec3(voxel_pos); \
       uvec4 index = texelFetch(t, uvw, 0); \
+      float voxel_weight = 1.-sq_distance(voxel_pos, grid##ID##_uvw); \
+      voxel_weights[n_voxel_weights++] = voxel_weight; \
       for(uint32_t i=0; i<BVH_GRID_NUM_COMPONENTS; ++i) \
         ids[n++] = uint16_t(mix(index[i], 0, step(num_distance_fields, index[i]))); \
   }
@@ -166,6 +175,7 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
         ao_distancefield_cost++;
     #endif
     uint16_t leaf_index = ids[i];
+    float voxel_weight = voxel_weights[i/BVH_GRID_NUM_COMPONENTS];
     
     Sphere sphere = leaf_bounding_spheres[leaf_index];
     VoxelDataBlock* sdf = distance_field_data_blocks + leaf_index;
@@ -183,7 +193,9 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
 
         float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
         float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
-        cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao_coneSoftShadow(cone, sdf, intersection_distance_front, intersection_distance_back, cone_length));
+        float ao_value = ao_coneSoftShadow(cone, sdf, intersection_distance_front, intersection_distance_back, cone_length);
+        ao_value = mix(1.0, ao_value, voxel_weight);
+        cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao_value);
       }
     }
   }
