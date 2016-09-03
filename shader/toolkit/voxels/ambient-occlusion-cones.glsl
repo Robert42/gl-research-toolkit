@@ -177,6 +177,8 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
     uint16_t leaf_index = ids[i];
     float voxel_weight = voxel_weights[i/BVH_GRID_NUM_COMPONENTS];
     
+    voxel_weight *= cascade_weights[((i-start)/(BVH_GRID_NUM_COMPONENTS*8)) % 3];
+    
     Sphere sphere = leaf_bounding_spheres[leaf_index];
     VoxelDataBlock* sdf = distance_field_data_blocks + leaf_index;
     
@@ -185,7 +187,7 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
       Cone cone = cone_bouquet[j];
       float distance_to_sphere_origin;
       bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
-      if(has_intersection)
+      if(has_intersection && voxel_weight>0)
       {
         #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
             ao_distancefield_cost++;
