@@ -11,6 +11,7 @@ add_custom_target(
   common-with-cpp/glrt/glsl/math-common.h
   common-with-cpp/glrt/glsl/math-cpp.h
   common-with-cpp/glrt/glsl/math-glsl.h
+  compute/ao-collect-uniform.glsl
   debugging/posteffects/highlight-unconceiled-negative-distance.fs
   debugging/posteffects/highlight-unconceiled-negative-distance.vs
   debugging/posteffects/highlight-voxel-bounding-rect.fs
@@ -75,6 +76,7 @@ add_custom_target(
   toolkit/lighting/rendering-equation.glsl
   toolkit/scene/uniforms.glsl
   toolkit/voxels/ambient-occlusion-cones.glsl
+  toolkit/voxels/cones-bouquet.glsl
   toolkit/voxels/distance-field-utils.glsl
   toolkit/voxels/raymarching-bounding-spheres.glsl
   toolkit/voxels/raymarching-cubic-voxels.glsl

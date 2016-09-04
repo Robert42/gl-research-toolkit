@@ -16,7 +16,9 @@ void calc_tangent_to_worldspace();
 
 void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
 {
-  init_cone_bouquet(tangent_to_worldspace, surface.position);
+  vec3 world_pos = surface.position;
+  
+  init_cone_bouquet(tangent_to_worldspace, world_pos);
   
 #ifdef MASKED
   alpha = step(MASK_THRESHOLD, alpha);
@@ -53,11 +55,46 @@ return;
   return;
 #endif
 
+#if defined(BVH_NEAREST_LEAF_INDEX_0)
+#define BVH_NEAREST_LEAF_INDEX_ 0
+#elif defined(BVH_NEAREST_LEAF_INDEX_1)
+#define BVH_NEAREST_LEAF_INDEX_ 1
+#elif defined(BVH_NEAREST_LEAF_INDEX_2)
+#define BVH_NEAREST_LEAF_INDEX_ 2
+#endif
+#if defined(BVH_OCCLUSION_GRID_ONLY_0)
+#define BVH_OCCLUSION_GRID_ONLY_ 0
+#elif defined(BVH_OCCLUSION_GRID_ONLY_1)
+#define BVH_OCCLUSION_GRID_ONLY_ 1
+#elif defined(BVH_OCCLUSION_GRID_ONLY_2)
+#define BVH_OCCLUSION_GRID_ONLY_ 2
+#endif
+
+#if defined(BVH_NEAREST_LEAF_INDEX_)
+  uvec4 nearest_leaves_index = texelFetch(cascaded_grid_texture(BVH_NEAREST_LEAF_INDEX_), ivec3(round(cascaded_grid_cell_from_worldspace(world_pos, BVH_NEAREST_LEAF_INDEX_))), 0);
+  #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
+  fragment_color = vec4(nearest_leaves_index.xyz / float(BVH_MAX_VISITED_LEAVES-1), 1);
+  #else
+  fragment_color = heatvision_linear(float(nearest_leaves_index[0]) / float(BVH_MAX_VISITED_LEAVES-1));
+  #endif
+  return;
+#elif defined(BVH_OCCLUSION_GRID_ONLY_)
+  float grid_occlusion = textureLod(cascaded_grid_texture_occlusion(BVH_OCCLUSION_GRID_ONLY_), cascaded_grid_uvw_from_worldspace(world_pos, BVH_OCCLUSION_GRID_ONLY_), 0).r;
+  fragment_color = vec4(vec3(grid_occlusion), 1);
+  return;
+#elif defined(BVH_OCCLUSION_GRID)
+  vec4 weights = cascadedGridWeights(world_pos);
+  float grid_occlusion = merged_cascaded_grid_texture_occlusion();
+  PRINT_VALUE(weights);
+  fragment_color = vec4(vec3(grid_occlusion), 1);
+  return;
+#endif
+
 #if defined(CASCADED_GRID_WEIGHTS)
-  fragment_color = vec4(cascadedGridWeights(surface.position), 1);
+  fragment_color = vec4(cascadedGridWeights(surface.position).xyz, 1);
   return;
 #elif defined(CASCADED_GRID_WEIGHTS_TINTED)
-  fragment_color = vec4(cascadedGridWeights(surface.position) * (0.75 + 0.25*length(material.base_color)), 1);
+  fragment_color = vec4(cascadedGridWeights(surface.position).xyz * (0.75 + 0.25*length(material.base_color)), 1);
   return;
 #endif
 

@@ -351,6 +351,13 @@ inline bool intersects(in Sphere sphere, in Ray ray)
   return d <= sq(sphere.radius);
 }
 
+inline bool intersects(in Sphere sphere1, in Sphere sphere2)
+{
+  float d = sq_distance(sphere1.origin, sphere2.origin);
+  
+  return d <= sq(sphere1.radius + sphere2.radius);
+}
+
 
 // ======== Rect =============================================================
 

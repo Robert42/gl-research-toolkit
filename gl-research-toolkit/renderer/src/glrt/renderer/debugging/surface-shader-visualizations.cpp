@@ -1,5 +1,6 @@
 #include <glrt/renderer/debugging/surface-shader-visualizations.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/bvh-usage.h>
 
 namespace glrt {
 namespace renderer {
@@ -17,6 +18,26 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   map[" - "] = SurfaceShaderVisualization::NONE;
 
   VALUE(AMBIENT_OCCLUSION);
+  VALUE(BVH_NEAREST_LEAF_INDEX_0);
+#if NUM_GRID_CASCADES >= 2
+  VALUE(BVH_NEAREST_LEAF_INDEX_1);
+#endif
+#if NUM_GRID_CASCADES == 3
+  VALUE(BVH_NEAREST_LEAF_INDEX_2);
+#endif
+#if BVH_USE_GRID_OCCLUSION
+  VALUE(BVH_OCCLUSION_GRID);
+  VALUE(BVH_OCCLUSION_GRID_ONLY_0);
+#if NUM_GRID_CASCADES >= 2
+  VALUE(BVH_OCCLUSION_GRID_ONLY_1);
+#endif
+#if NUM_GRID_CASCADES == 3
+  VALUE(BVH_OCCLUSION_GRID_ONLY_2);
+#endif
+#if NUM_GRID_CASCADES<1 || NUM_GRID_CASCADES>3
+#error unexpected value for NUM_GRID_CASCADES
+#endif
+#endif
   VALUE(CASCADED_GRID_WEIGHTS);
   VALUE(CASCADED_GRID_WEIGHTS_TINTED);
   VALUE(DISTANCEFIELD_AO);

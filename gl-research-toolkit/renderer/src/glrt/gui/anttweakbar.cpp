@@ -258,7 +258,7 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
     shaderDebugPrinter->guiToggle.TwAddVarCB(tweakBar, "Use Printer", "group=Debug key=F6");
     TwAddVarRW(tweakBar, "Clear Scene", TW_TYPE_BOOLCPP, &shaderDebugPrinter->clearScene, "group=Debug");
   }
-  gui::Toolbar::registerTweakBar(tweakBar, true);
+  gui::Toolbar::registerTweakBar(tweakBar, false);
 
   return tweakBar;
 }

@@ -22,6 +22,10 @@ public:
     RG = GL_RG,
     RGB = GL_RGB,
     RGBA = GL_RGBA,
+    RED_INTEGER  = GL_RED_INTEGER,
+    RG_INTEGER = GL_RG_INTEGER,
+    RGB_INTEGER = GL_RGB_INTEGER,
+    RGBA_INTEGER = GL_RGBA_INTEGER,
   };
   // See https://www.opengl.org/sdk/docs/man/html/glGetTexImage.xhtml for supported types
   enum class Type : quint32
@@ -107,6 +111,8 @@ public:
 
   GLint maxLevel() const;
   Target target() const;
+
+  static UncompressedImage format(const glm::uvec3& size, int level, Format format, Type type, Target target);
 
   QPair<UncompressedImage, QVector<byte>> uncompressed2DImage(int level,
                                                               Format format,

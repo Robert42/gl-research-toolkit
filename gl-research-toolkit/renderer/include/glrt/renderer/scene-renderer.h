@@ -104,6 +104,8 @@ protected:
   void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
 private:
+  typedef scene::resources::utilities::GlTexture GlTexture;
+
   // Shaders
   QMap<QPair<Pass, Material::Type>, MaterialState*> materialShaderMetadata;
   Array<ReloadableShader> materialShaders;
@@ -111,9 +113,14 @@ private:
 
   // Cascaded Grids
   ComputeStep collectAmbientOcclusionToGrid;
-  gl::Texture3D* gridTexture[NUM_GRID_CASCADES*2];
+  GlTexture gridTexture[NUM_GRID_CASCADES*2];
   GLuint64 computeTextureHandles[NUM_GRID_CASCADES*2];
   GLuint64 renderTextureHandles[NUM_GRID_CASCADES*2];
+#if BVH_USE_GRID_OCCLUSION
+  GlTexture gridOcclusionTexture[NUM_GRID_CASCADES];
+  GLuint64 computeOcclusionTextureHandles[NUM_GRID_CASCADES];
+  GLuint64 renderOcclusionTextureHandles[NUM_GRID_CASCADES];
+#endif
   glm::vec3 grid_camera_pos = glm::vec3(NAN), grid_camera_dir = glm::vec3(NAN);
   bool _update_grid_camera : 1;
   void initCascadedGridTextures();
@@ -125,10 +132,19 @@ private:
 
   struct CascadedGridsHeader
   {
-    GLuint64 gridTextureRender[NUM_GRID_CASCADES];
-    GLuint64 gridTextureCompute[NUM_GRID_CASCADES];
+    GLuint64 gridTexture[NUM_GRID_CASCADES];
+#if BVH_USE_GRID_OCCLUSION
+    GLuint64 occlusionTexture[NUM_GRID_CASCADES];
+#endif
     glm::vec4 snappedGridLocation[NUM_GRID_CASCADES];
     glm::vec4 smoothGridLocation[NUM_GRID_CASCADES];
+  };
+  struct AoCollectHeader
+  {
+    AlignedImageHandle gridTexture[NUM_GRID_CASCADES];
+#if BVH_USE_GRID_OCCLUSION
+    AlignedImageHandle occlusionTexture[NUM_GRID_CASCADES];
+#endif
   };
 
   // Scene uniform buffer
@@ -149,6 +165,7 @@ private:
     padding<quint32, 1> _padding2;
   };
   gl::Buffer sceneUniformBuffer;
+  gl::Buffer aoCollectHeaderUniformBuffer;
 
   // other uniform buffer
   LightBuffer lightUniformBuffer;
@@ -172,6 +189,8 @@ private:
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);
 
   void allShadersReloaded() final override;
+
+  void updateBvhLeafGrid();
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);

@@ -178,9 +178,17 @@ float coneSoftShadow(in Cone cone, in uint16_t* inner_nodes, in Sphere* bvh_inne
 }
 #endif
 
+#if defined(BVH_USE_GRID)
+float coneSoftShadow(in Cone cone, in uint16_t* inner_nodes, in Sphere* bvh_inner_bounding_sphere, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+{
+  // TODO!!!
+  return 1.f;
+}
+#endif
+
 float coneSoftShadow(in Cone cone, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
-  return coneSoftShadow(cone, bvh_inner_nodes(), bvh_inner_bounding_spheres(), bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
+  return coneSoftShadow(cone, get_bvh_inner_nodes(), get_bvh_inner_bounding_spheres(), bounding_spheres, distance_field_data_blocks, num_distance_fields, cone_length);
 }
 
 #endif

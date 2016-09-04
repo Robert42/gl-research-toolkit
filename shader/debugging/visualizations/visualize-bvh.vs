@@ -14,9 +14,9 @@ void main()
 {
   vec3 c = vec3(1, 0.5, 0);
   
-  Sphere* bvh_inner_spheres = bvh_inner_bounding_spheres();
+  Sphere* bvh_inner_spheres = get_bvh_inner_bounding_spheres();
   Sphere* leaf_spheres = distance_fields_bounding_spheres();
-  uint16_t* bvh_inner_nodes = bvh_inner_nodes();
+  uint16_t* bvh_inner_nodes = get_bvh_inner_nodes();
   
   // ==== SPECIAL CASE HANDLING ====
   bool invalid_index = node_id >= distance_fields_num()-1;

@@ -12,6 +12,13 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/renderer/debugging/debugging-posteffect.h>
 
+#define MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY 1
+#define MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING 2
+
+// TODO remove
+#define RESIDENCY_TACTIC 0
+//#define RESIDENCY_TACTIC (MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY | MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING)
+
 namespace glrt {
 namespace renderer {
 
@@ -41,6 +48,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     _update_grid_camera(true),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
+    aoCollectHeaderUniformBuffer(sizeof(AoCollectHeader), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
     lightUniformBuffer(this->scene),
     voxelUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
@@ -93,10 +101,7 @@ void Renderer::render()
   updateCameraUniform();
 
   if(isUsingBvhLeafGrid())
-  {
-    sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
-    collectAmbientOcclusionToGrid.invoke();
-  }
+    updateBvhLeafGrid();
 
   prepareFramebuffer();
 
@@ -216,11 +221,43 @@ void Renderer::appendMaterialState(gl::FramebufferObject* framebuffer, const QSe
 
 void Renderer::initCascadedGridTextures()
 {
+  std::vector<uint8_t> r8ui_dummy_data;
+  std::vector<uint16_t> r16ui_dummy_data;
+  std::vector<uint16_t> rgba16ui_dummy_data;
+
+  r8ui_dummy_data.resize(16*16*16);
+  r16ui_dummy_data.resize(16*16*16);
+  rgba16ui_dummy_data.resize(16*16*16*4);
+
+  for(uint8_t u=0; u<16; ++u)
+  {
+    for(uint8_t v=0; v<16; ++v)
+    {
+      for(uint8_t w=0; w<16; ++w)
+      {
+        uint16_t is_even = (u%2) ^ (v%2) ^ (w%2);
+
+        uint8_t r8ui_value = uint8_t(is_even * 255) + 0;
+        uint16_t r16ui_value = uint16_t(is_even * 255) + 0;
+
+        r8ui_dummy_data[(u*256 + v*16 + w) * 1] = r8ui_value;
+        r16ui_dummy_data[(u*256 + v*16 + w) * 1] = r16ui_value;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 0] = r16ui_value;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 1] = r16ui_value/2;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 2] = r16ui_value/3;
+        rgba16ui_dummy_data[(u*256 + v*16 + w) * 4 + 3] = r16ui_value/4;
+      }
+    }
+  }
+
   auto textureFormat = [](int i) {
+    GlTexture::Format f;
     if(i<NUM_GRID_CASCADES)
-      return gl::TextureFormat::R16UI;
+      f = GlTexture::Format::RED_INTEGER;
     else
-      return gl::TextureFormat::RGBA16UI;
+      f = GlTexture::Format::RGBA_INTEGER;
+
+    return GlTexture::format(glm::uvec3(16, 16, 16), 0, f, GlTexture::Type::UINT16, GlTexture::Target::TEXTURE_3D);
   };
   auto imageFormat = [](int i) {
     if(i<NUM_GRID_CASCADES)
@@ -228,29 +265,77 @@ void Renderer::initCascadedGridTextures()
     else
       return GL_RGBA16UI;
   };
+  auto init_data = [&](int i) -> const uint16_t* {
+    if(i<NUM_GRID_CASCADES)
+      return r16ui_dummy_data.data();
+    else
+      return rgba16ui_dummy_data.data();
+  };
+
+  const gl::SamplerObject& samplerObject = gl::SamplerObject::GetSamplerObject(gl::SamplerObject::Desc(gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Filter::LINEAR,
+                                                                                                       gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Border::CLAMP,
+                                                                                                       1 /* max anisotropy */,
+                                                                                                       glm::vec4(0.5f),
+                                                                                                       gl::SamplerObject::CompareMode::NONE,
+                                                                                                       0.f /* min lod */,
+                                                                                                       0.f /* max lod */));
+  GLuint clampedLinearSampler = samplerObject.GetInternHandle();
 
   for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
   {
-    gridTexture[i] = new gl::Texture3D(16, 16, 16, textureFormat(i));
-    gl::TextureId textureId = gridTexture[i]->GetInternHandle();
-    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, 0, 0, imageFormat(i));
+    gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
+    gl::TextureId textureId = gridTexture[i].textureId;
+
+    // Make the texture complete
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
+
+    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, imageFormat(i));
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
 
-    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
     GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
-
-    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));
+
+#if !(RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY)
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
+#endif
 
     computeTextureHandles[i] = imageHandle;
     renderTextureHandles[i] = textureHandle;
   }
+
+#if BVH_USE_GRID_OCCLUSION
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+    gridOcclusionTexture[i].setUncompressed2DImage(GlTexture::format(glm::uvec3(16, 16, 16), 0, GlTexture::Format::RED, GlTexture::Type::UINT8, GlTexture::Target::TEXTURE_3D), r8ui_dummy_data.data());
+    gl::TextureId textureId = gridOcclusionTexture[i].textureId;
+    // Make the texture complete
+
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
+    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
+
+    GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R8);
+    GLuint64 textureHandle = GL_RET_CALL(glGetTextureSamplerHandleNV, textureId, clampedLinearSampler);
+
+    GL_CALL(glMakeTextureHandleResidentNV, textureHandle);
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, textureHandle));
+
+#if !(RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY)
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, imageHandle));
+#endif
+
+    computeOcclusionTextureHandles[i] = imageHandle;
+    renderOcclusionTextureHandles[i] = textureHandle;
+  }
+#endif
 }
 
 void Renderer::deinitCascadedGridTextures()
 {
-  for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
-    delete gridTexture[i];
 }
 
 inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
@@ -294,11 +379,53 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
-    header.gridTextureCompute[i] = computeTextureHandles[i + texture_base];
-    header.gridTextureRender[i] = renderTextureHandles[i + texture_base];
+    header.gridTexture[i] = renderTextureHandles[i + texture_base];
+#if BVH_USE_GRID_OCCLUSION
+    header.occlusionTexture[i] = renderOcclusionTextureHandles[i];
+#endif
   }
 
   return header;
+}
+
+void Renderer::updateBvhLeafGrid()
+{
+  const int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+#if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
+    GL_CALL(glMakeTextureHandleNonResidentNV, renderTextureHandles[i + texture_base]);
+    GL_CALL(glMakeTextureHandleNonResidentNV, renderOcclusionTextureHandles[i]);
+#endif
+
+#if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
+    GL_CALL(glMakeImageHandleResidentNV, computeTextureHandles[i + texture_base], GL_WRITE_ONLY);
+    GL_CALL(glMakeImageHandleResidentNV, computeOcclusionTextureHandles[i], GL_WRITE_ONLY);
+#endif
+
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeTextureHandles[i + texture_base]));
+    Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeOcclusionTextureHandles[i]));
+  }
+
+  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+  aoCollectHeaderUniformBuffer.BindUniformBuffer(UNIFORM_COLLECT_OCCLUSION_METADATA_BLOCK);
+  collectAmbientOcclusionToGrid.invoke();
+
+  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  {
+#if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
+    GL_CALL(glMakeImageHandleNonResidentNV, computeTextureHandles[i + texture_base]);
+    GL_CALL(glMakeImageHandleNonResidentNV, computeOcclusionTextureHandles[i]);
+#endif
+
+#if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
+    GL_CALL(glMakeTextureHandleResidentNV, renderTextureHandles[i + texture_base]);
+    GL_CALL(glMakeTextureHandleResidentNV, renderOcclusionTextureHandles[i]);
+#endif
+
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));
+    Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderOcclusionTextureHandles[i]));
+  }
 }
 
 bool Renderer::needRecapturing() const
@@ -460,6 +587,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   }
 
   PROFILE_SCOPE("Renderer::fillCameraUniform()")
+
   SceneUniformBlock& sceneUniformData =  *reinterpret_cast<SceneUniformBlock*>(sceneUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   sceneUniformData.camera_position = camera_position;
   sceneUniformData.view_projection_matrix = view_projection_matrix;
@@ -471,6 +599,23 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.bvh_debug_depth_begin = bvh_debug_depth_begin;
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
   sceneUniformData.cascadedGrids = updateCascadedGrids();
+
+  if(isUsingBvhLeafGrid())
+  {
+    AoCollectHeader& aoCollectSceneUniformData = *reinterpret_cast<AoCollectHeader*>(aoCollectHeaderUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+
+    int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
+    for(int i=0; i<NUM_GRID_CASCADES; ++i)
+    {
+      aoCollectSceneUniformData.gridTexture[i] = computeTextureHandles[i + texture_base];
+  #if BVH_USE_GRID_OCCLUSION
+      aoCollectSceneUniformData.occlusionTexture[i] = computeOcclusionTextureHandles[i];
+  #endif
+    }
+
+    aoCollectHeaderUniformBuffer.Unmap();
+  }
+
   sceneUniformBuffer.Unmap();
 }
 

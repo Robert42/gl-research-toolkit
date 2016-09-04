@@ -156,9 +156,10 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
   this->bvhInnerNodes[num_leaves-1].left_child = 0x8000;
   this->bvhInnerNodes[num_leaves-1].right_child = 0x8000;
 
-  if(Q_LIKELY(num_leaves > 1))
+  const quint16 skip_first_n = HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
+  if(Q_LIKELY(num_leaves > 1 + skip_first_n))
   {
-    generateHierarchy(0, num_leaves);
+    generateHierarchy(skip_first_n, num_leaves);
     verifyHierarchy();
     testOcclusion();
   }else
@@ -242,6 +243,10 @@ quint16 BVH::addInnerNode()
 
 quint16 BVH::calcDepth(quint16 root, InnerNode* bvhInnerNodes) const
 {
+#if ENFORCE_HUGE_BVH_LEAVES_FIRST
+  Q_ASSERT(root!=0x8000);
+#endif
+
   if(root & 0x8000)
     return 0;
 

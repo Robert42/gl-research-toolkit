@@ -33,9 +33,9 @@ public:
       return settings;
     }
 
-    static Settings addVSync(Settings settings)
+    static Settings addVSync(Settings settings, bool enable=true)
     {
-      settings.VSync = true;
+      settings.VSync = enable;
       return settings;
     }
 
