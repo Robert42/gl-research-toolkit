@@ -191,6 +191,7 @@ private:
   void allShadersReloaded() final override;
 
   void updateBvhLeafGrid();
+  void update_aoCollectHeader();
 
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);

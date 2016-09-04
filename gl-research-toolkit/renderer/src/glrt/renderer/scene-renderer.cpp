@@ -340,6 +340,8 @@ void Renderer::deinitCascadedGridTextures()
 
 inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 {
+  PROFILE_SCOPE("Renderer::updateCascadedGrids()")
+
   static_assert(NUM_GRID_CASCADES<=3, "unexpected number of cascades");
 #if NUM_GRID_CASCADES == 2
   const float gridSizes[3] = {8., 32};
@@ -390,6 +392,8 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 
 void Renderer::updateBvhLeafGrid()
 {
+  PROFILE_SCOPE("Renderer::updateBvhLeafGrid()")
+
   const int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
@@ -409,6 +413,7 @@ void Renderer::updateBvhLeafGrid()
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   aoCollectHeaderUniformBuffer.BindUniformBuffer(UNIFORM_COLLECT_OCCLUSION_METADATA_BLOCK);
+
   collectAmbientOcclusionToGrid.invoke();
 
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
@@ -425,6 +430,25 @@ void Renderer::updateBvhLeafGrid()
 
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderOcclusionTextureHandles[i]));
+  }
+}
+
+void Renderer::update_aoCollectHeader()
+{
+  if(isUsingBvhLeafGrid())
+  {
+    AoCollectHeader& aoCollectSceneUniformData = *reinterpret_cast<AoCollectHeader*>(aoCollectHeaderUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+
+    int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
+    for(int i=0; i<NUM_GRID_CASCADES; ++i)
+    {
+      aoCollectSceneUniformData.gridTexture[i] = computeTextureHandles[i + texture_base];
+  #if BVH_USE_GRID_OCCLUSION
+      aoCollectSceneUniformData.occlusionTexture[i] = computeOcclusionTextureHandles[i];
+  #endif
+    }
+
+    aoCollectHeaderUniformBuffer.Unmap();
   }
 }
 
@@ -539,6 +563,8 @@ void Renderer::recordCommandlist()
 void Renderer::allShadersReloaded()
 {
   _needRecapturing = true;
+
+  update_aoCollectHeader();
 }
 
 void Renderer::updateCameraUniform()
@@ -599,23 +625,6 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.bvh_debug_depth_begin = bvh_debug_depth_begin;
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
   sceneUniformData.cascadedGrids = updateCascadedGrids();
-
-  if(isUsingBvhLeafGrid())
-  {
-    AoCollectHeader& aoCollectSceneUniformData = *reinterpret_cast<AoCollectHeader*>(aoCollectHeaderUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-
-    int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
-    for(int i=0; i<NUM_GRID_CASCADES; ++i)
-    {
-      aoCollectSceneUniformData.gridTexture[i] = computeTextureHandles[i + texture_base];
-  #if BVH_USE_GRID_OCCLUSION
-      aoCollectSceneUniformData.occlusionTexture[i] = computeOcclusionTextureHandles[i];
-  #endif
-    }
-
-    aoCollectHeaderUniformBuffer.Unmap();
-  }
-
   sceneUniformBuffer.Unmap();
 }
 
