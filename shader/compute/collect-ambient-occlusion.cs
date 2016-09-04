@@ -141,9 +141,6 @@ void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float cell_siz
 
   for(uint32_t i=0; i<num_leaves; ++i)
   {
-    #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
-        ao_distancefield_cost++;
-    #endif
     uint32_t leaf = leaves[i];
     Sphere sphere = leaf_bounding_spheres[leaf];
     VoxelDataBlock* sdf = leaf_data_blocks + leaf;
@@ -156,10 +153,6 @@ void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float cell_siz
       bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
       if(has_intersection)
       {
-        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
-            ao_distancefield_cost++;
-        #endif
-
         float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
         float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
         
