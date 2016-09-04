@@ -259,7 +259,7 @@ void Renderer::initCascadedGridTextures()
 
     return GlTexture::format(glm::uvec3(16, 16, 16), 0, f, GlTexture::Type::UINT16, GlTexture::Target::TEXTURE_3D);
   };
-  auto imageFormat = [](int i) {
+  auto imageFormat = [](int i) -> GLenum {
     if(i<NUM_GRID_CASCADES)
       return GL_R16UI;
     else
