@@ -56,7 +56,7 @@ inline bool isUsingBvhLeafGrid()
   return bvh_is_grid(currentBvhUsage);
 }
 
-#define NUM_GRID_CASCADES 3
+#define NUM_GRID_CASCADES 1
 #define BVH_USE_GRID_OCCLUSION 1
 
 } // namespace renderer

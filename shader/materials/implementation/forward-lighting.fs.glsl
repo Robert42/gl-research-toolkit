@@ -84,7 +84,7 @@ return;
   return;
 #elif defined(BVH_OCCLUSION_GRID)
   vec4 weights = cascadedGridWeights(world_pos);
-  float grid_occlusion = merged_cascaded_grid_texture_occlusion();
+  float grid_occlusion = merged_cascaded_grid_texture_occlusion(world_pos);
   PRINT_VALUE(weights);
   fragment_color = vec4(vec3(grid_occlusion), 1);
   return;
