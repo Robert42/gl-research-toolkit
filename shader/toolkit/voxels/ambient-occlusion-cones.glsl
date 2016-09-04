@@ -177,7 +177,7 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
     uint16_t leaf_index = ids[i];
     float voxel_weight = voxel_weights[i/BVH_GRID_NUM_COMPONENTS];
     
-    voxel_weight *= cascade_weights[((i-start)/(BVH_GRID_NUM_COMPONENTS*8)) % 3];
+    voxel_weight *= mix(1., cascade_weights[((i-start)/(BVH_GRID_NUM_COMPONENTS*8)) % 3], step(1, i));
     
     Sphere sphere = leaf_bounding_spheres[leaf_index];
     VoxelDataBlock* sdf = distance_field_data_blocks + leaf_index;
