@@ -13,8 +13,10 @@ public:
   ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter);
   ~ForwardRenderer();
 
+  gl::Texture2D normalFramebufferTexture;
   gl::Texture2D colorFramebufferTexture;
   gl::Texture2D depthFramebufferTexture;
+  gl::FramebufferObject prepassFramebuffer;
   gl::FramebufferObject framebuffer;
 
 protected:
