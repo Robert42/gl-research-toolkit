@@ -348,7 +348,7 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 #elif NUM_GRID_CASCADES == 3
   const float gridSizes[3] = {8., 16, 32};
 #else
-#error TODO, need gridsize for the current number of Grid Cascades
+  const float gridSizes[3] = {8.};
 #endif
 
   CascadedGridsHeader header;
