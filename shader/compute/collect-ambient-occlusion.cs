@@ -21,7 +21,7 @@ struct found_leaf_t
 #endif
 };
     
-void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float ao_length);
+void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float cell_size, float ao_length);
 
 void main()
 {
@@ -29,12 +29,14 @@ void main()
   ivec3 grid_cell = ivec3(gl_GlobalInvocationID.xy, gl_GlobalInvocationID.z%16);
   get_cascaded_grid_images(whichTexture);
 
+  float cell_size = 1. / cascaded_grid_scale_factor(whichTexture);
+
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
   
   init_cone_bouquet(mat3(1), world_pos);
   
 #if 1
-  collect_scene_information_at(world_pos, grid_cell, AO_RADIUS);
+  collect_scene_information_at(world_pos, grid_cell, cell_size, AO_RADIUS);
 #else
   imageStore(leafIndexTexture, grid_cell, uvec4(grid_cell*16, whichTexture));
   #if BVH_USE_GRID_OCCLUSION
@@ -48,7 +50,7 @@ void main()
 void init_found_leaf(out found_leaf_t leaf);
 void take_better_node(inout found_leaf_t found_leaf, in uint32_t index, in float occlusion);
 
-void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float ao_radius)
+void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float cell_size, float ao_radius)
 {
   Sphere* bvh_inner_bounding_sphere = get_bvh_inner_bounding_spheres();
   uint16_t* inner_nodes = get_bvh_inner_nodes();
@@ -68,6 +70,8 @@ void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float ao_radiu
   uint16_t leaves_occlusion[BVH_MAX_VISITED_LEAVES];
   uint32_t num_leaves;
   num_leaves = 0;
+  
+  uint32_t is_within_a_leaf = 0;
 
   do {
     stack_depth--;
@@ -118,7 +122,15 @@ void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float ao_radiu
     num_leaves = min(num_leaves, BVH_MAX_VISITED_LEAVES-1);
     #endif
     
+    uint32_t left_contains_world_pos = 1 ^ uint32_t(step( left_sphere.radius+cell_size, distance(left_sphere.origin,world_pos) ));
+    uint32_t right_contains_world_pos = 1 ^ uint32_t(step( right_sphere.radius+cell_size, distance(right_sphere.origin,world_pos) ));
+    is_within_a_leaf += (left_is_leaf & left_contains_world_pos) | (right_is_leaf & right_contains_world_pos);
+    
   }while(stack_depth>0);
+  
+  // the cell is not wothin a leaf, there's no geometry here which will  be shaded in the fragment shader phase => do not waste going through the leafs and accessing the texture memory
+  if(is_within_a_leaf == 0)
+    return;
 
   found_leaf_t found_leaf;
   init_found_leaf(found_leaf);
