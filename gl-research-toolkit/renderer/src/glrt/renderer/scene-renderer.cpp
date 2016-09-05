@@ -15,7 +15,6 @@
 #define MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY 1
 #define MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING 2
 
-// TODO remove
 #define RESIDENCY_TACTIC 0
 //#define RESIDENCY_TACTIC (MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY | MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING)
 
@@ -272,17 +271,6 @@ void Renderer::initCascadedGridTextures()
       return rgba16ui_dummy_data.data();
   };
 
-  const gl::SamplerObject& samplerObject = gl::SamplerObject::GetSamplerObject(gl::SamplerObject::Desc(gl::SamplerObject::Filter::NEAREST,
-                                                                                                       gl::SamplerObject::Filter::LINEAR,
-                                                                                                       gl::SamplerObject::Filter::NEAREST,
-                                                                                                       gl::SamplerObject::Border::CLAMP,
-                                                                                                       1 /* max anisotropy */,
-                                                                                                       glm::vec4(0.5f),
-                                                                                                       gl::SamplerObject::CompareMode::NONE,
-                                                                                                       0.f /* min lod */,
-                                                                                                       0.f /* max lod */));
-  GLuint clampedLinearSampler = samplerObject.GetInternHandle();
-
   for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
   {
     gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
@@ -308,6 +296,17 @@ void Renderer::initCascadedGridTextures()
   }
 
 #if BVH_USE_GRID_OCCLUSION
+  const gl::SamplerObject& samplerObject = gl::SamplerObject::GetSamplerObject(gl::SamplerObject::Desc(gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Filter::LINEAR,
+                                                                                                       gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Border::CLAMP,
+                                                                                                       1 /* max anisotropy */,
+                                                                                                       glm::vec4(0.5f),
+                                                                                                       gl::SamplerObject::CompareMode::NONE,
+                                                                                                       0.f /* min lod */,
+                                                                                                       0.f /* max lod */));
+  GLuint clampedLinearSampler = samplerObject.GetInternHandle();
+
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
     gridOcclusionTexture[i].setUncompressed2DImage(GlTexture::format(glm::uvec3(16, 16, 16), 0, GlTexture::Format::RED, GlTexture::Type::UINT8, GlTexture::Target::TEXTURE_3D), r8ui_dummy_data.data());
@@ -399,16 +398,22 @@ void Renderer::updateBvhLeafGrid()
   {
 #if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
     GL_CALL(glMakeTextureHandleNonResidentNV, renderTextureHandles[i + texture_base]);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeTextureHandleNonResidentNV, renderOcclusionTextureHandles[i]);
+#endif
 #endif
 
 #if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
     GL_CALL(glMakeImageHandleResidentNV, computeTextureHandles[i + texture_base], GL_WRITE_ONLY);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeImageHandleResidentNV, computeOcclusionTextureHandles[i], GL_WRITE_ONLY);
+#endif
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeTextureHandles[i + texture_base]));
+#if BVH_USE_GRID_OCCLUSION
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeOcclusionTextureHandles[i]));
+#endif
   }
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
@@ -420,16 +425,22 @@ void Renderer::updateBvhLeafGrid()
   {
 #if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
     GL_CALL(glMakeImageHandleNonResidentNV, computeTextureHandles[i + texture_base]);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeImageHandleNonResidentNV, computeOcclusionTextureHandles[i]);
+#endif
 #endif
 
 #if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
     GL_CALL(glMakeTextureHandleResidentNV, renderTextureHandles[i + texture_base]);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeTextureHandleResidentNV, renderOcclusionTextureHandles[i]);
+#endif
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));
+#if BVH_USE_GRID_OCCLUSION
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderOcclusionTextureHandles[i]));
+#endif
   }
 }
 

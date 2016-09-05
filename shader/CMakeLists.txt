@@ -12,6 +12,8 @@ add_custom_target(
   common-with-cpp/glrt/glsl/math-cpp.h
   common-with-cpp/glrt/glsl/math-glsl.h
   compute/ao-collect-uniform.glsl
+  compute/collect-ambient-occlusion.cs
+  compute/voxelize.cs
   debugging/posteffects/highlight-unconceiled-negative-distance.fs
   debugging/posteffects/highlight-unconceiled-negative-distance.vs
   debugging/posteffects/highlight-voxel-bounding-rect.fs

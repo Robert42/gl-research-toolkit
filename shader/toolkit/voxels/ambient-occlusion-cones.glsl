@@ -100,6 +100,9 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
   }
 }
 
+#define BASE_VOXEL_GRID 1
+#define PER_OBJECT_GRID 0
+
 float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
 {
   const vec3 world_pos = cone_bouquet[0].origin;
@@ -128,9 +131,13 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
 #endif
   float voxel_weights[N_voxel_weights];
   uint16_t ids[N];
+#if BASE_VOXEL_GRID
   ids[0] = uint16_t(0);
   voxel_weights[0] = 1.0;
   const uint32_t start = 1;
+#else
+  const uint32_t start = 0;
+#endif
   uint32_t n = start;
   uint32_t n_voxel_weights = start;
   
@@ -169,7 +176,7 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
   GATHER_INDICES(2)
   #endif
   
-  for(uint32_t i=0; i<N; ++i)
+  for(uint32_t i=0; i<n; ++i)
   {
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
         ao_distancefield_cost++;
@@ -177,7 +184,13 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
     uint16_t leaf_index = ids[i];
     float voxel_weight = voxel_weights[i/BVH_GRID_NUM_COMPONENTS];
     
-    voxel_weight *= cascade_weights[((i-start)/(BVH_GRID_NUM_COMPONENTS*8)) % 3];
+    float grid_interpolation = 1.f;//cascade_weights[((i-start)/(BVH_GRID_NUM_COMPONENTS*8)) % 3];
+#if BASE_VOXEL_GRID || PER_OBJECT_GRID
+    voxel_weight *= mix(1., grid_interpolation, step(PER_OBJECT_GRID+BASE_VOXEL_GRID, i));
+#else
+    voxel_weight *= grid_interpolation;
+#endif
+
     
     Sphere sphere = leaf_bounding_spheres[leaf_index];
     VoxelDataBlock* sdf = distance_field_data_blocks + leaf_index;
@@ -202,8 +215,12 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
     }
   }
   
+#if BVH_USE_GRID_OCCLUSION
   float grid_occlusion = merged_cascaded_grid_texture_occlusion(world_pos);
   return grid_occlusion;
+#else
+  return 1.f;
+#endif
 }
 
 void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner_nodes, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
