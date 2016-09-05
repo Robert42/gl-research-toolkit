@@ -202,8 +202,12 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
     }
   }
   
+#if BVH_USE_GRID_OCCLUSION
   float grid_occlusion = merged_cascaded_grid_texture_occlusion(world_pos);
   return grid_occlusion;
+#else
+  return 1.f;
+#endif
 }
 
 void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner_nodes, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)

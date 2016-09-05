@@ -190,6 +190,7 @@ usampler3D cascaded_grid_texture(uint i)
   return targetTextures[i];
 }
 
+#if BVH_USE_GRID_OCCLUSION
 sampler3D cascaded_grid_texture_occlusion(uint i)
 {
   sampler3D targetOcclusionTextures[NUM_GRID_CASCADES];
@@ -204,7 +205,9 @@ sampler3D cascaded_grid_texture_occlusion(uint i)
   
   return targetOcclusionTextures[i];
 }
+#endif
 
+#if BVH_USE_GRID_OCCLUSION
 float merged_cascaded_grid_texture_occlusion(vec3 world_pos)
 {
   vec4 weights = cascadedGridWeights(world_pos);
@@ -218,6 +221,7 @@ float merged_cascaded_grid_texture_occlusion(vec3 world_pos)
                             + weights.a;
   return grid_occlusion;
 }
+#endif
 
 #ifndef highlightColor_DEFINED
 vec4 heatvision(uint32_t value)

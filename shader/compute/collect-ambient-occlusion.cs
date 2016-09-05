@@ -4,8 +4,18 @@
 #include <scene/uniforms.glsl>
 #include "ao-collect-uniform.glsl"
 
+#define USE_CONES 1
+#define USE_ONLY_LEAF_SPHERE 0
+
+#if USE_CONES
 #define N_GI_CONES 18
 #include <voxels/ambient-occlusion-cones.glsl>
+#endif
+
+#if 0==USE_CONES && BVH_USE_GRID_OCCLUSION!=0
+#error BVH_USE_GRID_OCCLUSION without cones is not possible
+#endif
+
 
 layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROUPS_SIZE_Z) in;
 
@@ -32,8 +42,10 @@ void main()
   float cell_size = 1. / cascaded_grid_scale_factor(whichTexture);
 
   vec3 world_pos = cascaded_grid_cell_to_worldspace(grid_cell, whichTexture);
-  
+
+#if USE_CONES
   init_cone_bouquet(mat3(1), world_pos);
+#endif
   
 #if 1
   collect_scene_information_at(world_pos, grid_cell, cell_size, AO_RADIUS);
@@ -134,8 +146,10 @@ void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float cell_siz
 
   found_leaf_t found_leaf;
   init_found_leaf(found_leaf);
-  
+
+#if USE_CONES
   init_cone_bouquet_ao();
+#endif
   
   const float cone_length = ao_radius;
 
@@ -145,6 +159,7 @@ void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float cell_siz
     Sphere sphere = leaf_bounding_spheres[leaf];
     VoxelDataBlock* sdf = leaf_data_blocks + leaf;
     
+#if USE_CONES
     float V = 0.f;
     for(int j=0; j<N_GI_CONES; ++j)
     {
@@ -165,15 +180,22 @@ void collect_scene_information_at(in vec3 world_pos, ivec3 voxel, float cell_siz
     }
     
     V /= N_GI_CONES;
+#endif
+
+#if USE_ONLY_LEAF_SPHERE
+    float V = -sq_distance(sphere.origin, world_pos);
+#endif
     
     take_better_node(found_leaf, leaf, V);
   }
-  
+
+#if USE_CONES
   #ifndef BVH_GRID_UNCLAMPED_OCCLUSION
   const float total_ao_at = accumulate_bouquet_to_total_occlusion_unclamped();
   #else
   const float total_ao_at = accumulate_bouquet_to_total_occlusion();
   #endif
+#endif
   
   imageStore(leafIndexTexture, voxel, uvec4(found_leaf.index));
 #if BVH_USE_GRID_OCCLUSION

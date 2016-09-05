@@ -271,17 +271,6 @@ void Renderer::initCascadedGridTextures()
       return rgba16ui_dummy_data.data();
   };
 
-  const gl::SamplerObject& samplerObject = gl::SamplerObject::GetSamplerObject(gl::SamplerObject::Desc(gl::SamplerObject::Filter::NEAREST,
-                                                                                                       gl::SamplerObject::Filter::LINEAR,
-                                                                                                       gl::SamplerObject::Filter::NEAREST,
-                                                                                                       gl::SamplerObject::Border::CLAMP,
-                                                                                                       1 /* max anisotropy */,
-                                                                                                       glm::vec4(0.5f),
-                                                                                                       gl::SamplerObject::CompareMode::NONE,
-                                                                                                       0.f /* min lod */,
-                                                                                                       0.f /* max lod */));
-  GLuint clampedLinearSampler = samplerObject.GetInternHandle();
-
   for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
   {
     gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
@@ -307,6 +296,17 @@ void Renderer::initCascadedGridTextures()
   }
 
 #if BVH_USE_GRID_OCCLUSION
+  const gl::SamplerObject& samplerObject = gl::SamplerObject::GetSamplerObject(gl::SamplerObject::Desc(gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Filter::LINEAR,
+                                                                                                       gl::SamplerObject::Filter::NEAREST,
+                                                                                                       gl::SamplerObject::Border::CLAMP,
+                                                                                                       1 /* max anisotropy */,
+                                                                                                       glm::vec4(0.5f),
+                                                                                                       gl::SamplerObject::CompareMode::NONE,
+                                                                                                       0.f /* min lod */,
+                                                                                                       0.f /* max lod */));
+  GLuint clampedLinearSampler = samplerObject.GetInternHandle();
+
   for(int i=0; i<NUM_GRID_CASCADES; ++i)
   {
     gridOcclusionTexture[i].setUncompressed2DImage(GlTexture::format(glm::uvec3(16, 16, 16), 0, GlTexture::Format::RED, GlTexture::Type::UINT8, GlTexture::Target::TEXTURE_3D), r8ui_dummy_data.data());
@@ -407,7 +407,9 @@ void Renderer::updateBvhLeafGrid()
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeTextureHandles[i + texture_base]));
+#if BVH_USE_GRID_OCCLUSION
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeOcclusionTextureHandles[i]));
+#endif
   }
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
@@ -428,7 +430,9 @@ void Renderer::updateBvhLeafGrid()
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));
+#if BVH_USE_GRID_OCCLUSION
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderOcclusionTextureHandles[i]));
+#endif
   }
 }
 
