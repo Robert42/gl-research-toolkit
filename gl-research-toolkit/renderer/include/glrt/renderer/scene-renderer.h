@@ -135,6 +135,8 @@ private:
     GLuint64 gridTexture[NUM_GRID_CASCADES];
 #if BVH_USE_GRID_OCCLUSION
     GLuint64 occlusionTexture[NUM_GRID_CASCADES];
+#else
+    padding<GLuint64, NUM_GRID_CASCADES%2> _padding;
 #endif
     glm::vec4 snappedGridLocation[NUM_GRID_CASCADES];
     glm::vec4 smoothGridLocation[NUM_GRID_CASCADES];
