@@ -57,7 +57,7 @@ inline bool isUsingBvhLeafGrid()
 }
 
 #define NUM_GRID_CASCADES 1
-#define BVH_USE_GRID_OCCLUSION 1
+#define BVH_USE_GRID_OCCLUSION 0
 
 } // namespace renderer
 } // namespace glrt
