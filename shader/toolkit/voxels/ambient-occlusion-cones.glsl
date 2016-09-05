@@ -169,7 +169,7 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
   GATHER_INDICES(2)
   #endif
   
-  for(uint32_t i=0; i<N; ++i)
+  for(uint32_t i=0; i<n; ++i)
   {
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
         ao_distancefield_cost++;

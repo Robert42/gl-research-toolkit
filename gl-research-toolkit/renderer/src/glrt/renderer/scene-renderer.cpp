@@ -398,12 +398,16 @@ void Renderer::updateBvhLeafGrid()
   {
 #if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
     GL_CALL(glMakeTextureHandleNonResidentNV, renderTextureHandles[i + texture_base]);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeTextureHandleNonResidentNV, renderOcclusionTextureHandles[i]);
+#endif
 #endif
 
 #if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
     GL_CALL(glMakeImageHandleResidentNV, computeTextureHandles[i + texture_base], GL_WRITE_ONLY);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeImageHandleResidentNV, computeOcclusionTextureHandles[i], GL_WRITE_ONLY);
+#endif
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeTextureHandles[i + texture_base]));
@@ -421,12 +425,16 @@ void Renderer::updateBvhLeafGrid()
   {
 #if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
     GL_CALL(glMakeImageHandleNonResidentNV, computeTextureHandles[i + texture_base]);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeImageHandleNonResidentNV, computeOcclusionTextureHandles[i]);
+#endif
 #endif
 
 #if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
     GL_CALL(glMakeTextureHandleResidentNV, renderTextureHandles[i + texture_base]);
+#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeTextureHandleResidentNV, renderOcclusionTextureHandles[i]);
+#endif
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));
