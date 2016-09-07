@@ -150,7 +150,3 @@ std::string ShaderObject::FileIndex::filterErrorText(const std::string& t) const
 // OpenGL header.
 
 #include <GL/glew.h>
-
-#ifndef GLEW_NV_fragment_shader_interlock
-#error Please make sure to use glew version 1.13 or higher!
-#endif

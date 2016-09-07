@@ -210,10 +210,6 @@ void System::verifyNVidiaFeatures()
   if(!GLEW_NV_fill_rectangle)
     throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fill_rectangle"));
 
-  // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fragment_shader_interlock.txt
-  if(!GLEW_NV_fragment_shader_interlock)
-    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fragment_shader_interlock"));
-
   // http://developer.download.nvidia.com/opengl/specs/GL_NV_gpu_shader5.txt
     if(!GLEW_NV_gpu_shader5)
       throw GLRT_EXCEPTION(QString("Missing opengl extension NV_gpu_shader5"));
