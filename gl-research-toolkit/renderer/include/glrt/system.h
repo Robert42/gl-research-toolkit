@@ -24,12 +24,23 @@ public:
     int minOpenglVersion = 450;
     bool VSync = false;
     bool onlyOpenGLContext = false;
+    bool windowedMode = true;
+    padding<uint8_t, 1> _padding;
 
     static Settings simpleWindow(const QString& windowTitle="Hello World :)", const glm::ivec2 windowSize = glm::ivec2(1024, 768))
     {
       Settings settings;
       settings.windowTitle = windowTitle;
       settings.windowSize = windowSize;
+      return settings;
+    }
+
+    static Settings fullscreen(const QString& windowTitle, const glm::ivec2 resolution)
+    {
+      Settings settings;
+      settings.windowTitle = windowTitle;
+      settings.windowSize = resolution;
+      settings.windowedMode = false;
       return settings;
     }
 
@@ -75,6 +86,8 @@ private:
   QSplashScreen* splashscreen = nullptr;
   renderer::ShaderCompiler* shaderCompiler = nullptr;
   Logger logger;
+
+  const bool _fullscreen : 1;
 
   static glm::ivec2 _windowSize;
 

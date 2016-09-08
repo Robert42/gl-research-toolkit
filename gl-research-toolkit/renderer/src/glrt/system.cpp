@@ -40,7 +40,8 @@ glm::ivec3 System::maxComputeWorkGroupSize = glm::ivec3(-1);
 int System::maxComputeWorkGroupInvocations = -1;
 
 System::System(int& argc, char** argv, const Settings& settings)
-  : application(argc, argv)
+  : application(argc, argv),
+  _fullscreen(!settings.windowedMode)
 {
   initSplashscreen(settings);
 
@@ -79,6 +80,60 @@ void System::showWindow()
   splashscreen = nullptr;
 
   SDL_ShowWindow(sdlWindow);
+
+  if(_fullscreen)
+  {
+#ifdef QT_DEBUG
+    SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+#else
+    SDL_SetWindowFullscreen(sdlWindow, SDL_WINDOW_FULLSCREEN);
+#endif
+
+    SDL_DisplayMode bestDisplayMode;
+
+    int best_display_index = -1;
+    int best_size_diff = std::numeric_limits<int>::max();
+    int best_refresh_rate = 0;
+    quint32 best_format_bits_per_pixel = 0;
+    quint32 best_format_bytes_per_pixel = 0;
+
+
+    for(int display_index = 0; display_index<SDL_GetNumVideoDisplays(); ++display_index)
+    {
+      int num_display_modes = SDL_GetNumDisplayModes(display_index);
+      for(int i=0; i<num_display_modes; ++i)
+      {
+        SDL_DisplayMode candidate;
+        CALL_SDL_CRITICAL(0==SDL_GetDisplayMode(display_index, i, &candidate));
+
+        int size_diff = glm::abs(candidate.w-_windowSize.x) + glm::abs(candidate.h-_windowSize.y);
+        if(size_diff > best_size_diff)
+          continue;
+
+        if(SDL_ISPIXELFORMAT_INDEXED(candidate.format))
+          continue;
+        if(SDL_BITSPERPIXEL(candidate.format) < 24)
+          continue;
+        if(SDL_BYTESPERPIXEL(candidate.format) < 3)
+          continue;
+
+        if(candidate.refresh_rate < best_refresh_rate)
+          continue;
+
+        bestDisplayMode = candidate;
+        best_display_index = display_index;
+        best_refresh_rate = candidate.refresh_rate;
+        best_format_bits_per_pixel = SDL_BITSPERPIXEL(candidate.format);
+        best_format_bytes_per_pixel = SDL_BYTESPERPIXEL(candidate.format);
+        best_size_diff = size_diff;
+      }
+    }
+
+    SDL_DisplayMode usedDisplayMode;
+    CALL_SDL_CRITICAL(SDL_GetClosestDisplayMode(best_display_index, &bestDisplayMode, &usedDisplayMode));
+    CALL_SDL_CRITICAL(0==SDL_SetWindowDisplayMode(sdlWindow, &usedDisplayMode));
+
+  }
 }
 
 void System::initSplashscreen(const Settings& settings)
@@ -101,12 +156,17 @@ void System::initSDL(const Settings& settings)
 
   CALL_SDL_CRITICAL(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) == 0);
 
+  uint32_t additionalFlags = 0;
+
+  if(_fullscreen)
+    additionalFlags |= SDL_WINDOW_BORDERLESS;
+
   sdlWindow = SDL_CreateWindow(settings.windowTitle.toUtf8().data(),
                                SDL_WINDOWPOS_CENTERED,
                                SDL_WINDOWPOS_CENTERED,
                                settings.windowSize.x,
                                settings.windowSize.y,
-                               SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+                               SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN | additionalFlags);
   CALL_SDL_CRITICAL(sdlWindow != nullptr);
 
   _windowSize =  settings.windowSize;
