@@ -1,6 +1,7 @@
 option(GLRT_SAMPLES "Enable to compile tools." ON)
 
 if(GLRT_SAMPLES)
+add_subdirectory(benchmark)
 add_subdirectory(forward-renderer)
 add_subdirectory(simple-commandlist)
 add_subdirectory(single-quad)
