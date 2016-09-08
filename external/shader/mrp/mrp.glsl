@@ -3,7 +3,8 @@ float mrp_specular_correction_factor_line(in float len, in float light_distance,
   float alpha = surface.roughness;
   // Equation 10
   float alpha_ = saturate(alpha + len / (2.f*light_distance));
-  
+
+  // Equation 20
   return alpha / alpha_;
 }
 
@@ -15,6 +16,7 @@ float mrp_specular_correction_factor_area(in float radius, in float light_distan
 // TODO: improve performance by using a precomputed inverse influence_radius
 float light_falloff(float distance_for_influence, float influence_radius, float distance_to_light)
 {
+  // Equation 9
   return sq(saturate(1.f - sq(sq(distance_for_influence/influence_radius)))) / (sq(distance_to_light) + 1.f);
 }
 
