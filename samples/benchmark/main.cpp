@@ -164,7 +164,8 @@ int main(int argc, char** argv)
 
     all_frame_times << deltaTime;
     aborted_by_criteria = (num_frames++) >= max_num_frames || (total_time+=deltaTime) > max_time;
-    app.isRunning = app.isRunning && !aborted_by_criteria;
+    bool need_more_frames = num_frames<frame_count_padding*3+1;
+    app.isRunning = app.isRunning && (!aborted_by_criteria || need_more_frames);
   }
 
   if(!screenshot_file_path.isEmpty())
