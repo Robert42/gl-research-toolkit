@@ -119,6 +119,8 @@ int main(int argc, char** argv)
 
   SDL_ShowCursor(0);
 
+  setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
+
   app.showWindow();
 
   int num_frames = 0;
