@@ -104,6 +104,8 @@ int main(int argc, char** argv)
     }
   }
 
+  setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
+
   const int frame_count_padding = 4;
   max_num_frames += frame_count_padding*2;
   all_frame_times.reserve(max_num_frames);
@@ -118,8 +120,6 @@ int main(int argc, char** argv)
   app.antweakbar.visible = false;
 
   SDL_ShowCursor(0);
-
-  setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
 
   app.showWindow();
 
