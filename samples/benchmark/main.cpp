@@ -104,6 +104,8 @@ int main(int argc, char** argv)
     }
   }
 
+  const int frame_count_padding = 4;
+  max_num_frames += frame_count_padding*2;
   all_frame_times.reserve(max_num_frames);
 
   glrt::SampleApplication app(argc, argv,
@@ -175,10 +177,10 @@ int main(int argc, char** argv)
       qWarning() << "Couldn't open the file for writing the framerate data";
       return 1;
     }
-    for(int i=0; i<all_frame_times.length(); ++i)
+    for(int i=frame_count_padding; i<all_frame_times.length()-frame_count_padding; ++i)
     {
-      if(i!=0)
-        file.write("\t");
+      if(i!=frame_count_padding)
+        file.write("\n");
       file.write(QString::number(all_frame_times[i], 'g', 10).toUtf8());
     }
   }
