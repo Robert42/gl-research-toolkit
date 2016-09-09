@@ -1,4 +1,5 @@
 #include <glrt/sample-application.h>
+#include <glrt/renderer/bvh-usage.h>
 #include <glrt/renderer/debugging/surface-shader-visualizations.h>
 
 using namespace glrt::renderer;
@@ -12,6 +13,7 @@ int main(int argc, char** argv)
   bool deferred = false;
 
   SurfaceShaderVisualization surfaceShaderVisualization = SurfaceShaderVisualization::NONE;
+  BvhUsage bvhUsage = BvhUsage::NO_BVH;
   QString screenshot_file_path;
   QString framedurations_file_path;
 
@@ -34,6 +36,17 @@ int main(int argc, char** argv)
       if(arguments.length() >= 1 && map.contains(arguments.first()))
       {
         surfaceShaderVisualization = map.value(arguments.first());
+        ok = true;
+        arguments.removeFirst();
+      }
+    }else if(arguments.first() == "--bvh-usage") // --visualization <VALUE>
+    {
+      arguments.removeFirst();
+      auto map = allcurrentBvhUsages();
+
+      if(arguments.length() >= 1 && map.contains(arguments.first()))
+      {
+        bvhUsage = map.value(arguments.first());
         ok = true;
         arguments.removeFirst();
       }
@@ -105,6 +118,7 @@ int main(int argc, char** argv)
   }
 
   setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
+  setCurrentBVHUsage(bvhUsage);
 
   const int frame_count_padding = 4;
   max_num_frames += frame_count_padding*2;
