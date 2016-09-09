@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     QString argument = arguments.first();
 
     bool ok = false;
-    if(arguments.first() == "--gui")
+    if(arguments.first() == "--gui") // --gui <VARNAME> <VALUE>
     {
       arguments.removeFirst();
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
         arguments.removeFirst();
         arguments.removeFirst();
       }
-    }else if(arguments.first() == "--max_num_frames")
+    }else if(arguments.first() == "--max_time") // --max_time <FLOAT_VALUE>
     {
       arguments.removeFirst();
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
         max_time = arguments.first().toFloat(&ok);
         arguments.removeFirst();
       }
-    }else if(arguments.first() == "--max_num_frames")
+    }else if(arguments.first() == "--max_num_frames") // --max_num_frames <FLOAT_VALUE>
     {
       arguments.removeFirst();
 
@@ -49,12 +49,12 @@ int main(int argc, char** argv)
         max_num_frames = arguments.first().toInt(&ok);
         arguments.removeFirst();
       }
-    }else if(arguments.first() == "--deferred")
+    }else if(arguments.first() == "--deferred") // --deferred
     {
       arguments.removeFirst();
       ok = true;
       deferred = true;
-    }else if(arguments.first() == "--forward")
+    }else if(arguments.first() == "--forward") // --forward
     {
       arguments.removeFirst();
       ok = true;
