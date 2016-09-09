@@ -13,6 +13,7 @@ int main(int argc, char** argv)
 
   SurfaceShaderVisualization surfaceShaderVisualization = SurfaceShaderVisualization::NONE;
   QString screenshot_file_path;
+  QString framedurations_file_path;
 
   QVector<float> all_frame_times;
 
@@ -76,6 +77,21 @@ int main(int argc, char** argv)
         QFileInfo screenshot_file(screenshot_file_path);
         if(!screenshot_file.dir().mkpath("."))
           qWarning() << "Couldn't create directory"<<screenshot_file.absolutePath();
+        else
+          ok = true;
+      }
+    }else if(arguments.first() == "--framerate")
+    {
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        framedurations_file_path = arguments.first();
+        arguments.removeFirst();
+
+        QFileInfo framedurations_file(screenshot_file_path);
+        if(!framedurations_file.dir().mkpath("."))
+          qWarning() << "Couldn't create directory"<<framedurations_file.absolutePath();
         else
           ok = true;
       }
@@ -149,6 +165,22 @@ int main(int argc, char** argv)
         std::swap(a[x], b[x]);
     }
     screenshot.save(screenshot_file_path);
+  }
+
+  if(!framedurations_file_path.isEmpty())
+  {
+    QFile file(framedurations_file_path);
+    if(!file.open(QFile::WriteOnly))
+    {
+      qWarning() << "Couldn't open the file for writing the framerate data";
+      return 1;
+    }
+    for(int i=0; i<all_frame_times.length(); ++i)
+    {
+      if(i!=0)
+        file.write("\t");
+      file.write(QString::number(all_frame_times[i], 'g', 10).toUtf8());
+    }
   }
 
   return aborted_by_criteria ? 0 : 42;
