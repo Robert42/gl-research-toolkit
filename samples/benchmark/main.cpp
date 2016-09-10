@@ -10,7 +10,8 @@ int main(int argc, char** argv)
 
   int max_num_frames = 500;
   float max_time = 5.f;
-  bool deferred = false;
+  bool deferred = false; // TODO
+  Q_UNUSED(deferred);
 
   SurfaceShaderVisualization surfaceShaderVisualization = SurfaceShaderVisualization::NONE;
   BvhUsage bvhUsage = BvhUsage::NO_BVH;

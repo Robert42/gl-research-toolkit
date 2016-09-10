@@ -222,6 +222,12 @@ inline TwType TweakBarCBVar<bool>::type()
   return TW_TYPE_BOOLCPP;
 }
 
+template<>
+inline TwType TweakBarCBVar<int>::type()
+{
+  return TW_TYPE_INT32;
+}
+
 class TweakBarShaderToggle : public TweakBarCBVar<bool>
 {
 public:
@@ -307,6 +313,7 @@ private:
   gui::TweakBarCBVar<bool> sdfShadowsToggle;
   gui::TweakBarCBVar<bool> updateGridCameraToggle;
   gui::TweakBarCBVar<bool> disableSceneryVoxels;
+  gui::TweakBarCBVar<int> numBvhGrids;
 
   bool _disableSceneryVoxels = false;
 

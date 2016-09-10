@@ -43,7 +43,9 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
-    collectAmbientOcclusionToGrid(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*NUM_GRID_CASCADES), QSet<QString>({"#define COMPUTE_GRIDS"})),
+    collectAmbientOcclusionToGrid1(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*1), QSet<QString>({"#define COMPUTE_GRIDS"})), // FIXME: possible to have only one shader?
+    collectAmbientOcclusionToGrid2(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*2), QSet<QString>({"#define COMPUTE_GRIDS"})),
+    collectAmbientOcclusionToGrid3(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*3), QSet<QString>({"#define COMPUTE_GRIDS"})),
     _update_grid_camera(true),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
@@ -79,6 +81,11 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
 
   setAdjustRoughness(true);
   setSDFShadows(false);
+
+  collectAmbientOcclusionToGrid[0] = nullptr;
+  collectAmbientOcclusionToGrid[1] = &collectAmbientOcclusionToGrid1;
+  collectAmbientOcclusionToGrid[2] = &collectAmbientOcclusionToGrid2;
+  collectAmbientOcclusionToGrid[3] = &collectAmbientOcclusionToGrid3;
 
   initCascadedGridTextures();
 }
@@ -251,7 +258,7 @@ void Renderer::initCascadedGridTextures()
 
   auto textureFormat = [](int i) {
     GlTexture::Format f;
-    if(i<NUM_GRID_CASCADES)
+    if(i<MAX_NUM_GRID_CASCADES)
       f = GlTexture::Format::RED_INTEGER;
     else
       f = GlTexture::Format::RGBA_INTEGER;
@@ -259,19 +266,19 @@ void Renderer::initCascadedGridTextures()
     return GlTexture::format(glm::uvec3(16, 16, 16), 0, f, GlTexture::Type::UINT16, GlTexture::Target::TEXTURE_3D);
   };
   auto imageFormat = [](int i) -> GLenum {
-    if(i<NUM_GRID_CASCADES)
+    if(i<MAX_NUM_GRID_CASCADES)
       return GL_R16UI;
     else
       return GL_RGBA16UI;
   };
   auto init_data = [&](int i) -> const uint16_t* {
-    if(i<NUM_GRID_CASCADES)
+    if(i<MAX_NUM_GRID_CASCADES)
       return r16ui_dummy_data.data();
     else
       return rgba16ui_dummy_data.data();
   };
 
-  for(int i=0; i<NUM_GRID_CASCADES*2; ++i)
+  for(int i=0; i<MAX_NUM_GRID_CASCADES*2; ++i)
   {
     gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
     gl::TextureId textureId = gridTexture[i].textureId;
@@ -295,7 +302,6 @@ void Renderer::initCascadedGridTextures()
     renderTextureHandles[i] = textureHandle;
   }
 
-#if BVH_USE_GRID_OCCLUSION
   const gl::SamplerObject& samplerObject = gl::SamplerObject::GetSamplerObject(gl::SamplerObject::Desc(gl::SamplerObject::Filter::NEAREST,
                                                                                                        gl::SamplerObject::Filter::LINEAR,
                                                                                                        gl::SamplerObject::Filter::NEAREST,
@@ -307,7 +313,7 @@ void Renderer::initCascadedGridTextures()
                                                                                                        0.f /* max lod */));
   GLuint clampedLinearSampler = samplerObject.GetInternHandle();
 
-  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  for(int i=0; i<MAX_NUM_GRID_CASCADES; ++i)
   {
     gridOcclusionTexture[i].setUncompressed2DImage(GlTexture::format(glm::uvec3(16, 16, 16), 0, GlTexture::Format::RED, GlTexture::Type::UINT8, GlTexture::Target::TEXTURE_3D), r8ui_dummy_data.data());
     gl::TextureId textureId = gridOcclusionTexture[i].textureId;
@@ -330,7 +336,6 @@ void Renderer::initCascadedGridTextures()
     computeOcclusionTextureHandles[i] = imageHandle;
     renderOcclusionTextureHandles[i] = textureHandle;
   }
-#endif
 }
 
 void Renderer::deinitCascadedGridTextures()
@@ -341,20 +346,15 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 {
   PROFILE_SCOPE("Renderer::updateCascadedGrids()")
 
-  static_assert(NUM_GRID_CASCADES<=3, "unexpected number of cascades");
-#if NUM_GRID_CASCADES == 2
-  const float gridSizes[3] = {8., 32};
-#elif NUM_GRID_CASCADES == 3
-  const float gridSizes[3] = {8., 16, 32};
-#else
-  const float gridSizes[3] = {8.};
-#endif
+  float gridSizes[3] = {8., 16, 32};
+  gridSizes[num_grid_cascades()-1] = 32;
+  gridSizes[0] = 8;
 
   CascadedGridsHeader header;
 
   float margin = 1.f;
 
-  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  for(int i=0; i<num_grid_cascades(); ++i)
   {
     float gridSize = gridSizes[i];
 
@@ -376,14 +376,12 @@ inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
     header.smoothGridLocation[i] = glm::vec4(grid_origin, grid_scale_factor);
   }
 
-  int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
+  int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? MAX_NUM_GRID_CASCADES : 0;
 
-  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  for(int i=0; i<num_grid_cascades(); ++i)
   {
     header.gridTexture[i] = renderTextureHandles[i + texture_base];
-#if BVH_USE_GRID_OCCLUSION
     header.occlusionTexture[i] = renderOcclusionTextureHandles[i];
-#endif
   }
 
   return header;
@@ -393,8 +391,8 @@ void Renderer::updateBvhLeafGrid()
 {
   PROFILE_SCOPE("Renderer::updateBvhLeafGrid()")
 
-  const int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
-  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  const int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? MAX_NUM_GRID_CASCADES : 0;
+  for(int i=0; i<num_grid_cascades(); ++i)
   {
 #if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
     GL_CALL(glMakeTextureHandleNonResidentNV, renderTextureHandles[i + texture_base]);
@@ -411,17 +409,16 @@ void Renderer::updateBvhLeafGrid()
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeTextureHandles[i + texture_base]));
-#if BVH_USE_GRID_OCCLUSION
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeOcclusionTextureHandles[i]));
-#endif
   }
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   aoCollectHeaderUniformBuffer.BindUniformBuffer(UNIFORM_COLLECT_OCCLUSION_METADATA_BLOCK);
 
-  collectAmbientOcclusionToGrid.invoke();
+  Q_ASSERT(collectAmbientOcclusionToGrid[num_grid_cascades()] != nullptr);
+  collectAmbientOcclusionToGrid[num_grid_cascades()]->invoke();
 
-  for(int i=0; i<NUM_GRID_CASCADES; ++i)
+  for(int i=0; i<num_grid_cascades(); ++i)
   {
 #if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
     GL_CALL(glMakeImageHandleNonResidentNV, computeTextureHandles[i + texture_base]);
@@ -438,9 +435,7 @@ void Renderer::updateBvhLeafGrid()
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));
-#if BVH_USE_GRID_OCCLUSION
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderOcclusionTextureHandles[i]));
-#endif
   }
 }
 
@@ -450,13 +445,11 @@ void Renderer::update_aoCollectHeader()
   {
     AoCollectHeader& aoCollectSceneUniformData = *reinterpret_cast<AoCollectHeader*>(aoCollectHeaderUniformBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
 
-    int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? NUM_GRID_CASCADES : 0;
-    for(int i=0; i<NUM_GRID_CASCADES; ++i)
+    int texture_base = bvh_is_grid_with_four_components(renderer::currentBvhUsage) ? num_grid_cascades() : 0;
+    for(int i=0; i<num_grid_cascades(); ++i)
     {
       aoCollectSceneUniformData.gridTexture[i] = computeTextureHandles[i + texture_base];
-  #if BVH_USE_GRID_OCCLUSION
       aoCollectSceneUniformData.occlusionTexture[i] = computeOcclusionTextureHandles[i];
-  #endif
     }
 
     aoCollectHeaderUniformBuffer.Unmap();

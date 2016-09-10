@@ -97,6 +97,9 @@ void System::showWindow()
     quint32 best_format_bits_per_pixel = 0;
     quint32 best_format_bytes_per_pixel = 0;
 
+    Q_UNUSED(best_format_bits_per_pixel);
+    Q_UNUSED(best_format_bytes_per_pixel);
+
 
     for(int display_index = 0; display_index<SDL_GetNumVideoDisplays(); ++display_index)
     {

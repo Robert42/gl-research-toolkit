@@ -4,7 +4,28 @@
 namespace glrt {
 namespace renderer {
 
+extern int currentNumBvhGrids;
+
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
+int currentNumBvhGrids = 0;
+
+int num_grid_cascades()
+{
+  return currentNumBvhGrids;
+}
+
+void set_num_grid_cascades(int n)
+{
+  Q_ASSERT(n>=1 && n<=3);
+  if(currentNumBvhGrids == n)
+    return;
+
+  ReloadableShader::globalPreprocessorBlock.remove(QString("#define NUM_GRID_CASCADES %0").arg(currentNumBvhGrids));
+  currentNumBvhGrids = n;
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define NUM_GRID_CASCADES %0").arg(currentNumBvhGrids));
+
+  ReloadableShader::reloadAll();
+}
 
 QMap<QString, BvhUsage> allcurrentBvhUsages()
 {
@@ -16,10 +37,8 @@ QMap<QString, BvhUsage> allcurrentBvhUsages()
   VALUE(BVH_WITH_STACK);
   VALUE(BVH_GRID_NEAREST_LEAF);
   VALUE(BVH_GRID_NEAREST_FOUR_LEAVES);
-#if BVH_USE_GRID_OCCLUSION
   VALUE(BVH_GRID_NEAREST_LEAF_UNCLAMPED_OCCLUSION);
   VALUE(BVH_GRID_NEAREST_FOUR_LEAVES_UNCLAMPED_OCCLUSION);
-#endif
 
   return map;
 }
@@ -53,12 +72,13 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
 
 void init_bvh_shader_macros()
 {
+  set_num_grid_cascades(3);
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define AO_RADIUS 3.5"));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_STATIC_MESHES %0").arg(MAX_NUM_STATIC_MESHES));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_STACK_DEPTH %0").arg(BVH_MAX_STACK_DEPTH));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_VISITED_LEAVES %0").arg(BVH_MAX_VISITED_LEAVES));
-  ReloadableShader::globalPreprocessorBlock.insert(QString("#define NUM_GRID_CASCADES %0").arg(NUM_GRID_CASCADES));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_USE_GRID_OCCLUSION %0").arg(BVH_USE_GRID_OCCLUSION));
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_GRID_CASCADES %0").arg(MAX_NUM_GRID_CASCADES));
   setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
 }
 

@@ -227,6 +227,10 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   bvhUsageSwitcher->setCurrentValue(glrt::renderer::currentBvhUsage);
   bvhUsageSwitcher->valueChanged = [](glrt::renderer::BvhUsage bvhUsage){glrt::renderer::setCurrentBVHUsage(bvhUsage);};
 
+  numBvhGrids.setter = [](int n){renderer::set_num_grid_cascades(n);};
+  numBvhGrids.getter = []() -> int {return renderer::num_grid_cascades();};
+  numBvhGrids.TwAddVarCB(tweakBar, "Num Grid Cascades", QString("min=1 max=%0").arg(MAX_NUM_GRID_CASCADES).toStdString().c_str());
+
 
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
