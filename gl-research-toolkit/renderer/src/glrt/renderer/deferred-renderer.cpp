@@ -7,7 +7,7 @@ namespace renderer {
 
 DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter)
   : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter),
-    depth(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH_COMPONENT24),
+    depth(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH_COMPONENT32F),
     worldNormal_normalLength_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::R16F),
     baseColor_metalMask_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     emission_reflectance_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
@@ -17,7 +17,7 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
                     gl::FramebufferObject::Attachment(&emission_reflectance_Texture),
                     gl::FramebufferObject::Attachment(&occlusion_smoothness_Texture)},
                     gl::FramebufferObject::Attachment(&depth), false),
-    glProgram_CopyFrameToBackBuffer(std::move(ShaderCompiler::singleton().compileProgramFromFiles("copy-deferred-framebuffer", QDir(GLRT_SHADER_DIR"/materials/implementation"))))
+    glProgram_CopyFrameToBackBuffer("copy-deferred-framebuffer", QDir(GLRT_SHADER_DIR"/materials/implementation"))
 {
   const Material::Type PLAIN_COLOR = Material::TypeFlag::PLAIN_COLOR | Material::TypeFlag::OPAQUE | Material::TypeFlag::VERTEX_SHADER_UNIFORM;
   const Material::Type SPHERE_AREA_LIGHT =  Material::TypeFlag::SPHERE_LIGHT;
@@ -92,7 +92,7 @@ void DeferredRenderer::applyFramebuffer()
 {
   mrt_framebuffer.BindBackBuffer();
 
-  glProgram_CopyFrameToBackBuffer.use();
+  glProgram_CopyFrameToBackBuffer.glProgram.use();
   framebufferTextureHandlesBuffer.BindUniformBuffer(0);
   GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
   gl::Program::useNone();

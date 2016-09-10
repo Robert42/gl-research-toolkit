@@ -25,7 +25,7 @@ protected:
   void applyFramebuffer() override;
 
 private:
-  gl::Program  glProgram_CopyFrameToBackBuffer;
+  ReloadableShader  glProgram_CopyFrameToBackBuffer;
   gl::Buffer framebufferTextureHandlesBuffer;
 
   static QSet<QString> preprocessorBlock();
