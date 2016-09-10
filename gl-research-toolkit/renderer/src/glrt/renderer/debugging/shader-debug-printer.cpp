@@ -308,9 +308,7 @@ void ShaderDebugPrinter::draw()
 
   glProgram.use();
   headerBuffer.BindShaderStorageBuffer(UNIFORM_BINDING_VALUE_PRINTER);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL_RECTANGLE_NV);
-  GL_CALL(glDrawArrays, GL_TRIANGLES, 0, 3);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
   gl::Program::useNone();
 }
 

@@ -269,10 +269,6 @@ void System::verifyNVidiaFeatures()
 
   // See http://blog.icare3d.org/ for a more complete list of interesting Features
 
-  // https://developer.nvidia.com/sites/default/files/akamai/opengl/specs/GL_NV_fill_rectangle.txt
-  if(!GLEW_NV_fill_rectangle)
-    throw GLRT_EXCEPTION(QString("Missing opengl extension NV_fill_rectangle"));
-
   // http://developer.download.nvidia.com/opengl/specs/GL_NV_gpu_shader5.txt
     if(!GLEW_NV_gpu_shader5)
       throw GLRT_EXCEPTION(QString("Missing opengl extension NV_gpu_shader5"));
