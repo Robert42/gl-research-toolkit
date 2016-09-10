@@ -151,6 +151,8 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
     preprocessorBlock.insert("#define DEPTH_PREPASS");
   else if(pass == Pass::FORWARD_PASS)
     preprocessorBlock.insert("#define FORWARD_PASS");
+  else if(pass == Pass::GBUFFER_FILL_PASS)
+    preprocessorBlock.insert("#define GBUFFER_FILL_PASS");
   else
     Q_UNREACHABLE();
 
