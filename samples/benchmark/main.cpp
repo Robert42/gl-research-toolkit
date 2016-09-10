@@ -15,7 +15,6 @@ int main(int argc, char** argv)
 
   SurfaceShaderVisualization surfaceShaderVisualization = SurfaceShaderVisualization::NONE;
   BvhUsage bvhUsage = BvhUsage::NO_BVH;
-  int num_bvh_grids = 1;
   QString screenshot_file_path;
   QString framedurations_file_path;
 
@@ -58,7 +57,25 @@ int main(int argc, char** argv)
 
       if(arguments.length() >= 1)
       {
-        num_bvh_grids = arguments.first().toInt(&ok);
+        set_num_grid_cascades(uint16_t(glm::clamp<uint32_t>(arguments.first().toUInt(&ok), 1, 3)));
+        arguments.removeFirst();
+      }
+    }else if(arguments.first() == "--bvh-stack-depth") // --bvh-stack-depth <VALUE in [1,255]>
+    {
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        set_bvh_traversal_stack_depth(uint16_t(glm::clamp<uint32_t>(arguments.first().toUInt(&ok), 1, 255)));
+        arguments.removeFirst();
+      }
+    }else if(arguments.first() == "--bvh-leaf-array-length") // --bvh-leaf-array-length <VALUE in [1,255]>
+    {
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        set_bvh_traversal_leaf_result_array_length(uint16_t(glm::min<uint32_t>(std::numeric_limits<uint16_t>::max(), arguments.first().toUInt(&ok))));
         arguments.removeFirst();
       }
     }else if(arguments.first() == "--max_time") // --max_time <FLOAT_VALUE>
@@ -130,7 +147,6 @@ int main(int argc, char** argv)
 
   setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
   setCurrentBVHUsage(bvhUsage);
-  set_num_grid_cascades(num_bvh_grids);
 
   const int frame_count_padding = 4;
   max_num_frames += frame_count_padding*2;
