@@ -1,4 +1,4 @@
-﻿#ifndef _GLRT_GLSL_MATH_H_
+#ifndef _GLRT_GLSL_MATH_H_
 #define _GLRT_GLSL_MATH_H_
 
 const float pi = 3.1415926535897;
@@ -317,26 +317,31 @@ inline ivec3 voxelIndexFromScalarIndex(int index, ivec3 voxelCount)
   return voxelCoord;
 }
 
-inline mat4 matrixForDirection(vec3 direction, vec3 origin=vec3(0))
+inline mat3 matrix3x3ForDirection(vec3 direction)
 {
   vec3 z = direction;
   vec3 x;
   vec3 y;
-  
+
   if(abs(dot(z, vec3(0,1,0))) < abs(dot(z, vec3(0, 0, 1))))
     x = cross(vec3(0, 1, 0), z);
   else
     x = cross(vec3(0, 0, 1), z);
-  
+
   x = normalize(x);
   y = cross(x, z);
-  
-  mat4 t;
-  t[0] = vec4(x, 0);
-  t[1] = vec4(y, 0);
-  t[2] = vec4(z, 0);
+
+  return mat3(x, y, z);
+}
+
+inline mat4 matrixForDirection(vec3 direction, vec3 origin=vec3(0))
+{
+  mat4 t = mat4(matrix3x3ForDirection(direction));
+  t[0][3] = 0;
+  t[1][3] = 0;
+  t[2][3] = 0;
   t[3] = vec4(origin, 1);
-  
+
   return t;
 }
 
