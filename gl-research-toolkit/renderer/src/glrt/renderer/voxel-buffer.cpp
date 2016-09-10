@@ -183,7 +183,7 @@ void BVH::verifyTreeDepth() const
   const quint16 depth = calcDepth(0, bvhInnerNodes);
   if(Q_UNLIKELY(depth == num_leaves-1))
     qWarning() << "Malformed tree (no performence gains)";
-  if(Q_UNLIKELY(BVH_MAX_STACK_DEPTH < depth))
+  if(Q_UNLIKELY(bvh_traversal_stack_depth() < depth))
     qWarning() << "bvh has a greater depth than the bvh traversal stack";
   qDebug() << "BVH::updateTreeCPU{num_leaves:" <<num_leaves << " depth:"<<depth<<"}";
   Q_ASSERT(depth < MAX_NUM_STATIC_MESHES);

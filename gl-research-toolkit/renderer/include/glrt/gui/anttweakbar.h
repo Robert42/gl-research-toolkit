@@ -228,6 +228,13 @@ inline TwType TweakBarCBVar<int>::type()
   return TW_TYPE_INT32;
 }
 
+template<>
+inline TwType TweakBarCBVar<uint16_t>::type()
+{
+  return TW_TYPE_UINT16;
+}
+
+
 class TweakBarShaderToggle : public TweakBarCBVar<bool>
 {
 public:
@@ -313,7 +320,9 @@ private:
   gui::TweakBarCBVar<bool> sdfShadowsToggle;
   gui::TweakBarCBVar<bool> updateGridCameraToggle;
   gui::TweakBarCBVar<bool> disableSceneryVoxels;
-  gui::TweakBarCBVar<int> numBvhGrids;
+  gui::TweakBarCBVar<uint16_t> numBvhGrids;
+  gui::TweakBarCBVar<uint16_t> bvhStackDepth;
+  gui::TweakBarCBVar<uint16_t> bvhLeafResultArrayLength;
 
   bool _disableSceneryVoxels = false;
 

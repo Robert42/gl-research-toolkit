@@ -15,6 +15,7 @@ int main(int argc, char** argv)
 
   SurfaceShaderVisualization surfaceShaderVisualization = SurfaceShaderVisualization::NONE;
   BvhUsage bvhUsage = BvhUsage::NO_BVH;
+  int num_bvh_grids = 1;
   QString screenshot_file_path;
   QString framedurations_file_path;
 
@@ -49,6 +50,15 @@ int main(int argc, char** argv)
       {
         bvhUsage = map.value(arguments.first());
         ok = true;
+        arguments.removeFirst();
+      }
+    }else if(arguments.first() == "--num-bvh-grids") // --num-bvh-grids <VALUE in [1,3]>
+    {
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        num_bvh_grids = arguments.first().toInt(&ok);
         arguments.removeFirst();
       }
     }else if(arguments.first() == "--max_time") // --max_time <FLOAT_VALUE>
@@ -120,6 +130,7 @@ int main(int argc, char** argv)
 
   setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
   setCurrentBVHUsage(bvhUsage);
+  set_num_grid_cascades(num_bvh_grids);
 
   const int frame_count_padding = 4;
   max_num_frames += frame_count_padding*2;

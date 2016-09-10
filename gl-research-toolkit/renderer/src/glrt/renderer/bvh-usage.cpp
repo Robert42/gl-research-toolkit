@@ -4,25 +4,65 @@
 namespace glrt {
 namespace renderer {
 
-extern int currentNumBvhGrids;
+extern uint16_t _num_grid_cascades;
+extern uint16_t _bvh_traversal_stack_depth;
+extern uint16_t _bvh_traversal_leaf_result_array_length;
 
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
-int currentNumBvhGrids = 0;
+uint16_t _num_grid_cascades = 0;
+uint16_t _bvh_traversal_stack_depth = 0;
+uint16_t _bvh_traversal_leaf_result_array_length = 0;
 
-int num_grid_cascades()
+uint16_t num_grid_cascades()
 {
-  return currentNumBvhGrids;
+  return _num_grid_cascades;
 }
 
-void set_num_grid_cascades(int n)
+void set_num_grid_cascades(uint16_t n)
 {
   Q_ASSERT(n>=1 && n<=3);
-  if(currentNumBvhGrids == n)
+  if(_num_grid_cascades == n)
     return;
 
-  ReloadableShader::globalPreprocessorBlock.remove(QString("#define NUM_GRID_CASCADES %0").arg(currentNumBvhGrids));
-  currentNumBvhGrids = n;
-  ReloadableShader::globalPreprocessorBlock.insert(QString("#define NUM_GRID_CASCADES %0").arg(currentNumBvhGrids));
+  ReloadableShader::globalPreprocessorBlock.remove(QString("#define NUM_GRID_CASCADES %0").arg(_num_grid_cascades));
+  _num_grid_cascades = n;
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define NUM_GRID_CASCADES %0").arg(_num_grid_cascades));
+
+  ReloadableShader::reloadAll();
+}
+
+uint16_t bvh_traversal_stack_depth()
+{
+  return _bvh_traversal_stack_depth;
+}
+
+void set_bvh_traversal_stack_depth(uint16_t n)
+{
+  Q_ASSERT(n>=1);
+  if(_bvh_traversal_stack_depth == n)
+    return;
+
+  ReloadableShader::globalPreprocessorBlock.remove(QString("#define BVH_MAX_STACK_DEPTH %0").arg(_bvh_traversal_stack_depth));
+  _bvh_traversal_stack_depth = n;
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_STACK_DEPTH %0").arg(_bvh_traversal_stack_depth));
+
+  ReloadableShader::reloadAll();
+}
+
+uint16_t bvh_traversal_leaf_result_array_length()
+{
+  return _bvh_traversal_leaf_result_array_length;
+}
+
+void set_bvh_traversal_leaf_result_array_length(uint16_t n)
+{
+  Q_ASSERT(n>=1);
+  if(_bvh_traversal_leaf_result_array_length == n)
+    return;
+
+  ReloadableShader::globalPreprocessorBlock.remove(QString("#define BVH_MAX_VISITED_LEAVES %0").arg(_bvh_traversal_leaf_result_array_length));
+  _bvh_traversal_leaf_result_array_length = n;
+  ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_VISITED_LEAVES %0").arg(_bvh_traversal_leaf_result_array_length));
 
   ReloadableShader::reloadAll();
 }
@@ -73,10 +113,10 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
 void init_bvh_shader_macros()
 {
   set_num_grid_cascades(3);
+  set_bvh_traversal_stack_depth(MAX_NUM_STATIC_MESHES);
+  set_bvh_traversal_leaf_result_array_length(MAX_NUM_STATIC_MESHES);
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define AO_RADIUS 3.5"));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_STATIC_MESHES %0").arg(MAX_NUM_STATIC_MESHES));
-  ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_STACK_DEPTH %0").arg(BVH_MAX_STACK_DEPTH));
-  ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_VISITED_LEAVES %0").arg(BVH_MAX_VISITED_LEAVES));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_USE_GRID_OCCLUSION %0").arg(BVH_USE_GRID_OCCLUSION));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_GRID_CASCADES %0").arg(MAX_NUM_GRID_CASCADES));
   setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);

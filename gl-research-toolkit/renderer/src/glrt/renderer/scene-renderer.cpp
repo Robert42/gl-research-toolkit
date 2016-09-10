@@ -43,7 +43,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
     videoResolution(videoResolution),
-    collectAmbientOcclusionToGrid1(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*1), QSet<QString>({"#define COMPUTE_GRIDS"})), // FIXME: possible to have only one shader?
+    collectAmbientOcclusionToGrid1(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*1), QSet<QString>({"#define COMPUTE_GRIDS"})),
     collectAmbientOcclusionToGrid2(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*2), QSet<QString>({"#define COMPUTE_GRIDS"})),
     collectAmbientOcclusionToGrid3(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*3), QSet<QString>({"#define COMPUTE_GRIDS"})),
     _update_grid_camera(true),
@@ -396,16 +396,12 @@ void Renderer::updateBvhLeafGrid()
   {
 #if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
     GL_CALL(glMakeTextureHandleNonResidentNV, renderTextureHandles[i + texture_base]);
-#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeTextureHandleNonResidentNV, renderOcclusionTextureHandles[i]);
-#endif
 #endif
 
 #if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
     GL_CALL(glMakeImageHandleResidentNV, computeTextureHandles[i + texture_base], GL_WRITE_ONLY);
-#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeImageHandleResidentNV, computeOcclusionTextureHandles[i], GL_WRITE_ONLY);
-#endif
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsImageHandleResidentNV, computeTextureHandles[i + texture_base]));
@@ -422,16 +418,12 @@ void Renderer::updateBvhLeafGrid()
   {
 #if RESIDENCY_TACTIC&MAKE_IMAGE_ONLY_RESIDENT_IF_NECESSARY
     GL_CALL(glMakeImageHandleNonResidentNV, computeTextureHandles[i + texture_base]);
-#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeImageHandleNonResidentNV, computeOcclusionTextureHandles[i]);
-#endif
 #endif
 
 #if RESIDENCY_TACTIC&MAKE_TEXTURE_NON_RESIDENT_BEFORE_COMPUTING
     GL_CALL(glMakeTextureHandleResidentNV, renderTextureHandles[i + texture_base]);
-#if BVH_USE_GRID_OCCLUSION
     GL_CALL(glMakeTextureHandleResidentNV, renderOcclusionTextureHandles[i]);
-#endif
 #endif
 
     Q_ASSERT(GL_RET_CALL(glIsTextureHandleResidentNV, renderTextureHandles[i + texture_base]));

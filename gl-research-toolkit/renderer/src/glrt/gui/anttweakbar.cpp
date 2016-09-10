@@ -173,8 +173,8 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizeVoxelBoundingSpheres.guiToggle.TwAddVarCB(tweakBar, "Show SDF B-Spheres", "group='Debug Scene' help='Show the Bounding Spheres of the Distancefield Components'");
   renderer->visualizeBVH.guiToggle.TwAddVarCB(tweakBar, "Show BVH Tree", "group='Debug Scene' help='Show the SDF Bounding Volume Hierarchy'");
 
-  TwAddVarRW(tweakBar, "BVH Debug depth begin", TW_TYPE_UINT16, &renderer->bvh_debug_depth_begin, QString("group='Debug Scene' min=0 max=%0").arg(renderer::BVH_MAX_STACK_DEPTH).toStdString().c_str());
-  TwAddVarRW(tweakBar, "BVH Debug depth end", TW_TYPE_UINT16, &renderer->bvh_debug_depth_end, QString("group='Debug Scene' min=1 max=%0").arg(renderer::BVH_MAX_STACK_DEPTH).toStdString().c_str());
+  TwAddVarRW(tweakBar, "BVH Debug depth begin", TW_TYPE_UINT16, &renderer->bvh_debug_depth_begin, QString("group='Debug Scene' min=0 max=%0").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
+  TwAddVarRW(tweakBar, "BVH Debug depth end", TW_TYPE_UINT16, &renderer->bvh_debug_depth_end, QString("group='Debug Scene' min=1 max=%0").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
   renderer->visualizeBVH_Grid.guiToggle.TwAddVarCB(tweakBar, "Show BVH Cascaded Grids", "group='Debug Scene' help='Show the Grids accessing the SDF Bounding Volume Hierarchy'");
 
   renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Voxel-AABBs", "group='Debug Scene'");
@@ -222,40 +222,40 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   visualizationSwitcher->setCurrentValue(glrt::renderer::currentSurfaceShaderVisualization);
   visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
 
-  bvhUsageSwitcher = BvhUsageEnumeration::Ptr(new BvhUsageEnumeration("BvhUsageEnumeration", tweakBar, "BVH Usage", "keyincr=F8 keydecr=SHIFT+F8 help='Switch the suage of the BVH-tree'"));
+
+  TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
+
+
+  //-------- BVH---------------------------------------------------
+  bvhUsageSwitcher = BvhUsageEnumeration::Ptr(new BvhUsageEnumeration("BvhUsageEnumeration", tweakBar, "BVH Usage", "keyincr=F8 keydecr=SHIFT+F8 help='Switch the suage of the BVH-tree' group='BVH'"));
   bvhUsageSwitcher->init(glrt::renderer::allcurrentBvhUsages());
   bvhUsageSwitcher->setCurrentValue(glrt::renderer::currentBvhUsage);
   bvhUsageSwitcher->valueChanged = [](glrt::renderer::BvhUsage bvhUsage){glrt::renderer::setCurrentBVHUsage(bvhUsage);};
 
-  numBvhGrids.setter = [](int n){renderer::set_num_grid_cascades(n);};
-  numBvhGrids.getter = []() -> int {return renderer::num_grid_cascades();};
-  numBvhGrids.TwAddVarCB(tweakBar, "Num Grid Cascades", QString("min=1 max=%0").arg(MAX_NUM_GRID_CASCADES).toStdString().c_str());
+  numBvhGrids.setter = [](uint16_t n){renderer::set_num_grid_cascades(n);};
+  numBvhGrids.getter = []() -> uint16_t {return renderer::num_grid_cascades();};
+  numBvhGrids.TwAddVarCB(tweakBar, "Num Grid Cascades", QString("min=1 max=%0 group='BVH'").arg(MAX_NUM_GRID_CASCADES).toStdString().c_str());
 
+  bvhStackDepth.setter = [](uint16_t n){renderer::set_bvh_traversal_stack_depth(n);};
+  bvhStackDepth.getter = []() -> uint16_t {return renderer::bvh_traversal_stack_depth();};
+  bvhStackDepth.TwAddVarCB(tweakBar, "Stack Depth", QString("min=1 max=%0 group='BVH'").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
 
-  TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
+  bvhStackDepth.setter = [](uint16_t n){renderer::set_bvh_traversal_leaf_result_array_length(n);};
+  bvhStackDepth.getter = []() -> uint16_t {return renderer::bvh_traversal_leaf_result_array_length();};
+  bvhStackDepth.TwAddVarCB(tweakBar, "Num used Leaf Results ", QString("min=1 max=%0 group='BVH'").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
 
+  TwSetParam(tweakBar, "BVH", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  //-------- PBS---------------------------------------------------
   roughnessAdjustmentToggle.setter = [renderer](bool ar){renderer->setAdjustRoughness(ar);};
   roughnessAdjustmentToggle.getter = [renderer]() -> bool {return renderer->adjustRoughness();};
   roughnessAdjustmentToggle.TwAddVarCB(tweakBar, "Roughness Adjustment", "group=PBS");
   TwSetParam(tweakBar, "PBS", "opened", TW_PARAM_CSTRING, 1, "false");
 
+  //-------- Debug---------------------------------------------------
   sdfShadowsToggle.setter = [renderer](bool ar){renderer->setSDFShadows(ar);};
   sdfShadowsToggle.getter = [renderer]() -> bool {return renderer->sdfShadows();};
   sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=Debug");
-  TwSetParam(tweakBar, "Debug", "opened", TW_PARAM_CSTRING, 1, "false");
-
-  TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->costsHeatvisionBlackLevel, "group='Debug/Show Costs' min=0 max=2147483647");
-  TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->costsHeatvisionWhiteLevel, "group='Debug/Show Costs' min=1 max=2147483647");
-  toggleLogHeatVision_costs.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
-  toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug/Show Costs'");
-  TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
-
-  toggleDistancefieldAOSphereTracing.TwAddVarCB(tweakBar, "Sphere-Tracing", "group='Debug/SDF-AO'");
-  TwSetParam(tweakBar, "Debug/SDF-AO", "opened", TW_PARAM_CSTRING, 1, "false");
-
-  toggleConeBouquetNoise.TwAddVarCB(tweakBar, "Noise", "group='Debug/Cone-Bouquet'");
-  toggleConeBouquetUnderwaterCaustics.TwAddVarCB(tweakBar, "Underwater Caustics", "group='Debug/Cone-Bouquet'");
-  TwSetParam(tweakBar, "Debug/Cone-Bouquet", "opened", TW_PARAM_CSTRING, 1, "false");
 
   if(shaderDebugPrinter != nullptr)
   {
@@ -263,6 +263,24 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
     TwAddVarRW(tweakBar, "Clear Scene", TW_TYPE_BOOLCPP, &shaderDebugPrinter->clearScene, "group=Debug");
   }
   gui::Toolbar::registerTweakBar(tweakBar, false);
+
+  TwSetParam(tweakBar, "Debug", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  //-------- Debug/Show Costs ---------------------------------------------------
+  TwAddVarRW(tweakBar, "Black-Level", TW_TYPE_INT32, &renderer->costsHeatvisionBlackLevel, "group='Debug/Show Costs' min=0 max=2147483647");
+  TwAddVarRW(tweakBar, "White-Level", TW_TYPE_INT32, &renderer->costsHeatvisionWhiteLevel, "group='Debug/Show Costs' min=1 max=2147483647");
+  toggleLogHeatVision_costs.TwAddVarCB(tweakBar, "Logarithmic", "group='Debug/Show Costs'");
+  toggleLogHeatVisionColors.TwAddVarCB(tweakBar, "Colors", "group='Debug/Show Costs'");
+  TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  //-------- Debug/SDF-AO ---------------------------------------------------
+  toggleDistancefieldAOSphereTracing.TwAddVarCB(tweakBar, "Sphere-Tracing", "group='Debug/SDF-AO'");
+  TwSetParam(tweakBar, "Debug/SDF-AO", "opened", TW_PARAM_CSTRING, 1, "false");
+
+  //-------- Debug/Cone-Bouquet---------------------------------------------------
+  toggleConeBouquetNoise.TwAddVarCB(tweakBar, "Noise", "group='Debug/Cone-Bouquet'");
+  toggleConeBouquetUnderwaterCaustics.TwAddVarCB(tweakBar, "Underwater Caustics", "group='Debug/Cone-Bouquet'");
+  TwSetParam(tweakBar, "Debug/Cone-Bouquet", "opened", TW_PARAM_CSTRING, 1, "false");
 
   return tweakBar;
 }

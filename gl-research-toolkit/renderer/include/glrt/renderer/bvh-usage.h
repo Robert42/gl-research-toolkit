@@ -26,10 +26,7 @@ void setCurrentBVHUsage(BvhUsage bvhUsage);
 
 void init_bvh_shader_macros();
 
-// FIXME set to a lower value!
-const quint16 MAX_NUM_STATIC_MESHES = 255;
-const quint16 BVH_MAX_STACK_DEPTH = MAX_NUM_STATIC_MESHES;
-const quint16 BVH_MAX_VISITED_LEAVES = MAX_NUM_STATIC_MESHES;
+constexpr const quint16 MAX_NUM_STATIC_MESHES = 255;
 
 inline bool bvh_is_grid(BvhUsage usage)
 {
@@ -56,11 +53,16 @@ inline bool isUsingBvhLeafGrid()
   return bvh_is_grid(currentBvhUsage);
 }
 
-int num_grid_cascades();
-void set_num_grid_cascades(int n);
+uint16_t num_grid_cascades();
+void set_num_grid_cascades(uint16_t n);
+
+uint16_t bvh_traversal_stack_depth();
+void set_bvh_traversal_stack_depth(uint16_t n);
+
+uint16_t bvh_traversal_leaf_result_array_length();
+void set_bvh_traversal_leaf_result_array_length(uint16_t n);
 
 #define MAX_NUM_GRID_CASCADES 3
-
 #define BVH_USE_GRID_OCCLUSION 1
 
 } // namespace renderer
