@@ -1,7 +1,7 @@
 #version 450 core
 #include <extensions/command_list.glsl>
 
-#if (defined(DEPTH_PREPASS) &&  defined(MASKED)) || defined(GBUFFER_FILL_PASS)
+#if (defined(DEPTH_PREPASS) || defined(GBUFFER_FILL_PASS)) &&  defined(MASKED)
 // TODO test, how this affects performance. Would performance be improved, if this layout woul dbe active always?
 // https://www.opengl.org/registry/specs/ARB/conservative_depth.txt
 layout(depth_unchanged) out float gl_FragDepth;
