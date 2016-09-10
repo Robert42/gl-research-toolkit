@@ -16,7 +16,7 @@ struct FramebufferTextures
   sampler2D occlusion_smoothness;
 };
 
-layout(binding=0, std140) uniform FramebufferTextureBlock {
+layout(binding=UNIFORM_BINDING_GBUFFER_BLOCK, std140) uniform FramebufferTextureBlock {
   FramebufferTextures textures;
 };
 

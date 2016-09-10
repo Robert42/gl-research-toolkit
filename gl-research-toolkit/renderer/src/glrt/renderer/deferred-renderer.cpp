@@ -1,6 +1,7 @@
 #include <glrt/renderer/deferred-renderer.h>
 #include <glrt/renderer/debugging/debugging-posteffect.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
+#include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
 namespace renderer {
@@ -93,7 +94,7 @@ void DeferredRenderer::applyFramebuffer()
   mrt_framebuffer.BindBackBuffer();
 
   glProgram_CopyFrameToBackBuffer.glProgram.use();
-  framebufferTextureHandlesBuffer.BindUniformBuffer(0);
+  framebufferTextureHandlesBuffer.BindUniformBuffer(UNIFORM_BINDING_GBUFFER_BLOCK);
   GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
   gl::Program::useNone();
 }
