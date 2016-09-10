@@ -13,6 +13,9 @@ layout(early_fragment_tests) in;
 
 #include "implementation/material-implementation.fs.glsl"
 
+mat3 tangent_to_worldspace;
+void calc_tangent_to_worldspace();
+
 #include <glrt/glsl/layout-constants.h>
 
 
@@ -20,7 +23,6 @@ layout(early_fragment_tests) in;
 
 void main()
 {
-  fragment_color = vec4(1, 0, 1, 1);
   return;
 }
 
@@ -40,7 +42,7 @@ void main()
   SurfaceData surface;
   surface.position = fragment.position;
   
-  apply_material(plainColorMaterial, surface, 1.f);
+  apply_material(plainColorMaterial, surface, tangent_to_worldspace, 1.f);
 }
 
 #elif defined(TEXTURED)
@@ -137,8 +139,6 @@ void calculate_material_output(out BaseMaterial material, out SurfaceData surfac
 void main()
 {
 #ifdef DEPTH_PREPASS
-  fragment_color = vec4(1, 0, 1, 1);
-  // ignore the alpha in the depth prepass, if the material is opaque, or the alpha channel itself is current being debugged
 #if defined(OPAQUE) || defined(MATERIAL_NORMAL_WS) || defined(MATERIAL_ALPHA)
   return;
 #endif
@@ -163,7 +163,7 @@ void main()
   return;
 #endif
   
-  apply_material(material, surface, alpha);
+  apply_material(material, surface, tangent_to_worldspace, alpha);
 }
 
 #else

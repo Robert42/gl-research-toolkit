@@ -1,4 +1,6 @@
 #include <glrt/renderer/deferred-renderer.h>
+#include <glrt/renderer/debugging/debugging-posteffect.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
 
 namespace glrt {
 namespace renderer {
@@ -14,12 +16,68 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
                     gl::FramebufferObject::Attachment(&baseColor_metalMask_Texture),
                     gl::FramebufferObject::Attachment(&emission_reflectance_Texture),
                     gl::FramebufferObject::Attachment(&occlusion_smoothness_Texture)},
-                    gl::FramebufferObject::Attachment(&depth), false)
+                    gl::FramebufferObject::Attachment(&depth), false),
+    glProgram_CopyFrameToBackBuffer(std::move(ShaderCompiler::singleton().compileProgramFromFiles("copy-deferred-framebuffer", QDir(GLRT_SHADER_DIR"/materials/implementation"))))
 {
+  const Material::Type PLAIN_COLOR = Material::TypeFlag::PLAIN_COLOR | Material::TypeFlag::OPAQUE | Material::TypeFlag::VERTEX_SHADER_UNIFORM;
+  const Material::Type SPHERE_AREA_LIGHT =  Material::TypeFlag::SPHERE_LIGHT;
+  const Material::Type RECT_LIGHT_LIGHT = Material::TypeFlag::RECT_LIGHT;
+  const Material::Type TEXTURED_OPAQUE = Material::TypeFlag::TEXTURED | Material::TypeFlag::OPAQUE | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
+  const Material::Type TEXTURED_MASKED_TWO_SIDED = Material::TypeFlag::TEXTURED | Material::TypeFlag::MASKED | Material::TypeFlag::TWO_SIDED | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
+  const Material::Type TEXTURED_TRANSPARENT_TWO_SIDED = Material::TypeFlag::TEXTURED | Material::TypeFlag::TRANSPARENT | Material::TypeFlag::TWO_SIDED | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
+
+  int opaqueDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {PLAIN_COLOR, TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS);
+  int sphereLightDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {SPHERE_AREA_LIGHT}, Pass::DEPTH_PREPASS);
+  int rectLightDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {RECT_LIGHT_LIGHT}, Pass::DEPTH_PREPASS);
+  int maskedDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_MASKED_TWO_SIDED}, Pass::DEPTH_PREPASS);
+
+  int plainColorShader = appendMaterialShader(preprocessorBlock(), {PLAIN_COLOR}, Pass::FORWARD_PASS);
+  int sphereLightShader = appendMaterialShader(preprocessorBlock(), {SPHERE_AREA_LIGHT}, Pass::FORWARD_PASS);
+  int rectLightShader = appendMaterialShader(preprocessorBlock(), {RECT_LIGHT_LIGHT}, Pass::FORWARD_PASS);
+  int texturedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_OPAQUE}, Pass::FORWARD_PASS);
+  int maskedTwoSidedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_MASKED_TWO_SIDED}, Pass::FORWARD_PASS);
+  int transparentTwoSidedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_TRANSPARENT_TWO_SIDED}, Pass::FORWARD_PASS);
+
+  MaterialState::Flags commonAccelerationFlags = MaterialState::Flags::DEPTH_TEST;
+
+  MaterialState::Flags depthPrepassFlags = MaterialState::Flags::DEPTH_WRITE|commonAccelerationFlags;
+  MaterialState::Flags forwardPassFlags = MaterialState::Flags::COLOR_WRITE|commonAccelerationFlags;
+
+  MaterialState::Flags maskedTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING | MaterialState::Flags::ALPHA_BLENDING;
+  MaterialState::Flags transparentTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING | MaterialState::Flags::ALPHA_BLENDING;
+
+  appendMaterialState(&mrt_framebuffer, {PLAIN_COLOR, TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS, opaqueDepthPrepassShader, depthPrepassFlags);
+  appendMaterialState(&mrt_framebuffer, {SPHERE_AREA_LIGHT}, Pass::DEPTH_PREPASS, sphereLightDepthPrepassShader, depthPrepassFlags);
+  appendMaterialState(&mrt_framebuffer, {RECT_LIGHT_LIGHT}, Pass::DEPTH_PREPASS, rectLightDepthPrepassShader, depthPrepassFlags);
+  appendMaterialState(&mrt_framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::DEPTH_PREPASS, maskedDepthPrepassShader, depthPrepassFlags | maskedTwoSidedFlags);
+
+  appendMaterialState(&mrt_framebuffer, {PLAIN_COLOR}, Pass::FORWARD_PASS, plainColorShader, forwardPassFlags);
+  appendMaterialState(&mrt_framebuffer, {SPHERE_AREA_LIGHT}, Pass::FORWARD_PASS, sphereLightShader, forwardPassFlags);
+  appendMaterialState(&mrt_framebuffer, {RECT_LIGHT_LIGHT}, Pass::FORWARD_PASS, rectLightShader, forwardPassFlags);
+  appendMaterialState(&mrt_framebuffer, {TEXTURED_OPAQUE}, Pass::FORWARD_PASS, texturedShader, forwardPassFlags);
+  appendMaterialState(&mrt_framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::FORWARD_PASS, maskedTwoSidedShader, forwardPassFlags | maskedTwoSidedFlags);
+  appendMaterialState(&mrt_framebuffer, {TEXTURED_TRANSPARENT_TWO_SIDED}, Pass::FORWARD_PASS, transparentTwoSidedShader, forwardPassFlags | transparentTwoSidedFlags);
+
+  GLuint64 textureHandle[4];
+  textureHandle[0] = GL_RET_CALL(glGetTextureHandleNV, worldNormal_normalLength_Texture.GetInternHandle());
+  textureHandle[1] = GL_RET_CALL(glGetTextureHandleNV, baseColor_metalMask_Texture.GetInternHandle());
+  textureHandle[2] = GL_RET_CALL(glGetTextureHandleNV, emission_reflectance_Texture.GetInternHandle());
+  textureHandle[3] = GL_RET_CALL(glGetTextureHandleNV, occlusion_smoothness_Texture.GetInternHandle());
+  GL_CALL(glMakeTextureHandleResidentNV, textureHandle[0]);
+  GL_CALL(glMakeTextureHandleResidentNV, textureHandle[1]);
+  GL_CALL(glMakeTextureHandleResidentNV, textureHandle[2]);
+  GL_CALL(glMakeTextureHandleResidentNV, textureHandle[3]);
+
+  framebufferTextureHandlesBuffer = std::move(gl::Buffer(4*sizeof(GLuint64), gl::Buffer::IMMUTABLE, textureHandle));
+
+  mrt_framebuffer.Bind(true);
+  glrt::renderer::debugging::DebuggingPosteffect::init(&mrt_framebuffer, this);
+  mrt_framebuffer.BindBackBuffer();
 }
 
 DeferredRenderer::~DeferredRenderer()
 {
+  glrt::renderer::debugging::DebuggingPosteffect::deinit();
 }
 
 void DeferredRenderer::prepareFramebuffer()
@@ -34,7 +92,10 @@ void DeferredRenderer::applyFramebuffer()
 {
   mrt_framebuffer.BindBackBuffer();
 
-  // TODO draw fullscreen quad
+  glProgram_CopyFrameToBackBuffer.use();
+  framebufferTextureHandlesBuffer.BindUniformBuffer(0);
+  GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
+  gl::Program::useNone();
 }
 
 QSet<QString> DeferredRenderer::preprocessorBlock()

@@ -4,6 +4,10 @@
 #include "forward-lighting.fs.glsl"
 #endif
 
+#ifdef DEFERRED_RENDERER
+#include "deferred-lighting.fs.glsl"
+#endif
+
 vec4 checkerboard()
 {
   ivec2 tileId = ivec2(floor(gl_FragCoord.xy / 8)) % 2;

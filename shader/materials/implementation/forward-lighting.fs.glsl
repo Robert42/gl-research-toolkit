@@ -9,12 +9,9 @@
 
 out vec4 fragment_color;
 
-mat3 tangent_to_worldspace;
-void calc_tangent_to_worldspace();
-
 #include "highlight-numeric-issues.glsl"
 
-void apply_material(in BaseMaterial material, in SurfaceData surface, float alpha)
+void apply_material(in BaseMaterial material, in SurfaceData surface, mat3 tangent_to_worldspace, float alpha)
 {
   vec3 world_pos = surface.position;
   
