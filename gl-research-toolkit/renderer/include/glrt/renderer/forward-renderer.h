@@ -7,7 +7,7 @@
 namespace glrt {
 namespace renderer {
 
-class ForwardRenderer final : public Renderer
+class ForwardRenderer : public Renderer
 {
 public:
   ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter);

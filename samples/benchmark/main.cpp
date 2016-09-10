@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 
   int max_num_frames = 500;
   float max_time = 5.f;
-  bool deferred = false; // TODO
+  bool deferred = false;
   Q_UNUSED(deferred);
 
   SurfaceShaderVisualization surfaceShaderVisualization = SurfaceShaderVisualization::NONE;
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
   glrt::SampleApplication app(argc, argv,
                               glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
                                                                           ),
-                              glrt::SampleApplication::Settings::techDemo(),
+                              deferred ? glrt::SampleApplication::Settings::techDemoDeferred() : glrt::SampleApplication::Settings::techDemoForward(),
                               glrt::Application::Settings::techDemo(),
                               glrt::System::Settings::addVSync(glrt::System::Settings::fullscreen("Benchmark", resolution), false));
 

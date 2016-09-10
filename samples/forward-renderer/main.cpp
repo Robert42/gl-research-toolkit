@@ -7,7 +7,7 @@ int main(int argc, char** argv)
   glrt::SampleApplication app(argc, argv,
                               glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
                                                                           ),
-                              glrt::SampleApplication::Settings::techDemo(),
+                              glrt::SampleApplication::Settings::techDemoForward(),
                               glrt::Application::Settings::techDemo(),
                               glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Forward-Renderer"), ADD_VSYNC));
 

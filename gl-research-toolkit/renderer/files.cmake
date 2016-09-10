@@ -12,6 +12,7 @@ set(SOURCE_FILES
   include/glrt/renderer/debugging/surface-shader-visualizations.h
   include/glrt/renderer/debugging/visualization-renderer.h
   include/glrt/renderer/declarations.h
+  include/glrt/renderer/deferred-renderer.h
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
   include/glrt/renderer/gl/command-list.h
@@ -53,6 +54,7 @@ set(SOURCE_FILES
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/surface-shader-visualizations.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
+  src/glrt/renderer/deferred-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp
   src/glrt/renderer/gl/command-list.cpp
   src/glrt/renderer/gl/command-list-recorder.cpp
