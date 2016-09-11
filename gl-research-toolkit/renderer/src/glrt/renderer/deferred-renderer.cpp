@@ -18,7 +18,7 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
                     gl::FramebufferObject::Attachment(&emission_reflectance_Texture),
                     gl::FramebufferObject::Attachment(&occlusion_smoothness_Texture)},
                     gl::FramebufferObject::Attachment(&depth), false),
-    glProgram_CopyFrameToBackBuffer("copy-deferred-framebuffer", QDir(GLRT_SHADER_DIR"/materials/implementation"))
+    glProgram_CopyFrameToBackBuffer("deferred-light-phase", QDir(GLRT_SHADER_DIR"/materials/implementation"))
 {
   const Material::Type PLAIN_COLOR = Material::TypeFlag::PLAIN_COLOR | Material::TypeFlag::OPAQUE | Material::TypeFlag::VERTEX_SHADER_UNIFORM;
   const Material::Type SPHERE_AREA_LIGHT =  Material::TypeFlag::SPHERE_LIGHT;
