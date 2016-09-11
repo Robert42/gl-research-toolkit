@@ -1,6 +1,6 @@
 #version 450 core
 
-#include <fullscreen-quad.vs>
+#include <fullscreen-quad.vs.glsl>
 
 void main()
 {

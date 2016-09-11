@@ -22,6 +22,37 @@ layout(binding=UNIFORM_BINDING_GBUFFER_BLOCK, std140) uniform FramebufferTexture
 };
 
 in vec2 viewport_pos;
+flat in mat4 inv_projection_view_matrix;
+
+
+vec3 worldpos_from_ndc(mat4 inv_projection_view_matrix, vec3 view_ndc)
+{
+  // see also http://www.derschmale.com/2014/09/28/unprojections-explained/
+  
+  vec3 world_pos = transform_point(inv_projection_view_matrix, view_ndc);
+
+  return world_pos;
+}
+
+
+vec3 worldpos_from_depth(mat4 inv_projection_view_matrix, vec2 viewport_pos, float depth)
+{
+  // Normalize to the Range [0, 1]
+  depth = (depth - gl_DepthRange.near) / gl_DepthRange.diff;
+  
+  // map from [0, 1] to [-1, 1]
+  float depth_ndc = depth*2-1;
+  
+  vec3 view_ndc = vec3(viewport_pos, depth_ndc);
+
+  return worldpos_from_ndc(inv_projection_view_matrix, view_ndc);
+}
+
+vec3 worldpos_from_depth(float depth)
+{
+  return worldpos_from_depth(inv_projection_view_matrix, viewport_pos, depth);
+}
+
 
 void main()
 {
@@ -45,7 +76,7 @@ void main()
 
 
   SurfaceData surface;
-  surface.position = worldpos_from_depth(viewport_pos, depth);
+  surface.position = worldpos_from_depth(depth);
 
   float alpha = 1;
   mat3 tangent_to_worldspace = matrix3x3ForDirection(material.normal);

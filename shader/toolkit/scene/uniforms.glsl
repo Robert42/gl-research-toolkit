@@ -54,24 +54,6 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   SceneData scene;
 };
 
-vec3 worldpos_from_depth(vec2 viewport_pos, float depth)
-{
-  // see also http://www.derschmale.com/2014/09/28/unprojections-explained/
-  
-  // Normalize to the Range [0, 1]
-  depth = (depth - gl_DepthRange.near) / gl_DepthRange.diff;
-  
-  // map from [0, 1] to [-1, 1]
-  float depth_ndc = depth*2-1;
-  
-  vec3 view_ndc = vec3(viewport_pos, depth_ndc);
-
-  // TODO: test, whether precalculating it on the CPU side/in the vertex buffer (flat) is faster
-  vec3 world_pos = transform_point(inverse(scene.view_projection), view_ndc);
-
-  return world_pos;
-}
-
 float blink(float rate=0.2)
 {
   return step(rate, mod(scene.totalTime, rate*2.));
