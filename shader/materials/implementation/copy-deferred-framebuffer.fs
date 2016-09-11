@@ -21,6 +21,8 @@ layout(binding=UNIFORM_BINDING_GBUFFER_BLOCK, std140) uniform FramebufferTexture
   FramebufferTextures textures;
 };
 
+in vec2 viewport_pos;
+
 void main()
 {
   ivec2 texCoord = ivec2(gl_FragCoord.xy);
