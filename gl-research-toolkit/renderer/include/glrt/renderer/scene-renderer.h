@@ -149,7 +149,7 @@ private:
   };
 
   // Scene uniform buffer
-  struct SceneUniformBlock // TODO has it a performance impact, if the header is shorter than 256 bytes?
+  struct SceneUniformBlock
   {
     glm::mat4 view_projection_matrix;
     glm::vec3 camera_position;
