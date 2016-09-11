@@ -62,10 +62,12 @@ vec3 worldpos_from_depth(vec2 viewport_pos, float depth)
   depth = (depth - gl_DepthRange.near) / gl_DepthRange.diff;
   
   // map from [0, 1] to [-1, 1]
-  depth = depth*2-1;
+  float depth_ndc = depth*2-1;
+  
+  vec3 view_ndc = vec3(viewport_pos, depth_ndc);
 
   // TODO: test, whether precalculating it on the CPU side/in the vertex buffer (flat) is faster
-  vec3 world_pos = transform_point(inverse(scene.view_projection), vec3(viewport_pos, depth));
+  vec3 world_pos = transform_point(inverse(scene.view_projection), view_ndc);
 
   return world_pos;
 }
