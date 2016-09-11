@@ -57,11 +57,11 @@ add_custom_target(
   debugging/visualizations/visualize-voxel-grids.fs
   debugging/visualizations/visualize-voxel-grids.vs
   materials/implementation/common-implementation.vs.glsl
-  materials/implementation/copy-deferred-framebuffer.fs
-  materials/implementation/copy-deferred-framebuffer.vs
   materials/implementation/copy-forward-framebuffer.fs
   materials/implementation/copy-forward-framebuffer.vs
   materials/implementation/deferred-lighting.fs.glsl
+  materials/implementation/deferred-light-phase.fs
+  materials/implementation/deferred-light-phase.vs
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/highlight-numeric-issues.glsl
   materials/implementation/input-block.fs.glsl
@@ -78,7 +78,7 @@ add_custom_target(
   toolkit/debugging/print.glsl
   toolkit/extensions/command_list.glsl
   toolkit/extensions/common.glsl
-  toolkit/fullscreen-quad.vs
+  toolkit/fullscreen-quad.vs.glsl
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
