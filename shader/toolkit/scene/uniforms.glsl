@@ -54,7 +54,7 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   SceneData scene;
 };
 
-vec3 worldpos_from_depth(float depth)
+vec3 worldpos_from_depth(vec2 viewport_pos, float depth)
 {
   // Normalize to the Range [0, 1]
   depth = (depth - gl_DepthRange.near) / gl_DepthRange.diff;

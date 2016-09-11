@@ -45,7 +45,7 @@ void main()
 
 
   SurfaceData surface;
-  surface.position = worldpos_from_depth(depth);
+  surface.position = worldpos_from_depth(viewport_pos, depth);
 
   float alpha = 1;
   mat3 tangent_to_worldspace = matrix3x3ForDirection(material.normal);
