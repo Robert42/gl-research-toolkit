@@ -42,7 +42,8 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
   appendMaterialState(&mrt_framebuffer, {TEXTURED_OPAQUE}, Pass::GBUFFER_FILL_PASS, texturedShader, fillGbufferPassFlags);
   appendMaterialState(&mrt_framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::GBUFFER_FILL_PASS, maskedTwoSidedShader, fillGbufferPassFlags | maskedTwoSidedFlags);
 
-  GLuint64 textureHandle[5];
+  const int N = 5;
+  GLuint64 textureHandle[N];
   textureHandle[0] = GL_RET_CALL(glGetTextureHandleNV, worldNormal_normalLength_Texture.GetInternHandle());
   textureHandle[1] = GL_RET_CALL(glGetTextureHandleNV, baseColor_metalMask_Texture.GetInternHandle());
   textureHandle[2] = GL_RET_CALL(glGetTextureHandleNV, emission_reflectance_Texture.GetInternHandle());
@@ -54,7 +55,7 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
   GL_CALL(glMakeTextureHandleResidentNV, textureHandle[3]);
   GL_CALL(glMakeTextureHandleResidentNV, textureHandle[4]);
 
-  framebufferTextureHandlesBuffer = std::move(gl::Buffer(5*sizeof(GLuint64), gl::Buffer::IMMUTABLE, textureHandle));
+  framebufferTextureHandlesBuffer = std::move(gl::Buffer(N*sizeof(GLuint64), gl::Buffer::IMMUTABLE, textureHandle));
 
   mrt_framebuffer.Bind(true);
   glrt::renderer::debugging::DebuggingPosteffect::init(&mrt_framebuffer, this);
