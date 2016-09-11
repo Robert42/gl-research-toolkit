@@ -9,7 +9,7 @@ namespace renderer {
 DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter)
   : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter),
     depth(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH_COMPONENT32F),
-    worldNormal_normalLength_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::R16F),
+    worldNormal_normalLength_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA16F),
     baseColor_metalMask_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     emission_reflectance_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     occlusion_smoothness_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RG8),
