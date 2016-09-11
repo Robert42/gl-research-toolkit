@@ -56,6 +56,8 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
 
 vec3 worldpos_from_depth(vec2 viewport_pos, float depth)
 {
+  // see also http://www.derschmale.com/2014/09/28/unprojections-explained/
+  
   // Normalize to the Range [0, 1]
   depth = (depth - gl_DepthRange.near) / gl_DepthRange.diff;
   
