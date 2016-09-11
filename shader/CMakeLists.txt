@@ -61,6 +61,7 @@ add_custom_target(
   materials/implementation/copy-deferred-framebuffer.vs
   materials/implementation/copy-forward-framebuffer.fs
   materials/implementation/copy-forward-framebuffer.vs
+  materials/implementation/deferred-lighting.fs.glsl
   materials/implementation/forward-lighting.fs.glsl
   materials/implementation/highlight-numeric-issues.glsl
   materials/implementation/input-block.fs.glsl
@@ -90,4 +91,5 @@ add_custom_target(
   toolkit/voxels/raymarching-distance-cone-soft-shadow.glsl
   toolkit/voxels/raymarching-distance-field.glsl
   toolkit/voxels/voxel-structs.glsl
+  toolkit/write-fragment-color.glsl
 )

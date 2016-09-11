@@ -52,4 +52,3 @@ void main()
 
   apply_material(material, surface, tangent_to_worldspace, alpha);
 }
-
