@@ -25,6 +25,11 @@ public:
   float clipFar = 100.f;
   padding<float, 3> _padding;
 
+  float vertical_fov(float aspectRatio) const;
+  float vertical_fov() const;
+
+  glm::vec3 rightVector() const;
+
   static CameraParameter fromAssimp(const aiCamera& camera);
 
   friend CameraParameter operator*(const CoordFrame& frame, CameraParameter camera);

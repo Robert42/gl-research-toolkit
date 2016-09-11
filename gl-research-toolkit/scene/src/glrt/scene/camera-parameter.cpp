@@ -25,7 +25,7 @@ CameraParameter CameraParameter::fromAssimp(const aiCamera& assimpCamera)
 
 glm::mat4 CameraParameter::inverseViewMatrix() const
 {
-  return glm::mat4(glm::vec4(glm::cross(this->lookAt, this->upVector), 0),
+  return glm::mat4(glm::vec4(this->rightVector(), 0),
                    glm::vec4(this->upVector, 0),
                    glm::vec4(-this->lookAt, 0),
                    glm::vec4(this->position, 1));
@@ -43,7 +43,7 @@ glm::mat4 CameraParameter::projectionMatrix() const
 
 glm::mat4 CameraParameter::projectionMatrix(float aspectRatio) const
 {
-  return glm::perspective<float>(this->horizontal_fov/aspectRatio,
+  return glm::perspective<float>(vertical_fov(aspectRatio),
                                  aspectRatio,
                                  this->clipNear,
                                  this->clipFar);
@@ -52,6 +52,21 @@ glm::mat4 CameraParameter::projectionMatrix(float aspectRatio) const
 glm::mat4 CameraParameter::projectionMatrix(int width, int height) const
 {
   return projectionMatrix(float(width) / float(height));
+}
+
+float CameraParameter::vertical_fov(float aspectRatio) const
+{
+  return this->horizontal_fov/aspectRatio;
+}
+
+float CameraParameter::vertical_fov() const
+{
+  return vertical_fov(this->aspect);
+}
+
+glm::vec3 CameraParameter::rightVector() const
+{
+  return glm::cross(this->lookAt, this->upVector);
 }
 
 CameraParameter operator*(const CoordFrame& frame, CameraParameter camera)
