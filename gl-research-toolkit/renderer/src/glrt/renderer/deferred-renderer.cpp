@@ -32,7 +32,7 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
   int texturedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_OPAQUE}, Pass::GBUFFER_FILL_PASS);
   int maskedTwoSidedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_MASKED_TWO_SIDED}, Pass::GBUFFER_FILL_PASS);
 
-  MaterialState::Flags fillGbufferPassFlags = MaterialState::Flags::DEPTH_WRITE|MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::DEPTH_TEST;
+  MaterialState::Flags fillGbufferPassFlags = MaterialState::Flags::DEPTH_WRITE|MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::ALPHA_WRITE|MaterialState::Flags::DEPTH_TEST;
 
   MaterialState::Flags maskedTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING;
 
