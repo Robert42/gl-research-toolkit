@@ -1,6 +1,6 @@
 #include <glrt/sample-application.h>
 
-const bool ADD_VSYNC = false;
+const bool ADD_VSYNC = true;
 
 int main(int argc, char** argv)
 {
