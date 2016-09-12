@@ -17,6 +17,7 @@ int main(int argc, char** argv)
   BvhUsage bvhUsage = BvhUsage::NO_BVH;
   QString screenshot_file_path;
   QString framedurations_file_path;
+  QString systeminfo_file_path;
 
   QVector<float> all_frame_times;
 
@@ -136,6 +137,21 @@ int main(int argc, char** argv)
         else
           ok = true;
       }
+    }else if(arguments.first() == "--system-info")
+    {
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        systeminfo_file_path = arguments.first();
+        arguments.removeFirst();
+
+        QFileInfo systeminfo_file(screenshot_file_path);
+        if(!systeminfo_file.dir().mkpath("."))
+          qWarning() << "Couldn't create directory"<<systeminfo_file.absolutePath();
+        else
+          ok = true;
+      }
     }
 
     if(!ok)
@@ -228,6 +244,24 @@ int main(int argc, char** argv)
         file.write("\n");
       file.write(QString::number(all_frame_times[i], 'g', 10).toUtf8());
     }
+  }
+
+  if(!systeminfo_file_path.isEmpty())
+  {
+    QFile file(systeminfo_file_path);
+    if(!file.open(QFile::WriteOnly))
+    {
+      qWarning() << "Couldn't open the file for writing the framerate data";
+      return 1;
+    }
+    QTextStream textStream(&file);
+    textStream << "gl_vendor=" << reinterpret_cast<const char*>(glGetString(GL_VENDOR)) << "\n";
+    textStream << "gl_renderer=" << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << "\n";
+    textStream << "gl_version=" << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << "\n";
+    textStream << "shading_language_version=" << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n";
+    textStream << "cache_line=" << SDL_GetCPUCacheLineSize() << "\n";
+    textStream << "cpu_count=" << SDL_GetCPUCount() << "\n";
+    textStream << "system_ram=" << SDL_GetSystemRAM() << "\n";
   }
 
   return aborted_by_criteria ? 0 : 42;
