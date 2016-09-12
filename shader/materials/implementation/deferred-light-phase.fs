@@ -11,6 +11,8 @@
 struct FramebufferTextures
 {
   sampler2D worldNormal_normalLength;
+  sampler2D meshNormal_meshTangentX;
+  sampler2D meshTangentYZ;
   sampler2D baseColor_metalMask;
   sampler2D emission_reflectance;
   sampler2D occlusion_smoothness;
@@ -60,9 +62,11 @@ void main()
 
   float depth = texelFetch(textures.zbuffer, texCoord, 0).r;
   vec4 worldNormal_normalLength = texelFetch(textures.worldNormal_normalLength, texCoord, 0);
+  vec4 meshNormal_meshTangentX = texelFetch(textures.meshNormal_meshTangentX, texCoord, 0);
+  vec2 meshTangentYZ = texelFetch(textures.meshNormal_meshTangentX, texCoord, 0).xy;
   vec4 baseColor_metalMask = texelFetch(textures.baseColor_metalMask, texCoord, 0);
   vec4 emission_reflectance = texelFetch(textures.emission_reflectance, texCoord, 0);
-  vec4 occlusion_smoothness = texelFetch(textures.occlusion_smoothness, texCoord, 0);
+  vec2 occlusion_smoothness = texelFetch(textures.occlusion_smoothness, texCoord, 0).xy;
 
   BaseMaterial material;
   material.normal = worldNormal_normalLength.xyz;
@@ -77,9 +81,13 @@ void main()
 
   SurfaceData surface;
   surface.position = worldpos_from_depth(depth);
+  
+  vec3 meshNormal = normalize(meshNormal_meshTangentX.xyz);
+  vec3 meshTangent = normalize(vec3(meshNormal_meshTangentX.w, meshTangentYZ.xy));
+  vec3 meshBiTangent = normalize(cross(meshNormal, meshTangent));
 
   float alpha = 1;
-  mat3 tangent_to_worldspace = matrix3x3ForDirection(material.normal);
+  mat3 tangent_to_worldspace = mat3(meshTangent, meshBiTangent, meshNormal);
 
   apply_material(material, surface, tangent_to_worldspace, alpha);
 }

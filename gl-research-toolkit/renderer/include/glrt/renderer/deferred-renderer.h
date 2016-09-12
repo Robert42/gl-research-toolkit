@@ -15,6 +15,8 @@ public:
 
   gl::Texture2D depth;
   gl::Texture2D worldNormal_normalLength_Texture;
+  gl::Texture2D meshNormal_meshTangentX_Texture;
+  gl::Texture2D meshTangentYZ_Texture;
   gl::Texture2D baseColor_metalMask_Texture;
   gl::Texture2D emission_reflectance_Texture;
   gl::Texture2D occlusion_smoothness_Texture;
