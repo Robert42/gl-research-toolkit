@@ -63,6 +63,7 @@ uint16_t bvh_traversal_leaf_result_array_length();
 void set_bvh_traversal_leaf_result_array_length(uint16_t n);
 
 extern GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+extern GLSLMacroWrapper<int> SDFSAMPLING_EXPONENTIAL_NUM;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;

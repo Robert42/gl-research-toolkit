@@ -337,6 +337,7 @@ private:
   gui::TweakBarCBVar<uint16_t> bvhLeafResultArrayLength;
 
   TweakBarCBVar<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+  TweakBarCBVar<int> SDFSAMPLING_EXPONENTIAL_NUM;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_START;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_OFFSET;

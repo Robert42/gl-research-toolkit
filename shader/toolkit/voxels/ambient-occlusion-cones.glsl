@@ -7,6 +7,7 @@ int ao_distancefield_cost = 0;
 
 /*
 #define SDFSAMPLING_SELF_SHADOW_AVOIDANCE 0.25f
+#define SDFSAMPLING_EXPONENTIAL_NUM 4
 #define SDFSAMPLING_EXPONENTIAL_START (1.f/16.f)
 #define SDFSAMPLING_EXPONENTIAL_FACTOR 2.f
 #define SDFSAMPLING_EXPONENTIAL_OFFSET 0.f
@@ -39,15 +40,20 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   vec3 clamp_Range = vec3(voxelSize)-0.5f;
   
   // In Range [intersection_distance_front, intersection_distance_back]
-  float t = intersection_distance_front;
+  float spheretracing_start = max(SDFSAMPLING_SELF_SHADOW_AVOIDANCE, intersection_distance_front);
+  float t = spheretracing_start;
   
 #if defined(DISTANCEFIELD_FIXED_SAMPLE_POINTS)
   // In Range [0, 1]
   float exponential = SDFSAMPLING_EXPONENTIAL_START;
   
-  for(int i=0; i<4; ++i)
+  for(int i=0; i<SDFSAMPLING_EXPONENTIAL_NUM; ++i)
   {
+  #if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
+    t = mix(intersection_distance_front, spheretracing_start, exponential);
+  #else
     t = mix(intersection_distance_front, intersection_distance_back, exponential);
+  #endif
     vec3 p = get_point(ray_voxelspace, t);
     
     vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
