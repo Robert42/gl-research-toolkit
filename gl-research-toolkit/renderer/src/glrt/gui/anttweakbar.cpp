@@ -26,7 +26,8 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   toggleLogHeatVision_debugPosteffect.setter(true);
   toggleLogHeatVision_costs.setter(false);
   toggleLogHeatVisionColors.setter(true);
-  toggleDistancefieldAOSphereTracing.setter(false);
+  toggleDistancefieldFixedSamplePoints.setter(false);
+  toggleDistancefieldAOSphereTracing.setter(true);
   toggleConeBouquetNoise.setter(false);
   toggleConeBouquetUnderwaterCaustics.setter(false);
 
