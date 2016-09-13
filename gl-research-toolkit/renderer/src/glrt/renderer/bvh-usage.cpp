@@ -8,6 +8,12 @@ extern uint16_t _num_grid_cascades;
 extern uint16_t _bvh_traversal_stack_depth;
 extern uint16_t _bvh_traversal_leaf_result_array_length;
 
+GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE("#define SDFSAMPLING_SELF_SHADOW_AVOIDANCE %0", 0.25f);
+GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START("#define SDFSAMPLING_EXPONENTIAL_START %0", 1.f / 16.f);
+GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR("#define SDFSAMPLING_EXPONENTIAL_FACTOR %0", 2.f);
+GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET("#define SDFSAMPLING_EXPONENTIAL_OFFSET %0", 0.f);
+
+// TODO:: replace the following with GLSLMacroWrappers
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
 uint16_t _num_grid_cascades = 0;
 uint16_t _bvh_traversal_stack_depth = 0;
@@ -120,6 +126,8 @@ void init_bvh_shader_macros()
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_USE_GRID_OCCLUSION %0").arg(BVH_USE_GRID_OCCLUSION));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_GRID_CASCADES %0").arg(MAX_NUM_GRID_CASCADES));
   setCurrentBVHUsage(renderer::BvhUsage::NO_BVH);
+
+  GLSLMacroWrapperInterface::initAll();
 }
 
 } // namespace renderer

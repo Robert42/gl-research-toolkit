@@ -1,7 +1,7 @@
 #ifndef BVHUSAGE_H
 #define BVHUSAGE_H
 
-#include <glrt/dependencies.h>
+#include <glrt/renderer/toolkit/glsl-macro-wrapper.h>
 
 namespace glrt {
 namespace renderer {
@@ -61,6 +61,11 @@ void set_bvh_traversal_stack_depth(uint16_t n);
 
 uint16_t bvh_traversal_leaf_result_array_length();
 void set_bvh_traversal_leaf_result_array_length(uint16_t n);
+
+extern GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
+extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
+extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
 
 #define MAX_NUM_GRID_CASCADES 3
 #define BVH_USE_GRID_OCCLUSION 1

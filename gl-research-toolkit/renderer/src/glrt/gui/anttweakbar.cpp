@@ -18,6 +18,7 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     toggleLogHeatVision_debugPosteffect("LOG_HEATVISION_DEBUG_POSTEFFECT"),
     toggleLogHeatVision_costs("LOG_HEATVISION_DEBUG_COSTS"),
     toggleLogHeatVisionColors("HEATVISION_COLORS"),
+    toggleDistancefieldFixedSamplePoints("DISTANCEFIELD_FIXED_SAMPLE_POINTS"),
     toggleDistancefieldAOSphereTracing("DISTANCEFIELD_AO_SPHERE_TRACING"),
     toggleConeBouquetNoise("CONE_BOUQUET_NOISE"),
     toggleConeBouquetUnderwaterCaustics("CONE_BOUQUET_UNDERWATER_CAUSICS")
@@ -274,7 +275,19 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   TwSetParam(tweakBar, "Debug/Show Costs", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Debug/SDF-AO ---------------------------------------------------
+  toggleDistancefieldFixedSamplePoints.TwAddVarCB(tweakBar, "Fixed-Sampling-Points", "group='Debug/SDF-AO'");
   toggleDistancefieldAOSphereTracing.TwAddVarCB(tweakBar, "Sphere-Tracing", "group='Debug/SDF-AO'");
+
+  SDFSAMPLING_SELF_SHADOW_AVOIDANCE = renderer::SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+  SDFSAMPLING_EXPONENTIAL_START = renderer::SDFSAMPLING_EXPONENTIAL_START;
+  SDFSAMPLING_EXPONENTIAL_FACTOR = renderer::SDFSAMPLING_EXPONENTIAL_FACTOR;
+  SDFSAMPLING_EXPONENTIAL_OFFSET = renderer::SDFSAMPLING_EXPONENTIAL_OFFSET;
+
+  SDFSAMPLING_SELF_SHADOW_AVOIDANCE.TwAddVarCB(tweakBar, "SDFSAMPLING_SELF_SHADOW_AVOIDANCE", "group='Debug/SDF-AO'");
+  SDFSAMPLING_EXPONENTIAL_START.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_START", "group='Debug/SDF-AO'");
+  SDFSAMPLING_EXPONENTIAL_FACTOR.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_FACTOR", "group='Debug/SDF-AO'");
+  SDFSAMPLING_EXPONENTIAL_OFFSET.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_OFFSET", "group='Debug/SDF-AO'");
+
   TwSetParam(tweakBar, "Debug/SDF-AO", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Debug/Cone-Bouquet---------------------------------------------------

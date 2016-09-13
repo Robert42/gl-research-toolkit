@@ -188,6 +188,12 @@ public:
   std::function<T()> getter;
   std::function<void(T)> setter;
 
+  void operator=(renderer::GLSLMacroWrapper<T>& macroWrapper)
+  {
+    getter = [&macroWrapper](){return macroWrapper.get_value();};
+    setter = [&macroWrapper](T value){macroWrapper.set_value(value);};
+  }
+
   void TwAddVarCB(TwBar* bar, const char* name, const char* def)
   {
     ::TwAddVarCB(bar, name, type(), reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
@@ -232,6 +238,12 @@ template<>
 inline TwType TweakBarCBVar<uint16_t>::type()
 {
   return TW_TYPE_UINT16;
+}
+
+template<>
+inline TwType TweakBarCBVar<float>::type()
+{
+  return TW_TYPE_FLOAT;
 }
 
 
@@ -324,6 +336,11 @@ private:
   gui::TweakBarCBVar<uint16_t> bvhStackDepth;
   gui::TweakBarCBVar<uint16_t> bvhLeafResultArrayLength;
 
+  TweakBarCBVar<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+  TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_START;
+  TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
+  TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
+
   bool _disableSceneryVoxels = false;
 
   enum class MouseCaptureState : int
@@ -345,6 +362,7 @@ private:
   TweakBarShaderToggle toggleLogHeatVision_costs;
   TweakBarShaderToggle toggleLogHeatVisionColors;
 
+  TweakBarShaderToggle toggleDistancefieldFixedSamplePoints;
   TweakBarShaderToggle toggleDistancefieldAOSphereTracing;
 
   TweakBarShaderToggle toggleConeBouquetNoise;
