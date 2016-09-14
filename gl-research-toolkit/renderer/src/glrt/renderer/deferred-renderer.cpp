@@ -10,14 +10,16 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
   : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter),
     depth(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH_COMPONENT32F),
     worldNormal_normalLength_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA16F),
-    meshNormal_meshTangentX_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA16F),
-    meshTangentYZ_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RG16F),
+    meshNormal_meshBiTangentX_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA16F),
+    meshTangent_meshBiTangentY_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA16F),
+    meshBiTangentZ_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::R16F),
     baseColor_metalMask_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     emission_reflectance_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     occlusion_smoothness_Texture(videoResolution.x, videoResolution.y, gl::TextureFormat::RG8),
     mrt_framebuffer({gl::FramebufferObject::Attachment(&worldNormal_normalLength_Texture),
-                    gl::FramebufferObject::Attachment(&meshNormal_meshTangentX_Texture),
-                    gl::FramebufferObject::Attachment(&meshTangentYZ_Texture),
+                    gl::FramebufferObject::Attachment(&meshNormal_meshBiTangentX_Texture),
+                    gl::FramebufferObject::Attachment(&meshTangent_meshBiTangentY_Texture),
+                    gl::FramebufferObject::Attachment(&meshBiTangentZ_Texture),
                     gl::FramebufferObject::Attachment(&baseColor_metalMask_Texture),
                     gl::FramebufferObject::Attachment(&emission_reflectance_Texture),
                     gl::FramebufferObject::Attachment(&occlusion_smoothness_Texture)},
@@ -46,12 +48,13 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
   appendMaterialState(&mrt_framebuffer, {TEXTURED_OPAQUE}, Pass::GBUFFER_FILL_PASS, texturedShader, fillGbufferPassFlags);
   appendMaterialState(&mrt_framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::GBUFFER_FILL_PASS, maskedTwoSidedShader, fillGbufferPassFlags | maskedTwoSidedFlags);
 
-  const int N = 7;
+  const int N = 8;
   GLuint64 textureHandle[N];
   int i=0;
   textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, worldNormal_normalLength_Texture.GetInternHandle());
-  textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, meshNormal_meshTangentX_Texture.GetInternHandle());
-  textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, meshTangentYZ_Texture.GetInternHandle());
+  textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, meshNormal_meshBiTangentX_Texture.GetInternHandle());
+  textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, meshTangent_meshBiTangentY_Texture.GetInternHandle());
+  textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, meshBiTangentZ_Texture.GetInternHandle());
   textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, baseColor_metalMask_Texture.GetInternHandle());
   textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, emission_reflectance_Texture.GetInternHandle());
   textureHandle[i++] = GL_RET_CALL(glGetTextureHandleNV, occlusion_smoothness_Texture.GetInternHandle());

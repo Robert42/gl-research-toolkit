@@ -11,8 +11,9 @@
 struct FramebufferTextures
 {
   sampler2D worldNormal_normalLength;
-  sampler2D meshNormal_meshTangentX;
-  sampler2D meshTangentYZ;
+  sampler2D meshNormal_meshBiTangentX;
+  sampler2D meshTangent_meshBiTangentY;
+  sampler2D meshBiTangentZ;
   sampler2D baseColor_metalMask;
   sampler2D emission_reflectance;
   sampler2D occlusion_smoothness;
@@ -62,8 +63,9 @@ void main()
 
   float depth = texelFetch(textures.zbuffer, texCoord, 0).r;
   vec4 worldNormal_normalLength = texelFetch(textures.worldNormal_normalLength, texCoord, 0);
-  vec4 meshNormal_meshTangentX = texelFetch(textures.meshNormal_meshTangentX, texCoord, 0);
-  vec2 meshTangentYZ = texelFetch(textures.meshNormal_meshTangentX, texCoord, 0).xy;
+  vec4 meshNormal_meshBiTangentX = texelFetch(textures.meshNormal_meshBiTangentX, texCoord, 0);
+  vec4 meshTangent_meshBiTangentY = texelFetch(textures.meshTangent_meshBiTangentY, texCoord, 0);
+  float meshBiTangentZ = texelFetch(textures.meshBiTangentZ, texCoord, 0).x;
   vec4 baseColor_metalMask = texelFetch(textures.baseColor_metalMask, texCoord, 0);
   vec4 emission_reflectance = texelFetch(textures.emission_reflectance, texCoord, 0);
   vec2 occlusion_smoothness = texelFetch(textures.occlusion_smoothness, texCoord, 0).xy;
@@ -82,9 +84,9 @@ void main()
   SurfaceData surface;
   surface.position = worldpos_from_depth(depth);
   
-  vec3 meshNormal = normalize(meshNormal_meshTangentX.xyz);
-  vec3 meshTangent = normalize(vec3(meshNormal_meshTangentX.w, meshTangentYZ.xy));
-  vec3 meshBiTangent = normalize(cross(meshNormal, meshTangent));
+  vec3 meshNormal = normalize(meshNormal_meshBiTangentX.xyz);
+  vec3 meshTangent = normalize(meshTangent_meshBiTangentY.xyz);
+  vec3 meshBiTangent = normalize(vec3(meshNormal_meshBiTangentX.w, meshTangent_meshBiTangentY.w, meshBiTangentZ));
 
   float alpha = 1;
   mat3 tangent_to_worldspace = mat3(meshTangent, meshBiTangent, meshNormal);
