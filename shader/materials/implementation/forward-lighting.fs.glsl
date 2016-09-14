@@ -70,51 +70,51 @@ return;
 #if defined(BVH_NEAREST_LEAF_INDEX_)
   uvec4 nearest_leaves_index = texelFetch(cascaded_grid_texture(BVH_NEAREST_LEAF_INDEX_), ivec3(round(cascaded_grid_cell_from_worldspace(world_pos, BVH_NEAREST_LEAF_INDEX_))), 0);
   #ifdef BVH_GRID_HAS_FOUR_COMPONENTS
-  fragment_color = vec4(nearest_leaves_index.xyz / float(BVH_MAX_VISITED_LEAVES-1), 1);
+  fragment_color = vec4(nearest_leaves_index.xyz / float(BVH_MAX_VISITED_LEAVES-1), alpha);
   #else
-  fragment_color = heatvision_linear(float(nearest_leaves_index[0]) / float(BVH_MAX_VISITED_LEAVES-1));
+  fragment_color = heatvision_linear(float(nearest_leaves_index[0]) / float(BVH_MAX_VISITED_LEAVES-1), alpha);
   #endif
   return;
 #elif defined(BVH_OCCLUSION_GRID_ONLY_)
   float grid_occlusion = textureLod(cascaded_grid_texture_occlusion(BVH_OCCLUSION_GRID_ONLY_), cascaded_grid_uvw_from_worldspace(world_pos, BVH_OCCLUSION_GRID_ONLY_), 0).r;
-  fragment_color = vec4(vec3(grid_occlusion), 1);
+  fragment_color = vec4(vec3(grid_occlusion), alpha);
   return;
 #elif defined(BVH_OCCLUSION_GRID)
   vec4 weights = cascadedGridWeights(world_pos);
   float grid_occlusion = merged_cascaded_grid_texture_occlusion(world_pos);
   PRINT_VALUE(weights);
-  fragment_color = vec4(vec3(grid_occlusion), 1);
+  fragment_color = vec4(vec3(grid_occlusion), alpha);
   return;
 #endif
 
 #if defined(CASCADED_GRID_WEIGHTS)
-  fragment_color = vec4(cascadedGridWeights(surface.position).xyz, 1);
+  fragment_color = vec4(cascadedGridWeights(surface.position).xyz, alpha);
   return;
 #elif defined(CASCADED_GRID_WEIGHTS_TINTED)
-  fragment_color = vec4(cascadedGridWeights(surface.position).xyz * (0.75 + 0.25*length(material.base_color)), 1);
+  fragment_color = vec4(cascadedGridWeights(surface.position).xyz * (0.75 + 0.25*length(material.base_color)), alpha);
   return;
 #endif
 
 #if defined(MESH_NORMALS_WS)
-  fragment_color = vec4(encode_direction_as_color(fragment.normal), 1);
+  fragment_color = vec4(encode_direction_as_color(fragment.normal), alpha);
   return;
 #elif defined(MESH_UVS)
-  fragment_color = vec4(fragment.uv, 0, 1);
+  fragment_color = vec4(fragment.uv, 0, alpha);
   return;
 #elif defined(MESH_TANGENTS_WS)
-  fragment_color = vec4(encode_direction_as_color(fragment.tangent), 1);
+  fragment_color = vec4(encode_direction_as_color(fragment.tangent), alpha);
   return;
 #elif defined(MESH_BITANGENTS_WS)
-  fragment_color = vec4(encode_direction_as_color(fragment.bitangent), 1);
+  fragment_color = vec4(encode_direction_as_color(fragment.bitangent), alpha);
   return;
 #endif
 
 #if defined(DISTANCEFIELD_AO) || defined(DISTANCEFIELD_AO_COST_TEX) || defined(DISTANCEFIELD_AO_COST_BRANCHING) || defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
   float ao_distancefield = distancefield_ao();
 #if defined(DISTANCEFIELD_AO)
-  fragment_color = vec4(vec3(ao_distancefield), 1);
+  fragment_color = vec4(vec3(ao_distancefield), alpha);
 #else
-  fragment_color = heatvision(ao_distancefield_cost);
+  fragment_color = vec4(heatvision(ao_distancefield_cost).rgb, alpha);
 #endif
   return;
 #endif
@@ -122,7 +122,7 @@ return;
 #if defined(AMBIENT_OCCLUSION)
   float ao_distancefield = distancefield_ao();
   float ao = material.occlusion * ao_distancefield;
-  fragment_color = vec4(vec3(ao), 1);
+  fragment_color = vec4(vec3(ao), alpha);
   return;
 #endif
 
