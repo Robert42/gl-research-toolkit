@@ -120,9 +120,13 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
     for(int j=0; j<N_GI_CONES; ++j)
     {
       float distance_to_sphere_origin;
+      
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
       if(cone_intersects_sphere(cone_bouquet[j], sphere, distance_to_sphere_origin, cone_length))
       {
-        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
             ao_distancefield_cost++;
         #endif
 
@@ -237,9 +241,12 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
       Cone cone = cone_bouquet[j];
       float distance_to_sphere_origin;
       bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
       if(has_intersection && voxel_weight>0)
       {
-        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
             ao_distancefield_cost++;
         #endif
 
@@ -335,9 +342,12 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
       Cone cone = cone_bouquet[j];
       float distance_to_sphere_origin;
       bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
       if(has_intersection)
       {
-        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
             ao_distancefield_cost++;
         #endif
 
