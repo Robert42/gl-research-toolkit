@@ -163,7 +163,7 @@ int main(int argc, char** argv)
 
   const int frame_count_padding = 4;
   max_num_frames += frame_count_padding*2;
-  all_frame_times.resize(max_num_frames);
+  all_frame_times.reserve(max_num_frames+frame_count_padding*3);
 
   glrt::SampleApplication app(argc, argv,
                               glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
