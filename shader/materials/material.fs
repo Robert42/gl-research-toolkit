@@ -155,10 +155,10 @@ void main()
   return;
 #endif
   
-#if (defined(DEPTH_PREPASS) || defined(GBUFFER_FILL_PASS)) && defined(MASKED)
+//#if (defined(DEPTH_PREPASS) || defined(GBUFFER_FILL_PASS)) && defined(MASKED)
   if(alpha < MASK_THRESHOLD)
     discard;
-#endif
+//#endif
 #ifdef DEPTH_PREPASS
   return;
 #endif
