@@ -6,6 +6,7 @@
 int ao_distancefield_cost = 0;
 
 /*
+#define SDFSAMPLING_SPHERETRACING_START 0.f
 #define SDFSAMPLING_SELF_SHADOW_AVOIDANCE 0.25f
 #define SDFSAMPLING_EXPONENTIAL_NUM 4
 #define SDFSAMPLING_EXPONENTIAL_START (1.f/16.f)
@@ -40,7 +41,7 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   vec3 clamp_Range = vec3(voxelSize)-0.5f;
   
   // In Range [intersection_distance_front, intersection_distance_back]
-  float spheretracing_start = max(SDFSAMPLING_SELF_SHADOW_AVOIDANCE, intersection_distance_front);
+  float spheretracing_start = max(SDFSAMPLING_SPHERETRACING_START, intersection_distance_front);
   float t = spheretracing_start;
   
 #if defined(DISTANCEFIELD_FIXED_SAMPLE_POINTS)
@@ -92,7 +93,10 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
     float cone_radius = cone.tan_half_angle * t;
     
     float occlusionHeuristic = coneOcclusionHeuristic(cone_radius, d);
+    // linear falloff
     occlusionHeuristic = mix(occlusionHeuristic, 1.f, t*inv_cone_length_voxelspace);
+    // smooth start of falloff
+    occlusionHeuristic = mix(1, occlusionHeuristic, smoothstep(0.f, SDFSAMPLING_SELF_SHADOW_AVOIDANCE, t));
     minVisibility = min(minVisibility, occlusionHeuristic);
     
     t += max(0.1f, abs(d));
