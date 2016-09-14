@@ -39,7 +39,7 @@ void Scene::Data::clear()
 
   const uint16_t n = voxelGrids->capacity();
   resources::BoundingSphere* spheres = voxelGrids->boundingSphere;
-#pragma omp for simd
+#pragma omp simd
   for(int i=0; i<n; ++i)
   {
     spheres[i].center = glm::vec3(NAN);
