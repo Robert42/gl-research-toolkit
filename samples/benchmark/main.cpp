@@ -172,39 +172,50 @@ int main(int argc, char** argv)
                               glrt::Application::Settings::techDemo(),
                               glrt::System::Settings::addVSync(glrt::System::Settings::fullscreen("Benchmark", resolution), false));
 
-  setCurrentBVHUsage(bvhUsage);
-  setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
+  auto draw_single_frame = [&]() -> float {
+     SDL_Event event;
+     while(app.pollEvent(&event))
+     {
+       if(app.handleEvents(event))
+         continue;
 
-  app.antweakbar.visible = false;
+       // T O D O : Add your event handling code here
+     }
+
+     const float deltaTime = app.update();
+     Q_UNUSED(deltaTime);
+
+     app.beginDrawing();
+     app.drawScene();
+
+     // T O D O: add here your rendering code
+
+     app.endDrawing();
+     app.swapWindow();
+
+     return deltaTime;
+  };
+
 
   SDL_ShowCursor(0);
 
   app.showWindow();
+
+  draw_single_frame();
+
+  app.antweakbar.visible = false;
+
+  setCurrentBVHUsage(bvhUsage);
+  setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
+
+  draw_single_frame();
 
   int num_frames = 0;
   float total_time = 0;
   bool aborted_by_criteria = false;
   while(app.isRunning)
   {
-    SDL_Event event;
-    while(app.pollEvent(&event))
-    {
-      if(app.handleEvents(event))
-        continue;
-
-      // T O D O : Add your event handling code here
-    }
-
-    const float deltaTime = app.update();
-    Q_UNUSED(deltaTime);
-
-    app.beginDrawing();
-    app.drawScene();
-
-    // T O D O: add here your rendering code
-
-    app.endDrawing();
-    app.swapWindow();
+    const float deltaTime = draw_single_frame();
 
     all_frame_times << deltaTime;
     aborted_by_criteria = (num_frames++) >= max_num_frames || (total_time+=deltaTime) > max_time;
@@ -214,7 +225,7 @@ int main(int argc, char** argv)
 
   if(!screenshot_file_path.isEmpty())
   {
-
+    // save screenshot to file
     QImage screenshot(int(resolution.x), int(resolution.y), QImage::Format::Format_RGBA8888);
     GLsizei length = GLsizei(screenshot.byteCount());
     GL_CALL(glReadnPixels, 0, 0, int(resolution.x), int(resolution.y), GL_RGBA,  GL_UNSIGNED_BYTE, length, screenshot.bits());
