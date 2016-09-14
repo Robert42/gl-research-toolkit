@@ -21,6 +21,16 @@ int main(int argc, char** argv)
 
   QVector<float> all_frame_times;
 
+  QMap<QString, float> float_values;
+  QMap<QString, std::function<void(float)>> float_setters;
+  QMap<QString, float> bool_values;
+  QMap<QString, std::function<void(bool)>> bool_setters;
+
+  float_setters["--spheretracing_first_sample"] = [](float v){SDFSAMPLING_SPHERETRACING_START.set_value(v);};
+  float_setters["--spheretracing_self_shadowavoidance"] = [](float v){SDFSAMPLING_SELF_SHADOW_AVOIDANCE.set_value(v);};
+  bool_setters["--use_ao_spheretracing"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_AO_SPHERE_TRACING", v);};
+  bool_setters["--use_fixed_ao_samples"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_FIXED_SAMPLE_POINTS", v);};
+
   QStringList arguments;
   for(int i=1; i<argc; ++i)
     arguments << QString::fromUtf8(argv[i]).trimmed();
@@ -152,6 +162,26 @@ int main(int argc, char** argv)
         else
           ok = true;
       }
+    }else if(float_setters.contains(arguments.first()))
+    {
+      QString name = arguments.first();
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        float_values[name] = arguments.first().toFloat(&ok);
+        arguments.removeFirst();
+      }
+    }else if(bool_setters.contains(arguments.first()))
+    {
+      QString name = arguments.first();
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        bool_values[name] = arguments.first().toInt(&ok) != 0;
+        arguments.removeFirst();
+      }
     }
 
     if(!ok)
@@ -203,10 +233,19 @@ int main(int argc, char** argv)
 
   draw_single_frame();
 
-  app.antweakbar.visible = false;
+  {
+    // TODO defer recompiling
 
-  setCurrentBVHUsage(bvhUsage);
-  setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
+    setCurrentBVHUsage(bvhUsage);
+    setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
+
+    for(const QString& name : float_values.keys())
+      float_setters[name](float_values[name]);
+    for(const QString& name : bool_values.keys())
+      bool_setters[name](bool_values[name]);
+  }
+
+  app.antweakbar.visible = false;
 
   draw_single_frame();
 
