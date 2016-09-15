@@ -328,6 +328,8 @@ int main(int argc, char** argv)
 
   if(!scala_file_path.isEmpty())
   {
+    bool logarithmic_scale = glrt::renderer::ReloadableShader::isMacroDefined("LOG_HEATVISION_DEBUG_COSTS");
+
     QSvgGenerator svg;
     svg.setResolution(300);
     QPoint pos(0, 0);
@@ -337,7 +339,7 @@ int main(int argc, char** argv)
     svg.setTitle(QString("%0_%1_%2")
                  .arg(QFileInfo(scala_file_path).baseName())
                  .arg(renderer->costsHeatvisionWhiteLevel)
-                 .arg(glrt::renderer::ReloadableShader::isMacroDefined("LOG_HEATVISION_DEBUG_COSTS") ? "_log" : ""));
+                 .arg(logarithmic_scale ? "_log" : ""));
     svg.setSize(size);
     svg.setViewBox(QRect(pos, size));
 
@@ -369,10 +371,24 @@ int main(int argc, char** argv)
     painter.setPen(pen);
     for(int i=0; i<=7; ++i)
     {
-      qreal pos = glm::mix(start, end, i*f);
+      qreal normalized_value = i*f;
+
+      const uint32_t whiteLevel = renderer->costsHeatvisionWhiteLevel;
+      const uint32_t blackLevel = renderer->costsHeatvisionBlackLevel;
+      const uint32_t maxValue = whiteLevel - blackLevel;
+      qreal linear_value = glm::mix<qreal>(blackLevel, whiteLevel, normalized_value);
+      qreal log_value = glm::exp2(normalized_value * glm::log2(qreal(maxValue))) + blackLevel;
+
+      qreal value;
+      if(logarithmic_scale)
+        value = log_value;
+      else
+        value = linear_value;
+
+      qreal pos = glm::mix(start, end, normalized_value);
 
       painter.drawLine(QLineF(gradient_width + 4*pt, pos, gradient_width + 16*pt, pos));
-      painter.drawText(QRectF(gradient_width + 20*pt, pos-0*pt, 50*pt, 0*pt), Qt::AlignVCenter, "label");
+      painter.drawText(QRectF(gradient_width + 20*pt, pos-0*pt, 50*pt, 0*pt), Qt::AlignVCenter, QString("%0").arg(glm::round(value)));
     }
 
     painter.setBrush(QBrush(gradient));
