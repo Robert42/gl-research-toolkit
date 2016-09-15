@@ -12,8 +12,9 @@ int main(int argc, char** argv)
 {
   const glm::uvec2 resolution(1920, 1080);
 
-  int max_num_frames = 500;
   float max_time = 5.f;
+  uint32_t max_num_frames = 500;
+  uint32_t frame_num_padding = 0;
   bool deferred = false;
   Q_UNUSED(deferred);
 
@@ -43,6 +44,8 @@ int main(int argc, char** argv)
   bool_setters["--heatvision_use_colors"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("HEATVISION_COLORS", v);};
   uint32_setters["--heatvision_black_level"] = [&](uint32_t v){renderer->costsHeatvisionBlackLevel = v;};
   uint32_setters["--heatvision_white_level"] = [&](uint32_t v){renderer->costsHeatvisionWhiteLevel = v;};
+  uint32_setters["--frame_num_padding"] = [&](uint32_t v){frame_num_padding = v;};
+  uint32_setters["--max_num_frames"] = [&](uint32_t v){max_num_frames = v;};
   // TODO allow saving a heatvision->num axis image
 
   QStringList arguments;
@@ -112,15 +115,6 @@ int main(int argc, char** argv)
       if(arguments.length() >= 1)
       {
         max_time = arguments.first().toFloat(&ok);
-        arguments.removeFirst();
-      }
-    }else if(arguments.first() == "--max_num_frames") // --max_num_frames <FLOAT_VALUE>
-    {
-      arguments.removeFirst();
-
-      if(arguments.length() >= 1)
-      {
-        max_num_frames = arguments.first().toInt(&ok);
         arguments.removeFirst();
       }
     }else if(arguments.first() == "--deferred") // --deferred
@@ -232,9 +226,8 @@ int main(int argc, char** argv)
     }
   }
 
-  const int frame_count_padding = 4;
-  max_num_frames += frame_count_padding*2;
-  all_frame_times.reserve(max_num_frames+frame_count_padding*3);
+  max_num_frames += frame_num_padding*2;
+  all_frame_times.reserve(int(max_num_frames+frame_num_padding*3));
 
   glrt::SampleApplication app(argc, argv,
                               glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
@@ -295,7 +288,7 @@ int main(int argc, char** argv)
 
   draw_single_frame();
 
-  int num_frames = 0;
+  uint32_t num_frames = 0;
   float total_time = 0;
   bool aborted_by_criteria = false;
   while(app.isRunning)
@@ -304,7 +297,7 @@ int main(int argc, char** argv)
 
     all_frame_times << deltaTime;
     aborted_by_criteria = (num_frames++) >= max_num_frames || (total_time+=deltaTime) > max_time;
-    bool need_more_frames = num_frames<frame_count_padding*3+1;
+    bool need_more_frames = num_frames<frame_num_padding*3+1;
     app.isRunning = app.isRunning && (!aborted_by_criteria || need_more_frames);
   }
 
@@ -391,6 +384,8 @@ int main(int argc, char** argv)
       painter.drawText(QRectF(gradient_width + 20*pt, pos-0*pt, 50*pt, 0*pt), Qt::AlignVCenter, QString("%0").arg(glm::round(value)));
     }
 
+    // TODO: histogram
+
     painter.setBrush(QBrush(gradient));
     painter.drawRect(QRectF(pt*0.5, padding, gradient_width-pt, size.height()-padding*2));
 
@@ -405,11 +400,11 @@ int main(int argc, char** argv)
       qWarning() << "Couldn't open the file for writing the framerate data";
       return 1;
     }
-    for(int i=frame_count_padding; i<all_frame_times.length()-frame_count_padding; ++i)
+    for(uint32_t i=frame_num_padding; i<uint32_t(all_frame_times.length())-frame_num_padding; ++i)
     {
-      if(i!=frame_count_padding)
+      if(i!=frame_num_padding)
         file.write("\n");
-      file.write(QString::number(all_frame_times[i], 'g', 10).toUtf8());
+      file.write(QString::number(all_frame_times[int(i)], 'g', 10).toUtf8());
     }
   }
 
