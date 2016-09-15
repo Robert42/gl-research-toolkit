@@ -332,7 +332,7 @@ int main(int argc, char** argv)
     svg.setResolution(300);
     QPoint pos(0, 0);
     QSize size(svg.resolution()*2, svg.resolution()*5);
-    qreal pt = 50. / 12.; // https://de.wikipedia.org/wiki/Schriftgrad#DTP-Punkt
+    qreal pt = svg.resolution() / 72.; // https://de.wikipedia.org/wiki/Schriftgrad#DTP-Punkt
     svg.setFileName(scala_file_path);
     svg.setTitle(QString("%0_%1_%2")
                  .arg(QFileInfo(scala_file_path).baseName())
@@ -344,9 +344,39 @@ int main(int argc, char** argv)
     QPainter painter;
     painter.begin(&svg);
 
-    qreal gradient_width = 20*pt;
+    qreal gradient_width = 40*pt;
 
-    painter.drawRect(QRectF(0, gradient_width, 0, size.height()));
+    QPen pen(QColor::fromRgb(0));
+    pen.setWidthF(pt);
+    pen.setJoinStyle(Qt::SvgMiterJoin);
+
+    qreal padding = 10*pt + 0.5*pt;
+
+    qreal start = size.height()-padding;
+    qreal end = pt*0.5 + padding;
+
+    QLinearGradient gradient(0.f, start, 0.f, end);
+    qreal f = 1./7.;
+    gradient.setColorAt(0*f, QColor::fromRgb(0));
+    gradient.setColorAt(1*f, QColor::fromRgb(0x204a87));
+    gradient.setColorAt(2*f, QColor::fromRgb(0x5c3566));
+    gradient.setColorAt(3*f, QColor::fromRgb(0x75507b));
+    gradient.setColorAt(4*f, QColor::fromRgb(0xcc0000));
+    gradient.setColorAt(5*f, QColor::fromRgb(0xf57900));
+    gradient.setColorAt(6*f, QColor::fromRgb(0xfce94f));
+    gradient.setColorAt(7*f, QColor::fromRgb(0xffffff));
+
+    painter.setPen(pen);
+    for(int i=0; i<=7; ++i)
+    {
+      qreal pos = glm::mix(start, end, i*f);
+
+      painter.drawLine(QLineF(gradient_width + 4*pt, pos, gradient_width + 16*pt, pos));
+      painter.drawText(QRectF(gradient_width + 20*pt, pos-0*pt, 50*pt, 0*pt), Qt::AlignVCenter, "label");
+    }
+
+    painter.setBrush(QBrush(gradient));
+    painter.drawRect(QRectF(pt*0.5, padding, gradient_width-pt, size.height()-padding*2));
 
     painter.end();
   }
