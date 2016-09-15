@@ -4,6 +4,8 @@
 namespace glrt {
 namespace renderer {
 
+size_t ReloadableShader::disable_compilation = 0;
+
 
 QSet<QString> ReloadableShader::globalPreprocessorBlock;
 
@@ -100,6 +102,9 @@ bool ReloadableShader::reload()
 
 void ReloadableShader::reloadAll()
 {
+  if(disable_compilation>0)
+    return;
+
   bool succeeded = false;
 
   do
@@ -140,6 +145,20 @@ ReloadableShader::Listener::Listener()
 ReloadableShader::Listener::~Listener()
 {
   allListeners().remove(this);
+}
+
+
+// ========
+
+ReloadableShader::DeferredCompilation::DeferredCompilation()
+{
+  ++disable_compilation;
+}
+
+ReloadableShader::DeferredCompilation::~DeferredCompilation()
+{
+  --disable_compilation;
+  reloadAll();
 }
 
 

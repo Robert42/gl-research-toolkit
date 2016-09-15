@@ -1,6 +1,10 @@
 #include <glrt/sample-application.h>
 #include <glrt/renderer/bvh-usage.h>
+#include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/debugging/surface-shader-visualizations.h>
+
+#include <QSvgGenerator>
+#include <QPainter>
 
 using namespace glrt::renderer;
 
@@ -16,6 +20,7 @@ int main(int argc, char** argv)
   SurfaceShaderVisualization surfaceShaderVisualization = SurfaceShaderVisualization::NONE;
   BvhUsage bvhUsage = BvhUsage::NO_BVH;
   QString screenshot_file_path;
+  QString scala_file_path;
   QString framedurations_file_path;
   QString systeminfo_file_path;
 
@@ -23,13 +28,22 @@ int main(int argc, char** argv)
 
   QMap<QString, float> float_values;
   QMap<QString, std::function<void(float)>> float_setters;
-  QMap<QString, float> bool_values;
+  QMap<QString, bool> bool_values;
   QMap<QString, std::function<void(bool)>> bool_setters;
+  QMap<QString, uint32_t> uint32_values;
+  QMap<QString, std::function<void(uint32_t)>> uint32_setters;
+
+  Renderer* renderer;
 
   float_setters["--spheretracing_first_sample"] = [](float v){SDFSAMPLING_SPHERETRACING_START.set_value(v);};
   float_setters["--spheretracing_self_shadowavoidance"] = [](float v){SDFSAMPLING_SELF_SHADOW_AVOIDANCE.set_value(v);};
   bool_setters["--use_ao_spheretracing"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_AO_SPHERE_TRACING", v);};
   bool_setters["--use_fixed_ao_samples"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_FIXED_SAMPLE_POINTS", v);};
+  bool_setters["--heatvision_use_logarithmic_scale"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("LOG_HEATVISION_DEBUG_COSTS", v);};
+  bool_setters["--heatvision_use_colors"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("HEATVISION_COLORS", v);};
+  uint32_setters["--heatvision_black_level"] = [&](uint32_t v){renderer->costsHeatvisionBlackLevel = v;};
+  uint32_setters["--heatvision_white_level"] = [&](uint32_t v){renderer->costsHeatvisionWhiteLevel = v;};
+  // TODO allow saving a heatvision->num axis image
 
   QStringList arguments;
   for(int i=1; i<argc; ++i)
@@ -47,6 +61,8 @@ int main(int argc, char** argv)
 
       if(arguments.length() >= 1 && map.contains(arguments.first()))
       {
+        qDebug() << "--surface-visualization " << arguments.first();
+
         surfaceShaderVisualization = map.value(arguments.first());
         ok = true;
         arguments.removeFirst();
@@ -132,6 +148,21 @@ int main(int argc, char** argv)
         else
           ok = true;
       }
+    }else if(arguments.first() == "--scala")
+    {
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        scala_file_path = arguments.first();
+        arguments.removeFirst();
+
+        QFileInfo scala_file(scala_file_path);
+        if(!scala_file.dir().mkpath("."))
+          qWarning() << "Couldn't create directory"<<scala_file.absolutePath();
+        else
+          ok = true;
+      }
     }else if(arguments.first() == "--framerate")
     {
       arguments.removeFirst();
@@ -182,6 +213,16 @@ int main(int argc, char** argv)
         bool_values[name] = arguments.first().toInt(&ok) != 0;
         arguments.removeFirst();
       }
+    }else if(uint32_setters.contains(arguments.first()))
+    {
+      QString name = arguments.first();
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        uint32_values[name] = arguments.first().toUInt(&ok);
+        arguments.removeFirst();
+      }
     }
 
     if(!ok)
@@ -201,6 +242,7 @@ int main(int argc, char** argv)
                               deferred ? glrt::SampleApplication::Settings::techDemoDeferred() : glrt::SampleApplication::Settings::techDemoForward(),
                               glrt::Application::Settings::techDemo(),
                               glrt::System::Settings::addVSync(glrt::System::Settings::fullscreen("Benchmark", resolution), false));
+  renderer = app.renderer;
 
   auto draw_single_frame = [&]() -> float {
      SDL_Event event;
@@ -234,7 +276,7 @@ int main(int argc, char** argv)
   draw_single_frame();
 
   {
-    // TODO defer recompiling
+    ReloadableShader::DeferredCompilation deferredCompilation;
 
     setCurrentBVHUsage(bvhUsage);
     setCurrentSurfaceShaderVisualization(surfaceShaderVisualization);
@@ -243,6 +285,10 @@ int main(int argc, char** argv)
       float_setters[name](float_values[name]);
     for(const QString& name : bool_values.keys())
       bool_setters[name](bool_values[name]);
+    for(const QString& name : uint32_values.keys())
+      uint32_setters[name](uint32_values[name]);
+
+    Q_UNUSED(deferredCompilation);
   }
 
   app.antweakbar.visible = false;
@@ -278,6 +324,31 @@ int main(int argc, char** argv)
         std::swap(a[x], b[x]);
     }
     screenshot.save(screenshot_file_path);
+  }
+
+  if(!scala_file_path.isEmpty())
+  {
+    QSvgGenerator svg;
+    svg.setResolution(300);
+    QPoint pos(0, 0);
+    QSize size(svg.resolution()*2, svg.resolution()*5);
+    qreal pt = 50. / 12.; // https://de.wikipedia.org/wiki/Schriftgrad#DTP-Punkt
+    svg.setFileName(scala_file_path);
+    svg.setTitle(QString("%0_%1_%2")
+                 .arg(QFileInfo(scala_file_path).baseName())
+                 .arg(renderer->costsHeatvisionWhiteLevel)
+                 .arg(glrt::renderer::ReloadableShader::isMacroDefined("LOG_HEATVISION_DEBUG_COSTS") ? "_log" : ""));
+    svg.setSize(size);
+    svg.setViewBox(QRect(pos, size));
+
+    QPainter painter;
+    painter.begin(&svg);
+
+    qreal gradient_width = 20*pt;
+
+    painter.drawRect(QRectF(0, gradient_width, 0, size.height()));
+
+    painter.end();
   }
 
   if(!framedurations_file_path.isEmpty())

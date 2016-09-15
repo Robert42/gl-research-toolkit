@@ -12,6 +12,7 @@ class ReloadableShader final
 {
 public:
   class Listener;
+  class DeferredCompilation;
 
   static QSet<QString> globalPreprocessorBlock;
   static bool isMacroDefined(const QString& macro);
@@ -34,6 +35,7 @@ public:
   static void reloadAll();
 
 private:
+  static size_t disable_compilation;
   QDir shaderDir;
 
   static QSet<Listener*>& allListeners();
@@ -55,6 +57,15 @@ public:
   Listener& operator=(const Listener&) = delete;
 
   virtual void allShadersReloaded() = 0;
+};
+
+class ReloadableShader::DeferredCompilation final
+{
+public:
+  Q_DISABLE_COPY(DeferredCompilation)
+
+  DeferredCompilation();
+  ~DeferredCompilation();
 };
 
 } // namespace renderer
