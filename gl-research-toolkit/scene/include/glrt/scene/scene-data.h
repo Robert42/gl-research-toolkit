@@ -5,18 +5,15 @@
 #include <glrt/scene/resources/light-source.h>
 #include <glrt/scene/resources/voxel-data.h>
 #include <glrt/scene/resources/resource-manager.h>
+#include <glrt/toolkit/variable-with-callback.h>
 
 namespace glrt {
 namespace scene {
 
 
-#define HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE 1
-#define ENFORCE_HUGE_BVH_LEAVES_FIRST 1
-#define BVH_HUGE_LEAVES_LIMIT 0.25f
-
-#if HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE
-#define ENFORCE_HUGE_BVH_LEAVES_FIRST 1
-#endif
+extern VariableWithCallback<bool> ENFORCE_HUGE_BVH_LEAVES_FIRST;
+extern VariableWithCallback<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
+extern VariableWithCallback<float> BVH_HUGE_LEAVES_LIMIT;
 
 class Scene::Data
 {

@@ -19,6 +19,8 @@ set(SOURCE_FILES
   include/glrt/toolkit/tcp-messages.h
   include/glrt/toolkit/uuid.h
   include/glrt/toolkit/uuid.inl
+  include/glrt/toolkit/variable-with-callback.h
+  include/glrt/toolkit/variable-with-callback.inl
   include/glrt/toolkit/zindex.h
   src/glrt/dependencies.cpp
   src/glrt/toolkit/escape-string.cpp
