@@ -4,7 +4,6 @@
 namespace glrt {
 namespace renderer {
 
-extern uint16_t _num_grid_cascades;
 extern uint16_t _bvh_traversal_stack_depth;
 extern uint16_t _bvh_traversal_leaf_result_array_length;
 
@@ -15,29 +14,12 @@ GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START("#define SDFSAMPLING_EXPON
 GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR("#define SDFSAMPLING_EXPONENTIAL_FACTOR %0", 2.f);
 GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET("#define SDFSAMPLING_EXPONENTIAL_OFFSET %0", 0.f);
 
+GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES("#define NUM_GRID_CASCADES %0", 3);
+
 // TODO:: replace the following with GLSLMacroWrappers
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
-uint16_t _num_grid_cascades = 0;
 uint16_t _bvh_traversal_stack_depth = 0;
 uint16_t _bvh_traversal_leaf_result_array_length = 0;
-
-uint16_t num_grid_cascades()
-{
-  return _num_grid_cascades;
-}
-
-void set_num_grid_cascades(uint16_t n)
-{
-  Q_ASSERT(n>=1 && n<=3);
-  if(_num_grid_cascades == n)
-    return;
-
-  ReloadableShader::globalPreprocessorBlock.remove(QString("#define NUM_GRID_CASCADES %0").arg(_num_grid_cascades));
-  _num_grid_cascades = n;
-  ReloadableShader::globalPreprocessorBlock.insert(QString("#define NUM_GRID_CASCADES %0").arg(_num_grid_cascades));
-
-  ReloadableShader::reloadAll();
-}
 
 uint16_t bvh_traversal_stack_depth()
 {
@@ -120,7 +102,6 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
 
 void init_bvh_shader_macros()
 {
-  set_num_grid_cascades(3);
   set_bvh_traversal_stack_depth(MAX_NUM_STATIC_MESHES);
   set_bvh_traversal_leaf_result_array_length(MAX_NUM_STATIC_MESHES);
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define AO_RADIUS 3.5"));

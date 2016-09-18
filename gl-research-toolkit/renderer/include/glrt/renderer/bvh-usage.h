@@ -53,9 +53,6 @@ inline bool isUsingBvhLeafGrid()
   return bvh_is_grid(currentBvhUsage);
 }
 
-uint16_t num_grid_cascades();
-void set_num_grid_cascades(uint16_t n);
-
 uint16_t bvh_traversal_stack_depth();
 void set_bvh_traversal_stack_depth(uint16_t n);
 
@@ -68,6 +65,10 @@ extern GLSLMacroWrapper<int> SDFSAMPLING_EXPONENTIAL_NUM;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
+
+extern GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES;
+
+inline uint16_t num_grid_cascades(){return NUM_GRID_CASCADES.get_value();}
 
 #define MAX_NUM_GRID_CASCADES 3
 #define BVH_USE_GRID_OCCLUSION 1

@@ -33,6 +33,8 @@ int main(int argc, char** argv)
   QMap<QString, std::function<void(bool)>> bool_setters;
   QMap<QString, uint32_t> uint32_values;
   QMap<QString, std::function<void(uint32_t)>> uint32_setters;
+  QMap<QString, uint16_t> uint16_values;
+  QMap<QString, std::function<void(uint16_t)>> uint16_setters;
 
   Renderer* renderer;
 
@@ -46,6 +48,7 @@ int main(int argc, char** argv)
   uint32_setters["--heatvision_white_level"] = [&](uint32_t v){renderer->costsHeatvisionWhiteLevel = v;};
   uint32_setters["--frame_num_padding"] = [&](uint32_t v){frame_num_padding = v;};
   uint32_setters["--max_num_frames"] = [&](uint32_t v){max_num_frames = v;};
+  uint16_setters["--num-bvh-grids"] = [](uint16_t v){NUM_GRID_CASCADES.set_value(glm::clamp<uint16_t>(v, 1, 3));};
   // TODO allow saving a heatvision->num axis image
 
   QStringList arguments;
@@ -79,15 +82,6 @@ int main(int argc, char** argv)
       {
         bvhUsage = map.value(arguments.first());
         ok = true;
-        arguments.removeFirst();
-      }
-    }else if(arguments.first() == "--num-bvh-grids") // --num-bvh-grids <VALUE in [1,3]>
-    {
-      arguments.removeFirst();
-
-      if(arguments.length() >= 1)
-      {
-        set_num_grid_cascades(uint16_t(glm::clamp<uint32_t>(arguments.first().toUInt(&ok), 1, 3)));
         arguments.removeFirst();
       }
     }else if(arguments.first() == "--bvh-stack-depth") // --bvh-stack-depth <VALUE in [1,255]>
@@ -217,6 +211,16 @@ int main(int argc, char** argv)
         uint32_values[name] = arguments.first().toUInt(&ok);
         arguments.removeFirst();
       }
+    }else if(uint16_setters.contains(arguments.first()))
+    {
+      QString name = arguments.first();
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        uint16_values[name] = static_cast<uint16_t>(glm::clamp<uint32_t>(arguments.first().toUInt(&ok), 0, std::numeric_limits<uint16_t>::max()));
+        arguments.removeFirst();
+      }
     }
 
     if(!ok)
@@ -280,6 +284,8 @@ int main(int argc, char** argv)
       bool_setters[name](bool_values[name]);
     for(const QString& name : uint32_values.keys())
       uint32_setters[name](uint32_values[name]);
+    for(const QString& name : uint16_values.keys())
+      uint16_setters[name](uint16_values[name]);
 
     Q_UNUSED(deferredCompilation);
   }

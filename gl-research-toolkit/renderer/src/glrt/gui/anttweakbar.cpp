@@ -234,8 +234,7 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   bvhUsageSwitcher->setCurrentValue(glrt::renderer::currentBvhUsage);
   bvhUsageSwitcher->valueChanged = [](glrt::renderer::BvhUsage bvhUsage){glrt::renderer::setCurrentBVHUsage(bvhUsage);};
 
-  numBvhGrids.setter = [](uint16_t n){renderer::set_num_grid_cascades(n);};
-  numBvhGrids.getter = []() -> uint16_t {return renderer::num_grid_cascades();};
+  numBvhGrids = renderer::NUM_GRID_CASCADES;
   numBvhGrids.TwAddVarCB(tweakBar, "Num Grid Cascades", QString("min=1 max=%0 group='BVH'").arg(MAX_NUM_GRID_CASCADES).toStdString().c_str());
 
   bvhStackDepth.setter = [](uint16_t n){renderer::set_bvh_traversal_stack_depth(n);};
