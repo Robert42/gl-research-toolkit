@@ -4,7 +4,6 @@
 namespace glrt {
 namespace renderer {
 
-extern uint16_t _bvh_traversal_stack_depth;
 extern uint16_t _bvh_traversal_leaf_result_array_length;
 
 GLSLMacroWrapper<float> SDFSAMPLING_SPHERETRACING_START("#define SDFSAMPLING_SPHERETRACING_START %0", 0.0f);
@@ -15,29 +14,11 @@ GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR("#define SDFSAMPLING_EXPO
 GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET("#define SDFSAMPLING_EXPONENTIAL_OFFSET %0", 0.f);
 
 GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES("#define NUM_GRID_CASCADES %0", 3);
+GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH("#define BVH_MAX_STACK_DEPTH %0", MAX_NUM_STATIC_MESHES);
 
 // TODO:: replace the following with GLSLMacroWrappers
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
-uint16_t _bvh_traversal_stack_depth = 0;
 uint16_t _bvh_traversal_leaf_result_array_length = 0;
-
-uint16_t bvh_traversal_stack_depth()
-{
-  return _bvh_traversal_stack_depth;
-}
-
-void set_bvh_traversal_stack_depth(uint16_t n)
-{
-  Q_ASSERT(n>=1);
-  if(_bvh_traversal_stack_depth == n)
-    return;
-
-  ReloadableShader::globalPreprocessorBlock.remove(QString("#define BVH_MAX_STACK_DEPTH %0").arg(_bvh_traversal_stack_depth));
-  _bvh_traversal_stack_depth = n;
-  ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_MAX_STACK_DEPTH %0").arg(_bvh_traversal_stack_depth));
-
-  ReloadableShader::reloadAll();
-}
 
 uint16_t bvh_traversal_leaf_result_array_length()
 {
@@ -94,6 +75,7 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
   ReloadableShader::defineMacro("BVH_GRID_UNCLAMPED_OCCLUSION", bvh_is_occlusion_grid_unclamped(bvhUsage), false);
   ReloadableShader::defineMacro("BVH_GRID_HAS_FOUR_COMPONENTS", bvh_is_grid_with_four_components(bvhUsage), false);
 
+  // TODO:: replace the following with GLSLMacroWrappers
   ReloadableShader::globalPreprocessorBlock.remove(QString("#define BVH_GRID_NUM_COMPONENTS %0").arg(bvh_is_grid_with_four_components(bvhUsage) ? 1 : 4));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_GRID_NUM_COMPONENTS %0").arg(bvh_is_grid_with_four_components(bvhUsage) ? 4 : 1));
 
@@ -102,7 +84,6 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
 
 void init_bvh_shader_macros()
 {
-  set_bvh_traversal_stack_depth(MAX_NUM_STATIC_MESHES);
   set_bvh_traversal_leaf_result_array_length(MAX_NUM_STATIC_MESHES);
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define AO_RADIUS 3.5"));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_STATIC_MESHES %0").arg(MAX_NUM_STATIC_MESHES));

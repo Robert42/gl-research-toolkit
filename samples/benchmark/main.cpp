@@ -49,7 +49,7 @@ int main(int argc, char** argv)
   uint32_setters["--frame_num_padding"] = [&](uint32_t v){frame_num_padding = v;};
   uint32_setters["--max_num_frames"] = [&](uint32_t v){max_num_frames = v;};
   uint16_setters["--num-bvh-grids"] = [](uint16_t v){NUM_GRID_CASCADES.set_value(glm::clamp<uint16_t>(v, 1, 3));};
-  // TODO allow saving a heatvision->num axis image
+  uint16_setters["--bvh-stack-depth"] = [](uint16_t v){BVH_MAX_STACK_DEPTH.set_value(glm::clamp<uint16_t>(v, 1, MAX_NUM_STATIC_MESHES));};
 
   QStringList arguments;
   for(int i=1; i<argc; ++i)
@@ -82,15 +82,6 @@ int main(int argc, char** argv)
       {
         bvhUsage = map.value(arguments.first());
         ok = true;
-        arguments.removeFirst();
-      }
-    }else if(arguments.first() == "--bvh-stack-depth") // --bvh-stack-depth <VALUE in [1,255]>
-    {
-      arguments.removeFirst();
-
-      if(arguments.length() >= 1)
-      {
-        set_bvh_traversal_stack_depth(uint16_t(glm::clamp<uint32_t>(arguments.first().toUInt(&ok), 1, 255)));
         arguments.removeFirst();
       }
     }else if(arguments.first() == "--bvh-leaf-array-length") // --bvh-leaf-array-length <VALUE in [1,255]>

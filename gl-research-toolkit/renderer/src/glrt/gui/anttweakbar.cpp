@@ -237,8 +237,7 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   numBvhGrids = renderer::NUM_GRID_CASCADES;
   numBvhGrids.TwAddVarCB(tweakBar, "Num Grid Cascades", QString("min=1 max=%0 group='BVH'").arg(MAX_NUM_GRID_CASCADES).toStdString().c_str());
 
-  bvhStackDepth.setter = [](uint16_t n){renderer::set_bvh_traversal_stack_depth(n);};
-  bvhStackDepth.getter = []() -> uint16_t {return renderer::bvh_traversal_stack_depth();};
+  bvhStackDepth = renderer::BVH_MAX_STACK_DEPTH;
   bvhStackDepth.TwAddVarCB(tweakBar, "Stack Depth", QString("min=1 max=%0 group='BVH'").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
 
   bvhStackDepth.setter = [](uint16_t n){renderer::set_bvh_traversal_leaf_result_array_length(n);};
