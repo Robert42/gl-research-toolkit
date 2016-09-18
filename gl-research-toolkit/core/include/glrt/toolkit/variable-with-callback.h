@@ -17,6 +17,8 @@ public:
   void set_value(T value);
   T get_value() const{return _value;}
 
+  void connectWith(VariableWithCallback<T>* v);
+
   operator T() const{return get_value();}
 
 private:

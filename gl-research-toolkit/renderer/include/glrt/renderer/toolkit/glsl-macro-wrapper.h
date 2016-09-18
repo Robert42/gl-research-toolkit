@@ -22,19 +22,13 @@ protected:
 };
 
 template<typename T>
-class GLSLMacroWrapper final : public GLSLMacroWrapperInterface
+class GLSLMacroWrapper final : public VariableWithCallback<T>, public GLSLMacroWrapperInterface
 {
 public:
   GLSLMacroWrapper(const QString& preprocessorDeclaration, T defaultValue);
 
-  T get_value();
-  void set_value(T value);
-
-  void connectWith(VariableWithCallback<T>* v);
-
 private:
   const QString preprocessorDeclaration;
-  T value;
   QString preprocessorBlock;
 
   void updatePreprocessorBlock();

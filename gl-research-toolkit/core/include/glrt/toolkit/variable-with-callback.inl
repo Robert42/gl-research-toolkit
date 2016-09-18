@@ -27,6 +27,13 @@ void VariableWithCallback<T>::set_value(T value)
     fn(value);
 }
 
+template<typename T>
+inline void VariableWithCallback<T>::connectWith(VariableWithCallback<T>* v)
+{
+  set_value(v->get_value());
+  v->callback_functions.push_back([this](T v){this->set_value(v);});
+}
+
 
 } // namespace glrt
 
