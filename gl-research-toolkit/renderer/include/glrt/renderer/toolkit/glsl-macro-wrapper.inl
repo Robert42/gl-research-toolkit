@@ -5,20 +5,20 @@ namespace renderer {
 
 
 template<typename T>
-GLSLMacroWrapper<T>::GLSLMacroWrapper(const QString& preprocessorDeclaration, T defaultValue)
+inline GLSLMacroWrapper<T>::GLSLMacroWrapper(const QString& preprocessorDeclaration, T defaultValue)
   : preprocessorDeclaration(preprocessorDeclaration),
     value(defaultValue)
 {
 }
 
 template<typename T>
-T GLSLMacroWrapper<T>::get_value()
+inline T GLSLMacroWrapper<T>::get_value()
 {
   return this->value;
 }
 
 template<typename T>
-void GLSLMacroWrapper<T>::set_value(T value)
+inline void GLSLMacroWrapper<T>::set_value(T value)
 {
   if(this->value != value)
   {
@@ -28,14 +28,14 @@ void GLSLMacroWrapper<T>::set_value(T value)
 }
 
 template<typename T>
-void GLSLMacroWrapper<T>::connectWith(VariableWithCallback<T>* v)
+inline void GLSLMacroWrapper<T>::connectWith(VariableWithCallback<T>* v)
 {
   set_value(v->get_value());
-  v->callback_functions.push_back(std::bind(&GLSLMacroWrapper<T>::set_value, this, std::placeholders::_1));
+  v->callback_functions.push_back([this](T v){this->set_value(v);});
 }
 
 template<typename T>
-void GLSLMacroWrapper<T>::updatePreprocessorBlock()
+inline void GLSLMacroWrapper<T>::updatePreprocessorBlock()
 {
   QString newProprocessorBlock = preprocessorDeclaration.arg(value);
 
@@ -50,7 +50,7 @@ void GLSLMacroWrapper<T>::updatePreprocessorBlock()
 }
 
 template<typename T>
-void GLSLMacroWrapper<T>::init()
+inline void GLSLMacroWrapper<T>::init()
 {
   updatePreprocessorBlock();
 }
