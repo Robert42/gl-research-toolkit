@@ -275,6 +275,9 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
 
   uint16_t leaves[BVH_MAX_VISITED_LEAVES];
   uint32_t num_leaves;
+  #if HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE!=0 && HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE!=1
+  #error invalid value for HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE
+  #endif
   for(uint16_t i=uint16_t(0); i<uint16_t(HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE); ++i)
     leaves[i] = i;
   num_leaves = uint16_t(HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE);
