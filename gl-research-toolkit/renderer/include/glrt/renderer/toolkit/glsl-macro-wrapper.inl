@@ -28,6 +28,13 @@ void GLSLMacroWrapper<T>::set_value(T value)
 }
 
 template<typename T>
+void GLSLMacroWrapper<T>::connectWith(VariableWithCallback<T>* v)
+{
+  set_value(v->get_value());
+  v->callback_functions.push_back(std::bind(&GLSLMacroWrapper<T>::set_value, this, std::placeholders::_1));
+}
+
+template<typename T>
 void GLSLMacroWrapper<T>::updatePreprocessorBlock()
 {
   QString newProprocessorBlock = preprocessorDeclaration.arg(value);

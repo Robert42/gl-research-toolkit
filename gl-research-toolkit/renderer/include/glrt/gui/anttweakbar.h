@@ -194,6 +194,12 @@ public:
     setter = [&macroWrapper](T value){macroWrapper.set_value(value);};
   }
 
+  void operator=(VariableWithCallback<T>& varWrapper)
+  {
+    getter = [&varWrapper](){return varWrapper.get_value();};
+    setter = [&varWrapper](T value){varWrapper.set_value(value);};
+  }
+
   void TwAddVarCB(TwBar* bar, const char* name, const char* def)
   {
     ::TwAddVarCB(bar, name, type(), reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
@@ -264,6 +270,7 @@ public:
     bool showByDefault = false;
     bool toggleHelp = false;
     bool toggleGui= false;
+    padding<bool, 5> _padding;
 
     static Settings sampleGui(const QString& globalDescription)
     {
@@ -334,7 +341,6 @@ private:
   gui::TweakBarCBVar<bool> disableSceneryVoxels;
   gui::TweakBarCBVar<uint16_t> numBvhGrids;
   gui::TweakBarCBVar<uint16_t> bvhStackDepth;
-  gui::TweakBarCBVar<uint16_t> bvhLeafResultArrayLength;
 
   TweakBarCBVar<float> SDFSAMPLING_SPHERETRACING_START;
   TweakBarCBVar<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;

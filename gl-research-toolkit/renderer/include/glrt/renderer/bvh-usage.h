@@ -65,6 +65,7 @@ extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
 
 extern GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES;
 extern GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH;
+extern GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
 
 inline uint16_t num_grid_cascades(){return NUM_GRID_CASCADES.get_value();}
 inline uint16_t bvh_traversal_stack_depth(){return BVH_MAX_STACK_DEPTH.get_value();}

@@ -2,6 +2,7 @@
 #define GLRT_RENDERER_GLSLMACROWRAPPER_H
 
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/toolkit/variable-with-callback.h>
 
 namespace glrt {
 namespace renderer {
@@ -28,6 +29,8 @@ public:
 
   T get_value();
   void set_value(T value);
+
+  void connectWith(VariableWithCallback<T>* v);
 
 private:
   const QString preprocessorDeclaration;

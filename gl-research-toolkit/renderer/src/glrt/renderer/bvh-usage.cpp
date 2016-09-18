@@ -1,5 +1,6 @@
 #include <glrt/renderer/bvh-usage.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/scene/scene-data.h>
 
 namespace glrt {
 namespace renderer {
@@ -15,6 +16,7 @@ GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET("#define SDFSAMPLING_EXPO
 
 GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES("#define NUM_GRID_CASCADES %0", 3);
 GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH("#define BVH_MAX_STACK_DEPTH %0", MAX_NUM_STATIC_MESHES);
+GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE("#define HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE %0", 0);
 
 // TODO:: replace the following with GLSLMacroWrappers
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
@@ -84,6 +86,8 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
 
 void init_bvh_shader_macros()
 {
+  HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE.connectWith(&scene::HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE);
+
   set_bvh_traversal_leaf_result_array_length(MAX_NUM_STATIC_MESHES);
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define AO_RADIUS 3.5"));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_STATIC_MESHES %0").arg(MAX_NUM_STATIC_MESHES));
