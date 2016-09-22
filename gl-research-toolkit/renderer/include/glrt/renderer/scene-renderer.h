@@ -112,15 +112,16 @@ private:
   Array<MaterialState> materialStates;
 
   // Cascaded Grids
-  ComputeStep collectAmbientOcclusionToGrid;
-  GlTexture gridTexture[NUM_GRID_CASCADES*2];
-  GLuint64 computeTextureHandles[NUM_GRID_CASCADES*2];
-  GLuint64 renderTextureHandles[NUM_GRID_CASCADES*2];
-#if BVH_USE_GRID_OCCLUSION
-  GlTexture gridOcclusionTexture[NUM_GRID_CASCADES];
-  GLuint64 computeOcclusionTextureHandles[NUM_GRID_CASCADES];
-  GLuint64 renderOcclusionTextureHandles[NUM_GRID_CASCADES];
-#endif
+  ComputeStep collectAmbientOcclusionToGrid1, collectAmbientOcclusionToGrid2, collectAmbientOcclusionToGrid3;
+  ComputeStep* collectAmbientOcclusionToGrid[4];
+  GlTexture gridTexture[MAX_NUM_GRID_CASCADES*2];
+  GLuint64 computeTextureHandles[MAX_NUM_GRID_CASCADES*2];
+  GLuint64 renderTextureHandles[MAX_NUM_GRID_CASCADES*2];
+
+  GlTexture gridOcclusionTexture[MAX_NUM_GRID_CASCADES];
+  GLuint64 computeOcclusionTextureHandles[MAX_NUM_GRID_CASCADES];
+  GLuint64 renderOcclusionTextureHandles[MAX_NUM_GRID_CASCADES];
+
   glm::vec3 grid_camera_pos = glm::vec3(NAN), grid_camera_dir = glm::vec3(NAN);
   bool _update_grid_camera : 1;
   void initCascadedGridTextures();
@@ -132,21 +133,19 @@ private:
 
   struct CascadedGridsHeader
   {
-    GLuint64 gridTexture[NUM_GRID_CASCADES];
-#if BVH_USE_GRID_OCCLUSION
-    GLuint64 occlusionTexture[NUM_GRID_CASCADES];
-#else
-    padding<GLuint64, NUM_GRID_CASCADES%2> _padding;
-#endif
-    glm::vec4 snappedGridLocation[NUM_GRID_CASCADES];
-    glm::vec4 smoothGridLocation[NUM_GRID_CASCADES];
+    GLuint64 gridTexture[MAX_NUM_GRID_CASCADES];
+//#if BVH_USE_GRID_OCCLUSION
+    GLuint64 occlusionTexture[MAX_NUM_GRID_CASCADES];
+//#else
+//    padding<GLuint64, NUM_GRID_CASCADES%2> _padding;
+//#endif
+    glm::vec4 snappedGridLocation[MAX_NUM_GRID_CASCADES];
+    glm::vec4 smoothGridLocation[MAX_NUM_GRID_CASCADES];
   };
   struct AoCollectHeader
   {
-    AlignedImageHandle gridTexture[NUM_GRID_CASCADES];
-#if BVH_USE_GRID_OCCLUSION
-    AlignedImageHandle occlusionTexture[NUM_GRID_CASCADES];
-#endif
+    AlignedImageHandle gridTexture[MAX_NUM_GRID_CASCADES];
+    AlignedImageHandle occlusionTexture[MAX_NUM_GRID_CASCADES];
   };
 
   // Scene uniform buffer

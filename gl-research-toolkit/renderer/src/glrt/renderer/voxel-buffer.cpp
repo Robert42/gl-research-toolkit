@@ -60,7 +60,7 @@ void VoxelBuffer::updateVoxelGrid()
     z_indices[i] = voxelGridData->z_index[i] = calcZIndex(scene_aabb.toUnitSpace(voxelGridData->position[i]));
 
   scene.aabb = scene_aabb;
-  voxelGridData->huge_bvh_limit = BVH_HUGE_LEAVES_LIMIT * glm::distance(scene_aabb.maxPoint, scene_aabb.minPoint);
+  voxelGridData->huge_bvh_limit = scene::BVH_HUGE_LEAVES_LIMIT * glm::distance(scene_aabb.maxPoint, scene_aabb.minPoint);
 
   // -- W A R N I N G -- voxelgriddata swap happening here!!!!
   scene.data->sort_voxelGrids();
@@ -156,7 +156,7 @@ void BVH::updateTreeCPU(BoundingSphere* bvhInnerBoundingSpheres, BVH::InnerNode*
   this->bvhInnerNodes[num_leaves-1].left_child = 0x8000;
   this->bvhInnerNodes[num_leaves-1].right_child = 0x8000;
 
-  const quint16 skip_first_n = HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
+  const quint16 skip_first_n = scene::HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
   if(Q_LIKELY(num_leaves > 1 + skip_first_n))
   {
     generateHierarchy(skip_first_n, num_leaves);
@@ -183,7 +183,7 @@ void BVH::verifyTreeDepth() const
   const quint16 depth = calcDepth(0, bvhInnerNodes);
   if(Q_UNLIKELY(depth == num_leaves-1))
     qWarning() << "Malformed tree (no performence gains)";
-  if(Q_UNLIKELY(BVH_MAX_STACK_DEPTH < depth))
+  if(Q_UNLIKELY(bvh_traversal_stack_depth() < depth))
     qWarning() << "bvh has a greater depth than the bvh traversal stack";
   qDebug() << "BVH::updateTreeCPU{num_leaves:" <<num_leaves << " depth:"<<depth<<"}";
   Q_ASSERT(depth < MAX_NUM_STATIC_MESHES);

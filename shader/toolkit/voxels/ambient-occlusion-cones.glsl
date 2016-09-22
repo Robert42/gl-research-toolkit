@@ -5,6 +5,15 @@
 
 int ao_distancefield_cost = 0;
 
+/*
+#define SDFSAMPLING_SPHERETRACING_START 0.f
+#define SDFSAMPLING_SELF_SHADOW_AVOIDANCE 0.25f
+#define SDFSAMPLING_EXPONENTIAL_NUM 4
+#define SDFSAMPLING_EXPONENTIAL_START (1.f/16.f)
+#define SDFSAMPLING_EXPONENTIAL_FACTOR 2.f
+#define SDFSAMPLING_EXPONENTIAL_OFFSET 0.f
+*/
+
 float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
   mat4x3 worldToVoxelSpace;
@@ -31,25 +40,26 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   float minVisibility = 1.f;
   vec3 clamp_Range = vec3(voxelSize)-0.5f;
   
-#if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
   // In Range [intersection_distance_front, intersection_distance_back]
-  float t = intersection_distance_front;
+  float spheretracing_start = max(SDFSAMPLING_SPHERETRACING_START, intersection_distance_front);
+  float t = spheretracing_start;
   
-  int max_num_loops = 256;
-  while(t < intersection_distance_back && 0<=max_num_loops--)
-  {
-#else
+#if defined(DISTANCEFIELD_FIXED_SAMPLE_POINTS)
   // In Range [0, 1]
-  float exponential = 1.f/16.f;
+  float exponential = SDFSAMPLING_EXPONENTIAL_START;
   
-  for(int i=0; i<4; ++i)
+  for(int i=0; i<SDFSAMPLING_EXPONENTIAL_NUM; ++i)
   {
-    float t = mix(intersection_distance_front, intersection_distance_back, exponential);
-#endif
+  #if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
+    t = mix(intersection_distance_front, spheretracing_start, exponential);
+  #else
+    t = mix(intersection_distance_front, intersection_distance_back, exponential);
+  #endif
     vec3 p = get_point(ray_voxelspace, t);
     
     vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
     
+    // ee882b37 the distance between the clamped position and the sampling position is now added to the distancefield distance
     float d = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
 #if defined(DISTANCEFIELD_AO_COST_TEX)
     ao_distancefield_cost++;
@@ -61,12 +71,39 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
     occlusionHeuristic = mix(occlusionHeuristic, 1.f, t*inv_cone_length_voxelspace);
     minVisibility = min(minVisibility, occlusionHeuristic);
     
-#if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
-    t += max(0.1f, abs(d));
-#else
-    exponential *= 2.f;
-#endif
+    exponential *= SDFSAMPLING_EXPONENTIAL_FACTOR;
+    exponential += SDFSAMPLING_EXPONENTIAL_OFFSET;
   }
+#endif
+
+#if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
+  int max_num_loops = 256;
+  while(t < intersection_distance_back && 0<=max_num_loops--)
+  {
+    vec3 p = get_point(ray_voxelspace, t);
+    
+    // ee882b37 the distance between the clamped position and the sampling position is now added to the distancefield distance
+    vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
+    
+    float d = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
+#if defined(DISTANCEFIELD_AO_COST_TEX)
+    ao_distancefield_cost++;
+#endif
+    
+    float cone_radius = cone.tan_half_angle * t;
+    
+    float occlusionHeuristic = coneOcclusionHeuristic(cone_radius, d);
+    // linear falloff
+    occlusionHeuristic = mix(occlusionHeuristic, 1.f, t*inv_cone_length_voxelspace);
+    // smooth start of falloff
+    occlusionHeuristic = mix(1, occlusionHeuristic, smoothstep(0.f, SDFSAMPLING_SELF_SHADOW_AVOIDANCE, t));
+    minVisibility = min(minVisibility, occlusionHeuristic);
+    
+    t += max(0.1f, abs(d));
+  }
+#endif
+
+
   
   return minVisibility;
 }
@@ -83,9 +120,13 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
     for(int j=0; j<N_GI_CONES; ++j)
     {
       float distance_to_sphere_origin;
+      
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
       if(cone_intersects_sphere(cone_bouquet[j], sphere, distance_to_sphere_origin, cone_length))
       {
-        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
             ao_distancefield_cost++;
         #endif
 
@@ -200,9 +241,12 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
       Cone cone = cone_bouquet[j];
       float distance_to_sphere_origin;
       bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
       if(has_intersection && voxel_weight>0)
       {
-        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
             ao_distancefield_cost++;
         #endif
 
@@ -231,7 +275,12 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
 
   uint16_t leaves[BVH_MAX_VISITED_LEAVES];
   uint32_t num_leaves;
-  num_leaves = 0;
+  #if HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE!=0 && HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE!=1
+  #error invalid value for HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE, expecter 0 or 1
+  #endif
+  for(uint16_t i=uint16_t(0); i<uint16_t(HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE); ++i)
+    leaves[i] = i;
+  num_leaves = uint16_t(HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE);
 
   do {
     stack_depth--;
@@ -298,9 +347,12 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
       Cone cone = cone_bouquet[j];
       float distance_to_sphere_origin;
       bool has_intersection = cone_intersects_sphere(cone, sphere, distance_to_sphere_origin, cone_length);
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
       if(has_intersection)
       {
-        #if defined(DISTANCEFIELD_AO_COST_BRANCHING)
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
             ao_distancefield_cost++;
         #endif
 

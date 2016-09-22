@@ -1,7 +1,7 @@
 #ifndef BVHUSAGE_H
 #define BVHUSAGE_H
 
-#include <glrt/dependencies.h>
+#include <glrt/renderer/toolkit/glsl-macro-wrapper.h>
 
 namespace glrt {
 namespace renderer {
@@ -26,10 +26,7 @@ void setCurrentBVHUsage(BvhUsage bvhUsage);
 
 void init_bvh_shader_macros();
 
-// FIXME set to a lower value!
-const quint16 MAX_NUM_STATIC_MESHES = 255;
-const quint16 BVH_MAX_STACK_DEPTH = MAX_NUM_STATIC_MESHES;
-const quint16 BVH_MAX_VISITED_LEAVES = MAX_NUM_STATIC_MESHES;
+constexpr const quint16 MAX_NUM_STATIC_MESHES = 255;
 
 inline bool bvh_is_grid(BvhUsage usage)
 {
@@ -56,8 +53,25 @@ inline bool isUsingBvhLeafGrid()
   return bvh_is_grid(currentBvhUsage);
 }
 
-#define NUM_GRID_CASCADES 1
-#define BVH_USE_GRID_OCCLUSION 0
+uint16_t bvh_traversal_leaf_result_array_length();
+void set_bvh_traversal_leaf_result_array_length(uint16_t n);
+
+extern GLSLMacroWrapper<float> SDFSAMPLING_SPHERETRACING_START;
+extern GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+extern GLSLMacroWrapper<int> SDFSAMPLING_EXPONENTIAL_NUM;
+extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
+extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
+extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
+
+extern GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES;
+extern GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH;
+extern GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
+
+inline uint16_t num_grid_cascades(){return NUM_GRID_CASCADES.get_value();}
+inline uint16_t bvh_traversal_stack_depth(){return BVH_MAX_STACK_DEPTH.get_value();}
+
+#define MAX_NUM_GRID_CASCADES 3
+#define BVH_USE_GRID_OCCLUSION 1
 
 } // namespace renderer
 } // namespace glrt

@@ -188,6 +188,18 @@ public:
   std::function<T()> getter;
   std::function<void(T)> setter;
 
+  void operator=(renderer::GLSLMacroWrapper<T>& macroWrapper)
+  {
+    getter = [&macroWrapper](){return macroWrapper.get_value();};
+    setter = [&macroWrapper](T value){macroWrapper.set_value(value);};
+  }
+
+  void operator=(VariableWithCallback<T>& varWrapper)
+  {
+    getter = [&varWrapper](){return varWrapper.get_value();};
+    setter = [&varWrapper](T value){varWrapper.set_value(value);};
+  }
+
   void TwAddVarCB(TwBar* bar, const char* name, const char* def)
   {
     ::TwAddVarCB(bar, name, type(), reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
@@ -222,6 +234,25 @@ inline TwType TweakBarCBVar<bool>::type()
   return TW_TYPE_BOOLCPP;
 }
 
+template<>
+inline TwType TweakBarCBVar<int>::type()
+{
+  return TW_TYPE_INT32;
+}
+
+template<>
+inline TwType TweakBarCBVar<uint16_t>::type()
+{
+  return TW_TYPE_UINT16;
+}
+
+template<>
+inline TwType TweakBarCBVar<float>::type()
+{
+  return TW_TYPE_FLOAT;
+}
+
+
 class TweakBarShaderToggle : public TweakBarCBVar<bool>
 {
 public:
@@ -239,6 +270,7 @@ public:
     bool showByDefault = false;
     bool toggleHelp = false;
     bool toggleGui= false;
+    padding<bool, 5> _padding;
 
     static Settings sampleGui(const QString& globalDescription)
     {
@@ -307,6 +339,15 @@ private:
   gui::TweakBarCBVar<bool> sdfShadowsToggle;
   gui::TweakBarCBVar<bool> updateGridCameraToggle;
   gui::TweakBarCBVar<bool> disableSceneryVoxels;
+  gui::TweakBarCBVar<uint16_t> numBvhGrids;
+  gui::TweakBarCBVar<uint16_t> bvhStackDepth;
+
+  TweakBarCBVar<float> SDFSAMPLING_SPHERETRACING_START;
+  TweakBarCBVar<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+  TweakBarCBVar<int> SDFSAMPLING_EXPONENTIAL_NUM;
+  TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_START;
+  TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
+  TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
 
   bool _disableSceneryVoxels = false;
 
@@ -329,6 +370,7 @@ private:
   TweakBarShaderToggle toggleLogHeatVision_costs;
   TweakBarShaderToggle toggleLogHeatVisionColors;
 
+  TweakBarShaderToggle toggleDistancefieldFixedSamplePoints;
   TweakBarShaderToggle toggleDistancefieldAOSphereTracing;
 
   TweakBarShaderToggle toggleConeBouquetNoise;

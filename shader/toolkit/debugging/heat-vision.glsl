@@ -25,7 +25,7 @@ vec3 heatvision_color(float normalized_value)
   return vec3(normalized_value);
 }
 
-vec4 heatvision_linear(float normalized_value)
+vec4 heatvision_linear(float normalized_value, float alpha=1)
 {
   normalized_value = clamp(normalized_value, 0, 1);
   
@@ -35,7 +35,7 @@ vec4 heatvision_linear(float normalized_value)
   vec3 heatvision_color = heatvision_color_grey(normalized_value);
   #endif
   
-  return vec4(heatvision_color, 1);
+  return vec4(heatvision_color, alpha);
 }
 
 vec4 heatvision_log(uint32_t value, uint32_t maxValue)

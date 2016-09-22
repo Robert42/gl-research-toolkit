@@ -1,5 +1,6 @@
 #include <glrt/renderer/forward-renderer.h>
 #include <glrt/renderer/debugging/debugging-posteffect.h>
+#include <glrt/renderer/toolkit/shader-compiler.h>
 
 namespace glrt {
 namespace renderer {
@@ -8,8 +9,9 @@ namespace renderer {
 ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter)
   : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter),
     colorFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
-    depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH24_STENCIL8),
-    framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), true)
+    depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH_COMPONENT32F),
+    framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), false),
+    glProgram_CopyFrameToBackBuffer(std::move(ShaderCompiler::singleton().compileProgramFromFiles("copy-forward-framebuffer", QDir(GLRT_SHADER_DIR"/materials/implementation"))))
 {
   const Material::Type PLAIN_COLOR = Material::TypeFlag::PLAIN_COLOR | Material::TypeFlag::OPAQUE | Material::TypeFlag::VERTEX_SHADER_UNIFORM;
   const Material::Type SPHERE_AREA_LIGHT =  Material::TypeFlag::SPHERE_LIGHT;
@@ -50,6 +52,11 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   appendMaterialState(&framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::FORWARD_PASS, maskedTwoSidedShader, forwardPassFlags | maskedTwoSidedFlags);
   appendMaterialState(&framebuffer, {TEXTURED_TRANSPARENT_TWO_SIDED}, Pass::FORWARD_PASS, transparentTwoSidedShader, forwardPassFlags | transparentTwoSidedFlags);
 
+  GLuint64 colorTextureHandle = GL_RET_CALL(glGetTextureHandleNV, colorFramebufferTexture.GetInternHandle());
+  GL_CALL(glMakeTextureHandleResidentNV, colorTextureHandle);
+
+  framebufferTextureHandlesBuffer = std::move(gl::Buffer(sizeof(GLuint64), gl::Buffer::IMMUTABLE, &colorTextureHandle));
+
   framebuffer.Bind(true);
   glrt::renderer::debugging::DebuggingPosteffect::init(&framebuffer, this);
   framebuffer.BindBackBuffer();
@@ -64,7 +71,6 @@ void ForwardRenderer::prepareFramebuffer()
 {
   framebuffer.Bind(true);
 
-  Q_UNUSED(framebuffer);
   glClearColor(0.f, 0.f, 0.f, 1.f);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 }
@@ -73,9 +79,10 @@ void ForwardRenderer::applyFramebuffer()
 {
   framebuffer.BindBackBuffer();
 
-  framebuffer.BindRead();
-  GL_CALL(glBlitFramebuffer, 0, 0, videoResolution.x, videoResolution.y, 0, 0, videoResolution.x, videoResolution.y, GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-  framebuffer.UnbindRead();
+  glProgram_CopyFrameToBackBuffer.use();
+  framebufferTextureHandlesBuffer.BindUniformBuffer(0);
+  GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
+  gl::Program::useNone();
 }
 
 QSet<QString> ForwardRenderer::preprocessorBlock()

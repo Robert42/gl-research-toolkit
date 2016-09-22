@@ -5,7 +5,6 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/resources/resource-manager.h>
 #include <glrt/renderer/sample-resource-manager.h>
-#include <glrt/renderer/forward-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/voxelized-scene.h>
 #include <glrt/gui/anttweakbar.h>
@@ -22,10 +21,19 @@ public:
   {
     Uuid<scene::Scene> sceneToLoad = glrt::renderer::SampleResourceManager::defaultScene();
     bool loadDistanceField = true;
+    bool deferredRenderer = false;
+    padding<uint8_t, 6> _padding;
 
-    static Settings techDemo()
+    static Settings techDemoForward()
     {
       return Settings();
+    }
+
+    static Settings techDemoDeferred()
+    {
+      Settings settings;
+      settings.deferredRenderer = true;
+      return settings;
     }
   };
 
@@ -35,14 +43,14 @@ public:
   glrt::scene::Scene scene;
   glrt::renderer::VoxelizedScene voxelizedScene;
 
-  glrt::renderer::ForwardRenderer renderer;
+  glrt::renderer::Renderer* renderer;
   glrt::renderer::debugging::ShaderDebugPrinter shaderDebugPrinter;
 
   glrt::gui::AntTweakBar antweakbar;
 
   SampleApplication(int& argc, char** argv,
                     const gui::AntTweakBar::Settings& guiSettings,
-                    const SampleApplication::Settings& sampleApplicationSettings=SampleApplication::Settings::techDemo(),
+                    const SampleApplication::Settings& sampleApplicationSettings=SampleApplication::Settings::techDemoForward(),
                     const Application::Settings& applicationSettings=Application::Settings::techDemo(),
                     const System::Settings& systemSettings = System::Settings::simpleWindow());
   ~SampleApplication();

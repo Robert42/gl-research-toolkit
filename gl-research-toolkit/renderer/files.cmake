@@ -12,6 +12,7 @@ set(SOURCE_FILES
   include/glrt/renderer/debugging/surface-shader-visualizations.h
   include/glrt/renderer/debugging/visualization-renderer.h
   include/glrt/renderer/declarations.h
+  include/glrt/renderer/deferred-renderer.h
   include/glrt/renderer/dependencies.h
   include/glrt/renderer/forward-renderer.h
   include/glrt/renderer/gl/command-list.h
@@ -30,6 +31,8 @@ set(SOURCE_FILES
   include/glrt/renderer/static-mesh-renderer.h
   include/glrt/renderer/toolkit/aligned-vector.h
   include/glrt/renderer/toolkit/compute-shader-set.h
+  include/glrt/renderer/toolkit/glsl-macro-wrapper.h
+  include/glrt/renderer/toolkit/glsl-macro-wrapper.inl
   include/glrt/renderer/toolkit/gpu-voxelizer-implementation.h
   include/glrt/renderer/toolkit/managed-gl-buffer.h
   include/glrt/renderer/toolkit/managed-gl-buffer.inl
@@ -53,6 +56,7 @@ set(SOURCE_FILES
   src/glrt/renderer/debugging/shader-debug-printer.cpp
   src/glrt/renderer/debugging/surface-shader-visualizations.cpp
   src/glrt/renderer/debugging/visualization-renderer.cpp
+  src/glrt/renderer/deferred-renderer.cpp
   src/glrt/renderer/forward-renderer.cpp
   src/glrt/renderer/gl/command-list.cpp
   src/glrt/renderer/gl/command-list-recorder.cpp
@@ -69,6 +73,7 @@ set(SOURCE_FILES
   src/glrt/renderer/static-mesh-buffer-manager.cpp
   src/glrt/renderer/static-mesh-renderer.cpp
   src/glrt/renderer/toolkit/compute-shader-set.cpp
+  src/glrt/renderer/toolkit/glsl-macro-wrapper.cpp
   src/glrt/renderer/toolkit/gpu-voxelizer-implementation.cpp
   src/glrt/renderer/toolkit/reloadable-shader.cpp
   src/glrt/renderer/toolkit/shader-compiler.cpp

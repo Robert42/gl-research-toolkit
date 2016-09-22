@@ -177,13 +177,13 @@ vec4 cascadedGridWeights(vec3 world_pos)
 
 usampler3D cascaded_grid_texture(uint i)
 {
-  usampler3D targetTextures[NUM_GRID_CASCADES];
+  usampler3D targetTextures[MAX_NUM_GRID_CASCADES];
   
   targetTextures[0] = scene.cascadedGrids.gridTexture0;
-  #if NUM_GRID_CASCADES > 1
+  #if MAX_NUM_GRID_CASCADES > 1
   targetTextures[1] = scene.cascadedGrids.gridTexture1;
   #endif
-  #if NUM_GRID_CASCADES > 2
+  #if MAX_NUM_GRID_CASCADES > 2
   targetTextures[2] = scene.cascadedGrids.gridTexture2;
   #endif
   
@@ -193,13 +193,13 @@ usampler3D cascaded_grid_texture(uint i)
 #if BVH_USE_GRID_OCCLUSION
 sampler3D cascaded_grid_texture_occlusion(uint i)
 {
-  sampler3D targetOcclusionTextures[NUM_GRID_CASCADES];
+  sampler3D targetOcclusionTextures[MAX_NUM_GRID_CASCADES];
     
   targetOcclusionTextures[0] = scene.cascadedGrids.targetOcclusionTexture0;
-  #if NUM_GRID_CASCADES > 1
+  #if MAX_NUM_GRID_CASCADES > 1
   targetOcclusionTextures[1] = scene.cascadedGrids.targetOcclusionTexture1;
   #endif
-  #if NUM_GRID_CASCADES > 2
+  #if MAX_NUM_GRID_CASCADES > 2
   targetOcclusionTextures[2] = scene.cascadedGrids.targetOcclusionTexture2;
   #endif
   

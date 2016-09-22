@@ -5,11 +5,11 @@ const bool ADD_VSYNC = true;
 int main(int argc, char** argv)
 {
   glrt::SampleApplication app(argc, argv,
-                              glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the forward renderer to render a simple scene" // help text of the sample
+                              glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the deferred renderer to render a simple scene" // help text of the sample
                                                                           ),
-                              glrt::SampleApplication::Settings::techDemoForward(),
+                              glrt::SampleApplication::Settings::techDemoDeferred(),
                               glrt::Application::Settings::techDemo(),
-                              glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Forward-Renderer"), ADD_VSYNC));
+                              glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Deferred-Renderer", glm::ivec2(512, 384)), ADD_VSYNC));
 
   app.showWindow();
 

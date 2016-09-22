@@ -22,6 +22,9 @@ protected:
   void applyFramebuffer() override;
 
 private:
+  gl::Program  glProgram_CopyFrameToBackBuffer;
+  gl::Buffer framebufferTextureHandlesBuffer;
+
   static QSet<QString> preprocessorBlock();
 };
 

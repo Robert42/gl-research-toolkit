@@ -4,6 +4,10 @@
 namespace glrt {
 namespace scene {
 
+VariableWithCallback<bool> ENFORCE_HUGE_BVH_LEAVES_FIRST(true);
+VariableWithCallback<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE(1);
+VariableWithCallback<float> BVH_HUGE_LEAVES_LIMIT(0.25f);
+
 Scene::Data::Data(Scene& scene)
   : scene(scene),
     transformations{new Transformations(emptyNodes), new Transformations(sphereLights), new Transformations(rectLights), new Transformations(staticMeshes1), new Transformations(voxelGrids1), new Transformations(cameras)},
@@ -39,7 +43,7 @@ void Scene::Data::clear()
 
   const uint16_t n = voxelGrids->capacity();
   resources::BoundingSphere* spheres = voxelGrids->boundingSphere;
-#pragma omp for simd
+#pragma omp simd
   for(int i=0; i<n; ++i)
   {
     spheres[i].center = glm::vec3(NAN);
@@ -95,6 +99,27 @@ void Scene::Data::sort_staticMeshes()
   staticMeshes->dirtyOrder = false;
 }
 
+
+bool sorting_order_hugeBvhLeavesFirst_sortByZ(const quint32* z_indices, const resources::BoundingSphere* bounding_spheres, const resources::VoxelData* voxel_data, const float huge_bvh_limit, quint16 a, quint16 b)
+{
+  Q_UNUSED(voxel_data);
+
+  bool a_is_huge = bounding_spheres[a].radius>huge_bvh_limit;
+  bool b_is_huge = bounding_spheres[b].radius>huge_bvh_limit;
+  if(Q_UNLIKELY(a_is_huge != b_is_huge))
+    return a_is_huge;
+  return z_indices[a]<z_indices[b];
+}
+
+bool sorting_order_sortByZ(const quint32* z_indices, const resources::BoundingSphere* bounding_spheres, const resources::VoxelData* voxel_data, const float huge_bvh_limit, quint16 a, quint16 b)
+{
+  Q_UNUSED(voxel_data);
+  Q_UNUSED(bounding_spheres);
+  Q_UNUSED(huge_bvh_limit);
+  return z_indices[a]<z_indices[b];
+}
+
+
 void Scene::Data::sort_voxelGrids()
 {
   voxelGrids->assert_valid_indices();
@@ -106,17 +131,22 @@ void Scene::Data::sort_voxelGrids()
   const float huge_bvh_limit = voxelGrids->huge_bvh_limit;
   const quint32* z_indices = voxelGrids->z_index;
   const resources::BoundingSphere* bounding_spheres = voxelGrids->boundingSphere;
-  auto sorting_order = [&z_indices, &bounding_spheres,huge_bvh_limit](quint16 a, quint16 b){
-#if ENFORCE_HUGE_BVH_LEAVES_FIRST
-    bool a_is_huge = bounding_spheres[a].radius>huge_bvh_limit;
-    bool b_is_huge = bounding_spheres[b].radius>huge_bvh_limit;
-    if(Q_UNLIKELY(a_is_huge != b_is_huge))
-      return a_is_huge;
-#else
-    Q_UNUSED(bounding_spheres);
-    Q_UNUSED(huge_bvh_limit);
-#endif
-    return z_indices[a]<z_indices[b];
+  const resources::VoxelData* voxel_data = voxelGrids->voxelData;
+
+  // TODO make this decision at runtime
+
+  bool(*sorting_implementation)(const quint32* z_indices, const resources::BoundingSphere* bounding_spheres, const resources::VoxelData* voxel_data, const float huge_bvh_limit, quint16 a, quint16 b);
+
+  if(ENFORCE_HUGE_BVH_LEAVES_FIRST)
+  {
+    sorting_implementation = sorting_order_hugeBvhLeavesFirst_sortByZ;
+  }else
+  {
+    sorting_implementation = sorting_order_sortByZ;
+  }
+
+  auto sorting_order = [&z_indices, &voxel_data, &bounding_spheres,huge_bvh_limit,sorting_implementation](quint16 a, quint16 b) -> bool{
+    return sorting_implementation(z_indices, bounding_spheres, voxel_data, huge_bvh_limit, a, b);
   };
 
   std::stable_sort(&index_reorder[0], &index_reorder[voxelGrids->length], sorting_order);

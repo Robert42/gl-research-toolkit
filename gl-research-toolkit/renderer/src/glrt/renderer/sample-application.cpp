@@ -1,5 +1,7 @@
 #include <glrt/sample-application.h>
 #include <glrt/toolkit/profiler.h>
+#include <glrt/renderer/forward-renderer.h>
+#include <glrt/renderer/deferred-renderer.h>
 
 
 namespace glrt {
@@ -13,9 +15,13 @@ SampleApplication::SampleApplication(int& argc, char** argv,
     firstSceneToLoad(sampleApplicationSettings.sceneToLoad),
     scene(&resourceManager),
     voxelizedScene(scene),
-    renderer(systemSettings.windowSize, &scene, &resourceManager, &shaderDebugPrinter),
     antweakbar(this, guiSettings)
 {
+  if(sampleApplicationSettings.deferredRenderer)
+    renderer = new renderer::DeferredRenderer(systemSettings.windowSize, &scene, &resourceManager, &shaderDebugPrinter);
+  else
+    renderer = new renderer::ForwardRenderer(systemSettings.windowSize, &scene, &resourceManager, &shaderDebugPrinter);
+
   initGui();
 
   if(sampleApplicationSettings.loadDistanceField)
@@ -26,6 +32,7 @@ SampleApplication::SampleApplication(int& argc, char** argv,
 
 SampleApplication::~SampleApplication()
 {
+  delete renderer;
 }
 
 bool SampleApplication::handleEvents(const SDL_Event& event)
@@ -45,7 +52,7 @@ float SampleApplication::update()
   const float deltaTime = Application::update();
   scene.update(deltaTime);
   antweakbar.update(deltaTime);
-  renderer.update(deltaTime);
+  renderer->update(deltaTime);
   return deltaTime;
 }
 
@@ -60,7 +67,7 @@ void SampleApplication::beginDrawing()
 
 void SampleApplication::drawScene()
 {
-  renderer.render();
+  renderer->render();
 }
 
 void SampleApplication::endDrawing()
@@ -73,8 +80,8 @@ void SampleApplication::endDrawing()
 
 void SampleApplication::initGui()
 {
-  antweakbar.createDebugSceneBar(&renderer);
-  antweakbar.createDebugShaderBar(&renderer, &shaderDebugPrinter);
+  antweakbar.createDebugSceneBar(renderer);
+  antweakbar.createDebugShaderBar(renderer, &shaderDebugPrinter);
   antweakbar.createProfilerBar(&profiler);
 }
 

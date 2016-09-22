@@ -12,6 +12,7 @@ enum class Pass
 {
   DEPTH_PREPASS,
   FORWARD_PASS,
+  GBUFFER_FILL_PASS,
 };
 
 inline int qHash(Pass pass){return ::qHash(static_cast<int>(pass));}

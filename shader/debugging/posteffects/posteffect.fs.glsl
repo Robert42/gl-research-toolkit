@@ -9,6 +9,7 @@
 #include <glrt/glsl/math-glsl.h>
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
+#include <write-fragment-color.glsl>
 
 #include <lighting/rendering-equation.glsl>
 
@@ -48,7 +49,7 @@ void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_n
 const vec3 far_plane_world_pos = vec3(inf, inf, 0.9999999);
 const vec3 near_plane_world_pos = vec3(inf, inf, -1);
 
-out vec4 fragment_color;
+
 void main()
 {
   Ray ray;
@@ -58,7 +59,7 @@ void main()
   vec3 world_pos = near_plane_world_pos;
   vec3 world_normal = vec3(0);
   
-  fragment_color = vec4(1, 0.5, 0, 1);
+  vec4 fragment_color = vec4(1, 0.5, 0, 1);
   
   rayMarch(ray, fragment_color,  world_pos, world_normal);
   
@@ -92,6 +93,8 @@ void main()
     
     gl_FragDepth = FragCoord_z_toFragDepth(point.z);
   }
+
+  write_fragment_color(fragment_color);
 }
 
 vec4 heatvision(uint32_t value)

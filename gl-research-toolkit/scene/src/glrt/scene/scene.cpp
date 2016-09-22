@@ -122,6 +122,8 @@ void Scene::load(const Uuid<Scene>& scene)
   sceneLoadedExt(this, success);
   sceneLoaded(success);
 
+  qDebug() << "loaded scene with"<<data->voxelGrids->length<<"SDFs.";
+
   qApp->processEvents();
 
   unloadUnusedResources();
