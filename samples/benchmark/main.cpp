@@ -47,6 +47,8 @@ int main(int argc, char** argv)
   bool_setters["--heatvision_use_colors"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("HEATVISION_COLORS", v);};
   uint16_setters["--sdf_enforce_huge_bvh_leaves_first"] = [](bool v){ENFORCE_HUGE_BVH_LEAVES_FIRST.set_value(v);};
   uint16_setters["--sdf_sort_objects_by_sdf_texture"] = [](bool v){SORT_OBJECTS_BY_SDF_TEXTURE.set_value(v);};
+  uint16_setters["--ao_falloff_none"] = [](bool v){AO_FALLBACK_NONE.set_value(v);};
+  uint16_setters["--ao_falloff_clamped"] = [](bool v){AO_FALLBACK_CLAMPED.set_value(v);};
   uint32_setters["--heatvision_black_level"] = [&](uint32_t v){renderer->costsHeatvisionBlackLevel = v;};
   uint32_setters["--heatvision_white_level"] = [&](uint32_t v){renderer->costsHeatvisionWhiteLevel = v;};
   uint32_setters["--frame_num_padding"] = [&](uint32_t v){frame_num_padding = v;};

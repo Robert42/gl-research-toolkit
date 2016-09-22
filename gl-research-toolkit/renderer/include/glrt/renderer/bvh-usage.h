@@ -59,6 +59,7 @@ void set_bvh_traversal_leaf_result_array_length(uint16_t n);
 extern GLSLMacroWrapper<float> SDFSAMPLING_SPHERETRACING_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
 extern GLSLMacroWrapper<int> SDFSAMPLING_EXPONENTIAL_NUM;
+extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
@@ -66,6 +67,9 @@ extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
 extern GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES;
 extern GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH;
 extern GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
+
+extern GLSLMacroWrapper<bool> AO_FALLBACK_NONE;
+extern GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED;
 
 inline uint16_t num_grid_cascades(){return NUM_GRID_CASCADES.get_value();}
 inline uint16_t bvh_traversal_stack_depth(){return BVH_MAX_STACK_DEPTH.get_value();}
