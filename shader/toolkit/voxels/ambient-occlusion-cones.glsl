@@ -23,7 +23,7 @@ void ao_falloff(inout float occlusionHeuristic, float distance, float cone_lengt
   return;
 #endif
 #if AO_FALLBACK_CLAMPED
-  occlusionHeuristic = mix(1, occlusionHeuristic, step(cone_length_voxelspace, distance));
+  occlusionHeuristic = mix(occlusionHeuristic, 1, step(cone_length_voxelspace, distance));
   return;
 #endif
 
