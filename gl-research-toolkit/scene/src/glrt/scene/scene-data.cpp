@@ -141,33 +141,6 @@ int sorting_order_sortBySDF(const quint32* z_indices, const resources::BoundingS
 }
 
 
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-bool sorting_order_hugeBvhLeavesFirst_sortByZ(const quint32* z_indices, const resources::BoundingSphere* bounding_spheres, const resources::VoxelData* voxel_data, const float huge_bvh_limit, quint16 a, quint16 b)
-{
-  Q_UNUSED(voxel_data);
-
-  bool a_is_huge = bounding_spheres[a].radius>huge_bvh_limit;
-  bool b_is_huge = bounding_spheres[b].radius>huge_bvh_limit;
-  if(Q_UNLIKELY(a_is_huge != b_is_huge))
-    return a_is_huge;
-  return z_indices[a]<z_indices[b];
-}
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// FIXME: remmove this function again!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
-
-
 void Scene::Data::sort_voxelGrids()
 {
   voxelGrids->assert_valid_indices();
@@ -200,21 +173,7 @@ void Scene::Data::sort_voxelGrids()
     int order1 = enforce_order1(z_indices, bounding_spheres, voxel_data, huge_bvh_limit, a, b);
     int order2 = enforce_order2(z_indices, bounding_spheres, voxel_data, huge_bvh_limit, a, b);
 
-    PRINT_VALUE(a);
-    PRINT_VALUE(b);
-    PRINT_VALUE(z_indices[a]);
-    PRINT_VALUE(z_indices[b]);
-    PRINT_VALUE(int(z_indices[a]));
-    PRINT_VALUE(int(z_indices[b]));
-    PRINT_VALUE(int(z_indices[b])-int(z_indices[a]));
-    PRINT_VALUE(glm::sign(int(z_indices[b])-int(z_indices[a])));
-    PRINT_VALUE(bounding_spheres[a].radius>huge_bvh_limit);
-    PRINT_VALUE(bounding_spheres[b].radius>huge_bvh_limit);
-
     bool lessThan = order1!=0 ? order1>0 : order2>0;
-    bool expectedLessThan = sorting_order_hugeBvhLeavesFirst_sortByZ(z_indices, bounding_spheres,voxel_data, huge_bvh_limit, a, b);
-
-    Q_ASSERT(lessThan == expectedLessThan);
 
     return lessThan;
   };
