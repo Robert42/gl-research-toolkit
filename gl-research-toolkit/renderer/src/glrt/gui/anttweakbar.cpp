@@ -234,6 +234,8 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   sortObjectsBySDF = glrt::scene::SORT_OBJECTS_BY_SDF_TEXTURE;
   sortObjectsBySDF.TwAddVarCB(tweakBar, "SortBySDF", "group='Optimization'");
 
+  TwSetParam(tweakBar, "Optimization", "opened", TW_PARAM_CSTRING, 1, "false");
+
 
   //-------- BVH---------------------------------------------------
   bvhUsageSwitcher = BvhUsageEnumeration::Ptr(new BvhUsageEnumeration("BvhUsageEnumeration", tweakBar, "BVH Usage", "keyincr=F8 keydecr=SHIFT+F8 help='Switch the suage of the BVH-tree' group='BVH'"));
@@ -287,18 +289,21 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   toggleDistancefieldFixedSamplePoints.TwAddVarCB(tweakBar, "Fixed-Sampling-Points", "group='Debug/SDF-AO'");
   toggleDistancefieldAOSphereTracing.TwAddVarCB(tweakBar, "Sphere-Tracing", "group='Debug/SDF-AO'");
 
+  SDFSAMPLING_SPHERETRACING_START = renderer::SDFSAMPLING_SPHERETRACING_START;
   SDFSAMPLING_SELF_SHADOW_AVOIDANCE = renderer::SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
   SDFSAMPLING_EXPONENTIAL_NUM = renderer::SDFSAMPLING_EXPONENTIAL_NUM;
   SDFSAMPLING_EXPONENTIAL_START = renderer::SDFSAMPLING_EXPONENTIAL_START;
+  SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE = renderer::SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
   SDFSAMPLING_EXPONENTIAL_FACTOR = renderer::SDFSAMPLING_EXPONENTIAL_FACTOR;
   SDFSAMPLING_EXPONENTIAL_OFFSET = renderer::SDFSAMPLING_EXPONENTIAL_OFFSET;
 
-  SDFSAMPLING_SPHERETRACING_START.TwAddVarCB(tweakBar, "SDFSAMPLING_SPHERETRACING_START", "group='Debug/SDF-AO' min=0 max=1");
-  SDFSAMPLING_SELF_SHADOW_AVOIDANCE.TwAddVarCB(tweakBar, "SDFSAMPLING_SELF_SHADOW_AVOIDANCE", "group='Debug/SDF-AO' min=0 max=2");
+  SDFSAMPLING_SPHERETRACING_START.TwAddVarCB(tweakBar, "SDFSAMPLING_SPHERETRACING_START", "group='Debug/SDF-AO' min=0 max=4 precision=3");
+  SDFSAMPLING_SELF_SHADOW_AVOIDANCE.TwAddVarCB(tweakBar, "SDFSAMPLING_SELF_SHADOW_AVOIDANCE", "group='Debug/SDF-AO' min=0 max=2 precision=3");
   SDFSAMPLING_EXPONENTIAL_NUM.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_NUM", "group='Debug/SDF-AO' min=1 max=16");
-  SDFSAMPLING_EXPONENTIAL_START.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_START", "group='Debug/SDF-AO' min=0 max=1");
-  SDFSAMPLING_EXPONENTIAL_FACTOR.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_FACTOR", "group='Debug/SDF-AO' min=1 max=16");
-  SDFSAMPLING_EXPONENTIAL_OFFSET.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_OFFSET", "group='Debug/SDF-AO' min=0 max=1");
+  SDFSAMPLING_EXPONENTIAL_START.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_START", "group='Debug/SDF-AO' min=0 max=4 precision=3");
+  SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE", "group='Debug/SDF-AO' min=0 max=1 precision=3");
+  SDFSAMPLING_EXPONENTIAL_FACTOR.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_FACTOR", "group='Debug/SDF-AO' min=1 max=16 precision=3");
+  SDFSAMPLING_EXPONENTIAL_OFFSET.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_OFFSET", "group='Debug/SDF-AO' min=0 max=1 precision=3");
 
   TwSetParam(tweakBar, "Debug/SDF-AO", "opened", TW_PARAM_CSTRING, 1, "false");
 

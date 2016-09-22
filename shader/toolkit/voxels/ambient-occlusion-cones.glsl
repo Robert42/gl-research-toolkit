@@ -9,7 +9,8 @@ int ao_distancefield_cost = 0;
 #define SDFSAMPLING_SPHERETRACING_START 0.f
 #define SDFSAMPLING_SELF_SHADOW_AVOIDANCE 0.25f
 #define SDFSAMPLING_EXPONENTIAL_NUM 4
-#define SDFSAMPLING_EXPONENTIAL_START (1.f/16.f)
+#define SDFSAMPLING_EXPONENTIAL_START 0.25f
+#define SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE (1.f/16.f)
 #define SDFSAMPLING_EXPONENTIAL_FACTOR 2.f
 #define SDFSAMPLING_EXPONENTIAL_OFFSET 0.f
 #define AO_FALLBACK_NONE 0
@@ -18,6 +19,14 @@ int ao_distancefield_cost = 0;
 
 void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace)
 {
+#if AO_FALLBACK_NONE
+  return;
+#endif
+#if AO_FALLBACK_CLAMPED
+  occlusionHeuristic = mix(1, occlusionHeuristic, step(cone_length_voxelspace, distance));
+  return;
+#endif
+
   // linear falloff
   occlusionHeuristic = mix(occlusionHeuristic, 1.f, distance*inv_cone_length_voxelspace);
   // smooth start of falloff
@@ -44,28 +53,33 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   float cone_length_voxelspace = cone_length * worldToVoxelSpace_Factor;
   float inv_cone_length_voxelspace = 1.f / cone_length_voxelspace;
   
-  float self_shadow_avoidance = 0.25f; // TODO: use the distancefield itself to get the best offset? // TODO: use the id to deicide, whether the self occlusion offset should be applied?
-  
-  intersection_distance_front = max(intersection_distance_front*worldToVoxelSpace_Factor, self_shadow_avoidance);
+  intersection_distance_front = intersection_distance_front*worldToVoxelSpace_Factor;
   intersection_distance_back = min(intersection_distance_back*worldToVoxelSpace_Factor, cone_length_voxelspace);
+
+#if AO_FALLBACK_NONE || AO_FALLBACK_CLAMPED
+  intersection_distance_back = intersection_distance_back*worldToVoxelSpace_Factor;
+#endif
     
   float minVisibility = 1.f;
   vec3 clamp_Range = vec3(voxelSize)-0.5f;
   
   // In Range [intersection_distance_front, intersection_distance_back]
+  float exponential_start = max(SDFSAMPLING_EXPONENTIAL_START, intersection_distance_front);
   float spheretracing_start = max(SDFSAMPLING_SPHERETRACING_START, intersection_distance_front);
   float t = spheretracing_start;
   
 #if defined(DISTANCEFIELD_FIXED_SAMPLE_POINTS)
   // In Range [0, 1]
-  float exponential = SDFSAMPLING_EXPONENTIAL_START;
+  float exponential = SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
+
+  PRINT_VALUE(exponential);
   
   for(int i=0; i<SDFSAMPLING_EXPONENTIAL_NUM; ++i)
   {
   #if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
-    t = mix(intersection_distance_front, spheretracing_start, exponential);
+    t = mix(exponential_start, spheretracing_start, exponential);
   #else
-    t = mix(intersection_distance_front, intersection_distance_back, exponential);
+    t = mix(exponential_start, intersection_distance_back, exponential);
   #endif
     vec3 p = get_point(ray_voxelspace, t);
     
