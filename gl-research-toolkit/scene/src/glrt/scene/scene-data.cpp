@@ -193,6 +193,7 @@ void Scene::Data::sort_voxelGrids()
 
 #ifdef QT_DEBUG
   z_indices = voxelGrids->z_index; // after swapping the old address is invalid
+  voxel_data = voxelGrids->voxelData;
   bounding_spheres = voxelGrids->boundingSphere;
 
   voxelGrids->assert_valid_indices();
