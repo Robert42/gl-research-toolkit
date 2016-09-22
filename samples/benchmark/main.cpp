@@ -7,6 +7,7 @@
 #include <QPainter>
 
 using namespace glrt::renderer;
+using namespace glrt::scene;
 
 int main(int argc, char** argv)
 {
@@ -44,6 +45,8 @@ int main(int argc, char** argv)
   bool_setters["--use_fixed_ao_samples"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_FIXED_SAMPLE_POINTS", v);};
   bool_setters["--heatvision_use_logarithmic_scale"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("LOG_HEATVISION_DEBUG_COSTS", v);};
   bool_setters["--heatvision_use_colors"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("HEATVISION_COLORS", v);};
+  uint16_setters["--sdf_enforce_huge_bvh_leaves_first"] = [](bool v){ENFORCE_HUGE_BVH_LEAVES_FIRST.set_value(v);};
+  uint16_setters["--sdf_sort_objects_by_sdf_texture"] = [](bool v){SORT_OBJECTS_BY_SDF_TEXTURE.set_value(v);};
   uint32_setters["--heatvision_black_level"] = [&](uint32_t v){renderer->costsHeatvisionBlackLevel = v;};
   uint32_setters["--heatvision_white_level"] = [&](uint32_t v){renderer->costsHeatvisionWhiteLevel = v;};
   uint32_setters["--frame_num_padding"] = [&](uint32_t v){frame_num_padding = v;};
