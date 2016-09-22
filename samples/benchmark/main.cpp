@@ -381,7 +381,7 @@ int main(int argc, char** argv)
       painter.drawText(QRectF(gradient_width + 20*pt, pos-0*pt, 50*pt, 0*pt), Qt::AlignVCenter, QString("%0").arg(glm::round(value)));
     }
 
-    // TODO: histogram
+    // IDEA: histogram
 
     painter.setBrush(QBrush(gradient));
     painter.drawRect(QRectF(pt*0.5, padding, gradient_width-pt, size.height()-padding*2));

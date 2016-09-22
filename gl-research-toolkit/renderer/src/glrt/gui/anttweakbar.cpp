@@ -225,6 +225,10 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
 
 
+  sortObjectsBySDF = glrt::scene::SORT_OBJECTS_BY_SDF_TEXTURE;
+  sortObjectsBySDF.TwAddVarCB(tweakBar, "SortBySDF", "");
+
+
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
 
 

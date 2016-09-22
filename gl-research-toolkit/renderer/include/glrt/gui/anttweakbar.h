@@ -334,6 +334,7 @@ private:
   typedef TweakBarEnum<glrt::renderer::SurfaceShaderVisualization> VisualizationEnumeration;
   typedef TweakBarEnum<glrt::renderer::BvhUsage> BvhUsageEnumeration;
 
+  gui::TweakBarCBVar<bool> sortObjectsBySDF;
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
   gui::TweakBarCBVar<bool> sdfShadowsToggle;
