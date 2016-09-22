@@ -12,6 +12,7 @@ namespace scene {
 
 
 extern VariableWithCallback<bool> ENFORCE_HUGE_BVH_LEAVES_FIRST;
+extern VariableWithCallback<bool> SORT_OBJECTS_BY_SDF_TEXTURE;
 extern VariableWithCallback<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
 extern VariableWithCallback<float> BVH_HUGE_LEAVES_LIMIT;
 

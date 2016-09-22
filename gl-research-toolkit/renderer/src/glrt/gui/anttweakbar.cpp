@@ -225,7 +225,14 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   visualizationSwitcher->valueChanged = [](glrt::renderer::SurfaceShaderVisualization visualization){glrt::renderer::setCurrentSurfaceShaderVisualization(visualization);};
 
 
+
+
   TwAddButton(tweakBar, "Reload Shaders", __reload_all_shaders, nullptr, "key=F5 help='Reloads all reloadable shaders'");
+
+
+  //-------- Optimization ---------------------------------------------------
+  sortObjectsBySDF = glrt::scene::SORT_OBJECTS_BY_SDF_TEXTURE;
+  sortObjectsBySDF.TwAddVarCB(tweakBar, "SortBySDF", "group='Optimization'");
 
 
   //-------- BVH---------------------------------------------------
@@ -243,6 +250,9 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   bvhStackDepth.setter = [](uint16_t n){renderer::set_bvh_traversal_leaf_result_array_length(n);};
   bvhStackDepth.getter = []() -> uint16_t {return renderer::bvh_traversal_leaf_result_array_length();};
   bvhStackDepth.TwAddVarCB(tweakBar, "Num used Leaf Results ", QString("min=1 max=%0 group='BVH'").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
+
+  bvhEnforceHugeLeavesFirst = glrt::scene::ENFORCE_HUGE_BVH_LEAVES_FIRST;
+  bvhEnforceHugeLeavesFirst.TwAddVarCB(tweakBar, "EnforceHugeLeavesFirst", "group='BVH'");
 
   TwSetParam(tweakBar, "BVH", "opened", TW_PARAM_CSTRING, 1, "false");
 
