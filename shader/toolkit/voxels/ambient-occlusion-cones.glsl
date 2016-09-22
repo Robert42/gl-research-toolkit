@@ -12,7 +12,19 @@ int ao_distancefield_cost = 0;
 #define SDFSAMPLING_EXPONENTIAL_START (1.f/16.f)
 #define SDFSAMPLING_EXPONENTIAL_FACTOR 2.f
 #define SDFSAMPLING_EXPONENTIAL_OFFSET 0.f
+#define AO_FALLBACK_NONE 0
+#define AO_FALLBACK_CLAMPED 0
 */
+
+void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace)
+{
+  // linear falloff
+  occlusionHeuristic = mix(occlusionHeuristic, 1.f, distance*inv_cone_length_voxelspace);
+  // smooth start of falloff
+  occlusionHeuristic = mix(1, occlusionHeuristic, smoothstep(0.f, SDFSAMPLING_SELF_SHADOW_AVOIDANCE, distance));
+}
+
+#define AO_FALLOFF(occ, dist) ao_falloff(occ, dist, cone_length_voxelspace, inv_cone_length_voxelspace)
 
 float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
 {
@@ -68,7 +80,7 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
     float cone_radius = cone.tan_half_angle * t;
     
     float occlusionHeuristic = coneOcclusionHeuristic(cone_radius, d);
-    occlusionHeuristic = mix(occlusionHeuristic, 1.f, t*inv_cone_length_voxelspace);
+    AO_FALLOFF(occlusionHeuristic, t);
     minVisibility = min(minVisibility, occlusionHeuristic);
     
     exponential *= SDFSAMPLING_EXPONENTIAL_FACTOR;
@@ -93,10 +105,7 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
     float cone_radius = cone.tan_half_angle * t;
     
     float occlusionHeuristic = coneOcclusionHeuristic(cone_radius, d);
-    // linear falloff
-    occlusionHeuristic = mix(occlusionHeuristic, 1.f, t*inv_cone_length_voxelspace);
-    // smooth start of falloff
-    occlusionHeuristic = mix(1, occlusionHeuristic, smoothstep(0.f, SDFSAMPLING_SELF_SHADOW_AVOIDANCE, t));
+    AO_FALLOFF(occlusionHeuristic, t);
     minVisibility = min(minVisibility, occlusionHeuristic);
     
     t += max(0.1f, abs(d));
