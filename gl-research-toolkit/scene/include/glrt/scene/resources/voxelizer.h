@@ -11,6 +11,12 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+struct VoxelGridGeometry
+{
+  CoordFrame toVoxelSpace;
+  glm::ivec3 gridSize = glm::vec3(0);
+};
+
 class ResourceIndex;
 
 class Voxelizer final
@@ -44,6 +50,8 @@ public:
     int maxSize = 256;
     float scaleFactor = 1.f;
     bool enabled = true;
+    bool forcePowerOfTwo = false;
+    bool forceCube = false;
 
     Hints()
     {
@@ -65,6 +73,8 @@ public:
   void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided, const Uuid<StaticMesh>& proxyMesh);
   void addToGroup(const Uuid<StaticMesh>& meshUuid, const CoordFrame& frame, bool two_sided);
   void voxelizeJoinedGroup(MeshType meshType);
+
+  static VoxelGridGeometry calcVoxelSize(const AABB& boundingBox, int baseSize, bool forcePowerOfTwo=true, bool forceCube=false, float extend = 1.e-4f);
 
 private:
   struct FileNames

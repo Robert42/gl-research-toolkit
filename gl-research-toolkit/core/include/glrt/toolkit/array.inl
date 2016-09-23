@@ -916,6 +916,24 @@ void Array<T, T_traits,T_allocator>::resize(int newSize)
   }
 }
 
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::resize_memset_zero(int newSize)
+{
+  Q_ASSERT(newSize>=0);
+
+  if(newSize <= 0)
+    clear();
+  else
+  {
+    ensureCapacity(newSize);
+
+    if(newSize > _length)
+    std::memset(_data + _length, 0, newSize-_length);
+
+    _length = newSize;
+  }
+}
+
 
 template<typename T, typename T_traits, class T_allocator>
 QDebug operator<<(QDebug d, const Array<T, T_traits,T_allocator>& array)

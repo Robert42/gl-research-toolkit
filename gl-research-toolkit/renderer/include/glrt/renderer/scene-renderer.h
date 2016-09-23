@@ -111,6 +111,17 @@ private:
   Array<ReloadableShader> materialShaders;
   Array<MaterialState> materialStates;
 
+  // Candidate Grid
+  struct CandidateGrid
+  {
+    GLuint64 textureRenderHandle = 0;
+    GlTexture texture;
+    glm::uvec3 size;
+
+    void calcCandidates(const scene::Scene* scene, float influence_radius);
+  };
+  CandidateGrid candidateGrid;
+
   // Cascaded Grids
   ComputeStep collectAmbientOcclusionToGrid1, collectAmbientOcclusionToGrid2, collectAmbientOcclusionToGrid3;
   ComputeStep* collectAmbientOcclusionToGrid[4];
