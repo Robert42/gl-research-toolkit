@@ -156,6 +156,7 @@ private:
     float totalTime;
     LightBuffer::LightData lightData;
     VoxelBuffer::VoxelHeader voxelHeader;
+    VoxelBuffer::CandidateGridHeader candidateGrid;
     CascadedGridsHeader cascadedGrids;
 
     // Padding & debugging

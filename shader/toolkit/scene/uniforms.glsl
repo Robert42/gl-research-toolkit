@@ -33,6 +33,17 @@ struct SceneVoxelHeader
   padding3(uint32_t, _padding2);
 };
 
+struct CandidateGridHeader
+{
+  usampler3D gridRanges;
+  usampler2D _reservedForTiles;
+  sampler3D fallbackSDF;
+  sampler3D _padding;
+  
+  uint64_t candidateGrid;
+  uint64_t _candidate_reservedForTiles;
+};
+
 struct SceneData
 {
   mat4 view_projection;
@@ -40,7 +51,9 @@ struct SceneData
   float totalTime;
   SceneLightData lights;
   SceneVoxelHeader voxelHeader;
+  //CandidateGridHeader candidateGridHeader;
   CascadedGrids cascadedGrids;
+  
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;
   uint16_t bvh_debug_depth_begin;

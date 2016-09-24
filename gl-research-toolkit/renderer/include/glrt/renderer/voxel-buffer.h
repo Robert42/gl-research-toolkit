@@ -86,14 +86,24 @@ public:
   };
 
   // Candidate Grid
-  struct CandidateGrid
+  struct CandidateGridHeader
   {
     GLuint64 textureRenderHandle = 0;
+    GLuint64 _reservedForTiles = 0;
+    GLuint64 fallbackSDF = 0;
+    GLuint64 _padding = 0;
+
+    GLuint64 candidateBuffer = 0;
+    GLuint64 _candidate_reservedForTiles = 0;
+  };
+  struct CandidateGrid
+  {
     GlTexture texture;
     glm::uvec3 size;
 
-    void calcCandidates(const scene::Scene* scene, float influence_radius);
+    CandidateGridHeader calcCandidates(const scene::Scene* scene, float influence_radius);
   };
+  CandidateGridHeader candidateGridHeader;
   CandidateGrid candidateGrid;
 
   VoxelBuffer(scene::Scene& scene);

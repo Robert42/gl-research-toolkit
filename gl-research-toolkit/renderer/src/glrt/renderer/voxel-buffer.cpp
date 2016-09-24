@@ -49,7 +49,7 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
   if(Q_UNLIKELY(dirty_candidate_grid))
   {
-    candidateGrid.calcCandidates(&scene, AO_RADIUS);
+    candidateGridHeader = candidateGrid.calcCandidates(&scene, AO_RADIUS);
 
     dirty_candidate_grid = false;
   }
@@ -160,7 +160,7 @@ using scene::resources::VoxelGridGeometry;
 
 Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry,  float influence_radius);
 
-void VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, float influence_radius)
+VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, float influence_radius)
 {
   PROFILE_SCOPE("CandidateGrid::calcCandidateGrid")
 
@@ -235,20 +235,30 @@ void VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, float
     }
   }
 
+#define ALWAYS_NEW_TEXTURE_OBJECT 1
+
+#if !ALWAYS_NEW_TEXTURE_OBJECT
   if(this->size != size)
   {
+#endif
     this->size = size;
     texture = std::move(GlTexture());
+#if !ALWAYS_NEW_TEXTURE_OBJECT
   }else if(textureRenderHandle!=0)
   {
     if(GL_RET_CALL(glIsTextureHandleResidentNV, textureRenderHandle))
       GL_CALL(glMakeTextureHandleNonResidentNV, textureRenderHandle);
   }
+#endif
+
+  CandidateGridHeader header;
 
   texture.setUncompressed2DImage(format, buffer);
   texture.makeComplete();
-  textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
-  GL_CALL(glMakeTextureHandleResidentNV, textureRenderHandle);
+  header.textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
+  GL_CALL(glMakeTextureHandleResidentNV, header.textureRenderHandle);
+
+  return header;
 }
 
 

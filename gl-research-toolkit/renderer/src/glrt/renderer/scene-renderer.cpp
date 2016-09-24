@@ -619,6 +619,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.costsHeatvisionWhiteLevel = costsHeatvisionWhiteLevel;
   sceneUniformData.bvh_debug_depth_begin = bvh_debug_depth_begin;
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
+  sceneUniformData.candidateGrid = voxelUniformBuffer.candidateGridHeader;
   sceneUniformData.cascadedGrids = updateCascadedGrids();
   sceneUniformBuffer.Unmap();
 }
