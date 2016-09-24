@@ -902,7 +902,7 @@ void Array<T, T_traits,T_allocator>::append_by_memcpy(const T_value& value)
 template<typename T, class T_traits, class T_allocator>
 void Array<T, T_traits,T_allocator>::resize(int newSize)
 {
-  static_assert(std::is_same<byte, T>::value, "append_by_memcpy only allowed for an array of the type byte");
+  static_assert(T_traits::is_pod, "append_by_memcpy only allowed for an array of pod");
 
   Q_ASSERT(newSize>=0);
 
@@ -917,7 +917,23 @@ void Array<T, T_traits,T_allocator>::resize(int newSize)
 }
 
 template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::resize_memset(int newSize, uint8_t value)
+{
+  static_assert(T_traits::is_pod, "resize_memset is not usable for the given value type T");
+
+  _resize_memset(newSize, value);
+}
+
+template<typename T, class T_traits, class T_allocator>
 void Array<T, T_traits,T_allocator>::resize_memset_zero(int newSize)
+{
+  static_assert(T_traits::zero_is_valid_uninitialized_state, "resize_memset_zero is not usable for the given value type T");
+
+  _resize_memset(newSize, 0);
+}
+
+template<typename T, class T_traits, class T_allocator>
+void Array<T, T_traits,T_allocator>::_resize_memset(int newSize, uint8_t value)
 {
   Q_ASSERT(newSize>=0);
 
@@ -928,7 +944,7 @@ void Array<T, T_traits,T_allocator>::resize_memset_zero(int newSize)
     ensureCapacity(newSize);
 
     if(newSize > _length)
-    std::memset(_data + _length, 0, newSize-_length);
+    std::memset(_data + _length, value, (newSize-_length)*sizeof(T));
 
     _length = newSize;
   }

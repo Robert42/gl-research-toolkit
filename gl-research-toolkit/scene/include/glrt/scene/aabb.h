@@ -15,7 +15,7 @@ struct AABB
 
   bool isInf() const {return glm::any(glm::isinf(minPoint)) || glm::any(glm::isinf(maxPoint));}
   bool isNan() const {return glm::any(glm::isnan(minPoint)) || glm::any(glm::isnan(maxPoint));}
-  bool isValid() const{return !isInf() && !isNan();}
+  bool isValid() const{return !isInf() && !isNan() && all(greaterThan(maxPoint, minPoint));}
 
   glm::vec3 toUnitSpace(const glm::vec3& v) const;
 
@@ -27,6 +27,8 @@ struct AABB
   static AABB fromVertices(const glm::vec3* vertices, int numVertices);
   static AABB fromVertices(const glm::vec3* vertices, int numVertices, size_t stride);
   AABB aabbOfTransformedBoundingBox(const CoordFrame& coordFrame) const;
+
+  AABB ensureValid() const;
 };
 
 } // namespace scene

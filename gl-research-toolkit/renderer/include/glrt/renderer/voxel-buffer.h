@@ -72,6 +72,8 @@ class VoxelBuffer
   // PERFORMANCE: really big voxelgrids (spinza itself don't need to be part of the bvh)
   // PERFORMANCE: sort also by size of the bounding spheres?
 public:
+  typedef scene::resources::utilities::GlTexture GlTexture;
+
   struct VoxelHeader
   {
     GLuint64 distanceFieldBvhInnerBoundingSpheres;
@@ -83,6 +85,17 @@ public:
     padding<quint32, 3> _padding2;
   };
 
+  // Candidate Grid
+  struct CandidateGrid
+  {
+    GLuint64 textureRenderHandle = 0;
+    GlTexture texture;
+    glm::uvec3 size;
+
+    void calcCandidates(const scene::Scene* scene, float influence_radius);
+  };
+  CandidateGrid candidateGrid;
+
   VoxelBuffer(scene::Scene& scene);
   ~VoxelBuffer();
 
@@ -93,6 +106,7 @@ private:
 
   glrt::scene::Scene& scene;
   VoxelGrid*& voxelGridData;
+  bool dirty_candidate_grid;
 
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;

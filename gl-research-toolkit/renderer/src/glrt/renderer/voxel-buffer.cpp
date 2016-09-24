@@ -3,11 +3,16 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-data.h>
 #include <glrt/scene/resources/static-mesh.h>
+#include <glrt/scene/resources/voxelizer.h>
 #include <glrt/toolkit/profiler.h>
 #include <glrt/toolkit/zindex.h>
 
 namespace glrt {
 namespace renderer {
+
+// =============================================================================
+
+// ==== VoxelBuffer ============================================================
 
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
   : scene(scene),
@@ -17,6 +22,7 @@ VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
     bvhInnerBoundingSpheres(scene.data->voxelGrids->capacity()),
     bvhInnerNodes(scene.data->voxelGrids->capacity())
 {
+  AO_RADIUS.callback_functions << [this](float){dirty_candidate_grid=true;};
 }
 
 VoxelBuffer::~VoxelBuffer()
@@ -29,6 +35,7 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
   if(Q_UNLIKELY(voxelGridData->numDynamic>0 || voxelGridData->dirtyOrder))
   {
+    dirty_candidate_grid = true;
     updateVoxelGrid();
 
     _voxelHeader.numDistanceFields = voxelGridData->length;
@@ -38,6 +45,13 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
     _voxelHeader.distanceFieldBoundingSpheres = this->distanceFieldboundingSpheres.gpuBufferAddress();
 
     Q_ASSERT(voxelGridData->dirtyOrder == false);
+  }
+
+  if(Q_UNLIKELY(dirty_candidate_grid))
+  {
+    candidateGrid.calcCandidates(&scene, AO_RADIUS);
+
+    dirty_candidate_grid = false;
   }
 
   return _voxelHeader;
@@ -108,7 +122,6 @@ void VoxelBuffer::updateVoxelGrid()
 
   distanceFieldVoxelData.Unmap();
   distanceFieldboundingSpheres.Unmap();
-
 }
 
 void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
@@ -129,6 +142,122 @@ void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
   this->bvhInnerNodes.Unmap();
 
 }
+
+
+
+
+
+// ==========================================================================================================================================================
+
+// ======== CandidateGrid ===================================================================================================================================
+
+
+// TODO: make this replacableByTheUI
+#define SDF_CANDIDATE_GRID_SIZE 16
+
+using scene::resources::Voxelizer;
+using scene::resources::VoxelGridGeometry;
+
+Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry,  float influence_radius);
+
+void VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, float influence_radius)
+{
+  PROFILE_SCOPE("CandidateGrid::calcCandidateGrid")
+
+  const scene::Scene::Data* data = scene->data;
+  const scene::AABB aabb = scene->aabb.ensureValid();
+
+  VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, SDF_CANDIDATE_GRID_SIZE, true);
+
+  glm::uvec3 size = geometry.gridSize;
+
+  Q_ASSERT(all(greaterThan(size, glm::uvec3(0))));
+
+  // The current format uses a single integer. The lower 24 bits store the byte
+  // offset from the start of the buffer to the sdf indices stored by this grid.
+  //
+  Q_ASSERT(data->voxelGrids->length <= 255);
+  Q_ASSERT(size.x*size.y*size.z*255 <= 0x01000000);
+
+  auto format = GlTexture::format(size, 0, GlTexture::Format::RED_INTEGER, GlTexture::Type::UINT32, GlTexture::Target::TEXTURE_3D);
+
+  QVector<uint32_t> _buffer;
+  Array<Array<uint16_t>> _collectedSDFs;
+
+  _collectedSDFs.resize_memset_zero(int(size.x*size.y*size.z));
+  _buffer.resize(int(size.x*size.y*size.z));
+
+  for(Array<uint16_t>& a : _collectedSDFs)
+    a.reserve(data->voxelGrids->length);
+
+  uint32_t* const buffer = _buffer.data();
+  Array<uint16_t>* const collectedSDFs = _collectedSDFs.data();
+
+#pragma omp parallel for
+  for(uint32_t x=0; x<size.x; x++)
+  {
+    for(uint32_t y=0; y<size.y; y++)
+    {
+      for(uint32_t z=0; z<size.z; z++)
+      {
+        uint32_t offset = z + size.z * (y + x*size.x);
+        glm::uvec3 voxelCoord(x,y,z);
+        Array<uint16_t>& sdfs = *(collectedSDFs + offset);
+
+        sdfs = collectAllSdfIntersectingWith(data, voxelCoord, geometry, influence_radius);
+
+        Q_ASSERT(sdfs.length() <= 255);
+
+      }
+    }
+  }
+
+  uint32_t data_offset = 0;
+
+#pragma omp parallel for
+  for(uint32_t x=0; x<size.x; x++)
+  {
+    for(uint32_t y=0; y<size.y; y++)
+    {
+      for(uint32_t z=0; z<size.z; z++)
+      {
+        uint32_t offset = z + size.z * (y + x*size.x);
+        uint32_t& voxelData = *(buffer + offset);
+        Array<uint16_t>& sdfs = *(collectedSDFs + offset);
+        uint32_t num_candidates = uint32_t(sdfs.length());
+        Q_ASSERT(num_candidates <= 255);
+        Q_ASSERT(data_offset <= 0x00ffffff);
+
+        voxelData = (num_candidates <<  24) | (data_offset);
+
+        data_offset += num_candidates;
+      }
+    }
+  }
+
+  if(this->size != size)
+  {
+    this->size = size;
+    texture = std::move(GlTexture());
+  }else if(textureRenderHandle!=0)
+  {
+    if(GL_RET_CALL(glIsTextureHandleResidentNV, textureRenderHandle))
+      GL_CALL(glMakeTextureHandleNonResidentNV, textureRenderHandle);
+  }
+
+  texture.setUncompressed2DImage(format, buffer);
+  texture.makeComplete();
+  textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
+  GL_CALL(glMakeTextureHandleResidentNV, textureRenderHandle);
+}
+
+
+
+
+
+// ==========================================================================================================================================================
+
+// ======== BVH =============================================================================================================================================
 
 BVH::BVH(const BoundingSphere* leaves_bounding_spheres, const VoxelGrids& voxelGridData)
   : BVH(leaves_bounding_spheres, voxelGridData.z_index, voxelGridData.length, voxelGridData.huge_bvh_limit)

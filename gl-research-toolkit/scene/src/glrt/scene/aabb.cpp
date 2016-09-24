@@ -73,6 +73,19 @@ AABB AABB::aabbOfTransformedBoundingBox(const CoordFrame& coordFrame) const
   return aabb;
 }
 
+AABB AABB::ensureValid() const
+{
+  AABB aabb = *this;
+
+  if(!isValid())
+  {
+    aabb.minPoint = glm::vec3(-1);
+    aabb.maxPoint = glm::vec3(1);
+  }
+
+  return aabb;
+}
+
 
 } // namespace scene
 } // namespace glrt

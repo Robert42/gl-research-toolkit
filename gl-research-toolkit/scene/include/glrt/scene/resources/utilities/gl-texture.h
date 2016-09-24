@@ -120,6 +120,7 @@ public:
                                                               Format format,
                                                               Type type) const;
   void setUncompressed2DImage(const GlTexture::UncompressedImage& image, const void* data);
+  void makeComplete();
   TextureAsFloats asFloats(int level);
   void fromFloats(const TextureAsFloats& texture);
 };

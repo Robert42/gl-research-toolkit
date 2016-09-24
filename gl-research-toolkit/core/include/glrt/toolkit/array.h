@@ -71,6 +71,9 @@ struct ArrayTraits_Toolkit : public T_capacity_traits
   static void copy_instances_aO(T* a, T* b, int n);
   static void copy_single_instance_aO(T* a, T* b);
   static void call_instance_destructors_D(const T* a, int n);
+
+  constexpr static bool zero_is_valid_uninitialized_state = false;
+  constexpr static bool is_pod = false;
 };
 
 // Primitives, like int or float
@@ -122,6 +125,8 @@ struct ArrayTraits_Primitive : public ArrayTraits_Toolkit<T, T_capacity_traits>
   static void destruct(T*, int)
   {
   }
+  constexpr static bool zero_is_valid_uninitialized_state = true;
+  constexpr static bool is_pod = true;
 };
 
 // Plain old data, POD struct like vec3
@@ -173,6 +178,9 @@ struct ArrayTraits_POD : public ArrayTraits_Toolkit<T, T_capacity_traits>
   static void destruct(T*, int)
   {
   }
+
+  constexpr static bool zero_is_valid_uninitialized_state = true;
+  constexpr static bool is_pod = true;
 };
 
 // Class with move constructor, move operator and destructor
@@ -288,6 +296,13 @@ struct ArrayTraits_cCaOD : public ArrayTraits_Toolkit<T, T_capacity_traits>
   {
     parent_type::destruct_D(data, length);
   }
+};
+
+template<typename T>
+struct ArrayTraits_init_with_memset_zero : public T
+{
+  // this doesn't mean, that you are allowed to overwrite values with zero
+  constexpr static bool zero_is_valid_uninitialized_state = true;
 };
 
 template<typename T>
@@ -458,6 +473,7 @@ public:
   template<typename T_value>
   void append_by_memcpy(const T_value& value);
   void resize(int newSize);
+  void resize_memset(int newSize, uint8_t value);
   void resize_memset_zero(int newSize);
 
   void removeAt(int index);
@@ -483,12 +499,15 @@ private:
   T* _data;
   int _capacity;
   int _length;
+
+
+  void _resize_memset(int newSize, uint8_t value);
 };
 
 template<typename T>
 struct DefaultTraits<Array<T>>
 {
-  typedef ArrayTraits_mCmOD<Array<T>> type;
+  typedef ArrayTraits_init_with_memset_zero<ArrayTraits_mCmOD<Array<T>>> type;
 };
 
 template<typename T, class T_traits, class T_allocator>

@@ -5,7 +5,6 @@
 #include <glrt/scene/light-component.h>
 #include <glrt/scene/camera-component.h>
 #include <glrt/scene/collect-scene-data.h>
-#include <glrt/scene/resources/voxelizer.h>
 
 #include <glrt/system.h>
 #include <glrt/renderer/scene-renderer.h>
@@ -284,11 +283,8 @@ void Renderer::initCascadedGridTextures()
   for(int i=0; i<MAX_NUM_GRID_CASCADES*2; ++i)
   {
     gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
+    gridTexture[i].makeComplete();
     gl::TextureId textureId = gridTexture[i].textureId;
-
-    // Make the texture complete
-    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
-    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
 
     GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, imageFormat(i));
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
@@ -668,99 +664,6 @@ bool Renderer::update_grid_camera() const
 void Renderer::set_update_grid_camera(bool update_grid_camera)
 {
   _update_grid_camera = update_grid_camera;
-}
-
-// TODO: make this replacableByTheUI
-#define SDF_CANDIDATE_GRID_SIZE 16
-
-using scene::resources::Voxelizer;
-using scene::resources::VoxelGridGeometry;
-
-Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry,  float influence_radius);
-
-void Renderer::CandidateGrid::calcCandidates(const scene::Scene* scene, float influence_radius)
-{
-  PROFILE_SCOPE("CandidateGrid::calcCandidateGrid")
-
-  const scene::Scene::Data* data = scene->data;
-  const scene::AABB aabb = scene->aabb;
-
-  VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, SDF_CANDIDATE_GRID_SIZE, true);
-
-  Q_ASSERT(all(greaterThan(size, glm::uvec3(0))));
-
-  // The current format uses a single integer. The lower 24 bits store the byte
-  // offset from the start of the buffer to the sdf indices stored by this grid.
-  //
-  Q_ASSERT(data->voxelGrids->length <= 255);
-  Q_ASSERT(size.x*size.y*size.z*255 <= 0x01000000);
-
-  auto format = GlTexture::format(size, 0, GlTexture::Format::RED_INTEGER, GlTexture::Type::UINT32, GlTexture::Target::TEXTURE_3D);
-
-  QVector<uint32_t> _buffer;
-  Array<Array<uint16_t>> _collectedSDFs;
-
-  _collectedSDFs.resize_memset_zero(int(size.x*size.y*size.z));
-  _buffer.resize(int(size.x*size.y*size.z));
-
-  uint32_t* const buffer = _buffer.data();
-  Array<uint16_t>* const collectedSDFs = _collectedSDFs.data();
-
-#pragma omp parallel for
-  for(uint32_t x=0; x<size.x; x++)
-  {
-    for(uint32_t y=0; y<size.y; y++)
-    {
-      for(uint32_t z=0; z<size.z; z++)
-      {
-        uint32_t offset = z + size.z * (y + x*size.x);
-        glm::uvec3 voxelCoord(x,y,z);
-        Array<uint16_t>& sdfs = *(collectedSDFs + offset);
-
-        sdfs = collectAllSdfIntersectingWith(data, voxelCoord, geometry, influence_radius);
-
-        Q_ASSERT(sdfs.length() <= 255);
-
-      }
-    }
-  }
-
-  uint32_t data_offset = 0;
-
-#pragma omp parallel for
-  for(uint32_t x=0; x<size.x; x++)
-  {
-    for(uint32_t y=0; y<size.y; y++)
-    {
-      for(uint32_t z=0; z<size.z; z++)
-      {
-        uint32_t offset = z + size.z * (y + x*size.x);
-        uint32_t& voxelData = *(buffer + offset);
-        Array<uint16_t>& sdfs = *(collectedSDFs + offset);
-        uint32_t num_candidates = uint32_t(sdfs.length());
-        Q_ASSERT(num_candidates <= 255);
-        Q_ASSERT(data_offset <= 0x00ffffff);
-
-        voxelData = (num_candidates <<  24) | (data_offset);
-
-        data_offset += num_candidates;
-      }
-    }
-  }
-
-  if(this->size != size)
-  {
-    this->size = size;
-    texture = std::move(GlTexture());
-  }else if(textureRenderHandle!=0)
-  {
-    if(GL_RET_CALL(glIsTextureHandleResidentNV, textureRenderHandle))
-      GL_CALL(glMakeTextureHandleNonResidentNV, textureRenderHandle);
-  }
-
-  texture.setUncompressed2DImage(format, buffer);
-  textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
-  GL_CALL(glMakeTextureHandleResidentNV, textureRenderHandle);
 }
 
 } // namespace renderer
