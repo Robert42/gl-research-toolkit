@@ -4,7 +4,6 @@
 #undef DEFERRED_RENDERER
 #define FORWARD_RENDERER
 
-#define N_GI_CONES 9
 #include "input-block.fs.glsl"
 #include "forward-lighting.fs.glsl"
 

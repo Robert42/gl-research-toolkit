@@ -65,6 +65,8 @@ extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
 extern GLSLMacroWrapper<float> AO_RADIUS;
 
+extern GLSLMacroWrapper<uint16_t> N_GI_CONES;
+
 extern GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES;
 extern GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH;
 extern GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;

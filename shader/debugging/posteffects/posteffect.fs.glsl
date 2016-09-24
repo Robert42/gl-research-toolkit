@@ -5,6 +5,7 @@
 #endif
 
 #define highlightColor_DEFINED
+#define FORWARD_RENDERER
 
 #include <glrt/glsl/math-glsl.h>
 #include <scene/uniforms.glsl>

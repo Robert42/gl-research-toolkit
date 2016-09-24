@@ -138,7 +138,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances.guiToggle.TwAddVarCB(tweakBar, "Highlight Unconveiled Negative Distances", "group='Debug Voxels'");
   TwSetParam(tweakBar, "Debug Voxels", "opened", TW_PARAM_CSTRING, 1, "false");
 
-  TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
+  TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Posteffects.clearBuffer, "group='Debug Shader'");
   renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Enable Lighting in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.useLighting, "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Show Normals in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNormals, "group='Debug Shader'");

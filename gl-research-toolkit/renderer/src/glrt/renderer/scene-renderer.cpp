@@ -59,23 +59,23 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
 
-  debugDrawList_Backbuffer.connectTo(&visualizeCameras);
-  debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
-  debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
-  debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
-  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
-  debugDrawList_Backbuffer.connectTo(&visualizeBVH);
-  debugDrawList_Backbuffer.connectTo(&visualizeBVH_Grid);
-  debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
-  debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
-  debugDrawList_Backbuffer.connectTo(&visualizeBoundingBoxes);
-  debugDrawList_Backbuffer.connectTo(&visualizeSceneBoundingBox);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
+  debugDrawList_Lines.connectTo(&visualizeCameras);
+  debugDrawList_Lines.connectTo(&visualizeSphereAreaLights);
+  debugDrawList_Lines.connectTo(&visualizeRectAreaLights);
+  debugDrawList_Lines.connectTo(&visualizeVoxelGrids);
+  debugDrawList_Lines.connectTo(&visualizeVoxelBoundingSpheres);
+  debugDrawList_Lines.connectTo(&visualizeBVH);
+  debugDrawList_Lines.connectTo(&visualizeBVH_Grid);
+  debugDrawList_Lines.connectTo(&visualizeWorldGrid);
+  debugDrawList_Lines.connectTo(&visualizeUniformTest);
+  debugDrawList_Lines.connectTo(&visualizeBoundingBoxes);
+  debugDrawList_Lines.connectTo(&visualizeSceneBoundingBox);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_OrangeTest);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_BoundingBox);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_raymarch);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
 
   connect(scene, &scene::Scene::sceneCleared, this, &Renderer::forceNewGridCameraPos);
 
@@ -113,12 +113,11 @@ void Renderer::render()
 
   commandList.call();
 
-  debugDrawList_Framebuffer.render();
-
   applyFramebuffer();
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
-  debugDrawList_Backbuffer.render();
+  debugDrawList_Posteffects.render();
+  debugDrawList_Lines.render();
 }
 
 void Renderer::update(float deltaTime)

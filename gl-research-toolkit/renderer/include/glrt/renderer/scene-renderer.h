@@ -46,7 +46,7 @@ public:
 
   QPointer<scene::CameraComponent> cameraComponent;
 
-  debugging::DebugRenderer::List debugDrawList_Backbuffer;
+  debugging::DebugRenderer::List debugDrawList_Lines;
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
@@ -59,7 +59,7 @@ public:
   debugging::DebugRenderer visualizeBoundingBoxes;
   debugging::DebugRenderer visualizeSceneBoundingBox;
 
-  debugging::DebugRenderer::List debugDrawList_Framebuffer;
+  debugging::DebugRenderer::List debugDrawList_Posteffects;
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;
   debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
