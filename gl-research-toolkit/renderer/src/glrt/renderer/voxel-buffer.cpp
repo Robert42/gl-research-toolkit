@@ -256,11 +256,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   header.textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
   GL_CALL(glMakeTextureHandleResidentNV, header.textureRenderHandle);
 
-  glm::vec3 factor = glm::vec3(this->size)/aabb.size();
-  Q_ASSERT(glm::distance(factor.x, factor.y) < 1.e-4f);
-  Q_ASSERT(glm::distance(factor.x, factor.z) < 1.e-4f);
-
-  header.gridLocation = glm::vec4(-aabb.minPoint, factor.x);
+  header.gridLocation = glm::vec4(geometry.toVoxelSpace.position, geometry.toVoxelSpace.scaleFactor);
 
   return header;
 }

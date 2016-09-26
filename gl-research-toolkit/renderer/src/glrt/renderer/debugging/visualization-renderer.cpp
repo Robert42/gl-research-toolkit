@@ -63,6 +63,13 @@ DebugRenderer VisualizationRenderer::debugVoxelBoundingSpheres(scene::Scene* sce
   });
 }
 
+DebugRenderer VisualizationRenderer::showSceneSdfCandidateGrid(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    return debugging::DebugLineVisualisation::drawSdfCandidateGrid();
+  });
+}
+
 DebugRenderer VisualizationRenderer::showSceneBVH(scene::Scene* scene)
 {
   return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {

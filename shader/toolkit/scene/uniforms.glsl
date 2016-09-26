@@ -74,7 +74,7 @@ void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, ou
   vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
   float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
   
-  ivec3 textureCoord = ivec3((world_pos + gridLocationOffset) * gridLocationScale);
+  ivec3 textureCoord = ivec3(world_pos * gridLocationScale + gridLocationOffset);
   
   uint32_t gridRanges = texelFetch(scene.candidateGridHeader.gridRanges, textureCoord, 0).r;
   

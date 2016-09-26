@@ -20,6 +20,7 @@ public:
   static DebugRenderer debugRectAreaLights(scene::Scene* scene);
   static DebugRenderer debugVoxelGrids(scene::Scene* scene);
   static DebugRenderer debugVoxelBoundingSpheres(scene::Scene* scene);
+  static DebugRenderer showSceneSdfCandidateGrid(scene::Scene* scene);
   static DebugRenderer showSceneBVH(scene::Scene* scene);
   static DebugRenderer showSceneBVH_Grid(scene::Scene* scene);
   static DebugRenderer showSceneAABB(scene::Scene* scene);
