@@ -81,6 +81,7 @@ void main()
 
 
   SurfaceData surface;
+  gl_FragDepth = depth;
   surface.position = worldpos_from_depth(depth);
   
   vec3 meshNormal = normalize(meshNormal_meshBiTangentX.xyz);

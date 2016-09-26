@@ -52,10 +52,17 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   appendMaterialState(&framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::FORWARD_PASS, maskedTwoSidedShader, forwardPassFlags | maskedTwoSidedFlags);
   appendMaterialState(&framebuffer, {TEXTURED_TRANSPARENT_TWO_SIDED}, Pass::FORWARD_PASS, transparentTwoSidedShader, forwardPassFlags | transparentTwoSidedFlags);
 
-  GLuint64 colorTextureHandle = GL_RET_CALL(glGetTextureHandleNV, colorFramebufferTexture.GetInternHandle());
-  GL_CALL(glMakeTextureHandleResidentNV, colorTextureHandle);
 
-  framebufferTextureHandlesBuffer = std::move(gl::Buffer(sizeof(GLuint64), gl::Buffer::IMMUTABLE, &colorTextureHandle));
+  const int N=2;
+  GLuint64 textureHandles[N];
+  GLuint64& colorTextureHandle = textureHandles[0];
+  GLuint64& depthTextureHandle = textureHandles[1];
+  colorTextureHandle = GL_RET_CALL(glGetTextureHandleNV, colorFramebufferTexture.GetInternHandle());
+  depthTextureHandle = GL_RET_CALL(glGetTextureHandleNV, depthFramebufferTexture.GetInternHandle());
+  GL_CALL(glMakeTextureHandleResidentNV, colorTextureHandle);
+  GL_CALL(glMakeTextureHandleResidentNV, depthTextureHandle);
+
+  framebufferTextureHandlesBuffer = gl::Buffer(N*sizeof(GLuint64), gl::Buffer::IMMUTABLE, &colorTextureHandle);
 
   framebuffer.Bind(true);
   glrt::renderer::debugging::DebuggingPosteffect::init(&framebuffer, this);

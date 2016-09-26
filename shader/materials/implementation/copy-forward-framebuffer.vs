@@ -4,6 +4,5 @@
 
 void main()
 {
-  gl_Position = vec4(get_vertex_pos(), 0, 1);
+  gl_Position = vec4(get_vertex_pos(),0, 1);
 }
-
