@@ -15,10 +15,10 @@ bool sphere_intersects_convex_shape(const glsl::Plane* planes, int num_planes, c
   {
     const glsl::Plane& plane = planes[i];
 
-    if(glsl::intersects_or_backfaced(sphere, plane))
-      return true;
+    if(!glsl::intersects_or_backfaced(sphere, plane))
+      return false;
   }
-  return false;
+  return true;
 }
 
 Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* planes, int num_planes, const scene::Scene::Data* data, float influence_radius)
