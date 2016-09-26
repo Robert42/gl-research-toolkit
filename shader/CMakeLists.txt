@@ -92,4 +92,5 @@ add_custom_target(
   toolkit/voxels/raymarching-distance-field.glsl
   toolkit/voxels/voxel-structs.glsl
   toolkit/write-fragment-color.glsl
+  toolkit/write-fragment-depth.glsl
 )
