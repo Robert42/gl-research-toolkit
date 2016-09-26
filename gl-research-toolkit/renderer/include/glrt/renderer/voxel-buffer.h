@@ -93,6 +93,8 @@ public:
     GLuint64 fallbackSDF = 0;
     GLuint64 _padding = 0;
 
+    glm::vec4 gridLocation;
+
     GLuint64 candidateBuffer = 0;
     GLuint64 _candidate_reservedForTiles = 0;
   };

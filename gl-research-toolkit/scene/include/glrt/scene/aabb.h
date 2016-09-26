@@ -19,6 +19,8 @@ struct AABB
 
   glm::vec3 toUnitSpace(const glm::vec3& v) const;
 
+  glm::vec3 size() const;
+
   void operator |= (const AABB& other);
   void operator |= (const glm::vec3& other);
 

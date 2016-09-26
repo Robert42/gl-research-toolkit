@@ -40,6 +40,8 @@ struct CandidateGridHeader
   sampler3D fallbackSDF;
   sampler3D _padding;
   
+  vec4 gridLocation;
+  
   uint64_t candidateGrid;
   uint64_t _candidate_reservedForTiles;
 };

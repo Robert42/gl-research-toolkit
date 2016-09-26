@@ -230,7 +230,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
 
         voxelData = (num_candidates <<  24) | (data_offset);
 
-        data_offset += num_candidates;
+        data_offset += num_candidates * sizeof(uint8_t);
       }
     }
   }
@@ -257,6 +257,12 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   texture.makeComplete();
   header.textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
   GL_CALL(glMakeTextureHandleResidentNV, header.textureRenderHandle);
+
+  glm::vec3 factor = glm::vec3(this->size)/aabb.size();
+  Q_ASSERT(glm::distance(factor.x, factor.y) < 1.e-4f);
+  Q_ASSERT(glm::distance(factor.x, factor.z) < 1.e-4f);
+
+  header.gridLocation = glm::vec4(-aabb.minPoint, factor.x);
 
   return header;
 }
