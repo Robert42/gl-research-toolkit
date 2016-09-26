@@ -152,9 +152,6 @@ void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
 // ======== CandidateGrid ===================================================================================================================================
 
 
-// TODO: make this replacableByTheUI
-#define SDF_CANDIDATE_GRID_SIZE 16
-
 using scene::resources::Voxelizer;
 using scene::resources::VoxelGridGeometry;
 
@@ -165,6 +162,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   PROFILE_SCOPE("CandidateGrid::calcCandidateGrid")
 
   const scene::Scene::Data* data = scene->data;
+  // TODO: seperate aabb for whole scene and for static scene?
   const scene::AABB aabb = scene->aabb.ensureValid();
 
   VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, SDF_CANDIDATE_GRID_SIZE, true);

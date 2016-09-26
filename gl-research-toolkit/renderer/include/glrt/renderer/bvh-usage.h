@@ -71,6 +71,8 @@ extern GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES;
 extern GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH;
 extern GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
 
+extern GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE;
+
 extern GLSLMacroWrapper<bool> AO_FALLBACK_NONE;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED;
 

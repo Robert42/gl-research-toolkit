@@ -69,6 +69,22 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   SceneData scene;
 };
 
+void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, out uint8_t* first_static_candidate, out uint32_t num_dynamic_candidates, out uint8_t* first_dynamic_candidate)
+{
+  vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
+  float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
+  
+  ivec3 textureCoord = ivec3((world_pos + gridLocationOffset) * gridLocationScale);
+  
+  uint32_t gridRanges = texelFetch(scene.candidateGridHeader.gridRanges, textureCoord, 0).r;
+  
+  num_static_candidates = gridRanges>>24;
+  num_static_candidates = int(textureCoord==clamp(textureCoord, ivec3(0), ivec3(SDF_CANDIDATE_GRID_SIZE))) * num_static_candidates;
+  scene.candidateGridHeader.candidateGrid + (0x00ffffff & gridRanges);
+  
+  num_dynamic_candidates = 0;
+}
+
 float blink(float rate=0.2)
 {
   return step(rate, mod(scene.totalTime, rate*2.));
@@ -188,7 +204,6 @@ vec4 cascadedGridWeights(vec3 world_pos)
   
   return weights;
 }
-
 
 usampler3D cascaded_grid_texture(uint i)
 {
