@@ -51,7 +51,7 @@ struct SceneData
   float totalTime;
   SceneLightData lights;
   SceneVoxelHeader voxelHeader;
-  //CandidateGridHeader candidateGridHeader;
+  CandidateGridHeader candidateGridHeader;
   CascadedGrids cascadedGrids;
   
   uint32_t costsHeatvisionBlackLevel;
