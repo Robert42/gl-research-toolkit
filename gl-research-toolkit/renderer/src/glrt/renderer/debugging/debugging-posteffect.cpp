@@ -241,43 +241,43 @@ GlobalDistanceFieldRaymarch::GlobalDistanceFieldRaymarch(const QSet<QString>& de
 
 DebugRenderer DebuggingPosteffect::orangeSphere(const QSet<QString>& debug_posteffect_preprocessor, const glm::vec3& origin, float radius, bool depthTest)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, depthTest, origin, radius, padding](){return new OrangeSphere(debug_posteffect_preprocessor, origin, radius, depthTest);});
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, depthTest, padding, origin, radius](){return new OrangeSphere(debug_posteffect_preprocessor, origin, radius, depthTest);});
 }
 
 DebugRenderer DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
 {
-  padding<byte, 3> padding;
+  padding<byte, 7> padding;
   return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, depthTest, padding](){return new HighlightUnconveiledNegativeDistances(debug_posteffect_preprocessor, depthTest);});
 }
 
 DebugRenderer DebuggingPosteffect::voxelGridBoundingBox(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
 {
-  padding<byte, 3> padding;
+  padding<byte, 7> padding;
   return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, depthTest, padding](){return new HighlightVoxelGrids(debug_posteffect_preprocessor, depthTest);});
 }
 
 DebugRenderer DebuggingPosteffect::voxelGridCubicRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
 {
-  padding<byte, 3> padding;
+  padding<byte, 7> padding;
   return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new CubicVoxelRaymarch(debug_posteffect_preprocessor, mixWithScene);});
 }
 
 DebugRenderer DebuggingPosteffect::distanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
 {
-  padding<byte, 3> padding;
+  padding<byte, 7> padding;
   return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new DistanceFieldRaymarch(debug_posteffect_preprocessor, mixWithScene);});
 }
 
 DebugRenderer DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
 {
-  padding<byte, 3> padding;
+  padding<byte, 7> padding;
   return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new RaymarchBoundingSpheresAsDistanceField(debug_posteffect_preprocessor, mixWithScene);});
 }
 
 DebugRenderer DebuggingPosteffect::globalDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
 {
-  padding<byte, 3> padding;
+  padding<byte, 7> padding;
   return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new GlobalDistanceFieldRaymarch(debug_posteffect_preprocessor, mixWithScene);});
 }
 
@@ -309,8 +309,8 @@ DebuggingPosteffect::SharedRenderingData::SharedRenderingData(gl::FramebufferObj
                                         max_coord, min_coord,
                                         max_coord, max_coord};
 
-  vertexBuffer = std::move(gl::Buffer(sizeof(float)*8, gl::Buffer::UsageFlag::IMMUTABLE, positions.data()));
-  uniformBuffer = std::move(gl::Buffer(sizeof(debugging::PosteffectVisualizationDataBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr));
+  vertexBuffer = gl::Buffer(sizeof(float)*8, gl::Buffer::UsageFlag::IMMUTABLE, positions.data());
+  uniformBuffer = gl::Buffer(sizeof(debugging::PosteffectVisualizationDataBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr);
 }
 
 DebuggingPosteffect::SharedRenderingData::~SharedRenderingData()
