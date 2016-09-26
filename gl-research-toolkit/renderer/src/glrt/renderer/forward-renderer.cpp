@@ -7,7 +7,7 @@ namespace renderer {
 
 
 ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene* scene, SampleResourceManager* resourceManager, debugging::ShaderDebugPrinter* debugPrinter)
-  : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter),
+  : Renderer(videoResolution, scene, resourceManager->staticMeshBufferManager, debugPrinter, {"#define FORWARD_RENDERER"}),
     colorFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::RGBA8),
     depthFramebufferTexture(videoResolution.x, videoResolution.y, gl::TextureFormat::DEPTH_COMPONENT32F),
     framebuffer(gl::FramebufferObject::Attachment(&colorFramebufferTexture), gl::FramebufferObject::Attachment(&depthFramebufferTexture), false),

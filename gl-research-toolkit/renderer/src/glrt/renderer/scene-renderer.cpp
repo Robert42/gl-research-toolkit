@@ -21,7 +21,7 @@
 namespace glrt {
 namespace renderer {
 
-Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter)
+Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter, const QSet<QString>& debug_posteffect_preprocessor)
   : scene(*scene),
     staticMeshBufferManager(*staticMeshBufferManager),
     debugPrinter(*debugPrinter),
@@ -36,12 +36,12 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
     visualizeSceneBoundingBox(debugging::VisualizationRenderer::showSceneAABB(scene)),
-    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
-    visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
-    visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
-    visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
-    visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
-    visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
+    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere(debug_posteffect_preprocessor)),
+    visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances(debug_posteffect_preprocessor)),
+    visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox(debug_posteffect_preprocessor)),
+    visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch(debug_posteffect_preprocessor)),
+    visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch(debug_posteffect_preprocessor)),
+    visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(debug_posteffect_preprocessor)),
     videoResolution(videoResolution),
     collectAmbientOcclusionToGrid1(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*1), QSet<QString>({"#define COMPUTE_GRIDS"})),
     collectAmbientOcclusionToGrid2(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*2), QSet<QString>({"#define COMPUTE_GRIDS"})),
@@ -113,10 +113,10 @@ void Renderer::render()
 
   commandList.call();
 
+  debugDrawList_Posteffects.render();
   applyFramebuffer();
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
-  debugDrawList_Posteffects.render();
   debugDrawList_Lines.render();
 }
 

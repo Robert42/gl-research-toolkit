@@ -22,13 +22,13 @@ public:
   static void init(gl::FramebufferObject* framebuffer, glrt::renderer::Renderer* renderer);
   static void deinit();
 
-  static DebugRenderer orangeSphere(const glm::vec3& origin=glm::vec3(0), float radius = 1.f, bool depthTest=true);
-  static DebugRenderer voxelGridHighlightUnconveiledNegativeDistances(bool depthTest=true);
-  static DebugRenderer voxelGridBoundingBox(bool depthTest=true);
-  static DebugRenderer voxelGridCubicRaymarch(bool depthTest = true);
-  static DebugRenderer distanceFieldRaymarch(bool depthTest = true);
-  static DebugRenderer raymarchBoundingSpheresAsDistanceField(bool depthTest = true);
-  static DebugRenderer globalDistanceFieldRaymarch(bool depthTest=true);
+  static DebugRenderer orangeSphere(const QSet<QString>& debug_posteffect_preprocessor, const glm::vec3& origin=glm::vec3(0), float radius = 1.f, bool depthTest=true);
+  static DebugRenderer voxelGridHighlightUnconveiledNegativeDistances(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest=true);
+  static DebugRenderer voxelGridBoundingBox(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest=true);
+  static DebugRenderer voxelGridCubicRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest = true);
+  static DebugRenderer distanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest = true);
+  static DebugRenderer raymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest = true);
+  static DebugRenderer globalDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest=true);
 
 private:
   struct SharedRenderingData
