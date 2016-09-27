@@ -26,16 +26,16 @@ bool sphere_intersects_convex_shape(const glsl::Plane* planes, int num_planes, c
 Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* planes, int num_planes, const scene::Scene::Data* data, float influence_radius)
 {
   Array<uint16_t> target;
-  const BoundingSphere* boundingSpheres = data->voxelGrids->boundingSphere;
 
   uint16_t n = data->voxelGrids->length;
 
   // TODO how to handle static and dynamic objects?
   for(uint16_t i=0; i<n; ++i)
   {
+    const BoundingSphere bounding_sphere = data->voxelGrids->globalCoordFrame(i) * data->voxelGrids->boundingSphere[i];
     glsl::Sphere sphere;
-    sphere.origin = boundingSpheres[i].center;
-    sphere.radius = boundingSpheres[i].radius + influence_radius;
+    sphere.origin = bounding_sphere.center;
+    sphere.radius = bounding_sphere.radius + influence_radius;
 
     if(sphere_intersects_convex_shape(planes, num_planes, sphere))
       target.append_copy(i);
@@ -59,7 +59,7 @@ Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, co
     glm::vec3 normal(0);
     normal[i] = 1;
 
-    planes[i*2+0] = glsl::plane_from_normal(normal, max_pos);
+    planes[i*2+0] = glsl::plane_from_normal( normal, max_pos);
     planes[i*2+1] = glsl::plane_from_normal(-normal, min_pos);
   }
 
