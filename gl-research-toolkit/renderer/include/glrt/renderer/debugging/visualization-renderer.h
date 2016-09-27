@@ -14,6 +14,10 @@ class VisualizationRenderer final
 public:
   VisualizationRenderer() = delete;
 
+  static glm::ivec3 selectedSdfCandidateGrid;
+
+  static void setSdfCandidateGridData(Array<Array<uint16_t>>&& debug_collectedSDFs);
+
   // Note, the given scene/vector instance must live longer than the returned instance
   static DebugRenderer debugSceneCameras(scene::Scene* scene);
   static DebugRenderer debugSphereAreaLights(scene::Scene* scene);
@@ -21,6 +25,7 @@ public:
   static DebugRenderer debugVoxelGrids(scene::Scene* scene);
   static DebugRenderer debugVoxelBoundingSpheres(scene::Scene* scene);
   static DebugRenderer showSceneSdfCandidateGrid(scene::Scene* scene);
+  static DebugRenderer showSceneSdfCandidatesForCell(scene::Scene* scene);
   static DebugRenderer showSceneBVH(scene::Scene* scene);
   static DebugRenderer showSceneBVH_Grid(scene::Scene* scene);
   static DebugRenderer showSceneAABB(scene::Scene* scene);
@@ -30,6 +35,9 @@ public:
   static DebugRenderer debugCones(QVector<Cone>* cones);
   static DebugRenderer showWorldGrid();
   static DebugRenderer showUniformTest();
+
+private:
+  static Array<Array<uint16_t>> _debug_collectedSDFs;
 };
 
 

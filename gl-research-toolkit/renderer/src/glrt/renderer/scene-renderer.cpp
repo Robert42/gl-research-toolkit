@@ -31,6 +31,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
     visualizeSdfCandidateGrid(debugging::VisualizationRenderer::showSceneSdfCandidateGrid(scene)),
+    visualizeSdfCandidateCell(debugging::VisualizationRenderer::showSceneSdfCandidatesForCell(scene)),
     visualizeBVH(debugging::VisualizationRenderer::showSceneBVH(scene)),
     visualizeBVH_Grid(debugging::VisualizationRenderer::showSceneBVH_Grid(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
@@ -66,6 +67,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Lines.connectTo(&visualizeVoxelGrids);
   debugDrawList_Lines.connectTo(&visualizeVoxelBoundingSpheres);
   debugDrawList_Lines.connectTo(&visualizeSdfCandidateGrid);
+  debugDrawList_Lines.connectTo(&visualizeSdfCandidateCell);
   debugDrawList_Lines.connectTo(&visualizeBVH);
   debugDrawList_Lines.connectTo(&visualizeBVH_Grid);
   debugDrawList_Lines.connectTo(&visualizeWorldGrid);

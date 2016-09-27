@@ -53,6 +53,7 @@ public:
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
   debugging::DebugRenderer visualizeSdfCandidateGrid;
+  debugging::DebugRenderer visualizeSdfCandidateCell;
   debugging::DebugRenderer visualizeBVH;
   debugging::DebugRenderer visualizeBVH_Grid;
   debugging::DebugRenderer visualizeWorldGrid;

@@ -8,6 +8,14 @@ namespace renderer {
 namespace debugging {
 
 
+glm::ivec3 VisualizationRenderer::selectedSdfCandidateGrid(2, 10, 6);
+Array<Array<uint16_t>> VisualizationRenderer::_debug_collectedSDFs;
+
+void VisualizationRenderer::setSdfCandidateGridData(Array<Array<uint16_t> >&& debug_collectedSDFs)
+{
+  _debug_collectedSDFs = std::move(debug_collectedSDFs);
+}
+
 DebugRenderer VisualizationRenderer::debugSceneCameras(scene::Scene* scene)
 {
   return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
@@ -67,7 +75,21 @@ DebugRenderer VisualizationRenderer::showSceneSdfCandidateGrid(scene::Scene* sce
 {
   return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
     return debugging::DebugLineVisualisation::drawSdfCandidateGrid();
-  });
+                       });
+}
+
+DebugRenderer VisualizationRenderer::showSceneSdfCandidatesForCell(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    QVector<BoundingSphere> boundingSphere = scene::collectVoxelBoundingSphere(scene);
+                         if(boundingSphere.isEmpty() || any(lessThan(selectedSdfCandidateGrid, glm::ivec3(0))) || any(greaterThanEqual(selectedSdfCandidateGrid, glm::ivec3(int(SDF_CANDIDATE_GRID_SIZE)))))
+                         {
+                           return nullptr;
+                         }else
+                         {
+                           return debugging::DebugLineVisualisation::drawSdfCandidateCell();
+                         }
+                       });
 }
 
 DebugRenderer VisualizationRenderer::showSceneBVH(scene::Scene* scene)

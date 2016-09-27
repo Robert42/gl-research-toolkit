@@ -5,6 +5,7 @@
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
 
 namespace glrt {
 namespace gui {
@@ -180,6 +181,24 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizeBVH_Grid.guiToggle.TwAddVarCB(tweakBar, "Show BVH Cascaded Grids", "group='Debug Scene' help='Show the Grids accessing the SDF Bounding Volume Hierarchy'");
 
   renderer->visualizeSdfCandidateGrid.guiToggle.TwAddVarCB(tweakBar, "Show SDF Candidate-Grid", "group='Debug Scene'");
+  renderer->visualizeSdfCandidateCell.guiToggle.TwAddVarCB(tweakBar, "Show SDF Candidate-Cell", "group='Debug Scene'");
+  currentSdfCellToDebug_x.TwAddVarCB(tweakBar, "cell_x", "group='Debug Scene' visible=false min=0 max=31");
+  currentSdfCellToDebug_y.TwAddVarCB(tweakBar, "cell_y", "group='Debug Scene' visible=false min=0 max=31");
+  currentSdfCellToDebug_z.TwAddVarCB(tweakBar, "cell_z", "group='Debug Scene' visible=false min=0 max=31");
+  currentSdfCellToDebug_x.getter = []() -> int {return glm::min<int>(renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.x, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);};
+  currentSdfCellToDebug_y.getter = []() -> int {return glm::min<int>(renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.y, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);};
+  currentSdfCellToDebug_z.getter = []() -> int {return glm::min<int>(renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.z, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);};
+  currentSdfCellToDebug_x.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.x = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
+  currentSdfCellToDebug_y.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.y = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
+  currentSdfCellToDebug_z.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.z = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
+
+  std::function<void(bool)> setSdfCandidateEnabled = renderer->visualizeSdfCandidateCell.guiToggle.setter;
+  renderer->visualizeSdfCandidateCell.guiToggle.setter = [setSdfCandidateEnabled,this](bool b) {
+    currentSdfCellToDebug_x.setVisible(b);
+    currentSdfCellToDebug_y.setVisible(b);
+    currentSdfCellToDebug_z.setVisible(b);
+    setSdfCandidateEnabled(b);
+  };
 
   renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Voxel-AABBs", "group='Debug Scene'");
   renderer->visualizeSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");

@@ -3,6 +3,7 @@
 #include <glrt/renderer/debugging/debug-line-visualisation.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
 
 namespace glrt {
 namespace renderer {
@@ -357,6 +358,51 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateGrid()
     }
     painter.popMatrix();
   }
+
+  const unsigned int num_sdf_candidate_grids = 1;
+
+
+  QVector<uint16_t> grids;
+  grids.resize(num_sdf_candidate_grids);
+  for(quint16 i=0; i<num_sdf_candidate_grids; ++i)
+  {
+    grids[i] = num_sdf_candidate_grids-1-i;
+  }
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  grids,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-sdf-candidate-grids",
+                                                                                                                                   QDir(GLRT_SHADER_DIR"/debugging/visualizations"),
+                                                                                                                                   proprocessorBlock())))));
+  v->use_dephtest = true;
+  return v;
+}
+
+DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell()
+{
+  DebugMesh::Painter painter;
+
+  unsigned int gridSize = SDF_CANDIDATE_GRID_SIZE;
+
+  const glm::ivec3 currentCell = VisualizationRenderer::selectedSdfCandidateGrid;
+
+  painter.pushMatrix(glm::vec3(currentCell));
+  for(int dimension = 0; dimension<3; ++dimension)
+  {
+    const int n = 1;
+    glm::mat4 matrix = glm::mat4(1);
+    std::swap(matrix[2], matrix[dimension]);
+    painter.pushMatrix(matrix);
+    for(int i=0; i<=n; ++i)
+    {
+      painter.pushMatrix(glm::vec3(0, 0, i));
+      painter.addRect(glm::vec2(0), glm::vec2(1));
+      painter.popMatrix();
+    }
+    painter.popMatrix();
+  }
+  painter.popMatrix();
 
   const unsigned int num_sdf_candidate_grids = 1;
 

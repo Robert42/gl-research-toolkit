@@ -6,6 +6,7 @@
 #include <glrt/scene/resources/voxelizer.h>
 #include <glrt/toolkit/profiler.h>
 #include <glrt/toolkit/zindex.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
 
 namespace glrt {
 namespace renderer {
@@ -259,6 +260,8 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   GL_CALL(glMakeTextureHandleResidentNV, header.textureRenderHandle);
 
   header.gridLocation = gridLocation;
+
+  debugging::VisualizationRenderer::setSdfCandidateGridData(std::move(_collectedSDFs));
 
   return header;
 }
