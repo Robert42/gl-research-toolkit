@@ -10,9 +10,9 @@
 namespace glrt {
 namespace renderer {
 
-// =============================================================================
+// ==========================================================================================================================================================
 
-// ==== VoxelBuffer ============================================================
+// ==== VoxelBuffer =========================================================================================================================================
 
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
   : scene(scene),
@@ -155,7 +155,7 @@ void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
 using scene::resources::Voxelizer;
 using scene::resources::VoxelGridGeometry;
 
-Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry,  float influence_radius);
+Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry, float influence_radius);
 
 VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, float influence_radius)
 {
@@ -165,7 +165,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   // TODO: seperate aabb for whole scene and for static scene?
   const scene::AABB aabb = scene->aabb.ensureValid();
 
-  VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, SDF_CANDIDATE_GRID_SIZE, true);
+  VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, int(SDF_CANDIDATE_GRID_SIZE), true);
 
   glm::uvec3 size = geometry.gridSize;
 
@@ -190,6 +190,8 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
 
   uint32_t* const buffer = _buffer.data();
   Array<uint16_t>* const collectedSDFs = _collectedSDFs.data();
+
+  const glm::vec4 gridLocation(geometry.toVoxelSpace.position, geometry.toVoxelSpace.scaleFactor);
 
 #pragma omp parallel for
   for(uint32_t x=0; x<size.x; x++)
@@ -240,7 +242,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   {
 #endif
     this->size = size;
-    texture = std::move(GlTexture());
+    texture = GlTexture();
 #if !ALWAYS_NEW_TEXTURE_OBJECT
   }else if(textureRenderHandle!=0)
   {
@@ -256,7 +258,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   header.textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
   GL_CALL(glMakeTextureHandleResidentNV, header.textureRenderHandle);
 
-  header.gridLocation = glm::vec4(geometry.toVoxelSpace.position, geometry.toVoxelSpace.scaleFactor);
+  header.gridLocation = gridLocation;
 
   return header;
 }

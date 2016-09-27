@@ -5,6 +5,8 @@
 #error Please, never include the math-cpp.h header from a shader!
 #endif
 
+#include <QtGlobal>
+
 #include <openvdb/triangle-distance.h>
 
 namespace glm

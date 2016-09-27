@@ -1,7 +1,9 @@
+#include <glrt/glsl/math-cpp.h>
+
 #include <glrt/scene/scene-data.h>
 #include <glrt/scene/resources/voxelizer.h>
 
-#include <glrt/glsl/math-cpp.h>
+#include <glrt/dependencies.h>
 
 namespace glrt {
 namespace renderer {
@@ -44,9 +46,11 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
 
 Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry, float influence_radius)
 {
-  const glm::vec3 min_pos = glm::vec3(voxel);
-  const glm::vec3 max_pos = glm::vec3(voxel+uint32_t(1));
   const scene::CoordFrame coordFrame = geometry.toVoxelSpace.inverse();
+  auto transform = [&](const glm::vec3& position){return coordFrame * position;};
+
+  const glm::vec3 min_pos = transform(glm::vec3(voxel));
+  const glm::vec3 max_pos = transform(glm::vec3(voxel+uint32_t(1)));
 
   glsl::Plane planes[6];
 
@@ -55,8 +59,8 @@ Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, co
     glm::vec3 normal(0);
     normal[i] = 1;
 
-    planes[i*2+0] = coordFrame * glsl::plane_from_normal(normal, max_pos);
-    planes[i*2+1] = coordFrame * glsl::plane_from_normal(-normal, min_pos);
+    planes[i*2+0] = glsl::plane_from_normal(normal, max_pos);
+    planes[i*2+1] = glsl::plane_from_normal(-normal, min_pos);
   }
 
   return collectAllSdfIntersectingWith_ConvexShape(planes, 6, data, influence_radius);
