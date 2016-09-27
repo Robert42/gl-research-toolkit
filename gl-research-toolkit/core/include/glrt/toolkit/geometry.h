@@ -5,6 +5,12 @@
 
 namespace glrt {
 
+template<typename T>
+inline T voxelIndexForCoordinate(const glm::tvec3<T>& voxelCoordinate, const glm::tvec3<T>& gridSize)
+{
+  return voxelCoordinate.z * gridSize.y * gridSize.x + voxelCoordinate.y * gridSize.x + voxelCoordinate.x;
+}
+
 
 inline glm::vec3 find_best_perpendicular(const glm::vec3& vector, const glm::vec3& normal)
 {

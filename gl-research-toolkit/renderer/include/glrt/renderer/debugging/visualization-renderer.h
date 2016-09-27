@@ -17,6 +17,7 @@ public:
   static glm::ivec3 selectedSdfCandidateGrid;
 
   static void setSdfCandidateGridData(Array<Array<uint16_t>>&& debug_collectedSDFs);
+  static const Array<Array<uint16_t>>& debug_collectedSDFs(){return _debug_collectedSDFs;}
 
   // Note, the given scene/vector instance must live longer than the returned instance
   static DebugRenderer debugSceneCameras(scene::Scene* scene);

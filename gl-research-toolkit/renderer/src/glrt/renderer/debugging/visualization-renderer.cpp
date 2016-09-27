@@ -87,7 +87,8 @@ DebugRenderer VisualizationRenderer::showSceneSdfCandidatesForCell(scene::Scene*
                            return nullptr;
                          }else
                          {
-                           return debugging::DebugLineVisualisation::drawSdfCandidateCell();
+                           QList<BoundingSphere> voxelBoundingSpheres = scene::collectNamedVoxelBoundingSphere(scene).values();
+                           return debugging::DebugLineVisualisation::drawSdfCandidateCell(voxelBoundingSpheres);
                          }
                        });
 }

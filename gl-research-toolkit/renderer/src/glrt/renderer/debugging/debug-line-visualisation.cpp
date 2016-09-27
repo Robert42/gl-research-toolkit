@@ -379,7 +379,7 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateGrid()
   return v;
 }
 
-DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell()
+DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell(const QList<BoundingSphere>& spheres)
 {
   DebugMesh::Painter painter;
 
@@ -387,6 +387,8 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell()
 
   const glm::ivec3 currentCell = VisualizationRenderer::selectedSdfCandidateGrid;
 
+  painter.nextAttribute.parameter1 = 1;
+  painter.nextAttribute.color = glm::vec3(0.5, 1, 0);
   painter.pushMatrix(glm::vec3(currentCell));
   for(int dimension = 0; dimension<3; ++dimension)
   {
@@ -404,20 +406,29 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell()
   }
   painter.popMatrix();
 
-  const unsigned int num_sdf_candidate_grids = 1;
+  painter.nextAttribute.parameter1 = 0;
+  painter.nextAttribute.parameter2 = 0;
+  painter.nextAttribute.color = glm::vec3(1, 0.5, 0);
+  painter.addSphere(1.f, 96.f);
 
+  painter.nextAttribute.parameter2 = 1;
+  painter.nextAttribute.color = glm::vec3(0.5, 0, 0);
+  painter.addSphere(1.f, 96.f);
 
-  QVector<uint16_t> grids;
-  grids.resize(num_sdf_candidate_grids);
-  for(quint16 i=0; i<num_sdf_candidate_grids; ++i)
-  {
-    grids[i] = num_sdf_candidate_grids-1-i;
-  }
+  int offset = voxelIndexForCoordinate(currentCell, glm::ivec3(int(gridSize)));
+
+  const Array<uint16_t>& sdf_candidates = VisualizationRenderer::debug_collectedSDFs()[offset];
+
+  QVector<BoundingSphere> bounding_spheres;
+  bounding_spheres.resize(sdf_candidates.length());
+
+  for(int i=0; i<bounding_spheres.length(); ++i)
+    bounding_spheres[i] = spheres[sdf_candidates[i]];
 
   ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
-                                                                                  grids,
-                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-sdf-candidate-grids",
+                                                                                  bounding_spheres,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-sdf-candidate-cell",
                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"),
                                                                                                                                    proprocessorBlock())))));
   v->use_dephtest = true;

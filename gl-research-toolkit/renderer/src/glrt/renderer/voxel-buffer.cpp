@@ -201,7 +201,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
     {
       for(uint32_t z=0; z<size.z; z++)
       {
-        uint32_t offset = z + size.z * (y + x*size.x);
+        uint32_t offset = voxelIndexForCoordinate(glm::uvec3(x, y, z), size);
         glm::uvec3 voxelCoord(x,y,z);
         Array<uint16_t>& sdfs = *(collectedSDFs + offset);
 
@@ -222,7 +222,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
     {
       for(uint32_t z=0; z<size.z; z++)
       {
-        uint32_t offset = z + size.z * (y + x*size.x);
+        uint32_t offset = voxelIndexForCoordinate(glm::uvec3(x, y, z), size);
         uint32_t& voxelData = *(buffer + offset);
         Array<uint16_t>& sdfs = *(collectedSDFs + offset);
         uint32_t num_candidates = uint32_t(sdfs.length());

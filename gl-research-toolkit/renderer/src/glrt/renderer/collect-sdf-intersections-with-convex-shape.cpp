@@ -29,6 +29,8 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
 
   uint16_t n = data->voxelGrids->length;
 
+  const uint16_t interesting_index = 234;
+
   // TODO how to handle static and dynamic objects?
   for(uint16_t i=0; i<n; ++i)
   {
@@ -38,8 +40,14 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
     sphere.radius = bounding_sphere.radius + influence_radius;
 
     if(sphere_intersects_convex_shape(planes, num_planes, sphere))
+    {
+      if(interesting_index == i)
+        PRINT_VALUE(i);
       target.append_copy(i);
+    }
   }
+
+//  PRINT_VALUE(best_index);
 
   return target;
 }
