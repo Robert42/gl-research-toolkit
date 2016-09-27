@@ -10,7 +10,7 @@ uniform NodeBlock
 
 void main()
 {
-  vec3 grid_position = vertex_position-0.5;
+  vec3 grid_position = vertex_position;
   
   vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
   float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
