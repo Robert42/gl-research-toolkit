@@ -44,8 +44,8 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
 
 Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry, float influence_radius)
 {
-  const glm::vec3 min_pos = geometry.toVoxelSpace * glm::vec3(voxel);
-  const glm::vec3 max_pos = geometry.toVoxelSpace * glm::vec3(voxel+uint32_t(1));
+  const glm::vec3 min_pos = glm::vec3(voxel);
+  const glm::vec3 max_pos = glm::vec3(voxel+uint32_t(1));
   const scene::CoordFrame coordFrame = geometry.toVoxelSpace.inverse();
 
   glsl::Plane planes[6];
