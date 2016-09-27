@@ -48,6 +48,8 @@ add_custom_target(
   debugging/visualizations/visualize-rect-area-light.vs
   debugging/visualizations/visualize-scene-camera.fs
   debugging/visualizations/visualize-scene-camera.vs
+  debugging/visualizations/visualize-sdf-candidate-grids.fs
+  debugging/visualizations/visualize-sdf-candidate-grids.vs
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
   debugging/visualizations/visualize-spheres.fs
