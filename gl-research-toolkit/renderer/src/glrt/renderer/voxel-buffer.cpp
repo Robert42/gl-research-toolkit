@@ -174,7 +174,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
 
   // The current format uses a single integer. The lower 24 bits store the byte
   // offset from the start of the buffer to the sdf indices stored by this grid.
-  //
+  // LIMIT_255
   Q_ASSERT(data->voxelGrids->length <= 255);
   Q_ASSERT(size.x*size.y*size.z*255 <= 0x01000000);
 

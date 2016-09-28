@@ -69,6 +69,7 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   SceneData scene;
 };
 
+// LIMIT_255
 void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, out uint8_t* first_static_candidate, out uint32_t num_dynamic_candidates, out uint8_t* first_dynamic_candidate)
 {
   vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
