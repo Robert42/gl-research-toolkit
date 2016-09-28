@@ -1,5 +1,6 @@
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
 #include <glrt/renderer/debugging/debug-line-visualisation.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
@@ -379,7 +380,7 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateGrid()
   return v;
 }
 
-DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell(const QList<BoundingSphere>& spheres)
+DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell(const scene::Scene::Data& scene_data)
 {
   DebugMesh::Painter painter;
 
@@ -423,7 +424,18 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell(const
   bounding_spheres.resize(sdf_candidates.length());
 
   for(int i=0; i<bounding_spheres.length(); ++i)
-    bounding_spheres[i] = spheres[sdf_candidates[i]];
+  {
+    uint16_t sdf_index = sdf_candidates[i];
+    scene::resources::BoundingSphere boundingSphere = scene_data.voxelGrids->globalCoordFrame(sdf_index) * scene_data.voxelGrids->boundingSphere[sdf_index];
+#if 0
+    if(93 == sdf_candidates[i])
+    {
+      PRINT_VALUE(boundingSphere.center);
+      PRINT_VALUE(boundingSphere.radius);
+    }
+#endif
+    bounding_spheres[i] = boundingSphere;
+  }
 
   ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
   DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,

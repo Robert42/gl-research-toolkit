@@ -23,13 +23,30 @@ bool sphere_intersects_convex_shape(const glsl::Plane* planes, int num_planes, c
   return true;
 }
 
+#define SPONZA_ARCH_PAD_EDGE_001 0
+
+#define DEBUG_SINGLE_SDF SPONZA_ARCH_PAD_EDGE_001
+#if DEBUG_SINGLE_SDF
+extern bool debug_now;
+bool debug_now = false;
+#endif
+
 Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* planes, int num_planes, const scene::Scene::Data* data, float influence_radius)
 {
   Array<uint16_t> target;
 
   uint16_t n = data->voxelGrids->length;
 
-  const uint16_t interesting_index = 234;
+//#define FIND_SDF
+#ifdef FIND_SDF
+  uint16_t sdf_candidate_index = 0xffff;
+  float distance_to_sdf_candidate = INFINITY;
+  glm::vec3 best_position(-12.86266, 5.75949, 1.87159);
+#endif
+
+#if SPONZA_ARCH_PAD_EDGE_001
+  uint16_t sponza_arch_pad_edge_001 = 93; // sponza-arch-pad-edge-001
+#endif
 
   // TODO how to handle static and dynamic objects?
   for(uint16_t i=0; i<n; ++i)
@@ -39,21 +56,53 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
     sphere.origin = bounding_sphere.center;
     sphere.radius = bounding_sphere.radius + influence_radius;
 
+#if DEBUG_SINGLE_SDF
+    if(debug_now && sponza_arch_pad_edge_001 == i)
+    {
+      PRINT_VALUE(sphere.origin);
+      PRINT_VALUE(sphere.radius);
+
+      for(int j=0; j<num_planes; ++j)
+      {
+        const glsl::Plane& plane = planes[j];
+
+        PRINT_VALUE(plane.normal);
+        PRINT_VALUE(plane.d * plane.normal);
+      }
+      PRINT_VALUE(sphere_intersects_convex_shape(planes, num_planes, sphere));
+    }
+#endif
+
+#ifdef FIND_SDF
+    if(glm::distance(bounding_sphere.center, best_position) < distance_to_sdf_candidate)
+    {
+      sdf_candidate_index = i;
+      distance_to_sdf_candidate = glm::distance(bounding_sphere.center, best_position);
+    }
+#endif
+
     if(sphere_intersects_convex_shape(planes, num_planes, sphere))
     {
-      if(interesting_index == i)
-        PRINT_VALUE(i);
       target.append_copy(i);
     }
   }
 
-//  PRINT_VALUE(best_index);
+#ifdef FIND_SDF
+  PRINT_VALUE(sdf_candidate_index);
+#endif
 
   return target;
 }
 
 Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry, float influence_radius)
 {
+#if DEBUG_SINGLE_SDF
+  debug_now = false;
+#if SPONZA_ARCH_PAD_EDGE_001
+  debug_now = (voxel == glm::uvec3(2, 10, 6));
+#endif
+#endif
+
   const scene::CoordFrame coordFrame = geometry.toVoxelSpace.inverse();
   auto transform = [&](const glm::vec3& position){return coordFrame * position;};
 
