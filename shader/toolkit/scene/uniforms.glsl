@@ -76,12 +76,13 @@ void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, ou
   float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
   
   ivec3 textureCoord = ivec3(world_pos * gridLocationScale + gridLocationOffset);
+  textureCoord = clamp(textureCoord, ivec3(0), ivec3(SDF_CANDIDATE_GRID_SIZE));
   
   uint32_t gridRanges = texelFetch(scene.candidateGridHeader.gridRanges, textureCoord, 0).r;
   
   num_static_candidates = gridRanges>>24;
-  num_static_candidates = int(textureCoord==clamp(textureCoord, ivec3(0), ivec3(SDF_CANDIDATE_GRID_SIZE))) * num_static_candidates;
-  scene.candidateGridHeader.candidateGrid + (0x00ffffff & gridRanges);
+  // LIMIT_255
+  first_static_candidate = (uint8_t*)(scene.candidateGridHeader.candidateGrid + (0x00ffffff & gridRanges));
   
   num_dynamic_candidates = 0;
 }

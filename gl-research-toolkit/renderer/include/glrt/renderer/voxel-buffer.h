@@ -103,7 +103,7 @@ public:
     GlTexture texture;
     glm::uvec3 size;
 
-    CandidateGridHeader calcCandidates(const scene::Scene* scene, float influence_radius);
+    CandidateGridHeader calcCandidates(const scene::Scene* scene, ManagedGLBuffer<uint8_t>* candidateGridBuffer, float influence_radius);
   };
   CandidateGridHeader candidateGridHeader;
   CandidateGrid candidateGrid;
@@ -126,6 +126,9 @@ private:
 
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
   ManagedGLBuffer<BVH::InnerNode> bvhInnerNodes;
+
+  // LIMIT_255
+  ManagedGLBuffer<uint8_t> candidateIndexBuffer;
 
   VoxelHeader _voxelHeader;
 

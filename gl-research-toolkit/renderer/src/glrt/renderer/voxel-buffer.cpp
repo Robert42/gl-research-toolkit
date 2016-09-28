@@ -21,7 +21,8 @@ VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
     distanceFieldVoxelData(scene.data->voxelGrids->capacity()),
     distanceFieldboundingSpheres(scene.data->voxelGrids->capacity()),
     bvhInnerBoundingSpheres(scene.data->voxelGrids->capacity()),
-    bvhInnerNodes(scene.data->voxelGrids->capacity())
+    bvhInnerNodes(scene.data->voxelGrids->capacity()),
+    candidateIndexBuffer(MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE)
 {
   AO_RADIUS.callback_functions << [this](float){dirty_candidate_grid=true;};
 }
@@ -50,7 +51,7 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
   if(Q_UNLIKELY(dirty_candidate_grid))
   {
-    candidateGridHeader = candidateGrid.calcCandidates(&scene, AO_RADIUS);
+    candidateGridHeader = candidateGrid.calcCandidates(&scene, &candidateIndexBuffer, AO_RADIUS);
 
     dirty_candidate_grid = false;
   }
@@ -158,7 +159,7 @@ using scene::resources::VoxelGridGeometry;
 
 Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry, float influence_radius);
 
-VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, float influence_radius)
+VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, ManagedGLBuffer<uint8_t>* candidateGridBuffer, float influence_radius)
 {
   PROFILE_SCOPE("CandidateGrid::calcCandidateGrid")
 
@@ -260,6 +261,20 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
   GL_CALL(glMakeTextureHandleResidentNV, header.textureRenderHandle);
 
   header.gridLocation = gridLocation;
+  header.candidateBuffer = candidateGridBuffer->gpuBufferAddress();
+
+  uint8_t* index_data = candidateGridBuffer->Map(data_offset*sizeof(uint8_t));
+  for(const Array<uint16_t>& sdfs : _collectedSDFs)
+  {
+    // LIMIT_255
+    for(uint16_t sdf : sdfs)
+    {
+      Q_ASSERT(sdf < 255);
+      *index_data = uint8_t(sdf);
+      ++index_data;
+    }
+  }
+  candidateGridBuffer->Unmap();
 
   debugging::VisualizationRenderer::setSdfCandidateGridData(std::move(_collectedSDFs));
 
