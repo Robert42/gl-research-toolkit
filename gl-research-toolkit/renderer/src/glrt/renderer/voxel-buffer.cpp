@@ -217,6 +217,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
 
   uint32_t data_offset = 0;
 
+  uint8_t* _index_data = candidateGridBuffer->Map();
   for(uint32_t x=0; x<size.x; x++)
   {
     for(uint32_t y=0; y<size.y; y++)
@@ -224,11 +225,20 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
       for(uint32_t z=0; z<size.z; z++)
       {
         uint32_t offset = voxelIndexForCoordinate(glm::uvec3(x, y, z), size);
-        uint32_t& voxelData = *(buffer + offset);
         Array<uint16_t>& sdfs = *(collectedSDFs + offset);
-        uint32_t num_candidates = uint32_t(sdfs.length());
+        const uint32_t num_candidates = uint32_t(sdfs.length());
+        uint32_t& voxelData = *(buffer + offset);
+        uint8_t* index_data = reinterpret_cast<uint8_t*>(reinterpret_cast<uint8_t*>(_index_data) + data_offset);
         Q_ASSERT(num_candidates <= 255);
         Q_ASSERT(data_offset <= 0x00ffffff);
+        Q_ASSERT(data_offset+num_candidates*sizeof(uint8_t) <= 0x01000000);
+
+        for(uint32_t i=0; i<num_candidates; ++i)
+        {
+          uint16_t index = sdfs[int(i)];
+          Q_ASSERT(index <= 255);
+          index_data[i] = static_cast<uint8_t>(index);
+        }
 
         voxelData = (num_candidates <<  24) | (data_offset);
 
@@ -236,6 +246,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
       }
     }
   }
+  candidateGridBuffer->Unmap();
 
 #define ALWAYS_NEW_TEXTURE_OBJECT 1
 
@@ -262,19 +273,6 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
 
   header.gridLocation = gridLocation;
   header.candidateBuffer = candidateGridBuffer->gpuBufferAddress();
-
-  uint8_t* index_data = candidateGridBuffer->Map(data_offset*sizeof(uint8_t));
-  for(const Array<uint16_t>& sdfs : _collectedSDFs)
-  {
-    // LIMIT_255
-    for(uint16_t sdf : sdfs)
-    {
-      Q_ASSERT(sdf < 255);
-      *index_data = uint8_t(sdf);
-      ++index_data;
-    }
-  }
-  candidateGridBuffer->Unmap();
 
   debugging::VisualizationRenderer::setSdfCandidateGridData(std::move(_collectedSDFs));
 
