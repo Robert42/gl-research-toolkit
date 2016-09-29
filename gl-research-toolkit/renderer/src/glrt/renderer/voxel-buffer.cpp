@@ -402,9 +402,10 @@ quint16 BVH::addInnerNode()
 
 quint16 BVH::calcDepth(quint16 root, InnerNode* bvhInnerNodes) const
 {
-#if ENFORCE_HUGE_BVH_LEAVES_FIRST
-  Q_ASSERT(root!=0x8000);
-#endif
+  if(scene::ENFORCE_HUGE_BVH_LEAVES_FIRST)
+  {
+    Q_ASSERT(root!=0x8000);
+  }
 
   if(root & 0x8000)
     return 0;
