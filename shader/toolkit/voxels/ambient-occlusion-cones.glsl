@@ -442,7 +442,7 @@ float distancefield_ao(float radius=AO_RADIUS)
   init_cone_bouquet_ao();
   
   #if defined(NO_BVH)
-  #if defined(AO_USE_CANDIDATE_GRID)
+  #if AO_USE_CANDIDATE_GRID
   ao_coneSoftShadow_candidateGrid(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
   #else
   ao_coneSoftShadow_bruteforce(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
