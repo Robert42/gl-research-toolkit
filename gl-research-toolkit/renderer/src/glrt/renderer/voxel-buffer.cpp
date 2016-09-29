@@ -24,6 +24,7 @@ VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
     bvhInnerNodes(scene.data->voxelGrids->capacity()),
     candidateIndexBuffer(MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE)
 {
+  dirty_candidate_grid = true;
   AO_RADIUS.callback_functions << [this](float){dirty_candidate_grid=true;};
 }
 
