@@ -217,7 +217,6 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
 
   uint32_t data_offset = 0;
 
-#pragma omp parallel for
   for(uint32_t x=0; x<size.x; x++)
   {
     for(uint32_t y=0; y<size.y; y++)
