@@ -77,6 +77,9 @@ extern GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
 #define MAX_SDF_CANDIDATE_GRID_SIZE 32
 extern GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE;
 
+#define MAX_SDF_MERGED_STATIC 512
+extern VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE;
+
 extern GLSLMacroWrapper<bool> AO_FALLBACK_NONE;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED;
 

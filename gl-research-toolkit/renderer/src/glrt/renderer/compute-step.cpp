@@ -105,5 +105,31 @@ glm::ivec3 ComputeStep::calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount,
   return groupSize;
 }
 
+DynamicComputeStep::DynamicComputeStep(const QString& shaderFileName, const glm::uvec3& typicalWorkAmount, const QSet<QString>& preprocessorBlock)
+  : shader(QFileInfo(shaderFileName).baseName(), QFileInfo(shaderFileName).absoluteDir(), preprocessorBlock | groupSizeAsMacro(typicalWorkAmount))
+{
+
+}
+
+void DynamicComputeStep::invoke(const glm::uvec3& workAmount)
+{
+  glm::uvec3 numInvocations = workAmount/groupSize;
+  shader.glProgram.use();
+  GL_CALL(glDispatchCompute, numInvocations.x, numInvocations.y, numInvocations.z);
+  gl::Program::useNone();
+}
+
+QSet<QString> DynamicComputeStep::groupSizeAsMacro(const glm::uvec3& totalWorkAmount)
+{
+  const bool mustBeMultiple = false;
+  glm::uvec3 workerGroupSize = ComputeStep::calcBestWorkGroupSize(totalWorkAmount, mustBeMultiple);
+
+  this->groupSize = workerGroupSize;
+
+  return QSet<QString>({QString("#define GROUPS_SIZE_X %0").arg(workerGroupSize.x),
+                        QString("#define GROUPS_SIZE_Y %1").arg(workerGroupSize.y),
+                        QString("#define GROUPS_SIZE_Z %2").arg(workerGroupSize.z)});
+}
+
 } // namespace renderer
 } // namespace glrt

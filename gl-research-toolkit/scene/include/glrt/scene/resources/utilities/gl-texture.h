@@ -111,6 +111,8 @@ public:
   GLint height(int level) const;
   GLint depth(int level) const;
 
+  glm::ivec3 resolution(int level) const;
+
   GLint maxLevel() const;
   Target target() const;
 

@@ -644,6 +644,13 @@ GLint GlTexture::depth(int level) const
   return value;
 }
 
+glm::ivec3 GlTexture::resolution(int level) const
+{
+  return glm::ivec3(width(level),
+                    height(level),
+                    depth(level));
+}
+
 GLint GlTexture::maxLevel() const
 {
   for(GLint level=0; level<1000; ++level)

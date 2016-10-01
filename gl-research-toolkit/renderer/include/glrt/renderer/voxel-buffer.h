@@ -3,6 +3,7 @@
 
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/toolkit/managed-gl-buffer.h>
+#include <glrt/renderer/compute-step.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
 #include <glrt/scene/scene-data.h>
 
@@ -94,6 +95,7 @@ public:
     GLuint64 _padding = 0;
 
     glm::vec4 gridLocation;
+    glm::vec4 fallbackSdfLocation;
 
     GLuint64 candidateBuffer = 0;
     GLuint64 _candidate_reservedForTiles = 0;
@@ -113,12 +115,16 @@ public:
 
   const VoxelHeader& updateVoxelHeader();
 
+  void mergeStaticSDFs();
+
 private:
   typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
   glrt::scene::Scene& scene;
   VoxelGrid*& voxelGridData;
   bool dirty_candidate_grid;
+  bool dirty_merged_sdf_texture_buffer;
+  bool dirty_merged_sdf;
 
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
@@ -132,8 +138,22 @@ private:
 
   VoxelHeader _voxelHeader;
 
+  struct FallbackSdf
+  {
+    GlTexture texture;
+    GLuint64 textureHandle;
+    glm::vec4 location;
+    glm::ivec3 resolution;
+  };
+  FallbackSdf staticFallbackSdf;
+  DynamicComputeStep mergeSDFs;
+
   void updateVoxelGrid();
   void updateBvhTree(const glrt::scene::resources::BoundingSphere* leaves_bounding_spheres);
+
+  gl::Buffer sdfMergeHeaderBuffer;
+  void initStaticSDFMerged();
+  void initStaticSdfFallbackTexture();
 };
 
 } // namespace renderer

@@ -24,6 +24,8 @@ GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE("#define HOLD_BACK_
 
 GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE("#define SDF_CANDIDATE_GRID_SIZE %0", 16);
 
+VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE(64, [](uint32_t v) -> uint32_t{return glm::clamp<uint32_t>(v, 4, MAX_SDF_CANDIDATE_GRID_SIZE);});
+
 GLSLMacroWrapper<bool> AO_FALLBACK_NONE("#define AO_FALLBACK_NONE %0", false);
 GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED("#define AO_FALLBACK_CLAMPED %0", false);
 
