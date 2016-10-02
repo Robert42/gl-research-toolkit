@@ -164,6 +164,12 @@ public:
   DistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
 };
 
+class FallbackDistanceFieldRaymarch : public SingleShader
+{
+public:
+  FallbackDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
+};
+
 class RaymarchBoundingSpheresAsDistanceField : public SingleShader
 {
 public:
@@ -227,6 +233,12 @@ DistanceFieldRaymarch::DistanceFieldRaymarch(const QSet<QString>& debug_posteffe
 }
 
 
+FallbackDistanceFieldRaymarch::FallbackDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "raymarch-fallback-distancefield", depthTest)
+{
+}
+
+
 RaymarchBoundingSpheresAsDistanceField::RaymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
   : SingleShader(debug_posteffect_preprocessor, "show-bounding-spheres-as-distancefield", depthTest)
 {
@@ -267,6 +279,12 @@ DebugRenderer DebuggingPosteffect::distanceFieldRaymarch(const QSet<QString>& de
 {
   padding<byte, 7> padding;
   return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new DistanceFieldRaymarch(debug_posteffect_preprocessor, mixWithScene);});
+}
+
+DebugRenderer DebuggingPosteffect::fallbackDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
+{
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new FallbackDistanceFieldRaymarch(debug_posteffect_preprocessor, mixWithScene);});
 }
 
 DebugRenderer DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)

@@ -43,6 +43,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox(debug_posteffect_preprocessor)),
     visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch(debug_posteffect_preprocessor)),
     visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch(debug_posteffect_preprocessor)),
+    visualizePosteffect_Fallback_Distancefield_raymarch(debugging::DebuggingPosteffect::fallbackDistanceFieldRaymarch(debug_posteffect_preprocessor)),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(debug_posteffect_preprocessor)),
     videoResolution(videoResolution),
     collectAmbientOcclusionToGrid1(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*1), QSet<QString>({"#define COMPUTE_GRIDS"})),
@@ -79,6 +80,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_BoundingBox);
   debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
   debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_raymarch);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Fallback_Distancefield_raymarch);
   debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
 
   connect(scene, &scene::Scene::sceneCleared, this, &Renderer::forceNewGridCameraPos);
@@ -112,6 +114,8 @@ void Renderer::render()
 
   if(isUsingBvhLeafGrid())
     updateBvhLeafGrid();
+
+  voxelUniformBuffer.mergeStaticSDFs();
 
   prepareFramebuffer();
 

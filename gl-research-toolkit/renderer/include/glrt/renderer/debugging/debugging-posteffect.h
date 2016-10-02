@@ -27,6 +27,7 @@ public:
   static DebugRenderer voxelGridBoundingBox(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest=true);
   static DebugRenderer voxelGridCubicRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest = true);
   static DebugRenderer distanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest = true);
+  static DebugRenderer fallbackDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest = true);
   static DebugRenderer raymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest = true);
   static DebugRenderer globalDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest=true);
 

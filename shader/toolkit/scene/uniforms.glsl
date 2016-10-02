@@ -88,6 +88,20 @@ void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, ou
   num_dynamic_candidates = 0;
 }
 
+sampler3D fallback_distance_field_data(out mat4x3 worldToVoxelSpace, out ivec3 voxelCount, out vec3 voxelToUvwSpace, out float worldToVoxelSpaceFactor)
+{
+  vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
+  float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
+  
+  sampler3D texture = scene.candidateGridHeader.fallbackSDF;
+  worldToVoxelSpace = mat4x3(gridLocationScale, 0, 0, 0, gridLocationScale, 0, 0, 0, gridLocationScale, gridLocationOffset);
+  voxelCount = textureSize(texture, 0);
+  voxelToUvwSpace = distance_field_voxelToUvwSpace(voxelCount);
+  worldToVoxelSpaceFactor = gridLocationScale;
+  
+  return texture;
+}
+
 float blink(float rate=0.2)
 {
   return step(rate, mod(scene.totalTime, rate*2.));

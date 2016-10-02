@@ -113,7 +113,7 @@ DynamicComputeStep::DynamicComputeStep(const QString& shaderFileName, const glm:
 
 void DynamicComputeStep::invoke(const glm::uvec3& workAmount)
 {
-  glm::uvec3 numInvocations = workAmount/groupSize;
+  glm::uvec3 numInvocations = (workAmount+groupSize-glm::uvec3(1))/groupSize;
   shader.glProgram.use();
   GL_CALL(glDispatchCompute, numInvocations.x, numInvocations.y, numInvocations.z);
   gl::Program::useNone();

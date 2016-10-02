@@ -52,8 +52,9 @@ void main()
       d = min(d, distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p));
     }
     
-    if(all(lessThan(gl_GlobalInvocationID, header.targetTextureSize)))
-    {
-      imageStore(header.targetTexture, ivec3(voxel_index), vec4(d));
-    }
+    //d = length(world_pos)-4;
+    //d =  voxel_position.x-32;//length(voxel_position - vec3(32)) - 8;
+    //d = header.gridLocation.x;
+    
+    imageStore(header.targetTexture, ivec3(voxel_index), vec4(d));
 }

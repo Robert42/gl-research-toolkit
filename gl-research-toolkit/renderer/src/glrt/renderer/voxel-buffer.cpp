@@ -45,10 +45,11 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
   PROFILE_SCOPE("VoxelBuffer::updateVoxelHeader()")
 
+  // TODO: (voxelGridData->numDynamic>0) is not an elegant solution for dynamic objects
   if(Q_UNLIKELY(voxelGridData->numDynamic>0 || voxelGridData->dirtyOrder))
   {
     dirty_candidate_grid = true;
-    dirty_merged_sdf = true;
+    dirty_merged_sdf_texture_buffer = true;
     updateVoxelGrid();
 
     _voxelHeader.numDistanceFields = voxelGridData->length;
@@ -66,7 +67,6 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
     dirty_merged_sdf_texture_buffer = false;
     dirty_merged_sdf = true;
-    dirty_candidate_grid = true;
   }
 
   if(Q_UNLIKELY(dirty_candidate_grid))
@@ -349,6 +349,7 @@ void VoxelBuffer::initStaticSdfFallbackTexture()
     GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
 
   sdfMergeHeader.targetTexture = imageHandle;
+  sdfMergeHeader.targetTextureSize = glm::uvec3(MERGED_STATIC_SDF_SIZE);
 
   sdfMergeHeaderBuffer.Unmap();
 
