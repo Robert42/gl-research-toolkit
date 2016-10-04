@@ -33,6 +33,8 @@ struct AABB
   AABB ensureValid() const;
 };
 
+QDebug operator<<(QDebug d, const AABB& aabb);
+
 } // namespace scene
 } // namespace glrt
 

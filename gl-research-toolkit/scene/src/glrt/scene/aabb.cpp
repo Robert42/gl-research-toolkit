@@ -91,6 +91,11 @@ AABB AABB::ensureValid() const
   return aabb;
 }
 
+QDebug operator<<(QDebug d, const AABB& aabb)
+{
+  return d << "AABB{min:"<<aabb.minPoint<<", max:"<<aabb.maxPoint<<"}";
+}
+
 
 } // namespace scene
 } // namespace glrt
