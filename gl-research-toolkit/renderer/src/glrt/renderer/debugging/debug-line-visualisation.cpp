@@ -380,6 +380,47 @@ DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateGrid()
   return v;
 }
 
+DebugRenderer::Implementation* DebugLineVisualisation::drawSdfFallbackGrid()
+{
+  DebugMesh::Painter painter;
+
+  unsigned int gridSize = SDF_CANDIDATE_GRID_SIZE;
+
+  for(int dimension = 0; dimension<3; ++dimension)
+  {
+    const int n = gridSize;
+    glm::mat4 matrix = glm::mat4(1);
+    std::swap(matrix[2], matrix[dimension]);
+    painter.pushMatrix(matrix);
+    for(int i=0; i<=n; ++i)
+    {
+      painter.pushMatrix(glm::vec3(0, 0, i));
+      painter.addRect(glm::vec2(0), glm::vec2(gridSize));
+      painter.popMatrix();
+    }
+    painter.popMatrix();
+  }
+
+  const unsigned int num_sdf_candidate_grids = 1;
+
+
+  QVector<uint16_t> grids;
+  grids.resize(num_sdf_candidate_grids);
+  for(quint16 i=0; i<num_sdf_candidate_grids; ++i)
+  {
+    grids[i] = num_sdf_candidate_grids-1-i;
+  }
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  grids,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-sdf-fallback-grids",
+                                                                                                                                   QDir(GLRT_SHADER_DIR"/debugging/visualizations"),
+                                                                                                                                   proprocessorBlock())))));
+  v->use_dephtest = true;
+  return v;
+}
+
 DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell(const scene::Scene::Data& scene_data)
 {
   DebugMesh::Painter painter;

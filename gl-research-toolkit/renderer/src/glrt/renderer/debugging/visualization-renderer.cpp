@@ -92,6 +92,13 @@ DebugRenderer VisualizationRenderer::showSceneSdfCandidatesForCell(scene::Scene*
                        });
 }
 
+DebugRenderer VisualizationRenderer::showSceneSdfFallbackGrid(scene::Scene* scene)
+{
+  return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {
+    return debugging::DebugLineVisualisation::drawSdfFallbackGrid();
+                       });
+}
+
 DebugRenderer VisualizationRenderer::showSceneBVH(scene::Scene* scene)
 {
   return DebugRenderer(scene, [scene]() -> DebugRenderer::Implementation* {

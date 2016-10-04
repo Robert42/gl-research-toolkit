@@ -192,6 +192,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   currentSdfCellToDebug_x.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.x = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
   currentSdfCellToDebug_y.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.y = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
   currentSdfCellToDebug_z.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.z = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
+  renderer->visualizeSdfFallbackGrid.guiToggle.TwAddVarCB(tweakBar, "Show SDF Fallback-Grid", "group='Debug Scene'");
 
   std::function<void(bool)> setSdfCandidateEnabled = renderer->visualizeSdfCandidateCell.guiToggle.setter;
   renderer->visualizeSdfCandidateCell.guiToggle.setter = [setSdfCandidateEnabled,this](bool b) {

@@ -68,6 +68,7 @@ public:
   static DebugRenderer::Implementation* drawSpheres(const QList<BoundingSphere>& spheres);
   static DebugRenderer::Implementation* drawBoundingBoxes(const QVector<scene::AABB>& boundingBoxes);
   static DebugRenderer::Implementation* drawSdfCandidateGrid();
+  static DebugRenderer::Implementation* drawSdfFallbackGrid();
   static DebugRenderer::Implementation* drawSdfCandidateCell(const scene::Scene::Data& scene_data);
   static DebugRenderer::Implementation* drawBvh(quint16 num_bvh_leaves);
   static DebugRenderer::Implementation* drawBvh_Grid(quint16 num_bvh_grids);

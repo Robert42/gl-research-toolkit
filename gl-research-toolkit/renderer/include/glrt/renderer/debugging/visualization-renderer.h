@@ -27,6 +27,7 @@ public:
   static DebugRenderer debugVoxelBoundingSpheres(scene::Scene* scene);
   static DebugRenderer showSceneSdfCandidateGrid(scene::Scene* scene);
   static DebugRenderer showSceneSdfCandidatesForCell(scene::Scene* scene);
+  static DebugRenderer showSceneSdfFallbackGrid(scene::Scene* scene);
   static DebugRenderer showSceneBVH(scene::Scene* scene);
   static DebugRenderer showSceneBVH_Grid(scene::Scene* scene);
   static DebugRenderer showSceneAABB(scene::Scene* scene);

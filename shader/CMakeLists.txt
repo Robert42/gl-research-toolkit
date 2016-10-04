@@ -25,6 +25,8 @@ add_custom_target(
   debugging/posteffects/posteffect.vs.glsl
   debugging/posteffects/raymarch-distancefield.fs
   debugging/posteffects/raymarch-distancefield.vs
+  debugging/posteffects/raymarch-fallback-distancefield.fs
+  debugging/posteffects/raymarch-fallback-distancefield.vs
   debugging/posteffects/show-bounding-spheres-as-distancefield.fs
   debugging/posteffects/show-bounding-spheres-as-distancefield.vs
   debugging/posteffects/show-distancefield-as-cubic-voxel.fs
@@ -53,6 +55,8 @@ add_custom_target(
   debugging/visualizations/visualize-sdf-candidate-cell.vs
   debugging/visualizations/visualize-sdf-candidate-grids.fs
   debugging/visualizations/visualize-sdf-candidate-grids.vs
+  debugging/visualizations/visualize-sdf-fallback-grids.fs
+  debugging/visualizations/visualize-sdf-fallback-grids.vs
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
   debugging/visualizations/visualize-spheres.fs
