@@ -384,7 +384,7 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawSdfFallbackGrid()
 {
   DebugMesh::Painter painter;
 
-  unsigned int gridSize = SDF_CANDIDATE_GRID_SIZE;
+  unsigned int gridSize = MERGED_STATIC_SDF_SIZE;
 
   for(int dimension = 0; dimension<3; ++dimension)
   {
