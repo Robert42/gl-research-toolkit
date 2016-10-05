@@ -13,7 +13,7 @@
 #include <sdk/add_on/scriptarray/scriptarray.h>
 #include <sdk/add_on/scriptdictionary/scriptdictionary.h>
 
-#define SLOW_DOWN_IN_DEBUG
+//#define SLOW_DOWN_IN_DEBUG
 
 namespace glrt {
 
