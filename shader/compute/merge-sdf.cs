@@ -34,8 +34,7 @@ void main()
     VoxelDataBlock* leaf_data_blocks = distance_fields_voxelData();
     uint32_t num_distance_fields = distance_fields_num();
     
-    vec3 p = world_pos;
-    float d = inf;
+    float bestDistance = inf;
     
     for(uint32_t i=0; i<num_distance_fields; ++i)
     {
@@ -47,14 +46,12 @@ void main()
       float worldToVoxelSpace_Factor;
       sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
       
+      vec3 p = transform_point(worldToVoxelSpace, world_pos);
       vec3 clamp_Range = vec3(voxelSize)-0.5f;
       vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
-      d = min(d, distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p));
+      float currentDistance = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
+      bestDistance = min(bestDistance, currentDistance);
     }
     
-    //d = length(world_pos)-4;
-    //d =  length(voxel_position - vec3(32)) - 8;
-    //d = header.gridLocation.x;
-    
-    imageStore(header.targetTexture, ivec3(voxel_index), vec4(d));
+    imageStore(header.targetTexture, ivec3(voxel_index), vec4(bestDistance));
 }
