@@ -53,7 +53,7 @@ void main()
     }
     
     //d = length(world_pos)-4;
-    //d =  voxel_position.x-32;//length(voxel_position - vec3(32)) - 8;
+    //d =  length(voxel_position - vec3(32)) - 8;
     //d = header.gridLocation.x;
     
     imageStore(header.targetTexture, ivec3(voxel_index), vec4(d));
