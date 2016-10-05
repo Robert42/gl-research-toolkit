@@ -5,12 +5,15 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
 
 #include <glhelper/gl.hpp>
+#include <QThread>
 
 #include <assimp/DefaultLogger.hpp>
 
 #include <sdk/add_on/scriptstdstring/scriptstdstring.h>
 #include <sdk/add_on/scriptarray/scriptarray.h>
 #include <sdk/add_on/scriptdictionary/scriptdictionary.h>
+
+#define SLOW_DOWN_IN_DEBUG
 
 namespace glrt {
 
@@ -55,6 +58,9 @@ bool Application::pollEvent(SDL_Event* e)
 
 float Application::update()
 {
+#if defined(QT_DEBUG) && defined(SLOW_DOWN_IN_DEBUG)
+  QThread::msleep(10);
+#endif
   qApp->processEvents();
   frameDuration = profiler.update();
   frameDurationMS = frameDuration * 1000.f;
