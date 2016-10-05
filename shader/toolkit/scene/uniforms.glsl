@@ -90,8 +90,8 @@ void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, ou
 
 sampler3D fallback_distance_field_data(out mat4x3 worldToVoxelSpace, out ivec3 voxelCount, out vec3 voxelToUvwSpace, out float worldToVoxelSpaceFactor)
 {
-  vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
-  float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
+  vec3 gridLocationOffset = scene.candidateGridHeader.fallbackSdfGridLocation.xyz;
+  float gridLocationScale = scene.candidateGridHeader.fallbackSdfGridLocation.w;
   
   sampler3D texture = scene.candidateGridHeader.fallbackSDF;
   worldToVoxelSpace = mat4x3(gridLocationScale, 0, 0, 0, gridLocationScale, 0, 0, 0, gridLocationScale, gridLocationOffset);

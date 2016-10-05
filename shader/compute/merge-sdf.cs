@@ -21,8 +21,8 @@ uniform MergeHeaderBlock
 
 void main()
 {
-    vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
-    float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
+    vec3 gridLocationOffset = scene.candidateGridHeader.fallbackSdfGridLocation.xyz;
+    float gridLocationScale = scene.candidateGridHeader.fallbackSdfGridLocation.w;
     
     uvec3 voxel_index = gl_GlobalInvocationID;
     vec3 voxel_position = vec3(0.5) + vec3(voxel_index);
