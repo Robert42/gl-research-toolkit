@@ -117,6 +117,8 @@ public:
 
   void mergeStaticSDFs();
 
+  bool need_merged_sdf() const {return dirty_merged_sdf;}
+
 private:
   typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 

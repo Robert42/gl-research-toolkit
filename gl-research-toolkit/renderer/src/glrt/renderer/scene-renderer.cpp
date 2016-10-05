@@ -117,7 +117,11 @@ void Renderer::render()
   if(isUsingBvhLeafGrid())
     updateBvhLeafGrid();
 
-  voxelUniformBuffer.mergeStaticSDFs();
+  if(voxelUniformBuffer.need_merged_sdf())
+  {
+    sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+    voxelUniformBuffer.mergeStaticSDFs();
+  }
 
   prepareFramebuffer();
 

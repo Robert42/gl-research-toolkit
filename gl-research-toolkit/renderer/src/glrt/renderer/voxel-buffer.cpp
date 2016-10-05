@@ -357,9 +357,6 @@ void VoxelBuffer::initStaticSdfFallbackTexture()
 
 void glrt::renderer::VoxelBuffer::mergeStaticSDFs()
 {
-  if(!dirty_merged_sdf)
-    return;
-
   dirty_merged_sdf = false;
 
   sdfMergeHeaderBuffer.BindUniformBuffer(UNIFORM_MERGE_SDF_BLOCK);
