@@ -367,6 +367,8 @@ private:
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
   gui::TweakBarCBVar<bool> AO_USE_CANDIDATE_GRID;
+  gui::TweakBarCBVar<bool> AO_LEAF_SDF_ONLY;
+  gui::TweakBarCBVar<bool> AO_FALLBACK_SDF_ONLY;
 
   gui::TweakBarCBVar<int> currentSdfCellToDebug_x;
   gui::TweakBarCBVar<int> currentSdfCellToDebug_y;

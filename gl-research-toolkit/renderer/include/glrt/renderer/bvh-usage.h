@@ -65,6 +65,8 @@ extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
 extern GLSLMacroWrapper<float> AO_RADIUS;
 extern GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID;
+extern GLSLMacroWrapper<bool> AO_LEAF_SDF_ONLY;
+extern GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY;
 
 
 extern GLSLMacroWrapper<uint16_t> N_GI_CONES;
