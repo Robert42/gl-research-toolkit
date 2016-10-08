@@ -50,6 +50,13 @@ void main()
       vec3 clamp_Range = vec3(voxelSize)-0.5f;
       vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
       float currentDistance = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
+      
+      // scale from source sdf voxel-space to world-space
+      currentDistance /= (length(worldToVoxelSpace[0]) + length(worldToVoxelSpace[1]) + length(worldToVoxelSpace[2])) / 3.f;
+      
+      // scale from world-space to target sdf voxel-space
+      currentDistance *= gridLocationScale;
+      
       bestDistance = min(bestDistance, currentDistance);
     }
     
