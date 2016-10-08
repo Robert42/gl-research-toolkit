@@ -8,7 +8,7 @@ layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROU
 
 struct MergeHeader
 {
-  layout(r16f) image3D targetTexture;
+  layout(r16f) writeonly image3D targetTexture;
   vec4 gridLocation;
   uvec3 targetTextureSize;
 };
