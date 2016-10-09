@@ -17,7 +17,7 @@ GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET("#define SDFSAMPLING_EXPO
 GLSLMacroWrapper<float> AO_RADIUS("#define AO_RADIUS %0", 3.5f);
 GLSLMacroWrapper<uint16_t> N_GI_CONES("#define N_GI_CONES %0", 9);
 GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID("#define AO_USE_CANDIDATE_GRID %0", false);
-GLSLMacroWrapper<bool> AO_LEAF_SDF_ONLY("#define AO_LEAF_SDF_ONLY %0", true);
+GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF("#define AO_IGNORE_FALLBACK_SDF %0", true);
 GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY("#define AO_FALLBACK_SDF_ONLY %0", false);
 
 GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES("#define NUM_GRID_CASCADES %0", 3);

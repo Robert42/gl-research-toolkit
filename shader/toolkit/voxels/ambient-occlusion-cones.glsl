@@ -471,12 +471,12 @@ float distancefield_ao()
   
     vec2 fallback_fading = vec2(inf, inf);
   
-    #if !AO_LEAF_SDF_ONLY
+    #if !AO_IGNORE_FALLBACK_SDF
       #if AO_FALLBACK_SDF_ONLY
         fallback_fading = vec2(0, 0);
       #endif
-    
-    // TODO use fallback_fading
+
+      // TODO use fallback_fading
       ao_coneSoftShadow_fallbackGrid(fallback_fading, ao_radius);
     #endif
     

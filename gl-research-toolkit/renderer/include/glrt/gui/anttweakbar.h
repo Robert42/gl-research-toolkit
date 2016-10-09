@@ -249,9 +249,15 @@ inline TwType TweakBarCBVar<bool>::type()
 }
 
 template<>
-inline TwType TweakBarCBVar<int>::type()
+inline TwType TweakBarCBVar<int32_t>::type()
 {
   return TW_TYPE_INT32;
+}
+
+template<>
+inline TwType TweakBarCBVar<uint32_t>::type()
+{
+  return TW_TYPE_UINT32;
 }
 
 template<>
@@ -367,8 +373,9 @@ private:
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
   gui::TweakBarCBVar<bool> AO_USE_CANDIDATE_GRID;
-  gui::TweakBarCBVar<bool> AO_LEAF_SDF_ONLY;
+  gui::TweakBarCBVar<bool> AO_IGNORE_FALLBACK_SDF;
   gui::TweakBarCBVar<bool> AO_FALLBACK_SDF_ONLY;
+  gui::TweakBarCBVar<uint32_t> MERGED_STATIC_SDF_SIZE;
 
   gui::TweakBarCBVar<int> currentSdfCellToDebug_x;
   gui::TweakBarCBVar<int> currentSdfCellToDebug_y;

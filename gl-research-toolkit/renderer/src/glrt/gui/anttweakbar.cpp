@@ -259,11 +259,14 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   AO_USE_CANDIDATE_GRID = glrt::renderer::AO_USE_CANDIDATE_GRID;
   AO_USE_CANDIDATE_GRID.TwAddVarCB(tweakBar, "Use Candidate Grid", "group='Optimization'");
 
-  AO_LEAF_SDF_ONLY = glrt::renderer::AO_LEAF_SDF_ONLY;
-  AO_LEAF_SDF_ONLY.TwAddVarCB(tweakBar, "AO ignore fallback texture", "group='Optimization'");
+  AO_IGNORE_FALLBACK_SDF = glrt::renderer::AO_IGNORE_FALLBACK_SDF;
+  AO_IGNORE_FALLBACK_SDF.TwAddVarCB(tweakBar, "AO ignore fallback texture", "group='Optimization'");
 
   AO_FALLBACK_SDF_ONLY = glrt::renderer::AO_FALLBACK_SDF_ONLY;
   AO_FALLBACK_SDF_ONLY.TwAddVarCB(tweakBar, "AO use only fallback texture", "group='Optimization'");
+
+  MERGED_STATIC_SDF_SIZE = glrt::renderer::MERGED_STATIC_SDF_SIZE;
+  MERGED_STATIC_SDF_SIZE.TwAddVarCB(tweakBar, "AO Fallback SDF size", "group='Optimization' min=16 max=512");
 
   TwSetParam(tweakBar, "Optimization", "opened", TW_PARAM_CSTRING, 1, "false");
 
