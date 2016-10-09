@@ -82,6 +82,7 @@ add_custom_target(
   materials/material.vs
   toolkit/alignment.glsl
   toolkit/cascaded-grid/uniforms.glsl
+  toolkit/checkerboard.glsl
   toolkit/debugging/heat-vision.glsl
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
