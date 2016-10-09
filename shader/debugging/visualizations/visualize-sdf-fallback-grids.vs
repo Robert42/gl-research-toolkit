@@ -15,7 +15,18 @@ void main()
   vec3 gridLocationOffset = scene.candidateGridHeader.fallbackSdfGridLocation.xyz;
   float gridLocationScale = scene.candidateGridHeader.fallbackSdfGridLocation.w;
   
-  vec3 ws_position = (vertex_position - gridLocationOffset)/gridLocationScale;
+  int dimension = int(vertex_parameter1);
+  int index = int(vertex_parameter2);
+  
+  ivec3 gridSize = textureSize(scene.candidateGridHeader.fallbackSDF, 0);
+
+  grid_position *= gridSize;
+  grid_position[dimension] = index;
+
+  vec3 ws_position = (grid_position - gridLocationOffset)/gridLocationScale;
+  
+  if(index > gridSize[dimension])
+    ws_position = vec3(0);
   
   pass_attributes_to_fragment_shader(ws_position, vertex_color);
 }

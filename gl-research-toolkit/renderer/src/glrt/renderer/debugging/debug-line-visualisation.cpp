@@ -384,19 +384,19 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawSdfFallbackGrid()
 {
   DebugMesh::Painter painter;
 
-  unsigned int gridSize = MERGED_STATIC_SDF_SIZE;
+  unsigned int gridSize = MAX_SDF_MERGED_STATIC;
 
   for(int dimension = 0; dimension<3; ++dimension)
   {
     const int n = gridSize;
     glm::mat4 matrix = glm::mat4(1);
     std::swap(matrix[2], matrix[dimension]);
+    painter.nextAttribute.parameter1 = dimension;
     painter.pushMatrix(matrix);
     for(int i=0; i<=n; ++i)
     {
-      painter.pushMatrix(glm::vec3(0, 0, i));
-      painter.addRect(glm::vec2(0), glm::vec2(gridSize));
-      painter.popMatrix();
+      painter.nextAttribute.parameter2 = i;
+      painter.addRect(glm::vec2(0), glm::vec2(1));
     }
     painter.popMatrix();
   }

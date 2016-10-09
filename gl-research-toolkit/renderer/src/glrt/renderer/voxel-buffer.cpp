@@ -67,6 +67,9 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
     dirty_merged_sdf_texture_buffer = false;
     dirty_merged_sdf = true;
+
+    candidateGridHeader.fallbackSDF = staticFallbackSdf.textureHandle;
+    candidateGridHeader.fallbackSdfLocation = staticFallbackSdf.location;
   }
 
   if(Q_UNLIKELY(dirty_candidate_grid))
