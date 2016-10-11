@@ -268,6 +268,13 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   MERGED_STATIC_SDF_SIZE = glrt::renderer::MERGED_STATIC_SDF_SIZE;
   MERGED_STATIC_SDF_SIZE.TwAddVarCB(tweakBar, "AO Fallback SDF size", "group='Optimization' min=16 max=512");
 
+  AO_RADIUS = glrt::renderer::AO_RADIUS;
+  AO_RADIUS.TwAddVarCB(tweakBar, "AO Radius", "group='Optimization' min=0.1 max=20");
+  AO_STATIC_FALLBACK_FADING_START = glrt::renderer::AO_STATIC_FALLBACK_FADING_START;
+  AO_STATIC_FALLBACK_FADING_START.TwAddVarCB(tweakBar, "AO Fallback Fading Start", "group='Optimization' min=0.1 max=20");
+  AO_STATIC_FALLBACK_FADING_END = glrt::renderer::AO_STATIC_FALLBACK_FADING_END;
+  AO_STATIC_FALLBACK_FADING_END.TwAddVarCB(tweakBar, "AO Fallback Fading End", "group='Optimization' min=0.1 max=20");
+
   TwSetParam(tweakBar, "Optimization", "opened", TW_PARAM_CSTRING, 1, "false");
 
 

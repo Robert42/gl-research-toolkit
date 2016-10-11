@@ -365,6 +365,10 @@ private:
   gui::TweakBarCBVar<uint16_t> numBvhGrids;
   gui::TweakBarCBVar<uint16_t> bvhStackDepth;
 
+  gui::TweakBarCBVar<float> AO_RADIUS;
+  gui::TweakBarCBVar<float> AO_STATIC_FALLBACK_FADING_START;
+  gui::TweakBarCBVar<float> AO_STATIC_FALLBACK_FADING_END;
+
   TweakBarCBVar<float> SDFSAMPLING_SPHERETRACING_START;
   TweakBarCBVar<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
   TweakBarCBVar<int> SDFSAMPLING_EXPONENTIAL_NUM;

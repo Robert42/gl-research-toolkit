@@ -64,6 +64,8 @@ extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
 extern GLSLMacroWrapper<float> AO_RADIUS;
+extern GLSLMacroWrapper<float> AO_STATIC_FALLBACK_FADING_START;
+extern GLSLMacroWrapper<float> AO_STATIC_FALLBACK_FADING_END;
 extern GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID;
 extern GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY;
