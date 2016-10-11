@@ -20,7 +20,7 @@ int ao_distancefield_cost = 0;
 
 #define NEED_AO_INTERPOLATION_STATIC defined(NO_BVH) && !AO_IGNORE_FALLBACK_SDF && !AO_FALLBACK_SDF_ONLY
 
-void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, vec2 fallbackFading)
+void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, bool is_fallback)
 {
 #if AO_FALLBACK_NONE
   return;
@@ -36,14 +36,16 @@ void ao_falloff(inout float occlusionHeuristic, float distance, float cone_lengt
   occlusionHeuristic = mix(1, occlusionHeuristic, smoothstep(0.f, SDFSAMPLING_SELF_SHADOW_AVOIDANCE, distance));
   
 #if NEED_AO_INTERPOLATION_STATIC
-  fallbackFading = mix(vec2(1.f), vec2(occlusionHeuristic), fallbackFading);
-  occlusionHeuristic = mix(fallbackFading[0], fallbackFading[1], smoothstep(fallbackRangeVoxelspace[0], fallbackRangeVoxelspace[1], distance));
+  if(is_fallback) // I hope the optimizer resolves this ;)
+    occlusionHeuristic = mix(1.f, occlusionHeuristic, smoothstep(fallbackRangeVoxelspace[0], fallbackRangeVoxelspace[1], distance));
+  else
+    occlusionHeuristic = mix(occlusionHeuristic, 1.f, smoothstep(fallbackRangeVoxelspace[0], fallbackRangeVoxelspace[1], distance));
 #endif
 }
 
-#define AO_FALLOFF(occ, dist) ao_falloff(occ, dist, cone_length_voxelspace, inv_cone_length_voxelspace, fallbackRangeVoxelspace, fallbackFading)
+#define AO_FALLOFF(occ, dist) ao_falloff(occ, dist, cone_length_voxelspace, inv_cone_length_voxelspace, fallbackRangeVoxelspace, is_fallback)
 
-float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVoxelSpace, in ivec3 voxelSize, in vec3 voxelToUvwSpace, in float worldToVoxelSpace_Factor, float intersection_distance_front, float intersection_distance_back, float cone_length, vec2 fallbackFading=vec2(1,1))
+float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVoxelSpace, in ivec3 voxelSize, in vec3 voxelToUvwSpace, in float worldToVoxelSpace_Factor, float intersection_distance_front, float intersection_distance_back, float cone_length, bool is_fallback=false)
 {
   #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
       ao_distancefield_cost++;
@@ -74,8 +76,6 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
 #if defined(DISTANCEFIELD_FIXED_SAMPLE_POINTS)
   // In Range [0, 1]
   float exponential = SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
-
-  PRINT_VALUE(exponential);
   
   for(int i=0; i<SDFSAMPLING_EXPONENTIAL_NUM; ++i)
   {
@@ -145,7 +145,7 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
   intersection_distance_back = min(AO_STATIC_FALLBACK_FADING_END, intersection_distance_back);
 #endif
   
-  return ao_coneSoftShadow(cone, texture, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor, intersection_distance_front, intersection_distance_back, cone_length, vec2(1, 0));
+  return ao_coneSoftShadow(cone, texture, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor, intersection_distance_front, intersection_distance_back, cone_length, false);
 }
 
 
@@ -169,7 +169,7 @@ void ao_coneSoftShadow_fallbackGrid(float cone_length)
   for(int j=0; j<N_GI_CONES; ++j)
   {
     Cone cone = cone_bouquet[j];
-    float ao = ao_coneSoftShadow(cone, texture, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor, intersection_distance_front, intersection_distance_back, cone_length, vec2(0, 1));
+    float ao = ao_coneSoftShadow(cone, texture, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor, intersection_distance_front, intersection_distance_back, cone_length, true);
     cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
   }
 }
