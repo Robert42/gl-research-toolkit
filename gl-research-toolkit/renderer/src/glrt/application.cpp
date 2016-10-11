@@ -23,7 +23,8 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
     settings(applicationSettings),
     sdlWindow(system.sdlWindow),
     profiler(systemSettings.windowTitle),
-    isRunning(true)
+    isRunning(true),
+    hasFocus(true)
 {
   initAngelScript();
   initAssimp();
