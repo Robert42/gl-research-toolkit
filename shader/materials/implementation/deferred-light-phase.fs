@@ -4,7 +4,6 @@
 #undef DEFERRED_RENDERER
 #define FORWARD_RENDERER
 
-#define N_GI_CONES 9
 #include "input-block.fs.glsl"
 #include "forward-lighting.fs.glsl"
 
@@ -82,6 +81,7 @@ void main()
 
 
   SurfaceData surface;
+  gl_FragDepth = depth;
   surface.position = worldpos_from_depth(depth);
   
   vec3 meshNormal = normalize(meshNormal_meshBiTangentX.xyz);

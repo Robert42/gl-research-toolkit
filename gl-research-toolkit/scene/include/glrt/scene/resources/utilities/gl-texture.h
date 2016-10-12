@@ -34,6 +34,8 @@ public:
     INT8 = GL_BYTE,
     UINT16 = GL_UNSIGNED_SHORT,
     INT16 = GL_SHORT,
+    UINT32 = GL_UNSIGNED_INT,
+    INT32 = GL_INT,
     FLOAT16 = GL_HALF_FLOAT,
     FLOAT32 = GL_FLOAT,
   };
@@ -109,6 +111,8 @@ public:
   GLint height(int level) const;
   GLint depth(int level) const;
 
+  glm::ivec3 resolution(int level) const;
+
   GLint maxLevel() const;
   Target target() const;
 
@@ -118,6 +122,7 @@ public:
                                                               Format format,
                                                               Type type) const;
   void setUncompressed2DImage(const GlTexture::UncompressedImage& image, const void* data);
+  void makeComplete();
   TextureAsFloats asFloats(int level);
   void fromFloats(const TextureAsFloats& texture);
 };

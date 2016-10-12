@@ -3,6 +3,7 @@
 
 #include <glrt/renderer/declarations.h>
 #include <glrt/renderer/toolkit/managed-gl-buffer.h>
+#include <glrt/renderer/compute-step.h>
 #include <glrt/renderer/gl/command-list-recorder.h>
 #include <glrt/scene/scene-data.h>
 
@@ -72,6 +73,8 @@ class VoxelBuffer
   // PERFORMANCE: really big voxelgrids (spinza itself don't need to be part of the bvh)
   // PERFORMANCE: sort also by size of the bounding spheres?
 public:
+  typedef scene::resources::utilities::GlTexture GlTexture;
+
   struct VoxelHeader
   {
     GLuint64 distanceFieldBvhInnerBoundingSpheres;
@@ -83,16 +86,49 @@ public:
     padding<quint32, 3> _padding2;
   };
 
+  // Candidate Grid
+  struct CandidateGridHeader
+  {
+    GLuint64 textureRenderHandle = 0;
+    GLuint64 _reservedForTiles = 0;
+    GLuint64 fallbackSDF = 0;
+    GLuint64 _padding = 0;
+
+    glm::vec4 gridLocation;
+    glm::vec4 fallbackSdfLocation;
+
+    GLuint64 candidateBuffer = 0;
+    GLuint64 _candidate_reservedForTiles = 0;
+  };
+  struct CandidateGrid
+  {
+    GlTexture texture;
+    glm::uvec3 size;
+
+    CandidateGridHeader calcCandidates(const scene::Scene* scene, ManagedGLBuffer<uint8_t>* candidateGridBuffer, float influence_radius);
+  };
+  CandidateGridHeader candidateGridHeader;
+  CandidateGrid candidateGrid;
+
   VoxelBuffer(scene::Scene& scene);
   ~VoxelBuffer();
 
   const VoxelHeader& updateVoxelHeader();
+
+  void mergeStaticSDFs();
+
+  bool need_merged_sdf() const {return dirty_merged_sdf;}
 
 private:
   typedef scene::Scene::Data::VoxelGrids VoxelGrid;
 
   glrt::scene::Scene& scene;
   VoxelGrid*& voxelGridData;
+  bool dirty_candidate_grid;
+  bool dirty_merged_sdf_texture_buffer;
+  bool dirty_merged_sdf;
+  bool _static_fade_with_fallback;
+  void update_static_fade_with_fallback();
 
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
@@ -101,10 +137,27 @@ private:
   ManagedGLBuffer<BoundingSphere> bvhInnerBoundingSpheres;
   ManagedGLBuffer<BVH::InnerNode> bvhInnerNodes;
 
+  // LIMIT_255
+  ManagedGLBuffer<uint8_t> candidateIndexBuffer;
+
   VoxelHeader _voxelHeader;
+
+  struct FallbackSdf
+  {
+    GlTexture texture;
+    GLuint64 textureHandle;
+    glm::vec4 location;
+    glm::ivec3 resolution;
+  };
+  FallbackSdf staticFallbackSdf;
+  DynamicComputeStep mergeSDFs;
 
   void updateVoxelGrid();
   void updateBvhTree(const glrt::scene::resources::BoundingSphere* leaves_bounding_spheres);
+
+  gl::Buffer sdfMergeHeaderBuffer;
+  void initStaticSDFMerged();
+  void initStaticSdfFallbackTexture();
 };
 
 } // namespace renderer

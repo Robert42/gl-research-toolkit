@@ -46,12 +46,15 @@ public:
 
   QPointer<scene::CameraComponent> cameraComponent;
 
-  debugging::DebugRenderer::List debugDrawList_Backbuffer;
+  debugging::DebugRenderer::List debugDrawList_Lines;
   debugging::DebugRenderer visualizeCameras;
   debugging::DebugRenderer visualizeSphereAreaLights;
   debugging::DebugRenderer visualizeRectAreaLights;
   debugging::DebugRenderer visualizeVoxelGrids;
   debugging::DebugRenderer visualizeVoxelBoundingSpheres;
+  debugging::DebugRenderer visualizeSdfCandidateGrid;
+  debugging::DebugRenderer visualizeSdfCandidateCell;
+  debugging::DebugRenderer visualizeSdfFallbackGrid;
   debugging::DebugRenderer visualizeBVH;
   debugging::DebugRenderer visualizeBVH_Grid;
   debugging::DebugRenderer visualizeWorldGrid;
@@ -59,12 +62,13 @@ public:
   debugging::DebugRenderer visualizeBoundingBoxes;
   debugging::DebugRenderer visualizeSceneBoundingBox;
 
-  debugging::DebugRenderer::List debugDrawList_Framebuffer;
+  debugging::DebugRenderer::List debugDrawList_Posteffects;
   debugging::DebugRenderer visualizePosteffect_OrangeTest;
   debugging::DebugRenderer visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances;
   debugging::DebugRenderer visualizePosteffect_Voxel_BoundingBox;
   debugging::DebugRenderer visualizePosteffect_Voxel_Cubic_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_raymarch;
+  debugging::DebugRenderer visualizePosteffect_Fallback_Distancefield_raymarch;
   debugging::DebugRenderer visualizePosteffect_Distancefield_boundingSpheres_raymarch;
 
   debugging::PosteffectVisualizationDataBlock debugPosteffect;
@@ -81,7 +85,7 @@ public:
   Renderer& operator=(const Renderer&) = delete;
   Renderer& operator=(Renderer&&) = delete;
 
-  Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter);
+  Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter, const QSet<QString>& debug_posteffect_preprocessor);
   virtual ~Renderer();
 
   void render();
@@ -156,6 +160,7 @@ private:
     float totalTime;
     LightBuffer::LightData lightData;
     VoxelBuffer::VoxelHeader voxelHeader;
+    VoxelBuffer::CandidateGridHeader candidateGrid;
     CascadedGridsHeader cascadedGrids;
 
     // Padding & debugging
@@ -178,7 +183,6 @@ private:
   bool _sdfShadows : 1;
 
   CascadedGridsHeader updateCascadedGrids() const;
-
 
   bool needRecapturing() const;
   bool needRerecording() const;

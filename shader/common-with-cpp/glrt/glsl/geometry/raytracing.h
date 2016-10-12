@@ -358,6 +358,16 @@ inline bool intersects(in Sphere sphere1, in Sphere sphere2)
   return d <= sq(sphere1.radius + sphere2.radius);
 }
 
+inline bool intersects(in Sphere sphere, in Plane plane, float epsilon=1.e-6)
+{
+  return distance_to(plane, sphere.origin) <= sphere.radius+epsilon;
+}
+
+inline bool intersects_or_backfaced(in Sphere sphere, in Plane plane, float epsilon=1.e-6)
+{
+  return signed_distance_to(plane, sphere.origin) <= sphere.radius+epsilon;
+}
+
 
 // ======== Rect =============================================================
 

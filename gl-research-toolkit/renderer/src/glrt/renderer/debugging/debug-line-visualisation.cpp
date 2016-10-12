@@ -1,8 +1,10 @@
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/scene/scene.h>
+#include <glrt/scene/scene-data.h>
 #include <glrt/renderer/debugging/debug-line-visualisation.h>
 #include <glrt/renderer/toolkit/shader-compiler.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
 
 namespace glrt {
 namespace renderer {
@@ -331,6 +333,155 @@ DebugRenderer::Implementation* DebugLineVisualisation::drawBoundingBoxes(const Q
   DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
                                                                                   boundingBoxes,
                                                                                   std::move(shaderCompiler.compileProgramFromFiles("visualize-aabbs",
+                                                                                                                                   QDir(GLRT_SHADER_DIR"/debugging/visualizations"),
+                                                                                                                                   proprocessorBlock())))));
+  v->use_dephtest = true;
+  return v;
+}
+
+DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateGrid()
+{
+  DebugMesh::Painter painter;
+
+  unsigned int gridSize = SDF_CANDIDATE_GRID_SIZE;
+
+  for(int dimension = 0; dimension<3; ++dimension)
+  {
+    const int n = gridSize;
+    glm::mat4 matrix = glm::mat4(1);
+    std::swap(matrix[2], matrix[dimension]);
+    painter.pushMatrix(matrix);
+    for(int i=0; i<=n; ++i)
+    {
+      painter.pushMatrix(glm::vec3(0, 0, i));
+      painter.addRect(glm::vec2(0), glm::vec2(gridSize));
+      painter.popMatrix();
+    }
+    painter.popMatrix();
+  }
+
+  const unsigned int num_sdf_candidate_grids = 1;
+
+
+  QVector<uint16_t> grids;
+  grids.resize(num_sdf_candidate_grids);
+  for(quint16 i=0; i<num_sdf_candidate_grids; ++i)
+  {
+    grids[i] = num_sdf_candidate_grids-1-i;
+  }
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  grids,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-sdf-candidate-grids",
+                                                                                                                                   QDir(GLRT_SHADER_DIR"/debugging/visualizations"),
+                                                                                                                                   proprocessorBlock())))));
+  v->use_dephtest = true;
+  return v;
+}
+
+DebugRenderer::Implementation* DebugLineVisualisation::drawSdfFallbackGrid()
+{
+  DebugMesh::Painter painter;
+
+  unsigned int gridSize = MAX_SDF_MERGED_STATIC;
+
+  for(int dimension = 0; dimension<3; ++dimension)
+  {
+    const int n = gridSize;
+    glm::mat4 matrix = glm::mat4(1);
+    std::swap(matrix[2], matrix[dimension]);
+    painter.nextAttribute.parameter1 = dimension;
+    painter.pushMatrix(matrix);
+    for(int i=0; i<=n; ++i)
+    {
+      painter.nextAttribute.parameter2 = i;
+      painter.addRect(glm::vec2(0), glm::vec2(1));
+    }
+    painter.popMatrix();
+  }
+
+  const unsigned int num_sdf_candidate_grids = 1;
+
+
+  QVector<uint16_t> grids;
+  grids.resize(num_sdf_candidate_grids);
+  for(quint16 i=0; i<num_sdf_candidate_grids; ++i)
+  {
+    grids[i] = num_sdf_candidate_grids-1-i;
+  }
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  grids,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-sdf-fallback-grids",
+                                                                                                                                   QDir(GLRT_SHADER_DIR"/debugging/visualizations"),
+                                                                                                                                   proprocessorBlock())))));
+  v->use_dephtest = true;
+  return v;
+}
+
+DebugRenderer::Implementation*DebugLineVisualisation::drawSdfCandidateCell(const scene::Scene::Data& scene_data)
+{
+  DebugMesh::Painter painter;
+
+  unsigned int gridSize = SDF_CANDIDATE_GRID_SIZE;
+
+  const glm::ivec3 currentCell = VisualizationRenderer::selectedSdfCandidateGrid;
+
+  painter.nextAttribute.parameter1 = 1;
+  painter.nextAttribute.color = glm::vec3(0.5, 1, 0);
+  painter.pushMatrix(glm::vec3(currentCell));
+  for(int dimension = 0; dimension<3; ++dimension)
+  {
+    const int n = 1;
+    glm::mat4 matrix = glm::mat4(1);
+    std::swap(matrix[2], matrix[dimension]);
+    painter.pushMatrix(matrix);
+    for(int i=0; i<=n; ++i)
+    {
+      painter.pushMatrix(glm::vec3(0, 0, i));
+      painter.addRect(glm::vec2(0), glm::vec2(1));
+      painter.popMatrix();
+    }
+    painter.popMatrix();
+  }
+  painter.popMatrix();
+
+  painter.nextAttribute.parameter1 = 0;
+  painter.nextAttribute.parameter2 = 0;
+  painter.nextAttribute.color = glm::vec3(1, 0.5, 0);
+  painter.addSphere(1.f, 96.f);
+
+  painter.nextAttribute.parameter2 = 1;
+  painter.nextAttribute.color = glm::vec3(0.5, 0, 0);
+  painter.addSphere(1.f, 96.f);
+
+  int offset = voxelIndexForCoordinate(currentCell, glm::ivec3(int(gridSize)));
+
+  const Array<uint16_t>& sdf_candidates = VisualizationRenderer::debug_collectedSDFs()[offset];
+
+  QVector<BoundingSphere> bounding_spheres;
+  bounding_spheres.resize(sdf_candidates.length());
+
+  for(int i=0; i<bounding_spheres.length(); ++i)
+  {
+    uint16_t sdf_index = sdf_candidates[i];
+    scene::resources::BoundingSphere boundingSphere = scene_data.voxelGrids->globalCoordFrame(sdf_index) * scene_data.voxelGrids->boundingSphere[sdf_index];
+#if 0
+    if(93 == sdf_candidates[i])
+    {
+      PRINT_VALUE(boundingSphere.center);
+      PRINT_VALUE(boundingSphere.radius);
+    }
+#endif
+    bounding_spheres[i] = boundingSphere;
+  }
+
+  ShaderCompiler& shaderCompiler = ShaderCompiler::singleton();
+  DebugLineVisualisation* v = new DebugLineVisualisation(std::move(debugRendering(painter,
+                                                                                  bounding_spheres,
+                                                                                  std::move(shaderCompiler.compileProgramFromFiles("visualize-sdf-candidate-cell",
                                                                                                                                    QDir(GLRT_SHADER_DIR"/debugging/visualizations"),
                                                                                                                                    proprocessorBlock())))));
   v->use_dephtest = true;

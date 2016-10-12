@@ -40,6 +40,8 @@ int GlTexture::bytesPerPixelForType(Type type)
   case Type::INT16:
   case Type::FLOAT16:
     return 2;
+  case Type::UINT32:
+  case Type::INT32:
   case Type::FLOAT32:
     return 4;
   }
@@ -155,6 +157,42 @@ GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
       return GL_RGBA16I;
     }
     break;
+  case Type::UINT32:
+    switch(format)
+    {
+    case Format::RED:
+    case Format::RG:
+    case Format::RGB:
+    case Format::RGBA:
+      break;
+    case Format::RED_INTEGER:
+      return GL_R32UI;
+    case Format::RG_INTEGER:
+      return GL_RG32UI;
+    case Format::RGB_INTEGER:
+      return GL_RGB32UI;
+    case Format::RGBA_INTEGER:
+      return GL_RGBA32UI;
+    }
+    break;
+  case Type::INT32:
+    switch(format)
+    {
+    case Format::RED:
+    case Format::RG:
+    case Format::RGB:
+    case Format::RGBA:
+      break;
+    case Format::RED_INTEGER:
+      return GL_R32I;
+    case Format::RG_INTEGER:
+      return GL_RG32I;
+    case Format::RGB_INTEGER:
+      return GL_RGB32I;
+    case Format::RGBA_INTEGER:
+      return GL_RGBA32I;
+    }
+    break;
   case Type::FLOAT16:
     switch(format)
     {
@@ -239,7 +277,7 @@ GlTexture::UncompressedImage GlTexture::TextureAsFloats::format(quint32 width, q
 
 GlTexture::UncompressedImage GlTexture::TextureAsFloats::format(const glm::ivec3& textureSize, quint32 numComponents)
 {
-  return format(textureSize.x, textureSize.y, textureSize.z, numComponents);
+  return format(uint32_t(textureSize.x), uint32_t(textureSize.y), uint32_t(textureSize.z), numComponents);
 }
 
 GlTexture::TextureAsFloats::TextureAsFloats(quint32 width, quint32 height, quint32 depth, quint32 numComponents)
@@ -276,7 +314,7 @@ GlTexture::TextureAsFloats::TextureAsFloats(const QPair<UncompressedImage, QVect
 }
 
 GlTexture::TextureAsFloats::TextureAsFloats(const glm::ivec3& size, quint32 numComponents)
-  : TextureAsFloats(size.x, size.y, size.z, numComponents)
+  : TextureAsFloats(uint32_t(size.x), uint32_t(size.y), uint32_t(size.z), numComponents)
 {
 }
 
@@ -606,6 +644,13 @@ GLint GlTexture::depth(int level) const
   return value;
 }
 
+glm::ivec3 GlTexture::resolution(int level) const
+{
+  return glm::ivec3(width(level),
+                    height(level),
+                    depth(level));
+}
+
 GLint GlTexture::maxLevel() const
 {
   for(GLint level=0; level<1000; ++level)
@@ -736,6 +781,13 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
   }
 
   GL_CALL(glBindTexture, static_cast<GLenum>(image.target), 0);
+}
+
+void GlTexture::makeComplete()
+{
+  // Make the texture complete
+  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
+  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
 }
 
 GlTexture::TextureAsFloats GlTexture::asFloats(int level)

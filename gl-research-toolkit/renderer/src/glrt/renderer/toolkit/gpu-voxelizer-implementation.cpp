@@ -39,10 +39,7 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
 
   GlTexture texture;
   texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), nullptr);
-
-  // Make the texture complete
-  GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_BASE_LEVEL, 0);
-  GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_MAX_LEVEL, 0);
+  texture.makeComplete();
 
   GLuint textureId = texture.textureId;
 
@@ -92,7 +89,7 @@ int GpuVoxelizerImplementation::preprocessVertices(const scene::CoordFrame& loca
   if(staticMesh.vertices.size() > std::numeric_limits<int>::max())
     throw GLRT_EXCEPTION(QString("Mesh is too large to voxelize with %0 vertices").arg(staticMesh.vertices.size()));
 
-  const int num_vertices = quint32(staticMesh.vertices.size());
+  const int num_vertices = int(staticMesh.vertices.size());
 
   int stride = quint32(sizeof(glm::vec3) + sizeof(float));
   GLsizeiptr necessarySpace = GLsizeiptr(num_vertices) * GLsizeiptr(stride);

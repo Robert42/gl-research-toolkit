@@ -21,7 +21,7 @@
 namespace glrt {
 namespace renderer {
 
-Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter)
+Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, StaticMeshBufferManager* staticMeshBufferManager, debugging::ShaderDebugPrinter* debugPrinter, const QSet<QString>& debug_posteffect_preprocessor)
   : scene(*scene),
     staticMeshBufferManager(*staticMeshBufferManager),
     debugPrinter(*debugPrinter),
@@ -30,18 +30,22 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizeRectAreaLights(debugging::VisualizationRenderer::debugRectAreaLights(scene)),
     visualizeVoxelGrids(debugging::VisualizationRenderer::debugVoxelGrids(scene)),
     visualizeVoxelBoundingSpheres(debugging::VisualizationRenderer::debugVoxelBoundingSpheres(scene)),
+    visualizeSdfCandidateGrid(debugging::VisualizationRenderer::showSceneSdfCandidateGrid(scene)),
+    visualizeSdfCandidateCell(debugging::VisualizationRenderer::showSceneSdfCandidatesForCell(scene)),
+    visualizeSdfFallbackGrid(debugging::VisualizationRenderer::showSceneSdfFallbackGrid(scene)),
     visualizeBVH(debugging::VisualizationRenderer::showSceneBVH(scene)),
     visualizeBVH_Grid(debugging::VisualizationRenderer::showSceneBVH_Grid(scene)),
     visualizeWorldGrid(debugging::VisualizationRenderer::showWorldGrid()),
     visualizeUniformTest(debugging::VisualizationRenderer::showUniformTest()),
     visualizeBoundingBoxes(debugging::VisualizationRenderer::showMeshAABBs(scene)),
     visualizeSceneBoundingBox(debugging::VisualizationRenderer::showSceneAABB(scene)),
-    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere()),
-    visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances()),
-    visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox()),
-    visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch()),
-    visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch()),
-    visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField()),
+    visualizePosteffect_OrangeTest(debugging::DebuggingPosteffect::orangeSphere(debug_posteffect_preprocessor)),
+    visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances(debugging::DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances(debug_posteffect_preprocessor)),
+    visualizePosteffect_Voxel_BoundingBox(debugging::DebuggingPosteffect::voxelGridBoundingBox(debug_posteffect_preprocessor)),
+    visualizePosteffect_Voxel_Cubic_raymarch(debugging::DebuggingPosteffect::voxelGridCubicRaymarch(debug_posteffect_preprocessor)),
+    visualizePosteffect_Distancefield_raymarch(debugging::DebuggingPosteffect::distanceFieldRaymarch(debug_posteffect_preprocessor)),
+    visualizePosteffect_Fallback_Distancefield_raymarch(debugging::DebuggingPosteffect::fallbackDistanceFieldRaymarch(debug_posteffect_preprocessor)),
+    visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(debug_posteffect_preprocessor)),
     videoResolution(videoResolution),
     collectAmbientOcclusionToGrid1(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*1), QSet<QString>({"#define COMPUTE_GRIDS"})),
     collectAmbientOcclusionToGrid2(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*2), QSet<QString>({"#define COMPUTE_GRIDS"})),
@@ -59,23 +63,27 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
 
-  debugDrawList_Backbuffer.connectTo(&visualizeCameras);
-  debugDrawList_Backbuffer.connectTo(&visualizeSphereAreaLights);
-  debugDrawList_Backbuffer.connectTo(&visualizeRectAreaLights);
-  debugDrawList_Backbuffer.connectTo(&visualizeVoxelGrids);
-  debugDrawList_Backbuffer.connectTo(&visualizeVoxelBoundingSpheres);
-  debugDrawList_Backbuffer.connectTo(&visualizeBVH);
-  debugDrawList_Backbuffer.connectTo(&visualizeBVH_Grid);
-  debugDrawList_Backbuffer.connectTo(&visualizeWorldGrid);
-  debugDrawList_Backbuffer.connectTo(&visualizeUniformTest);
-  debugDrawList_Backbuffer.connectTo(&visualizeBoundingBoxes);
-  debugDrawList_Backbuffer.connectTo(&visualizeSceneBoundingBox);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_OrangeTest);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_BoundingBox);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_raymarch);
-  debugDrawList_Framebuffer.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
+  debugDrawList_Lines.connectTo(&visualizeCameras);
+  debugDrawList_Lines.connectTo(&visualizeSphereAreaLights);
+  debugDrawList_Lines.connectTo(&visualizeRectAreaLights);
+  debugDrawList_Lines.connectTo(&visualizeVoxelGrids);
+  debugDrawList_Lines.connectTo(&visualizeVoxelBoundingSpheres);
+  debugDrawList_Lines.connectTo(&visualizeSdfCandidateGrid);
+  debugDrawList_Lines.connectTo(&visualizeSdfCandidateCell);
+  debugDrawList_Lines.connectTo(&visualizeSdfFallbackGrid);
+  debugDrawList_Lines.connectTo(&visualizeBVH);
+  debugDrawList_Lines.connectTo(&visualizeBVH_Grid);
+  debugDrawList_Lines.connectTo(&visualizeWorldGrid);
+  debugDrawList_Lines.connectTo(&visualizeUniformTest);
+  debugDrawList_Lines.connectTo(&visualizeBoundingBoxes);
+  debugDrawList_Lines.connectTo(&visualizeSceneBoundingBox);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_OrangeTest);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_BoundingBox);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Voxel_Cubic_raymarch);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_raymarch);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Fallback_Distancefield_raymarch);
+  debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
 
   connect(scene, &scene::Scene::sceneCleared, this, &Renderer::forceNewGridCameraPos);
 
@@ -109,16 +117,21 @@ void Renderer::render()
   if(isUsingBvhLeafGrid())
     updateBvhLeafGrid();
 
+  if(voxelUniformBuffer.need_merged_sdf())
+  {
+    sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
+    voxelUniformBuffer.mergeStaticSDFs();
+  }
+
   prepareFramebuffer();
 
   commandList.call();
 
-  debugDrawList_Framebuffer.render();
-
+  debugDrawList_Posteffects.render();
   applyFramebuffer();
 
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
-  debugDrawList_Backbuffer.render();
+  debugDrawList_Lines.render();
 }
 
 void Renderer::update(float deltaTime)
@@ -283,11 +296,8 @@ void Renderer::initCascadedGridTextures()
   for(int i=0; i<MAX_NUM_GRID_CASCADES*2; ++i)
   {
     gridTexture[i].setUncompressed2DImage(textureFormat(i), init_data(i));
+    gridTexture[i].makeComplete();
     gl::TextureId textureId = gridTexture[i].textureId;
-
-    // Make the texture complete
-    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
-    GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
 
     GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, imageFormat(i));
     GLuint64 textureHandle = GL_RET_CALL(glGetTextureHandleNV, textureId);
@@ -622,6 +632,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.costsHeatvisionWhiteLevel = costsHeatvisionWhiteLevel;
   sceneUniformData.bvh_debug_depth_begin = bvh_debug_depth_begin;
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
+  sceneUniformData.candidateGrid = voxelUniformBuffer.candidateGridHeader;
   sceneUniformData.cascadedGrids = updateCascadedGrids();
   sceneUniformBuffer.Unmap();
 }

@@ -13,6 +13,7 @@ add_custom_target(
   common-with-cpp/glrt/glsl/math-glsl.h
   compute/ao-collect-uniform.glsl
   compute/collect-ambient-occlusion.cs
+  compute/merge-sdf.cs
   compute/voxelize.cs
   debugging/posteffects/highlight-unconceiled-negative-distance.fs
   debugging/posteffects/highlight-unconceiled-negative-distance.vs
@@ -24,6 +25,8 @@ add_custom_target(
   debugging/posteffects/posteffect.vs.glsl
   debugging/posteffects/raymarch-distancefield.fs
   debugging/posteffects/raymarch-distancefield.vs
+  debugging/posteffects/raymarch-fallback-distancefield.fs
+  debugging/posteffects/raymarch-fallback-distancefield.vs
   debugging/posteffects/show-bounding-spheres-as-distancefield.fs
   debugging/posteffects/show-bounding-spheres-as-distancefield.vs
   debugging/posteffects/show-distancefield-as-cubic-voxel.fs
@@ -48,6 +51,12 @@ add_custom_target(
   debugging/visualizations/visualize-rect-area-light.vs
   debugging/visualizations/visualize-scene-camera.fs
   debugging/visualizations/visualize-scene-camera.vs
+  debugging/visualizations/visualize-sdf-candidate-cell.fs
+  debugging/visualizations/visualize-sdf-candidate-cell.vs
+  debugging/visualizations/visualize-sdf-candidate-grids.fs
+  debugging/visualizations/visualize-sdf-candidate-grids.vs
+  debugging/visualizations/visualize-sdf-fallback-grids.fs
+  debugging/visualizations/visualize-sdf-fallback-grids.vs
   debugging/visualizations/visualize-sphere-area-light.fs
   debugging/visualizations/visualize-sphere-area-light.vs
   debugging/visualizations/visualize-spheres.fs
@@ -73,6 +82,7 @@ add_custom_target(
   materials/material.vs
   toolkit/alignment.glsl
   toolkit/cascaded-grid/uniforms.glsl
+  toolkit/checkerboard.glsl
   toolkit/debugging/heat-vision.glsl
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
@@ -92,4 +102,5 @@ add_custom_target(
   toolkit/voxels/raymarching-distance-field.glsl
   toolkit/voxels/voxel-structs.glsl
   toolkit/write-fragment-color.glsl
+  toolkit/write-fragment-depth.glsl
 )

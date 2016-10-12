@@ -127,7 +127,7 @@ class SingleShader : public DebuggingPosteffect::Renderer
 public:
   ReloadableShader shader;
 
-  SingleShader(const QString& name, bool depthTest);
+  SingleShader(const QSet<QString>& debug_posteffect_preprocessor, const QString& name, bool depthTest);
 
   void activateShader() override;
 };
@@ -136,51 +136,58 @@ public:
 class OrangeSphere : public SingleShader
 {
 public:
-  OrangeSphere(const glm::vec3& origin, float radius, bool depthTest);
+  OrangeSphere(const QSet<QString>& debug_posteffect_preprocessor, const glm::vec3& origin, float radius, bool depthTest);
 };
 
 
 class HighlightUnconveiledNegativeDistances : public SingleShader
 {
 public:
-  HighlightUnconveiledNegativeDistances(bool depthTest);
+  HighlightUnconveiledNegativeDistances(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
 };
 
 class HighlightVoxelGrids : public SingleShader
 {
 public:
-  HighlightVoxelGrids(bool depthTest);
+  HighlightVoxelGrids(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
 };
 
 class CubicVoxelRaymarch : public SingleShader
 {
 public:
-  CubicVoxelRaymarch(bool depthTest);
+  CubicVoxelRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
 };
 
 class DistanceFieldRaymarch : public SingleShader
 {
 public:
-  DistanceFieldRaymarch(bool depthTest);
+  DistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
+};
+
+class FallbackDistanceFieldRaymarch : public SingleShader
+{
+public:
+  FallbackDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
 };
 
 class RaymarchBoundingSpheresAsDistanceField : public SingleShader
 {
 public:
-  RaymarchBoundingSpheresAsDistanceField(bool depthTest);
+  RaymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
 };
 
 class GlobalDistanceFieldRaymarch : public SingleShader
 {
 public:
-  GlobalDistanceFieldRaymarch(bool depthTest);
+  GlobalDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest);
 };
 
 
-SingleShader::SingleShader(const QString& name, bool depthTest)
+SingleShader::SingleShader(const QSet<QString>& debug_posteffect_preprocessor, const QString& name, bool depthTest)
   : Renderer(depthTest),
     shader(name,
-           QDir(GLRT_SHADER_DIR"/debugging/posteffects"))
+           QDir(GLRT_SHADER_DIR"/debugging/posteffects"),
+           debug_posteffect_preprocessor)
 {
 }
 
@@ -190,94 +197,106 @@ void SingleShader::activateShader()
 }
 
 
-OrangeSphere::OrangeSphere(const glm::vec3& origin, float radius, bool depthTest)
-  : SingleShader("orange-sphere", depthTest)
+OrangeSphere::OrangeSphere(const QSet<QString>& debug_posteffect_preprocessor, const glm::vec3& origin, float radius, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "orange-sphere", depthTest)
 {
   glsl::Sphere sphere;
 
   sphere.origin = origin;
   sphere.radius = radius;
 
-  fragmentUniformBuffer = std::move(gl::Buffer(sizeof(glsl::Sphere), gl::Buffer::IMMUTABLE, &sphere));
+  fragmentUniformBuffer = gl::Buffer(sizeof(glsl::Sphere), gl::Buffer::IMMUTABLE, &sphere);
 }
 
 
-HighlightVoxelGrids::HighlightVoxelGrids(bool depthTest)
-  : SingleShader("highlight-voxel-bounding-rect", depthTest)
+HighlightVoxelGrids::HighlightVoxelGrids(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "highlight-voxel-bounding-rect", depthTest)
 {
 }
 
 
-HighlightUnconveiledNegativeDistances::HighlightUnconveiledNegativeDistances(bool depthTest)
-  : SingleShader("highlight-unconceiled-negative-distance", depthTest)
+HighlightUnconveiledNegativeDistances::HighlightUnconveiledNegativeDistances(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "highlight-unconceiled-negative-distance", depthTest)
 {
 }
 
 
-CubicVoxelRaymarch::CubicVoxelRaymarch(bool depthTest)
-  : SingleShader("show-distancefield-as-cubic-voxel", depthTest)
+CubicVoxelRaymarch::CubicVoxelRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "show-distancefield-as-cubic-voxel", depthTest)
 {
 }
 
 
-DistanceFieldRaymarch::DistanceFieldRaymarch(bool depthTest)
-  : SingleShader("raymarch-distancefield", depthTest)
+DistanceFieldRaymarch::DistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "raymarch-distancefield", depthTest)
 {
 }
 
 
-RaymarchBoundingSpheresAsDistanceField::RaymarchBoundingSpheresAsDistanceField(bool depthTest)
-  : SingleShader("show-bounding-spheres-as-distancefield", depthTest)
+FallbackDistanceFieldRaymarch::FallbackDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "raymarch-fallback-distancefield", depthTest)
 {
 }
 
 
-GlobalDistanceFieldRaymarch::GlobalDistanceFieldRaymarch(bool depthTest)
-  : SingleShader("raymarch-global-distancefield", depthTest)
+RaymarchBoundingSpheresAsDistanceField::RaymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "show-bounding-spheres-as-distancefield", depthTest)
 {
 }
 
 
-DebugRenderer DebuggingPosteffect::orangeSphere(const glm::vec3& origin, float radius, bool depthTest)
+GlobalDistanceFieldRaymarch::GlobalDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
+  : SingleShader(debug_posteffect_preprocessor, "raymarch-global-distancefield", depthTest)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([origin, radius, depthTest, padding](){return new OrangeSphere(origin, radius, depthTest);});
 }
 
-DebugRenderer DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances(bool depthTest)
+
+DebugRenderer DebuggingPosteffect::orangeSphere(const QSet<QString>& debug_posteffect_preprocessor, const glm::vec3& origin, float radius, bool depthTest)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([depthTest, padding](){return new HighlightUnconveiledNegativeDistances(depthTest);});
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, depthTest, padding, origin, radius](){return new OrangeSphere(debug_posteffect_preprocessor, origin, radius, depthTest);});
 }
 
-DebugRenderer DebuggingPosteffect::voxelGridBoundingBox(bool depthTest)
+DebugRenderer DebuggingPosteffect::voxelGridHighlightUnconveiledNegativeDistances(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([depthTest, padding](){return new HighlightVoxelGrids(depthTest);});
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, depthTest, padding](){return new HighlightUnconveiledNegativeDistances(debug_posteffect_preprocessor, depthTest);});
 }
 
-DebugRenderer DebuggingPosteffect::voxelGridCubicRaymarch(bool mixWithScene)
+DebugRenderer DebuggingPosteffect::voxelGridBoundingBox(const QSet<QString>& debug_posteffect_preprocessor, bool depthTest)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new CubicVoxelRaymarch(mixWithScene);});
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, depthTest, padding](){return new HighlightVoxelGrids(debug_posteffect_preprocessor, depthTest);});
 }
 
-DebugRenderer DebuggingPosteffect::distanceFieldRaymarch(bool mixWithScene)
+DebugRenderer DebuggingPosteffect::voxelGridCubicRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new DistanceFieldRaymarch(mixWithScene);});
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new CubicVoxelRaymarch(debug_posteffect_preprocessor, mixWithScene);});
 }
 
-DebugRenderer DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(bool mixWithScene)
+DebugRenderer DebuggingPosteffect::distanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new RaymarchBoundingSpheresAsDistanceField(mixWithScene);});
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new DistanceFieldRaymarch(debug_posteffect_preprocessor, mixWithScene);});
 }
 
-DebugRenderer DebuggingPosteffect::globalDistanceFieldRaymarch(bool mixWithScene)
+DebugRenderer DebuggingPosteffect::fallbackDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
 {
-  padding<byte, 3> padding;
-  return DebugRenderer::ImplementationFactory([mixWithScene, padding](){return new GlobalDistanceFieldRaymarch(mixWithScene);});
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new FallbackDistanceFieldRaymarch(debug_posteffect_preprocessor, mixWithScene);});
+}
+
+DebugRenderer DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
+{
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new RaymarchBoundingSpheresAsDistanceField(debug_posteffect_preprocessor, mixWithScene);});
+}
+
+DebugRenderer DebuggingPosteffect::globalDistanceFieldRaymarch(const QSet<QString>& debug_posteffect_preprocessor, bool mixWithScene)
+{
+  padding<byte, 7> padding;
+  return DebugRenderer::ImplementationFactory([debug_posteffect_preprocessor, mixWithScene, padding](){return new GlobalDistanceFieldRaymarch(debug_posteffect_preprocessor, mixWithScene);});
 }
 
 QSharedPointer<DebuggingPosteffect::SharedRenderingData> DebuggingPosteffect::renderingData;
@@ -308,8 +327,8 @@ DebuggingPosteffect::SharedRenderingData::SharedRenderingData(gl::FramebufferObj
                                         max_coord, min_coord,
                                         max_coord, max_coord};
 
-  vertexBuffer = std::move(gl::Buffer(sizeof(float)*8, gl::Buffer::UsageFlag::IMMUTABLE, positions.data()));
-  uniformBuffer = std::move(gl::Buffer(sizeof(debugging::PosteffectVisualizationDataBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr));
+  vertexBuffer = gl::Buffer(sizeof(float)*8, gl::Buffer::UsageFlag::IMMUTABLE, positions.data());
+  uniformBuffer = gl::Buffer(sizeof(debugging::PosteffectVisualizationDataBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr);
 }
 
 DebuggingPosteffect::SharedRenderingData::~SharedRenderingData()

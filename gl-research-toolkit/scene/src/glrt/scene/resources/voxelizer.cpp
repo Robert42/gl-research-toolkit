@@ -333,8 +333,6 @@ QString Voxelizer::voxelMetaDataFilenameForMesh(const QString& staticMeshFileNam
 
 VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Voxelizer::Hints& hints)
 {
-#define FORCE_POWER_OF_TWO 0
-
   const glm::vec3& meshBoundingBoxMin = meshBoundingBox.minPoint;
   const glm::vec3& meshBoundingBoxMax = meshBoundingBox.maxPoint;
 
@@ -357,9 +355,10 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Vo
   Q_ASSERT(glm::all(glm::lessThanEqual(meshBoundingBoxMin, meshBoundingBoxMax)));
 
   glm::ivec3 voxels = glm::ceil(voxelsPerMeter * meshSize + extend*2.f);
-#if FORCE_POWER_OF_TWO
-  voxels = glm::ceilPowerOfTwo(voxels);
-#endif
+  if(hints.forcePowerOfTwo)
+    voxels = glm::ceilPowerOfTwo(voxels);
+  if(hints.forceCube)
+    voxels = glm::ivec3(glm::max(voxels.x, glm::max(voxels.y, voxels.z))); // this is untested
   voxels = glm::clamp(voxels, glm::ivec3(minSize), glm::ivec3(maxSize));
   metaData.gridSize = glm::ivec3(voxels);
 
@@ -420,6 +419,25 @@ VoxelFile::MetaData initSize(const AABB& meshBoundingBox, int baseSize, const Vo
 
 
   return metaData;
+}
+
+VoxelGridGeometry Voxelizer::calcVoxelSize(const AABB& boundingBox, int baseSize, bool forcePowerOfTwo, bool forceCube, float extend)
+{
+  Voxelizer::Hints hints;
+  hints.minSize = 4;
+  hints.maxSize = baseSize;
+  hints.extend = extend;
+  hints.forcePowerOfTwo = forcePowerOfTwo;
+  hints.forceCube = forceCube;
+
+  VoxelFile::MetaData metaData = initSize(boundingBox, baseSize, hints);
+
+  VoxelGridGeometry result;
+
+  result.gridSize = metaData.gridSize;
+  result.toVoxelSpace = metaData.localToVoxelSpace;
+
+  return result;
 }
 
 

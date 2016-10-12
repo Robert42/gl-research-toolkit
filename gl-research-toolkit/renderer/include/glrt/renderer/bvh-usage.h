@@ -59,14 +59,31 @@ void set_bvh_traversal_leaf_result_array_length(uint16_t n);
 extern GLSLMacroWrapper<float> SDFSAMPLING_SPHERETRACING_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
 extern GLSLMacroWrapper<int> SDFSAMPLING_EXPONENTIAL_NUM;
+extern GLSLMacroWrapper<int> SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
+extern GLSLMacroWrapper<float> AO_RADIUS;
+extern GLSLMacroWrapper<float> AO_STATIC_FALLBACK_FADING_START;
+extern GLSLMacroWrapper<float> AO_STATIC_FALLBACK_FADING_END;
+extern GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID;
+extern GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF;
+extern GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY;
+
+
+extern GLSLMacroWrapper<uint16_t> N_GI_CONES;
 
 extern GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES;
 extern GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH;
 extern GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE;
+
+// LIMIT_255
+#define MAX_SDF_CANDIDATE_GRID_SIZE 32
+extern GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE;
+
+#define MAX_SDF_MERGED_STATIC 512
+extern VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE;
 
 extern GLSLMacroWrapper<bool> AO_FALLBACK_NONE;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED;

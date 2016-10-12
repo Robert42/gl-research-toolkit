@@ -5,6 +5,8 @@
 #error Please, never include the math-cpp.h header from a shader!
 #endif
 
+#include <QtGlobal>
+
 #include <openvdb/triangle-distance.h>
 
 namespace glm
@@ -146,6 +148,24 @@ inline void PRINT_VALUE(const T&, bool x=false){Q_UNUSED(x);}
 #undef wxyz
 
 } // namespace glsl
+} // namespace glrt
+
+
+#include <glrt/scene/coord-frame.h>
+
+namespace glrt {
+
+
+inline glsl::Plane operator*(const scene::CoordFrame& coordFrame, const glsl::Plane& plane);
+
+
+glsl::Plane operator*(const scene::CoordFrame& coordFrame, const glsl::Plane& plane)
+{
+  return glsl::plane_from_normal(coordFrame.transform_direction(plane.normal),
+                                 coordFrame.transform_point(plane.normal * plane.d));
+}
+
+
 } // namespace glrt
 
 #endif // _GLRT_GLSL_MATH_CPP_H_

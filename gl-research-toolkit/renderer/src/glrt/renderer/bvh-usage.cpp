@@ -10,14 +10,27 @@ extern uint16_t _bvh_traversal_leaf_result_array_length;
 GLSLMacroWrapper<float> SDFSAMPLING_SPHERETRACING_START("#define SDFSAMPLING_SPHERETRACING_START %0", 0.0f);
 GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE("#define SDFSAMPLING_SELF_SHADOW_AVOIDANCE %0", 1.0f);
 GLSLMacroWrapper<int> SDFSAMPLING_EXPONENTIAL_NUM("#define SDFSAMPLING_EXPONENTIAL_NUM %0", 4);
+GLSLMacroWrapper<int> SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS("#define SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS %0", 16);
 GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE("#define SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE %0", 1.f / 16.f);
 GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START("#define SDFSAMPLING_EXPONENTIAL_START %0", 0.25f);
 GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR("#define SDFSAMPLING_EXPONENTIAL_FACTOR %0", 2.f);
 GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_OFFSET("#define SDFSAMPLING_EXPONENTIAL_OFFSET %0", 0.f);
+GLSLMacroWrapper<float> AO_RADIUS("#define AO_RADIUS %0", 3.5f);
+GLSLMacroWrapper<uint16_t> N_GI_CONES("#define N_GI_CONES %0", 9);
+GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID("#define AO_USE_CANDIDATE_GRID %0", true);
+GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF("#define AO_IGNORE_FALLBACK_SDF %0", false);
+GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY("#define AO_FALLBACK_SDF_ONLY %0", false);
+
+GLSLMacroWrapper<float> AO_STATIC_FALLBACK_FADING_START("#define AO_STATIC_FALLBACK_FADING_START %0", 0.5);
+GLSLMacroWrapper<float> AO_STATIC_FALLBACK_FADING_END("#define AO_STATIC_FALLBACK_FADING_END %0", 1.5);
 
 GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES("#define NUM_GRID_CASCADES %0", 3);
 GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH("#define BVH_MAX_STACK_DEPTH %0", MAX_NUM_STATIC_MESHES);
 GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE("#define HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE %0", 0);
+
+GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE("#define SDF_CANDIDATE_GRID_SIZE %0", 16);
+
+VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE(64, [](uint32_t v) -> uint32_t{return glm::clamp<uint32_t>(v, 4, MAX_SDF_MERGED_STATIC);});
 
 GLSLMacroWrapper<bool> AO_FALLBACK_NONE("#define AO_FALLBACK_NONE %0", false);
 GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED("#define AO_FALLBACK_CLAMPED %0", false);
@@ -93,7 +106,6 @@ void init_bvh_shader_macros()
   HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE.connectWith(&scene::HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE);
 
   set_bvh_traversal_leaf_result_array_length(MAX_NUM_STATIC_MESHES);
-  ReloadableShader::globalPreprocessorBlock.insert(QString("#define AO_RADIUS 3.5"));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_STATIC_MESHES %0").arg(MAX_NUM_STATIC_MESHES));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_USE_GRID_OCCLUSION %0").arg(BVH_USE_GRID_OCCLUSION));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define MAX_NUM_GRID_CASCADES %0").arg(MAX_NUM_GRID_CASCADES));

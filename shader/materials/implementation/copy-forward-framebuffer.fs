@@ -4,6 +4,7 @@
 struct FramebufferTextures
 {
   sampler2D color;
+  sampler2D depth;
 };
 
 layout(binding=0, std140) uniform FramebufferTextureBlock {
@@ -14,6 +15,8 @@ out vec4 color;
 
 void main()
 {
-  color = texelFetch(textures.color, ivec2(gl_FragCoord.xy), 0);
+  ivec2 texCoord = ivec2(gl_FragCoord.xy);
+  
+  color = texelFetch(textures.color, texCoord, 0);
+  gl_FragDepth = texelFetch(textures.depth, texCoord, 0).r;
 }
-

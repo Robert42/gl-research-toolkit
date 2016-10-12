@@ -22,6 +22,11 @@ glm::vec3 AABB::toUnitSpace(const glm::vec3& v) const
   return (v-this->minPoint) / (this->maxPoint-this->minPoint);
 }
 
+glm::vec3 AABB::size() const
+{
+  return maxPoint-minPoint;
+}
+
 void AABB::operator |= (const AABB& other)
 {
   Q_ASSERT(other.isValid());
@@ -71,6 +76,24 @@ AABB AABB::aabbOfTransformedBoundingBox(const CoordFrame& coordFrame) const
   }
 
   return aabb;
+}
+
+AABB AABB::ensureValid() const
+{
+  AABB aabb = *this;
+
+  if(!isValid())
+  {
+    aabb.minPoint = glm::vec3(-1);
+    aabb.maxPoint = glm::vec3(1);
+  }
+
+  return aabb;
+}
+
+QDebug operator<<(QDebug d, const AABB& aabb)
+{
+  return d << "AABB{min:"<<aabb.minPoint<<", max:"<<aabb.maxPoint<<"}";
 }
 
 

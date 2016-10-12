@@ -9,10 +9,11 @@ template<typename T>
 class VariableWithCallback
 {
 public:
-  std::vector<std::function<void(T)>> callback_functions;
+  QVector<std::function<void(T)>> callback_functions;
   std::function<T(T)> validate_value;
 
   VariableWithCallback(T initial_value);
+  VariableWithCallback(T initial_value, const std::function<T(T)>& validate_value);
 
   void set_value(T value);
   T get_value() const{return _value;}

@@ -52,7 +52,8 @@ inline void ShaderDebugPrinter::printVectorChunk(int dimension, const char* scal
     qDebug() << vectorPrefix  << glm::tvec4<T>(input);
     break;
   default:
-    Q_UNREACHABLE();
+    qDebug() << "ShaderDebugPrinter: Invalid vector dimension" << dimension << "received!";
+    return;
   }
 }
 

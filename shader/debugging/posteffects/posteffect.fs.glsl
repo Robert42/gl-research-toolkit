@@ -10,6 +10,7 @@
 #include <scene/uniforms.glsl>
 #include <debugging/normal.glsl>
 #include <write-fragment-color.glsl>
+#include <write-fragment-depth.glsl>
 
 #include <lighting/rendering-equation.glsl>
 
@@ -38,11 +39,6 @@ in FragmentBlock
   vec3 look_target;
 }fragment;
 
-float FragCoord_z_toFragDepth(float z)
-{
-  // TODO check for performance improvement by leaving out gl_DepthRange.diff and gl_DepthRange.near
-  return (0.5 * z + 0.5) * gl_DepthRange.diff + gl_DepthRange.near;
-}
 
 void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_normal);
 
@@ -91,7 +87,7 @@ void main()
     point = fragment.view_projection * point;
     point /= point.w;
     
-    gl_FragDepth = FragCoord_z_toFragDepth(point.z);
+    write_fragment_depth(point.z);
   }
 
   write_fragment_color(fragment_color);

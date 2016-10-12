@@ -8,7 +8,14 @@
 #define USE_ONLY_LEAF_SPHERE 0
 
 #if USE_CONES
+#if N_GI_CONES==9
+#undef N_GI_CONES
 #define N_GI_CONES 18
+#elif N_GI_CONES==7
+#define N_GI_CONES 14
+#else
+#error unexpected number cones
+#endif
 #include <voxels/ambient-occlusion-cones.glsl>
 #endif
 

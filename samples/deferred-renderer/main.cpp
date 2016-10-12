@@ -9,7 +9,7 @@ int main(int argc, char** argv)
                                                                           ),
                               glrt::SampleApplication::Settings::techDemoDeferred(),
                               glrt::Application::Settings::techDemo(),
-                              glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Deferred-Renderer", glm::ivec2(512, 384)), ADD_VSYNC));
+                              glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Deferred-Renderer"), ADD_VSYNC));
 
   app.showWindow();
 

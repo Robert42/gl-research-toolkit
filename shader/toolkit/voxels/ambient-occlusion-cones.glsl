@@ -17,7 +17,10 @@ int ao_distancefield_cost = 0;
 #define AO_FALLBACK_CLAMPED 0
 */
 
-void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace)
+
+#define NEED_AO_INTERPOLATION_STATIC defined(NO_BVH) && !AO_IGNORE_FALLBACK_SDF && !AO_FALLBACK_SDF_ONLY
+
+void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, bool is_fallback)
 {
 #if AO_FALLBACK_NONE
   return;
@@ -31,24 +34,26 @@ void ao_falloff(inout float occlusionHeuristic, float distance, float cone_lengt
   occlusionHeuristic = mix(occlusionHeuristic, 1.f, distance*inv_cone_length_voxelspace);
   // smooth start of falloff
   occlusionHeuristic = mix(1, occlusionHeuristic, smoothstep(0.f, SDFSAMPLING_SELF_SHADOW_AVOIDANCE, distance));
+  
+#if NEED_AO_INTERPOLATION_STATIC
+  if(is_fallback) // I hope the optimizer resolves this ;)
+    occlusionHeuristic = mix(1.f, occlusionHeuristic, smoothstep(fallbackRangeVoxelspace[0], fallbackRangeVoxelspace[1], distance));
+  else
+    occlusionHeuristic = mix(occlusionHeuristic, 1.f, smoothstep(fallbackRangeVoxelspace[0], fallbackRangeVoxelspace[1], distance));
+#endif
 }
 
-#define AO_FALLOFF(occ, dist) ao_falloff(occ, dist, cone_length_voxelspace, inv_cone_length_voxelspace)
+#define AO_FALLOFF(occ, dist) ao_falloff(occ, dist, cone_length_voxelspace, inv_cone_length_voxelspace, fallbackRangeVoxelspace, is_fallback)
 
-float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
+float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVoxelSpace, in ivec3 voxelSize, in vec3 voxelToUvwSpace, in float worldToVoxelSpace_Factor, float intersection_distance_front, float intersection_distance_back, float cone_length, bool is_fallback=false)
 {
-  mat4x3 worldToVoxelSpace;
-  ivec3 voxelSize;
-  vec3 voxelToUvwSpace;
-  float worldToVoxelSpace_Factor;
-  
-  sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
-  
   #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
       ao_distancefield_cost++;
   #endif
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_from_cone(cone), worldToVoxelSpace);
+  
+  vec2 fallbackRangeVoxelspace = worldToVoxelSpace_Factor * vec2(AO_STATIC_FALLBACK_FADING_START, AO_STATIC_FALLBACK_FADING_END);
   
   float cone_length_voxelspace = cone_length * worldToVoxelSpace_Factor;
   float inv_cone_length_voxelspace = 1.f / cone_length_voxelspace;
@@ -71,8 +76,6 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
 #if defined(DISTANCEFIELD_FIXED_SAMPLE_POINTS)
   // In Range [0, 1]
   float exponential = SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
-
-  PRINT_VALUE(exponential);
   
   for(int i=0; i<SDFSAMPLING_EXPONENTIAL_NUM; ++i)
   {
@@ -103,7 +106,7 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
 #endif
 
 #if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
-  int max_num_loops = 256;
+  int max_num_loops = SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS;
   while(t < intersection_distance_back && 0<=max_num_loops--)
   {
     vec3 p = get_point(ray_voxelspace, t);
@@ -125,13 +128,53 @@ float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_blo
     t += max(0.1f, abs(d));
   }
 #endif
-
-
   
   return minVisibility;
 }
 
-void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+float ao_coneSoftShadow(in Cone cone, in VoxelDataBlock* distance_field_data_block, float intersection_distance_front, float intersection_distance_back, float cone_length)
+{
+  mat4x3 worldToVoxelSpace;
+  ivec3 voxelSize;
+  vec3 voxelToUvwSpace;
+  float worldToVoxelSpace_Factor;
+  
+  sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
+  
+#if NEED_AO_INTERPOLATION_STATIC
+  intersection_distance_back = min(AO_STATIC_FALLBACK_FADING_END, intersection_distance_back);
+#endif
+  
+  return ao_coneSoftShadow(cone, texture, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor, intersection_distance_front, intersection_distance_back, cone_length, false);
+}
+
+
+void ao_coneSoftShadow_fallbackGrid(float cone_length)
+{
+  mat4x3 worldToVoxelSpace;
+  ivec3 voxelSize;
+  vec3 voxelToUvwSpace;
+  float worldToVoxelSpace_Factor;
+  
+  sampler3D texture = fallback_distance_field_data(worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
+  
+  
+  float intersection_distance_front = 0.f;
+  float intersection_distance_back = cone_length;
+#if NEED_AO_INTERPOLATION_STATIC
+  intersection_distance_front = AO_STATIC_FALLBACK_FADING_START;
+#endif
+  
+  // TODO
+  for(int j=0; j<N_GI_CONES; ++j)
+  {
+    Cone cone = cone_bouquet[j];
+    float ao = ao_coneSoftShadow(cone, texture, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor, intersection_distance_front, intersection_distance_back, cone_length, true);
+    cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao);
+  }
+}
+
+void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
 {
   for(uint32_t i=0; i<num_distance_fields; ++i)
   {
@@ -164,10 +207,50 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
   }
 }
 
+void ao_coneSoftShadow_candidateGrid(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
+{
+  const vec3 world_pos = cone_bouquet[0].origin;
+  uint32_t num_static_candidates;
+  uint8_t* first_static_candidate;
+  uint32_t num_dynamic_candidates;
+  uint8_t* first_dynamic_candidate;
+  get_sdfCandidates(world_pos, num_static_candidates, first_static_candidate, num_dynamic_candidates, first_dynamic_candidate);
+  
+  for(uint32_t i=0; i<num_static_candidates; ++i)
+  {
+    #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
+        ao_distancefield_cost++;
+    #endif
+    uint16_t sdf_index = uint16_t(first_static_candidate[i]);
+    Sphere sphere = bounding_spheres[sdf_index];
+    VoxelDataBlock* sdf = distance_field_data_blocks + sdf_index;
+    
+    for(int j=0; j<N_GI_CONES; ++j)
+    {
+      float distance_to_sphere_origin;
+      
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
+      if(cone_intersects_sphere(cone_bouquet[j], sphere, distance_to_sphere_origin, cone_length))
+      {
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
+            ao_distancefield_cost++;
+        #endif
+
+        float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
+        float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
+        cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao_coneSoftShadow(cone_bouquet[j], sdf, intersection_distance_front, intersection_distance_back, cone_length));
+      }
+    }
+  }
+}
+
+
 #define BASE_VOXEL_GRID 1
 #define PER_OBJECT_GRID 0
 
-float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
 {
   const vec3 world_pos = cone_bouquet[0].origin;
 
@@ -290,7 +373,7 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
 #endif
 }
 
-void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner_nodes, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length=inf)
+void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner_nodes, in Sphere* leaf_bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
 {
   uint16_t stack[BVH_MAX_STACK_DEPTH];
   stack[0] = uint16_t(0);
@@ -389,31 +472,42 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
   }
 }
 
-float distancefield_ao(in Sphere* bvh_bounding_spheres, uint16_t* bvh_nodes, in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float radius=3.5)
+float distancefield_ao()
 {
+  const float ao_radius = AO_RADIUS;
+  
+  Sphere* bvh_bounding_spheres = get_bvh_inner_bounding_spheres();
+  uint16_t* bvh_nodes = get_bvh_inner_nodes();
+  Sphere* bounding_spheres = distance_fields_bounding_spheres();
+  VoxelDataBlock* distance_field_data_blocks = distance_fields_voxelData();
+  uint32_t num_distance_fields = distance_fields_num();
+  
   float occlusion_factor = 1.f;
   init_cone_bouquet_ao();
-    
+  
   #if defined(NO_BVH)
-  ao_coneSoftShadow_bruteforce(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+  
+    #if !AO_IGNORE_FALLBACK_SDF
+      ao_coneSoftShadow_fallbackGrid(ao_radius);
+    #endif
+    
+    #if !AO_FALLBACK_SDF_ONLY
+    
+      #if AO_USE_CANDIDATE_GRID
+      ao_coneSoftShadow_candidateGrid(bounding_spheres, distance_field_data_blocks, num_distance_fields, ao_radius);
+      #else
+      ao_coneSoftShadow_bruteforce(bounding_spheres, distance_field_data_blocks, num_distance_fields, ao_radius);
+      #endif
+  
+    #endif
+  
   #elif defined(BVH_WITH_STACK)
-  ao_coneSoftShadow_bvh(bvh_bounding_spheres, bvh_nodes, bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+    ao_coneSoftShadow_bvh(bvh_bounding_spheres, bvh_nodes, bounding_spheres, distance_field_data_blocks, num_distance_fields, ao_radius);
   #elif defined(BVH_USE_GRID)
-  occlusion_factor = ao_coneSoftShadow_cascaded_grids(bounding_spheres, distance_field_data_blocks, num_distance_fields, radius);
+    occlusion_factor = ao_coneSoftShadow_cascaded_grids(bounding_spheres, distance_field_data_blocks, num_distance_fields, ao_radius);
   #else
-  #error UNKNOWN BVH usage
+    #error UNKNOWN BVH usage
   #endif
     
   return accumulate_bouquet_to_total_occlusion() * occlusion_factor;
-}
-
-float distancefield_ao(float radius=AO_RADIUS)
-{
-  Sphere* _bvh_bounding_spheres = get_bvh_inner_bounding_spheres();
-  uint16_t* _bvh_nodes = get_bvh_inner_nodes();
-  Sphere* _bounding_spheres = distance_fields_bounding_spheres();
-  VoxelDataBlock* _distance_field_data_blocks = distance_fields_voxelData();
-  uint32_t _num_distance_fields = distance_fields_num();
-  
-  return distancefield_ao(_bvh_bounding_spheres, _bvh_nodes, _bounding_spheres, _distance_field_data_blocks, _num_distance_fields, radius);
 }

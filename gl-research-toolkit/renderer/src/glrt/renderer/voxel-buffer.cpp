@@ -3,11 +3,18 @@
 #include <glrt/scene/scene.h>
 #include <glrt/scene/scene-data.h>
 #include <glrt/scene/resources/static-mesh.h>
+#include <glrt/scene/resources/voxelizer.h>
 #include <glrt/toolkit/profiler.h>
 #include <glrt/toolkit/zindex.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
+#include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
 namespace renderer {
+
+// ==========================================================================================================================================================
+
+// ==== VoxelBuffer =========================================================================================================================================
 
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
   : scene(scene),
@@ -15,8 +22,24 @@ VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
     distanceFieldVoxelData(scene.data->voxelGrids->capacity()),
     distanceFieldboundingSpheres(scene.data->voxelGrids->capacity()),
     bvhInnerBoundingSpheres(scene.data->voxelGrids->capacity()),
-    bvhInnerNodes(scene.data->voxelGrids->capacity())
+    bvhInnerNodes(scene.data->voxelGrids->capacity()),
+    candidateIndexBuffer(MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE),
+    mergeSDFs(GLRT_SHADER_DIR "/compute/merge-sdf.cs",
+              glm::uvec3(16))
 {
+  dirty_candidate_grid = true;
+  dirty_merged_sdf_texture_buffer = true;
+  dirty_merged_sdf = true;
+  AO_RADIUS.callback_functions << [this](float){dirty_candidate_grid=true;};
+
+  MERGED_STATIC_SDF_SIZE.callback_functions << [this](uint32_t){dirty_merged_sdf_texture_buffer=true;};
+
+  AO_IGNORE_FALLBACK_SDF.callback_functions << [this](uint32_t){update_static_fade_with_fallback();};
+  AO_FALLBACK_SDF_ONLY.callback_functions << [this](uint32_t){update_static_fade_with_fallback();};
+  AO_STATIC_FALLBACK_FADING_END.callback_functions << [this](uint32_t){dirty_candidate_grid = true;};
+  AO_RADIUS.callback_functions << [this](uint32_t){dirty_candidate_grid = true;};
+
+  initStaticSDFMerged();
 }
 
 VoxelBuffer::~VoxelBuffer()
@@ -27,8 +50,11 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
   PROFILE_SCOPE("VoxelBuffer::updateVoxelHeader()")
 
+  // TODO: (voxelGridData->numDynamic>0) is not an elegant solution for dynamic objects
   if(Q_UNLIKELY(voxelGridData->numDynamic>0 || voxelGridData->dirtyOrder))
   {
+    dirty_candidate_grid = true;
+    dirty_merged_sdf_texture_buffer = true;
     updateVoxelGrid();
 
     _voxelHeader.numDistanceFields = voxelGridData->length;
@@ -38,6 +64,28 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
     _voxelHeader.distanceFieldBoundingSpheres = this->distanceFieldboundingSpheres.gpuBufferAddress();
 
     Q_ASSERT(voxelGridData->dirtyOrder == false);
+  }
+
+  if(Q_UNLIKELY(dirty_merged_sdf_texture_buffer))
+  {
+    initStaticSdfFallbackTexture();
+
+    dirty_merged_sdf_texture_buffer = false;
+    dirty_merged_sdf = true;
+
+    candidateGridHeader.fallbackSDF = staticFallbackSdf.textureHandle;
+    candidateGridHeader.fallbackSdfLocation = staticFallbackSdf.location;
+  }
+
+  if(Q_UNLIKELY(dirty_candidate_grid))
+  {
+    float radius = _static_fade_with_fallback ? AO_STATIC_FALLBACK_FADING_END : AO_RADIUS;
+
+    candidateGridHeader = candidateGrid.calcCandidates(&scene, &candidateIndexBuffer, radius);
+    candidateGridHeader.fallbackSDF = staticFallbackSdf.textureHandle;
+    candidateGridHeader.fallbackSdfLocation = staticFallbackSdf.location;
+
+    dirty_candidate_grid = false;
   }
 
   return _voxelHeader;
@@ -108,7 +156,6 @@ void VoxelBuffer::updateVoxelGrid()
 
   distanceFieldVoxelData.Unmap();
   distanceFieldboundingSpheres.Unmap();
-
 }
 
 void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
@@ -129,6 +176,220 @@ void VoxelBuffer::updateBvhTree(const BoundingSphere* leaves_bounding_spheres)
   this->bvhInnerNodes.Unmap();
 
 }
+
+
+
+
+
+// ==========================================================================================================================================================
+
+// ======== CandidateGrid ===================================================================================================================================
+
+
+using scene::resources::Voxelizer;
+using scene::resources::VoxelGridGeometry;
+
+Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, const glm::uvec3 voxel, const VoxelGridGeometry& geometry, float influence_radius);
+
+VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, ManagedGLBuffer<uint8_t>* candidateGridBuffer, float influence_radius)
+{
+  PROFILE_SCOPE("CandidateGrid::calcCandidateGrid")
+
+  const scene::Scene::Data* data = scene->data;
+  // TODO: seperate aabb for whole scene and for static scene?
+  const scene::AABB aabb = scene->aabb.ensureValid();
+
+  VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, int(SDF_CANDIDATE_GRID_SIZE), true);
+
+  glm::uvec3 size = geometry.gridSize;
+
+  Q_ASSERT(all(greaterThan(size, glm::uvec3(0))));
+
+  // The current format uses a single integer. The lower 24 bits store the byte
+  // offset from the start of the buffer to the sdf indices stored by this grid.
+  // LIMIT_255
+  Q_ASSERT(data->voxelGrids->length <= 255);
+  Q_ASSERT(size.x*size.y*size.z*255 <= 0x01000000);
+
+  auto format = GlTexture::format(size, 0, GlTexture::Format::RED_INTEGER, GlTexture::Type::UINT32, GlTexture::Target::TEXTURE_3D);
+
+  QVector<uint32_t> _buffer;
+  Array<Array<uint16_t>> _collectedSDFs;
+
+  _collectedSDFs.resize_memset_zero(int(size.x*size.y*size.z));
+  _buffer.resize(int(size.x*size.y*size.z));
+
+  for(Array<uint16_t>& a : _collectedSDFs)
+    a.reserve(data->voxelGrids->length);
+
+  uint32_t* const buffer = _buffer.data();
+  Array<uint16_t>* const collectedSDFs = _collectedSDFs.data();
+
+  const glm::vec4 gridLocation(geometry.toVoxelSpace.position, geometry.toVoxelSpace.scaleFactor);
+
+#pragma omp parallel for
+  for(uint32_t x=0; x<size.x; x++)
+  {
+    for(uint32_t y=0; y<size.y; y++)
+    {
+      for(uint32_t z=0; z<size.z; z++)
+      {
+        uint32_t offset = voxelIndexForCoordinate(glm::uvec3(x, y, z), size);
+        glm::uvec3 voxelCoord(x,y,z);
+        Array<uint16_t>& sdfs = *(collectedSDFs + offset);
+
+        sdfs = collectAllSdfIntersectingWith(data, voxelCoord, geometry, influence_radius);
+
+        Q_ASSERT(sdfs.length() <= 255);
+
+      }
+    }
+  }
+
+  uint32_t data_offset = 0;
+
+  uint8_t* _index_data = candidateGridBuffer->Map();
+  for(uint32_t x=0; x<size.x; x++)
+  {
+    for(uint32_t y=0; y<size.y; y++)
+    {
+      for(uint32_t z=0; z<size.z; z++)
+      {
+        uint32_t offset = voxelIndexForCoordinate(glm::uvec3(x, y, z), size);
+        Array<uint16_t>& sdfs = *(collectedSDFs + offset);
+        const uint32_t num_candidates = uint32_t(sdfs.length());
+        uint32_t& voxelData = *(buffer + offset);
+        uint8_t* index_data = reinterpret_cast<uint8_t*>(reinterpret_cast<uint8_t*>(_index_data) + data_offset);
+        Q_ASSERT(num_candidates <= 255);
+        Q_ASSERT(data_offset <= 0x00ffffff);
+        Q_ASSERT(data_offset+num_candidates*sizeof(uint8_t) <= 0x01000000);
+
+        for(uint32_t i=0; i<num_candidates; ++i)
+        {
+          uint16_t index = sdfs[int(i)];
+          Q_ASSERT(index <= 255);
+          index_data[i] = static_cast<uint8_t>(index);
+        }
+
+        voxelData = (num_candidates <<  24) | (data_offset);
+
+        data_offset += num_candidates * sizeof(uint8_t);
+      }
+    }
+  }
+  candidateGridBuffer->Unmap();
+
+#define ALWAYS_NEW_TEXTURE_OBJECT 1
+
+#if !ALWAYS_NEW_TEXTURE_OBJECT
+  if(this->size != size)
+  {
+#endif
+    this->size = size;
+    texture = GlTexture();
+#if !ALWAYS_NEW_TEXTURE_OBJECT
+  }else if(textureRenderHandle!=0)
+  {
+    if(GL_RET_CALL(glIsTextureHandleResidentNV, textureRenderHandle))
+      GL_CALL(glMakeTextureHandleNonResidentNV, textureRenderHandle);
+  }
+#endif
+
+  CandidateGridHeader header;
+
+  texture.setUncompressed2DImage(format, buffer);
+  texture.makeComplete();
+  header.textureRenderHandle = GL_RET_CALL(glGetTextureHandleNV, texture.textureId);
+  GL_CALL(glMakeTextureHandleResidentNV, header.textureRenderHandle);
+
+  header.gridLocation = gridLocation;
+  header.candidateBuffer = candidateGridBuffer->gpuBufferAddress();
+
+  debugging::VisualizationRenderer::setSdfCandidateGridData(std::move(_collectedSDFs));
+
+  return header;
+}
+
+struct SDFMergeHeader
+{
+  GLuint64 targetTexture;
+  padding<GLuint64, 1> _padding1;
+  glm::vec4 gridLocation;
+  glm::uvec3 targetTextureSize;
+  padding<uint, 1> _padding3;
+};
+
+void VoxelBuffer::initStaticSDFMerged()
+{
+  sdfMergeHeaderBuffer = gl::Buffer(sizeof(SDFMergeHeader), gl::Buffer::MAP_WRITE);
+}
+
+
+void VoxelBuffer::initStaticSdfFallbackTexture()
+{
+  PROFILE_SCOPE("CandidateGrid::mergeStaticSDFs");
+  // TODO: seperate aabb for whole scene and for static scene?
+  const scene::AABB aabb = scene.aabb.ensureValid();
+
+  SDFMergeHeader& sdfMergeHeader = *reinterpret_cast<SDFMergeHeader*>(sdfMergeHeaderBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
+
+  VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, int(MERGED_STATIC_SDF_SIZE), true);
+
+
+  if(staticFallbackSdf.resolution != geometry.gridSize)
+  {
+    staticFallbackSdf.resolution = geometry.gridSize;
+    staticFallbackSdf.texture = GlTexture();
+    staticFallbackSdf.texture.setUncompressed2DImage(GlTexture::format(glm::uvec3(staticFallbackSdf.resolution),
+                                                                       0,
+                                                                       GlTexture::Format::RED,
+                                                                       GlTexture::Type::FLOAT16,
+                                                                       GlTexture::Target::TEXTURE_3D), nullptr);
+    staticFallbackSdf.texture.makeComplete();
+    staticFallbackSdf.textureHandle = GL_RET_CALL(glGetTextureHandleNV, staticFallbackSdf.texture.textureId);
+    GL_CALL(glMakeTextureHandleResidentNV, staticFallbackSdf.textureHandle);
+  }
+
+  sdfMergeHeader.gridLocation = glm::vec4(geometry.toVoxelSpace.position, geometry.toVoxelSpace.scaleFactor);
+
+  staticFallbackSdf.location = sdfMergeHeader.gridLocation;
+
+  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, staticFallbackSdf.texture.textureId, 0, GL_TRUE, 0, GL_R16F);
+  if(!GL_RET_CALL(glIsImageHandleResidentNV, imageHandle))
+    GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
+
+  sdfMergeHeader.targetTexture = imageHandle;
+  sdfMergeHeader.targetTextureSize = glm::uvec3(MERGED_STATIC_SDF_SIZE);
+
+  sdfMergeHeaderBuffer.Unmap();
+
+}
+
+void glrt::renderer::VoxelBuffer::mergeStaticSDFs()
+{
+  dirty_merged_sdf = false;
+
+  sdfMergeHeaderBuffer.BindUniformBuffer(UNIFORM_MERGE_SDF_BLOCK);
+
+  mergeSDFs.invoke(glm::uvec3(MERGED_STATIC_SDF_SIZE));
+}
+
+void VoxelBuffer::update_static_fade_with_fallback()
+{
+  bool should_fade = !AO_FALLBACK_SDF_ONLY && !AO_IGNORE_FALLBACK_SDF;
+  if(_static_fade_with_fallback != should_fade)
+  {
+    _static_fade_with_fallback = should_fade;
+    dirty_candidate_grid = true;
+  }
+}
+
+
+
+
+// ==========================================================================================================================================================
+
+// ======== BVH =============================================================================================================================================
 
 BVH::BVH(const BoundingSphere* leaves_bounding_spheres, const VoxelGrids& voxelGridData)
   : BVH(leaves_bounding_spheres, voxelGridData.z_index, voxelGridData.length, voxelGridData.huge_bvh_limit)
@@ -243,9 +504,10 @@ quint16 BVH::addInnerNode()
 
 quint16 BVH::calcDepth(quint16 root, InnerNode* bvhInnerNodes) const
 {
-#if ENFORCE_HUGE_BVH_LEAVES_FIRST
-  Q_ASSERT(root!=0x8000);
-#endif
+  if(scene::ENFORCE_HUGE_BVH_LEAVES_FIRST)
+  {
+    Q_ASSERT(root!=0x8000);
+  }
 
   if(root & 0x8000)
     return 0;

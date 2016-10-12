@@ -33,6 +33,20 @@ struct SceneVoxelHeader
   padding3(uint32_t, _padding2);
 };
 
+struct CandidateGridHeader
+{
+  usampler3D gridRanges;
+  usampler2D _reservedForTiles;
+  sampler3D fallbackSDF;
+  sampler3D _padding;
+  
+  vec4 gridLocation;
+  vec4 fallbackSdfGridLocation;
+  
+  uint64_t candidateGrid;
+  uint64_t _candidate_reservedForTiles;
+};
+
 struct SceneData
 {
   mat4 view_projection;
@@ -40,7 +54,9 @@ struct SceneData
   float totalTime;
   SceneLightData lights;
   SceneVoxelHeader voxelHeader;
+  CandidateGridHeader candidateGridHeader;
   CascadedGrids cascadedGrids;
+  
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;
   uint16_t bvh_debug_depth_begin;
@@ -53,6 +69,38 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
 {
   SceneData scene;
 };
+
+// LIMIT_255
+void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, out uint8_t* first_static_candidate, out uint32_t num_dynamic_candidates, out uint8_t* first_dynamic_candidate)
+{
+  vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
+  float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
+  
+  ivec3 textureCoord = ivec3(world_pos * gridLocationScale + gridLocationOffset);
+  textureCoord = clamp(textureCoord, ivec3(0), ivec3(SDF_CANDIDATE_GRID_SIZE));
+  
+  uint32_t gridRanges = texelFetch(scene.candidateGridHeader.gridRanges, textureCoord, 0).r;
+  
+  num_static_candidates = gridRanges>>24;
+  // LIMIT_255
+  first_static_candidate = (uint8_t*)(scene.candidateGridHeader.candidateGrid + (0x00ffffff & gridRanges));
+  
+  num_dynamic_candidates = 0;
+}
+
+sampler3D fallback_distance_field_data(out mat4x3 worldToVoxelSpace, out ivec3 voxelCount, out vec3 voxelToUvwSpace, out float worldToVoxelSpaceFactor)
+{
+  vec3 gridLocationOffset = scene.candidateGridHeader.fallbackSdfGridLocation.xyz;
+  float gridLocationScale = scene.candidateGridHeader.fallbackSdfGridLocation.w;
+  
+  sampler3D texture = scene.candidateGridHeader.fallbackSDF;
+  worldToVoxelSpace = mat4x3(gridLocationScale, 0, 0, 0, gridLocationScale, 0, 0, 0, gridLocationScale, gridLocationOffset);
+  voxelCount = textureSize(texture, 0);
+  voxelToUvwSpace = distance_field_voxelToUvwSpace(voxelCount);
+  worldToVoxelSpaceFactor = gridLocationScale;
+  
+  return texture;
+}
 
 float blink(float rate=0.2)
 {
@@ -173,7 +221,6 @@ vec4 cascadedGridWeights(vec3 world_pos)
   
   return weights;
 }
-
 
 usampler3D cascaded_grid_texture(uint i)
 {

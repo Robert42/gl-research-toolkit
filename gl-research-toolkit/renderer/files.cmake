@@ -48,6 +48,7 @@ set(SOURCE_FILES
   src/glrt/gui/anttweakbar.cpp
   src/glrt/gui/toolbar.cpp
   src/glrt/renderer/bvh-usage.cpp
+  src/glrt/renderer/collect-sdf-intersections-with-convex-shape.cpp
   src/glrt/renderer/compute-step.cpp
   src/glrt/renderer/debugging/debugging-posteffect.cpp
   src/glrt/renderer/debugging/debug-line-visualisation.cpp

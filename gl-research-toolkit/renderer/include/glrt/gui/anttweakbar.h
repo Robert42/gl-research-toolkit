@@ -202,6 +202,8 @@ public:
 
   void TwAddVarCB(TwBar* bar, const char* name, const char* def)
   {
+    this->bar = bar;
+    this->name = name;
     ::TwAddVarCB(bar, name, type(), reinterpret_cast<TwSetVarCallback>(setValue), reinterpret_cast<TwGetVarCallback>(getValue), this, def);
   }
 
@@ -212,6 +214,15 @@ public:
   }
 
   static TwType type();
+
+  void setVisible(bool visible)
+  {
+    uint32_t value = visible;
+
+    Q_ASSERT(bar != nullptr);
+    Q_ASSERT(name != nullptr);
+    ::TwSetParam(bar, name, "visible", TW_PARAM_INT32, 1, &value);
+  }
 
 private:
 
@@ -226,6 +237,9 @@ private:
     if(wrapper->setter)
       wrapper->setter(*value);
   }
+
+  TwBar* bar = nullptr;
+  const char* name = nullptr;
 };
 
 template<>
@@ -235,9 +249,15 @@ inline TwType TweakBarCBVar<bool>::type()
 }
 
 template<>
-inline TwType TweakBarCBVar<int>::type()
+inline TwType TweakBarCBVar<int32_t>::type()
 {
   return TW_TYPE_INT32;
+}
+
+template<>
+inline TwType TweakBarCBVar<uint32_t>::type()
+{
+  return TW_TYPE_UINT32;
 }
 
 template<>
@@ -251,6 +271,7 @@ inline TwType TweakBarCBVar<float>::type()
 {
   return TW_TYPE_FLOAT;
 }
+
 
 
 class TweakBarShaderToggle : public TweakBarCBVar<bool>
@@ -344,13 +365,26 @@ private:
   gui::TweakBarCBVar<uint16_t> numBvhGrids;
   gui::TweakBarCBVar<uint16_t> bvhStackDepth;
 
+  gui::TweakBarCBVar<float> AO_RADIUS;
+  gui::TweakBarCBVar<float> AO_STATIC_FALLBACK_FADING_START;
+  gui::TweakBarCBVar<float> AO_STATIC_FALLBACK_FADING_END;
+
   TweakBarCBVar<float> SDFSAMPLING_SPHERETRACING_START;
   TweakBarCBVar<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+  TweakBarCBVar<int> SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS;
   TweakBarCBVar<int> SDFSAMPLING_EXPONENTIAL_NUM;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_START;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_FACTOR;
   TweakBarCBVar<float> SDFSAMPLING_EXPONENTIAL_OFFSET;
+  gui::TweakBarCBVar<bool> AO_USE_CANDIDATE_GRID;
+  gui::TweakBarCBVar<bool> AO_IGNORE_FALLBACK_SDF;
+  gui::TweakBarCBVar<bool> AO_FALLBACK_SDF_ONLY;
+  gui::TweakBarCBVar<uint32_t> MERGED_STATIC_SDF_SIZE;
+
+  gui::TweakBarCBVar<int> currentSdfCellToDebug_x;
+  gui::TweakBarCBVar<int> currentSdfCellToDebug_y;
+  gui::TweakBarCBVar<int> currentSdfCellToDebug_z;
 
   bool _disableSceneryVoxels = false;
 

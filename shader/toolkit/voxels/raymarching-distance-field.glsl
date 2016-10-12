@@ -1,15 +1,8 @@
 #include "raymarching-cubic-voxels.glsl"
 #include "distance-field-utils.glsl"
 
-bool raymarch_distancefield(in Ray ray_worldspace, in VoxelDataBlock* distance_field_data_block, out float ray_hit_distance_worldspace, out vec3 intersection_normal_worldspace, inout uint32_t stepCount)
+bool raymarch_distancefield(in Ray ray_worldspace, in sampler3D texture, in mat4x3 worldToVoxelSpace, in ivec3 voxelSize, in vec3 voxelToUvwSpace, in float worldToVoxelSpace_Factor, out float ray_hit_distance_worldspace, out vec3 intersection_normal_worldspace, inout uint32_t stepCount)
 {
-  mat4x3 worldToVoxelSpace;
-  ivec3 voxelSize;
-  vec3 voxelToUvwSpace;
-  float worldToVoxelSpace_Factor;
-  
-  sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
-  
   float voxelToWorldSpace = 1.f / worldToVoxelSpace_Factor;
   
   Ray ray_voxelspace = ray_world_to_voxelspace(ray_worldspace, worldToVoxelSpace);
@@ -41,6 +34,18 @@ bool raymarch_distancefield(in Ray ray_worldspace, in VoxelDataBlock* distance_f
   }
   
   return false;
+}
+
+bool raymarch_distancefield(in Ray ray_worldspace, in VoxelDataBlock* distance_field_data_block, out float ray_hit_distance_worldspace, out vec3 intersection_normal_worldspace, inout uint32_t stepCount)
+{
+  mat4x3 worldToVoxelSpace;
+  ivec3 voxelSize;
+  vec3 voxelToUvwSpace;
+  float worldToVoxelSpace_Factor;
+  
+  sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
+  
+  return raymarch_distancefield(ray_worldspace, texture, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor, ray_hit_distance_worldspace, intersection_normal_worldspace, stepCount);
 }
 
 bool raymarch_distancefields(in Ray ray_worldspace, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_voxels, out vec3 intersection_point, out vec3 intersection_normal, inout uint32_t stepCount)

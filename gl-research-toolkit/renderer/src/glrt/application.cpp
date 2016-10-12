@@ -5,12 +5,15 @@
 #include <glrt/renderer/toolkit/shader-compiler.h>
 
 #include <glhelper/gl.hpp>
+#include <QThread>
 
 #include <assimp/DefaultLogger.hpp>
 
 #include <sdk/add_on/scriptstdstring/scriptstdstring.h>
 #include <sdk/add_on/scriptarray/scriptarray.h>
 #include <sdk/add_on/scriptdictionary/scriptdictionary.h>
+
+#define SLOW_DOWN_IN_DEBUG 500
 
 namespace glrt {
 
@@ -20,7 +23,8 @@ Application::Application(int& argc, char** argv, const System::Settings& systemS
     settings(applicationSettings),
     sdlWindow(system.sdlWindow),
     profiler(systemSettings.windowTitle),
-    isRunning(true)
+    isRunning(true),
+    hasFocus(true)
 {
   initAngelScript();
   initAssimp();
@@ -55,6 +59,10 @@ bool Application::pollEvent(SDL_Event* e)
 
 float Application::update()
 {
+#if defined(QT_DEBUG) && defined(SLOW_DOWN_IN_DEBUG)
+  if(Q_UNLIKELY(!hasFocus))
+    QThread::msleep(SLOW_DOWN_IN_DEBUG);
+#endif
   qApp->processEvents();
   frameDuration = profiler.update();
   frameDurationMS = frameDuration * 1000.f;
@@ -109,6 +117,12 @@ bool Application::handleWindowEvent(const SDL_WindowEvent& event)
   case SDL_WINDOWEVENT_CLOSE:
     this->isRunning = false;
     return true;
+  case SDL_WINDOWEVENT_FOCUS_GAINED:
+    this->hasFocus = true;
+    return false;
+  case SDL_WINDOWEVENT_FOCUS_LOST:
+    this->hasFocus = false;
+    return false;
   default:
     return false;
   }

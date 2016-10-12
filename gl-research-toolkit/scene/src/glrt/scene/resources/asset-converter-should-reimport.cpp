@@ -10,6 +10,8 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+extern bool forceReimport_Assets;
+
 bool forceReimport_Assets = false;
 
 bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile)
@@ -40,11 +42,15 @@ bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, con
     return false;
   }
 
+#if 0
 #ifdef QT_DEBUG
   // If the cpp files responsible for converting the source files is newer than the target file, we probably need a reconversion, as the conversion code changed
   for(QFileInfo cppFile : converterSourceFile)
     if(cppFile.exists() && cppFile.lastModified() > targetFile.lastModified())
       return true;
+#endif
+#else
+  Q_UNUSED(converterSourceFile);
 #endif
 
   // automatically convert, if the target doesn't exist or the source file is newer

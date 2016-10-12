@@ -9,8 +9,6 @@ layout(depth_unchanged) out float gl_FragDepth;
 layout(early_fragment_tests) in;
 #endif
 
-#define N_GI_CONES 9
-
 #include "implementation/material-implementation.fs.glsl"
 
 mat3 tangent_to_worldspace;

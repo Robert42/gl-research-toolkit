@@ -8,9 +8,16 @@ namespace glrt {
 
 template<typename T>
 VariableWithCallback<T>::VariableWithCallback(T initial_value)
-  : _value(initial_value)
+  : VariableWithCallback(initial_value,
+                         [](T v){return v;})
 {
-  validate_value = [](T v){return v;};
+}
+
+template<typename T>
+VariableWithCallback<T>::VariableWithCallback(T initial_value, const std::function<T(T)>& validate_value)
+  : validate_value(validate_value),
+    _value(initial_value)
+{
 }
 
 template<typename T>

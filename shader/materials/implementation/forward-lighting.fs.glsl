@@ -52,6 +52,22 @@ return;
   return;
 #endif
 
+#if defined(CANDIDATE_GRID_NUM_STATIC_CANDIDATES) || defined(CANDIDATE_GRID_NUM_DYNAMIC_CANDIDATES)
+  uint num_static_candidates;
+  uint num_dynamic_candidates;
+  uint8_t* first_static_candidate;
+  uint8_t* first_dynamic_candidate;
+  get_sdfCandidates(world_pos, num_static_candidates, first_static_candidate, num_dynamic_candidates, first_dynamic_candidate);
+  #if defined(CANDIDATE_GRID_NUM_STATIC_CANDIDATES)
+  fragment_color = vec4(heatvision(num_static_candidates).rgb, alpha);
+  PRINT_VALUE(num_static_candidates);
+  #endif
+  #if defined(CANDIDATE_GRID_NUM_DYNAMIC_CANDIDATES)
+  fragment_color = vec4(heatvision(num_dynamic_candidates).rgb, alpha);
+  #endif
+  return;
+#endif
+
 #if defined(BVH_NEAREST_LEAF_INDEX_0)
 #define BVH_NEAREST_LEAF_INDEX_ 0
 #elif defined(BVH_NEAREST_LEAF_INDEX_1)

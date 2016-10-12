@@ -29,7 +29,7 @@ inline void GLSLMacroWrapper<T>::updatePreprocessorBlock()
 template<typename T>
 inline void GLSLMacroWrapper<T>::init()
 {
-  VariableWithCallback<T>::callback_functions.push_back([this](T){updatePreprocessorBlock();});
+  VariableWithCallback<T>::callback_functions << [this](T){updatePreprocessorBlock();};
   updatePreprocessorBlock();
 }
 

@@ -17,6 +17,8 @@ public:
 
 
 private:
+  friend class DynamicComputeStep;
+
   // UGLY HACK: numInvocationsis initialized while initilaizing the shader member, so the numInvocations member must be initialized before shader
   glm::ivec3 numInvocations;
   ReloadableShader shader;
@@ -24,6 +26,21 @@ private:
   QSet<QString> groupSizeAsMacro(const glm::ivec3& totalWorkAmount, bool mustBeMultiple=true);
   static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple);
   static glm::ivec3 calcBestWorkGroupSize(const glm::ivec3& totalWorkAmount, bool mustBeMultiple, int maxNumInvocations);
+};
+
+class DynamicComputeStep
+{
+  Q_DISABLE_COPY(DynamicComputeStep)
+public:
+  DynamicComputeStep(const QString& shaderFileName, const glm::uvec3& typicalWorkAmount, const QSet<QString>& preprocessorBlock=QSet<QString>());
+
+  void invoke(const glm::uvec3& workAmount);
+
+private:
+  glm::uvec3 groupSize;
+  ReloadableShader shader;
+
+  QSet<QString> groupSizeAsMacro(const glm::uvec3& totalWorkAmount);
 };
 
 } // namespace renderer

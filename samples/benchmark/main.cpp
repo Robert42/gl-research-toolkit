@@ -9,6 +9,19 @@
 using namespace glrt::renderer;
 using namespace glrt::scene;
 
+template<typename T>
+T pickNearest(T value, const QVector<T>& options)
+{
+  T bestCandidate = value;
+
+  for(T candidate : options)
+    if(glm::abs(value-candidate) < glm::abs(value-bestCandidate))
+      bestCandidate = candidate;
+
+  return bestCandidate;
+}
+
+
 int main(int argc, char** argv)
 {
   const glm::uvec2 resolution(1920, 1080);
@@ -55,6 +68,13 @@ int main(int argc, char** argv)
   uint32_setters["--max_num_frames"] = [&](uint32_t v){max_num_frames = v;};
   uint16_setters["--num-bvh-grids"] = [](uint16_t v){NUM_GRID_CASCADES.set_value(glm::clamp<uint16_t>(v, 1, 3));};
   uint16_setters["--bvh-stack-depth"] = [](uint16_t v){BVH_MAX_STACK_DEPTH.set_value(glm::clamp<uint16_t>(v, 1, MAX_NUM_STATIC_MESHES));};
+
+  static_assert(MAX_SDF_CANDIDATE_GRID_SIZE==32, "Please adapt the line below to cover all possible candidate grid sizes");
+  uint16_setters["--sdf_scandidate_grid_size"] = [](uint16_t v){SDF_CANDIDATE_GRID_SIZE.set_value(pickNearest(v, {16, 32}));};
+  bool_setters["--ao_use_candidate_grid"] = [](bool v){AO_USE_CANDIDATE_GRID.set_value(v);};
+  bool_setters["--ao_ignore_fallback_sdf"] = [](bool v){AO_IGNORE_FALLBACK_SDF.set_value(v);};
+  bool_setters["--ao_fallback_sdf_only"] = [](bool v){AO_FALLBACK_SDF_ONLY.set_value(v);};
+  uint32_setters["--merged_static_sdf_size"] = [](uint32_t v){MERGED_STATIC_SDF_SIZE.set_value(v);};
 
   QStringList arguments;
   for(int i=1; i<argc; ++i)
@@ -352,7 +372,7 @@ int main(int argc, char** argv)
     qreal start = size.height()-padding;
     qreal end = pt*0.5 + padding;
 
-    QLinearGradient gradient(0.f, start, 0.f, end);
+    QLinearGradient gradient(0., start, 0., end);
     qreal f = 1./7.;
     gradient.setColorAt(0*f, QColor::fromRgb(0));
     gradient.setColorAt(1*f, QColor::fromRgb(0x204a87));
@@ -406,7 +426,7 @@ int main(int argc, char** argv)
     {
       if(i!=frame_num_padding)
         file.write("\n");
-      file.write(QString::number(all_frame_times[int(i)], 'g', 10).toUtf8());
+      file.write(QString::number(qreal(all_frame_times[int(i)]), 'g', 10).toUtf8());
     }
   }
 

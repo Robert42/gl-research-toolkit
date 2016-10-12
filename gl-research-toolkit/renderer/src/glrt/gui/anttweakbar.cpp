@@ -5,6 +5,7 @@
 #include <glrt/renderer/scene-renderer.h>
 #include <glrt/renderer/debugging/shader-debug-printer.h>
 #include <glrt/renderer/toolkit/reloadable-shader.h>
+#include <glrt/renderer/debugging/visualization-renderer.h>
 
 namespace glrt {
 namespace gui {
@@ -133,12 +134,13 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
 
   renderer->visualizePosteffect_Distancefield_boundingSpheres_raymarch.guiToggle.TwAddVarCB(tweakBar, "SDF B-Spheres", "group='Debug Voxels' help='Show the Bounding Spheres of the Distancefield Components as if they would define the distance field'");
   renderer->visualizePosteffect_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Distance-Field Ray-March", "group='Debug Voxels'");
+  renderer->visualizePosteffect_Fallback_Distancefield_raymarch.guiToggle.TwAddVarCB(tweakBar, "Fallback Distance-Field Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_Cubic_raymarch.guiToggle.TwAddVarCB(tweakBar, "Cubic-Voxel Ray-March", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances.guiToggle.TwAddVarCB(tweakBar, "Highlight Unconveiled Negative Distances", "group='Debug Voxels'");
   TwSetParam(tweakBar, "Debug Voxels", "opened", TW_PARAM_CSTRING, 1, "false");
 
-  TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Framebuffer.clearBuffer, "group='Debug Shader'");
+  TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Posteffects.clearBuffer, "group='Debug Shader'");
   renderer->visualizePosteffect_OrangeTest.guiToggle.TwAddVarCB(tweakBar, "Orange CommandList Test", "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Enable Lighting in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.useLighting, "group='Debug Shader'");
   TwAddVarRW(tweakBar, "Show Normals in Debug", TW_TYPE_BOOL32, &renderer->debugPosteffect.showNormals, "group='Debug Shader'");
@@ -178,6 +180,27 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   TwAddVarRW(tweakBar, "BVH Debug depth begin", TW_TYPE_UINT16, &renderer->bvh_debug_depth_begin, QString("group='Debug Scene' min=0 max=%0").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
   TwAddVarRW(tweakBar, "BVH Debug depth end", TW_TYPE_UINT16, &renderer->bvh_debug_depth_end, QString("group='Debug Scene' min=1 max=%0").arg(renderer::MAX_NUM_STATIC_MESHES).toStdString().c_str());
   renderer->visualizeBVH_Grid.guiToggle.TwAddVarCB(tweakBar, "Show BVH Cascaded Grids", "group='Debug Scene' help='Show the Grids accessing the SDF Bounding Volume Hierarchy'");
+
+  renderer->visualizeSdfCandidateGrid.guiToggle.TwAddVarCB(tweakBar, "Show SDF Candidate-Grid", "group='Debug Scene'");
+  renderer->visualizeSdfCandidateCell.guiToggle.TwAddVarCB(tweakBar, "Show SDF Candidate-Cell", "group='Debug Scene'");
+  currentSdfCellToDebug_x.TwAddVarCB(tweakBar, "cell_x", "group='Debug Scene' visible=false min=0 max=31");
+  currentSdfCellToDebug_y.TwAddVarCB(tweakBar, "cell_y", "group='Debug Scene' visible=false min=0 max=31");
+  currentSdfCellToDebug_z.TwAddVarCB(tweakBar, "cell_z", "group='Debug Scene' visible=false min=0 max=31");
+  currentSdfCellToDebug_x.getter = []() -> int {return glm::min<int>(renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.x, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);};
+  currentSdfCellToDebug_y.getter = []() -> int {return glm::min<int>(renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.y, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);};
+  currentSdfCellToDebug_z.getter = []() -> int {return glm::min<int>(renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.z, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);};
+  currentSdfCellToDebug_x.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.x = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
+  currentSdfCellToDebug_y.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.y = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
+  currentSdfCellToDebug_z.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.z = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
+  renderer->visualizeSdfFallbackGrid.guiToggle.TwAddVarCB(tweakBar, "Show SDF Fallback-Grid", "group='Debug Scene'");
+
+  std::function<void(bool)> setSdfCandidateEnabled = renderer->visualizeSdfCandidateCell.guiToggle.setter;
+  renderer->visualizeSdfCandidateCell.guiToggle.setter = [setSdfCandidateEnabled,this](bool b) {
+    currentSdfCellToDebug_x.setVisible(b);
+    currentSdfCellToDebug_y.setVisible(b);
+    currentSdfCellToDebug_z.setVisible(b);
+    setSdfCandidateEnabled(b);
+  };
 
   renderer->visualizeBoundingBoxes.guiToggle.TwAddVarCB(tweakBar, "Show Voxel-AABBs", "group='Debug Scene'");
   renderer->visualizeSceneBoundingBox.guiToggle.TwAddVarCB(tweakBar, "Show Scene-AABB", "group='Debug Scene'");
@@ -233,6 +256,24 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   //-------- Optimization ---------------------------------------------------
   sortObjectsBySDF = glrt::scene::SORT_OBJECTS_BY_SDF_TEXTURE;
   sortObjectsBySDF.TwAddVarCB(tweakBar, "SortBySDF", "group='Optimization'");
+  AO_USE_CANDIDATE_GRID = glrt::renderer::AO_USE_CANDIDATE_GRID;
+  AO_USE_CANDIDATE_GRID.TwAddVarCB(tweakBar, "Use Candidate Grid", "group='Optimization'");
+
+  AO_IGNORE_FALLBACK_SDF = glrt::renderer::AO_IGNORE_FALLBACK_SDF;
+  AO_IGNORE_FALLBACK_SDF.TwAddVarCB(tweakBar, "AO ignore fallback texture", "group='Optimization'");
+
+  AO_FALLBACK_SDF_ONLY = glrt::renderer::AO_FALLBACK_SDF_ONLY;
+  AO_FALLBACK_SDF_ONLY.TwAddVarCB(tweakBar, "AO use only fallback texture", "group='Optimization'");
+
+  MERGED_STATIC_SDF_SIZE = glrt::renderer::MERGED_STATIC_SDF_SIZE;
+  MERGED_STATIC_SDF_SIZE.TwAddVarCB(tweakBar, "AO Fallback SDF size", "group='Optimization' min=16 max=512");
+
+  AO_RADIUS = glrt::renderer::AO_RADIUS;
+  AO_RADIUS.TwAddVarCB(tweakBar, "AO Radius", "group='Optimization' min=0.1 max=20");
+  AO_STATIC_FALLBACK_FADING_START = glrt::renderer::AO_STATIC_FALLBACK_FADING_START;
+  AO_STATIC_FALLBACK_FADING_START.TwAddVarCB(tweakBar, "AO Fallback Fading Start", "group='Optimization' min=0.1 max=20");
+  AO_STATIC_FALLBACK_FADING_END = glrt::renderer::AO_STATIC_FALLBACK_FADING_END;
+  AO_STATIC_FALLBACK_FADING_END.TwAddVarCB(tweakBar, "AO Fallback Fading End", "group='Optimization' min=0.1 max=20");
 
   TwSetParam(tweakBar, "Optimization", "opened", TW_PARAM_CSTRING, 1, "false");
 
@@ -291,12 +332,14 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
 
   SDFSAMPLING_SPHERETRACING_START = renderer::SDFSAMPLING_SPHERETRACING_START;
   SDFSAMPLING_SELF_SHADOW_AVOIDANCE = renderer::SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
+  SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS = renderer::SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS;
   SDFSAMPLING_EXPONENTIAL_NUM = renderer::SDFSAMPLING_EXPONENTIAL_NUM;
   SDFSAMPLING_EXPONENTIAL_START = renderer::SDFSAMPLING_EXPONENTIAL_START;
   SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE = renderer::SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
   SDFSAMPLING_EXPONENTIAL_FACTOR = renderer::SDFSAMPLING_EXPONENTIAL_FACTOR;
   SDFSAMPLING_EXPONENTIAL_OFFSET = renderer::SDFSAMPLING_EXPONENTIAL_OFFSET;
 
+  SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS.TwAddVarCB(tweakBar, "SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS", "group='Debug/SDF-AO' min=1 max=256");
   SDFSAMPLING_SPHERETRACING_START.TwAddVarCB(tweakBar, "SDFSAMPLING_SPHERETRACING_START", "group='Debug/SDF-AO' min=0 max=4 precision=3");
   SDFSAMPLING_SELF_SHADOW_AVOIDANCE.TwAddVarCB(tweakBar, "SDFSAMPLING_SELF_SHADOW_AVOIDANCE", "group='Debug/SDF-AO' min=0 max=2 precision=3");
   SDFSAMPLING_EXPONENTIAL_NUM.TwAddVarCB(tweakBar, "SDFSAMPLING_EXPONENTIAL_NUM", "group='Debug/SDF-AO' min=1 max=16");

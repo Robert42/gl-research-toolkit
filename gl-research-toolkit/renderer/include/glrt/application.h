@@ -35,6 +35,7 @@ public:
   Profiler profiler;
 
   bool isRunning;
+  bool hasFocus;
 
   Application(int& argc, char** argv, const System::Settings& systemSettings = System::Settings::simpleWindow(), const Application::Settings& applicationSettings=Settings::techDemo());
   virtual ~Application();
