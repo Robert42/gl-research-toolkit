@@ -127,6 +127,8 @@ private:
   bool dirty_candidate_grid;
   bool dirty_merged_sdf_texture_buffer;
   bool dirty_merged_sdf;
+  bool _static_fade_with_fallback;
+  void update_static_fade_with_fallback();
 
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;

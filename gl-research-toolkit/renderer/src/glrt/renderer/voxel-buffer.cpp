@@ -34,6 +34,11 @@ VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
 
   MERGED_STATIC_SDF_SIZE.callback_functions << [this](uint32_t){dirty_merged_sdf_texture_buffer=true;};
 
+  AO_IGNORE_FALLBACK_SDF.callback_functions << [this](uint32_t){update_static_fade_with_fallback();};
+  AO_FALLBACK_SDF_ONLY.callback_functions << [this](uint32_t){update_static_fade_with_fallback();};
+  AO_STATIC_FALLBACK_FADING_END.callback_functions << [this](uint32_t){dirty_candidate_grid = true;};
+  AO_RADIUS.callback_functions << [this](uint32_t){dirty_candidate_grid = true;};
+
   initStaticSDFMerged();
 }
 
@@ -74,7 +79,9 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
   if(Q_UNLIKELY(dirty_candidate_grid))
   {
-    candidateGridHeader = candidateGrid.calcCandidates(&scene, &candidateIndexBuffer, AO_RADIUS);
+    float radius = _static_fade_with_fallback ? AO_STATIC_FALLBACK_FADING_END : AO_RADIUS;
+
+    candidateGridHeader = candidateGrid.calcCandidates(&scene, &candidateIndexBuffer, radius);
     candidateGridHeader.fallbackSDF = staticFallbackSdf.textureHandle;
     candidateGridHeader.fallbackSdfLocation = staticFallbackSdf.location;
 
@@ -365,6 +372,16 @@ void glrt::renderer::VoxelBuffer::mergeStaticSDFs()
   sdfMergeHeaderBuffer.BindUniformBuffer(UNIFORM_MERGE_SDF_BLOCK);
 
   mergeSDFs.invoke(glm::uvec3(MERGED_STATIC_SDF_SIZE));
+}
+
+void VoxelBuffer::update_static_fade_with_fallback()
+{
+  bool should_fade = !AO_FALLBACK_SDF_ONLY && !AO_IGNORE_FALLBACK_SDF;
+  if(_static_fade_with_fallback != should_fade)
+  {
+    _static_fade_with_fallback = should_fade;
+    dirty_candidate_grid = true;
+  }
 }
 
 
