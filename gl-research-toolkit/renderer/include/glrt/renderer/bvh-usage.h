@@ -59,6 +59,7 @@ void set_bvh_traversal_leaf_result_array_length(uint16_t n);
 extern GLSLMacroWrapper<float> SDFSAMPLING_SPHERETRACING_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_SELF_SHADOW_AVOIDANCE;
 extern GLSLMacroWrapper<int> SDFSAMPLING_EXPONENTIAL_NUM;
+extern GLSLMacroWrapper<int> SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FIRST_SAMPLE;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_START;
 extern GLSLMacroWrapper<float> SDFSAMPLING_EXPONENTIAL_FACTOR;

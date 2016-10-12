@@ -106,7 +106,7 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
 #endif
 
 #if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
-  int max_num_loops = 256;
+  int max_num_loops = SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS;
   while(t < intersection_distance_back && 0<=max_num_loops--)
   {
     vec3 p = get_point(ray_voxelspace, t);
