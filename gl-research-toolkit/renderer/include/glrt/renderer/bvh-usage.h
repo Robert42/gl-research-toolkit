@@ -71,6 +71,8 @@ extern GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID;
 extern GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY;
 
+extern GLSLMacroWrapper<bool> AO_CANDIDATE_GRID_CONTAINS_INDICES;
+
 
 extern GLSLMacroWrapper<uint16_t> N_GI_CONES;
 
