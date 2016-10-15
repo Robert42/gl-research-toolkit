@@ -15,6 +15,7 @@ public:
 
   ManagedGLBuffer(quint32 capacity);
 
+  const T_element* MapReadOnly();
   T_element* Map();
   T_element* Map(quint32 numElements);
   void Unmap();

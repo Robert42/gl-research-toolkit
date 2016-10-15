@@ -16,6 +16,9 @@ struct Cone;
 } // namespace glsl
 namespace renderer {
 
+typedef scene::resources::DirectDataCandidateGridArrayCell DirectDataCandidateGridArrayCell;
+
+
 struct BVH
 {
   typedef scene::resources::BoundingSphere BoundingSphere;
@@ -106,6 +109,11 @@ public:
     glm::uvec3 size;
 
     CandidateGridHeader calcCandidates(const scene::Scene* scene, ManagedGLBuffer<uint8_t>* candidateGridBuffer, float influence_radius);
+    CandidateGridHeader calcCandidates(const scene::Scene* scene, ManagedGLBuffer<DirectDataCandidateGridArrayCell>* candidateGridBuffer, float influence_radius, const QVector<scene::resources::VoxelUniformDataBlock>& distanceFieldVoxelData_cpu, const QVector<BoundingSphere>& distanceFieldboundingSpheres_cpu);
+
+  private:
+    template<typename T>
+    CandidateGridHeader calcCandidatesImplementation(const scene::Scene* scene, ManagedGLBuffer<T>* candidateGridBuffer, float influence_radius, const std::function<T(uint8_t)>& generate_data);
   };
   CandidateGridHeader candidateGridHeader;
   CandidateGrid candidateGrid;
@@ -130,6 +138,8 @@ private:
   bool _static_fade_with_fallback;
   void update_static_fade_with_fallback();
 
+  QVector<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData_cpu;
+  QVector<BoundingSphere> distanceFieldboundingSpheres_cpu;
   ManagedGLBuffer<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData;
   ManagedGLBuffer<BoundingSphere> distanceFieldboundingSpheres;
 
@@ -139,6 +149,7 @@ private:
 
   // LIMIT_255
   ManagedGLBuffer<uint8_t> candidateIndexBuffer;
+  ManagedGLBuffer<DirectDataCandidateGridArrayCell> candidateDataBuffer;
 
   VoxelHeader _voxelHeader;
 

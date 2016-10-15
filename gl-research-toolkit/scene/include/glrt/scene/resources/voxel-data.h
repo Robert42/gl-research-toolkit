@@ -63,6 +63,13 @@ struct VoxelUniformDataBlock
   padding<quint64, 1> _padding1;
 };
 
+struct DirectDataCandidateGridArrayCell
+{
+  VoxelUniformDataBlock block;
+  BoundingSphere boundingSphere;
+};
+
+
 
 } // namespace resources
 } // namespace scene

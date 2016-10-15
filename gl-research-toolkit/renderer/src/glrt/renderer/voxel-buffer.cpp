@@ -16,6 +16,8 @@ namespace renderer {
 
 // ==== VoxelBuffer =========================================================================================================================================
 
+constexpr const uint32_t item_capacity = MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE*255;
+
 VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
   : scene(scene),
     voxelGridData(scene.data->voxelGrids),
@@ -23,10 +25,15 @@ VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
     distanceFieldboundingSpheres(scene.data->voxelGrids->capacity()),
     bvhInnerBoundingSpheres(scene.data->voxelGrids->capacity()),
     bvhInnerNodes(scene.data->voxelGrids->capacity()),
-    candidateIndexBuffer(MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE*MAX_SDF_CANDIDATE_GRID_SIZE),
+    // LIMIT_255
+    candidateIndexBuffer(item_capacity),
+    candidateDataBuffer(item_capacity),
     mergeSDFs(GLRT_SHADER_DIR "/compute/merge-sdf.cs",
               glm::uvec3(16))
 {
+  distanceFieldVoxelData_cpu.resize(item_capacity);
+  distanceFieldboundingSpheres_cpu.resize(item_capacity);
+
   dirty_candidate_grid = true;
   dirty_merged_sdf_texture_buffer = true;
   dirty_merged_sdf = true;
@@ -38,6 +45,7 @@ VoxelBuffer::VoxelBuffer(glrt::scene::Scene& scene)
   AO_FALLBACK_SDF_ONLY.callback_functions << [this](uint32_t){update_static_fade_with_fallback();};
   AO_STATIC_FALLBACK_FADING_END.callback_functions << [this](uint32_t){dirty_candidate_grid = true;};
   AO_RADIUS.callback_functions << [this](uint32_t){dirty_candidate_grid = true;};
+  AO_CANDIDATE_GRID_CONTAINS_INDICES.callback_functions << [this](uint32_t){dirty_candidate_grid = true;};
 
   initStaticSDFMerged();
 }
@@ -79,9 +87,12 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 
   if(Q_UNLIKELY(dirty_candidate_grid))
   {
-    float radius = _static_fade_with_fallback ? AO_STATIC_FALLBACK_FADING_END : AO_RADIUS;
+    const float radius = _static_fade_with_fallback ? AO_STATIC_FALLBACK_FADING_END : AO_RADIUS;
 
-    candidateGridHeader = candidateGrid.calcCandidates(&scene, &candidateIndexBuffer, radius);
+    if(AO_CANDIDATE_GRID_CONTAINS_INDICES)
+      candidateGridHeader = candidateGrid.calcCandidates(&scene, &candidateIndexBuffer, radius);
+    else
+      candidateGridHeader = candidateGrid.calcCandidates(&scene, &candidateDataBuffer, radius, distanceFieldVoxelData_cpu, distanceFieldboundingSpheres_cpu);
     candidateGridHeader.fallbackSDF = staticFallbackSdf.textureHandle;
     candidateGridHeader.fallbackSdfLocation = staticFallbackSdf.location;
 
@@ -116,12 +127,12 @@ void VoxelBuffer::updateVoxelGrid()
   // after swapping the old address is invalid
   z_indices = voxelGridData->z_index;
   const float* scaleFactor = voxelGridData->scaleFactor;
-  const BoundingSphere* boundingSpheres = voxelGridData->boundingSphere;
+  const BoundingSphere* localSpaceBoundingSpheres = voxelGridData->boundingSphere;
 
   const quint16 n_mintwo = glm::max<quint16>(2, n);
 
-  scene::resources::VoxelUniformDataBlock* dataBlock = distanceFieldVoxelData.Map(n_mintwo);
-  BoundingSphere* boundingSphere = distanceFieldboundingSpheres.Map(n_mintwo);
+  scene::resources::VoxelUniformDataBlock* const dataBlock = distanceFieldVoxelData_cpu.data();
+  BoundingSphere* const boundingSphere = distanceFieldboundingSpheres_cpu.data();
 
   #pragma omp simd
   for(quint16 i=0; i<n; ++i)
@@ -143,7 +154,7 @@ void VoxelBuffer::updateVoxelGrid()
     dataBlock[i].voxelCount_z = voxelCount.z;
     dataBlock[i].texture = gpuTextureHandle;
 
-    boundingSphere[i] = globalCoordFrame * boundingSpheres[i];
+    boundingSphere[i] = globalCoordFrame * localSpaceBoundingSpheres[i];
   }
 
   if(Q_UNLIKELY(n==1))
@@ -154,7 +165,10 @@ void VoxelBuffer::updateVoxelGrid()
 
   updateBvhTree(boundingSphere);
 
+  memcpy(distanceFieldVoxelData.Map(n_mintwo), dataBlock, size_t(n_mintwo) * sizeof(scene::resources::VoxelUniformDataBlock));
   distanceFieldVoxelData.Unmap();
+
+  memcpy(distanceFieldboundingSpheres.Map(n_mintwo), boundingSphere, size_t(n_mintwo) * sizeof(BoundingSphere));
   distanceFieldboundingSpheres.Unmap();
 }
 
@@ -193,7 +207,34 @@ Array<uint16_t> collectAllSdfIntersectingWith(const scene::Scene::Data* data, co
 
 VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, ManagedGLBuffer<uint8_t>* candidateGridBuffer, float influence_radius)
 {
-  PROFILE_SCOPE("CandidateGrid::calcCandidateGrid")
+  PROFILE_SCOPE("CandidateGrid::calcCandidateGrid(uint8_t*)");
+
+  return calcCandidatesImplementation<uint8_t>(scene, candidateGridBuffer, influence_radius, [](uint8_t i){return i;});
+}
+
+VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(const scene::Scene* scene, ManagedGLBuffer<DirectDataCandidateGridArrayCell>* candidateGridBuffer, float influence_radius, const QVector<scene::resources::VoxelUniformDataBlock>& distanceFieldVoxelData_cpu, const QVector<BoundingSphere>& distanceFieldboundingSpheres_cpu)
+{
+  PROFILE_SCOPE("CandidateGrid::calcCandidateGrid(DirectDataCandidateGridArrayCell*)");
+
+  const scene::Scene::Data* data = scene->data;
+
+  const scene::resources::VoxelUniformDataBlock* distanceFieldVoxelData = distanceFieldVoxelData_cpu.data();
+  const BoundingSphere* distanceFieldboundingSpheres = distanceFieldboundingSpheres_cpu.data();
+  CandidateGridHeader header = calcCandidatesImplementation<DirectDataCandidateGridArrayCell>(scene,
+                                                                        candidateGridBuffer,
+                                                                        influence_radius,
+                                                                        [data, distanceFieldVoxelData, distanceFieldboundingSpheres](uint8_t i){
+    DirectDataCandidateGridArrayCell c;
+    c.boundingSphere = distanceFieldboundingSpheres[i];
+    c.block = distanceFieldVoxelData[i];
+    return c;
+  });
+  return header;
+}
+
+template<typename T>
+VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidatesImplementation(const scene::Scene* scene, ManagedGLBuffer<T>* candidateGridBuffer, float influence_radius, const std::function<T(uint8_t)>& generate_data)
+{
 
   const scene::Scene::Data* data = scene->data;
   // TODO: seperate aabb for whole scene and for static scene?
@@ -248,7 +289,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
 
   uint32_t data_offset = 0;
 
-  uint8_t* _index_data = candidateGridBuffer->Map();
+  T* candidate_data_buffer = candidateGridBuffer->Map();
   for(uint32_t x=0; x<size.x; x++)
   {
     for(uint32_t y=0; y<size.y; y++)
@@ -259,21 +300,21 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidates(cons
         Array<uint16_t>& sdfs = *(collectedSDFs + offset);
         const uint32_t num_candidates = uint32_t(sdfs.length());
         uint32_t& voxelData = *(buffer + offset);
-        uint8_t* index_data = reinterpret_cast<uint8_t*>(reinterpret_cast<uint8_t*>(_index_data) + data_offset);
+        T* candidate_data = reinterpret_cast<T*>(reinterpret_cast<T*>(candidate_data_buffer) + data_offset);
         Q_ASSERT(num_candidates <= 255);
         Q_ASSERT(data_offset <= 0x00ffffff);
-        Q_ASSERT(data_offset+num_candidates*sizeof(uint8_t) <= 0x01000000);
+        Q_ASSERT(data_offset+num_candidates <= 0x01000000);
 
         for(uint32_t i=0; i<num_candidates; ++i)
         {
           uint16_t index = sdfs[int(i)];
           Q_ASSERT(index <= 255);
-          index_data[i] = static_cast<uint8_t>(index);
+          candidate_data[i] = generate_data(static_cast<uint8_t>(index));
         }
 
         voxelData = (num_candidates <<  24) | (data_offset);
 
-        data_offset += num_candidates * sizeof(uint8_t);
+        data_offset += num_candidates;
       }
     }
   }

@@ -274,6 +274,8 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   AO_STATIC_FALLBACK_FADING_START.TwAddVarCB(tweakBar, "AO Fallback Fading Start", "group='Optimization' min=0.1 max=20");
   AO_STATIC_FALLBACK_FADING_END = glrt::renderer::AO_STATIC_FALLBACK_FADING_END;
   AO_STATIC_FALLBACK_FADING_END.TwAddVarCB(tweakBar, "AO Fallback Fading End", "group='Optimization' min=0.1 max=20");
+  AO_CANDIDATE_GRID_CONTAINS_INDICES = glrt::renderer::AO_CANDIDATE_GRID_CONTAINS_INDICES;
+  AO_CANDIDATE_GRID_CONTAINS_INDICES.TwAddVarCB(tweakBar, "AO Candidate Grid Contains Indices", "group='Optimization'");
 
   TwSetParam(tweakBar, "Optimization", "opened", TW_PARAM_CSTRING, 1, "false");
 

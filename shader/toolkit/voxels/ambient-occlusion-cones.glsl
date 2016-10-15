@@ -207,6 +207,7 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
   }
 }
 
+#if AO_CANDIDATE_GRID_CONTAINS_INDICES
 void ao_coneSoftShadow_candidateGrid(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
 {
   const vec3 world_pos = cone_bouquet[0].origin;
@@ -245,6 +246,47 @@ void ao_coneSoftShadow_candidateGrid(in Sphere* bounding_spheres, in VoxelDataBl
     }
   }
 }
+#else
+void ao_coneSoftShadow_candidateGrid(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
+{
+  const vec3 world_pos = cone_bouquet[0].origin;
+  uint32_t num_static_candidates;
+  CandidateType* first_static_candidate;
+  uint32_t num_dynamic_candidates;
+  uint8_t* first_dynamic_candidate;
+  get_sdfCandidates(world_pos, num_static_candidates, first_static_candidate, num_dynamic_candidates, first_dynamic_candidate);
+  
+  for(uint32_t i=0; i<num_static_candidates; ++i)
+  {
+    #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
+        ao_distancefield_cost++;
+    #endif
+    VoxelDataBlock* sdf = (VoxelDataBlock*)first_static_candidate;
+    Sphere sphere = first_static_candidate->boundingSphere;
+    
+    for(int j=0; j<N_GI_CONES; ++j)
+    {
+      float distance_to_sphere_origin;
+      
+      #if defined(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST)
+      ao_distancefield_cost++;
+      #endif
+      if(cone_intersects_sphere(cone_bouquet[j], sphere, distance_to_sphere_origin, cone_length))
+      {
+        #if defined(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF)
+            ao_distancefield_cost++;
+        #endif
+
+        float intersection_distance_front = distance_to_sphere_origin-sphere.radius;
+        float intersection_distance_back = distance_to_sphere_origin+sphere.radius;
+        cone_bouquet_ao[j] = min(cone_bouquet_ao[j], ao_coneSoftShadow(cone_bouquet[j], sdf, intersection_distance_front, intersection_distance_back, cone_length));
+      }
+    }
+    
+    first_static_candidate++;
+  }
+}
+#endif
 
 
 #define BASE_VOXEL_GRID 1

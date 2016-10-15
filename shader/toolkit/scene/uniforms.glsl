@@ -70,8 +70,18 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
   SceneData scene;
 };
 
+#if AO_CANDIDATE_GRID_CONTAINS_INDICES
+#define CandidateType uint8_t
+#else
+struct CandidateType
+{
+  Sphere boundingSphere;
+  VoxelDataBlock voxelDataBlock;
+};
+#endif
+
 // LIMIT_255
-void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, out uint8_t* first_static_candidate, out uint32_t num_dynamic_candidates, out uint8_t* first_dynamic_candidate)
+void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, out CandidateType* first_static_candidate, out uint32_t num_dynamic_candidates, out uint8_t* first_dynamic_candidate)
 {
   vec3 gridLocationOffset = scene.candidateGridHeader.gridLocation.xyz;
   float gridLocationScale = scene.candidateGridHeader.gridLocation.w;
@@ -83,7 +93,7 @@ void get_sdfCandidates(in vec3 world_pos, out uint32_t num_static_candidates, ou
   
   num_static_candidates = gridRanges>>24;
   // LIMIT_255
-  first_static_candidate = (uint8_t*)(scene.candidateGridHeader.candidateGrid + (0x00ffffff & gridRanges));
+  first_static_candidate = ((CandidateType*)(scene.candidateGridHeader.candidateGrid)) + (0x00ffffff & gridRanges);
   
   num_dynamic_candidates = 0;
 }

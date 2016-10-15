@@ -55,7 +55,7 @@ return;
 #if defined(CANDIDATE_GRID_NUM_STATIC_CANDIDATES) || defined(CANDIDATE_GRID_NUM_DYNAMIC_CANDIDATES)
   uint num_static_candidates;
   uint num_dynamic_candidates;
-  uint8_t* first_static_candidate;
+  CandidateType* first_static_candidate;
   uint8_t* first_dynamic_candidate;
   get_sdfCandidates(world_pos, num_static_candidates, first_static_candidate, num_dynamic_candidates, first_dynamic_candidate);
   #if defined(CANDIDATE_GRID_NUM_STATIC_CANDIDATES)

@@ -14,6 +14,12 @@ ManagedGLBuffer<T_element>::ManagedGLBuffer(quint32 capacity)
 }
 
 template<typename T_element>
+const T_element* ManagedGLBuffer<T_element>::MapReadOnly()
+{
+  return reinterpret_cast<T_element*>(this->buffer.Map(gl::Buffer::MapType::READ, gl::Buffer::MapWriteFlag::NONE));
+}
+
+template<typename T_element>
 T_element* ManagedGLBuffer<T_element>::Map()
 {
   return reinterpret_cast<T_element*>(this->buffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
