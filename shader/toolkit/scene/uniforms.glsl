@@ -75,8 +75,8 @@ layout(binding=UNIFORM_BINDING_SCENE_BLOCK, std140) uniform SceneBlock
 #else
 struct CandidateType
 {
-  Sphere boundingSphere;
   VoxelDataBlock voxelDataBlock;
+  Sphere boundingSphere;
 };
 #endif
 
