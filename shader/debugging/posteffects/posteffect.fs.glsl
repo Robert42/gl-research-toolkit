@@ -71,9 +71,9 @@ vec3 light_up_mesh_directional(in vec3 camera_direction, vec3 normal)
 
   vec3 light_directions[3];
   vec3 light_colors[3];
-  light_directions[0] = vec3(0.675000011920929, 0.7250000238418579, 0.1369306445121765);
-  light_directions[1] = vec3(-0.375, -0.7750000357627869, 0.5086748003959656);
-  light_directions[2] = vec3(-0.6413142681121826, 0.6855428814888, -0.34459683299064636);
+  light_directions[0] = normalize(vec3(0.675000011920929, 0.7250000238418579, 0.1369306445121765));
+  light_directions[1] = normalize(vec3(-0.375, -0.7750000357627869, 0.5086748003959656));
+  light_directions[2] = normalize(vec3(-0.6413142681121826, 0.6855428814888, -0.34459683299064636));
   light_colors[0] = vec3(0.5681918263435364, 0.6234841346740723, 0.6859579086303711);
   light_colors[1] = vec3(0.47173696756362915, 0.5366537570953369, 0.5999999046325684);
   light_colors[2] = vec3(1.0, 0.7710601687431335, 0.5074158310890198);
@@ -82,7 +82,12 @@ vec3 light_up_mesh_directional(in vec3 camera_direction, vec3 normal)
   vec3 diffuse_color = vec3(1);
   for(int i=0; i<3; ++i)
   {
-    L_out += max(0, dot(-light_directions[i], normal)) * light_colors[i] * diffuse_color;
+    float cos_term = max(0, dot(-light_directions[i], normal));
+
+    // hack for making the light look smoother
+    cos_term = smoothstep(0, 1, cos_term);
+
+    L_out += cos_term * light_colors[i] * diffuse_color;
   }
 
   return L_out;
