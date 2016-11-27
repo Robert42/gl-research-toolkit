@@ -10,12 +10,20 @@ namespace glrt {
 namespace scene {
 namespace resources {
 
+#ifndef PREVENT_REIMPORT
+#define PREVENT_REIMPORT false
+#endif
+
+extern bool preventReimport_Assets;
 extern bool forceReimport_Assets;
 
+bool preventReimport_Assets = PREVENT_REIMPORT;
 bool forceReimport_Assets = false;
 
 bool shouldConvert(const QFileInfo& targetFile, const QFileInfo& sourceFile, const QSet<QString>& converterSourceFile)
 {
+  if(preventReimport_Assets)
+    return false;
   if(forceReimport_Assets)
     return true;
 
