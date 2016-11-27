@@ -20,6 +20,7 @@
 struct PosteffectVisualizationData
 {
   float distancefield_offset;
+  bool showWorldPos;
   bool showNormals;
   bool useLighting;
   bool showNumSteps;
@@ -59,9 +60,11 @@ void main()
   
   rayMarch(ray, fragment_color,  world_pos, world_normal);
   
-  if(posteffect_param.showNormals && !posteffect_param.showNumSteps)
+  if(posteffect_param.showWorldPos && !posteffect_param.showNumSteps)
+    fragment_color.rgb = world_pos;
+  else if(posteffect_param.showNormals && !posteffect_param.showNumSteps)
     fragment_color.rgb = encode_signed_normalized_vector_as_color(world_normal);
-  if(posteffect_param.useLighting && !posteffect_param.showNumSteps)
+  else if(posteffect_param.useLighting && !posteffect_param.showNumSteps)
   {
     BaseMaterial material;
     material.normal = world_normal;
