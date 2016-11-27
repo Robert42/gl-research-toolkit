@@ -64,7 +64,13 @@ Color((1.0, 0.7710601687431335, 0.5074158310890198))
 */
 vec3 light_up_mesh_directional(in vec3 camera_direction, vec3 normal)
 {
-  return encode_signed_normalized_vector_as_color(-normal);
+  mat3 m = matrix3x3ForDirection(-camera_direction, vec3(0,0,1));
+  m = inverse(m);
+
+  normal = m * normal;
+
+
+  return encode_signed_normalized_vector_as_color(normal);
 }
 
 void main()
