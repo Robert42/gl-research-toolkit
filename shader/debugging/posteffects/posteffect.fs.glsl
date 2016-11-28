@@ -6,17 +6,11 @@
 
 #define highlightColor_DEFINED
 
+
 #include <glrt/glsl/math-glsl.h>
-#include <scene/uniforms.glsl>
-#include <debugging/normal.glsl>
-#include <write-fragment-color.glsl>
-#include <write-fragment-depth.glsl>
 
-#include <lighting/rendering-equation.glsl>
-
+// THis must be above the other headers, otherwise distancefield_offset is not used
 #define POSTEFFECT_VISUALIZATION
-
-
 struct PosteffectVisualizationData
 {
   float distancefield_offset;
@@ -34,6 +28,13 @@ layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform Po
 {
   PosteffectVisualizationData posteffect_param;
 };
+
+#include <scene/uniforms.glsl>
+#include <debugging/normal.glsl>
+#include <write-fragment-color.glsl>
+#include <write-fragment-depth.glsl>
+
+#include <lighting/rendering-equation.glsl>
 
 in FragmentBlock
 {
