@@ -339,6 +339,9 @@ GLuint TextureFile::loadFromFile(const QFileInfo& textureFile)
       break;
     }
 
+    if(image.depth != 1)
+      qDebug() << "loading 3d texture file"<<textureFile.fileName() << glm::ivec3(image.width, image.height, image.depth);
+
     importedTexture.setUncompressed2DImage(image, tempBuffer.data());
   }
 

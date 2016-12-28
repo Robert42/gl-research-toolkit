@@ -317,21 +317,34 @@ inline ivec3 voxelIndexFromScalarIndex(int index, ivec3 voxelCount)
   return voxelCoord;
 }
 
+inline mat3 matrix3x3ForDirection(vec3 direction, vec3 up)
+{
+  vec3 z = direction;
+  vec3 x;
+  vec3 y;
+
+  x = cross(up, z);
+
+  x = normalize(x);
+  y = cross(x, z);
+
+  return mat3(x, y, z);
+}
+
 inline mat3 matrix3x3ForDirection(vec3 direction)
 {
   vec3 z = direction;
   vec3 x;
   vec3 y;
 
+  vec3 up;
+
   if(abs(dot(z, vec3(0,1,0))) < abs(dot(z, vec3(0, 0, 1))))
-    x = cross(vec3(0, 1, 0), z);
+    up = vec3(0, 1, 0);
   else
-    x = cross(vec3(0, 0, 1), z);
+    up = vec3(0, 0, 1);
 
-  x = normalize(x);
-  y = cross(x, z);
-
-  return mat3(x, y, z);
+  return matrix3x3ForDirection(direction, up);
 }
 
 inline mat4 matrixForDirection(vec3 direction, vec3 origin=vec3(0))
