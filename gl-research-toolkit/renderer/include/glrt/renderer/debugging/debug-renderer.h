@@ -12,8 +12,10 @@ namespace debugging {
 struct PosteffectVisualizationDataBlock
 {
   float distanceFieldOffset = 0;
+  quint32 showWorldPos = false;
   quint32 showNormals = false;
   quint32 useLighting = false;
+  quint32 useDirectionalLighting = false;
   quint32 showNumSteps = false;
   quint32 stepCountAsWhite = 1024;
   quint32 stepCountAsBlack = 0;
