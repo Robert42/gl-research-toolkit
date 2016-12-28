@@ -12,6 +12,7 @@ target_link_libraries(glrt-scene
   glhelper
   Qt5::Widgets
   openvdb
+  open_exr
 )
 
 target_include_directories(

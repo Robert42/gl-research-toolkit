@@ -2,6 +2,7 @@
 #include <glrt/scene/resources/utilities/gl-texture.h>
 
 #include <QImage>
+#include <OpenEXR/ImfRgbaFile.h>
 
 namespace glrt {
 namespace scene {
@@ -585,6 +586,42 @@ GlTexture::GlTexture(const QFileInfo& fileToBeImported, ImportSettings importSet
 
     if(importSettings.generateMipmaps)
       GL_CALL(glGenerateTextureMipmap, textureId);
+  }else if(suffix == "exr")
+  {
+    QString prev = QDir::currentPath();
+    QDir::setCurrent(fileToBeImported.absolutePath());
+
+    QVector<byte> plain_data;
+    int32_t width, height;
+
+    {
+      std::string filename = fileToBeImported.fileName().toStdString();
+      OPENEXR_IMF_NAMESPACE::RgbaInputFile file(filename.c_str());
+      IMATH_NAMESPACE::Box2i data_window = file.dataWindow();
+
+      width = data_window.max.x - data_window.min.x;
+      height = data_window.max.y - data_window.min.y;
+
+      Q_ASSERT(width > 0);
+      Q_ASSERT(height > 0);
+
+      const int n_components = 4; // rgba
+      const int channel_size = sizeof(half); // float 16 bit
+
+      plain_data.resize(width*height*channel_size*n_components);
+
+      file.setFrameBuffer(reinterpret_cast<OPENEXR_IMF_NAMESPACE::Rgba*>(plain_data.data()), 1, uint32_t(width));
+      file.readPixels(data_window.min.y, data_window.max.y);
+    }
+
+    QDir::setCurrent(prev);
+
+    setUncompressed2DImage(GlTexture::format(glm::uvec3(glm::ivec3(width, height, 1)),
+                                             0,
+                                             GlTexture::Format::RGBA,
+                                             GlTexture::Type::FLOAT16,
+                                             GlTexture::Target::TEXTURE_2D),
+                           plain_data.data());
   }else
   {
     qDebug() << "Unsupported image format" << suffix << "used with the file" << fileToBeImported.absoluteFilePath();
