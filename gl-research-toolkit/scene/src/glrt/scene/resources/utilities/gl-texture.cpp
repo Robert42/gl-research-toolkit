@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <glrt/scene/resources/utilities/gl-texture.h>
+#include <glrt/toolkit/memory.h>
 
 #include <QImage>
 #include <OpenEXR/ImfRgbaFile.h>
@@ -61,6 +62,24 @@ quint32 GlTexture::UncompressedImage::calcRowStride() const
   quint32 bytesPerPixel = quint32(bytesPerPixelForFormatType(format, type));
 
   return quint32(glm::ceilMultiple<quint32>(width * bytesPerPixel, alignment));
+}
+
+void GlTexture::UncompressedImage::flipDataY(void* data) const
+{
+  for(uint32_t y = 0; y<height/2; ++y)
+  {
+    swap_lines(y, height-1-y, data);
+  }
+}
+
+void GlTexture::UncompressedImage::swap_lines(uint32_t y1, uint32_t y2, void* data) const
+{
+  swap_memory(line(data, y1), line(data, y2), rowStride);
+}
+
+void* GlTexture::UncompressedImage::line(void* data, uint32_t y) const
+{
+  return reinterpret_cast<byte*>(data) + rowStride*y;
 }
 
 GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
@@ -613,14 +632,17 @@ GlTexture::GlTexture(const QFileInfo& fileToBeImported, ImportSettings importSet
       file.setFrameBuffer(reinterpret_cast<OPENEXR_IMF_NAMESPACE::Rgba*>(plain_data.data()), 1, uint32_t(width));
       file.readPixels(data_window.min.y, data_window.max.y);
     }
-
     QDir::setCurrent(prev);
 
-    setUncompressed2DImage(GlTexture::format(glm::uvec3(glm::ivec3(width, height, 1)),
-                                             0,
-                                             GlTexture::Format::RGBA,
-                                             GlTexture::Type::FLOAT16,
-                                             GlTexture::Target::TEXTURE_2D),
+    GlTexture::UncompressedImage header = GlTexture::format(glm::uvec3(glm::ivec3(width, height, 1)),
+                                                            0,
+                                                            GlTexture::Format::RGBA,
+                                                            GlTexture::Type::FLOAT16,
+                                                            GlTexture::Target::TEXTURE_2D);
+
+    header.flipDataY(plain_data.data());
+
+    setUncompressed2DImage(header,
                            plain_data.data());
   }else
   {

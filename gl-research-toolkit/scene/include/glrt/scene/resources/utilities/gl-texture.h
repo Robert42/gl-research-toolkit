@@ -87,6 +87,11 @@ public:
     quint32 rawDataLength;
 
     quint32 calcRowStride() const;
+
+    void flipDataY(void* data) const;
+  private:
+    void swap_lines(uint32_t y1, uint32_t y2, void* data) const;
+    void* line(void* data, uint32_t y) const;
   };
 
   struct CompressedImage
