@@ -65,7 +65,7 @@ namespace scene {
 namespace resources {
 namespace utilities {
 
-vec4 calculate_dfg_lookup_value(double u, double v)
+vec3 calculate_dfg_lookup_value(double u, double v)
 {
   float roughness = float(v);
   float NoV = float(u);
@@ -73,11 +73,7 @@ vec4 calculate_dfg_lookup_value(double u, double v)
   vec3 N = glm::vec3(0,0,1);
   vec3 V = glm::vec3(sin(acos(NoV)), 0.f, NoV);
 
-  vec4 color = integrateDFGOnly(V, N, roughness);
-
-  color.a = 1.0;
-
-  return color;
+  return integrateDFGOnly(V, N, roughness);
 }
 
 } // namespace glrt

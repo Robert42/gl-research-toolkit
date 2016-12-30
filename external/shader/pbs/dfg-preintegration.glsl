@@ -22,13 +22,13 @@ void importanceSampleCosDir(
   pdf = NdotL * inv_pi;
 }
 
-vec4 integrateDFGOnly(
+vec3 integrateDFGOnly(
   in vec3 V,
   in vec3 N,
   in float roughness)
 {
   float NdotV = saturate ( dot (N , V ) ) ;
-  vec4 acc = vec4(0);
+  vec3 acc = vec3(0);
   float accWeight = 0;
   
   // Compute pre-integration
