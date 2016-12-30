@@ -42,8 +42,8 @@ namespace utilities {
 
 vec2 calculate_dfg_lookup_value(double u, double v)
 {
-  float roughness = float(u);
-  float NoV = float(v);
+  float roughness = float(v);
+  float NoV = float(u);
 
   return IntegrateBRDF(roughness, NoV, glm::vec3(0,0,1));
 }

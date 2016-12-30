@@ -8,6 +8,9 @@
 namespace glrt {
 namespace scene {
 namespace resources {
+
+void show_texture_in_dialog(const utilities::GlTexture::TextureAsFloats& asFloats, int channel=-1);
+
 namespace utilities {
 
 
@@ -345,11 +348,20 @@ void GlTexture::TextureAsFloats::calculate_dfg_lut()
     float* line = this->lineData_As<float>(y);
     for(quint32 x=0; x<width; ++x)
     {
-      glm::vec2 dfg_lut_value = calculate_dfg_lookup_value(x / double(width-1), y / double(height-1));
-      line[x*2 + 0] = dfg_lut_value.x;
-      line[x*2 + 1] = dfg_lut_value.y;
+      double u = x / double(width-1);
+      double v = y / double(height-1);
+
+      v = 1.0 - v;
+
+      glm::vec2 dfg_lut_value = calculate_dfg_lookup_value(u, v);
+      line[x*4 + 0] = dfg_lut_value.x;
+      line[x*4 + 1] = dfg_lut_value.y;
+      line[x*4 + 2] = 0.f;
+      line[x*4 + 3] = 1.f;
     }
   }
+
+  show_texture_in_dialog(*this);
 }
 
 GlTexture::TextureAsFloats::TextureAsFloats(const glm::ivec3& size, quint32 numComponents)

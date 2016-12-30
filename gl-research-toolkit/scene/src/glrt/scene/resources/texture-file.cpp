@@ -28,6 +28,34 @@ void TextureFile::appendImage(const GlTexture& texture, Type type, Format format
   appendUncompressedImage(image.first, image.second);
 }
 
+void show_texture_in_dialog(const TextureFile::TextureAsFloats& asFloats, int channel=-1)
+{
+  glm::vec4 smallestValue = glm::vec4(INFINITY);
+  glm::vec4 largestValue = glm::vec4(-INFINITY);
+  for(quint32 y=0; y<asFloats.height; ++y)
+  {
+    const glm::vec4* line = asFloats.lineData_As<glm::vec4>(y);
+    for(quint32 x=0; x<asFloats.width; ++x)
+    {
+      smallestValue = glm::min(line[x], smallestValue);
+      largestValue = glm::max(line[x], largestValue);
+    }
+  }
+  QImage debugImage;
+  if(channel >= 0)
+    debugImage = asFloats.asChannelQImage(channel);
+  else
+    debugImage = asFloats.asQImage();
+  QDialog texturePreview;
+  QVBoxLayout vbox(&texturePreview);
+  QLabel label;
+  vbox.addWidget(&label);
+  qDebug() << "min: " << smallestValue << "max: " << largestValue;
+  label.setPixmap(QPixmap::fromImage(debugImage));
+  label.setVisible(true);
+  texturePreview.exec();
+}
+
 void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings)
 {
   importSettings.preprocess();
@@ -123,30 +151,7 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
     }
 
 #if SHOW_TEXTURE_IN_DIALOG
-    {
-      TextureAsFloats _asFloats = textureInformation.asFloats(1);
-      glm::vec4 smallestValue = glm::vec4(INFINITY);
-      glm::vec4 largestValue = glm::vec4(-INFINITY);
-      for(quint32 y=0; y<_asFloats.height; ++y)
-      {
-        glm::vec4* line = _asFloats.lineData_As<glm::vec4>(y);
-        for(quint32 x=0; x<_asFloats.width; ++x)
-        {
-          smallestValue = glm::min(line[x], smallestValue);
-          largestValue = glm::max(line[x], largestValue);
-        }
-      }
-      QImage debugImage = _asFloats.asChannelQImage(0);
-      //            QImage debugImage = _asFloats.asQImage();
-      QDialog texturePreview;
-      QVBoxLayout vbox(&texturePreview);
-      QLabel label;
-      vbox.addWidget(&label);
-      qDebug() << "min: " << smallestValue << "max: " << largestValue;
-      label.setPixmap(QPixmap::fromImage(debugImage));
-      label.setVisible(true);
-      texturePreview.exec();
-    }
+    show_texture_in_dialog(textureInformation.asFloats(1));
 #endif
   }else
   {
