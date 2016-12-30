@@ -348,8 +348,8 @@ void GlTexture::TextureAsFloats::calculate_dfg_lut()
     float* line = this->lineData_As<float>(y);
     for(quint32 x=0; x<width; ++x)
     {
-      double u = x / double(width-1);
-      double v = y / double(height-1);
+      double u = (x + 0.5) / double(width);
+      double v = (y + 0.5) / double(height);
 
       v = 1.0 - v;
 
