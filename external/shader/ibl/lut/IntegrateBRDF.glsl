@@ -22,7 +22,7 @@ vec2 IntegrateBRDF(float Roughness, float NoV, vec3 N)
     
     if( NoL > 0 )
     {
-      float G = G_Smith(Roughness, NoV, NoL);
+      float G = G_Smith(Roughness*Roughness, NoV, NoL);
       float G_Vis = G * VoH / (NoH * NoV);
       float Fc = pow(1 - VoH, 5);
       A += (1 - Fc) * G_Vis;
