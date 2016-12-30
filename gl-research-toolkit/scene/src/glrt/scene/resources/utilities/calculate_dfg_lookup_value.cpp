@@ -9,7 +9,26 @@ using glm::pow;
 
 #define saturate(value) clamp(value, 0.f, 1.f)
 
-vec2 Hammersley(uint i, uint n);
+// Source: https://en.wikipedia.org/w/index.php?title=Low-discrepancy_sequence&oldid=731052708#Hammersley_set
+vec2 Hammersley(uint n, uint N)
+{
+  auto g_2 = [N](uint n) {
+    double sum = 0.;
+
+    double base = 0.5;
+
+    for(uint k=1; k<N; k<<=1)
+    {
+      if(n & k)
+        sum += base;
+      base *= 0.5;
+    }
+
+    return sum;
+  };
+
+  return vec2(g_2(n), double(n)/double(N));
+}
 
 
 #include <pbs/g_smith.glsl>
