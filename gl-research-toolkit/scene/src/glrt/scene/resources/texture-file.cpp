@@ -105,6 +105,9 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
           delete alphaAsFloats;
         }
 
+        if(importSettings.calculate_dfg_lut)
+          asFloats.calculate_dfg_lut();
+
         if(importSettings.remapSourceAsSigned)
           asFloats.remapSourceAsSigned();
 
@@ -432,6 +435,7 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool remapSourceAsSigned", asOFFSET(ImportSettings,remapSourceAsSigned)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_dfg_lut", asOFFSET(ImportSettings,calculate_dfg_lut)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToPowerOfTwo", asOFFSET(ImportSettings,scaleDownToPowerOfTwo)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);

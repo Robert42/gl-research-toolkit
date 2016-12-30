@@ -152,6 +152,7 @@ struct GlTexture::TextureAsFloats
 
   TextureAsFloats(const QPair<UncompressedImage, QVector<byte>>& importedTexture);
 
+  void calculate_dfg_lut();
   void remapSourceAsSigned();
   void remapSourceAsUnsigned();
   void remap(glm::vec4 offset, glm::vec4 factor);

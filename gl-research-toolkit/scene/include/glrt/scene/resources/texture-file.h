@@ -31,6 +31,7 @@ public:
     Type type = Type::UINT8;
     Format format = Format::RGBA;
     Compression compression = Compression::NONE;
+    bool calculate_dfg_lut = false;
     bool remapSourceAsSigned = false;
     glm::vec4 offset = glm::vec4(0);
     glm::vec4 factor = glm::vec4(1);

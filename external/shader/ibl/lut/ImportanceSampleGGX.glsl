@@ -1,7 +1,7 @@
 vec3 ImportanceSampleGGX(vec2 Xi, float Roughness, vec3 N)
 {
   float a = Roughness * Roughness;
-  float Phi = 2 * PI * Xi.x;
+  float Phi = 2 * pi * Xi.x;
   float CosTheta = sqrt( (1 - Xi.y) / ( 1 + (a*a - 1) * Xi.y ) );
   float SinTheta = sqrt( 1 - CosTheta * CosTheta );
   

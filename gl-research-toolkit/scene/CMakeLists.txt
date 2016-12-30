@@ -20,3 +20,5 @@ target_include_directories(
   PUBLIC
   include
 )
+
+target_include_directories(glrt-scene PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../shader/common-with-cpp ${CMAKE_CURRENT_SOURCE_DIR}/../../external/shader)

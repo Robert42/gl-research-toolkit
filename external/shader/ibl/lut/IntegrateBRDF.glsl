@@ -1,4 +1,4 @@
-vec2 IntegrateBRDF(float Roughness, float NoV)
+vec2 IntegrateBRDF(float Roughness, float NoV, vec3 N)
 {
   vec3 V;
   V.x = sqrt(1.0f - NoV * NoV); // sin
@@ -30,5 +30,5 @@ vec2 IntegrateBRDF(float Roughness, float NoV)
     }
   }
   
-  return vec2(A, B) / NumSamples;
+  return vec2(A, B) / float(NumSamples);
 }

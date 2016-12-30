@@ -10,7 +10,7 @@ float V_SmithGGXCorrelated(float NdotL, float NdotV, float alphaG)
   // Original formulation of G_SmithGGX Correlated
   // lambda_v = (-1 + sqrt(alphaG2 * (1 - NdotL2) / NdotL2 + 1)) * 0.5f;
   // lambda_l = (-1 + sqrt(alphaG2 * (1 - NdotV2) / NdotV2 + 1)) * 0.5f;
-  // G_SmithGGXCorrelated = 1 / (1 + lambda_v + lambda_l) ;
+  // G_SmithGGXCorrelated = 1 / (1 + lambda_v + lambda_l);
   // V_SmithGGXCorrelated = G_SmithGGXCorrelated / (4.0 f * NdotL * NdotV);
   
   // This is the optimize version

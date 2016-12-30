@@ -333,6 +333,25 @@ GlTexture::TextureAsFloats::TextureAsFloats(const QPair<UncompressedImage, QVect
   rowCount = height * depth;
 }
 
+glm::vec2 calculate_dfg_lookup_value(double u, double v);
+
+void GlTexture::TextureAsFloats::calculate_dfg_lut()
+{
+  Q_ASSERT(depth==1);
+
+  #pragma omp parallel for
+  for(quint32 y=0; y<height; ++y)
+  {
+    float* line = this->lineData_As<float>(y);
+    for(quint32 x=0; x<width; ++x)
+    {
+      glm::vec2 dfg_lut_value = calculate_dfg_lookup_value(x / double(width-1), y / double(height-1));
+      line[x*2 + 0] = dfg_lut_value.x;
+      line[x*2 + 1] = dfg_lut_value.y;
+    }
+  }
+}
+
 GlTexture::TextureAsFloats::TextureAsFloats(const glm::ivec3& size, quint32 numComponents)
   : TextureAsFloats(uint32_t(size.x), uint32_t(size.y), uint32_t(size.z), numComponents)
 {

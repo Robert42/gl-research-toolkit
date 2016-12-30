@@ -69,6 +69,7 @@ set(SOURCE_FILES
   src/glrt/scene/resources/texture-file.cpp
   src/glrt/scene/resources/texture-manager.cpp
   src/glrt/scene/resources/texture-sampler.cpp
+  src/glrt/scene/resources/utilities/calculate_dfg_lookup_value.cpp
   src/glrt/scene/resources/utilities/gl-texture.cpp
   src/glrt/scene/resources/voxel-data.cpp
   src/glrt/scene/resources/voxel-file.cpp
