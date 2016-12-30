@@ -1,7 +1,8 @@
 #ifndef _GLRT_GLSL_MATH_H_
 #define _GLRT_GLSL_MATH_H_
 
-const float pi = 3.1415926535897;
+const float pi     = 3.1415926535897932384626433832795;
+const float inv_pi = 0.3183098861837906715377675267450;
 
 const float inf = 1./0.;
 

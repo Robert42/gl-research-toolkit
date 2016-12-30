@@ -6,8 +6,16 @@ using glm::vec2;
 using glm::vec3;
 using glm::vec4;
 using glm::pow;
+using glm::fract;
 
-#define saturate(value) clamp(value, 0.f, 1.f)
+template<typename T>
+T saturate(T value)
+{
+  return clamp<T>(value, 0., 1.);
+}
+
+#define in
+#define out(x) x&
 
 // Source: https://en.wikipedia.org/w/index.php?title=Low-discrepancy_sequence&oldid=731052708#Hammersley_set
 vec2 Hammersley(uint n, uint N)
@@ -30,22 +38,46 @@ vec2 Hammersley(uint n, uint N)
   return vec2(g_2(n), double(n)/double(N));
 }
 
+vec2 getSample(uint i, uint sampleCount)
+{
+  return Hammersley(i, sampleCount);
+}
 
-#include <pbs/g_smith.glsl>
-#include <ibl/lut/ImportanceSampleGGX.glsl>
-#include <ibl/lut/IntegrateBRDF.glsl>
+#define ONLY_Fr_DisneyDiffuse
+#include <pbs/brdf.glsl>
+#include <ibl/ggx_importance/ImportanceSampleGGX.glsl>
+
+void importanceSampleGGX_G(vec2 u, vec3 V, vec3 N, float roughness, float& NdotH, float& LdotH, vec3& L, float& G)
+{
+  L = ImportanceSampleGGX(u, roughness, N);
+
+  vec3 H = normalize(V + L);
+  NdotH  = saturate(dot(N, H));
+  LdotH  = saturate(dot(L, H));
+
+  G = D_GGX(NdotH, roughness);
+}
+
+#include <pbs/dfg-preintegration.glsl>
 
 namespace glrt {
 namespace scene {
 namespace resources {
 namespace utilities {
 
-vec2 calculate_dfg_lookup_value(double u, double v)
+vec4 calculate_dfg_lookup_value(double u, double v)
 {
   float roughness = float(v);
   float NoV = float(u);
 
-  return IntegrateBRDF(roughness, NoV, glm::vec3(0,0,1));
+  vec3 N = glm::vec3(0,0,1);
+  vec3 V = glm::vec3(sin(acos(NoV)), 0.f, NoV);
+
+  vec4 color = integrateDFGOnly(V, N, roughness);
+
+  color.a = 1.0;
+
+  return color;
 }
 
 } // namespace glrt

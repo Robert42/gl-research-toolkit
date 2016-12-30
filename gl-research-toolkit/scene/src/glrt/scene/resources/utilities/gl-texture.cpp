@@ -336,7 +336,7 @@ GlTexture::TextureAsFloats::TextureAsFloats(const QPair<UncompressedImage, QVect
   rowCount = height * depth;
 }
 
-glm::vec2 calculate_dfg_lookup_value(double u, double v);
+glm::vec4 calculate_dfg_lookup_value(double u, double v);
 
 void GlTexture::TextureAsFloats::calculate_dfg_lut()
 {
@@ -353,11 +353,11 @@ void GlTexture::TextureAsFloats::calculate_dfg_lut()
 
       v = 1.0 - v;
 
-      glm::vec2 dfg_lut_value = calculate_dfg_lookup_value(u, v);
+      glm::vec4 dfg_lut_value = calculate_dfg_lookup_value(u, v);
       line[x*4 + 0] = dfg_lut_value.x;
       line[x*4 + 1] = dfg_lut_value.y;
-      line[x*4 + 2] = 0.f;
-      line[x*4 + 3] = 1.f;
+      line[x*4 + 2] = dfg_lut_value.z;
+      line[x*4 + 3] = dfg_lut_value.w;
     }
   }
 

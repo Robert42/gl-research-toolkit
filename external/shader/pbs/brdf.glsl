@@ -1,4 +1,6 @@
+#ifndef ONLY_Fr_DisneyDiffuse
 #include <glrt/glsl/math-glsl.h>
+#endif
 
 vec3 F_Schlick(in vec3 f0, in float f90, in float u)
 {
@@ -43,6 +45,8 @@ float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH,
     return lightScatter * viewScatter * energyFactor;
 }
 
+#ifndef ONLY_Fr_DisneyDiffuse
+
 // Specular BRDF
 vec3 brdf_specular(in BrdfData_Generic brdf_data_g, in BrdfData_WithLight brdf_data_l, in vec3 f0, in float f90)
 {
@@ -74,3 +78,4 @@ float brdf_diffuse(in BrdfData_Generic brdf_data_g, in BrdfData_WithLight brdf_d
 }
 
 
+#endif
