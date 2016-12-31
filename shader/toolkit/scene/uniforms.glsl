@@ -18,6 +18,10 @@ struct SceneLightData
 {
   uint64_t sphere_arealights_address;
   uint64_t rect_arealights_address;
+  uint64_t sky_ibl_ggx;
+  uint64_t sky_ibl_diffuse;
+  uint64_t sky_ibl_cone_60;
+  uint64_t sky_ibl_cone_45;
   uint32_t num_sphere_area_lights;
   uint32_t num_rect_area_lights;
 };

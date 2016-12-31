@@ -175,6 +175,17 @@ Uuid<resources::LightSource> Scene::light(LightSlot slot) const
   return _lights[slot];
 }
 
+Sky Scene::sky() const
+{
+  return _sky;
+}
+
+void Scene::set_sky(const Sky& sky)
+{
+  _sky = sky;
+  skyChanged(_sky);
+}
+
 void Scene::registerAngelScriptAPIDeclarations()
 {
   int r;

@@ -16,6 +16,10 @@ public:
   {
     GLuint64 sphereAreaLightsBuffer;
     GLuint64 rectAreaLightsBuffer;
+    GLuint64 sky_ibl_ggx;
+    GLuint64 sky_ibl_diffuse;
+    GLuint64 sky_ibl_cone_60;
+    GLuint64 sky_ibl_cone_45;
     quint32 numSphereLights;
     quint32 numRectLights;
     padding<quint32, 2> _padding;
