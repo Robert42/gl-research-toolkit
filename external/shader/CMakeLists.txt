@@ -28,7 +28,7 @@ add_custom_target(
   pbs/camera.glsl
   pbs/dfg-preintegration.glsl
   pbs/image-based-lighting.glsl
-  pbs/image-based-lighting-precalculation.glsl
+  pbs/ld-prefiltering.glsl
   pbs/light.glsl
   pbs/luminance-for-luminous-power.glsl
   pbs/material.glsl

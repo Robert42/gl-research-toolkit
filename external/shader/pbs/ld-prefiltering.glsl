@@ -41,7 +41,7 @@ vec3 integrateCubeLDOnly(
       float pdf = D_GGX_Divide_Pi(NdotH, roughness) * NdotH / (4* LdotH);
       float omegaS = 1.0 / (sampleCount * pdf);
       float omegaP = 4.0 * FB_PI / (6.0 * width * width);
-      float mipLevel = clamp(0.5 * log2(omegaS / omegaP),0 ,mipCount);
+      float mipLevel = clamp(0.5 * log2(omegaS / omegaP), 0, mipCount);
       vec4 Li = IBLCube.SampleLevel(IBLSampler, L, mipLevel);
       
       accBrdf += Li.rgb * NdotL;

@@ -60,8 +60,6 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
 {
   importSettings.preprocess();
 
-  const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
-
   GlTexture textureInformation(srcFile, importSettings);
 
   GlTexture* red_texture = nullptr;
@@ -94,7 +92,17 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
     alpha_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
   }
 
-  if(importSettings.compression == TextureFile::Compression::NONE)
+  if(importSettings.result_is_cubemap())
+  {
+    if(importSettings.calculate_ibl_ggx_cubemap)
+    {
+//      calculate_ibl_ggx_cubemap(textureInformation); TODO
+    }else if(importSettings.calculate_ibl_diffuse_cubemap)
+    {
+//      calculate_ibl_diffuse_cubemap(textureInformation); TODO
+    }else
+      Q_UNREACHABLE();
+  }else if(importSettings.compression == TextureFile::Compression::NONE)
   {
     for(int level=firstMipMap; level<=lastMipMap; ++level)
     {

@@ -32,6 +32,8 @@ public:
     Format format = Format::RGBA;
     Compression compression = Compression::NONE;
     bool calculate_dfg_lut = false;
+    bool calculate_ibl_ggx_cubemap = false;
+    bool calculate_ibl_diffuse_cubemap = false;
     bool remapSourceAsSigned = false;
     glm::vec4 offset = glm::vec4(0);
     glm::vec4 factor = glm::vec4(1);
@@ -81,7 +83,12 @@ public:
 
     bool need_processing() const
     {
-      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging() || calculate_dfg_lut;
+      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging() || calculate_dfg_lut || calculate_ibl_ggx_cubemap || calculate_ibl_diffuse_cubemap;
+    }
+
+    bool result_is_cubemap() const
+    {
+      return calculate_ibl_ggx_cubemap || calculate_ibl_diffuse_cubemap;
     }
 
     static void registerType();
