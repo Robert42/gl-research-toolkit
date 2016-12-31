@@ -60,6 +60,8 @@ struct SceneData
   SceneVoxelHeader voxelHeader;
   CandidateGridHeader candidateGridHeader;
   CascadedGrids cascadedGrids;
+  uint64_t skyTexture;
+  padding1(uint64_t, _padding);
   
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;

@@ -162,6 +162,8 @@ private:
     VoxelBuffer::VoxelHeader voxelHeader;
     VoxelBuffer::CandidateGridHeader candidateGrid;
     CascadedGridsHeader cascadedGrids;
+    quint64 sky_texture;
+    padding<quint64, 1> _padding1;
 
     // Padding & debugging
     quint32 costsHeatvisionBlackLevel;
