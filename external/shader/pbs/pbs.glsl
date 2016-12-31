@@ -8,7 +8,6 @@
 #include "../mrp/mrp.glsl"
 #include "luminance-for-luminous-power.glsl"
 #include "camera.glsl"
-#include "image-based-lighting-precalculation.glsl"
 #include "image-based-lighting.glsl"
 
 #undef saturate
