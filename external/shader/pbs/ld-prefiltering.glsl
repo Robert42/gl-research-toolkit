@@ -1,18 +1,18 @@
 // Based on Listing 19
 // Pre-filtered importance sampling function.
 
-float3 integrateCubeLDOnly(
-  in float3 V,
-  in float3 N,
+vec3 integrateCubeLDOnly(
+  in vec3 V,
+  in vec3 N,
   in float roughness)
 {
-  float3 accBrdf = 0;
+  vec3 accBrdf = 0;
   float accBrdfWeight = 0;
   for(uint i =0; i<sampleCount; ++i)
   {
     float2 eta = getSample (i , sampleCount ) ;
-    float3 L ;
-    float3 H ;
+    vec3 L ;
+    vec3 H ;
     importanceSampleGGXDir(eta, V, N, roughness, H, L);
     float NdotL = dot(N, L);
     if(NdotL>0)
@@ -42,7 +42,7 @@ float3 integrateCubeLDOnly(
       float omegaS = 1.0 / (sampleCount * pdf);
       float omegaP = 4.0 * FB_PI / (6.0 * width * width);
       float mipLevel = clamp(0.5 * log2(omegaS / omegaP),0 ,mipCount);
-      float4 Li = IBLCube.SampleLevel(IBLSampler, L, mipLevel);
+      vec4 Li = IBLCube.SampleLevel(IBLSampler, L, mipLevel);
       
       accBrdf += Li.rgb * NdotL;
       accBrdfWeight += NdotL;
