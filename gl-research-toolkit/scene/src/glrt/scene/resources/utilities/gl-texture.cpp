@@ -351,8 +351,6 @@ void GlTexture::TextureAsFloats::calculate_dfg_lut()
       double u = (x + 0.5) / double(width);
       double v = (y + 0.5) / double(height);
 
-      v = 1.0 - v;
-
       glm::vec3 dfg_lut_value = calculate_dfg_lookup_value(u, v);
       line[x*4 + 0] = dfg_lut_value.x;
       line[x*4 + 1] = dfg_lut_value.y;
@@ -361,7 +359,7 @@ void GlTexture::TextureAsFloats::calculate_dfg_lut()
     }
   }
 
-  show_texture_in_dialog(*this);
+//  show_texture_in_dialog(*this);
 }
 
 GlTexture::TextureAsFloats::TextureAsFloats(const glm::ivec3& size, quint32 numComponents)

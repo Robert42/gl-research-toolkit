@@ -81,7 +81,7 @@ public:
 
     bool need_processing() const
     {
-      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging();
+      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging() || calculate_dfg_lut;
     }
 
     static void registerType();

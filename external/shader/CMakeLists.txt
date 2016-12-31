@@ -21,12 +21,12 @@ add_custom_target(
   gl-noise/src/noise3Dgrad.glsl
   gl-noise/src/noise4D.glsl
   gl-noise/src/psrdnoise2D.glsl
-  ibl/lut/ImportanceSampleGGX.glsl
-  ibl/lut/IntegrateBRDF.glsl
+  ibl/ggx_importance/ImportanceSampleGGX.glsl
   mrp/mrp.glsl
   openvdb/triangle-distance.glsl
   pbs/brdf.glsl
   pbs/camera.glsl
+  pbs/dfg-preintegration.glsl
   pbs/image-based-lighting.glsl
   pbs/image-based-lighting-precalculation.glsl
   pbs/light.glsl
