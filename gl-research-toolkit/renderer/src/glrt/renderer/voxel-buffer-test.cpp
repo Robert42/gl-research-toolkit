@@ -16,6 +16,7 @@ void BVH::testOcclusion() const
   if(glrt::scene::HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE!=1 || !glrt::scene::ENFORCE_HUGE_BVH_LEAVES_FIRST || glrt::scene::SORT_OBJECTS_BY_SDF_TEXTURE)
     return;
 
+/*
 #ifdef QT_DEBUG
 
   glsl::Cone cone_flagpole = glsl::cone_from_ray_tan_angle(vec3(-3.497906f, -0.867900f, 0.000001f), // origin
@@ -42,6 +43,7 @@ void BVH::testOcclusion() const
   Q_ASSERT(BVH::shadow_occlusion_without_bvh(cone_flagpole).contains(flagpole));
   Q_ASSERT(BVH::shadow_occlusion_with_bvh(cone_flagpole).contains(flagpole));
 #endif
+*/
 }
 
 QSet<quint16> BVH::shadow_occlusion_without_bvh(const Cone& cone) const
