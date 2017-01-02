@@ -86,6 +86,7 @@ add_custom_target(
   toolkit/debugging/heat-vision.glsl
   toolkit/debugging/normal.glsl
   toolkit/debugging/print.glsl
+  toolkit/equirectengular_env_mapping.glsl
   toolkit/extensions/command_list.glsl
   toolkit/extensions/common.glsl
   toolkit/fullscreen-quad.vs.glsl
