@@ -36,11 +36,7 @@ layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform Po
 
 #include <lighting/rendering-equation.glsl>
 
-in FragmentBlock
-{
-  flat mat4 view_projection;
-  vec3 look_target;
-}fragment;
+#include "posteffect_ray.glsl"
 
 
 void rayMarch(in Ray ray, inout vec4 color, out vec3 world_pos, out vec3 world_normal);
@@ -96,9 +92,7 @@ vec3 light_up_mesh_directional(in vec3 camera_direction, vec3 normal)
 
 void main()
 {
-  Ray ray;
-  ray.origin = scene.camera_position;
-  ray.direction = normalize(fragment.look_target - scene.camera_position);
+  Ray ray = view_ray();
   
   vec3 world_pos = near_plane_world_pos;
   vec3 world_normal = vec3(0);

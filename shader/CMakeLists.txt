@@ -22,6 +22,7 @@ add_custom_target(
   debugging/posteffects/orange-sphere.fs
   debugging/posteffects/orange-sphere.vs
   debugging/posteffects/posteffect.fs.glsl
+  debugging/posteffects/posteffect_ray.glsl
   debugging/posteffects/posteffect.vs.glsl
   debugging/posteffects/raymarch-distancefield.fs
   debugging/posteffects/raymarch-distancefield.vs
@@ -80,6 +81,8 @@ add_custom_target(
   materials/implementation/vertex-material.vs.glsl
   materials/material.fs
   materials/material.vs
+  materials/sky.fs
+  materials/sky.vs
   toolkit/alignment.glsl
   toolkit/cascaded-grid/uniforms.glsl
   toolkit/checkerboard.glsl
