@@ -132,10 +132,10 @@ private:
 
   glrt::scene::Scene& scene;
   VoxelGrid*& voxelGridData;
-  bool dirty_candidate_grid;
-  bool dirty_merged_sdf_texture_buffer;
-  bool dirty_merged_sdf;
-  bool _static_fade_with_fallback;
+  bool dirty_candidate_grid = true;;
+  bool dirty_merged_sdf_texture_buffer = true;
+  bool dirty_merged_sdf = true;
+  bool _static_fade_with_fallback = true;
   void update_static_fade_with_fallback();
 
   QVector<scene::resources::VoxelUniformDataBlock> distanceFieldVoxelData_cpu;
