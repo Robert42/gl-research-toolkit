@@ -68,6 +68,8 @@ void Scene::clear()
   _cameras.clear();
   _lights.clear();
 
+  _sky.clear();
+
   data->clear();
 
   sceneCleared();
@@ -186,6 +188,17 @@ void Scene::set_sky(const Sky& sky)
   skyChanged(_sky);
 }
 
+void Scene::set_sky_by_script(Uuid<resources::Texture> equirectengular_view, Uuid<resources::Texture> ibl_ggx, Uuid<resources::Texture> ibl_diffuse, Uuid<resources::Texture> ibl_cone_60, Uuid<resources::Texture> ibl_cone_45)
+{
+  Sky sky;
+  sky.equirectengular_view = equirectengular_view;
+  sky.ibl_ggx = ibl_ggx;
+  sky.ibl_diffuse = ibl_diffuse;
+  sky.ibl_cone_60 = ibl_cone_60;
+  sky.ibl_cone_45 = ibl_cone_45;
+  set_sky(sky);
+}
+
 void Scene::registerAngelScriptAPIDeclarations()
 {
   int r;
@@ -213,6 +226,7 @@ void Scene::registerAngelScriptAPI()
   r = angelScriptEngine->RegisterObjectMethod("Scene", "Uuid<CameraComponent> get_camera(CameraSlot slot)", AngelScript::asMETHOD(Scene,camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void set_light(LightSlot slot, const Uuid<LightSource> &in uuid)", AngelScript::asMETHOD(Scene,set_camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "Uuid<LightSource> get_light(LightSlot slot)", AngelScript::asMETHOD(Scene,camera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectMethod("Scene", "void set_sky(Uuid<Texture> equirectengular_view, Uuid<Texture> ibl_ggx, Uuid<Texture> ibl_diffuse, Uuid<Texture> ibl_cone_60, Uuid<Texture> ibl_cone_45)", AngelScript::asMETHOD(Scene,set_sky_by_script), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void loadSceneLayer(const Uuid<SceneLayer> &in uuid)", AngelScript::asMETHOD(Scene,loadSceneLayer), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "void addSceneLayer_debugCamera()", AngelScript::asMETHOD(Scene,addSceneLayer_debugCamera), AngelScript::asCALL_THISCALL); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectMethod("Scene", "ResourceManager@ get_resourceManager()", AngelScript::asFUNCTION(get_resourceManager), AngelScript::asCALL_CDECL_OBJFIRST); AngelScriptCheck(r);
@@ -265,6 +279,15 @@ void Scene::unloadUnusedResources()
 
   textureManager.removeUnusedTextures(allUsedTextures);
   staticMeshLoader.removeUnusedStaticMeshes(allUsedStaticMeshes);
+}
+
+void Sky::clear()
+{
+  equirectengular_view = Uuid<resources::Texture>();
+  ibl_ggx = Uuid<resources::Texture>();
+  ibl_diffuse = Uuid<resources::Texture>();
+  ibl_cone_60 = Uuid<resources::Texture>();
+  ibl_cone_45 = Uuid<resources::Texture>();
 }
 
 } // namespace scene

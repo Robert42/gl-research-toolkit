@@ -28,6 +28,8 @@ struct Sky
   Uuid<resources::Texture> ibl_diffuse;
   Uuid<resources::Texture> ibl_cone_60;
   Uuid<resources::Texture> ibl_cone_45;
+
+  void clear();
 };
 
 
@@ -77,6 +79,11 @@ public:
 
   Sky sky() const;
   void set_sky(const Sky& sky);
+  void set_sky_by_script(Uuid<resources::Texture> equirectengular_view,
+                         Uuid<resources::Texture> ibl_ggx,
+                         Uuid<resources::Texture> ibl_diffuse,
+                         Uuid<resources::Texture> ibl_cone_60,
+                         Uuid<resources::Texture> ibl_cone_45);
 
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
