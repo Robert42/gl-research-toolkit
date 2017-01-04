@@ -175,6 +175,15 @@ private:
   gl::Buffer sceneUniformBuffer;
   gl::Buffer aoCollectHeaderUniformBuffer;
 
+  struct SkyTexture
+  {
+    GLuint64 equirectengular_view;
+    GLuint64 ibl_ggx;
+    GLuint64 ibl_diffuse;
+    GLuint64 ibl_cone_45;
+    GLuint64 ibl_cone_60;
+  }skyTexture;
+
   // other uniform buffer
   LightBuffer lightUniformBuffer;
   VoxelBuffer voxelUniformBuffer;
@@ -191,6 +200,7 @@ private:
   void captureStates();
   void recordCommandlist();
   void recordLightVisualization(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList);
+  void recordSky(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList);
 
   void updateCameraUniform();
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);
@@ -203,6 +213,7 @@ private:
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
   void forceNewGridCameraPos();
+  void updateSky();
 };
 
 

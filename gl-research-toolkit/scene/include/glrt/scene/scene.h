@@ -21,7 +21,7 @@ class Renderer;
 
 namespace scene {
 
-class Sky
+struct Sky
 {
   Uuid<resources::Texture> equirectengular_view;
   Uuid<resources::Texture> ibl_ggx;

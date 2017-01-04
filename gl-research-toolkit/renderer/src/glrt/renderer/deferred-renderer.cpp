@@ -31,22 +31,26 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
   const Material::Type RECT_LIGHT_LIGHT = Material::TypeFlag::RECT_LIGHT;
   const Material::Type TEXTURED_OPAQUE = Material::TypeFlag::TEXTURED | Material::TypeFlag::OPAQUE | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
   const Material::Type TEXTURED_MASKED_TWO_SIDED = Material::TypeFlag::TEXTURED | Material::TypeFlag::MASKED | Material::TypeFlag::TWO_SIDED | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
+  const Material::Type SKY = Material::TypeFlag::SKY;
 
   int plainColorShader = appendMaterialShader(preprocessorBlock(), {PLAIN_COLOR}, Pass::GBUFFER_FILL_PASS);
   int sphereLightShader = appendMaterialShader(preprocessorBlock(), {SPHERE_AREA_LIGHT}, Pass::GBUFFER_FILL_PASS);
   int rectLightShader = appendMaterialShader(preprocessorBlock(), {RECT_LIGHT_LIGHT}, Pass::GBUFFER_FILL_PASS);
   int texturedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_OPAQUE}, Pass::GBUFFER_FILL_PASS);
   int maskedTwoSidedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_MASKED_TWO_SIDED}, Pass::GBUFFER_FILL_PASS);
+  int skyShader = appendMaterialShader(preprocessorBlock(), {SKY}, Pass::GBUFFER_FILL_PASS);
 
   MaterialState::Flags fillGbufferPassFlags = MaterialState::Flags::DEPTH_WRITE|MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::ALPHA_WRITE|MaterialState::Flags::DEPTH_TEST;
 
   MaterialState::Flags maskedTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING;
+  MaterialState::Flags skyFlags = MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::DEPTH_TEST|MaterialState::Flags::ALPHA_WRITE|MaterialState::Flags::NO_STATIC_MESH;
 
   appendMaterialState(&mrt_framebuffer, {PLAIN_COLOR}, Pass::GBUFFER_FILL_PASS, plainColorShader, fillGbufferPassFlags);
   appendMaterialState(&mrt_framebuffer, {SPHERE_AREA_LIGHT}, Pass::GBUFFER_FILL_PASS, sphereLightShader, fillGbufferPassFlags);
   appendMaterialState(&mrt_framebuffer, {RECT_LIGHT_LIGHT}, Pass::GBUFFER_FILL_PASS, rectLightShader, fillGbufferPassFlags);
   appendMaterialState(&mrt_framebuffer, {TEXTURED_OPAQUE}, Pass::GBUFFER_FILL_PASS, texturedShader, fillGbufferPassFlags);
   appendMaterialState(&mrt_framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::GBUFFER_FILL_PASS, maskedTwoSidedShader, fillGbufferPassFlags | maskedTwoSidedFlags);
+  appendMaterialState(&mrt_framebuffer, {SKY}, Pass::GBUFFER_FILL_PASS, skyShader, skyFlags);
 
   const int N = 8;
   GLuint64 textureHandle[N];

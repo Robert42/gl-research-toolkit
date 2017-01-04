@@ -29,12 +29,6 @@ layout(binding=UNIFORM_BINDING_POSTEFFECTVISUALIZATION_BLOCK, std140) uniform Po
   PosteffectVisualizationData posteffect_param;
 };
 
-#include <scene/uniforms.glsl>
-#include <debugging/normal.glsl>
-#include <write-fragment-color.glsl>
-#include <write-fragment-depth.glsl>
-
-#include <lighting/rendering-equation.glsl>
 
 #include "posteffect_ray.glsl"
 

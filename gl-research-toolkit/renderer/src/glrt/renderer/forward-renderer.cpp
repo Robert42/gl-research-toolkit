@@ -19,6 +19,7 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   const Material::Type TEXTURED_OPAQUE = Material::TypeFlag::TEXTURED | Material::TypeFlag::OPAQUE | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
   const Material::Type TEXTURED_MASKED_TWO_SIDED = Material::TypeFlag::TEXTURED | Material::TypeFlag::MASKED | Material::TypeFlag::TWO_SIDED | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
   const Material::Type TEXTURED_TRANSPARENT_TWO_SIDED = Material::TypeFlag::TEXTURED | Material::TypeFlag::TRANSPARENT | Material::TypeFlag::TWO_SIDED | Material::TypeFlag::FRAGMENT_SHADER_UNIFORM;
+  const Material::Type SKY = Material::TypeFlag::SKY;
 
   int opaqueDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {PLAIN_COLOR, TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS);
   int sphereLightDepthPrepassShader = appendMaterialShader(preprocessorBlock(), {SPHERE_AREA_LIGHT}, Pass::DEPTH_PREPASS);
@@ -31,6 +32,7 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
   int texturedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_OPAQUE}, Pass::FORWARD_PASS);
   int maskedTwoSidedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_MASKED_TWO_SIDED}, Pass::FORWARD_PASS);
   int transparentTwoSidedShader = appendMaterialShader(preprocessorBlock(), {TEXTURED_TRANSPARENT_TWO_SIDED}, Pass::FORWARD_PASS);
+  int skyShader = appendMaterialShader(preprocessorBlock(), {SKY}, Pass::FORWARD_PASS);
 
   MaterialState::Flags commonAccelerationFlags = MaterialState::Flags::DEPTH_TEST;
 
@@ -39,12 +41,14 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
 
   MaterialState::Flags maskedTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING | MaterialState::Flags::ALPHA_BLENDING;
   MaterialState::Flags transparentTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING | MaterialState::Flags::ALPHA_BLENDING;
+  MaterialState::Flags skyFlags = MaterialState::Flags::NO_STATIC_MESH;
 
   appendMaterialState(&framebuffer, {PLAIN_COLOR, TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS, opaqueDepthPrepassShader, depthPrepassFlags);
   appendMaterialState(&framebuffer, {SPHERE_AREA_LIGHT}, Pass::DEPTH_PREPASS, sphereLightDepthPrepassShader, depthPrepassFlags);
   appendMaterialState(&framebuffer, {RECT_LIGHT_LIGHT}, Pass::DEPTH_PREPASS, rectLightDepthPrepassShader, depthPrepassFlags);
   appendMaterialState(&framebuffer, {TEXTURED_MASKED_TWO_SIDED}, Pass::DEPTH_PREPASS, maskedDepthPrepassShader, depthPrepassFlags | maskedTwoSidedFlags);
 
+  appendMaterialState(&framebuffer, {SKY}, Pass::FORWARD_PASS, skyShader, forwardPassFlags | skyFlags);
   appendMaterialState(&framebuffer, {PLAIN_COLOR}, Pass::FORWARD_PASS, plainColorShader, forwardPassFlags);
   appendMaterialState(&framebuffer, {SPHERE_AREA_LIGHT}, Pass::FORWARD_PASS, sphereLightShader, forwardPassFlags);
   appendMaterialState(&framebuffer, {RECT_LIGHT_LIGHT}, Pass::FORWARD_PASS, rectLightShader, forwardPassFlags);

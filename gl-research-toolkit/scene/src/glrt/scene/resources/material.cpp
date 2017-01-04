@@ -18,6 +18,8 @@ QString Material::typeToString(Type type)
 {
   QStringList usedFlags;
 
+  if(type.testFlag(TypeFlag::SKY))
+    usedFlags << "SKY";
   if(type.testFlag(TypeFlag::TEXTURED))
     usedFlags << "TEXTURED";
   if(type.testFlag(TypeFlag::PLAIN_COLOR))

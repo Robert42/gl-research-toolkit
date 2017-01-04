@@ -86,6 +86,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
 
   connect(scene, &scene::Scene::sceneCleared, this, &Renderer::forceNewGridCameraPos);
+  connect(scene, &scene::Scene::skyChanged, this, &Renderer::updateSky);
 
   setAdjustRoughness(true);
   setSDFShadows(false);
@@ -154,6 +155,8 @@ bool testFlagOnAll(const QSet<Material::Type>& types, Material::TypeFlag flag)
 
 int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass)
 {
+  QString shader_name = "material";
+
   if(materialTypes.isEmpty())
   {
     Q_UNREACHABLE();
@@ -187,6 +190,12 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
     preprocessorBlock.insert("#define TWO_SIDED");
   }
 
+  if(testFlagOnAll(materialTypes, Material::TypeFlag::SKY))
+  {
+    shader_name = "sky";
+    preprocessorBlock.insert("#define SKY");
+  }
+
   if(testFlagOnAll(materialTypes, Material::TypeFlag::AREA_LIGHT))
   {
     Q_ASSERT(!testFlagOnAll(materialTypes, Material::TypeFlag::TEXTURED));
@@ -217,7 +226,7 @@ int Renderer::appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<M
 
   preprocessorBlock.insert(QString("#define MASK_THRESHOLD %0").arg(maskAlphaThreshold));
 
-  ReloadableShader shader("material",
+  ReloadableShader shader(shader_name,
                           QDir(GLRT_SHADER_DIR"/materials"),
                           preprocessorBlock);
   materialShaders.append_move(std::move(shader));
@@ -479,7 +488,6 @@ void Renderer::captureStates()
     gl::FramebufferObject& framebuffer = *materialState.framebuffer;
     ReloadableShader& shader = materialShaders[materialState.shader];
 
-    StaticMeshBuffer::enableVertexArrays();
     framebuffer.Bind(false);
     shader.glProgram.use();
     materialState.activateStateForFlags();
@@ -487,7 +495,6 @@ void Renderer::captureStates()
     materialState.deactivateStateForFlags();
     framebuffer.BindBackBuffer();
     gl::Program::useNone();
-    StaticMeshBuffer::disableVertexArrays();
   }
 }
 
@@ -521,6 +528,51 @@ void Renderer::recordLightVisualization(gl::CommandListRecorder& recorder, Mater
   }
 }
 
+void Renderer::recordSky(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList)
+{
+  if(!materialType.testFlag(Material::TypeFlag::SKY))
+    return;
+
+  TextureManager& textureManager = *TextureManager::instance();
+  Uuid<Texture> equirectengular_view = this->scene.sky().equirectengular_view;
+  Uuid<Texture> ibl_ggx = this->scene.sky().ibl_ggx;
+  Uuid<Texture> ibl_diffuse = this->scene.sky().ibl_diffuse;
+  Uuid<Texture> ibl_cone_45 = this->scene.sky().ibl_cone_45;
+  Uuid<Texture> ibl_cone_60 = this->scene.sky().ibl_cone_60;
+
+  Uuid<Texture> fallbackCubemap = scene::resources::uuids::blackTexture; // TODO::: test, whether this is working
+
+  if(ibl_ggx.isNull())
+    ibl_ggx = fallbackCubemap;
+  skyTexture.ibl_ggx = textureManager.gpuHandle(textureManager.handleFor(ibl_ggx));
+
+
+  if(ibl_diffuse.isNull())
+    ibl_diffuse = fallbackCubemap;
+  skyTexture.ibl_diffuse = textureManager.gpuHandle(textureManager.handleFor(ibl_diffuse));
+
+
+  if(ibl_cone_45.isNull())
+    ibl_cone_45 = fallbackCubemap;
+  skyTexture.ibl_cone_45 = textureManager.gpuHandle(textureManager.handleFor(ibl_cone_45));
+
+
+  if(ibl_cone_60.isNull())
+    ibl_cone_60 = fallbackCubemap;
+  skyTexture.ibl_cone_60 = textureManager.gpuHandle(textureManager.handleFor(ibl_cone_60));
+
+
+  if(equirectengular_view.isNull() == false)
+  {
+    skyTexture.equirectengular_view = textureManager.gpuHandle(textureManager.handleFor(equirectengular_view));
+
+    recorder.beginTokenListWithCopy(commonTokenList);
+    recorder.append_token_DrawElements(4, 0, 0, gl::CommandListRecorder::Strip::STRIP);
+    glm::ivec2 range = recorder.endTokenList();
+    recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
+  }
+}
+
 void Renderer::recordCommandlist()
 {
   PROFILE_SCOPE("Renderer::recordCommandlist()")
@@ -550,6 +602,7 @@ void Renderer::recordCommandlist()
     glm::ivec2 range;
 
     recordLightVisualization(recorder, materialType, materialShader, commonTokenList);
+    recordSky(recorder, materialType, materialShader, commonTokenList);
 
     if(meshDrawRanges.contains(materialType))
     {
@@ -609,6 +662,11 @@ void Renderer::forceNewGridCameraPos()
   grid_camera_pos = glm::vec3(NAN);
 }
 
+void Renderer::updateSky()
+{
+  _needRecapturing = true;
+}
+
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
 {
   glm::vec3 camera_position = cameraParameter.position;
@@ -634,6 +692,11 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.bvh_debug_depth_end = bvh_debug_depth_end;
   sceneUniformData.candidateGrid = voxelUniformBuffer.candidateGridHeader;
   sceneUniformData.cascadedGrids = updateCascadedGrids();
+  sceneUniformData.sky_texture = skyTexture.equirectengular_view;
+  sceneUniformData.lightData.sky_ibl_ggx = skyTexture.ibl_ggx;
+  sceneUniformData.lightData.sky_ibl_diffuse = skyTexture.ibl_diffuse;
+  sceneUniformData.lightData.sky_ibl_cone_45 = skyTexture.ibl_cone_45;
+  sceneUniformData.lightData.sky_ibl_cone_60 = skyTexture.ibl_cone_60;
   sceneUniformBuffer.Unmap();
 }
 

@@ -1,3 +1,14 @@
+#include <extensions/command_list.glsl>
+
+#include <glrt/glsl/math-glsl.h>
+
+#include <scene/uniforms.glsl>
+
+#include <debugging/normal.glsl>
+#include <write-fragment-color.glsl>
+#include <write-fragment-depth.glsl>
+
+#include <lighting/rendering-equation.glsl>
 
 in FragmentBlock
 {
