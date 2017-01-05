@@ -3,9 +3,11 @@
 
 void main()
 {
-  vec3 color = vec3(1,0.5,0);
+  Ray ray = view_ray();
   
-#ifdef FORWARD_RENDERER
+  vec3 color = get_environment_infoming_ligth(ray.direction);
+  
+#if defined(FORWARD_RENDERER) && 0
   color *= get_exposure();
   color = accurateLinearToSRGB(color);
 #endif

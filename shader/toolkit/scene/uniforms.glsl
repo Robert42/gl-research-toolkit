@@ -5,6 +5,7 @@
 #include <voxels/voxel-structs.glsl>
 #include <alignment.glsl>
 #include <glrt/glsl/math-glsl.h>
+#include <equirectengular_env_mapping.glsl>
 
 
 #ifdef LOG_HEATVISION_DEBUG_COSTS
@@ -60,7 +61,7 @@ struct SceneData
   SceneVoxelHeader voxelHeader;
   CandidateGridHeader candidateGridHeader;
   CascadedGrids cascadedGrids;
-  uint64_t skyTexture;
+  sampler2D skyTexture;
   padding1(uint64_t, _padding);
   
   uint32_t costsHeatvisionBlackLevel;
@@ -121,6 +122,11 @@ sampler3D fallback_distance_field_data(out mat4x3 worldToVoxelSpace, out ivec3 v
 float get_exposure()
 {
   return 1.f;
+}
+
+vec3 get_environment_infoming_ligth(vec3 view_direction)
+{
+  return vec3(viewdir_to_uv_coord(view_direction), 0);
 }
 
 float blink(float rate=0.2)
