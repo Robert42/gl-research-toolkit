@@ -118,6 +118,11 @@ sampler3D fallback_distance_field_data(out mat4x3 worldToVoxelSpace, out ivec3 v
   return texture;
 }
 
+float get_exposure()
+{
+  return 1.f;
+}
+
 float blink(float rate=0.2)
 {
   return step(rate, mod(scene.totalTime, rate*2.));
