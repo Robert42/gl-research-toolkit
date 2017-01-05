@@ -17,6 +17,8 @@ vec2 viewdir_to_angles(in vec3 viewdir)
 vec2 viewdir_to_uv_coord(in vec3 viewdir)
 {
   vec2 angles = viewdir_to_angles(viewdir);
+  
+  angles.y *= 2.f;
 
   angles += pi;
 
