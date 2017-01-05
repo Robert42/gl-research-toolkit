@@ -91,6 +91,7 @@ void DeferredRenderer::applyFramebuffer()
 {
   mrt_framebuffer.BindBackBuffer();
 
+  glDisable(GL_DEPTH_TEST);
   glProgram_CopyFrameToBackBuffer.glProgram.use();
   framebufferTextureHandlesBuffer.BindUniformBuffer(UNIFORM_BINDING_GBUFFER_BLOCK);
   GL_CALL(glDrawArrays, GL_TRIANGLE_STRIP, 0, 4);
