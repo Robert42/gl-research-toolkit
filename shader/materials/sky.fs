@@ -7,7 +7,7 @@ void main()
   
   vec3 color = get_environment_infoming_ligth(ray.direction);
   
-#if defined(FORWARD_RENDERER) && 0
+#if defined(FORWARD_RENDERER) && 1
   color *= get_exposure();
   color = accurateLinearToSRGB(color);
 #endif

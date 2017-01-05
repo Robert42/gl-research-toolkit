@@ -126,7 +126,9 @@ float get_exposure()
 
 vec3 get_environment_infoming_ligth(vec3 view_direction)
 {
-  return vec3(viewdir_to_uv_coord(view_direction), 0);
+  vec2 uv = viewdir_to_uv_coord(view_direction);
+  
+  return texture2D(scene.skyTexture, uv).rgb;
 }
 
 float blink(float rate=0.2)
