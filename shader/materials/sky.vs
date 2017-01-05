@@ -3,6 +3,8 @@
 
 #include <scene/uniforms.glsl>
 
+in layout(location=0) vec2 position;
+
 out FragmentBlock
 {
   flat mat4 view_projection;
@@ -11,9 +13,7 @@ out FragmentBlock
 
 void main()
 {
-  vec2 position = vec2(gl_VertexID&1, gl_VertexID&2) * vec2(2.f, 1.f) - 1.f;
-
-  gl_Position = vec4(position, 0, 1);
+  gl_Position = vec4(position.xy, 0, 1);
   
   fragment.view_projection = scene.view_projection;
   

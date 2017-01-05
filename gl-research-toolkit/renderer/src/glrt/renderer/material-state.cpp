@@ -51,7 +51,11 @@ void MaterialState::activateStateForFlags()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
-  if(!hasFlag(Flags::NO_STATIC_MESH))
+  if(hasFlag(Flags::SCREENSPACE_POS_ATTRIBUTES))
+  {
+    GL_CALL(glVertexAttribFormatNV, 0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
+    GL_CALL(glEnableVertexAttribArray, 0);
+  }else
   {
     StaticMeshBuffer::enableVertexArrays();
   }
@@ -70,7 +74,13 @@ void MaterialState::deactivateStateForFlags()
   glDisable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ZERO);
 
-  StaticMeshBuffer::disableVertexArrays();
+  if(hasFlag(Flags::SCREENSPACE_POS_ATTRIBUTES))
+  {
+    GL_CALL(glDisableVertexAttribArray, 0);
+  }else
+  {
+    StaticMeshBuffer::disableVertexArrays();
+  }
 }
 
 bool MaterialState::hasFlag(Flags flag) const

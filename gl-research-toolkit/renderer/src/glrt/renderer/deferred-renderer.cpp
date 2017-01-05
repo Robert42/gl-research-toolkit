@@ -43,7 +43,7 @@ DeferredRenderer::DeferredRenderer(const glm::ivec2& videoResolution, scene::Sce
   MaterialState::Flags fillGbufferPassFlags = MaterialState::Flags::DEPTH_WRITE|MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::ALPHA_WRITE|MaterialState::Flags::DEPTH_TEST;
 
   MaterialState::Flags maskedTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING;
-  MaterialState::Flags skyFlags = MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::DEPTH_TEST|MaterialState::Flags::ALPHA_WRITE|MaterialState::Flags::NO_STATIC_MESH;
+  MaterialState::Flags skyFlags = MaterialState::Flags::COLOR_WRITE|MaterialState::Flags::DEPTH_TEST|MaterialState::Flags::ALPHA_WRITE|MaterialState::Flags::SCREENSPACE_POS_ATTRIBUTES;
 
   appendMaterialState(&mrt_framebuffer, {PLAIN_COLOR}, Pass::GBUFFER_FILL_PASS, plainColorShader, fillGbufferPassFlags);
   appendMaterialState(&mrt_framebuffer, {SPHERE_AREA_LIGHT}, Pass::GBUFFER_FILL_PASS, sphereLightShader, fillGbufferPassFlags);

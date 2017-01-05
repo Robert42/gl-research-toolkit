@@ -23,7 +23,7 @@ public:
     ALPHA_WRITE = 0x8,
     ALPHA_BLENDING = 0x10,
     NO_FACE_CULLING = 0x20,
-    NO_STATIC_MESH = 0x40,
+    SCREENSPACE_POS_ATTRIBUTES = 0x40,
   };
 
   friend Flags operator|(Flags a, Flags b){return Flags(quint32(a) | quint32(b));}

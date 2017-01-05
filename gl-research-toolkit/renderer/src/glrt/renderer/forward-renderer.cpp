@@ -41,7 +41,7 @@ ForwardRenderer::ForwardRenderer(const glm::ivec2& videoResolution, scene::Scene
 
   MaterialState::Flags maskedTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING | MaterialState::Flags::ALPHA_BLENDING;
   MaterialState::Flags transparentTwoSidedFlags = MaterialState::Flags::NO_FACE_CULLING | MaterialState::Flags::ALPHA_BLENDING;
-  MaterialState::Flags skyFlags = MaterialState::Flags::NO_STATIC_MESH | MaterialState::Flags::COLOR_WRITE;
+  MaterialState::Flags skyFlags = MaterialState::Flags::SCREENSPACE_POS_ATTRIBUTES | MaterialState::Flags::COLOR_WRITE;
 
   appendMaterialState(&framebuffer, {PLAIN_COLOR, TEXTURED_OPAQUE}, Pass::DEPTH_PREPASS, opaqueDepthPrepassShader, depthPrepassFlags);
   appendMaterialState(&framebuffer, {SPHERE_AREA_LIGHT}, Pass::DEPTH_PREPASS, sphereLightDepthPrepassShader, depthPrepassFlags);

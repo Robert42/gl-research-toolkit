@@ -63,6 +63,8 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
 
+  init_screenspace_quad_buffer();
+
   debugDrawList_Lines.connectTo(&visualizeCameras);
   debugDrawList_Lines.connectTo(&visualizeSphereAreaLights);
   debugDrawList_Lines.connectTo(&visualizeRectAreaLights);
@@ -363,6 +365,20 @@ void Renderer::deinitCascadedGridTextures()
 {
 }
 
+void Renderer::init_screenspace_quad_buffer()
+{
+  float min_coord = -1;
+  float max_coord = 1;
+  const std::vector<float> positions = {min_coord, min_coord,
+                                        max_coord, min_coord,
+                                        min_coord, max_coord,
+                                        max_coord, max_coord};
+
+  gl::Buffer buffer(8*sizeof(float), gl::Buffer::UsageFlag::IMMUTABLE, positions.data());
+
+  screenspace_quad_buffer = std::move(buffer);
+}
+
 inline Renderer::CascadedGridsHeader Renderer::updateCascadedGrids() const
 {
   PROFILE_SCOPE("Renderer::updateCascadedGrids()")
@@ -567,7 +583,8 @@ void Renderer::recordSky(gl::CommandListRecorder& recorder, Material::Type mater
     skyTexture.equirectengular_view = textureManager.gpuHandle(textureManager.handleFor(equirectengular_view));
 
     recorder.beginTokenListWithCopy(commonTokenList);
-    recorder.append_token_DrawElements(4, 0, 0, gl::CommandListRecorder::Strip::STRIP);
+    recorder.append_token_AttributeAddress(0, screenspace_quad_buffer.gpuBufferAddress());
+    recorder.append_token_DrawArrays(4, 0, gl::CommandListRecorder::Strip::STRIP);
     glm::ivec2 range = recorder.endTokenList();
     recorder.append_drawcall(range, &materialShader.stateCapture, materialShader.framebuffer);
   }

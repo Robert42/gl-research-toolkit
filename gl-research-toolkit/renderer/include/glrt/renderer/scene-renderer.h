@@ -189,6 +189,10 @@ private:
   VoxelBuffer voxelUniformBuffer;
   StaticMeshRenderer staticMeshRenderer;
 
+
+  gl::Buffer screenspace_quad_buffer;
+  void init_screenspace_quad_buffer();
+
   // debugging
   bool _adjustRoughness : 1;
   bool _sdfShadows : 1;
