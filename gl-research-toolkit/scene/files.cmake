@@ -32,6 +32,7 @@ set(SOURCE_FILES
   include/glrt/scene/resources/texture.h
   include/glrt/scene/resources/texture-manager.h
   include/glrt/scene/resources/texture-sampler.h
+  include/glrt/scene/resources/utilities/calculate_ibl_cubemaps.h
   include/glrt/scene/resources/utilities/gl-texture.h
   include/glrt/scene/resources/voxel-data.h
   include/glrt/scene/resources/voxel-file.h
@@ -70,6 +71,7 @@ set(SOURCE_FILES
   src/glrt/scene/resources/texture-manager.cpp
   src/glrt/scene/resources/texture-sampler.cpp
   src/glrt/scene/resources/utilities/calculate_dfg_lookup_value.cpp
+  src/glrt/scene/resources/utilities/calculate_ibl_cubemaps.cpp
   src/glrt/scene/resources/utilities/gl-texture.cpp
   src/glrt/scene/resources/voxel-data.cpp
   src/glrt/scene/resources/voxel-file.cpp

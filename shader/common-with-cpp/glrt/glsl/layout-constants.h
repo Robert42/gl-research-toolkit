@@ -19,6 +19,7 @@
 // compute only
 #define UNIFORM_COLLECT_OCCLUSION_METADATA_BLOCK  1
 #define UNIFORM_MERGE_SDF_BLOCK 1
+#define IBL_BLOCK 1
 
 // vertex & fragment
 #define UNIFORM_BINDING_MATERIAL_INSTANCE_BLOCK  1

@@ -22,9 +22,16 @@ TextureFile::TextureFile()
 {
 }
 
-void TextureFile::appendImage(const GlTexture& texture, Type type, Format format)
+void TextureFile::appendImage(const GlTexture& texture, Type type, Format format, int mipmapLevel)
 {
-  QPair<UncompressedImage, QVector<byte>> image =  texture.uncompressed2DImage(0, format, type);
+  QPair<UncompressedImage, QVector<byte>> image =  texture.uncompressed2DImage(mipmapLevel, format, type);
+  appendUncompressedImage(image.first, image.second);
+}
+
+void TextureFile::appendImageToTarget(TextureFile::Target target, const TextureFile::GlTexture& texture, TextureFile::Type type, TextureFile::Format format, int mipmapLevel)
+{
+  QPair<UncompressedImage, QVector<byte>> image =  texture.uncompressed2DImage(mipmapLevel, format, type);
+  image.first.target = target;
   appendUncompressedImage(image.first, image.second);
 }
 
@@ -96,10 +103,16 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
   {
     if(importSettings.calculate_ibl_ggx_cubemap)
     {
-//      calculate_ibl_ggx_cubemap(textureInformation); TODO
+      calculate_ibl_ggx_cubemap(textureInformation);
     }else if(importSettings.calculate_ibl_diffuse_cubemap)
     {
-//      calculate_ibl_diffuse_cubemap(textureInformation); TODO
+      calculate_ibl_diffuse_cubemap(textureInformation);
+    }else if(importSettings.calculate_ibl_cone_60)
+    {
+      calculate_ibl_cone_60_cubemap(textureInformation);
+    }else if(importSettings.calculate_ibl_cone_45)
+    {
+      calculate_ibl_cone_45(textureInformation);
     }else
       Q_UNREACHABLE();
   }else if(importSettings.compression == TextureFile::Compression::NONE)
@@ -449,6 +462,10 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool remapSourceAsSigned", asOFFSET(ImportSettings,remapSourceAsSigned)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_dfg_lut", asOFFSET(ImportSettings,calculate_dfg_lut)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_ggx_cubemap", asOFFSET(ImportSettings,calculate_ibl_ggx_cubemap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_diffuse_cubemap", asOFFSET(ImportSettings,calculate_ibl_diffuse_cubemap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_cone_60", asOFFSET(ImportSettings,calculate_ibl_cone_60)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_cone_45", asOFFSET(ImportSettings,calculate_ibl_cone_45)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToPowerOfTwo", asOFFSET(ImportSettings,scaleDownToPowerOfTwo)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);

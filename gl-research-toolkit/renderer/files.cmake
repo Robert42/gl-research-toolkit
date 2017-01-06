@@ -33,6 +33,7 @@ set(SOURCE_FILES
   include/glrt/renderer/toolkit/compute-shader-set.h
   include/glrt/renderer/toolkit/glsl-macro-wrapper.h
   include/glrt/renderer/toolkit/glsl-macro-wrapper.inl
+  include/glrt/renderer/toolkit/gpu-ibl-cubemap-implementation.h
   include/glrt/renderer/toolkit/gpu-voxelizer-implementation.h
   include/glrt/renderer/toolkit/managed-gl-buffer.h
   include/glrt/renderer/toolkit/managed-gl-buffer.inl
@@ -75,6 +76,7 @@ set(SOURCE_FILES
   src/glrt/renderer/static-mesh-renderer.cpp
   src/glrt/renderer/toolkit/compute-shader-set.cpp
   src/glrt/renderer/toolkit/glsl-macro-wrapper.cpp
+  src/glrt/renderer/toolkit/gpu-ibl-cubemap-implementation.cpp
   src/glrt/renderer/toolkit/gpu-voxelizer-implementation.cpp
   src/glrt/renderer/toolkit/reloadable-shader.cpp
   src/glrt/renderer/toolkit/shader-compiler.cpp
