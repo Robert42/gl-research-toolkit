@@ -87,12 +87,12 @@ public:
 
     bool need_processing() const
     {
-      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging() || calculate_dfg_lut || calculate_ibl_ggx_cubemap || calculate_ibl_diffuse_cubemap;
+      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging() || calculate_dfg_lut || result_is_cubemap();
     }
 
     bool result_is_cubemap() const
     {
-      return calculate_ibl_ggx_cubemap || calculate_ibl_diffuse_cubemap;
+      return calculate_ibl_ggx_cubemap || calculate_ibl_diffuse_cubemap || calculate_ibl_cone_60 || calculate_ibl_cone_45;
     }
 
     static void registerType();
