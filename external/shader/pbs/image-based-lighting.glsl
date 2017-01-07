@@ -14,7 +14,7 @@ vec3 evaluateIBLDiffuse(in vec3 V, in vec3 N, in vec3 R, in float roughness, flo
 
 #define DFG_TEXTURE_SIZE 256
 
-vec3 evaluateIBLSpecular(float f0, float f90, in vec3 N, in vec3 R, in float roughness, float NdotV)
+vec3 evaluateIBLSpecular(vec3 f0, float f90, in vec3 N, in vec3 R, in float roughness, float NdotV)
 {
   vec3 dominantR = getSpecularDominantDir(N, R, NdotV, roughness);
   // Rebuild the function
