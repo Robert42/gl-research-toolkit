@@ -58,7 +58,11 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     voxelUniformBuffer(this->scene),
     staticMeshRenderer(this->scene, staticMeshBufferManager),
     _adjustRoughness(false),
-    _sdfShadows(false)
+    _sdfShadows(false),
+    _sdfAO(false),
+    _textureAO(false),
+    _iblDiffuse(false),
+    _iblSpecular(false)
 {
   fillCameraUniform(scene::CameraParameter());
   updateCameraUniform();
@@ -92,6 +96,10 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
 
   setAdjustRoughness(true);
   setSDFShadows(false);
+  setIBL_Specular(true);
+  setIBL_Diffuse(true);
+  setAmbientOcclusionTexture(true);
+  setAmbientOcclusionSDF(false); // TODO? set to true?
 
   collectAmbientOcclusionToGrid[0] = nullptr;
   collectAmbientOcclusionToGrid[1] = &collectAmbientOcclusionToGrid1;
@@ -753,6 +761,62 @@ void Renderer::setSDFShadows(bool sdfShadows)
   {
     _sdfShadows = sdfShadows;
     ReloadableShader::defineMacro("CONETRACED_SHADOW", sdfShadows);
+  }
+}
+
+bool Renderer::ambientOcclusionSDF() const
+{
+  return _sdfAO;
+}
+
+void Renderer::setAmbientOcclusionSDF(bool sdfAO)
+{
+  if(_sdfAO != sdfAO)
+  {
+    _sdfAO = sdfAO;
+    ReloadableShader::defineMacro("AO_SDF", sdfAO);
+  }
+}
+
+bool Renderer::ambientOcclusionTexture() const
+{
+  return _textureAO;
+}
+
+void Renderer::setAmbientOcclusionTexture(bool textureAO)
+{
+  if(_textureAO != textureAO)
+  {
+    _textureAO = textureAO;
+    ReloadableShader::defineMacro("AO_TEXTURE", textureAO);
+  }
+}
+
+bool Renderer::ibl_Diffuse() const
+{
+  return _iblDiffuse;
+}
+
+void Renderer::setIBL_Diffuse(bool ibl)
+{
+  if(_iblDiffuse != ibl)
+  {
+    _iblDiffuse = ibl;
+    ReloadableShader::defineMacro("IBL_DIFFUSE", ibl);
+  }
+}
+
+bool Renderer::ibl_Specular() const
+{
+  return _iblSpecular;
+}
+
+void Renderer::setIBL_Specular(bool ibl)
+{
+  if(_iblSpecular != ibl)
+  {
+    _iblSpecular = ibl;
+    ReloadableShader::defineMacro("IBL_SPECULAR", ibl);
   }
 }
 

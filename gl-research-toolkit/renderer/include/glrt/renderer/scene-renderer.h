@@ -97,6 +97,14 @@ public:
   void setAdjustRoughness(bool adjustRoughness);
   bool sdfShadows() const;
   void setSDFShadows(bool sdfShadows);
+  bool ambientOcclusionSDF() const;
+  void setAmbientOcclusionSDF(bool sdfAO);
+  bool ambientOcclusionTexture() const;
+  void setAmbientOcclusionTexture(bool textureAO);
+  bool ibl_Diffuse() const;
+  void setIBL_Diffuse(bool ibl);
+  bool ibl_Specular() const;
+  void setIBL_Specular(bool ibl);
   bool update_grid_camera() const;
   void set_update_grid_camera(bool update_grid_camera);
 
@@ -197,6 +205,10 @@ private:
   // debugging
   bool _adjustRoughness : 1;
   bool _sdfShadows : 1;
+  bool _sdfAO : 1;
+  bool _textureAO : 1;
+  bool _iblDiffuse : 1;
+  bool _iblSpecular : 1;
 
   CascadedGridsHeader updateCascadedGrids() const;
 
