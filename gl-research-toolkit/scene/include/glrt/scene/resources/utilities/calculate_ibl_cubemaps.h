@@ -21,7 +21,7 @@ public:
 
   IblCalculator(TextureFile* file, Type type, int size=512);
 
-  TextureFile::GlTexture target_texture;
+  TextureFile::GlTexture target_textures[6];
   Type type;
   int size;
 
@@ -30,7 +30,10 @@ public:
 private:
   TextureFile* file;
 
-  int max_mipmap_layer;
+  int max_mipmap_level;
+
+  static Target targetForLayer(int layer);
+  static glm::mat4 rotationForLayer(int layer);
 };
 
 class TextureFile::IblCalculator::Implementation

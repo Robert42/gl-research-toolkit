@@ -58,6 +58,8 @@ public:
     CUBE_MAP_NEGATIVE_Z = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
   };
 
+  static bool isCubemap(Target target);
+
   Q_ENUM(Format)
   Q_ENUM(Type)
   Q_ENUM(Compression)

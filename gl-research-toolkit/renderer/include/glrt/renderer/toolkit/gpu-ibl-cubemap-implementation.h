@@ -21,10 +21,9 @@ public:
 private:
   struct Header
   {
-    GLuint64 source;
     GLuint64 target;
-    glm::mat4 side;
-    int mipmap;
+    GLuint64 source;
+    glm::mat4 rotation;
   };
 
   ComputeShaderSet shader;

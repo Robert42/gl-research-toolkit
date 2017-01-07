@@ -17,9 +17,9 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
   QSet<QString> proprocessorBlock = preprocessorFromType(calculator->type);
 
   GLuint sourceTextureId = sourceTexture.textureId;
-  GLuint targetTextureId = calculator->target_texture.textureId;
+  GLuint targetTextureId = calculator->target_textures[layer].textureId;
 
-  GLuint64 targetTextureHandle = GL_RET_CALL(glGetImageHandleNV, targetTextureId, level, GL_FALSE, layer, GL_R32F);
+  GLuint64 targetTextureHandle = GL_RET_CALL(glGetImageHandleNV, targetTextureId, level, GL_TRUE, 0, GL_RGB16F);
   GL_CALL(glMakeImageHandleResidentNV, targetTextureHandle, GL_WRITE_ONLY);
 
   GLuint64 sourceTextureHandle = GL_RET_CALL(glGetTextureHandleNV, sourceTextureId);
@@ -28,7 +28,7 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
   Header& header = *reinterpret_cast<Header*>(header_buffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
   header.source = sourceTextureHandle;
   header.target = targetTextureHandle;
-  header.side = side_rotation;
+  header.rotation = side_rotation;
   header_buffer.Unmap();
 
   shader.execute(glm::ivec3(glm::ivec2(calculator->size >> level), 1), proprocessorBlock);
@@ -39,10 +39,13 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
 
 QSet<QString> GpuIblCubemapImplementation::preprocessorFromType(TextureFile::IblCalculator::Type type)
 {
-  return {QString("#define GGX %0\n"
-                  "#define DIFFUSE %0\n"
-                  "#define CONE_60 %0\n"
-                  "#define CONE_45 %0\n").arg(int(type==TextureFile::IblCalculator::Type::GGX)).arg(int(type==TextureFile::IblCalculator::Type::DIFFUSE)).arg(int(type==TextureFile::IblCalculator::Type::CONE_60)).arg(int(type==TextureFile::IblCalculator::Type::CONE_45))};
+  return {QString("#define GGX %0").arg(int(type==TextureFile::IblCalculator::Type::GGX)),
+          QString("#define DIFFUSE %0").arg(int(type==TextureFile::IblCalculator::Type::DIFFUSE)),
+          QString("#define CONE_60 %0").arg(int(type==TextureFile::IblCalculator::Type::CONE_60)),
+          QString("#define CONE_45 %0n").arg(int(type==TextureFile::IblCalculator::Type::CONE_45)),
+          QString("#define MAX_NUM_GRID_CASCADES 1"),
+          QString("#define NUM_GRID_CASCADES 1"),
+          QString("#define SDF_CANDIDATE_GRID_SIZE 4")};
 }
 
 } // namespace renderer
