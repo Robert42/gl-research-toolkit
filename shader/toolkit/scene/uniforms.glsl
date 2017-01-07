@@ -6,6 +6,7 @@
 #include <alignment.glsl>
 #include <glrt/glsl/math-glsl.h>
 #include <equirectengular_env_mapping.glsl>
+#include <debugging/normal.glsl>
 
 
 #ifdef LOG_HEATVISION_DEBUG_COSTS
@@ -124,6 +125,7 @@ float get_exposure()
   return 1.f;
 }
 
+#define SHOW_DIRECTION 0
 #define SHOW_ENVIRONMENT 1
 #define SHOW_IBL_GGX 0
 #define SHOW_IBL_DIFFUSE 0
@@ -131,7 +133,9 @@ float get_exposure()
 #define SHOW_IBL_CONE_45 0
 vec3 get_environment_infoming_ligth(vec3 view_direction)
 {
-#if SHOW_ENVIRONMENT
+#if SHOW_DIRECTION
+  return encode_signed_normalized_vector_as_color(view_direction);
+#elif SHOW_ENVIRONMENT
   mat3 m = mat3(0,-1, 0,
                 1, 0, 0,
                 0, 0, 1);
