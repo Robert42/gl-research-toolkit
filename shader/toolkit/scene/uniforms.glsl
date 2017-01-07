@@ -19,10 +19,10 @@ struct SceneLightData
 {
   uint64_t sphere_arealights_address;
   uint64_t rect_arealights_address;
-  uint64_t sky_ibl_ggx;
-  uint64_t sky_ibl_diffuse;
-  uint64_t sky_ibl_cone_60;
-  uint64_t sky_ibl_cone_45;
+  samplerCube sky_ibl_ggx;
+  samplerCube sky_ibl_diffuse;
+  samplerCube sky_ibl_cone_60;
+  samplerCube sky_ibl_cone_45;
   uint32_t num_sphere_area_lights;
   uint32_t num_rect_area_lights;
 };
@@ -124,14 +124,36 @@ float get_exposure()
   return 1.f;
 }
 
+#define SHOW_ENVIRONMENT 1
+#define SHOW_IBL_GGX 0
+#define SHOW_IBL_DIFFUSE 0
+#define SHOW_IBL_CONE_60 0
+#define SHOW_IBL_CONE_45 0
 vec3 get_environment_infoming_ligth(vec3 view_direction)
 {
+#if SHOW_ENVIRONMENT
   mat3 m = mat3(0,-1, 0,
                 1, 0, 0,
                 0, 0, 1);
   vec2 uv = viewdir_to_uv_coord(m * view_direction);
   
   return texture2D(scene.skyTexture, uv).rgb;
+#elif SHOW_IBL_GGX || SHOW_IBL_DIFFUSE || SHOW_IBL_CONE_60 || SHOW_IBL_CONE_45
+
+  int level = 0;
+#if SHOW_IBL_GGX
+  samplerCube sampler = scene.lights.sky_ibl_ggx;
+#elif SHOW_IBL_DIFFUSE
+  samplerCube sampler = scene.lights.sky_ibl_diffuse;
+#elif SHOW_IBL_CONE_60
+  samplerCube sampler = scene.lights.sky_ibl_cone_60;
+#elif SHOW_IBL_CONE_45
+  samplerCube sampler = scene.lights.sky_ibl_cone_45;
+#endif
+
+  return texture(sampler, view_direction).rgb;
+
+#endif
 }
 
 float blink(float rate=0.2)
