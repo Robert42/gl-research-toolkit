@@ -31,9 +31,9 @@ void TextureFile::appendImage(const GlTexture& texture, Type type, Format format
 
 void TextureFile::appendCubemapImageToTarget(TextureFile::GlTexture* side_textures, Type type, Format format, int max_mipmap_level)
 {
-  for(int level=max_mipmap_level; level>=0; level--)
+  for(int layer=0; layer<6; layer++)
   {
-    for(int layer=0; layer<6; layer++)
+    for(int level=max_mipmap_level; level>=0; level--)
     {
       QPair<UncompressedImage, QVector<byte>> image =  side_textures[layer].uncompressed2DImage(level, format, type);
       image.first.target = IblCalculator::targetForLayer(layer);

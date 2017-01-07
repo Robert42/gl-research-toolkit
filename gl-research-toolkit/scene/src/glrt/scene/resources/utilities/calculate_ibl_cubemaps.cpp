@@ -55,9 +55,7 @@ TextureFile::IblCalculator::IblCalculator(TextureFile* file, Type type, int size
       rawData.resize(glm::max<int>(int(format.rawDataLength), rawData.length()));
       texture.setUncompressed2DImage(format, rawData.data());
     }
-    texture.makeComplete();
-    GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_BASE_LEVEL, 0);
-    GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_MAX_LEVEL, max_mipmap_level);
+    texture.makeComplete(max_mipmap_level);
   }
 }
 

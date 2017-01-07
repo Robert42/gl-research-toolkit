@@ -147,6 +147,7 @@ vec3 get_environment_infoming_ligth(vec3 view_direction)
   int level = 0;
 #if SHOW_IBL_GGX
   samplerCube sampler = scene.lights.sky_ibl_ggx;
+  return textureLod(sampler, view_direction, 0).rgb;
 #elif SHOW_IBL_DIFFUSE
   samplerCube sampler = scene.lights.sky_ibl_diffuse;
 #elif SHOW_IBL_CONE_60
