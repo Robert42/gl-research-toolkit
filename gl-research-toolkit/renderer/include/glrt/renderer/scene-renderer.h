@@ -163,7 +163,7 @@ private:
     VoxelBuffer::CandidateGridHeader candidateGrid;
     CascadedGridsHeader cascadedGrids;
     quint64 sky_texture;
-    padding<quint64, 1> _padding1;
+    quint64 dfg_lut_texture;
 
     // Padding & debugging
     quint32 costsHeatvisionBlackLevel;
@@ -182,6 +182,7 @@ private:
     GLuint64 ibl_diffuse;
     GLuint64 ibl_cone_45;
     GLuint64 ibl_cone_60;
+    GLuint64 dfg;
   }skyTexture;
 
   // other uniform buffer

@@ -63,7 +63,7 @@ struct SceneData
   CandidateGridHeader candidateGridHeader;
   CascadedGrids cascadedGrids;
   sampler2D skyTexture;
-  padding1(uint64_t, _padding);
+  sampler2D dfg_lut_texture;
   
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;
@@ -135,13 +135,50 @@ float pulse(float rate=1.0)
   return abs(sin(pi*scene.totalTime/rate));
 }
 
+
+vec3 get_dfg_lut_value(float NdotV, float roughness)
+{
+  sampler2D sampler = scene.dfg_lut_texture;
+  return texture(sampler, vec2(NdotV, roughness)).xyz;
+}
+
+vec3 get_environment_ibl_ggx(vec3 view_direction, float roughness)
+{
+  samplerCube sampler = scene.lights.sky_ibl_ggx;
+  float max_lod = log2(max_component(textureSize(sampler, 0)));
+  return textureLod(sampler, view_direction, roughness).rgb;
+}
+
+vec3 get_environment_ibl_diffuse_disney(vec3 view_direction)
+{
+  samplerCube sampler = scene.lights.sky_ibl_diffuse;
+  return texture(sampler, view_direction).rgb;
+}
+
+vec3 get_environment_ibl_cone_60(vec3 view_direction)
+{
+  samplerCube sampler = scene.lights.sky_ibl_cone_60;
+  return texture(sampler, view_direction).rgb;
+}
+
+vec3 get_environment_ibl_cone_45(vec3 view_direction)
+{
+  samplerCube sampler = scene.lights.sky_ibl_cone_45;
+  return texture(sampler, view_direction).rgb;
+}
+
+vec3 get_environment_ibl_diffuse(vec3 view_direction)
+{
+  return get_environment_ibl_diffuse_disney(view_direction);
+}
+
 #define SHOW_DIRECTION 0
 #define SHOW_ENVIRONMENT 1
 #define SHOW_IBL_GGX 0
 #define SHOW_IBL_DIFFUSE 0
 #define SHOW_IBL_CONE_60 0
 #define SHOW_IBL_CONE_45 0
-vec3 get_environment_infoming_ligth(vec3 view_direction)
+vec3 get_environment_incoming_ligth(vec3 view_direction)
 {
 #if SHOW_DIRECTION
   return encode_signed_normalized_vector_as_color(view_direction);
@@ -156,9 +193,7 @@ vec3 get_environment_infoming_ligth(vec3 view_direction)
 
   int level = 0;
 #if SHOW_IBL_GGX
-  samplerCube sampler = scene.lights.sky_ibl_ggx;
-  float max_lod = log2(max_component(textureSize(sampler, 0)));
-  return textureLod(sampler, view_direction, mix(max_lod, 0, pulse(30))).rgb;
+  return get_environment_ibl_ggx(view_direction, mix(max_lod, 0, pulse(30))).rgb;
 #elif SHOW_IBL_DIFFUSE
   samplerCube sampler = scene.lights.sky_ibl_diffuse;
 #elif SHOW_IBL_CONE_60

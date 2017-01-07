@@ -556,7 +556,12 @@ void Renderer::recordSky(gl::CommandListRecorder& recorder, Material::Type mater
   Uuid<Texture> ibl_cone_45 = this->scene.sky().ibl_cone_45;
   Uuid<Texture> ibl_cone_60 = this->scene.sky().ibl_cone_60;
 
+  Uuid<Texture> dfg = glrt::scene::resources::uuids::dfg;
+
   Uuid<Texture> fallbackCubemap = scene::resources::uuids::blackTexture;
+
+  Q_ASSERT(!dfg.isNull());
+  skyTexture.dfg = textureManager.gpuHandle(textureManager.handleFor(dfg));
 
   if(ibl_ggx.isNull())
     ibl_ggx = fallbackCubemap;
@@ -710,6 +715,7 @@ void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
   sceneUniformData.candidateGrid = voxelUniformBuffer.candidateGridHeader;
   sceneUniformData.cascadedGrids = updateCascadedGrids();
   sceneUniformData.sky_texture = skyTexture.equirectengular_view;
+  sceneUniformData.dfg_lut_texture = skyTexture.dfg;
   sceneUniformData.lightData.sky_ibl_ggx = skyTexture.ibl_ggx;
   sceneUniformData.lightData.sky_ibl_diffuse = skyTexture.ibl_diffuse;
   sceneUniformData.lightData.sky_ibl_cone_45 = skyTexture.ibl_cone_45;

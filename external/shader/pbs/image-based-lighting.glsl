@@ -1,31 +1,31 @@
-/*
-
-
 // Based on Listing 24
 
-float3 evaluateIBLDiffuse(...)
+vec3 get_dfg_lut_value(float NdotV, float roughness);
+vec3 get_environment_ibl_diffuse(vec3 view_direction);
+vec3 get_environment_ibl_ggx(vec3 view_direction, float roughness);
+
+vec3 evaluateIBLDiffuse(in vec3 V, in vec3 N, in vec3 R, in float roughness, float NdotV)
 {
-  float3 dominantN = getDiffuseDominantDir(N, V, NdotV, roughness);
-  float3 diffuseLighting = diffuseLD.Sample(sampler, dominantN);
-  float diffF = DFG.SampleLevel(sampler, float2(NdotV, roughness), 0).z;
+  vec3 dominantN = getDiffuseDominantDir(N, V, NdotV, roughness);
+  vec3 diffuseLighting = get_environment_ibl_diffuse(dominantN);
+  float diffF = get_dfg_lut_value(NdotV, roughness).z;
   return diffuseLighting * diffF;
 }
 
-float3 evaluateIBLSpecular(...)
+#define DFG_TEXTURE_SIZE 256
+
+vec3 evaluateIBLSpecular(float f0, float f90, in vec3 N, in vec3 R, in float roughness, float NdotV)
 {
-  float3 dominantR = getSpecularDominantDir(N, R, NdotV, roughness);
+  vec3 dominantR = getSpecularDominantDir(N, R, NdotV, roughness);
   // Rebuild the function
   // L . D . ( f0.Gv.(1-Fc) + Gv.Fc ) . cosTheta / (4 . NdotL . NdotV )
   NdotV = max(NdotV, 0.5f/DFG_TEXTURE_SIZE);
-  float mipLevel = linearRoughnessToMipLevel(linearRoughness, mipCount);
-  float3 preLD = specularLD.SampleLevel(sampler, dominantR, mipLevel).rgb;
+  vec3 preLD = get_environment_ibl_ggx(dominantR, roughness).rgb;
   // Sample pre - integrate DFG
   // Fc = (1-H.L)^5
   // PreIntegratedDFG.r = Gv.(1-Fc)
   // PreIntegratedDFG.g = Gv.Fc
-  float2 preDFG = DFG.SampleLevel(sampler, float2(NdotV, roughness), 0).xy;
+  vec2 preDFG = get_dfg_lut_value(NdotV, roughness).xy;
   // LD.(f0.Gv.(1 - Fc) + Gv.Fc.f90)
   return preLD * (f0 * preDFG.x + f90 * preDFG.y);
 }
-
-*/

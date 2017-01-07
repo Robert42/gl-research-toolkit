@@ -127,6 +127,11 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
   }
   
 #endif
+
+
+
+
+  //evaluateIBLDiffuse();
   
   return outgoing_luminance + surface.emission;
 }

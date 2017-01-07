@@ -60,7 +60,6 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness)
     return normalize(mix(N, R, lerpFactor));
 }
 
-/*
 // Based on Listing 22
 
 // We have a better approximation of the off specular peak
@@ -68,14 +67,13 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness)
 // N is the normal direction
 // R is the mirror vector
 // This approximation works fine for G smith correlated and uncorrelated
-float3 getSpecularDominantDir(float3 N, float3 R, float roughness)
+vec3 getSpecularDominantDir(vec3 N, vec3 R, float NdotV, float roughness)
 {
   float smoothness = saturate(1 - roughness);
   float lerpFactor = smoothness * (sqrt(smoothness) + roughness);
   // The result is not normalized as we fetch in a cubemap
-  return lerp(N, R, lerpFactor);
+  return mix(N, R, lerpFactor);
 }
-*/
 
 // listing 26
 float computeSpecOcclusion(float NdotV, float AO, float roughness)
@@ -151,7 +149,6 @@ void precomputeData(in BaseMaterial material,
   float specular_occlusion = computeSpecOcclusion(NdotV, AO, roughness);
   
   vec3 dominant_specular_dir = getSpecularDominantDirArea(N, R, NdotV, roughness);
-  vec3 dominant_specular_dir_ibl = getSpecularDominantDir(N, R, NdotV, roughness);
   vec3 dominant_diffuse_dir  = getDiffuseDominantDir(N, V, NdotV, roughness);
   
   surface_data.position = surface_position;
@@ -170,6 +167,7 @@ void precomputeData(in BaseMaterial material,
   
   brdf_data.NdotV             = NdotV;
   brdf_data.roughness         = roughness;
+
   
 #ifdef LIGHTING_ONLY_SPECULAR
   surface_data.diffuse_color = vec3(0);
