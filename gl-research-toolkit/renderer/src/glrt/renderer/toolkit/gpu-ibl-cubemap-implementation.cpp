@@ -55,7 +55,7 @@ QSet<QString> GpuIblCubemapImplementation::preprocessorFromType(TextureFile::Ibl
   return {QString("#define GGX %0").arg(int(type==TextureFile::IblCalculator::Type::GGX)),
           QString("#define DIFFUSE %0").arg(int(type==TextureFile::IblCalculator::Type::DIFFUSE)),
           QString("#define CONE_60 %0").arg(int(type==TextureFile::IblCalculator::Type::CONE_60)),
-          QString("#define CONE_45 %0n").arg(int(type==TextureFile::IblCalculator::Type::CONE_45)),
+          QString("#define CONE_45 %0").arg(int(type==TextureFile::IblCalculator::Type::CONE_45)),
           QString("#define MAX_NUM_GRID_CASCADES 1"),
           QString("#define NUM_GRID_CASCADES 1"),
           QString("#define SDF_CANDIDATE_GRID_SIZE 4")};
