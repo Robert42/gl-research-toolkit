@@ -51,7 +51,7 @@ TextureFile::IblCalculator::IblCalculator(TextureFile* file, Type type, int size
       uint s = uint(size) >> uint(level);
       Q_ASSERT(s>0);
 
-      GlTexture::UncompressedImage format = GlTexture::format(glm::uvec3(s, s, 1), level, GlTexture::Format::RGB, GlTexture::Type::FLOAT16, GlTexture::Target::TEXTURE_2D);
+      GlTexture::UncompressedImage format = GlTexture::format(glm::uvec3(s, s, 1), level, GlTexture::Format::RGBA, GlTexture::Type::FLOAT16, GlTexture::Target::TEXTURE_2D);
       rawData.resize(glm::max<int>(int(format.rawDataLength), rawData.length()));
       texture.setUncompressed2DImage(format, rawData.data());
     }

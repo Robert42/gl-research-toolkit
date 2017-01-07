@@ -19,7 +19,7 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
   GLuint sourceTextureId = sourceTexture.textureId;
   GLuint targetTextureId = calculator->target_textures[layer].textureId;
 
-  GLuint64 targetTextureHandle = GL_RET_CALL(glGetImageHandleNV, targetTextureId, level, GL_TRUE, 0, GL_RGB16F);
+  GLuint64 targetTextureHandle = GL_RET_CALL(glGetImageHandleNV, targetTextureId, level, GL_TRUE, 0, GL_RGBA16F);
   GL_CALL(glMakeImageHandleResidentNV, targetTextureHandle, GL_WRITE_ONLY);
 
   GLuint64 sourceTextureHandle = GL_RET_CALL(glGetTextureHandleNV, sourceTextureId);
