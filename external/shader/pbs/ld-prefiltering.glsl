@@ -99,4 +99,26 @@ float4 integrateDiffuseCube(in float3 N)
   }
   return float4(accBrdf * (1.0f / sampleCount), 1.0f);
 }
+
+// Based on listing A.2 
+void importanceSampleCosDir(
+    in float2 u,
+    in float3 N,
+    out float3 L,
+    out float NdotL,
+    out float pdf)
+{
+  // Local referencial
+  float3 upVector = abs(N.z) < 0.999 ? float3(0, 0, 1) : float3(1 ,0 ,0);
+  float3 tangentX = normalize(cross(upVector, N));
+  float3 tangentY = cross(N, tangentX);
+  float u1 = u.x;
+  float u2 = u.y;
+  float r = sqrt(u1);
+  float phi = u2 * FB_PI * 2;
+  L = float3(r * cos(phi), r * sin(phi), sqrt(max(0.0f, 1.0f - u1)));
+  L = normalize (tangentX * L.y + tangentY * L.x + N * L.z);
+  NdotL = dot(L, N);
+  pdf = NdotL * FB_INV_PI;
+}
 */
