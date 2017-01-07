@@ -137,8 +137,8 @@ float pulse(float rate=1.0)
 
 #define SHOW_DIRECTION 0
 #define SHOW_ENVIRONMENT 0
-#define SHOW_IBL_GGX 1
-#define SHOW_IBL_DIFFUSE 0
+#define SHOW_IBL_GGX 0
+#define SHOW_IBL_DIFFUSE 1
 #define SHOW_IBL_CONE_60 0
 #define SHOW_IBL_CONE_45 0
 vec3 get_environment_infoming_ligth(vec3 view_direction)

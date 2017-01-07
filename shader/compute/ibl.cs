@@ -35,11 +35,13 @@ void main()
   
   vec3 result;
   
+  vec3 n = v;
 #if GGX
   float roughness = header.roughness;
-  vec3 n = v;
   v = vec3(0,0,1);
   result = integrateCubeLDOnly(v, n, roughness, sampleCount);
+#elif DIFFUSE
+  result = integrateDiffuseCube(n, sampleCount).rgb;
 #else
   result = environment_color(v);
 #endif
@@ -78,7 +80,11 @@ vec3 environment_color(vec3 view_direction)
 
 vec4 sample_environment(vec3 view, float mipLevel)
 {
-  return vec4(environment_color(view), 1);
+  vec3 incoming = environment_color(view);
+  
+  incoming = clamp(incoming, vec3(0), vec3(5));
+  
+  return vec4(incoming, 1);
 }
 
 vec2 Hammersley(uint n, uint N)

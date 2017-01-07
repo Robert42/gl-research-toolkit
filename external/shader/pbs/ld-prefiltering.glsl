@@ -3,7 +3,7 @@
 #include <ibl/ggx_importance/ImportanceSampleGGX.glsl>
 
 
-vec4 sample_environment(vec3 view, float mipLevel);
+vec4 sample_environment(vec3 view, float mipLevel=0);
 vec2 getSample(uint i, uint sampleCount);
 
 void importanceSampleGGX_(vec2 u, vec3 V, vec3 N, float roughness, out float NdotH, out float LdotH, out vec3 H, out vec3 L, out float G)
@@ -80,45 +80,49 @@ vec3 integrateCubeLDOnly(
   return accBrdf * (1.0f / accBrdfWeight);
 }
 
+void importanceSampleCosDir(
+    in vec2 u,
+    in vec3 N,
+    out vec3 L,
+    out float NdotL,
+    out float pdf);
 
-/*
 // Based on Listing 20
-float4 integrateDiffuseCube(in float3 N)
+vec4 integrateDiffuseCube(in vec3 N, in int sampleCount=1024)
 {
-  float3 accBrdf = 0;
+  vec3 accBrdf = vec3(0);
   for(uint i=0; i<sampleCount; ++i)
   {
-    float2 eta = getSample(i, sampleCount);
-    float3 L;
+    vec2 eta = getSample(i, sampleCount);
+    vec3 L;
     float NdotL;
     float pdf;
     // see reference code in appendix
     importanceSampleCosDir(eta, N, L, NdotL, pdf);
     if(NdotL >0)
-      accBrdf += IBLCube.Sample(incomingLightSampler, L).rgb;
+      accBrdf += sample_environment(L).rgb;
   }
-  return float4(accBrdf * (1.0f / sampleCount), 1.0f);
+  return vec4(accBrdf * (1.0f / sampleCount), 1.0f);
 }
 
 // Based on listing A.2 
 void importanceSampleCosDir(
-    in float2 u,
-    in float3 N,
-    out float3 L,
+    in vec2 u,
+    in vec3 N,
+    out vec3 L,
     out float NdotL,
     out float pdf)
 {
   // Local referencial
-  float3 upVector = abs(N.z) < 0.999 ? float3(0, 0, 1) : float3(1 ,0 ,0);
-  float3 tangentX = normalize(cross(upVector, N));
-  float3 tangentY = cross(N, tangentX);
+  vec3 upVector = abs(N.z) < 0.999 ? vec3(0, 0, 1) : vec3(1 ,0 ,0);
+  vec3 tangentX = normalize(cross(upVector, N));
+  vec3 tangentY = cross(N, tangentX);
   float u1 = u.x;
   float u2 = u.y;
   float r = sqrt(u1);
-  float phi = u2 * FB_PI * 2;
-  L = float3(r * cos(phi), r * sin(phi), sqrt(max(0.0f, 1.0f - u1)));
+  float phi = u2 * pi * 2;
+  L = vec3(r * cos(phi), r * sin(phi), sqrt(max(0.0f, 1.0f - u1)));
   L = normalize (tangentX * L.y + tangentY * L.x + N * L.z);
   NdotL = dot(L, N);
-  pdf = NdotL * FB_INV_PI;
+  pdf = NdotL * inv_pi;
 }
-*/
