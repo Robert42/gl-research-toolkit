@@ -129,10 +129,9 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
 #endif
 
 
+  outgoing_luminance += evaluateIBLDiffuse(viewDir, worldNormal, R, surface.roughness, brdf_g.NdotV) * surface.diffuse_color * surface.diffuse_occlusion;
+  outgoing_luminance += evaluateIBLSpecular(surface.f0, surface.f90, worldNormal, R, surface.roughness, brdf_g.NdotV) * surface.specular_occlusion;
 
-
-  //evaluateIBLDiffuse();
-  
   return outgoing_luminance + surface.emission;
 }
 
