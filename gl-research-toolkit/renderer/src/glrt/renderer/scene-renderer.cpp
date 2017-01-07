@@ -556,7 +556,7 @@ void Renderer::recordSky(gl::CommandListRecorder& recorder, Material::Type mater
   Uuid<Texture> ibl_cone_45 = this->scene.sky().ibl_cone_45;
   Uuid<Texture> ibl_cone_60 = this->scene.sky().ibl_cone_60;
 
-  Uuid<Texture> fallbackCubemap = scene::resources::uuids::blackTexture; // TODO::: test, whether this is working
+  Uuid<Texture> fallbackCubemap = scene::resources::uuids::blackTexture;
 
   if(ibl_ggx.isNull())
     ibl_ggx = fallbackCubemap;
