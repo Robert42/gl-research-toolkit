@@ -673,6 +673,7 @@ GlTexture::GlTexture(const QFileInfo& fileToBeImported, ImportSettings importSet
 
     setUncompressed2DImage(header,
                            plain_data.data());
+    makeComplete();
   }else
   {
     qDebug() << "Unsupported image format" << suffix << "used with the file" << fileToBeImported.absoluteFilePath();

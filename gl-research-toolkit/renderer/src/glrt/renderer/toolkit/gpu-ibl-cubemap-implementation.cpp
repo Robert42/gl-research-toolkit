@@ -34,7 +34,7 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
   shader.execute(glm::ivec3(glm::ivec2(calculator->size >> level), 1), proprocessorBlock);
 
   GL_CALL(glMakeImageHandleNonResidentNV, targetTextureHandle);
-  GL_CALL(glMakeTextureHandleNonResidentNV, targetTextureHandle);
+  GL_CALL(glMakeTextureHandleNonResidentNV, sourceTextureHandle);
 }
 
 QSet<QString> GpuIblCubemapImplementation::preprocessorFromType(TextureFile::IblCalculator::Type type)
