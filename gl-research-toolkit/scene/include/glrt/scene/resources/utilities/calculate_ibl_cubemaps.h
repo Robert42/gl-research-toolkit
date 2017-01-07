@@ -27,13 +27,13 @@ public:
 
   void execute(const TextureFile::GlTexture& source_texture);
 
+  static Target targetForLayer(int layer);
+  static glm::mat4 rotationForLayer(int layer);
+
 private:
   TextureFile* file;
 
   int max_mipmap_level;
-
-  static Target targetForLayer(int layer);
-  static glm::mat4 rotationForLayer(int layer);
 };
 
 class TextureFile::IblCalculator::Implementation

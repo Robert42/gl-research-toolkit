@@ -129,7 +129,7 @@ public:
                                                               Format format,
                                                               Type type) const;
   void setUncompressed2DImage(const GlTexture::UncompressedImage& image, const void* data);
-  void makeComplete();
+  void makeComplete(int max_mipmap_level=0);
   TextureAsFloats asFloats(int level);
   void fromFloats(const TextureAsFloats& texture);
 };

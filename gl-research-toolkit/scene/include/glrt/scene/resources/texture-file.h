@@ -102,7 +102,7 @@ public:
 
   void appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData);
   void appendImage(const GlTexture& texture, Type type = Type::UINT8, Format format = Format::RGBA, int mipmapLevel=0);
-  void appendImageToTarget(Target target, const GlTexture& texture, Type type = Type::UINT8, Format format = Format::RGBA, int mipmapLevel=0);
+  void appendCubemapImageToTarget(GlTexture* side_textures, Type type, Format format, int max_mipmap_level);
 
   void import(const QFileInfo& srcFile, ImportSettings importSettings);
   void save(const QFileInfo& textureFile);

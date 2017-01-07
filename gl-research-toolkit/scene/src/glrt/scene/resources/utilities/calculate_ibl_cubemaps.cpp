@@ -40,18 +40,22 @@ TextureFile::IblCalculator::IblCalculator(TextureFile* file, Type type, int size
     Q_ASSERT((uint(1) << uint(max_mipmap_level)) == glm::floorPowerOfTwo(uint(size)));
   }
 
+  QVector<byte> rawData;
+
   for(int layer=0; layer<6; ++layer)
   {
     GlTexture& texture = target_textures[layer];
 
-    for(int level=0; level<=max_mipmap_level; ++level)
+    for(int level=max_mipmap_level; level>=0; --level)
     {
       uint s = uint(size) >> uint(level);
       Q_ASSERT(s>0);
 
       GlTexture::UncompressedImage format = GlTexture::format(glm::uvec3(s, s, 1), level, GlTexture::Format::RGB, GlTexture::Type::FLOAT16, GlTexture::Target::TEXTURE_2D);
-      texture.setUncompressed2DImage(format, nullptr);
+      rawData.resize(glm::max<int>(int(format.rawDataLength), rawData.length()));
+      texture.setUncompressed2DImage(format, rawData.data());
     }
+    texture.makeComplete();
     GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_BASE_LEVEL, 0);
     GL_CALL(glTextureParameteri, texture.textureId, GL_TEXTURE_MAX_LEVEL, max_mipmap_level);
   }
@@ -67,10 +71,10 @@ void TextureFile::IblCalculator::execute(const TextureFile::GlTexture& source_te
     for(int level=0; level<=max_mipmap_level; ++level)
     {
       Implementation::singleton().execute(this, source_texture, target, layer, level, rotation);
-
-      file->appendImageToTarget(target, this->target_textures[layer], GlTexture::Type::FLOAT16, GlTexture::Format::RGB, level);
     }
   }
+
+  file->appendCubemapImageToTarget(this->target_textures, GlTexture::Type::FLOAT16, GlTexture::Format::RGB, max_mipmap_level);
 }
 
 

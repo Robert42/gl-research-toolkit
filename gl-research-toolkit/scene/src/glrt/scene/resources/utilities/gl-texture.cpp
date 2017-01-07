@@ -871,11 +871,12 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
   GL_CALL(glBindTexture, static_cast<GLenum>(image.target), 0);
 }
 
-void GlTexture::makeComplete()
+void GlTexture::makeComplete(int max_mipmap_level)
 {
   // Make the texture complete
   GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
-  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
+  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LOD, max_mipmap_level);
+  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, max_mipmap_level);
 }
 
 GlTexture::TextureAsFloats GlTexture::asFloats(int level)

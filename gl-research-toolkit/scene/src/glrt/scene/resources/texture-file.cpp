@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <glrt/scene/resources/texture-file.h>
 #include <glrt/toolkit/plain-old-data-stream.h>
+#include <glrt/scene/resources/utilities/calculate_ibl_cubemaps.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
 #include <QLabel>
@@ -28,11 +29,17 @@ void TextureFile::appendImage(const GlTexture& texture, Type type, Format format
   appendUncompressedImage(image.first, image.second);
 }
 
-void TextureFile::appendImageToTarget(TextureFile::Target target, const TextureFile::GlTexture& texture, TextureFile::Type type, TextureFile::Format format, int mipmapLevel)
+void TextureFile::appendCubemapImageToTarget(TextureFile::GlTexture* side_textures, Type type, Format format, int max_mipmap_level)
 {
-  QPair<UncompressedImage, QVector<byte>> image =  texture.uncompressed2DImage(mipmapLevel, format, type);
-  image.first.target = target;
-  appendUncompressedImage(image.first, image.second);
+  for(int level=max_mipmap_level; level>=0; level--)
+  {
+    for(int layer=0; layer<6; layer++)
+    {
+      QPair<UncompressedImage, QVector<byte>> image =  side_textures[layer].uncompressed2DImage(level, format, type);
+      image.first.target = IblCalculator::targetForLayer(layer);
+      appendUncompressedImage(image.first, image.second);
+    }
+  }
 }
 
 void show_texture_in_dialog(const TextureFile::TextureAsFloats& asFloats, int channel=-1)
