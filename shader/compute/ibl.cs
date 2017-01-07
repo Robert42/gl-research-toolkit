@@ -24,6 +24,8 @@ uniform IblHeaderBlock
 vec3 view_dir(ivec2 tex_coord);
 vec3 environment_color(vec3 view);
 
+vec3 integrateCone(vec3 N, float cone_angle, int sampleCount=1024);
+
 #include <pbs/pbs.glsl>
 
 void main()
@@ -42,6 +44,9 @@ void main()
   result = integrateCubeLDOnly(v, n, roughness, sampleCount);
 #elif DIFFUSE
   result = integrateDiffuseCube(n, sampleCount).rgb;
+#elif CONE_60 || CONE_45
+  float cone_angle = radians((CONE_60*60.f + 45.f*CONE_45));
+  result = integrateCone(v, cone_angle, sampleCount);
 #else
   result = environment_color(v);
 #endif
@@ -106,4 +111,28 @@ vec2 Hammersley(uint n, uint N)
 vec2 getSample(uint i, uint sampleCount)
 {
   return Hammersley(i, sampleCount);
+}
+
+vec3 integrateCone(vec3 N, float cone_angle, int sampleCount)
+{
+  vec3 sum = vec3(0);
+  int usedSamples = 0;
+  float half_cone_angle = cone_angle * 0.5f;
+  
+  for(uint i=0; i<sampleCount; ++i)
+  {
+    float NdotL;
+    float pdf;
+    vec3 L;
+    vec2 u = getSample(i, sampleCount);
+    importanceSampleCosDir(u, N, L, NdotL, pdf);
+    
+    if(NdotL > cos(half_cone_angle))
+    {
+      sum += sample_environment(L, 0).rgb;
+      ++usedSamples;
+    }
+  }
+  
+  return sum / usedSamples;
 }
