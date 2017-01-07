@@ -9,5 +9,6 @@
 #include "luminance-for-luminous-power.glsl"
 #include "camera.glsl"
 #include "image-based-lighting.glsl"
+#include "ld-prefiltering.glsl"
 
 #undef saturate

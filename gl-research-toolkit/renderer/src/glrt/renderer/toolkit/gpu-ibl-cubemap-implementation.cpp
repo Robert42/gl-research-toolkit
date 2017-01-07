@@ -32,6 +32,8 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
   header.target = targetTextureHandle;
   header.source = sourceTextureHandle;
   header.rotation = side_rotation;
+  header.roughness = level / glm::log2<float>(target_texture.width(0));
+  header.sampleCount = 8192;
   header_buffer.Unmap();
 
   header_buffer.BindUniformBuffer(IBL_BLOCK);

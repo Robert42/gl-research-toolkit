@@ -26,6 +26,8 @@ private:
     GLuint64 source;
     GLuint64 padding2;
     glm::mat4 rotation;
+    float roughness;
+    int sampleCount;
   };
 
   ComputeShaderSet shader;
