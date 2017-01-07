@@ -125,6 +125,16 @@ float get_exposure()
   return 1.f;
 }
 
+float blink(float rate=0.2)
+{
+  return step(rate, mod(scene.totalTime, rate*2.));
+}
+
+float pulse(float rate=1.0)
+{
+  return abs(sin(pi*scene.totalTime/rate));
+}
+
 #define SHOW_DIRECTION 0
 #define SHOW_ENVIRONMENT 0
 #define SHOW_IBL_GGX 1
@@ -147,7 +157,8 @@ vec3 get_environment_infoming_ligth(vec3 view_direction)
   int level = 0;
 #if SHOW_IBL_GGX
   samplerCube sampler = scene.lights.sky_ibl_ggx;
-  return textureLod(sampler, view_direction, 0).rgb;
+  float max_lod = log2(max_component(textureSize(sampler, 0)));
+  return textureLod(sampler, view_direction, mix(max_lod, 0, pulse(30))).rgb;
 #elif SHOW_IBL_DIFFUSE
   samplerCube sampler = scene.lights.sky_ibl_diffuse;
 #elif SHOW_IBL_CONE_60
@@ -159,11 +170,6 @@ vec3 get_environment_infoming_ligth(vec3 view_direction)
   return texture(sampler, view_direction).rgb;
 
 #endif
-}
-
-float blink(float rate=0.2)
-{
-  return step(rate, mod(scene.totalTime, rate*2.));
 }
 
 void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)
