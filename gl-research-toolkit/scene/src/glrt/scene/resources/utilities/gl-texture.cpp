@@ -14,6 +14,26 @@ void show_texture_in_dialog(const utilities::GlTexture::TextureAsFloats& asFloat
 namespace utilities {
 
 
+bool GlTexture::isCubemap(GlTexture::Target target)
+{
+  switch(target)
+  {
+  case Target::TEXTURE_1D:
+  case Target::TEXTURE_2D:
+  case Target::TEXTURE_3D:
+    return false;
+  case Target::CUBE_MAP_POSITIVE_X:
+  case Target::CUBE_MAP_NEGATIVE_X:
+  case Target::CUBE_MAP_POSITIVE_Y:
+  case Target::CUBE_MAP_NEGATIVE_Y:
+  case Target::CUBE_MAP_POSITIVE_Z:
+  case Target::CUBE_MAP_NEGATIVE_Z:
+    return true;
+  }
+
+  return false;
+}
+
 int GlTexture::channelsPerPixelForFormat(Format format)
 {
   switch(format)
@@ -843,7 +863,11 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
   GLenum internalFormat = GlTexture::internalFormat(image.format, image.type, &supportedFormat);
   Q_ASSERT(supportedFormat);
 
-  GL_CALL(glBindTexture, static_cast<GLenum>(image.target), this->textureId);
+  GLenum bindTarget = static_cast<GLenum>(image.target);
+  if(isCubemap(image.target))
+    bindTarget = GL_TEXTURE_CUBE_MAP;
+
+  GL_CALL(glBindTexture, bindTarget, this->textureId);
 
   GL_CALL(glPixelStorei, GL_UNPACK_ALIGNMENT, image.alignment);
 
@@ -869,7 +893,7 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
     break;
   }
 
-  GL_CALL(glBindTexture, static_cast<GLenum>(image.target), 0);
+  GL_CALL(glBindTexture, bindTarget, 0);
 }
 
 void GlTexture::makeComplete(int max_mipmap_level)
