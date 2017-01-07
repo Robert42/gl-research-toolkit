@@ -14,10 +14,12 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
 {
   Q_UNUSED(target);
 
+  GlTexture& target_texture = calculator->target_textures[layer];
+
   QSet<QString> proprocessorBlock = preprocessorFromType(calculator->type);
 
   GLuint sourceTextureId = sourceTexture.textureId;
-  GLuint targetTextureId = calculator->target_textures[layer].textureId;
+  GLuint targetTextureId = target_texture.textureId;
 
   GLuint64 targetTextureHandle = GL_RET_CALL(glGetImageHandleNV, targetTextureId, level, GL_TRUE, 0, GL_RGBA16F);
   GL_CALL(glMakeImageHandleResidentNV, targetTextureHandle, GL_WRITE_ONLY);
@@ -31,7 +33,13 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
   header.rotation = side_rotation;
   header_buffer.Unmap();
 
-  shader.execute(glm::ivec3(glm::ivec2(calculator->size >> level), 1), proprocessorBlock);
+  Q_ASSERT(target_texture.width(level) == (calculator->size >> level));
+  Q_ASSERT(target_texture.height(level) == (calculator->size >> level));
+
+  shader.execute(glm::ivec3(target_texture.width(level),
+                            target_texture.height(level),
+                            1),
+                 proprocessorBlock);
 
   GL_CALL(glMakeImageHandleNonResidentNV, targetTextureHandle);
   GL_CALL(glMakeTextureHandleNonResidentNV, sourceTextureHandle);
