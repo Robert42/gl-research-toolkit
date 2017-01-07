@@ -1,4 +1,5 @@
 #include <glrt/renderer/toolkit/gpu-ibl-cubemap-implementation.h>
+#include <glrt/glsl/layout-constants.h>
 
 namespace glrt {
 namespace renderer {
@@ -28,10 +29,12 @@ void GpuIblCubemapImplementation::execute(TextureFile::IblCalculator* calculator
   GL_CALL(glMakeTextureHandleResidentNV, sourceTextureHandle);
 
   Header& header = *reinterpret_cast<Header*>(header_buffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));
-  header.source = sourceTextureHandle;
   header.target = targetTextureHandle;
+  header.source = sourceTextureHandle;
   header.rotation = side_rotation;
   header_buffer.Unmap();
+
+  header_buffer.BindUniformBuffer(IBL_BLOCK);
 
   Q_ASSERT(target_texture.width(level) == (calculator->size >> level));
   Q_ASSERT(target_texture.height(level) == (calculator->size >> level));

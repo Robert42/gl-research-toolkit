@@ -7,7 +7,7 @@ layout(local_size_x=GROUPS_SIZE_X, local_size_y=GROUPS_SIZE_Y, local_size_z=GROU
 
 struct IblHeader
 {
-  layout(r16f) writeonly image2D targetTexture;
+  layout(rgba16f) writeonly image2D targetTexture;
   sampler2D sourceTexture;
   mat4 cube_side;
 };
