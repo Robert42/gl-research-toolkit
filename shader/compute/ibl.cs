@@ -54,8 +54,6 @@ vec3 view_dir(ivec2 texture_coordinate)
 
 vec3 environment_color(vec3 view_direction)
 {
-  return encode_signed_normalized_vector_as_color(view_direction);
-  
   mat3 m = mat3(0,-1, 0,
                 1, 0, 0,
                 0, 0, 1);
