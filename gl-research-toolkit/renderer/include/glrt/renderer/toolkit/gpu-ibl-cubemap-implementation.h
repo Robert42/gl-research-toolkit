@@ -22,7 +22,9 @@ private:
   struct Header
   {
     GLuint64 target;
+    GLuint64 padding1;
     GLuint64 source;
+    GLuint64 padding2;
     glm::mat4 rotation;
   };
 

@@ -126,8 +126,8 @@ float get_exposure()
 }
 
 #define SHOW_DIRECTION 0
-#define SHOW_ENVIRONMENT 1
-#define SHOW_IBL_GGX 0
+#define SHOW_ENVIRONMENT 0
+#define SHOW_IBL_GGX 1
 #define SHOW_IBL_DIFFUSE 0
 #define SHOW_IBL_CONE_60 0
 #define SHOW_IBL_CONE_45 0

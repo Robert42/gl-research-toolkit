@@ -129,17 +129,42 @@ GlTexture::Target TextureFile::IblCalculator::targetForLayer(int layer)
   return Target::CUBE_MAP_POSITIVE_X;
 }
 
+inline glm::mat4 rotate_x(int angle)
+{
+  double alpha = angle * glm::half_pi<double>();
+
+  return glm::mat4(1.f, 0.f, 0.f, 0.f,
+                   0.f, glm::cos(alpha), glm::sin(alpha), 0.f,
+                   0.f, -glm::sin(alpha), glm::cos(alpha), 0.f,
+                   0.f, 0.f, 0.f, 1.f);
+}
+
+inline glm::mat4 rotate_z(int angle)
+{
+  double alpha = angle * glm::half_pi<double>();
+
+  return glm::mat4(glm::cos(alpha), glm::sin(alpha), 0.f, 0.f,
+                   -glm::sin(alpha), glm::cos(alpha), 0.f, 0.f,
+                   0.f, 0.f, 1.f, 0.f,
+                   0.f, 0.f, 0.f, 1.f);
+}
+
 glm::mat4 TextureFile::IblCalculator::rotationForLayer(int layer)
 {
   switch(targetForLayer(layer))
   {
   case Target::CUBE_MAP_POSITIVE_X:
+    return rotate_x(1) * rotate_z(-1);
   case Target::CUBE_MAP_NEGATIVE_X:
+    return rotate_x(1) * rotate_z(1);
   case Target::CUBE_MAP_POSITIVE_Y:
+    return glm::mat4(1);
   case Target::CUBE_MAP_NEGATIVE_Y:
+    return rotate_z(1) * rotate_x(2) * rotate_z(1);
   case Target::CUBE_MAP_POSITIVE_Z:
+    return rotate_z(0) * rotate_x(1);
   case Target::CUBE_MAP_NEGATIVE_Z:
-    return glm::mat4(1); // TODO::
+    return rotate_z(2) * rotate_x(-1);
   case Target::TEXTURE_1D:
   case Target::TEXTURE_2D:
   case Target::TEXTURE_3D:

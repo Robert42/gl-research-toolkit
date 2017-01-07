@@ -46,6 +46,8 @@ vec3 view_dir(ivec2 texture_coordinate)
   v.y = 1;
     
   v = normalize(v);
+  
+  v = (header.cube_side*vec4(v, 0)).xyz;
     
   return v;
 }
