@@ -1,4 +1,3 @@
-// Based on Listing 19
 // Pre-filtered importance sampling function.
 
 #include <ibl/ggx_importance/ImportanceSampleGGX.glsl>
@@ -25,6 +24,7 @@ void importanceSampleGGXDir(vec2 u, vec3 V, vec3 N, float roughness, out vec3 H,
   importanceSampleGGX_(u, V, N, roughness, NdotH, LdotH, H, L, G);
 }
 
+// Based on Listing 19
 vec3 integrateCubeLDOnly(
   in vec3 V,
   in vec3 N,
@@ -79,3 +79,24 @@ vec3 integrateCubeLDOnly(
   }
   return accBrdf * (1.0f / accBrdfWeight);
 }
+
+
+/*
+// Based on Listing 20
+float4 integrateDiffuseCube(in float3 N)
+{
+  float3 accBrdf = 0;
+  for(uint i=0; i<sampleCount; ++i)
+  {
+    float2 eta = getSample(i, sampleCount);
+    float3 L;
+    float NdotL;
+    float pdf;
+    // see reference code in appendix
+    importanceSampleCosDir(eta, N, L, NdotL, pdf);
+    if(NdotL >0)
+      accBrdf += IBLCube.Sample(incomingLightSampler, L).rgb;
+  }
+  return float4(accBrdf * (1.0f / sampleCount), 1.0f);
+}
+*/
