@@ -61,6 +61,8 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
   // IDEA: (voxelGridData->numDynamic>0) is not an elegant solution for dynamic objects
   if(Q_UNLIKELY(voxelGridData->numDynamic>0 || voxelGridData->dirtyOrder))
   {
+    dirty_candidate_grid = true;
+    dirty_merged_sdf_texture_buffer = true;
     updateVoxelGrid();
 
     _voxelHeader.numDistanceFields = voxelGridData->length;
