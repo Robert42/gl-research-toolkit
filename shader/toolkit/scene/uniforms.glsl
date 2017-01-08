@@ -146,7 +146,7 @@ vec3 get_environment_ibl_ggx(vec3 view_direction, float roughness)
 {
   samplerCube sampler = scene.lights.sky_ibl_ggx;
   float max_lod = log2(max_component(textureSize(sampler, 0)));
-  return textureLod(sampler, view_direction, roughness).rgb;
+  return textureLod(sampler, view_direction, mix(0, max_lod, roughness)).rgb;
 }
 
 vec3 get_environment_ibl_diffuse_disney(vec3 view_direction)
@@ -189,12 +189,11 @@ vec3 get_environment_incoming_ligth(vec3 view_direction)
   vec2 uv = viewdir_to_uv_coord(m * view_direction);
   
   return texture2D(scene.skyTexture, uv).rgb;
-#elif SHOW_IBL_GGX || SHOW_IBL_DIFFUSE || SHOW_IBL_CONE_60 || SHOW_IBL_CONE_45
+#elif SHOW_IBL_GGX
+  return get_environment_ibl_ggx(view_direction, 1.f-pulse(10));
+#elif SHOW_IBL_DIFFUSE || SHOW_IBL_CONE_60 || SHOW_IBL_CONE_45
 
-  int level = 0;
-#if SHOW_IBL_GGX
-  return get_environment_ibl_ggx(view_direction, mix(max_lod, 0, pulse(30))).rgb;
-#elif SHOW_IBL_DIFFUSE
+#if SHOW_IBL_DIFFUSE
   samplerCube sampler = scene.lights.sky_ibl_diffuse;
 #elif SHOW_IBL_CONE_60
   samplerCube sampler = scene.lights.sky_ibl_cone_60;
