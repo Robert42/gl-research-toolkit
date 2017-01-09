@@ -146,6 +146,7 @@ vec3 get_environment_ibl_ggx(vec3 view_direction, float roughness)
 {
   samplerCube sampler = scene.lights.sky_ibl_ggx;
   float max_lod = log2(max_component(textureSize(sampler, 0)));
+  roughness = sqrt(roughness); // WARNING: THIS IS A HACK, WHICH IS PROPABLY WRONG!
   return textureLod(sampler, view_direction, mix(0, max_lod, roughness)).rgb;
 }
 
