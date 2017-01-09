@@ -7,6 +7,8 @@ namespace renderer {
 
 typedef glrt::renderer::ReloadableShader ReloadableShader;
 
+bool show_forward_only = true;
+
 SurfaceShaderVisualization currentSurfaceShaderVisualization = SurfaceShaderVisualization::NONE;
 
 QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
@@ -52,21 +54,27 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   VALUE(MATERIAL_EMISSION);
   VALUE(MATERIAL_REFLECTANCE);
   VALUE(MATERIAL_OCCLUSION);
-  VALUE(MESH_NORMALS_WS);
-  VALUE(MESH_UVS);
-  VALUE(MESH_TANGENTS_WS);
-  VALUE(MESH_BITANGENTS_WS);
+  if(show_forward_only)
+  {
+    VALUE(MESH_NORMALS_WS);
+    VALUE(MESH_UVS);
+    VALUE(MESH_TANGENTS_WS);
+    VALUE(MESH_BITANGENTS_WS);
+  }
   VALUE(SHOW_NAN);
   VALUE(SHOW_INF);
-  VALUE(TEXTURE_BASECOLOR);
-  VALUE(TEXTURE_BASECOLOR_ALPHA);
-  VALUE(TEXTURE_NORMAL_LS);
-  VALUE(TEXTURE_BUMP);
-  VALUE(TEXTURE_SMOOTHENESS);
-  VALUE(TEXTURE_REFLECTIVITY);
-  VALUE(TEXTURE_METALLIC);
-  VALUE(TEXTURE_AO);
-  VALUE(TEXTURE_EMISSION);
+  if(show_forward_only)
+  {
+    VALUE(TEXTURE_BASECOLOR);
+    VALUE(TEXTURE_BASECOLOR_ALPHA);
+    VALUE(TEXTURE_NORMAL_LS);
+    VALUE(TEXTURE_BUMP);
+    VALUE(TEXTURE_SMOOTHENESS);
+    VALUE(TEXTURE_REFLECTIVITY);
+    VALUE(TEXTURE_METALLIC);
+    VALUE(TEXTURE_AO);
+    VALUE(TEXTURE_EMISSION);
+  }
 
   return map;
 }

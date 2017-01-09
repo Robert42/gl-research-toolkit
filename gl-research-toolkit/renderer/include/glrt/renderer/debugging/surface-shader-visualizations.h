@@ -65,6 +65,7 @@ enum class SurfaceShaderVisualization
 extern SurfaceShaderVisualization currentSurfaceShaderVisualization;
 QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations();
 void setCurrentSurfaceShaderVisualization(SurfaceShaderVisualization visualization);
+extern bool show_forward_only;
 
 
 } // namespace renderer

@@ -4,6 +4,8 @@ const bool ADD_VSYNC = true;
 
 int main(int argc, char** argv)
 {
+  glrt::renderer::show_forward_only = false;
+
   glrt::SampleApplication app(argc, argv,
                               glrt::gui::AntTweakBar::Settings::sampleGui("This Sample shows how to use the deferred renderer to render a simple scene" // help text of the sample
                                                                           ),
