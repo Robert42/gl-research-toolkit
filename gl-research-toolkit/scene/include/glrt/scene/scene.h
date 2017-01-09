@@ -21,6 +21,17 @@ class Renderer;
 
 namespace scene {
 
+struct Sky
+{
+  Uuid<resources::Texture> equirectengular_view;
+  Uuid<resources::Texture> ibl_ggx;
+  Uuid<resources::Texture> ibl_diffuse;
+  Uuid<resources::Texture> ibl_cone_60;
+  Uuid<resources::Texture> ibl_cone_45;
+
+  void clear();
+};
+
 
 class StaticMeshComponent;
 
@@ -66,6 +77,14 @@ public:
   void set_light(LightSlot slot, const Uuid<resources::LightSource>& uuid);
   Uuid<resources::LightSource> light(LightSlot slot) const;
 
+  Sky sky() const;
+  void set_sky(const Sky& sky);
+  void set_sky_by_script(Uuid<resources::Texture> equirectengular_view,
+                         Uuid<resources::Texture> ibl_ggx,
+                         Uuid<resources::Texture> ibl_diffuse,
+                         Uuid<resources::Texture> ibl_cone_60,
+                         Uuid<resources::Texture> ibl_cone_45);
+
   static void registerAngelScriptAPIDeclarations();
   static void registerAngelScriptAPI();
 
@@ -77,6 +96,8 @@ signals:
   void sceneLoaded(bool success);
 
   void sceneRerecordedCommands();
+
+  void skyChanged(const Sky& sky);
 
   void nodeAdded(Node* node);
   void nodeRemoved(Node* node);
@@ -98,6 +119,7 @@ private:
   friend class SceneLayer;
 
   QHash<Uuid<SceneLayer>, SceneLayer*> _layers;
+  Sky _sky;
 
   QMap<CameraSlot, Uuid<CameraComponent>> _cameras;
   QMap<LightSlot, Uuid<resources::LightSource>> _lights;

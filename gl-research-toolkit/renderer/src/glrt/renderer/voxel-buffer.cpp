@@ -58,7 +58,7 @@ const VoxelBuffer::VoxelHeader& VoxelBuffer::updateVoxelHeader()
 {
   PROFILE_SCOPE("VoxelBuffer::updateVoxelHeader()")
 
-  // TODO: (voxelGridData->numDynamic>0) is not an elegant solution for dynamic objects
+  // IDEA: (voxelGridData->numDynamic>0) is not an elegant solution for dynamic objects
   if(Q_UNLIKELY(voxelGridData->numDynamic>0 || voxelGridData->dirtyOrder))
   {
     dirty_candidate_grid = true;
@@ -237,7 +237,7 @@ VoxelBuffer::CandidateGridHeader VoxelBuffer::CandidateGrid::calcCandidatesImple
 {
 
   const scene::Scene::Data* data = scene->data;
-  // TODO: seperate aabb for whole scene and for static scene?
+  // IDEA: seperate aabb for whole scene and for static scene?
   const scene::AABB aabb = scene->aabb.ensureValid();
 
   VoxelGridGeometry geometry = Voxelizer::calcVoxelSize(aabb, int(SDF_CANDIDATE_GRID_SIZE), true);
@@ -369,7 +369,7 @@ void VoxelBuffer::initStaticSDFMerged()
 void VoxelBuffer::initStaticSdfFallbackTexture()
 {
   PROFILE_SCOPE("CandidateGrid::mergeStaticSDFs");
-  // TODO: seperate aabb for whole scene and for static scene?
+  // IDEA: seperate aabb for whole scene and for static scene?
   const scene::AABB aabb = scene.aabb.ensureValid();
 
   SDFMergeHeader& sdfMergeHeader = *reinterpret_cast<SDFMergeHeader*>(sdfMergeHeaderBuffer.Map(gl::Buffer::MapType::WRITE, gl::Buffer::MapWriteFlag::INVALIDATE_BUFFER));

@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <glrt/scene/resources/texture-file.h>
 #include <glrt/toolkit/plain-old-data-stream.h>
+#include <glrt/scene/resources/utilities/calculate_ibl_cubemaps.h>
 #include <angelscript-integration/collection-converter.h>
 #include <angelscript-integration/ref-counted-object.h>
 #include <QLabel>
@@ -22,17 +23,56 @@ TextureFile::TextureFile()
 {
 }
 
-void TextureFile::appendImage(const GlTexture& texture, Type type, Format format)
+void TextureFile::appendImage(const GlTexture& texture, Type type, Format format, int mipmapLevel)
 {
-  QPair<UncompressedImage, QVector<byte>> image =  texture.uncompressed2DImage(0, format, type);
+  QPair<UncompressedImage, QVector<byte>> image =  texture.uncompressed2DImage(mipmapLevel, format, type);
   appendUncompressedImage(image.first, image.second);
+}
+
+void TextureFile::appendCubemapImageToTarget(TextureFile::GlTexture* side_textures, Type type, Format format, int max_mipmap_level)
+{
+  for(int layer=0; layer<6; layer++)
+  {
+    for(int level=max_mipmap_level; level>=0; level--)
+    {
+      QPair<UncompressedImage, QVector<byte>> image =  side_textures[layer].uncompressed2DImage(level, format, type);
+      image.first.target = IblCalculator::targetForLayer(layer);
+      appendUncompressedImage(image.first, image.second);
+    }
+  }
+}
+
+void show_texture_in_dialog(const TextureFile::TextureAsFloats& asFloats, int channel=-1)
+{
+  glm::vec4 smallestValue = glm::vec4(INFINITY);
+  glm::vec4 largestValue = glm::vec4(-INFINITY);
+  for(quint32 y=0; y<asFloats.height; ++y)
+  {
+    const glm::vec4* line = asFloats.lineData_As<glm::vec4>(y);
+    for(quint32 x=0; x<asFloats.width; ++x)
+    {
+      smallestValue = glm::min(line[x], smallestValue);
+      largestValue = glm::max(line[x], largestValue);
+    }
+  }
+  QImage debugImage;
+  if(channel >= 0)
+    debugImage = asFloats.asChannelQImage(channel);
+  else
+    debugImage = asFloats.asQImage();
+  QDialog texturePreview;
+  QVBoxLayout vbox(&texturePreview);
+  QLabel label;
+  vbox.addWidget(&label);
+  qDebug() << "min: " << smallestValue << "max: " << largestValue;
+  label.setPixmap(QPixmap::fromImage(debugImage));
+  label.setVisible(true);
+  texturePreview.exec();
 }
 
 void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings)
 {
   importSettings.preprocess();
-
-  const std::string sourceFilename = srcFile.absoluteFilePath().toStdString();
 
   GlTexture textureInformation(srcFile, importSettings);
 
@@ -66,7 +106,23 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
     alpha_texture = createChannelTextureInfo(importSettings.alpha_channel_suffix);
   }
 
-  if(importSettings.compression == TextureFile::Compression::NONE)
+  if(importSettings.result_is_cubemap())
+  {
+    if(importSettings.calculate_ibl_ggx_cubemap)
+    {
+      calculate_ibl_ggx_cubemap(textureInformation);
+    }else if(importSettings.calculate_ibl_diffuse_cubemap)
+    {
+      calculate_ibl_diffuse_cubemap(textureInformation);
+    }else if(importSettings.calculate_ibl_cone_60)
+    {
+      calculate_ibl_cone_60_cubemap(textureInformation);
+    }else if(importSettings.calculate_ibl_cone_45)
+    {
+      calculate_ibl_cone_45(textureInformation);
+    }else
+      Q_UNREACHABLE();
+  }else if(importSettings.compression == TextureFile::Compression::NONE)
   {
     for(int level=firstMipMap; level<=lastMipMap; ++level)
     {
@@ -105,6 +161,9 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
           delete alphaAsFloats;
         }
 
+        if(importSettings.calculate_dfg_lut)
+          asFloats.calculate_dfg_lut();
+
         if(importSettings.remapSourceAsSigned)
           asFloats.remapSourceAsSigned();
 
@@ -120,30 +179,7 @@ void TextureFile::import(const QFileInfo& srcFile, ImportSettings importSettings
     }
 
 #if SHOW_TEXTURE_IN_DIALOG
-    {
-      TextureAsFloats _asFloats = textureInformation.asFloats(1);
-      glm::vec4 smallestValue = glm::vec4(INFINITY);
-      glm::vec4 largestValue = glm::vec4(-INFINITY);
-      for(quint32 y=0; y<_asFloats.height; ++y)
-      {
-        glm::vec4* line = _asFloats.lineData_As<glm::vec4>(y);
-        for(quint32 x=0; x<_asFloats.width; ++x)
-        {
-          smallestValue = glm::min(line[x], smallestValue);
-          largestValue = glm::max(line[x], largestValue);
-        }
-      }
-      QImage debugImage = _asFloats.asChannelQImage(0);
-      //            QImage debugImage = _asFloats.asQImage();
-      QDialog texturePreview;
-      QVBoxLayout vbox(&texturePreview);
-      QLabel label;
-      vbox.addWidget(&label);
-      qDebug() << "min: " << smallestValue << "max: " << largestValue;
-      label.setPixmap(QPixmap::fromImage(debugImage));
-      label.setVisible(true);
-      texturePreview.exec();
-    }
+    show_texture_in_dialog(textureInformation.asFloats(1));
 #endif
   }else
   {
@@ -432,6 +468,11 @@ void TextureFile::ImportSettings::registerType()
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureType type", asOFFSET(ImportSettings,type)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "TextureFormat format", asOFFSET(ImportSettings,format)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool remapSourceAsSigned", asOFFSET(ImportSettings,remapSourceAsSigned)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_dfg_lut", asOFFSET(ImportSettings,calculate_dfg_lut)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_ggx_cubemap", asOFFSET(ImportSettings,calculate_ibl_ggx_cubemap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_diffuse_cubemap", asOFFSET(ImportSettings,calculate_ibl_diffuse_cubemap)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_cone_60", asOFFSET(ImportSettings,calculate_ibl_cone_60)); AngelScriptCheck(r);
+  r = angelScriptEngine->RegisterObjectProperty(name, "bool calculate_ibl_cone_45", asOFFSET(ImportSettings,calculate_ibl_cone_45)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool generateMipmaps", asOFFSET(ImportSettings,generateMipmaps)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "bool scaleDownToPowerOfTwo", asOFFSET(ImportSettings,scaleDownToPowerOfTwo)); AngelScriptCheck(r);
   r = angelScriptEngine->RegisterObjectProperty(name, "vec4 offset", asOFFSET(ImportSettings,offset)); AngelScriptCheck(r);

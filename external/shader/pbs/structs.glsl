@@ -41,7 +41,7 @@ struct SurfaceData
   vec3 emission;
 };
 
-// listing 16
+// listing 23
 vec3 getDiffuseDominantDir(vec3 N, vec3 V, float NdotV, float roughness)
 {
     float a = 1.02341f * roughness - 1.51174f;
@@ -58,6 +58,21 @@ vec3 getSpecularDominantDirArea(vec3 N, vec3 R, float NdotV, float roughness)
     float lerpFactor = (1 - roughness);
 
     return normalize(mix(N, R, lerpFactor));
+}
+
+// Based on Listing 22
+
+// We have a better approximation of the off specular peak
+// but due to the other ap proximat ions we found this one performs better .
+// N is the normal direction
+// R is the mirror vector
+// This approximation works fine for G smith correlated and uncorrelated
+vec3 getSpecularDominantDir(vec3 N, vec3 R, float NdotV, float roughness)
+{
+  float smoothness = saturate(1 - roughness);
+  float lerpFactor = smoothness * (sqrt(smoothness) + roughness);
+  // The result is not normalized as we fetch in a cubemap
+  return mix(N, R, lerpFactor);
 }
 
 // listing 26
@@ -152,6 +167,7 @@ void precomputeData(in BaseMaterial material,
   
   brdf_data.NdotV             = NdotV;
   brdf_data.roughness         = roughness;
+
   
 #ifdef LIGHTING_ONLY_SPECULAR
   surface_data.diffuse_color = vec3(0);

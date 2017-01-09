@@ -360,6 +360,10 @@ private:
   gui::TweakBarCBVar<bool> toggleProfiler;
   gui::TweakBarCBVar<bool> roughnessAdjustmentToggle;
   gui::TweakBarCBVar<bool> sdfShadowsToggle;
+  gui::TweakBarCBVar<bool> sdfAOToggle;
+  gui::TweakBarCBVar<bool> texAOToggle;
+  gui::TweakBarCBVar<bool> iblDiffuseToggle;
+  gui::TweakBarCBVar<bool> iblSpecularToggle;
   gui::TweakBarCBVar<bool> updateGridCameraToggle;
   gui::TweakBarCBVar<bool> disableSceneryVoxels;
   gui::TweakBarCBVar<uint16_t> numBvhGrids;

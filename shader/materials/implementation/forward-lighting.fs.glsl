@@ -144,9 +144,7 @@ return;
 
   vec3 incoming_luminance = light_material(material, surface.position, scene.camera_position);
   
-  float exposure = 1.f; // Only dummy value, to be corrected
-  
-  incoming_luminance *= exposure;
+  incoming_luminance *= get_exposure();
 
   fragment_color = vec4(accurateLinearToSRGB(incoming_luminance), alpha);
   

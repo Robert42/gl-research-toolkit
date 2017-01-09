@@ -1,4 +1,6 @@
+#ifndef ONLY_Fr_DisneyDiffuse
 #include <glrt/glsl/math-glsl.h>
+#endif
 
 vec3 F_Schlick(in vec3 f0, in float f90, in float u)
 {
@@ -10,7 +12,7 @@ float V_SmithGGXCorrelated(float NdotL, float NdotV, float alphaG)
   // Original formulation of G_SmithGGX Correlated
   // lambda_v = (-1 + sqrt(alphaG2 * (1 - NdotL2) / NdotL2 + 1)) * 0.5f;
   // lambda_l = (-1 + sqrt(alphaG2 * (1 - NdotV2) / NdotV2 + 1)) * 0.5f;
-  // G_SmithGGXCorrelated = 1 / (1 + lambda_v + lambda_l) ;
+  // G_SmithGGXCorrelated = 1 / (1 + lambda_v + lambda_l);
   // V_SmithGGXCorrelated = G_SmithGGXCorrelated / (4.0 f * NdotL * NdotV);
   
   // This is the optimize version
@@ -43,6 +45,8 @@ float Fr_DisneyDiffuse(float NdotV, float NdotL, float LdotH,
     return lightScatter * viewScatter * energyFactor;
 }
 
+#ifndef ONLY_Fr_DisneyDiffuse
+
 // Specular BRDF
 vec3 brdf_specular(in BrdfData_Generic brdf_data_g, in BrdfData_WithLight brdf_data_l, in vec3 f0, in float f90)
 {
@@ -74,3 +78,4 @@ float brdf_diffuse(in BrdfData_Generic brdf_data_g, in BrdfData_WithLight brdf_d
 }
 
 
+#endif

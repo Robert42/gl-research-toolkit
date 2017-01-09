@@ -16,6 +16,8 @@ class TextureFile : public QObject
 {
   Q_OBJECT
 public:
+  class IblCalculator;
+
   typedef utilities::GlTexture GlTexture;
   typedef GlTexture::Target Target;
   typedef GlTexture::Type Type;
@@ -31,6 +33,11 @@ public:
     Type type = Type::UINT8;
     Format format = Format::RGBA;
     Compression compression = Compression::NONE;
+    bool calculate_dfg_lut = false;
+    bool calculate_ibl_ggx_cubemap = false;
+    bool calculate_ibl_diffuse_cubemap = false;
+    bool calculate_ibl_cone_60 = false;
+    bool calculate_ibl_cone_45 = false;
     bool remapSourceAsSigned = false;
     glm::vec4 offset = glm::vec4(0);
     glm::vec4 factor = glm::vec4(1);
@@ -80,7 +87,12 @@ public:
 
     bool need_processing() const
     {
-      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging();
+      return remapSourceAsSigned || remapSourceAsSigned || need_remapping() || need_merging() || calculate_dfg_lut || result_is_cubemap();
+    }
+
+    bool result_is_cubemap() const
+    {
+      return calculate_ibl_ggx_cubemap || calculate_ibl_diffuse_cubemap || calculate_ibl_cone_60 || calculate_ibl_cone_45;
     }
 
     static void registerType();
@@ -89,7 +101,8 @@ public:
   TextureFile();
 
   void appendUncompressedImage(UncompressedImage image, const QVector<byte>& rawData);
-  void appendImage(const GlTexture& texture, Type type = Type::UINT8, Format format = Format::RGBA);
+  void appendImage(const GlTexture& texture, Type type = Type::UINT8, Format format = Format::RGBA, int mipmapLevel=0);
+  void appendCubemapImageToTarget(GlTexture* side_textures, Type type, Format format, int max_mipmap_level);
 
   void import(const QFileInfo& srcFile, ImportSettings importSettings);
   void save(const QFileInfo& textureFile);
@@ -119,6 +132,11 @@ private:
   void clear();
 
   static quint64 magicNumber();
+
+  void calculate_ibl_ggx_cubemap(const GlTexture& texture);
+  void calculate_ibl_diffuse_cubemap(const GlTexture& texture);
+  void calculate_ibl_cone_60_cubemap(const GlTexture& texture);
+  void calculate_ibl_cone_45(const GlTexture& texture);
 };
 
 } // namespace resources

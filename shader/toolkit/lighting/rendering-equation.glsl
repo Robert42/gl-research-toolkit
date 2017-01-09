@@ -127,7 +127,14 @@ vec3 rendering_equation(in BrdfData_Generic brdf_g, in SurfaceData surface)
   }
   
 #endif
-  
+
+#if defined(IBL_DIFFUSE)
+  outgoing_luminance += evaluateIBLDiffuse(viewDir, worldNormal, R, surface.roughness, brdf_g.NdotV) * surface.diffuse_color * surface.diffuse_occlusion;
+#endif
+#if defined(IBL_SPECULAR)
+  outgoing_luminance += evaluateIBLSpecular(surface.f0, surface.f90, worldNormal, R, surface.roughness, brdf_g.NdotV) * surface.specular_occlusion;
+#endif
+
   return outgoing_luminance + surface.emission;
 }
 
@@ -136,7 +143,16 @@ vec3 light_material(in BaseMaterial material, in vec3 surface_position, in vec3 
 {
   BrdfData_Generic brdf_g;
   SurfaceData surface;
-  
+
+  material.occlusion = 1.f
+#if defined(AO_SDF)
+   * distancefield_ao()
+#endif
+#if defined(AO_TEXTURE)
+   * material.occlusion
+#endif
+   ;
+
   precomputeData(material, surface_position, camera_position, brdf_g, surface);
   
   return rendering_equation(brdf_g, surface);

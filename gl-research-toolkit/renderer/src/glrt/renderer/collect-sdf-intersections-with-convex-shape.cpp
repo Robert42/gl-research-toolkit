@@ -48,7 +48,7 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
   uint16_t sponza_arch_pad_edge_001 = 93; // sponza-arch-pad-edge-001
 #endif
 
-  // TODO how to handle static and dynamic objects?
+  // IDEA how to handle static and dynamic objects?
   for(uint16_t i=0; i<n; ++i)
   {
     const BoundingSphere bounding_sphere = data->voxelGrids->globalCoordFrame(i) * data->voxelGrids->boundingSphere[i];

@@ -314,6 +314,19 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   sdfShadowsToggle.getter = [renderer]() -> bool {return renderer->sdfShadows();};
   sdfShadowsToggle.TwAddVarCB(tweakBar, "SDF Shadows", "group=Debug");
 
+  sdfAOToggle.setter = [renderer](bool ar){renderer->setAmbientOcclusionSDF(ar);};
+  sdfAOToggle.getter = [renderer]() -> bool {return renderer->ambientOcclusionSDF();};
+  sdfAOToggle.TwAddVarCB(tweakBar, "SDF AO", "group=Debug");
+  texAOToggle.setter = [renderer](bool ar){renderer->setAmbientOcclusionTexture(ar);};
+  texAOToggle.getter = [renderer]() -> bool {return renderer->ambientOcclusionTexture();};
+  texAOToggle.TwAddVarCB(tweakBar, "Use Texture AO", "group=Debug");
+  iblDiffuseToggle.setter = [renderer](bool ar){renderer->setIBL_Diffuse(ar);};
+  iblDiffuseToggle.getter = [renderer]() -> bool {return renderer->ibl_Diffuse();};
+  iblDiffuseToggle.TwAddVarCB(tweakBar, "Use Diffuse IBL", "group=Debug");
+  iblSpecularToggle.setter = [renderer](bool ar){renderer->setIBL_Specular(ar);};
+  iblSpecularToggle.getter = [renderer]() -> bool {return renderer->ibl_Specular();};
+  iblSpecularToggle.TwAddVarCB(tweakBar, "Use Specular IBL", "group=Debug");
+
   if(shaderDebugPrinter != nullptr)
   {
     shaderDebugPrinter->guiToggle.TwAddVarCB(tweakBar, "Use Printer", "group=Debug key=F6");

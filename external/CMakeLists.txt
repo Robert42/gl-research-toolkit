@@ -10,6 +10,7 @@ find_package(OpenGL REQUIRED)
 find_package(Qt5Core 5.5 REQUIRED)
 find_package(ASSIMP 3.2 REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(OPENEXR REQUIRED)
 
 
 ######## googletest ############################################################

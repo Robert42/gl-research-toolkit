@@ -1,4 +1,5 @@
 #include <glrt/renderer/material-state.h>
+#include <glrt/renderer/static-mesh-buffer.h>
 
 namespace glrt {
 namespace renderer {
@@ -49,6 +50,15 @@ void MaterialState::activateStateForFlags()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
+
+  if(hasFlag(Flags::SCREENSPACE_POS_ATTRIBUTES))
+  {
+    GL_CALL(glVertexAttribFormatNV, 0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float));
+    GL_CALL(glEnableVertexAttribArray, 0);
+  }else
+  {
+    StaticMeshBuffer::enableVertexArrays();
+  }
 }
 
 void MaterialState::deactivateStateForFlags()
@@ -63,6 +73,14 @@ void MaterialState::deactivateStateForFlags()
 
   glDisable(GL_BLEND);
   glBlendFunc(GL_ONE, GL_ZERO);
+
+  if(hasFlag(Flags::SCREENSPACE_POS_ATTRIBUTES))
+  {
+    GL_CALL(glDisableVertexAttribArray, 0);
+  }else
+  {
+    StaticMeshBuffer::disableVertexArrays();
+  }
 }
 
 bool MaterialState::hasFlag(Flags flag) const

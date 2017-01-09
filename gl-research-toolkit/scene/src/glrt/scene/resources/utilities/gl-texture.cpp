@@ -1,13 +1,38 @@
 #include <GL/glew.h>
 #include <glrt/scene/resources/utilities/gl-texture.h>
+#include <glrt/toolkit/memory.h>
 
 #include <QImage>
+#include <OpenEXR/ImfRgbaFile.h>
 
 namespace glrt {
 namespace scene {
 namespace resources {
+
+void show_texture_in_dialog(const utilities::GlTexture::TextureAsFloats& asFloats, int channel=-1);
+
 namespace utilities {
 
+
+bool GlTexture::isCubemap(GlTexture::Target target)
+{
+  switch(target)
+  {
+  case Target::TEXTURE_1D:
+  case Target::TEXTURE_2D:
+  case Target::TEXTURE_3D:
+    return false;
+  case Target::CUBE_MAP_POSITIVE_X:
+  case Target::CUBE_MAP_NEGATIVE_X:
+  case Target::CUBE_MAP_POSITIVE_Y:
+  case Target::CUBE_MAP_NEGATIVE_Y:
+  case Target::CUBE_MAP_POSITIVE_Z:
+  case Target::CUBE_MAP_NEGATIVE_Z:
+    return true;
+  }
+
+  return false;
+}
 
 int GlTexture::channelsPerPixelForFormat(Format format)
 {
@@ -60,6 +85,24 @@ quint32 GlTexture::UncompressedImage::calcRowStride() const
   quint32 bytesPerPixel = quint32(bytesPerPixelForFormatType(format, type));
 
   return quint32(glm::ceilMultiple<quint32>(width * bytesPerPixel, alignment));
+}
+
+void GlTexture::UncompressedImage::flipDataY(void* data) const
+{
+  for(uint32_t y = 0; y<height/2; ++y)
+  {
+    swap_lines(y, height-1-y, data);
+  }
+}
+
+void GlTexture::UncompressedImage::swap_lines(uint32_t y1, uint32_t y2, void* data) const
+{
+  swap_memory(line(data, y1), line(data, y2), rowStride);
+}
+
+void* GlTexture::UncompressedImage::line(void* data, uint32_t y) const
+{
+  return reinterpret_cast<byte*>(data) + rowStride*y;
 }
 
 GLenum GlTexture::internalFormat(Format format, Type type, bool* supported)
@@ -311,6 +354,32 @@ GlTexture::TextureAsFloats::TextureAsFloats(const QPair<UncompressedImage, QVect
   height = image.height;
   depth = image.depth;
   rowCount = height * depth;
+}
+
+glm::vec3 calculate_dfg_lookup_value(double u, double v);
+
+void GlTexture::TextureAsFloats::calculate_dfg_lut()
+{
+  Q_ASSERT(depth==1);
+
+  #pragma omp parallel for
+  for(quint32 y=0; y<height; ++y)
+  {
+    float* line = this->lineData_As<float>(y);
+    for(quint32 x=0; x<width; ++x)
+    {
+      double u = (x + 0.5) / double(width);
+      double v = (y + 0.5) / double(height);
+
+      glm::vec3 dfg_lut_value = calculate_dfg_lookup_value(u, v);
+      line[x*4 + 0] = dfg_lut_value.x;
+      line[x*4 + 1] = dfg_lut_value.y;
+      line[x*4 + 2] = dfg_lut_value.z;
+      line[x*4 + 3] = 1.f;
+    }
+  }
+
+//  show_texture_in_dialog(*this);
 }
 
 GlTexture::TextureAsFloats::TextureAsFloats(const glm::ivec3& size, quint32 numComponents)
@@ -585,6 +654,46 @@ GlTexture::GlTexture(const QFileInfo& fileToBeImported, ImportSettings importSet
 
     if(importSettings.generateMipmaps)
       GL_CALL(glGenerateTextureMipmap, textureId);
+  }else if(suffix == "exr")
+  {
+    QString prev = QDir::currentPath();
+    QDir::setCurrent(fileToBeImported.absolutePath());
+
+    QVector<byte> plain_data;
+    int32_t width, height;
+
+    {
+      std::string filename = fileToBeImported.fileName().toStdString();
+      OPENEXR_IMF_NAMESPACE::RgbaInputFile file(filename.c_str());
+      IMATH_NAMESPACE::Box2i data_window = file.dataWindow();
+
+      width = data_window.max.x - data_window.min.x;
+      height = data_window.max.y - data_window.min.y;
+
+      Q_ASSERT(width > 0);
+      Q_ASSERT(height > 0);
+
+      const int n_components = 4; // rgba
+      const int channel_size = sizeof(half); // float 16 bit
+
+      plain_data.resize(width*height*channel_size*n_components);
+
+      file.setFrameBuffer(reinterpret_cast<OPENEXR_IMF_NAMESPACE::Rgba*>(plain_data.data()), 1, uint32_t(width));
+      file.readPixels(data_window.min.y, data_window.max.y);
+    }
+    QDir::setCurrent(prev);
+
+    GlTexture::UncompressedImage header = GlTexture::format(glm::uvec3(glm::ivec3(width, height, 1)),
+                                                            0,
+                                                            GlTexture::Format::RGBA,
+                                                            GlTexture::Type::FLOAT16,
+                                                            GlTexture::Target::TEXTURE_2D);
+
+    header.flipDataY(plain_data.data());
+
+    setUncompressed2DImage(header,
+                           plain_data.data());
+    makeComplete();
   }else
   {
     qDebug() << "Unsupported image format" << suffix << "used with the file" << fileToBeImported.absoluteFilePath();
@@ -754,7 +863,11 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
   GLenum internalFormat = GlTexture::internalFormat(image.format, image.type, &supportedFormat);
   Q_ASSERT(supportedFormat);
 
-  GL_CALL(glBindTexture, static_cast<GLenum>(image.target), this->textureId);
+  GLenum bindTarget = static_cast<GLenum>(image.target);
+  if(isCubemap(image.target))
+    bindTarget = GL_TEXTURE_CUBE_MAP;
+
+  GL_CALL(glBindTexture, bindTarget, this->textureId);
 
   GL_CALL(glPixelStorei, GL_UNPACK_ALIGNMENT, image.alignment);
 
@@ -780,14 +893,15 @@ void GlTexture::setUncompressed2DImage(const GlTexture::UncompressedImage& image
     break;
   }
 
-  GL_CALL(glBindTexture, static_cast<GLenum>(image.target), 0);
+  GL_CALL(glBindTexture, bindTarget, 0);
 }
 
-void GlTexture::makeComplete()
+void GlTexture::makeComplete(int max_mipmap_level)
 {
   // Make the texture complete
   GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_BASE_LEVEL, 0);
-  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, 0);
+  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LOD, max_mipmap_level);
+  GL_CALL(glTextureParameteri, textureId, GL_TEXTURE_MAX_LEVEL, max_mipmap_level);
 }
 
 GlTexture::TextureAsFloats GlTexture::asFloats(int level)

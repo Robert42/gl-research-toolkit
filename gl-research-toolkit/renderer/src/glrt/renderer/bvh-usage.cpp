@@ -30,14 +30,14 @@ GLSLMacroWrapper<uint16_t> NUM_GRID_CASCADES("#define NUM_GRID_CASCADES %0", 3);
 GLSLMacroWrapper<uint16_t> BVH_MAX_STACK_DEPTH("#define BVH_MAX_STACK_DEPTH %0", MAX_NUM_STATIC_MESHES);
 GLSLMacroWrapper<uint16_t> HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE("#define HOLD_BACK_HUGE_LEAf_FROM_BVH_TREE %0", 0);
 
-GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE("#define SDF_CANDIDATE_GRID_SIZE %0", 16); // TODO: TRY OUT USING 32!!
+GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE("#define SDF_CANDIDATE_GRID_SIZE %0", 16); // IDEA: TRY OUT USING 32!!
 
 VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE(64, [](uint32_t v) -> uint32_t{return glm::clamp<uint32_t>(v, 4, MAX_SDF_MERGED_STATIC);});
 
 GLSLMacroWrapper<bool> AO_FALLBACK_NONE("#define AO_FALLBACK_NONE %0", false);
 GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED("#define AO_FALLBACK_CLAMPED %0", false);
 
-// TODO:: replace the following with GLSLMacroWrappers
+// IDEA:: replace the following with GLSLMacroWrappers
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
 uint16_t _bvh_traversal_leaf_result_array_length = 0;
 
@@ -96,7 +96,7 @@ void setCurrentBVHUsage(BvhUsage bvhUsage)
   ReloadableShader::defineMacro("BVH_GRID_UNCLAMPED_OCCLUSION", bvh_is_occlusion_grid_unclamped(bvhUsage), false);
   ReloadableShader::defineMacro("BVH_GRID_HAS_FOUR_COMPONENTS", bvh_is_grid_with_four_components(bvhUsage), false);
 
-  // TODO:: replace the following with GLSLMacroWrappers
+  // IDEA:: replace the following with GLSLMacroWrappers
   ReloadableShader::globalPreprocessorBlock.remove(QString("#define BVH_GRID_NUM_COMPONENTS %0").arg(bvh_is_grid_with_four_components(bvhUsage) ? 1 : 4));
   ReloadableShader::globalPreprocessorBlock.insert(QString("#define BVH_GRID_NUM_COMPONENTS %0").arg(bvh_is_grid_with_four_components(bvhUsage) ? 4 : 1));
 

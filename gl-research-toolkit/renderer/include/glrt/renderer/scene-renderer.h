@@ -97,6 +97,14 @@ public:
   void setAdjustRoughness(bool adjustRoughness);
   bool sdfShadows() const;
   void setSDFShadows(bool sdfShadows);
+  bool ambientOcclusionSDF() const;
+  void setAmbientOcclusionSDF(bool sdfAO);
+  bool ambientOcclusionTexture() const;
+  void setAmbientOcclusionTexture(bool textureAO);
+  bool ibl_Diffuse() const;
+  void setIBL_Diffuse(bool ibl);
+  bool ibl_Specular() const;
+  void setIBL_Specular(bool ibl);
   bool update_grid_camera() const;
   void set_update_grid_camera(bool update_grid_camera);
 
@@ -162,6 +170,8 @@ private:
     VoxelBuffer::VoxelHeader voxelHeader;
     VoxelBuffer::CandidateGridHeader candidateGrid;
     CascadedGridsHeader cascadedGrids;
+    quint64 sky_texture;
+    quint64 dfg_lut_texture;
 
     // Padding & debugging
     quint32 costsHeatvisionBlackLevel;
@@ -173,14 +183,32 @@ private:
   gl::Buffer sceneUniformBuffer;
   gl::Buffer aoCollectHeaderUniformBuffer;
 
+  struct SkyTexture
+  {
+    GLuint64 equirectengular_view;
+    GLuint64 ibl_ggx;
+    GLuint64 ibl_diffuse;
+    GLuint64 ibl_cone_45;
+    GLuint64 ibl_cone_60;
+    GLuint64 dfg;
+  }skyTexture;
+
   // other uniform buffer
   LightBuffer lightUniformBuffer;
   VoxelBuffer voxelUniformBuffer;
   StaticMeshRenderer staticMeshRenderer;
 
+
+  gl::Buffer screenspace_quad_buffer;
+  void init_screenspace_quad_buffer();
+
   // debugging
   bool _adjustRoughness : 1;
   bool _sdfShadows : 1;
+  bool _sdfAO : 1;
+  bool _textureAO : 1;
+  bool _iblDiffuse : 1;
+  bool _iblSpecular : 1;
 
   CascadedGridsHeader updateCascadedGrids() const;
 
@@ -189,6 +217,7 @@ private:
   void captureStates();
   void recordCommandlist();
   void recordLightVisualization(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList);
+  void recordSky(gl::CommandListRecorder& recorder, Material::Type materialType, const MaterialState& materialShader, const glm::ivec2& commonTokenList);
 
   void updateCameraUniform();
   void fillCameraUniform(const scene::CameraParameter& cameraParameter);
@@ -201,6 +230,7 @@ private:
 private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
   void forceNewGridCameraPos();
+  void updateSky();
 };
 
 

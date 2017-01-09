@@ -5,6 +5,8 @@
 #include <voxels/voxel-structs.glsl>
 #include <alignment.glsl>
 #include <glrt/glsl/math-glsl.h>
+#include <equirectengular_env_mapping.glsl>
+#include <debugging/normal.glsl>
 
 
 #ifdef LOG_HEATVISION_DEBUG_COSTS
@@ -18,6 +20,10 @@ struct SceneLightData
 {
   uint64_t sphere_arealights_address;
   uint64_t rect_arealights_address;
+  samplerCube sky_ibl_ggx;
+  samplerCube sky_ibl_diffuse;
+  samplerCube sky_ibl_cone_60;
+  samplerCube sky_ibl_cone_45;
   uint32_t num_sphere_area_lights;
   uint32_t num_rect_area_lights;
 };
@@ -56,6 +62,8 @@ struct SceneData
   SceneVoxelHeader voxelHeader;
   CandidateGridHeader candidateGridHeader;
   CascadedGrids cascadedGrids;
+  sampler2D skyTexture;
+  sampler2D dfg_lut_texture;
   
   uint32_t costsHeatvisionBlackLevel;
   uint32_t costsHeatvisionWhiteLevel;
@@ -112,9 +120,91 @@ sampler3D fallback_distance_field_data(out mat4x3 worldToVoxelSpace, out ivec3 v
   return texture;
 }
 
+float get_exposure()
+{
+  return 1.f;
+}
+
 float blink(float rate=0.2)
 {
   return step(rate, mod(scene.totalTime, rate*2.));
+}
+
+float pulse(float rate=1.0)
+{
+  return abs(sin(pi*scene.totalTime/rate));
+}
+
+
+vec3 get_dfg_lut_value(float NdotV, float roughness)
+{
+  sampler2D sampler = scene.dfg_lut_texture;
+  return texture(sampler, vec2(NdotV, roughness)).xyz;
+}
+
+vec3 get_environment_ibl_ggx(vec3 view_direction, float roughness)
+{
+  samplerCube sampler = scene.lights.sky_ibl_ggx;
+  float max_lod = log2(max_component(textureSize(sampler, 0)));
+  roughness = sqrt(roughness); // WARNING: THIS IS A HACK, WHICH IS PROPABLY WRONG!
+  return textureLod(sampler, view_direction, mix(0, max_lod, roughness)).rgb;
+}
+
+vec3 get_environment_ibl_diffuse_disney(vec3 view_direction)
+{
+  samplerCube sampler = scene.lights.sky_ibl_diffuse;
+  return texture(sampler, view_direction).rgb;
+}
+
+vec3 get_environment_ibl_cone_60(vec3 view_direction)
+{
+  samplerCube sampler = scene.lights.sky_ibl_cone_60;
+  return texture(sampler, view_direction).rgb;
+}
+
+vec3 get_environment_ibl_cone_45(vec3 view_direction)
+{
+  samplerCube sampler = scene.lights.sky_ibl_cone_45;
+  return texture(sampler, view_direction).rgb;
+}
+
+vec3 get_environment_ibl_diffuse(vec3 view_direction)
+{
+  return get_environment_ibl_diffuse_disney(view_direction);
+}
+
+#define SHOW_DIRECTION 0
+#define SHOW_ENVIRONMENT 1
+#define SHOW_IBL_GGX 0
+#define SHOW_IBL_DIFFUSE 0
+#define SHOW_IBL_CONE_60 0
+#define SHOW_IBL_CONE_45 0
+vec3 get_environment_incoming_ligth(vec3 view_direction)
+{
+#if SHOW_DIRECTION
+  return encode_signed_normalized_vector_as_color(view_direction);
+#elif SHOW_ENVIRONMENT
+  mat3 m = mat3(0,-1, 0,
+                1, 0, 0,
+                0, 0, 1);
+  vec2 uv = viewdir_to_uv_coord(m * view_direction);
+  
+  return texture2D(scene.skyTexture, uv).rgb;
+#elif SHOW_IBL_GGX
+  return get_environment_ibl_ggx(view_direction, 1.f-pulse(10));
+#elif SHOW_IBL_DIFFUSE || SHOW_IBL_CONE_60 || SHOW_IBL_CONE_45
+
+#if SHOW_IBL_DIFFUSE
+  samplerCube sampler = scene.lights.sky_ibl_diffuse;
+#elif SHOW_IBL_CONE_60
+  samplerCube sampler = scene.lights.sky_ibl_cone_60;
+#elif SHOW_IBL_CONE_45
+  samplerCube sampler = scene.lights.sky_ibl_cone_45;
+#endif
+
+  return texture(sampler, view_direction).rgb;
+
+#endif
 }
 
 void get_sphere_lights(out uint32_t num_sphere_lights, out SphereAreaLight* sphere_lights)

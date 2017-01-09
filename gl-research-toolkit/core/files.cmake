@@ -13,6 +13,8 @@ set(SOURCE_FILES
   include/glrt/toolkit/geometry.h
   include/glrt/toolkit/linked-tuple.h
   include/glrt/toolkit/logger.h
+  include/glrt/toolkit/memory.cpp
+  include/glrt/toolkit/memory.h
   include/glrt/toolkit/network.h
   include/glrt/toolkit/plain-old-data-stream.h
   include/glrt/toolkit/profiler.h

@@ -58,6 +58,8 @@ public:
     CUBE_MAP_NEGATIVE_Z = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
   };
 
+  static bool isCubemap(Target target);
+
   Q_ENUM(Format)
   Q_ENUM(Type)
   Q_ENUM(Compression)
@@ -87,6 +89,11 @@ public:
     quint32 rawDataLength;
 
     quint32 calcRowStride() const;
+
+    void flipDataY(void* data) const;
+  private:
+    void swap_lines(uint32_t y1, uint32_t y2, void* data) const;
+    void* line(void* data, uint32_t y) const;
   };
 
   struct CompressedImage
@@ -122,7 +129,7 @@ public:
                                                               Format format,
                                                               Type type) const;
   void setUncompressed2DImage(const GlTexture::UncompressedImage& image, const void* data);
-  void makeComplete();
+  void makeComplete(int max_mipmap_level=0);
   TextureAsFloats asFloats(int level);
   void fromFloats(const TextureAsFloats& texture);
 };
@@ -147,6 +154,7 @@ struct GlTexture::TextureAsFloats
 
   TextureAsFloats(const QPair<UncompressedImage, QVector<byte>>& importedTexture);
 
+  void calculate_dfg_lut();
   void remapSourceAsSigned();
   void remapSourceAsUnsigned();
   void remap(glm::vec4 offset, glm::vec4 factor);
