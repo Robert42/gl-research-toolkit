@@ -1,4 +1,5 @@
 #version 450 core
+#include <extensions/command_list.glsl>
 #include "../debugging/posteffects/posteffect_ray.glsl"
 
 void main()

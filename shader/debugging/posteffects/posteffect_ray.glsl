@@ -1,5 +1,3 @@
-#include <extensions/command_list.glsl>
-
 #include <glrt/glsl/math-glsl.h>
 
 #include <scene/uniforms.glsl>
