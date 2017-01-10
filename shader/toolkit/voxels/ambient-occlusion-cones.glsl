@@ -106,7 +106,13 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
 #endif
 
 #if defined(DISTANCEFIELD_AO_SPHERE_TRACING)
+#define GRADIENT_DESCENT 0
   int max_num_loops = SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS;
+#ifdef GRADIENT_DESCENT
+  float dt = 0.f;
+  float prev_d = -10000; // dt/dd will make the first value irrelevant (as long as dt is zero and dd is not zero)
+  float dd; 
+#endif
   while(t < intersection_distance_back && 0<=max_num_loops--)
   {
     vec3 p = get_point(ray_voxelspace, t);
@@ -125,7 +131,21 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
     AO_FALLOFF(occlusionHeuristic, t);
     minVisibility = min(minVisibility, occlusionHeuristic);
     
-    t += max(0.1f, abs(d));
+    float next_dt = abs(d);
+    
+#if GRADIENT_DESCENT
+    dd = d - prev_d;
+    float corrected_dt = d * dt/dd;
+    prev_d = d;
+#endif
+
+#if GRADIENT_DESCENT
+    dt = max(next_dt, mix(next_dt, corrected_dt, 1.e-5));
+#else
+    dt = next_dt;
+#endif
+    dt = max(0.1f, dt);
+    t += dt;
   }
 #endif
   
