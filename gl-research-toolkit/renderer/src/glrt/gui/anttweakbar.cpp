@@ -258,6 +258,8 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   //-------- Optimization ---------------------------------------------------
   sortObjectsBySDF = glrt::scene::SORT_OBJECTS_BY_SDF_TEXTURE;
   sortObjectsBySDF.TwAddVarCB(tweakBar, "SortBySDF", "group='Optimization'");
+  AO_INSTANCES_IN_INNER_LOOP = glrt::renderer::AO_INSTANCES_IN_INNER_LOOP;
+  AO_INSTANCES_IN_INNER_LOOP.TwAddVarCB(tweakBar, "Instances in inner loop", "group='Optimization'");
   AO_USE_CANDIDATE_GRID = glrt::renderer::AO_USE_CANDIDATE_GRID;
   AO_USE_CANDIDATE_GRID.TwAddVarCB(tweakBar, "Use Candidate Grid", "group='Optimization'");
 

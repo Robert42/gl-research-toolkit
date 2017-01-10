@@ -146,7 +146,7 @@ vec3 get_environment_ibl_ggx(vec3 view_direction, float roughness)
 {
   samplerCube sampler = scene.lights.sky_ibl_ggx;
   float max_lod = log2(max_component(textureSize(sampler, 0)));
-  roughness = sqrt(roughness); // WARNING: THIS IS A HACK, WHICH IS PROPABLY WRONG!
+  roughness = sqrt(roughness); // WARNING: THIS IS A HACK, WHICH IS PROPABLY WRONG! HOW TO DO IT RIGHT: Create a rect area light as direct light source (rgb:#ff8000) (and a ibl with the same rect area light with the color #0080ff). They should match and result int a single white gloss reflection
   return textureLod(sampler, view_direction, mix(0, max_lod, roughness)).rgb;
 }
 

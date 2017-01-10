@@ -71,6 +71,7 @@ int main(int argc, char** argv)
 
   static_assert(MAX_SDF_CANDIDATE_GRID_SIZE==32, "Please adapt the line below to cover all possible candidate grid sizes");
   uint16_setters["--sdf_scandidate_grid_size"] = [](uint16_t v){SDF_CANDIDATE_GRID_SIZE.set_value(pickNearest(v, {16, 32}));};
+  bool_setters["--ao_instances_in_inner_loop"] = [](bool v){AO_INSTANCES_IN_INNER_LOOP.set_value(v);};
   bool_setters["--ao_use_candidate_grid"] = [](bool v){AO_USE_CANDIDATE_GRID.set_value(v);};
   bool_setters["--ao_ignore_fallback_sdf"] = [](bool v){AO_IGNORE_FALLBACK_SDF.set_value(v);};
   bool_setters["--ao_fallback_sdf_only"] = [](bool v){AO_FALLBACK_SDF_ONLY.set_value(v);};
