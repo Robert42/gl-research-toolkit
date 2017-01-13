@@ -7,6 +7,22 @@ Cone cone_bouquet[N_GI_CONES];
 float cone_bouquet_ao[N_GI_CONES];
 vec3 cone_normal;
 
+#if 0
+// Add the cos factor mentioned in the conetracing paper
+const float cos_60_degreee = 0.50;
+const float cos_22_5_degreee = 0.923879532511287f;
+
+#if N_GI_CONES == 7 || N_GI_CONES == 14
+#define APPLY_COS_FACTOR(x, i) mix(1.0, x, i<6 ? cos_60_degreee : 1.f)
+#elif N_GI_CONES == 9 || N_GI_CONES == 18
+#define APPLY_COS_FACTOR(x, i) mix(1.0, x, i<6 ? cos_60_degreee : cos_22_5_degreee)
+#else
+#error unknown num cones
+#endif
+#else
+#define APPLY_COS_FACTOR(x, i) x
+#endif
+
 void init_cone_bouquet_ao()
 {
   for(int i=0; i<N_GI_CONES; ++i)
@@ -17,7 +33,7 @@ float accumulate_bouquet_to_total_occlusion()
 {
   float V = 0.f;
   for(int i=0; i<N_GI_CONES; ++i)
-    V += max(0, cone_bouquet_ao[i]);
+    V += APPLY_COS_FACTOR(max(0, cone_bouquet_ao[i]), i);
   return V / N_GI_CONES;
 }
 
@@ -25,7 +41,7 @@ float accumulate_bouquet_to_total_occlusion_unclamped()
 {
   float V = 0.f;
   for(int i=0; i<N_GI_CONES; ++i)
-    V += cone_bouquet_ao[i];
+    V += APPLY_COS_FACTOR(cone_bouquet_ao[i], i);
   return V / N_GI_CONES;
 }
 
