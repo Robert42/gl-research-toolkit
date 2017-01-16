@@ -47,9 +47,11 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
     visualizePosteffect_Fallback_Distancefield_raymarch(debugging::DebuggingPosteffect::fallbackDistanceFieldRaymarch(debug_posteffect_preprocessor)),
     visualizePosteffect_Distancefield_boundingSpheres_raymarch(debugging::DebuggingPosteffect::raymarchBoundingSpheresAsDistanceField(debug_posteffect_preprocessor)),
     videoResolution(videoResolution),
+    #if COLLECT_AMBIENT_OCCLUSION
     collectAmbientOcclusionToGrid1(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*1), QSet<QString>({"#define COMPUTE_GRIDS"})),
     collectAmbientOcclusionToGrid2(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*2), QSet<QString>({"#define COMPUTE_GRIDS"})),
     collectAmbientOcclusionToGrid3(GLRT_SHADER_DIR "/compute/collect-ambient-occlusion.cs", glm::ivec3(16, 16, 16*3), QSet<QString>({"#define COMPUTE_GRIDS"})),
+    #endif
     _update_grid_camera(true),
     _needRecapturing(true),
     sceneUniformBuffer(sizeof(SceneUniformBlock), gl::Buffer::UsageFlag::MAP_WRITE, nullptr),
@@ -101,10 +103,12 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   setAmbientOcclusionTexture(true);
   setAmbientOcclusionSDF(false); // TODO? set to true?
 
+#if COLLECT_AMBIENT_OCCLUSION
   collectAmbientOcclusionToGrid[0] = nullptr;
   collectAmbientOcclusionToGrid[1] = &collectAmbientOcclusionToGrid1;
   collectAmbientOcclusionToGrid[2] = &collectAmbientOcclusionToGrid2;
   collectAmbientOcclusionToGrid[3] = &collectAmbientOcclusionToGrid3;
+#endif
 
   initCascadedGridTextures();
 }
@@ -456,8 +460,10 @@ void Renderer::updateBvhLeafGrid()
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   aoCollectHeaderUniformBuffer.BindUniformBuffer(UNIFORM_COLLECT_OCCLUSION_METADATA_BLOCK);
 
+#if COLLECT_AMBIENT_OCCLUSION
   Q_ASSERT(collectAmbientOcclusionToGrid[num_grid_cascades()] != nullptr);
   collectAmbientOcclusionToGrid[num_grid_cascades()]->invoke();
+#endif
 
   for(int i=0; i<num_grid_cascades(); ++i)
   {
