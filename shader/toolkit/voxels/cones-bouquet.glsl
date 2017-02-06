@@ -166,7 +166,7 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 #if defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
     float alpha = scene.totalTime;
 #elif defined(CONE_BOUQUET_NOISE)
-    float alpha = cnoise(vec2(gl_FragCoord.x  + scene.totalTime*7874, gl_FragCoord.y) * .4);
+    float alpha = cnoise(vec2(gl_FragCoord.x  + scene.totalTime*7874, gl_FragCoord.y) * .8);
     alpha *= radians(30);
 #endif
     float c = cos(alpha);
