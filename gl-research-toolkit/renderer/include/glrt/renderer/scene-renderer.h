@@ -25,8 +25,6 @@
 #include <glhelper/texture2d.hpp>
 
 
-#define COLLECT_AMBIENT_OCCLUSION 0
-
 namespace glrt {
 namespace renderer {
 
@@ -126,10 +124,8 @@ private:
   Array<MaterialState> materialStates;
 
   // Cascaded Grids
-#if COLLECT_AMBIENT_OCCLUSION
   ComputeStep collectAmbientOcclusionToGrid1, collectAmbientOcclusionToGrid2, collectAmbientOcclusionToGrid3;
   ComputeStep* collectAmbientOcclusionToGrid[4];
-#endif
   GlTexture gridTexture[MAX_NUM_GRID_CASCADES*2];
   GLuint64 computeTextureHandles[MAX_NUM_GRID_CASCADES*2];
   GLuint64 renderTextureHandles[MAX_NUM_GRID_CASCADES*2];

@@ -129,26 +129,34 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
   {
     const int n = N_GI_CONES/2;
     
-    cone_bouquet[9] = cone_bouquet[9%n];
-    cone_bouquet[10] = cone_bouquet[10%n];
-    cone_bouquet[11] = cone_bouquet[11%n];
-    cone_bouquet[12] = cone_bouquet[12%n];
-    cone_bouquet[13] = cone_bouquet[13%n];
-    #if N_GI_CONES > 14
-    cone_bouquet[14] = cone_bouquet[14%n];
-    cone_bouquet[15] = cone_bouquet[15%n];
-    cone_bouquet[16] = cone_bouquet[16%n];
-    cone_bouquet[17] = cone_bouquet[17%n];
-    #endif
-    
     const float alpha = radians(30);
     const float c = cos(alpha);
     const float s = sin(alpha);
     const mat3 r = mat3( c, s, 0,
                         -s, c, 0,
                          0, 0, 1);
-    for(int i=n; i<N_GI_CONES; ++i)
-      cone_bouquet[i].direction = r * cone_bouquet[i].direction;
+
+
+    int i=n;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+    i = n+1;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+    i = n+2;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+    i = n+3;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+    i = n+4;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+    i = n+5;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+    i = n+6;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+#if N_GI_CONES == 18
+    i = n+7;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+    i = n+8;
+    cone_bouquet[i].direction = r * cone_bouquet[i%n].direction;
+#endif
   }
 #endif
 

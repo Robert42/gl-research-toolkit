@@ -12,6 +12,7 @@
 #undef N_GI_CONES
 #define N_GI_CONES 18
 #elif N_GI_CONES==7
+#undef N_GI_CONES
 #define N_GI_CONES 14
 #else
 #error unexpected number cones
