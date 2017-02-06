@@ -4,6 +4,8 @@
 #include <scene/uniforms.glsl>
 #include "ao-collect-uniform.glsl"
 
+#define COMPUTE_SHADER
+
 #define USE_CONES 1
 #define USE_ONLY_LEAF_SPHERE 0
 

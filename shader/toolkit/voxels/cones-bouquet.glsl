@@ -162,7 +162,7 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 
   for(int i=0; i<N_GI_CONES; ++i)
   {
-#if defined(CONE_BOUQUET_NOISE) || defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
+#if (CONE_BOUQUET_NOISE || defined(CONE_BOUQUET_UNDERWATER_CAUSICS)) && !defined(COMPUTE_SHADER)
 #if defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
     float alpha = scene.totalTime;
 #elif defined(CONE_BOUQUET_NOISE)

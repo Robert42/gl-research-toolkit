@@ -415,7 +415,7 @@ private:
   TweakBarShaderToggle toggleDistancefieldFixedSamplePoints;
   TweakBarShaderToggle toggleDistancefieldAOSphereTracing;
 
-  TweakBarShaderToggle toggleConeBouquetNoise;
+  TweakBarCBVar<bool> toggleConeBouquetNoise;
   TweakBarShaderToggle toggleConeBouquetUnderwaterCaustics;
 
   void updateAntTweakBarWindowSize();

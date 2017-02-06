@@ -21,7 +21,6 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
     toggleLogHeatVisionColors("HEATVISION_COLORS"),
     toggleDistancefieldFixedSamplePoints("DISTANCEFIELD_FIXED_SAMPLE_POINTS"),
     toggleDistancefieldAOSphereTracing("DISTANCEFIELD_AO_SPHERE_TRACING"),
-    toggleConeBouquetNoise("CONE_BOUQUET_NOISE"),
     toggleConeBouquetUnderwaterCaustics("CONE_BOUQUET_UNDERWATER_CAUSICS")
 {
   toggleLogHeatVision_debugPosteffect.setter(true);
@@ -29,7 +28,6 @@ AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
   toggleLogHeatVisionColors.setter(true);
   toggleDistancefieldFixedSamplePoints.setter(false);
   toggleDistancefieldAOSphereTracing.setter(true);
-  toggleConeBouquetNoise.setter(false);
   toggleConeBouquetUnderwaterCaustics.setter(false);
 
   Q_ASSERT(application != nullptr);
@@ -368,6 +366,8 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   TwSetParam(tweakBar, "Debug/SDF-AO", "opened", TW_PARAM_CSTRING, 1, "false");
 
   //-------- Debug/Cone-Bouquet---------------------------------------------------
+  toggleConeBouquetNoise = renderer::CONE_BOUQUET_NOISE;
+
   toggleConeBouquetNoise.TwAddVarCB(tweakBar, "Noise", "group='Debug/Cone-Bouquet'");
   toggleConeBouquetUnderwaterCaustics.TwAddVarCB(tweakBar, "Underwater Caustics", "group='Debug/Cone-Bouquet'");
   TwSetParam(tweakBar, "Debug/Cone-Bouquet", "opened", TW_PARAM_CSTRING, 1, "false");

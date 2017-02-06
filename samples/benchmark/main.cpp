@@ -24,7 +24,7 @@ T pickNearest(T value, const QVector<T>& options)
 
 int main(int argc, char** argv)
 {
-  const glm::uvec2 resolution(1920, 1080);
+  glm::uvec2 resolution(1920, 1080);
 
   float max_time = 5.f;
   uint32_t max_num_frames = 500;
@@ -74,6 +74,8 @@ int main(int argc, char** argv)
   bool_setters["--ao_use_candidate_grid"] = [](bool v){AO_USE_CANDIDATE_GRID.set_value(v);};
   bool_setters["--ao_ignore_fallback_sdf"] = [](bool v){AO_IGNORE_FALLBACK_SDF.set_value(v);};
   bool_setters["--ao_fallback_sdf_only"] = [](bool v){AO_FALLBACK_SDF_ONLY.set_value(v);};
+  bool_setters["--noisy"] = [](bool v){CONE_BOUQUET_NOISE.set_value(v);};
+  bool_setters["--low_res"] = [&resolution](bool v){resolution = v ? glm::uvec2(1024,768) : glm::uvec2(1920,1080);};
   uint32_setters["--merged_static_sdf_size"] = [](uint32_t v){MERGED_STATIC_SDF_SIZE.set_value(v);};
 
   QStringList arguments;
