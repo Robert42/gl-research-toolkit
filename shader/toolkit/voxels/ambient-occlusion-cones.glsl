@@ -25,13 +25,14 @@ void ao_falloff(inout float occlusionHeuristic, float distance, float cone_lengt
 #if AO_FALLBACK_NONE
   return;
 #endif
-#if AO_FALLBACK_CLAMPED
-  occlusionHeuristic = mix(occlusionHeuristic, 1, step(cone_length_voxelspace, distance));
-  return;
-#endif
 
   // linear falloff
   occlusionHeuristic = mix(occlusionHeuristic, 1.f, distance*inv_cone_length_voxelspace);
+
+#if AO_FALLBACK_CLAMPED
+  occlusionHeuristic = mix(1, occlusionHeuristic, step(SDFSAMPLING_SELF_SHADOW_AVOIDANCE, distance));
+  return;
+#endif
   // smooth start of falloff
   occlusionHeuristic = mix(1, occlusionHeuristic, smoothstep(0.f, SDFSAMPLING_SELF_SHADOW_AVOIDANCE, distance));
   
@@ -60,10 +61,6 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
   
   intersection_distance_front = intersection_distance_front*worldToVoxelSpace_Factor;
   intersection_distance_back = min(intersection_distance_back*worldToVoxelSpace_Factor, cone_length_voxelspace);
-
-#if AO_FALLBACK_NONE || AO_FALLBACK_CLAMPED
-  intersection_distance_back = intersection_distance_back*worldToVoxelSpace_Factor;
-#endif
     
   float minVisibility = 1.f;
   vec3 clamp_Range = vec3(voxelSize)-0.5f;
