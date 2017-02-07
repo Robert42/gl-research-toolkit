@@ -154,7 +154,7 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
 #else
     dt = next_dt;
 #endif
-    dt = max(0.1f, dt);
+    dt = max(AO_SPHERETRACE_MINSTEPSIZE, dt);
     t += dt;
   }
 #endif

@@ -62,6 +62,8 @@ int main(int argc, char** argv)
 
   Renderer* renderer;
 
+  float_setters["--spheretracing_min_step_size"] = [](float v){AO_SPHERETRACE_MINSTEPSIZE.set_value(v);};
+  uint32_setters["--spheretracing_max_num_samples"] = [](uint32_t v){SDFSAMPLING_SPHERE_TRACING_MAX_NUM_LOOPS.set_value(int(v));};
   float_setters["--spheretracing_first_sample"] = [](float v){SDFSAMPLING_SPHERETRACING_START.set_value(v);};
   float_setters["--spheretracing_self_shadowavoidance"] = [](float v){SDFSAMPLING_SELF_SHADOW_AVOIDANCE.set_value(v);};
   bool_setters["--use_ao_spheretracing"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_AO_SPHERE_TRACING", v);};
