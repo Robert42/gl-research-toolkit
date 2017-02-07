@@ -17,9 +17,6 @@ int ao_distancefield_cost = 0;
 #define AO_FALLBACK_CLAMPED 0
 */
 
-#undef AO_FALLBACK_CLAMPED
-#define AO_FALLBACK_CLAMPED 1
-
 #define NEED_AO_INTERPOLATION_STATIC defined(NO_BVH) && !AO_IGNORE_FALLBACK_SDF && !AO_FALLBACK_SDF_ONLY
 
 void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, bool is_fallback)
@@ -74,6 +71,11 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
   // In Range [intersection_distance_front, intersection_distance_back]
   float exponential_start = max(SDFSAMPLING_EXPONENTIAL_START, intersection_distance_front);
   float spheretracing_start = max(SDFSAMPLING_SPHERETRACING_START, intersection_distance_front);
+
+#if AO_FALLBACK_LINEAR || AO_FALLBACK_NONE
+  exponential_start =  max(0, intersection_distance_front);
+  spheretracing_start = max(0, intersection_distance_front);
+#endif
 
 #if AO_FALLBACK_CLAMPED
   spheretracing_start = max(spheretracing_start, SDFSAMPLING_SELF_SHADOW_AVOIDANCE);
