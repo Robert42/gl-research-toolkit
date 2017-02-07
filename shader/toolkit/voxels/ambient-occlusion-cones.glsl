@@ -64,6 +64,11 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
   
   intersection_distance_front = intersection_distance_front*worldToVoxelSpace_Factor;
   intersection_distance_back = min(intersection_distance_back*worldToVoxelSpace_Factor, cone_length_voxelspace);
+
+#if !SPHERETRACING_BOUNDING_SPHERE_CLAMPING
+  intersection_distance_front = 0;
+  intersection_distance_back = cone_length_voxelspace;
+#endif
     
   float minVisibility = 1.f;
   vec3 clamp_Range = vec3(voxelSize)-0.5f;
