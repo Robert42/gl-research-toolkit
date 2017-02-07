@@ -9,6 +9,14 @@
 using namespace glrt::renderer;
 using namespace glrt::scene;
 
+namespace glrt {
+namespace gui {
+  extern int default_camera_index;
+} // namespace gui
+} // namespace glrt
+
+using glrt::gui::default_camera_index;
+
 template<typename T>
 T pickNearest(T value, const QVector<T>& options)
 {
@@ -50,6 +58,8 @@ int main(int argc, char** argv)
   QMap<QString, uint16_t> uint16_values;
   QMap<QString, std::function<void(uint16_t)>> uint16_setters;
 
+  QMap<QString, std::function<void(uint32_t)>> uint32_immediate_setters;
+
   Renderer* renderer;
 
   float_setters["--spheretracing_first_sample"] = [](float v){SDFSAMPLING_SPHERETRACING_START.set_value(v);};
@@ -68,6 +78,7 @@ int main(int argc, char** argv)
   uint32_setters["--max_num_frames"] = [&](uint32_t v){max_num_frames = v;};
   uint16_setters["--num-bvh-grids"] = [](uint16_t v){NUM_GRID_CASCADES.set_value(glm::clamp<uint16_t>(v, 1, 3));};
   uint16_setters["--bvh-stack-depth"] = [](uint16_t v){BVH_MAX_STACK_DEPTH.set_value(glm::clamp<uint16_t>(v, 1, MAX_NUM_STATIC_MESHES));};
+  uint16_setters["--num_cones"] = [](uint16_t v){N_GI_CONES.set_value(v<8 ? 7 : 9);};
 
   static_assert(MAX_SDF_CANDIDATE_GRID_SIZE==32, "Please adapt the line below to cover all possible candidate grid sizes");
   uint16_setters["--sdf_scandidate_grid_size"] = [](uint16_t v){SDF_CANDIDATE_GRID_SIZE.set_value(pickNearest(v, {16, 32}));};
@@ -77,6 +88,7 @@ int main(int argc, char** argv)
   bool_setters["--noisy"] = [](bool v){CONE_BOUQUET_NOISE.set_value(v);};
   bool_setters["--low_res"] = [&resolution](bool v){resolution = v ? glm::uvec2(1024,768) : glm::uvec2(1920,1080);};
   uint32_setters["--merged_static_sdf_size"] = [](uint32_t v){MERGED_STATIC_SDF_SIZE.set_value(v);};
+  uint32_immediate_setters["--default_camera_index"] = [](uint32_t v){default_camera_index=int(glm::clamp<uint32_t>(v, 0, 1024));};
 
   QStringList arguments;
   for(int i=1; i<argc; ++i)
@@ -228,6 +240,17 @@ int main(int argc, char** argv)
       {
         uint32_values[name] = arguments.first().toUInt(&ok);
         arguments.removeFirst();
+      }
+    }else if(uint32_immediate_setters.contains(arguments.first()))
+    {
+      QString name = arguments.first();
+      arguments.removeFirst();
+
+      if(arguments.length() >= 1)
+      {
+        uint32_t v = arguments.first().toUInt(&ok);
+        arguments.removeFirst();
+        uint32_immediate_setters[name](v);
       }
     }else if(uint16_setters.contains(arguments.first()))
     {

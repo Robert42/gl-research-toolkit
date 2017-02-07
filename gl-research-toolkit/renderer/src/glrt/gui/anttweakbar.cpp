@@ -7,8 +7,11 @@
 #include <glrt/renderer/toolkit/reloadable-shader.h>
 #include <glrt/renderer/debugging/visualization-renderer.h>
 
+
 namespace glrt {
 namespace gui {
+
+int default_camera_index = 0;
 
 
 AntTweakBar::AntTweakBar(Application* application, const Settings& settings)
@@ -406,7 +409,7 @@ void AntTweakBar::handleSceneLoaded(scene::Scene* scene)
     }
     cameraSwitcher->init(cameras);
     if(!cameras.isEmpty())
-      cameraSwitcher->setCurrentKey(cameras.keys().first());
+      cameraSwitcher->setCurrentKey(cameras.keys().value(default_camera_index, 0));
 
     QPointer<scene::CameraComponent> cameraComponent = glrt::scene::findComponent(scene, scene->camera(glrt::scene::CameraSlot::MAIN_CAMERA));
     if(!cameraComponent.isNull())
