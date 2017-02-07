@@ -91,6 +91,7 @@ extern VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE;
 
 extern GLSLMacroWrapper<bool> AO_FALLBACK_NONE;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED;
+extern GLSLMacroWrapper<bool> AO_FALLBACK_LINEAR;
 
 inline uint16_t num_grid_cascades(){return NUM_GRID_CASCADES.get_value();}
 inline uint16_t bvh_traversal_stack_depth(){return BVH_MAX_STACK_DEPTH.get_value();}

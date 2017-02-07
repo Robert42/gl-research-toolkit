@@ -37,6 +37,7 @@ VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE(64, [](uint32_t v) -> uint
 
 GLSLMacroWrapper<bool> AO_FALLBACK_NONE("#define AO_FALLBACK_NONE %0", false);
 GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED("#define AO_FALLBACK_CLAMPED %0", false);
+GLSLMacroWrapper<bool> AO_FALLBACK_LINEAR("#define AO_FALLBACK_LINEAR %0", false);
 
 // IDEA:: replace the following with GLSLMacroWrappers
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;
