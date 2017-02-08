@@ -72,6 +72,7 @@ extern GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY;
 
 extern GLSLMacroWrapper<bool> AO_CANDIDATE_GRID_CONTAINS_INDICES;
+extern GLSLMacroWrapper<bool> AO_SPHERETRACE_CLAMPING_CORRECTION;
 
 extern GLSLMacroWrapper<bool> CONE_BOUQUET_NOISE;
 
