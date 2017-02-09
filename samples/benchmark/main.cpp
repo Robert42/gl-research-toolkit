@@ -90,6 +90,7 @@ int main(int argc, char** argv)
   bool_setters["--ao_use_candidate_grid"] = [](bool v){AO_USE_CANDIDATE_GRID.set_value(v);};
   bool_setters["--ao_ignore_fallback_sdf"] = [](bool v){AO_IGNORE_FALLBACK_SDF.set_value(v);};
   bool_setters["--ao_fallback_sdf_only"] = [](bool v){AO_FALLBACK_SDF_ONLY.set_value(v);};
+  bool_setters["--ao_enable_boundingsphere_culling"] = [](bool v){AO_ENABLE_BOUNDINGSPHERE_CULLING.set_value(v);};
   bool_setters["--noisy"] = [](bool v){CONE_BOUQUET_NOISE.set_value(v);};
   bool_setters["--low_res"] = [&resolution](bool v){resolution = v ? glm::uvec2(1024,768) : glm::uvec2(1920,1080);};
   uint32_setters["--merged_static_sdf_size"] = [](uint32_t v){MERGED_STATIC_SDF_SIZE.set_value(v);};

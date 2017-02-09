@@ -20,6 +20,7 @@ GLSLMacroWrapper<uint16_t> N_GI_CONES("#define N_GI_CONES %0", 7);
 GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID("#define AO_USE_CANDIDATE_GRID %0", true);
 GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF("#define AO_IGNORE_FALLBACK_SDF %0", false);
 GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY("#define AO_FALLBACK_SDF_ONLY %0", false);
+GLSLMacroWrapper<bool> AO_ENABLE_BOUNDINGSPHERE_CULLING("#define AO_ENABLE_BOUNDINGSPHERE_CULLING %0", true);
 
 GLSLMacroWrapper<bool> AO_CANDIDATE_GRID_CONTAINS_INDICES("#define AO_CANDIDATE_GRID_CONTAINS_INDICES %0", false);
 GLSLMacroWrapper<bool> CONE_BOUQUET_NOISE("#define CONE_BOUQUET_NOISE %0", false);

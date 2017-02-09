@@ -70,6 +70,7 @@ extern GLSLMacroWrapper<float> AO_STATIC_FALLBACK_FADING_END;
 extern GLSLMacroWrapper<bool> AO_USE_CANDIDATE_GRID;
 extern GLSLMacroWrapper<bool> AO_IGNORE_FALLBACK_SDF;
 extern GLSLMacroWrapper<bool> AO_FALLBACK_SDF_ONLY;
+extern GLSLMacroWrapper<bool> AO_ENABLE_BOUNDINGSPHERE_CULLING;
 
 extern GLSLMacroWrapper<bool> AO_CANDIDATE_GRID_CONTAINS_INDICES;
 extern GLSLMacroWrapper<bool> AO_SPHERETRACE_CLAMPING_CORRECTION;
