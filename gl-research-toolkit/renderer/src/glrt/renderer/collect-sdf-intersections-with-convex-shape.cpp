@@ -1,15 +1,20 @@
 #include <glrt/glsl/math-cpp.h>
 
 #include <glrt/scene/scene-data.h>
+#include <glrt/scene/aabb.h>
 #include <glrt/scene/resources/voxelizer.h>
+#include <glrt/toolkit/zindex.h>
 
 #include <glrt/dependencies.h>
+
 
 namespace glrt {
 namespace renderer {
 
 using scene::resources::VoxelGridGeometry;
+using scene::SORT_OBJECTS_BY_SDF_TEXTURE;
 using scene::resources::BoundingSphere;
+using scene::AABB;
 
 bool sphere_intersects_convex_shape(const glsl::Plane* planes, int num_planes, const glsl::Sphere& sphere)
 {
@@ -35,6 +40,8 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
 {
   Array<uint16_t> target;
 
+  AABB aabb;
+
   uint16_t n = data->voxelGrids->length;
 
 //#define FIND_SDF
@@ -47,6 +54,7 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
 #if SPONZA_ARCH_PAD_EDGE_001
   uint16_t sponza_arch_pad_edge_001 = 93; // sponza-arch-pad-edge-001
 #endif
+
 
   // IDEA how to handle static and dynamic objects?
   for(uint16_t i=0; i<n; ++i)
@@ -83,9 +91,28 @@ Array<uint16_t> collectAllSdfIntersectingWith_ConvexShape(const glsl::Plane* pla
 
     if(sphere_intersects_convex_shape(planes, num_planes, sphere))
     {
+      aabb |= sphere.origin;
       target.append_copy(i);
     }
   }
+
+  if(SORT_OBJECTS_BY_SDF_TEXTURE)
+    std::sort(target.begin(), target.end(), [data, aabb](uint16_t a, uint16_t b) {
+      const GLuint64 texture_handle_a = data->voxelGrids->voxelData[a].gpuTextureHandle;
+      const GLuint64 texture_handle_b = data->voxelGrids->voxelData[b].gpuTextureHandle;
+
+      return texture_handle_a < texture_handle_b;
+    });
+  else
+    std::sort(target.begin(), target.end(), [data, aabb](uint16_t a, uint16_t b) {
+      const BoundingSphere bounding_sphere_a = data->voxelGrids->globalCoordFrame(a) * data->voxelGrids->boundingSphere[a];
+      const BoundingSphere bounding_sphere_b = data->voxelGrids->globalCoordFrame(b) * data->voxelGrids->boundingSphere[b];
+
+      quint32 z_index_a = calcZIndex(aabb.toUnitSpace(bounding_sphere_a.center));
+      quint32 z_index_b = calcZIndex(aabb.toUnitSpace(bounding_sphere_b.center));
+
+      return z_index_a < z_index_b;
+    });
 
 #ifdef FIND_SDF
   PRINT_VALUE(sdf_candidate_index);
