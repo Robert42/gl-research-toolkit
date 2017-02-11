@@ -84,6 +84,7 @@ int main(int argc, char** argv)
   uint16_setters["--bvh-stack-depth"] = [](uint16_t v){BVH_MAX_STACK_DEPTH.set_value(glm::clamp<uint16_t>(v, 1, MAX_NUM_STATIC_MESHES));};
   uint16_setters["--num_cones"] = [](uint16_t v){N_GI_CONES.set_value(v<8 ? 7 : 9);};
   bool_setters["--spheretracing_bounding_sphere_clamping"] = [](bool v){SPHERETRACING_BOUNDING_SPHERE_CLAMPING.set_value(v);};
+  // TODO: BEfehl um Groundtruth zu erstellen (einmalmit maximlaer Qualität ohne noise, dann mit Noise, mit Durchschnitt über viele Bilder hinweg)
 
   static_assert(MAX_SDF_CANDIDATE_GRID_SIZE==32, "Please adapt the line below to cover all possible candidate grid sizes");
   uint16_setters["--sdf_scandidate_grid_size"] = [](uint16_t v){SDF_CANDIDATE_GRID_SIZE.set_value(pickNearest(v, {16, 32}));};
@@ -370,6 +371,8 @@ int main(int argc, char** argv)
         std::swap(a[x], b[x]);
     }
     screenshot.save(screenshot_file_path);
+
+//    QString hdrPath = QFileInfo(screenshot_file_path).dir().absoluteFilePath(QFileInfo(screenshot_file_path).baseName() + ".exr");
   }
 
   if(!scala_file_path.isEmpty())
