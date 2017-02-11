@@ -71,8 +71,8 @@ int main(int argc, char** argv)
   bool_setters["--ao_spheretrace_clamping_correction"] = [&](bool v){AO_SPHERETRACE_CLAMPING_CORRECTION.set_value(v);};
   bool_setters["--heatvision_use_logarithmic_scale"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("LOG_HEATVISION_DEBUG_COSTS", v);};
   bool_setters["--heatvision_use_colors"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("HEATVISION_COLORS", v);};
-  uint16_setters["--sdf_enforce_huge_bvh_leaves_first"] = [](bool v){ENFORCE_HUGE_BVH_LEAVES_FIRST.set_value(v);};
-  uint16_setters["--sdf_sort_objects_by_sdf_texture"] = [](bool v){SORT_OBJECTS_BY_SDF_TEXTURE.set_value(v);};
+  uint32_immediate_setters["--sdf_enforce_huge_bvh_leaves_first"] = [](bool v){ENFORCE_HUGE_BVH_LEAVES_FIRST.set_value(v);};
+  uint32_immediate_setters["--sdf_sort_objects_by_sdf_texture"] = [](bool v){SORT_OBJECTS_BY_SDF_TEXTURE.set_value(v);};
   uint16_setters["--ao_falloff_none"] = [](bool v){AO_FALLBACK_NONE.set_value(v);};
   uint16_setters["--ao_falloff_clamped"] = [](bool v){AO_FALLBACK_CLAMPED.set_value(v);};
   uint16_setters["--ao_falloff_linear"] = [](bool v){AO_FALLBACK_LINEAR.set_value(v);};
