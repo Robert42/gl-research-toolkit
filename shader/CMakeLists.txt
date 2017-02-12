@@ -97,8 +97,10 @@ add_custom_target(
   toolkit/lighting/light-direction.glsl
   toolkit/lighting/light-structs.glsl
   toolkit/lighting/rendering-equation.glsl
+  toolkit/random.glsl
   toolkit/scene/uniforms.glsl
   toolkit/voxels/ambient-occlusion-cones.glsl
+  toolkit/voxels/ao-groundtruth.glsl
   toolkit/voxels/cones-bouquet.glsl
   toolkit/voxels/distance-field-utils.glsl
   toolkit/voxels/raymarching-bounding-spheres.glsl

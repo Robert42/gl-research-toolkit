@@ -80,6 +80,8 @@ extern GLSLMacroWrapper<bool> CONE_BOUQUET_NOISE;
 extern GLSLMacroWrapper<float> AO_SPHERETRACE_MINSTEPSIZE;
 extern GLSLMacroWrapper<bool> SPHERETRACING_BOUNDING_SPHERE_CLAMPING;
 
+extern GLSLMacroWrapper<int> AO_GROUNDTRUTH_SAMPLES;
+extern GLSLMacroWrapper<float> AO_GROUNDTRUTH_CONE_HALF_TAN_ANGLE;
 
 extern GLSLMacroWrapper<uint16_t> N_GI_CONES;
 

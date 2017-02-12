@@ -17,6 +17,11 @@ int ao_distancefield_cost = 0;
 #define AO_FALLBACK_CLAMPED 0
 */
 
+
+#include "ao-groundtruth.glsl"
+
+
+
 #define NEED_AO_INTERPOLATION_STATIC defined(NO_BVH) && !AO_IGNORE_FALLBACK_SDF && !AO_FALLBACK_SDF_ONLY
 
 void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, bool is_fallback)
@@ -33,7 +38,7 @@ void ao_falloff(inout float occlusionHeuristic, float distance, float cone_lengt
 #endif
 
 #if AO_FALLBACK_CLAMPED
-//  occlusionHeuristic = mix(1, occlusionHeuristic, step(SDFSAMPLING_SELF_SHADOW_AVOIDANCE, distance));
+  occlusionHeuristic = mix(1, occlusionHeuristic, step(SDFSAMPLING_SELF_SHADOW_AVOIDANCE, distance));
   return;
 #endif
   // smooth start of falloff
@@ -248,12 +253,79 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
   }
 }
 
+
+#if AO_GROUNDTRUTH_SAMPLES>0
+#if NEED_AO_INTERPOLATION_STATIC
+#error AO_GROUNDTRUTH_SAMPLES expects NEED_AO_INTERPOLATION_STATIC to be false
+#endif
+
+#if N_GI_CONES != 7
+#error AO_GROUNDTRUTH_SAMPLES expects N_GI_CONES to be 7
+#endif
+
+#if AO_CANDIDATE_GRID_CONTAINS_INDICES
+#error AO_GROUNDTRUTH_SAMPLES does not allow AO_CANDIDATE_GRID_CONTAINS_INDICES
+#else
+void ao_coneSoftShadow_candidateGrid_groundtruth(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
+{
+  const vec3 world_pos = cone_bouquet[6].origin;
+  const vec3 world_normal = cone_bouquet[6].direction;
+  uint32_t num_static_candidates;
+  CandidateType* first_static_candidate;
+  uint32_t num_dynamic_candidates;
+  uint8_t* first_dynamic_candidate;
+
+  Cone cone = cone_from_ray_tan_angle(world_pos, vec3(0,0,1), AO_GROUNDTRUTH_CONE_HALF_TAN_ANGLE);
+
+  float totalContribution = 0.;
+  float ao = 0.;
+
+  const float intersection_distance_front = 0;
+  const float intersection_distance_back = 100000.f;
+
+  for(uint i=0; i<AO_GROUNDTRUTH_SAMPLES; ++i)
+  {
+    bool contribution;
+
+    cone.direction = groundtruth_cone_direction(contribution, i, world_normal);
+
+    if(!contribution)
+      continue;
+
+    get_sdfCandidates(world_pos, num_static_candidates, first_static_candidate, num_dynamic_candidates, first_dynamic_candidate);
+
+    float current_ao = 1.f;
+
+    for(uint32_t i=0; i<num_static_candidates; ++i)
+    {
+      VoxelDataBlock* sdf = (VoxelDataBlock*)first_static_candidate;
+      Sphere sphere = first_static_candidate->boundingSphere;
+
+      current_ao = min(current_ao, ao_coneSoftShadow(cone, sdf, intersection_distance_front, intersection_distance_back, cone_length));
+
+      first_static_candidate++;
+    }
+
+    totalContribution += 1.;
+    ao += current_ao;
+  }
+
+  ao /= totalContribution;
+
+  for(int j=0; j<N_GI_CONES; ++j)
+  {
+    cone_bouquet_ao[j] = ao;
+  }
+}
+#endif
+#endif
+
 #if AO_CANDIDATE_GRID_CONTAINS_INDICES
 void ao_coneSoftShadow_candidateGrid(in Sphere* bounding_spheres, in VoxelDataBlock* distance_field_data_blocks, uint32_t num_distance_fields, float cone_length)
 {
   const vec3 world_pos = cone_bouquet[0].origin;
   uint32_t num_static_candidates;
-  uint8_t* first_static_candidate;
+  CandidateType* first_static_candidate;
   uint32_t num_dynamic_candidates;
   uint8_t* first_dynamic_candidate;
   get_sdfCandidates(world_pos, num_static_candidates, first_static_candidate, num_dynamic_candidates, first_dynamic_candidate);
@@ -567,7 +639,15 @@ float distancefield_ao()
   
   float occlusion_factor = 1.f;
   init_cone_bouquet_ao();
-  
+
+  #if AO_GROUNDTRUTH_SAMPLES > 0
+  #if defined(AO_USE_CANDIDATE_GRID)
+  ao_coneSoftShadow_candidateGrid_groundtruth(bounding_spheres, distance_field_data_blocks, num_distance_fields, ao_radius);
+  #else
+  #error AO_GROUNDTRUTH_SAMPLES needs the candidate-grid
+  #endif
+  #endif
+
   #if defined(NO_BVH)
   
     #if !AO_IGNORE_FALLBACK_SDF

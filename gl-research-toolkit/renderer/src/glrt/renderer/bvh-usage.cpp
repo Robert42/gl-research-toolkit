@@ -41,8 +41,11 @@ GLSLMacroWrapper<uint32_t> SDF_CANDIDATE_GRID_SIZE("#define SDF_CANDIDATE_GRID_S
 VariableWithCallback<uint32_t> MERGED_STATIC_SDF_SIZE(64, [](uint32_t v) -> uint32_t{return glm::clamp<uint32_t>(v, 4, MAX_SDF_MERGED_STATIC);});
 
 GLSLMacroWrapper<bool> AO_FALLBACK_NONE("#define AO_FALLBACK_NONE %0", false);
-GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED("#define AO_FALLBACK_CLAMPED %0", false);
+GLSLMacroWrapper<bool> AO_FALLBACK_CLAMPED("#define AO_FALLBACK_CLAMPED %0", true);
 GLSLMacroWrapper<bool> AO_FALLBACK_LINEAR("#define AO_FALLBACK_LINEAR %0", false);
+
+GLSLMacroWrapper<int> AO_GROUNDTRUTH_SAMPLES("#define AO_GROUNDTRUTH_SAMPLES %0", 0);
+GLSLMacroWrapper<float> AO_GROUNDTRUTH_CONE_HALF_TAN_ANGLE("#define AO_GROUNDTRUTH_CONE_HALF_TAN_ANGLE %0", 10.f);
 
 // IDEA:: replace the following with GLSLMacroWrappers
 BvhUsage currentBvhUsage = BvhUsage::BVH_WITH_STACK;

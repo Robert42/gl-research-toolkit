@@ -84,7 +84,6 @@ int main(int argc, char** argv)
   uint16_setters["--bvh-stack-depth"] = [](uint16_t v){BVH_MAX_STACK_DEPTH.set_value(glm::clamp<uint16_t>(v, 1, MAX_NUM_STATIC_MESHES));};
   uint16_setters["--num_cones"] = [](uint16_t v){N_GI_CONES.set_value(v<8 ? 7 : 9);};
   bool_setters["--spheretracing_bounding_sphere_clamping"] = [](bool v){SPHERETRACING_BOUNDING_SPHERE_CLAMPING.set_value(v);};
-  // TODO: BEfehl um Groundtruth zu erstellen (einmalmit maximlaer Qualität ohne noise, dann mit Noise, mit Durchschnitt über viele Bilder hinweg)
 
   static_assert(MAX_SDF_CANDIDATE_GRID_SIZE==32, "Please adapt the line below to cover all possible candidate grid sizes");
   uint16_setters["--sdf_scandidate_grid_size"] = [](uint16_t v){SDF_CANDIDATE_GRID_SIZE.set_value(pickNearest(v, {16, 32}));};
@@ -94,6 +93,20 @@ int main(int argc, char** argv)
   bool_setters["--ao_enable_boundingsphere_culling"] = [](bool v){AO_ENABLE_BOUNDINGSPHERE_CULLING.set_value(v);};
   bool_setters["--noisy"] = [](bool v){CONE_BOUQUET_NOISE.set_value(v);};
   bool_setters["--low_res"] = [&resolution](bool v){resolution = v ? glm::uvec2(1024,768) : glm::uvec2(1920,1080);};
+  uint16_setters["--ground_truth"] = [&resolution](uint16_t v){
+    if(v > 0)
+    {
+      N_GI_CONES.set_value(7);
+      AO_USE_CANDIDATE_GRID.set_value(true);
+      AO_IGNORE_FALLBACK_SDF.set_value(true);
+      setCurrentBVHUsage(BvhUsage::NO_BVH);
+      setCurrentSurfaceShaderVisualization(SurfaceShaderVisualization::DISTANCEFIELD_AO);
+    }
+    AO_GROUNDTRUTH_SAMPLES.set_value(v);
+  };
+  float_setters["--ground_truth_cone_angle"] = [&resolution](float angle_degrees){
+    AO_GROUNDTRUTH_CONE_HALF_TAN_ANGLE.set_value(glm::tan(glm::radians(angle_degrees) * 0.5f));
+  };
   uint32_setters["--merged_static_sdf_size"] = [](uint32_t v){MERGED_STATIC_SDF_SIZE.set_value(v);};
   uint32_immediate_setters["--default_camera_index"] = [](uint32_t v){default_camera_index=int(glm::clamp<uint32_t>(v, 0, 1024));};
 
