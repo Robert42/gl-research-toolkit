@@ -383,7 +383,7 @@ void VoxelBuffer::initStaticSdfFallbackTexture()
     staticFallbackSdf.texture = GlTexture();
     staticFallbackSdf.texture.setUncompressed2DImage(GlTexture::format(glm::uvec3(staticFallbackSdf.resolution),
                                                                        0,
-                                                                       GlTexture::Format::RED,
+                                                                       GlTexture::Format::RGBA,
                                                                        GlTexture::Type::FLOAT16,
                                                                        GlTexture::Target::TEXTURE_3D), nullptr);
     staticFallbackSdf.texture.makeComplete();
@@ -395,7 +395,7 @@ void VoxelBuffer::initStaticSdfFallbackTexture()
 
   staticFallbackSdf.location = sdfMergeHeader.gridLocation;
 
-  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, staticFallbackSdf.texture.textureId, 0, GL_TRUE, 0, GL_R16F);
+  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, staticFallbackSdf.texture.textureId, 0, GL_TRUE, 0, GL_RGBA16F);
   if(!GL_RET_CALL(glIsImageHandleResidentNV, imageHandle))
     GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
 
