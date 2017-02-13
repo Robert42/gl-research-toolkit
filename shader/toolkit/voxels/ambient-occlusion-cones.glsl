@@ -228,6 +228,17 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
     #endif
     Sphere sphere = *bounding_spheres;
     
+    #if DEBUG_EXCLUDE_OBJECT_FROM_AO >= 0
+    #if 0
+    if(DEBUG_EXCLUDE_OBJECT_FROM_AO == i && distance(sphere.origin, cone_bouquet[0].origin) < 1)
+    {
+    for(int j=0; j<N_GI_CONES; ++j)
+        cone_bouquet_ao[j] = 0;
+        return;
+    }
+    #endif
+    if(DEBUG_EXCLUDE_OBJECT_FROM_AO != i)
+    #endif
     for(int j=0; j<N_GI_CONES; ++j)
     {
       float distance_to_sphere_origin;

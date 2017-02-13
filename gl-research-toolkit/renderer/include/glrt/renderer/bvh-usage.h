@@ -81,6 +81,8 @@ extern GLSLMacroWrapper<float> AO_SPHERETRACE_MINSTEPSIZE;
 extern GLSLMacroWrapper<float> AO_SELFSHADOW_AVOIDANCE_CONE_DIRECTION_LIFT;
 extern GLSLMacroWrapper<bool> SPHERETRACING_BOUNDING_SPHERE_CLAMPING;
 
+extern GLSLMacroWrapper<int> DEBUG_EXCLUDE_OBJECT_FROM_AO;
+
 
 extern GLSLMacroWrapper<uint16_t> N_GI_CONES;
 

@@ -197,6 +197,9 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   currentSdfCellToDebug_z.setter = [renderer](int v){renderer::debugging::VisualizationRenderer::selectedSdfCandidateGrid.z = glm::min<int>(v, int(renderer::SDF_CANDIDATE_GRID_SIZE)-1);renderer->visualizeSdfCandidateCell.reinit();};
   renderer->visualizeSdfFallbackGrid.guiToggle.TwAddVarCB(tweakBar, "Show SDF Fallback-Grid", "group='Debug Scene'");
 
+  exclude_sdf_instance_from_ao = glrt::renderer::DEBUG_EXCLUDE_OBJECT_FROM_AO;
+  exclude_sdf_instance_from_ao.TwAddVarCB(tweakBar, "exclude sdf from Brute-Force AO", "group='Debug Scene' help='SDF instance to ignore, when calculating SDF AO using the brute force method.'");
+
   std::function<void(bool)> setSdfCandidateEnabled = renderer->visualizeSdfCandidateCell.guiToggle.setter;
   renderer->visualizeSdfCandidateCell.guiToggle.setter = [setSdfCandidateEnabled,this](bool b) {
     currentSdfCellToDebug_x.setVisible(b);
