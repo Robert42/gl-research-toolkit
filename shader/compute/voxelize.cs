@@ -78,7 +78,7 @@ void main()
     
 #if defined(MANIFOLD_RAY_CHECK) || defined(FACE_SIDE)
     best_positive_point = mix(best_positive_point, closestPoint, step(d, best_positive_d) * max(sign(d), 0)); // if d <= best_positive_d && d>0, d=best_positive_d
-    best_negative_point = mix(best_negative_point, closestPoint, step(best_negative_d, d) * max(sign(-d), 0)); // if d <= best_positive_d && d<0, d=best_positive_d
+    best_negative_point = mix(best_negative_point, closestPoint, step(best_negative_d, d) * max(sign(-d), 0)); // if d >= best_negative_d && d<0, d=best_negative_d
 
     best_positive_d = d >= 0 ? min(d, best_positive_d) : best_positive_d;
     best_negative_d = d <= 0 ? max(d, best_negative_d) : best_negative_d;
