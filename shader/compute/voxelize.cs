@@ -51,6 +51,10 @@ void main()
   int intersection_sign_sum = 0;
 #endif
 
+  vec3 best_abs_point = vec3(0);
+  vec3 best_positive_point = vec3(0);
+  vec3 best_negative_point = vec3(0);
+
   for(int i=0; i<num_vertices; i+=3)
   {
     const vec3 v0 = vertices[i];
@@ -69,28 +73,44 @@ void main()
     intersection_sign_sum += int(triangle_ray_intersection_unclamped(ray_z, v0, v1, v2)) * int(sign(d));
 #endif
     
+    best_abs_point = mix(best_abs_point, closestPoint, step(d_abs, best_d_abs)); // if d_abs <= best_d_abs, best_abs_point=closestPoint
     best_d_abs = min(d_abs, best_d_abs);
     
 #if defined(MANIFOLD_RAY_CHECK) || defined(FACE_SIDE)
+    best_positive_point = mix(best_positive_point, closestPoint, step(d, best_positive_d) * max(sign(d), 0)); // if d <= best_positive_d && d>0, d=best_positive_d
+    best_negative_point = mix(best_negative_point, closestPoint, step(best_negative_d, d) * max(sign(-d), 0)); // if d <= best_positive_d && d<0, d=best_positive_d
+
     best_positive_d = d >= 0 ? min(d, best_positive_d) : best_positive_d;
     best_negative_d = d <= 0 ? max(d, best_negative_d) : best_negative_d;
 #endif
   }
   
   float best_d;
+  vec3 best_p;
   
 #if defined(TWO_SIDED)
   best_d = best_d_abs;
+  best_p = best_abs_point;
 #elif defined(MANIFOLD_RAY_CHECK)
   if(intersection_sign_sum >= 0)
+  {
     best_d = best_positive_d;
-  else
+    best_p = best_positive_point;
+  }else
+  {
     best_d = best_negative_d;
+    best_p = best_negative_point;
+  }
 #elif defined(FACE_SIDE)
   if(abs(best_negative_d) + 1.e-4f < best_positive_d)
+  {
+    best_p = best_negative_point;
     best_d = best_negative_d;
-  else
+  }else
+  {
     best_d = best_positive_d;
+    best_p = best_positive_point;
+  }
 #else
 #error Mode not recognized
 #endif
@@ -102,5 +122,5 @@ void main()
   best_d = isPadding ? max(0, best_d) : best_d;
   
   if(all(lessThan(voxelCoord, textureSize)))
-    imageStore(metaData.targetTexture, voxelCoord, vec4(best_d));
+    imageStore(metaData.targetTexture, voxelCoord, vec4(best_p, best_d));
 }
