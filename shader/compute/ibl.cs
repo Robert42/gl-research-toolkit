@@ -92,6 +92,7 @@ vec4 sample_environment(vec3 view, float mipLevel)
   return vec4(incoming, 1);
 }
 
+// source https://en.wikipedia.org/w/index.php?title=Low-discrepancy_sequence&oldid=731052708#Hammersley_set
 vec2 Hammersley(uint n, uint N)
 {
   float g_2 = 0.f;
