@@ -70,33 +70,35 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
   const float inv_cos_half_angle_of_60 = 1.15470053837925;
   const float inv_cos_half_angle_of_45 = 1.08239220029239;
   
-  cone_bouquet[0].origin = world_position;
-  cone_bouquet[0].direction = vec3(0, -0.866025403784439, 0.5);
+  const float outer_6_z = 0.5 + AO_SELFSHADOW_AVOIDANCE_CONE_DIRECTION_LIFT;
+      
+  cone_bouquet[0].origin = world_position; 
+  cone_bouquet[0].direction = normalize(vec3(0, -0.866025403784439, outer_6_z));
   cone_bouquet[0].tan_half_angle = tan_half_angle_of_60;
   cone_bouquet[0].inv_cos_half_angle = inv_cos_half_angle_of_60;
   
   cone_bouquet[1].origin = world_position;
-  cone_bouquet[1].direction = vec3(0.75, -0.433012701892219, 0.5);
+  cone_bouquet[1].direction = normalize(vec3(0.75, -0.433012701892219, outer_6_z));
   cone_bouquet[1].tan_half_angle = tan_half_angle_of_60;
   cone_bouquet[1].inv_cos_half_angle = inv_cos_half_angle_of_60;
   
   cone_bouquet[2].origin = world_position;
-  cone_bouquet[2].direction = vec3(0.75, 0.433012701892219, 0.5);
+  cone_bouquet[2].direction = normalize(vec3(0.75, 0.433012701892219, outer_6_z));
   cone_bouquet[2].tan_half_angle = tan_half_angle_of_60;
   cone_bouquet[2].inv_cos_half_angle = inv_cos_half_angle_of_60;
   
   cone_bouquet[3].origin = world_position;
-  cone_bouquet[3].direction = vec3(1.06057523872491e-16, 8.66025403784439e-01, 0.5);
+  cone_bouquet[3].direction = normalize(vec3(1.06057523872491e-16, 8.66025403784439e-01, outer_6_z));
   cone_bouquet[3].tan_half_angle = tan_half_angle_of_60;
   cone_bouquet[3].inv_cos_half_angle = inv_cos_half_angle_of_60;
   
   cone_bouquet[4].origin = world_position;
-  cone_bouquet[4].direction = vec3(-0.75, 0.433012701892220, 0.5);
+  cone_bouquet[4].direction = normalize(vec3(-0.75, 0.433012701892220, outer_6_z));
   cone_bouquet[4].tan_half_angle = tan_half_angle_of_60;
   cone_bouquet[4].inv_cos_half_angle = inv_cos_half_angle_of_60;
   
   cone_bouquet[5].origin = world_position;
-  cone_bouquet[5].direction = vec3(-0.75, -0.433012701892219, 0.5);
+  cone_bouquet[5].direction = normalize(vec3(-0.75, -0.433012701892219, outer_6_z));
   cone_bouquet[5].tan_half_angle = tan_half_angle_of_60;
   cone_bouquet[5].inv_cos_half_angle = inv_cos_half_angle_of_60;
   
