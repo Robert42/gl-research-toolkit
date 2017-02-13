@@ -105,13 +105,8 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
   #endif
     vec3 p = get_point(ray_voxelspace, t);
     
-    vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
-    
     // ee882b37 the distance between the clamped position and the sampling position is now added to the distancefield distance
-    float d = distancefield_distance(clamped_p, voxelToUvwSpace, texture);
-#if AO_SPHERETRACE_CLAMPING_CORRECTION
-    d += distance(clamped_p, p);
-#endif
+    float d = distancefield_distance_clamp_range(p, voxelToUvwSpace, texture, clamp_Range);
 #if defined(DISTANCEFIELD_AO_COST_TEX)
     ao_distancefield_cost++;
 #endif
@@ -140,12 +135,7 @@ float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVox
     vec3 p = get_point(ray_voxelspace, t);
     
     // ee882b37 the distance between the clamped position and the sampling position is now added to the distancefield distance
-    vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
-    
-    float d = distancefield_distance(clamped_p, voxelToUvwSpace, texture);
-#if AO_SPHERETRACE_CLAMPING_CORRECTION
-    d += distance(clamped_p, p);
-#endif
+    float d = distancefield_distance_clamp_range(p, voxelToUvwSpace, texture, clamp_Range);
 #if defined(DISTANCEFIELD_AO_COST_TEX)
     ao_distancefield_cost++;
 #endif

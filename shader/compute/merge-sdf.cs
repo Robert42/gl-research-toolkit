@@ -49,9 +49,7 @@ void main()
       sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
       
       vec3 p = transform_point(worldToVoxelSpace, world_pos);
-      vec3 clamp_Range = vec3(voxelSize)-0.5f;
-      vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
-      float currentDistance = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
+      float currentDistance = distancefield_distance_resolution(p, voxelToUvwSpace, texture, voxelSize);
       
       // scale from source sdf voxel-space to world-space
       currentDistance /= (length(worldToVoxelSpace[0]) + length(worldToVoxelSpace[1]) + length(worldToVoxelSpace[2])) / 3.f;

@@ -36,9 +36,7 @@ float coneSoftShadow_singleVoxel(in Cone cone, in VoxelDataBlock* distance_field
   {
     vec3 p = get_point(ray_voxelspace, t);
     
-    vec3 clamped_p = clamp(p, vec3(0.5), clamp_Range);
-    
-    float d = distancefield_distance(clamped_p, voxelToUvwSpace, texture) + distance(clamped_p, p);
+    float d = distancefield_distance_clamp_range(p, voxelToUvwSpace, texture, clamp_Range);
     float cone_radius = cone.tan_half_angle * t;
     
     minVisibility = min(minVisibility, coneOcclusionHeuristic(cone_radius, d));

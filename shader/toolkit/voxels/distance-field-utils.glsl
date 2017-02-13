@@ -3,15 +3,35 @@
 
 #include "voxel-structs.glsl"
 
-float distancefield_distance(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture)
+float distancefield_distance_clamp_range(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, in vec3 clampRange)
 {
-  float voxel_value = texture(voxelTexture, voxelToUvwSpace * voxelCoord).w;
-  
+  vec3 clamped_voxelCoord = clamp(voxelCoord, vec3(0.5), clampRange);
+
+  float voxel_value = texture(voxelTexture, voxelToUvwSpace * clamped_voxelCoord).w;
+
 #ifdef POSTEFFECT_VISUALIZATION
   voxel_value += posteffect_param.distancefield_offset;
-#endif 
-  
+#endif
+
+#if AO_SPHERETRACE_CLAMPING_CORRECTION
+  voxel_value += distance(clamped_voxelCoord, voxelCoord);
+#endif
+
   return voxel_value;
+}
+
+float distancefield_distance_resolution(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, in ivec3 voxelResolution)
+{
+  vec3 clampRange = vec3(voxelResolution)-vec3(0.5);
+
+  return distancefield_distance_clamp_range(voxelCoord, voxelToUvwSpace, voxelTexture, clampRange);
+}
+
+float distancefield_distance(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture)
+{
+  ivec3 voxelResolution = ivec3(textureSize(voxelTexture, 0));
+
+  return distancefield_distance_resolution(voxelCoord, voxelToUvwSpace, voxelTexture, voxelResolution);
 }
 
 #include <distance-fields/debugging.glsl>
