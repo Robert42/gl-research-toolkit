@@ -97,6 +97,9 @@ int main(int argc, char** argv)
   uint32_setters["--merged_static_sdf_size"] = [](uint32_t v){MERGED_STATIC_SDF_SIZE.set_value(v);};
   uint32_immediate_setters["--default_camera_index"] = [](uint32_t v){default_camera_index=int(glm::clamp<uint32_t>(v, 0, 1024));};
 
+  float_setters["--fallback_fading_start"] = [](float v){AO_STATIC_FALLBACK_FADING_START.set_value(v);};
+  float_setters["--fallback_fading_end"] = [](float v){AO_STATIC_FALLBACK_FADING_END.set_value(v);};
+
   QStringList arguments;
   for(int i=1; i<argc; ++i)
     arguments << QString::fromUtf8(argv[i]).trimmed();
