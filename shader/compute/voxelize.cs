@@ -12,7 +12,7 @@ struct VoxelizeMetaData
 {
   int numVertices;
   int indexOffset;
-  layout(r32f) writeonly image3D targetTexture;
+  layout(rgba32f) writeonly image3D targetTexture;
   uint64_t vertices;
 };
 

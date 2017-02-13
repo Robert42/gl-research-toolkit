@@ -38,12 +38,12 @@ GlTexture GpuVoxelizerImplementation::distanceField(const glm::ivec3& gridSize,
   int totalNumVoxels = gridSize.x*gridSize.y*gridSize.z;
 
   GlTexture texture;
-  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 1), nullptr);
+  texture.setUncompressed2DImage(GlTexture::TextureAsFloats::format(gridSize, 4), nullptr);
   texture.makeComplete();
 
   GLuint textureId = texture.textureId;
 
-  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_R32F);
+  GLuint64 imageHandle = GL_RET_CALL(glGetImageHandleNV, textureId, 0, GL_TRUE, 0, GL_RGBA32F);
   GL_CALL(glMakeImageHandleResidentNV, imageHandle, GL_WRITE_ONLY);
 
   int numVertices = preprocessVertices(localToVoxelSpace, staticMesh);

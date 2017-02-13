@@ -482,7 +482,7 @@ VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileNam
   case Voxelizer::FieldType::SIGNED_DISTANCE_FIELD:
   {
     const TextureFile::Type voxelType = GlTexture::Type::FLOAT16;
-    const TextureFile::Format voxelFormat = GlTexture::Format::RED;
+    const TextureFile::Format voxelFormat = GlTexture::Format::RGBA;
     const size_t bytesPerVoxel = size_t(GlTexture::bytesPerPixelForFormatType(voxelFormat, voxelType));
 
     metaData = findBestSize(meshDataSize, bytesPerVoxel, aabb, hints);
