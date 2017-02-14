@@ -89,6 +89,9 @@ void ForwardRenderer::prepareFramebuffer()
 
 void ForwardRenderer::applyFramebuffer()
 {
+  render_debugLines();
+  render_debugPosteffects();
+
   framebuffer.BindBackBuffer();
 
   glDisable(GL_DEPTH_TEST);

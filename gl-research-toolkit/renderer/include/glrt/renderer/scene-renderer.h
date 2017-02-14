@@ -117,6 +117,9 @@ protected:
   int appendMaterialShader(QSet<QString> preprocessorBlock, const QSet<Material::Type>& materialTypes, const Pass pass);
   void appendMaterialState(gl::FramebufferObject* framebuffer, const QSet<Material::Type>& materialTypes, const Pass pass, int shader, MaterialState::Flags flags);
 
+  void render_debugPosteffects();
+  void render_debugLines();
+
 private:
   typedef scene::resources::utilities::GlTexture GlTexture;
 
@@ -233,6 +236,7 @@ private slots:
   void updateCameraComponent(scene::CameraComponent* cameraComponent);
   void forceNewGridCameraPos();
   void updateSky();
+  void updateStatistics();
 };
 
 

@@ -140,7 +140,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
   renderer->visualizePosteffect_Voxel_BoundingBox.guiToggle.TwAddVarCB(tweakBar, "Highlight Voxel BoundingBox", "group='Debug Voxels'");
   renderer->visualizePosteffect_Voxel_HighlightUnconveiledNegativeDistances.guiToggle.TwAddVarCB(tweakBar, "Highlight Unconveiled Negative Distances", "group='Debug Voxels'");
 
-  static char note[128] = "For more debug options, use the forward renderer.";
+  static char note[128] = "For debug options, use the forward renderer.";
   TwAddVarRO(tweakBar, "Note", TW_TYPE_CSSTRING(sizeof(note)), note, "");
   TwAddVarRW(tweakBar, "Clear Framebuffer", TW_TYPE_BOOLCPP, &renderer->debugDrawList_Posteffects.clearBuffer, "group='Debug Shader'");
 
@@ -239,6 +239,7 @@ TwBar* AntTweakBar::createDebugSceneBar(renderer::Renderer* renderer)
     TwSetParam(tweakBar, "Debug Voxels", "visible", TW_PARAM_CSTRING, 1, "false");
     TwSetParam(tweakBar, "Debug Shader/Show Step-Count", "visible", TW_PARAM_CSTRING, 1, "false");
     TwSetParam(tweakBar, "Debug Shader", "visible", TW_PARAM_CSTRING, 1, "false");
+    TwSetParam(tweakBar, "Debug Scene", "visible", TW_PARAM_CSTRING, 1, "false");
   }else
   {
     TwSetParam(tweakBar, "Noter", "visible", TW_PARAM_CSTRING, 1, "false");

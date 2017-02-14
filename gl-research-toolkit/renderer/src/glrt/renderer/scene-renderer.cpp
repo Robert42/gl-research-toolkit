@@ -91,6 +91,7 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   debugDrawList_Posteffects.connectTo(&visualizePosteffect_Fallback_Distancefield_raymarch);
   debugDrawList_Posteffects.connectTo(&visualizePosteffect_Distancefield_boundingSpheres_raymarch);
 
+  connect(scene, &scene::Scene::sceneLoaded, this, &Renderer::updateStatistics);
   connect(scene, &scene::Scene::sceneCleared, this, &Renderer::forceNewGridCameraPos);
   connect(scene, &scene::Scene::skyChanged, this, &Renderer::updateSky);
 
@@ -138,10 +139,18 @@ void Renderer::render()
 
   commandList.call();
 
+  applyFramebuffer();
+}
+
+void Renderer::render_debugPosteffects()
+{
   sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Posteffects.render();
-  applyFramebuffer();
+}
 
+void Renderer::render_debugLines()
+{
+  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Lines.render();
 }
 
@@ -695,6 +704,11 @@ void Renderer::forceNewGridCameraPos()
 void Renderer::updateSky()
 {
   _needRecapturing = true;
+}
+
+void Renderer::updateStatistics()
+{
+  statistics.numSdfInstances = scene.data->voxelGrids->length;
 }
 
 void Renderer::fillCameraUniform(const scene::CameraParameter& cameraParameter)
