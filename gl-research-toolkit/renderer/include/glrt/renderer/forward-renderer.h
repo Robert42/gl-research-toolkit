@@ -17,6 +17,8 @@ public:
   gl::Texture2D depthFramebufferTexture;
   gl::FramebufferObject framebuffer;
 
+  bool isForward() const  override {return true;}
+
 protected:
   void prepareFramebuffer() override;
   void applyFramebuffer() override;

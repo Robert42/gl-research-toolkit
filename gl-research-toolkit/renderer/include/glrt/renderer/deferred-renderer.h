@@ -23,6 +23,8 @@ public:
   gl::Texture2D occlusion_smoothness_Texture;
   gl::FramebufferObject mrt_framebuffer;
 
+  bool isForward() const  override {return false;}
+
 protected:
   void prepareFramebuffer() override;
   void applyFramebuffer() override;

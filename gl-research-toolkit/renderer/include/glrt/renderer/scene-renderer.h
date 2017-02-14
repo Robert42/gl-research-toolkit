@@ -108,6 +108,8 @@ public:
   bool update_grid_camera() const;
   void set_update_grid_camera(bool update_grid_camera);
 
+  virtual bool isForward() const = 0;
+
 protected:
   virtual void prepareFramebuffer() = 0;
   virtual void applyFramebuffer() = 0;
