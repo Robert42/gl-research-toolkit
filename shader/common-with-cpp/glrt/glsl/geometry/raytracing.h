@@ -418,7 +418,6 @@ inline bool intersects_unclamped(in Rect rect, in Ray ray)
 
 // ======== Triangles =============================================================
 
-// returns 0 for no intersection, 1 for an intersection from the frontside and -1 for intersecting from the backside
 inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, float treshold=1.e-9f)
 {
   Plane plane = plane_from_three_points(v0, v1, v2);
@@ -430,6 +429,30 @@ inline bool triangle_ray_intersection_unclamped(in Ray ray, in vec3 v0, in vec3 
   vec3 closestPoint = closestPointOnTriangleToPoint(v0, v1, v2, p, uvw);
   
   return intersectsPlane && sq_distance(closestPoint, p)<=treshold;
+}
+
+// p must be on the plane of the triangle
+inline bool is_point_within_triangle(in vec3 p, in vec3 v0, in vec3 v1, in vec3 v2)
+{
+  const vec3 n = plane_from_three_points(v0, v1, v2).normal;
+
+  const vec3 pyramid_tip = (v0+v1+v2)/3.f + n;
+
+  Plane plane0 = plane_from_three_points(pyramid_tip, v1, v0);
+  Plane plane1 = plane_from_three_points(pyramid_tip, v2, v1);
+  Plane plane2 = plane_from_three_points(pyramid_tip, v0, v2);
+
+  return is_on_frontside(plane0, p) && is_on_frontside(plane1, p) && is_on_frontside(plane2, p);
+}
+
+// returns 1, if the ray is intersecting with the triangle.
+inline bool triangle_ray_intersection_test(in Ray ray, in vec3 v0, in vec3 v1, in vec3 v2, out(vec3) p)
+{
+  Plane plane = plane_from_three_points(v0, v1, v2);
+
+  bool intersectsPlane = intersection_point(plane, ray, p);
+
+  return intersectsPlane && is_point_within_triangle(p, v0, v1, v2);
 }
 
 

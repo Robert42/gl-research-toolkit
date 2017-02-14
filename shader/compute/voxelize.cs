@@ -23,6 +23,11 @@ uniform VoxelizeMetaDataBlock
   VoxelizeMetaData metaData;
 };
 
+#ifndef STOCHASTIC_VOXELIZATION
+#define STOCHASTIC_VOXELIZATION 1
+#endif
+
+#if !STOCHASTIC_VOXELIZATION
 void main()
 {
   int num_vertices = metaData.numVertices;
@@ -105,3 +110,72 @@ void main()
   if(all(lessThan(voxelCoord, textureSize)))
     imageStore(metaData.targetTexture, voxelCoord, vec4(best_d));
 }
+
+#elif STOCHASTIC_VOXELIZATION
+
+void main()
+{
+  int num_vertices = metaData.numVertices;
+  vec3* vertices = vec3*(metaData.vertices);
+
+  ivec3 textureSize = imageSize(metaData.targetTexture);
+
+  const ivec3 voxelCoord = voxelIndexFromScalarIndex(int(gl_GlobalInvocationID.x)+metaData.indexOffset, textureSize);
+  const vec3 p = centerPointOfVoxel(voxelCoord);
+
+  const uint num_rays = 10;
+
+  int sign_heuristic = 0;
+
+  float average_distance = 0.;
+
+
+  for(uint i_ray=0; i_ray<num_rays; ++i_ray)
+  {
+    Ray ray;
+    ray.origin = p;
+    ray.direction = getSphereSample(i_ray, num_rays);
+
+    float closest_distance = 65536;
+
+    for(int i=0; i<num_vertices; i+=3)
+    {
+      const vec3 v0 = vertices[i];
+      const vec3 v1 = vertices[i+1];
+      const vec3 v2 = vertices[i+2];
+
+      Plane triangle_plane = plane_from_three_points(v0, v1, v2);
+
+      vec3 intersection_point;
+      const bool has_intersection = triangle_ray_intersection_test(ray, v0, v1, v2, intersection_point);
+      const float abs_distance = abs(dot(intersection_point - ray.origin, ray.direction));
+      float distance_sign = sign(signed_distance_to(triangle_plane, p));
+#if defined(TWO_SIDED)
+      distance_sign = 1.f;
+#endif
+      const float signed_distance = abs_distance * distance_sign;
+
+      closest_distance = mix(closest_distance, signed_distance, step(abs_distance, closest_distance) * float(has_intersection));
+    }
+
+
+    sign_heuristic += int(sign(closest_distance));
+    average_distance += abs(closest_distance);
+  }
+
+  average_distance /= float(num_rays);
+
+  float best_d = mix(-average_distance, average_distance, float(sign_heuristic<0));
+
+
+  // Make sure, that voxels at the padding are never negative
+  const int paddingWidth = 1;
+  const bool isPadding = any(lessThan(voxelCoord, vec3(paddingWidth))) || any(greaterThanEqual(voxelCoord, vec3(textureSize-paddingWidth)));
+
+  best_d = isPadding ? max(0, best_d) : best_d;
+
+  if(all(lessThan(voxelCoord, textureSize)))
+    imageStore(metaData.targetTexture, voxelCoord, vec4(best_d));
+}
+
+#endif
