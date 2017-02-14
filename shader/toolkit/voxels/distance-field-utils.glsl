@@ -7,12 +7,13 @@ float distancefield_distance_clamp_range_returning_point(vec3 voxelCoord, in vec
 {
   vec3 clamped_voxelCoord = clamp(voxelCoord, vec3(0.5), clampRange);
 
-  vec4 voxel_value = texture(voxelTexture, voxelToUvwSpace * clamped_voxelCoord);
+  const vec4 voxel_value = texture(voxelTexture, voxelToUvwSpace * clamped_voxelCoord);
   float signed_distance = voxel_value.w;
-  nearest_point = voxel_value.xyz;
+  const vec3 direction_to_nearest_point = normalize(voxel_value.xyz);
+  nearest_point = clamped_voxelCoord + direction_to_nearest_point * abs(signed_distance);
 
 #if AO_SPHERETRACE_CLAMPING_CORRECTION
-  signed_distance = distance(nearest_point, voxelCoord) * sign(signed_distance);
+  signed_distance = distance(voxelCoord, nearest_point) * sign(signed_distance);
 #elif AO_SPHERETRACE_CLAMPING_CORRECTION_APROXIMATED
   signed_distance += distance(clamped_voxelCoord, voxelCoord);
 #endif

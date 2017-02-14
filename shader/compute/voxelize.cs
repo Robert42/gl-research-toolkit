@@ -122,5 +122,5 @@ void main()
   best_d = isPadding ? max(0, best_d) : best_d;
   
   if(all(lessThan(voxelCoord, textureSize)))
-    imageStore(metaData.targetTexture, voxelCoord, vec4(best_p, best_d));
+    imageStore(metaData.targetTexture, voxelCoord, vec4(normalize(best_p-p), best_d));
 }

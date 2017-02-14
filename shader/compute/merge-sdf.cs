@@ -63,5 +63,5 @@ void main()
       bestDistance = min(bestDistance, currentDistance);
     }
     
-    imageStore(header.targetTexture, ivec3(voxel_index), vec4(bestPoint, bestDistance));
+    imageStore(header.targetTexture, ivec3(voxel_index), vec4(normalize(bestPoint-world_pos), bestDistance));
 }
