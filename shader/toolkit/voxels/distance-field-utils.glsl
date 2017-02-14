@@ -3,35 +3,55 @@
 
 #include "voxel-structs.glsl"
 
-float distancefield_distance_clamp_range(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, in vec3 clampRange)
+float distancefield_distance_clamp_range_returning_point(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, in vec3 clampRange, out vec3 nearest_point)
 {
   vec3 clamped_voxelCoord = clamp(voxelCoord, vec3(0.5), clampRange);
 
-  float voxel_value = texture(voxelTexture, voxelToUvwSpace * clamped_voxelCoord).w;
+  vec4 voxel_value = texture(voxelTexture, voxelToUvwSpace * clamped_voxelCoord);
+  float signed_distance = voxel_value.w;
+  nearest_point = voxel_value.xyz;
 
 #ifdef POSTEFFECT_VISUALIZATION
-  voxel_value += posteffect_param.distancefield_offset;
+  signed_distance += posteffect_param.distancefield_offset;
 #endif
 
 #if AO_SPHERETRACE_CLAMPING_CORRECTION
-  voxel_value += distance(clamped_voxelCoord, voxelCoord);
+  signed_distance += distance(clamped_voxelCoord, voxelCoord);
 #endif
 
-  return voxel_value;
+  return signed_distance;
+}
+
+float distancefield_distance_resolution_returning_point(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, in ivec3 voxelResolution, out vec3 nearest_point)
+{
+  vec3 clampRange = vec3(voxelResolution)-vec3(0.5);
+
+  return distancefield_distance_clamp_range_returning_point(voxelCoord, voxelToUvwSpace, voxelTexture, clampRange, nearest_point);
+}
+
+float distancefield_distance_returning_point(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, out vec3 nearest_point)
+{
+  ivec3 voxelResolution = ivec3(textureSize(voxelTexture, 0));
+
+  return distancefield_distance_resolution_returning_point(voxelCoord, voxelToUvwSpace, voxelTexture, voxelResolution, nearest_point);
+}
+
+float distancefield_distance_clamp_range(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, in vec3 clampRange)
+{
+  vec3 dummy_point;
+  return distancefield_distance_clamp_range_returning_point(voxelCoord, voxelToUvwSpace, voxelTexture, clampRange, dummy_point);
 }
 
 float distancefield_distance_resolution(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture, in ivec3 voxelResolution)
 {
-  vec3 clampRange = vec3(voxelResolution)-vec3(0.5);
-
-  return distancefield_distance_clamp_range(voxelCoord, voxelToUvwSpace, voxelTexture, clampRange);
+  vec3 dummy_point;
+  return distancefield_distance_resolution_returning_point(voxelCoord, voxelToUvwSpace, voxelTexture, voxelResolution, dummy_point);
 }
 
 float distancefield_distance(vec3 voxelCoord, in vec3 voxelToUvwSpace, sampler3D voxelTexture)
 {
-  ivec3 voxelResolution = ivec3(textureSize(voxelTexture, 0));
-
-  return distancefield_distance_resolution(voxelCoord, voxelToUvwSpace, voxelTexture, voxelResolution);
+  vec3 dummy_point;
+  return distancefield_distance_returning_point(voxelCoord, voxelToUvwSpace, voxelTexture, dummy_point);
 }
 
 #include <distance-fields/debugging.glsl>

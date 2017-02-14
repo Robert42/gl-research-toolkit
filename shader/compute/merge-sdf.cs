@@ -37,6 +37,7 @@ void main()
     uint32_t num_distance_fields = distance_fields_num();
     
     float bestDistance = inf;
+    vec3 bestPoint = vec3(0);
     
     for(uint32_t i=0; i<num_distance_fields; ++i)
     {
@@ -49,7 +50,8 @@ void main()
       sampler3D texture = distance_field_data(distance_field_data_block, worldToVoxelSpace, voxelSize, voxelToUvwSpace, worldToVoxelSpace_Factor);
       
       vec3 p = transform_point(worldToVoxelSpace, world_pos);
-      float currentDistance = distancefield_distance_resolution(p, voxelToUvwSpace, texture, voxelSize);
+      vec3 currentPoint;
+      float currentDistance = distancefield_distance_resolution_returning_point(p, voxelToUvwSpace, texture, voxelSize, currentPoint);
       
       // scale from source sdf voxel-space to world-space
       currentDistance /= (length(worldToVoxelSpace[0]) + length(worldToVoxelSpace[1]) + length(worldToVoxelSpace[2])) / 3.f;
@@ -57,8 +59,9 @@ void main()
       // scale from world-space to target sdf voxel-space
       currentDistance *= gridLocationScale;
       
+      bestPoint = mix(bestPoint, currentPoint, step(currentDistance, bestDistance));
       bestDistance = min(bestDistance, currentDistance);
     }
     
-    imageStore(header.targetTexture, ivec3(voxel_index), vec4(bestDistance));
+    imageStore(header.targetTexture, ivec3(voxel_index), vec4(bestPoint, bestDistance));
 }
