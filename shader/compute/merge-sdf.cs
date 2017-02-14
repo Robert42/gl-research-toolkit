@@ -1,6 +1,8 @@
 #version 450 core
 #include <extensions/common.glsl>
 
+#define COMPUTE_SHADER
+
 #include <scene/uniforms.glsl>
 #include <voxels/distance-field-utils.glsl>
 

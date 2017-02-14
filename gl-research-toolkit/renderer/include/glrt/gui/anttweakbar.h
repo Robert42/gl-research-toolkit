@@ -391,6 +391,8 @@ private:
   gui::TweakBarCBVar<int> currentSdfCellToDebug_y;
   gui::TweakBarCBVar<int> currentSdfCellToDebug_z;
 
+  gui::TweakBarCBVar<int> exclude_sdf_instance_from_ao;
+
   bool _disableSceneryVoxels = false;
 
   enum class MouseCaptureState : int

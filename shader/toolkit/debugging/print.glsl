@@ -1,6 +1,14 @@
+
 #include <glrt/glsl/layout-constants.h>
 #include <glrt/glsl/geometry/structs.h>
 #include <glrt/glsl/debugging/printer-types.h>
+
+#ifdef COMPUTE_SHADER
+
+#define PRINT_VALUE(x)
+#define SHOW_VALUE(x)
+
+#else
 
 struct DebuggingOutputChunk
 {
@@ -261,3 +269,5 @@ void SHOW_VALUE(in Cone cone)
 {
   PRINT_VALUE(cone, true);
 }
+
+#endif

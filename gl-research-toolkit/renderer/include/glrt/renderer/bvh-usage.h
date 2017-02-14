@@ -78,10 +78,14 @@ extern GLSLMacroWrapper<bool> AO_SPHERETRACE_CLAMPING_CORRECTION;
 extern GLSLMacroWrapper<bool> CONE_BOUQUET_NOISE;
 
 extern GLSLMacroWrapper<float> AO_SPHERETRACE_MINSTEPSIZE;
+extern GLSLMacroWrapper<float> AO_SELFSHADOW_AVOIDANCE_CONE_DIRECTION_LIFT;
 extern GLSLMacroWrapper<bool> SPHERETRACING_BOUNDING_SPHERE_CLAMPING;
+
 
 extern GLSLMacroWrapper<int> AO_GROUNDTRUTH_SAMPLES;
 extern GLSLMacroWrapper<float> AO_GROUNDTRUTH_CONE_HALF_TAN_ANGLE;
+
+extern GLSLMacroWrapper<int> DEBUG_EXCLUDE_OBJECT_FROM_AO;
 
 extern GLSLMacroWrapper<uint16_t> N_GI_CONES;
 

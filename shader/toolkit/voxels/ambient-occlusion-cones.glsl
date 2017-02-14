@@ -24,10 +24,14 @@ int ao_distancefield_cost = 0;
 
 #define NEED_AO_INTERPOLATION_STATIC defined(NO_BVH) && !AO_IGNORE_FALLBACK_SDF && !AO_FALLBACK_SDF_ONLY
 
-void ao_falloff(inout float occlusionHeuristic, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, bool is_fallback)
+void ao_falloff(inout float occlusionHeuristic, float sdf_value, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, bool is_fallback)
 {
 #if AO_FALLBACK_NONE
   return;
+#endif
+
+#ifdef DISTANCEFIELD_AO_NUM_NEGATIVE_SAMPLES
+    ao_distancefield_cost += int(sdf_value < 0);
 #endif
 
   // linear falloff
@@ -52,7 +56,7 @@ void ao_falloff(inout float occlusionHeuristic, float distance, float cone_lengt
 #endif
 }
 
-#define AO_FALLOFF(occ, dist) ao_falloff(occ, dist, cone_length_voxelspace, inv_cone_length_voxelspace, fallbackRangeVoxelspace, is_fallback)
+#define AO_FALLOFF(occ, dist) ao_falloff(occ, d, dist, cone_length_voxelspace, inv_cone_length_voxelspace, fallbackRangeVoxelspace, is_fallback)
 
 float ao_coneSoftShadow(in Cone cone, in sampler3D texture, in mat4x3 worldToVoxelSpace, in ivec3 voxelSize, in vec3 voxelToUvwSpace, in float worldToVoxelSpace_Factor, float intersection_distance_front, float intersection_distance_back, float cone_length, bool is_fallback=false)
 {
@@ -229,6 +233,17 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
     #endif
     Sphere sphere = *bounding_spheres;
     
+    #if DEBUG_EXCLUDE_OBJECT_FROM_AO >= 0
+    #if 0
+    if(DEBUG_EXCLUDE_OBJECT_FROM_AO == i && distance(sphere.origin, cone_bouquet[0].origin) < 1)
+    {
+    for(int j=0; j<N_GI_CONES; ++j)
+        cone_bouquet_ao[j] = 0;
+        return;
+    }
+    #endif
+    if(DEBUG_EXCLUDE_OBJECT_FROM_AO != i)
+    #endif
     for(int j=0; j<N_GI_CONES; ++j)
     {
       float distance_to_sphere_origin;

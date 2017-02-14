@@ -92,7 +92,7 @@ vec4 sample_environment(vec3 view, float mipLevel)
   return vec4(incoming, 1);
 }
 
-#include <toolkit/random.glsl>
+#include <random.glsl>
 
 vec3 integrateCone(vec3 N, float cone_angle, int sampleCount)
 {
