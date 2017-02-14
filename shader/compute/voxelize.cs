@@ -2,6 +2,7 @@
 #include <extensions/common.glsl>
 
 #include <glrt/glsl/math-glsl.h>
+#include <random.glsl>
 
 
 
