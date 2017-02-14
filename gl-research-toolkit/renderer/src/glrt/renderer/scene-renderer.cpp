@@ -138,10 +138,10 @@ void Renderer::render()
 
   commandList.call();
 
+  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Posteffects.render();
   applyFramebuffer();
 
-  sceneUniformBuffer.BindUniformBuffer(UNIFORM_BINDING_SCENE_BLOCK);
   debugDrawList_Lines.render();
 }
 
