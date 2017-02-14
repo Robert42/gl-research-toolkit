@@ -64,6 +64,16 @@ inline float min4(float a, float b, float c, float d)
   return min(min(a, b), min(c, d));
 }
 
+inline vec3 min3(vec3 a, vec3 b, vec3 c)
+{
+  return min(min(a, b), c);
+}
+
+inline vec3 min4(vec3 a, vec3 b, vec3 c, vec3 d)
+{
+  return min(min(a, b), min(c, d));
+}
+
 inline vec4 min3(vec4 a, vec4 b, vec4 c)
 {
   return min(min(a, b), c);
@@ -144,6 +154,16 @@ inline float max3(float a, float b, float c)
 }
 
 inline float max4(float a, float b, float c, float d)
+{
+  return max(max(a, b), max(c, d));
+}
+
+inline vec3 max3(vec3 a, vec3 b, vec3 c)
+{
+  return max(max(a, b), c);
+}
+
+inline vec3 max4(vec3 a, vec3 b, vec3 c, vec3 d)
 {
   return max(max(a, b), max(c, d));
 }
