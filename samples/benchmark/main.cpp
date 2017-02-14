@@ -68,6 +68,7 @@ int main(int argc, char** argv)
   float_setters["--spheretracing_self_shadowavoidance"] = [](float v){SDFSAMPLING_SELF_SHADOW_AVOIDANCE.set_value(v);};
   bool_setters["--use_ao_spheretracing"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_AO_SPHERE_TRACING", v);};
   bool_setters["--use_fixed_ao_samples"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("DISTANCEFIELD_FIXED_SAMPLE_POINTS", v);};
+  bool_setters["--ao_spheretrace_clamping_correction_approcimated"] = [&](bool v){AO_SPHERETRACE_CLAMPING_CORRECTION_APPROXIMATED.set_value(v);};
   bool_setters["--ao_spheretrace_clamping_correction"] = [&](bool v){AO_SPHERETRACE_CLAMPING_CORRECTION.set_value(v);};
   bool_setters["--heatvision_use_logarithmic_scale"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("LOG_HEATVISION_DEBUG_COSTS", v);};
   bool_setters["--heatvision_use_colors"] = [&](bool v){glrt::renderer::ReloadableShader::defineMacro("HEATVISION_COLORS", v);};

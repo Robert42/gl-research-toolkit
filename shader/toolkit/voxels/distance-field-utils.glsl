@@ -11,12 +11,14 @@ float distancefield_distance_clamp_range_returning_point(vec3 voxelCoord, in vec
   float signed_distance = voxel_value.w;
   nearest_point = voxel_value.xyz;
 
-#ifdef POSTEFFECT_VISUALIZATION
-  signed_distance += posteffect_param.distancefield_offset;
+#if AO_SPHERETRACE_CLAMPING_CORRECTION
+  signed_distance = distance(nearest_point, voxelCoord) * sign(signed_distance);
+#elif AO_SPHERETRACE_CLAMPING_CORRECTION_APROXIMATED
+  signed_distance += distance(clamped_voxelCoord, voxelCoord);
 #endif
 
-#if AO_SPHERETRACE_CLAMPING_CORRECTION
-  signed_distance += distance(clamped_voxelCoord, voxelCoord);
+#ifdef POSTEFFECT_VISUALIZATION
+  signed_distance += posteffect_param.distancefield_offset;
 #endif
 
   return signed_distance;
