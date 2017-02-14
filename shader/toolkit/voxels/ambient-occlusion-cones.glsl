@@ -226,7 +226,7 @@ void ao_coneSoftShadow_bruteforce(in Sphere* bounding_spheres, in VoxelDataBlock
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
         ao_distancefield_cost++;
     #endif
-    Sphere sphere = *bounding_spheres;
+    Sphere sphere = extend_sphere(*bounding_spheres, sqrt_two);
     
     #if DEBUG_EXCLUDE_OBJECT_FROM_AO >= 0
     #if 0
@@ -279,7 +279,7 @@ void ao_coneSoftShadow_candidateGrid(in Sphere* bounding_spheres, in VoxelDataBl
         ao_distancefield_cost++;
     #endif
     uint16_t sdf_index = uint16_t(first_static_candidate[i]);
-    Sphere sphere = bounding_spheres[sdf_index];
+    Sphere sphere = extend_sphere(bounding_spheres[sdf_index], sqrt_two);
     VoxelDataBlock* sdf = distance_field_data_blocks + sdf_index;
     
     for(int j=0; j<N_GI_CONES; ++j)
@@ -318,7 +318,7 @@ void ao_coneSoftShadow_candidateGrid(in Sphere* bounding_spheres, in VoxelDataBl
         ao_distancefield_cost++;
     #endif
     VoxelDataBlock* sdf = (VoxelDataBlock*)first_static_candidate;
-    Sphere sphere = first_static_candidate->boundingSphere;
+    Sphere sphere = extend_sphere(first_static_candidate->boundingSphere, sqrt_two);
     
     for(int j=0; j<N_GI_CONES; ++j)
     {
@@ -437,7 +437,7 @@ float ao_coneSoftShadow_cascaded_grids(in Sphere* leaf_bounding_spheres, in Voxe
 #endif
 
     
-    Sphere sphere = leaf_bounding_spheres[leaf_index];
+    Sphere sphere = extend_sphere(leaf_bounding_spheres[leaf_index], sqrt_two);
     VoxelDataBlock* sdf = distance_field_data_blocks + leaf_index;
     
     for(int j=0; j<N_GI_CONES; ++j)
@@ -543,7 +543,7 @@ void ao_coneSoftShadow_bvh(in Sphere* bvh_inner_bounding_sphere, uint16_t* inner
     #if defined(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS)
         ao_distancefield_cost++;
     #endif
-    Sphere sphere = leaf_bounding_spheres[leaves[i]];
+    Sphere sphere = extend_sphere(leaf_bounding_spheres[leaves[i]], sqrt_two);
     VoxelDataBlock* sdf = distance_field_data_blocks + leaves[i];
     
     for(int j=0; j<N_GI_CONES; ++j)
