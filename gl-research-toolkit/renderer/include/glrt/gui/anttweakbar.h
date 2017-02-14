@@ -354,6 +354,7 @@ private:
   typedef TweakBarEnum<QPointer<scene::CameraComponent>> CameraEnumeration;
   typedef TweakBarEnum<glrt::renderer::SurfaceShaderVisualization> VisualizationEnumeration;
   typedef TweakBarEnum<glrt::renderer::BvhUsage> BvhUsageEnumeration;
+  typedef TweakBarEnum<int> IntegerEnumeration;
 
   gui::TweakBarCBVar<bool> sortObjectsBySDF;
   gui::TweakBarCBVar<bool> bvhEnforceHugeLeavesFirst;
@@ -409,6 +410,7 @@ private:
   CameraEnumeration::Ptr cameraSwitcher;
   VisualizationEnumeration::Ptr visualizationSwitcher;
   BvhUsageEnumeration::Ptr bvhUsageSwitcher;
+  IntegerEnumeration::Ptr numberCones;
 
   TweakBarShaderToggle toggleLogHeatVision_debugPosteffect;
   TweakBarShaderToggle toggleLogHeatVision_costs;

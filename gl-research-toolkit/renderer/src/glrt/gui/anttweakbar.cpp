@@ -54,6 +54,7 @@ AntTweakBar::~AntTweakBar()
   sceneSwitcher.clear();
   visualizationSwitcher.clear();
   bvhUsageSwitcher.clear();
+  numberCones.clear();
 
   toolbar.deinit();
   TwTerminate();
@@ -297,6 +298,16 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   AO_STATIC_FALLBACK_FADING_END.TwAddVarCB(tweakBar, "AO Fallback Fading End", "group='Optimization' min=0.1 max=20");
   AO_CANDIDATE_GRID_CONTAINS_INDICES = glrt::renderer::AO_CANDIDATE_GRID_CONTAINS_INDICES;
   AO_CANDIDATE_GRID_CONTAINS_INDICES.TwAddVarCB(tweakBar, "AO Candidate Grid Contains Indices", "group='Optimization'");
+
+  {
+  numberCones = IntegerEnumeration::Ptr(new IntegerEnumeration("integerEnumeration", tweakBar, "Cones", "group='Optimization' help='Set the number of used cones.'"));
+  QMap<QString, int> cone_number_options;
+  cone_number_options["7 Cones"] = 7;
+  cone_number_options["9 Cones"] = 9;
+  numberCones->init(cone_number_options);
+  numberCones->setCurrentValue(renderer::N_GI_CONES.get_value());
+  numberCones->valueChanged = [](int n){renderer::N_GI_CONES.set_value(n);};
+  }
 
   TwSetParam(tweakBar, "Optimization", "opened", TW_PARAM_CSTRING, 1, "false");
 
