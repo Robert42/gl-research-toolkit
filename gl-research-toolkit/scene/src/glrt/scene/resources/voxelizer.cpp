@@ -485,6 +485,7 @@ VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileNam
     const TextureFile::Format voxelFormat = GlTexture::Format::RGBA;
     const size_t bytesPerVoxel = size_t(GlTexture::bytesPerPixelForFormatType(voxelFormat, voxelType));
 
+    // TODO: remove /4 again?
     metaData = findBestSize(meshDataSize, bytesPerVoxel/4, aabb, hints);
     metaData.boundingSphere = boundingSphere;
     metaData.fieldType = type;
