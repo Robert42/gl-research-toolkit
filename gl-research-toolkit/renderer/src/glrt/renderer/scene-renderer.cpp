@@ -96,11 +96,11 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   connect(scene, &scene::Scene::skyChanged, this, &Renderer::updateSky);
 
   setAdjustRoughness(true);
-  setSDFShadows(false);
+  setSDFShadows(true);
   setIBL_Specular(true);
   setIBL_Diffuse(true);
   setAmbientOcclusionTexture(true);
-  setAmbientOcclusionSDF(false); // TODO? set to true?
+  setAmbientOcclusionSDF(true);
 
   collectAmbientOcclusionToGrid[0] = nullptr;
   collectAmbientOcclusionToGrid[1] = &collectAmbientOcclusionToGrid1;
