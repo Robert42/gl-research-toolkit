@@ -487,6 +487,7 @@ VoxelFile::MetaData voxelizeImplementation(const QFileInfo& targetTextureFileNam
 
     metaData = findBestSize(meshDataSize, bytesPerVoxel, aabb, hints);
     metaData.boundingSphere = boundingSphere;
+    metaData.boundingSphere.radius += glm::sqrt(2.0001f) / metaData.localToVoxelSpace.scaleFactor;
     metaData.fieldType = type;
 
     utilities::GlTexture texture = Voxelizer::Implementation::singleton->distanceField(metaData.gridSize, metaData.localToVoxelSpace, staticMesh, meshType);
