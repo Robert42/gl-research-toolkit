@@ -368,13 +368,6 @@ inline bool intersects_or_backfaced(in Sphere sphere, in Plane plane, float epsi
   return signed_distance_to(plane, sphere.origin) <= sphere.radius+epsilon;
 }
 
-inline Sphere extend_sphere(in Sphere sphere, float additionalRadius)
-{
-  sphere.radius += additionalRadius;
-
-  return sphere;
-}
-
 
 // ======== Rect =============================================================
 
