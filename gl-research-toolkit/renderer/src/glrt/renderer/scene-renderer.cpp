@@ -96,11 +96,11 @@ Renderer::Renderer(const glm::ivec2& videoResolution, scene::Scene* scene, Stati
   connect(scene, &scene::Scene::skyChanged, this, &Renderer::updateSky);
 
   setAdjustRoughness(true);
-  setSDFShadows(true);
+  setSDFShadows(false);
   setIBL_Specular(true);
   setIBL_Diffuse(true);
   setAmbientOcclusionTexture(true);
-  setAmbientOcclusionSDF(true);
+  setAmbientOcclusionSDF(false); // TODO? set to true?
 
   collectAmbientOcclusionToGrid[0] = nullptr;
   collectAmbientOcclusionToGrid[1] = &collectAmbientOcclusionToGrid1;
@@ -769,12 +769,12 @@ bool Renderer::sdfShadows() const
   return _sdfShadows;
 }
 
-void Renderer::setSDFShadows(bool sdfShadows)
+void Renderer::setSDFShadows(bool sdfShadows, bool autoReloadShader)
 {
   if(_sdfShadows != sdfShadows)
   {
     _sdfShadows = sdfShadows;
-    ReloadableShader::defineMacro("CONETRACED_SHADOW", sdfShadows);
+    ReloadableShader::defineMacro("CONETRACED_SHADOW", sdfShadows, autoReloadShader);
   }
 }
 
@@ -783,12 +783,12 @@ bool Renderer::ambientOcclusionSDF() const
   return _sdfAO;
 }
 
-void Renderer::setAmbientOcclusionSDF(bool sdfAO)
+void Renderer::setAmbientOcclusionSDF(bool sdfAO, bool autoReloadShader)
 {
   if(_sdfAO != sdfAO)
   {
     _sdfAO = sdfAO;
-    ReloadableShader::defineMacro("AO_SDF", sdfAO);
+    ReloadableShader::defineMacro("AO_SDF", sdfAO, autoReloadShader);
   }
 }
 

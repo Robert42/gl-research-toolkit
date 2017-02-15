@@ -78,6 +78,27 @@ void SampleApplication::endDrawing()
   antweakbar.draw();
 }
 
+float SampleApplication::drawSingleFrame()
+{
+  SDL_Event event;
+  while(pollEvent(&event))
+  {
+    if(handleEvents(event))
+      continue;
+  }
+
+  const float deltaTime = update();
+
+  beginDrawing();
+  drawScene();
+
+
+  endDrawing();
+  swapWindow();
+
+  return deltaTime;
+}
+
 void SampleApplication::initGui()
 {
   antweakbar.createDebugSceneBar(renderer);

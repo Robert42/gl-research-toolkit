@@ -63,6 +63,8 @@ public:
   void drawScene();
   void endDrawing();
 
+  float drawSingleFrame();
+
 private:
   void initGui();
 

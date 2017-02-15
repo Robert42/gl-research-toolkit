@@ -1,4 +1,5 @@
 #include <glrt/sample-application.h>
+#include <glrt/renderer/scene-renderer.h>
 
 const bool ADD_VSYNC = true;
 
@@ -12,6 +13,11 @@ int main(int argc, char** argv)
                               glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Forward-Renderer"), ADD_VSYNC));
 
   app.showWindow();
+
+  // Workaround for driver issues. I will never use untested extension again :(
+  app.drawSingleFrame();
+  app.renderer->setAmbientOcclusionSDF(true, false);
+  app.renderer->setSDFShadows(true);
 
   while(app.isRunning)
   {

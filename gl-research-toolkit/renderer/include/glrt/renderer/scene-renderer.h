@@ -96,9 +96,9 @@ public:
   bool adjustRoughness() const;
   void setAdjustRoughness(bool adjustRoughness);
   bool sdfShadows() const;
-  void setSDFShadows(bool sdfShadows);
+  void setSDFShadows(bool sdfShadows, bool autoReloadShader=true);
   bool ambientOcclusionSDF() const;
-  void setAmbientOcclusionSDF(bool sdfAO);
+  void setAmbientOcclusionSDF(bool sdfAO, bool autoReloadShader=true);
   bool ambientOcclusionTexture() const;
   void setAmbientOcclusionTexture(bool textureAO);
   bool ibl_Diffuse() const;

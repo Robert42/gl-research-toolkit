@@ -292,36 +292,12 @@ int main(int argc, char** argv)
                               glrt::System::Settings::addVSync(glrt::System::Settings::fullscreen("Benchmark", resolution), false));
   renderer = app.renderer;
 
-  auto draw_single_frame = [&]() -> float {
-     SDL_Event event;
-     while(app.pollEvent(&event))
-     {
-       if(app.handleEvents(event))
-         continue;
-
-       // T O D O : Add your event handling code here
-     }
-
-     const float deltaTime = app.update();
-     Q_UNUSED(deltaTime);
-
-     app.beginDrawing();
-     app.drawScene();
-
-     // T O D O: add here your rendering code
-
-     app.endDrawing();
-     app.swapWindow();
-
-     return deltaTime;
-  };
-
 
   SDL_ShowCursor(0);
 
   app.showWindow();
 
-  draw_single_frame();
+  app.drawSingleFrame();
 
   {
     ReloadableShader::DeferredCompilation deferredCompilation;
@@ -343,14 +319,14 @@ int main(int argc, char** argv)
 
   app.antweakbar.visible = false;
 
-  draw_single_frame();
+  app.drawSingleFrame();
 
   uint32_t num_frames = 0;
   float total_time = 0;
   bool aborted_by_criteria = false;
   while(app.isRunning)
   {
-    const float deltaTime = draw_single_frame();
+    const float deltaTime = app.drawSingleFrame();
 
     all_frame_times << deltaTime;
     aborted_by_criteria = (num_frames++) >= max_num_frames || (total_time+=deltaTime) > max_time;
