@@ -6,6 +6,9 @@
 
 #define highlightColor_DEFINED
 
+#ifdef AO_SDF
+#undef AO_SDF
+#endif
 
 #include <glrt/glsl/math-glsl.h>
 
