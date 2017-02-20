@@ -99,7 +99,7 @@ TwBar* AntTweakBar::createProfilerBar(Profiler* profiler)
 {
   TwBar* tweakBar = TwNewBar("Profiler");
 
-  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]");
+  TwSetParam(tweakBar, nullptr, "help", TW_PARAM_CSTRING, 1, "Collection of tools to measure the performance.\nNote: For better Performance measurement, you can toggle AntTweakbar with [F9]\n Use F11 in order to take a screenshot.");
 
   TwAddVarRW(tweakBar, "Print FPS", TW_TYPE_BOOLCPP, &profiler->printFramerate, "");
   TwSetParam(tweakBar, nullptr, "size", TW_PARAM_CSTRING, 1, "320 320");

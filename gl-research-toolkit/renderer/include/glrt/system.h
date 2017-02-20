@@ -35,7 +35,7 @@ public:
       return settings;
     }
 
-    static Settings fullscreen(const QString& windowTitle, const glm::ivec2 resolution)
+    static Settings fullscreen(const QString& windowTitle, const glm::ivec2 resolution=glm::ivec2(1920, 1080))
     {
       Settings settings;
       settings.windowTitle = windowTitle;
