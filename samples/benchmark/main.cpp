@@ -337,18 +337,7 @@ int main(int argc, char** argv)
   if(!screenshot_file_path.isEmpty())
   {
     // save screenshot to file
-    QImage screenshot(int(resolution.x), int(resolution.y), QImage::Format::Format_RGBA8888);
-    GLsizei length = GLsizei(screenshot.byteCount());
-    GL_CALL(glReadnPixels, 0, 0, int(resolution.x), int(resolution.y), GL_RGBA,  GL_UNSIGNED_BYTE, length, screenshot.bits());
-    for(int y=0; y<int(resolution.y/2); ++y)
-    {
-      byte* a = screenshot.scanLine(y);
-      byte* b = screenshot.scanLine(int(resolution.y)-1-y);
-
-      const int w = screenshot.bytesPerLine();
-      for(int x=0; x<w; ++x)
-        std::swap(a[x], b[x]);
-    }
+    QImage screenshot = app.renderer->takeScreenshot();
     screenshot.save(screenshot_file_path);
 
 //    QString hdrPath = QFileInfo(screenshot_file_path).dir().absoluteFilePath(QFileInfo(screenshot_file_path).baseName() + ".exr");

@@ -108,6 +108,8 @@ public:
   bool update_grid_camera() const;
   void set_update_grid_camera(bool update_grid_camera);
 
+  QImage takeScreenshot();
+
   virtual bool isForward() const = 0;
 
 protected:

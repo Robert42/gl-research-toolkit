@@ -3,6 +3,8 @@
 #include <glrt/renderer/forward-renderer.h>
 #include <glrt/renderer/deferred-renderer.h>
 
+#include <QStandardPaths>
+
 
 namespace glrt {
 
@@ -43,7 +45,36 @@ bool SampleApplication::handleEvents(const SDL_Event& event)
     return true;
   if(shaderDebugPrinter.handleEvents(event))
     return true;
-  return false;
+  switch(event.type)
+  {
+  case SDL_KEYDOWN:
+    return handleKeyPressedEvent(event.key);
+  default:
+    return false;
+  }
+}
+
+bool SampleApplication::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
+{
+  switch(event.keysym.sym)
+  {
+  case SDLK_F11:
+  {
+    QDir directory = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    QString screenshot_filename;
+    for(int i=0; i<0x7fffffff; ++i)
+    {
+      screenshot_filename = directory.absoluteFilePath(QString("glrt_screenshot_%0.png").arg(i));
+      if(!QFileInfo::exists(screenshot_filename))
+        break;
+    }
+    renderer->takeScreenshot().save(screenshot_filename);
+    qDebug() << "Screenshot saved to " << screenshot_filename;
+    return false;
+  }
+  default:
+    return false;
+  }
 }
 
 float SampleApplication::update()

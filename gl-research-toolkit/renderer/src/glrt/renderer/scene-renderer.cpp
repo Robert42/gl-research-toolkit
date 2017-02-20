@@ -844,6 +844,24 @@ void Renderer::set_update_grid_camera(bool update_grid_camera)
   _update_grid_camera = update_grid_camera;
 }
 
+QImage Renderer::takeScreenshot()
+{
+  QImage screenshot(int(videoResolution.x), int(videoResolution.y), QImage::Format::Format_RGBA8888);
+  GLsizei length = GLsizei(screenshot.byteCount());
+  GL_CALL(glReadnPixels, 0, 0, int(videoResolution.x), int(videoResolution.y), GL_RGBA,  GL_UNSIGNED_BYTE, length, screenshot.bits());
+  for(int y=0; y<int(videoResolution.y/2); ++y)
+  {
+    byte* a = screenshot.scanLine(y);
+    byte* b = screenshot.scanLine(int(videoResolution.y)-1-y);
+
+    const int w = screenshot.bytesPerLine();
+    for(int x=0; x<w; ++x)
+      std::swap(a[x], b[x]);
+  }
+
+  return screenshot;
+}
+
 } // namespace renderer
 } // namespace glrt
 

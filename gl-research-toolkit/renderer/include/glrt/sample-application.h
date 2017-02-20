@@ -68,6 +68,8 @@ public:
 private:
   void initGui();
 
+  bool handleKeyPressedEvent(const SDL_KeyboardEvent& event);
+
   void shaderRecompileWorkaround() override;
 
   void loadDistanceField();
