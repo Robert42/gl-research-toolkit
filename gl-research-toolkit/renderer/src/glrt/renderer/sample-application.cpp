@@ -58,7 +58,7 @@ bool SampleApplication::handleKeyPressedEvent(const SDL_KeyboardEvent& event)
 {
   switch(event.keysym.sym)
   {
-  case SDLK_F11:
+  case SDLK_F11: // TODO: trigger this instead by anttweakbar to get a helptext
   {
     QDir directory = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
     QString screenshot_filename;
