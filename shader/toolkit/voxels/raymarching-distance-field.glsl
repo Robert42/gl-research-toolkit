@@ -25,7 +25,7 @@ bool raymarch_distancefield(in Ray ray_worldspace, in sampler3D texture, in mat4
     
     if(d <= 1.e-2f)
     {
-      ray_hit_distance_worldspace = voxelToWorldSpace * t / worldToVoxelSpace_Factor;
+      ray_hit_distance_worldspace = voxelToWorldSpace * t;
       intersection_normal_worldspace = transform_direction(inverseOf4x3As4x4(worldToVoxelSpace), distancefield_normal(p, voxelToUvwSpace, texture));
       return true;
     }
