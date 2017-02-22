@@ -17,7 +17,7 @@ int ao_distancefield_cost = 0;
 #define AO_FALLBACK_CLAMPED 0
 */
 
-#define NEED_AO_INTERPOLATION_STATIC defined(NO_BVH) && !AO_IGNORE_FALLBACK_SDF && !AO_FALLBACK_SDF_ONLY
+#define NEED_AO_INTERPOLATION_STATIC !AO_IGNORE_FALLBACK_SDF && !AO_FALLBACK_SDF_ONLY
 
 void ao_falloff(inout float occlusionHeuristic, float sdf_value, float distance, float cone_length_voxelspace, float inv_cone_length_voxelspace, vec2 fallbackRangeVoxelspace, bool is_fallback)
 {
@@ -582,13 +582,13 @@ float distancefield_ao()
   
   float occlusion_factor = 1.f;
   init_cone_bouquet_ao();
+
+  #if !AO_IGNORE_FALLBACK_SDF
+    ao_coneSoftShadow_fallbackGrid(ao_radius);
+  #endif
+
   
   #if defined(NO_BVH)
-  
-    #if !AO_IGNORE_FALLBACK_SDF
-      ao_coneSoftShadow_fallbackGrid(ao_radius);
-    #endif
-    
     #if !AO_FALLBACK_SDF_ONLY
     
       #if AO_USE_CANDIDATE_GRID
