@@ -308,6 +308,8 @@ TwBar* AntTweakBar::createDebugShaderBar(renderer::Renderer* renderer, renderer:
   numberCones->setCurrentValue(renderer::N_GI_CONES.get_value());
   numberCones->valueChanged = [](int n){renderer::N_GI_CONES.set_value(n);};
   }
+  SPHERETRACING_BOUNDING_SPHERE_CLAMPING = glrt::renderer::SPHERETRACING_BOUNDING_SPHERE_CLAMPING;
+  SPHERETRACING_BOUNDING_SPHERE_CLAMPING.TwAddVarCB(tweakBar, "Clamp Sample-Range to Bounding Sphere", "group='Optimization'");
 
   TwSetParam(tweakBar, "Optimization", "opened", TW_PARAM_CSTRING, 1, "false");
 
