@@ -1,6 +1,6 @@
 include(files.cmake)
 
-option(GLRT_PROFILER "If enabled the profiler will be avialable" ON)
+option(GLRT_PROFILER "If enabled the profiler will be avialable" OFF)
 
 if(NOT GLRT_ASSET_DIR)
 message(FATAL_ERROR "GLRT_ASSET_DIR must be set")
