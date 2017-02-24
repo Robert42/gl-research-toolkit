@@ -11,6 +11,8 @@ bool show_forward_only = true;
 
 SurfaceShaderVisualization currentSurfaceShaderVisualization = SurfaceShaderVisualization::NONE;
 
+#define pretty_screenshot 0
+
 QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
 {
   QMap<QString, SurfaceShaderVisualization> map;
@@ -19,6 +21,7 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
 
   map[" - "] = SurfaceShaderVisualization::NONE;
 
+#if !pretty_screenshot
   VALUE(AMBIENT_OCCLUSION);
   VALUE(BVH_NEAREST_LEAF_INDEX_0);
   VALUE(BVH_NEAREST_LEAF_INDEX_1);
@@ -31,13 +34,17 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
   VALUE(CANDIDATE_GRID_NUM_DYNAMIC_CANDIDATES);
   VALUE(CASCADED_GRID_WEIGHTS);
   VALUE(CASCADED_GRID_WEIGHTS_TINTED);
+#endif
   VALUE(DISTANCEFIELD_AO);
+#if !pretty_screenshot
   VALUE(DISTANCEFIELD_AO_COST_TEX);
   VALUE(DISTANCEFIELD_AO_COST_CONE_SPHERE_INTERSECTION_TEST);
   VALUE(DISTANCEFIELD_AO_COST_NUM_CONETRACED_SDF);
   VALUE(DISTANCEFIELD_AO_COST_SDF_ARRAY_ACCESS);
   VALUE(DISTANCEFIELD_AO_NUM_NEGATIVE_SAMPLES);
+#endif
   VALUE(LIGHTING_FLAT);
+#if !pretty_screenshot
   VALUE(LIGHTING_ONLY);
   VALUE(LIGHTING_ONLY_DIFFUSE);
   VALUE(LIGHTING_ONLY_SPECULAR);
@@ -76,6 +83,7 @@ QMap<QString, SurfaceShaderVisualization> allSurfaceShaderVisualizations()
     VALUE(TEXTURE_AO);
     VALUE(TEXTURE_EMISSION);
   }
+#endif
 
   return map;
 }
