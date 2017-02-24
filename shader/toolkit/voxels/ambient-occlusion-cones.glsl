@@ -1,5 +1,4 @@
 #include <voxels/raymarching-distance-cone-soft-shadow.glsl>
-#include <gl-noise/src/classicnoise2D.glsl>
 
 #include <voxels/cones-bouquet.glsl>
 

@@ -2,6 +2,9 @@
 #error N_GI_CONES undefined
 #endif
 
+//#include <gl-noise/src/classicnoise2D.glsl>
+#include <gl-noise/src/noise2D.glsl>
+
 
 Cone cone_bouquet[N_GI_CONES];
 float cone_bouquet_ao[N_GI_CONES];
@@ -168,8 +171,8 @@ void init_cone_bouquet(in mat3 tangent_to_worldspace, in vec3 world_position)
 #if defined(CONE_BOUQUET_UNDERWATER_CAUSICS)
     float alpha = scene.totalTime;
 #elif defined(CONE_BOUQUET_NOISE)
-    float alpha = cnoise(vec2(gl_FragCoord.x  + scene.totalTime*7874, gl_FragCoord.y) * .8);
-    alpha *= radians(30);
+    float alpha = snoise(vec2(gl_FragCoord.x  + scene.totalTime*7874, gl_FragCoord.y) * .8);
+    alpha *= radians(AO_BOUQUET_NOISE_ROTATION_ANGLE);
 #endif
     float c = cos(alpha);
     float s = sin(alpha);
