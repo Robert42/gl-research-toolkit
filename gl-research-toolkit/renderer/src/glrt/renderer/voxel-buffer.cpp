@@ -406,13 +406,28 @@ void VoxelBuffer::initStaticSdfFallbackTexture()
 
 }
 
+#define MEASURE_MERGING 0
 void glrt::renderer::VoxelBuffer::mergeStaticSDFs()
 {
+#if MEASURE_MERGING
+  glFlush();
+  glFinish();
+  Timer timer;
+
+  timer.restart();
+#endif
   dirty_merged_sdf = false;
 
   sdfMergeHeaderBuffer.BindUniformBuffer(UNIFORM_MERGE_SDF_BLOCK);
 
   mergeSDFs.invoke(glm::uvec3(MERGED_STATIC_SDF_SIZE));
+
+#if MEASURE_MERGING
+  glFlush();
+  glFinish();
+  quint64 elapsed_us = timer.elapsedTimeAsMicroseconds();
+  qDebug() << "Merging Fallback ("<<glm::uvec3(MERGED_STATIC_SDF_SIZE)<<") SDF took" << elapsed_us << "us";
+#endif
 }
 
 void VoxelBuffer::update_static_fade_with_fallback()
