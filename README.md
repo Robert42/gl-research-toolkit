@@ -17,7 +17,7 @@ Install instructions for Ubuntu 16.04
 - NVidia GTX 960 or newer
 - OpenGL 4.5 or newer
 - Qt 5.8 or newer
-    - in the ubuntu package system, the packages `qtbase5-dev` and `libqt5svg5-dev` are available, which install 5.5 for ubuntu 16.04
+    - in the ubuntu package system, the packages `qtbase5-dev` and `libqt5svg5-dev` are available, which install 5.5 for ubuntu 16.04. Executing the application when being compiled with 5.5 is untested.
 
 ### Install dependencies
 
