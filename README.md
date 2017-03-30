@@ -16,16 +16,14 @@ Install instructions for Ubuntu 16.04
 - Ubuntu 16.04 LTS or newer
 - NVidia GTX 960 or newer
 - OpenGL 4.5 or newer
+- Qt 5.8 or newer
+    - in the ubuntu package system, the packages `qtbase5-dev` and `libqt5svg5-dev` are available, which install 5.5 for ubuntu 16.04
 
 ### Install dependencies
 
     sudo apt-get install git cmake g++ 
     sudo apt-get install libglew-dev libassimp-dev libsdl2-dev libopenexr-dev
     
-    # I have never tested it with qt 5.5
-    # It would be better to install the newest qt version from the [qt website](https://www.qt.io/download/).
-    # But maybe the native qt package will also work? I have never tested it.
-    sudo apt-get install qtbase5-dev libqt5svg5-dev
     
 ### Compile
 
