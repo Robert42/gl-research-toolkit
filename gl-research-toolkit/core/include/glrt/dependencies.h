@@ -17,17 +17,21 @@
 #include <angelscript-integration/ref-counted-object.h>
 #include <QHash>
 
+namespace glm {
+
 template<typename T, glm::precision P>
 inline unsigned int qHash(const glm::tvec3<T, P>& v, unsigned int seed = 0)
 {
-  return qHash(v.x, qHash(v.y, qHash(v.z, seed)));
+  return ::qHash(v.x, ::qHash(v.y, ::qHash(v.z, seed)));
 }
 
 template<typename T, glm::precision P>
 inline unsigned int qHash(const glm::tquat<T, P>& v, unsigned int seed = 0)
 {
-  return qHash(v.x, qHash(v.y, qHash(v.z, qHash(v.w, seed))));
+  return ::qHash(v.x, ::qHash(v.y, ::qHash(v.z, ::qHash(v.w, seed))));
 }
+
+} // namespace glm
 
 #include <QPointer>
 

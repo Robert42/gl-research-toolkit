@@ -20,8 +20,12 @@ Install instructions for Ubuntu 16.04
 ### Install dependencies
 
     sudo apt-get install git cmake g++ 
+    sudo apt-get install libglew-dev libassimp-dev libsdl2-dev libopenexr-dev
+    
+    # I have never tested it with qt 5.5
+    # It would be better to install the newest qt version from the [qt website](https://www.qt.io/download/).
+    # But maybe the native qt package will also work? I have never tested it.
     sudo apt-get install qtbase5-dev libqt5svg5-dev
-    sudo apt-get install libglew-dev libassimp-dev libsdl2-dev
     
 ### Compile
 
@@ -32,4 +36,4 @@ Install instructions for Ubuntu 16.04
     
 ### Voxelize
 
-In order to (re)voxelize, blender >= 2.78 needs to be installed with the blender >= 2.78 executable in the `PATH` environment variable.
+In order to (re)voxelize, blender >= 2.78 needs to be installed. The directory containing the blender executable is allowed to be located in the `PATH` environment variable. In order to avoid ambiguity, you can also create a symling to the 2.78 blender executable with the name `blender-newest`.
