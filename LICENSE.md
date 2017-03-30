@@ -5,7 +5,7 @@ For the assets, please take a look at the license files of the submodules.
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Robert Hildebrandt
+Copyright (c) 2017 Robert Hildebrandt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

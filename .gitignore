@@ -1,2 +1,6 @@
 /*build*/
 /CMakeLists.txt.user*
+/*software*/
+/software.tar.gz
+/software.tar.bz2
+/software.zip
