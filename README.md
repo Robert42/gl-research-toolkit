@@ -6,16 +6,30 @@ A small collection of tools thought for researching realtime graphic techniques 
 - Sometime starts with GL_OUT_OF_MEMORY or completely rubbish images. In case that happens, just close and restart.  
     Note to myself: I will never use OpenGL extensions again which aren't alreada well established and tested (I'm looking at you, NV_command_list)
 
-## System Requirenments
+
+## Install
+
+Install instructions for Ubuntu 16.04
+
+### System Requirenments
 
 - Ubuntu 16.04 LTS or newer
 - NVidia GTX 960 or newer
 - OpenGL 4.5 or newer
 
-## Install
+### Install dependencies
 
-Tools
+    sudo apt-get install git cmake g++ 
+    sudo apt-get install qtbase5-dev libqt5svg5-dev
+    sudo apt-get install libglew-dev libassimp-dev libsdl2-dev
+    
+### Compile
 
-    sudo apt-get install git cmake g++
+    mkdir build
+    cd build
+    cmake ..
+    make
+    
+### Voxelize
 
-Install instructions for Ubuntu 16.04
+In order to (re)voxelize, blender >= 2.78 needs to be installed with the blender >= 2.78 executable in the `PATH` environment variable.

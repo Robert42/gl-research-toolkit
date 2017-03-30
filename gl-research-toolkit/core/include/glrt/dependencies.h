@@ -15,7 +15,7 @@
 
 #include <angelscript.h>
 #include <angelscript-integration/ref-counted-object.h>
-#include <QHashFunctions>
+#include <QHash>
 
 template<typename T, glm::precision P>
 inline unsigned int qHash(const glm::tvec3<T, P>& v, unsigned int seed = 0)
