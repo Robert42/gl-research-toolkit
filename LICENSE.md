@@ -1,7 +1,7 @@
 # OpenGL Research Toolkit
 
 The SourceCode from this Toolkit is using the MIT license.
-For the assets, please take a look at the license files of the submodules.
+For the assets and external dependencies, please take a look at the license information of the submodules/subdirectories located within `/external`.
 
 The MIT License (MIT)
 
@@ -31,6 +31,8 @@ For the assets (found in the submodules in `/external/assets`), please check eac
 
 # External Dependencies used by this Toolkit
 
+The External Dependencies are located in the directory `/external`. Please
+
 - [AngelScript](http://www.angelcode.com/angelscript/) (zlib license)
 - [AntTweakBar](http://anttweakbar.sourceforge.net/doc/tools:anttweakbar) (zlib/libpng license)
 - [glew](http://glew.sourceforge.net/) (BSDL License)
@@ -41,6 +43,8 @@ For the assets (found in the submodules in `/external/assets`), please check eac
 - [SDL](http://libsdl.org) (zlib license)
 
 # External Code-Snippets
+
+The External Code Snippets are located in the directory `/external`
 
 - Shader Code snippets from the Siggraph 2014 course [Moving Frostbite to PBR](http://www.frostbite.com/2014/11/moving-frostbite-to-pbr/).
 - [Header](https://github.com/nvpro-samples/gl_cadscene_rendertechniques/blob/b47350a949e94dce368f14e968faa1672ef6ac42/nvcommandlist.h) and [source](https://github.com/nvpro-samples/gl_cadscene_rendertechniques/blob/b47350a949e94dce368f14e968faa1672ef6ac42/nvcommandlist.cpp) files used the NV_command_list extension for OpenGl. Both source files are published under a BSD-like license.
