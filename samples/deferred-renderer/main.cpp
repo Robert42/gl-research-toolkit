@@ -3,6 +3,8 @@
 
 const bool ADD_VSYNC = true;
 
+#define RECORD_FRAMES 0
+
 int main(int argc, char** argv)
 {
   glrt::renderer::show_forward_only = false;
@@ -12,7 +14,13 @@ int main(int argc, char** argv)
                                                                           ),
                               glrt::SampleApplication::Settings::techDemoDeferred(),
                               glrt::Application::Settings::techDemo(),
-                              glrt::System::Settings::addVSync(glrt::System::Settings::simpleWindow("Deferred-Renderer"), ADD_VSYNC));
+                              glrt::System::Settings::addVSync(
+#if RECORD_FRAMES
+                                glrt::System::Settings::fullscreen("Deferred-Renderer"),
+#else
+                                glrt::System::Settings::simpleWindow("Deferred-Renderer"),
+#endif
+                                ADD_VSYNC));
 
   app.showWindow();
 
@@ -20,6 +28,16 @@ int main(int argc, char** argv)
   app.drawSingleFrame();
   app.renderer->setAmbientOcclusionSDF(true);
   app.renderer->setSDFShadows(true);
+
+#if RECORD_FRAMES
+  QDir screenshot_dir = QDir::current().absoluteFilePath("recording");
+  if(screenshot_dir.exists())
+    screenshot_dir.removeRecursively();
+  if(!screenshot_dir.mkpath("."))
+    qWarning() << "Couldn't create dir <" << screenshot_dir.absolutePath() << "> for saving the recorded screenshots";
+  QString screenshot_path = screenshot_dir.absoluteFilePath("screenshot-%0.bmp");
+  uint frame_index = 0;
+#endif
 
   while(app.isRunning)
   {
@@ -42,6 +60,16 @@ int main(int argc, char** argv)
 
     app.endDrawing();
     app.swapWindow();
+
+#if RECORD_FRAMES
+    QImage screenshot = app.renderer->takeScreenshot();
+    QString formated_frame_index = QString::number(frame_index++, 10);
+    if(Q_UNLIKELY(frame_index < 10))
+      formated_frame_index = "00" + formated_frame_index;
+    else if(Q_UNLIKELY(frame_index < 100))
+      formated_frame_index = "0" + formated_frame_index;
+    screenshot.save(screenshot_path.arg(formated_frame_index));
+#endif
   }
 
   return 0;
